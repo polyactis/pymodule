@@ -27,8 +27,12 @@ $bedtoolsPath intersect -a $inputFname1 -b $inputFname2 > $intersectTmpFname
 echo "Done"
 
 echo -n "Sorting ..."
-sort -k 1,1 -k 2,2n $intersectTmpFname > $sortTmpFname
+#2014.05.28 problem with sort is that it can't tell if input has header or not
+#sort -k 1,1 -k 2-3n $intersectTmpFname > $sortTmpFname
+#2024.05.28 problem with bedtools sort is that it doesnot use the 3rd column (stop) in sorting, only column 1,2
+$bedtoolsPath sort -i $intersectTmpFname > $sortTmpFname
 echo "Done"
+
 echo -n "Merging sorted .bed files ..."
 $bedtoolsPath merge -i $sortTmpFname > $outputFname 
 echo "Done"
@@ -36,6 +40,5 @@ echo "Done"
 echo -n "Removing temp files ..."
 rm $intersectTmpFname
 rm $sortTmpFname
-
 echo "Done"
 date
