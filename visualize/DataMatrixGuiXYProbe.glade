@@ -631,6 +631,22 @@
                         <property name="position">2</property>
                       </packing>
                     </child>
+                    <child>
+                      <widget class="GtkCheckButton" id="checkPlotOnlySelected">
+                        <property name="label" translatable="yes">only selected</property>
+                        <property name="tooltip" translatable="yes">Check this to plot only the data selected</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="use_action_appearance">False</property>
+                        <property name="draw_indicator">True</property>
+                      </widget>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
                   </widget>
                   <packing>
                     <property name="expand">False</property>
@@ -759,7 +775,7 @@
                     <property name="can_focus">False</property>
                     <child>
                       <widget class="GtkButton" id="button_PlotHistogram">
-                        <property name="label" translatable="yes">PlotHist #Col:</property>
+                        <property name="label" translatable="yes">PlotHist Column:</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
