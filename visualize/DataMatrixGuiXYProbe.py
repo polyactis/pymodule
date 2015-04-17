@@ -2,9 +2,17 @@
 """
 Example of embedding matplotlib in an application and interacting with a treeview to store data.  Double click on an entry to update plot data
 
-2013.07.02 input matrix file should have a header.
-	First two columns should be of string type. Everything else is of float type.
-
+2015.04.16 input matrix file should have a header.
+	By default first two columns are of string type, thereafter are of float type.
+	
+	A user can also append something like "|float" to each header to specify type.
+	For example:
+		name|string	position|int	chr|str	value|float
+	
+	Numeric value can not be empty. By default -1000 (changeable on the fly) is treated as NA in plotting.
+	
+	float/number/double/numeric all means float.
+	str/string all means string.
 """
 import __init__	#used to know the path to this file itself
 import os, sys, pygtk
@@ -13,7 +21,7 @@ import gtk, gtk.glade, gobject
 from gtk import gdk
 import gnome
 import gnome.ui
-import math, random
+import math, random, re, copy
 import matplotlib
 matplotlib.use('GTKAgg')  # or 'GTK'
 from matplotlib.backends.backend_gtkagg import FigureCanvasGTKAgg as FigureCanvas
@@ -73,16 +81,12 @@ class DataMatrixGuiXYProbe(gtk.Window):
 		self.category_list = category_list
 		self.data_matrix = data_matrix
 		
-		self.column_types = None
-		self.column_header = None
-		self.column_editable_flag_ls = None
-		self.list_2d = None
+		self.inputDataHeaders = None
 		
-		
-		self.column_types = None
-		self.list_2d = None
-		self.column_header = None
-		self.editable_flag_ls = None
+		self.columnTypes = None
+		self.columnHeaders = None
+		self.columnEditableFlagList = None
+		self.list2D = None
 		
 		self.vbox1 = xml.get_widget("vbox1")
 		self.treeview_matrix = xml.get_widget("treeview_matrix")
@@ -103,6 +107,8 @@ class DataMatrixGuiXYProbe(gtk.Window):
 		
 		self.checkbutton_label_dot = xml.get_widget('checkbutton_label_dot')
 		self.entry_dot_label_column = xml.get_widget('entry_dot_label_column')
+		self.dataLabelColumnIndexAndSeparatorList = None
+		self.dataLabelNumericItemIndexList = None 
 		
 		self.entry_x_na = xml.get_widget('entry_x_na')
 		self.entry_y_na = xml.get_widget('entry_y_na')
@@ -116,8 +122,11 @@ class DataMatrixGuiXYProbe(gtk.Window):
 		self.entry_y_error = xml.get_widget("entry_y_error")
 		self.checkbutton_logX = xml.get_widget('checkbutton_logX')	#2014.06.09
 		self.checkbutton_logY = xml.get_widget('checkbutton_logY')
+		self.checkButtonPlotOnlySelected = xml.get_widget('checkButtonPlotOnlySelected')	#2015.04.16
 		self.entry_x_column = xml.get_widget('entry_x_column')
 		self.entry_y_column = xml.get_widget('entry_y_column')
+		
+		self.entry_filters = xml.get_widget("entry_filters")
 		#self.checkbutton_histLogX = xml.get_widget('checkbutton_histLogX')	#2014.06.09
 		#self.checkbutton_histLogY = xml.get_widget('checkbutton_histLogY')
 		
@@ -145,7 +154,39 @@ class DataMatrixGuiXYProbe(gtk.Window):
 		self.x_error_column_index = None
 		self.y_error_column_index = None
 		
+		self.typeName2PythonType = {
+				"str": str,
+				"string": str,
+				"numeric":float,
+				"number":float,
+				"double":float,
+				"float":float,
+				"integer":int,
+				"int":int}
+		
 		#self.add_events(gdk.BUTTON_PRESS_MASK|gdk.KEY_PRESS_MASK|gdk.KEY_RELEASE_MASK)
+	
+	def parseDataLabelColumns(self, inputText):
+		"""
+		2015.04.16
+		"""
+		splitP= re.compile(r'([,/|\.\-_=\?:;"\'^%$@+])')	#any single character included could be used as splitter
+		self.dataLabelColumnIndexAndSeparatorList = splitP.split(inputText)
+		self.dataLabelNumericItemIndexList = []
+		for i in xrange(len(self.dataLabelColumnIndexAndSeparatorList)):
+			if not splitP.match(self.dataLabelColumnIndexAndSeparatorList[i]):	#it's a column index
+				self.dataLabelColumnIndexAndSeparatorList[i] = int(self.dataLabelColumnIndexAndSeparatorList[i])
+				self.dataLabelNumericItemIndexList.append(i)
+		return self.dataLabelColumnIndexAndSeparatorList, self.dataLabelNumericItemIndexList 
+	
+	def getDataPointLabel(self, dataRow):
+		"""
+		2015.04.16
+		"""
+		dataLabelInList = copy.deepcopy(self.dataLabelColumnIndexAndSeparatorList)
+		for i in self.dataLabelNumericItemIndexList:
+			dataLabelInList[i] = str(dataRow[self.dataLabelColumnIndexAndSeparatorList[i]])
+		return ''.join(dataLabelInList)
 	
 	def onUserClickCanvas(self, event):
 		"""
@@ -160,8 +201,10 @@ class DataMatrixGuiXYProbe(gtk.Window):
 		"""
 		# get the x and y coords, flip y from top to bottom
 		x, y = event.x, event.y
-		to_label_dot = self.checkbutton_label_dot.get_active()
-		dot_label_column = int(self.entry_dot_label_column.get_text())
+		toLabelDataPoint = self.checkbutton_label_dot.get_active()
+		
+		self.parseDataLabelColumns(self.entry_dot_label_column.get_text())
+		
 		x_column = int(self.entry_x_column.get_text())
 		y_column = int(self.entry_y_column.get_text())
 		x_lim = self.ax.get_xlim()
@@ -171,9 +214,9 @@ class DataMatrixGuiXYProbe(gtk.Window):
 		if event.button==1:
 			if event.inaxes is not None:
 				print 'data coords', event.xdata, event.ydata
-				if self.list_2d is None:
+				if self.list2D is None:
 					return
-				for row in self.list_2d:
+				for row in self.list2D:
 					if row[x_column] and row[y_column]:	#not empty
 						try:
 							x_data = float(row[x_column])
@@ -185,12 +228,12 @@ class DataMatrixGuiXYProbe(gtk.Window):
 							if y is None:
 								continue
 							if abs(x-event.xdata)<x_grain_size and abs(y-event.ydata)<y_grain_size:
-								info = row[dot_label_column]
-								if to_label_dot:
-									self.ax.text(event.xdata, event.ydata, info, size=8)
+								dataLabel = self.getDataPointLabel(row)
+								if toLabelDataPoint:
+									self.ax.text(event.xdata, event.ydata, dataLabel, size=8)
 									self.canvas.draw()
-								sys.stderr.write("%s: %s, %s: %s, raw xy=(%s, %s), scaled xy=(%s,%s), info: %s.\n"%\
-												(self.column_header[0], row[0], self.column_header[1], row[1], row[x_column], row[y_column], x,y, info))
+								sys.stderr.write("%s: %s, %s: %s, raw xy=(%s, %s), scaled xy=(%s,%s), dataLabel: %s.\n"%\
+												(self.columnHeaders[0], row[0], self.columnHeaders[1], row[1], row[x_column], row[y_column], x,y, dataLabel))
 						except:
 							sys.stderr.write("Column %s, %s of row (%s), could not be converted to float. skip.\n"%\
 											(x_column, y_column, repr(row)))
@@ -247,6 +290,17 @@ class DataMatrixGuiXYProbe(gtk.Window):
 			label = "%s+%s"%(label, valuePreProcessor.addition)
 		return label
 	
+	def filterDataRow(self, dataRow):
+		"""
+		2015.4.16
+			unfinished
+		"""
+		logicSplitP= re.compile(r'(AND|OR)')
+		equationSplitP = re.compile(r'>=|>|=|<|<=')
+		filtersText = self.entry_filters.get_text()
+		logicSplitP.split(filtersText)
+
+	
 	def plotXY(self, ax, canvas, liststore, plot_title='', 
 			chosen_index_ls=[]):
 		"""
@@ -284,7 +338,7 @@ class DataMatrixGuiXYProbe(gtk.Window):
 			row = liststore[i]
 			x = row[x_column]
 			y = row[y_column]
-			if not x or not y:	#2013.07.12 skip if empty cells
+			if x=='' or y=='':	#2015.04.16 bugfix 2013.07.12 skip if empty cells
 				continue
 			x = self.processDataValue(x, self.xValuePreProcessor)
 			if x is None:
@@ -292,7 +346,7 @@ class DataMatrixGuiXYProbe(gtk.Window):
 			y = self.processDataValue(y, self.yValuePreProcessor)
 			if y is None:
 				continue
-			
+			#self.filterDataRow()
 			if self.xValuePreProcessor.errorColumnIndex is not None:
 				x_error = row[self.xValuePreProcessor.errorColumnIndex]
 			else:
@@ -328,10 +382,12 @@ class DataMatrixGuiXYProbe(gtk.Window):
 		if self.yValuePreProcessor.logScale:
 			ax.set_yscale('log')
 		
-		if self.x_error_column_index is not None and self.y_error_column_index is not None:
-			ax.errorbar(x_ls, y_ls, xerr=x_error_ls, yerr=y_error_ls, ecolor='g', fmt='o')
-		else:
-			ax.plot(x_ls, y_ls, '.')
+		#plot unselected data only if 
+		if not self.checkButtonPlotOnlySelected.get_active():
+			if self.x_error_column_index is not None and self.y_error_column_index is not None:
+				ax.errorbar(x_ls, y_ls, xerr=x_error_ls, yerr=y_error_ls, ecolor='g', fmt='o')
+			else:
+				ax.plot(x_ls, y_ls, '.')
 		
 		
 		"""
@@ -353,10 +409,10 @@ class DataMatrixGuiXYProbe(gtk.Window):
 		else:
 			ax.set_title(titleWithStats)
 		
-		xlabel = "(%s)"%self.column_header[x_column]
+		xlabel = "(%s)"%self.columnHeaders[x_column]
 		xlabel = self.decorateAxisLabel(xlabel, self.xValuePreProcessor)
 		ax.set_xlabel(xlabel)
-		ylabel = "(%s)"%self.column_header[y_column]
+		ylabel = "(%s)"%self.columnHeaders[y_column]
 		ylabel = self.decorateAxisLabel(ylabel, self.yValuePreProcessor)
 		ax.set_ylabel(ylabel)
 		canvas.draw()
@@ -370,13 +426,13 @@ class DataMatrixGuiXYProbe(gtk.Window):
 		"""
 		2009-3-13
 		"""
-		if not getattr(self, 'column_header', None):
+		if not getattr(self, 'columnHeaders', None):
 			sys.stderr.write("Nothing in columns yet.\n")
 			return
-		self.liststore = gtk.ListStore(*self.column_types)
+		self.liststore = gtk.ListStore(*self.columnTypes)
 		#self.add_columns(self.treeview_matrix)
-		yh_gnome.create_columns(self.treeview_matrix, self.column_header, self.editable_flag_ls, self.liststore)
-		yh_gnome.fill_treeview(self.treeview_matrix, self.liststore, self.list_2d, reorderable=True)
+		yh_gnome.create_columns(self.treeview_matrix, self.columnHeaders, self.columnEditableFlagList, self.liststore)
+		yh_gnome.fill_treeview(self.treeview_matrix, self.liststore, self.list2D, reorderable=True)
 		self.treeselection = self.treeview_matrix.get_selection()
 	
 	def on_button_PlotXY_clicked(self, widget, data=None):
@@ -395,6 +451,14 @@ class DataMatrixGuiXYProbe(gtk.Window):
 		self.app1_appbar1.push("%s rows selected."%len(pathlist_strains1))
 		self.plotXY(self.ax, self.canvas, self.liststore, self.plot_title, index_ls)
 	
+	def on_button_UnSelectAll_clicked(self, widget, data=None):
+		"""
+		2015.04.16
+		"""
+		self.treeselection = self.treeview_matrix.get_selection()
+		self.treeselection.unselect_all()
+
+		
 	def on_button_save_clicked(self, widget, data=None):
 		"""
 		2008-02-05
@@ -457,7 +521,7 @@ class DataMatrixGuiXYProbe(gtk.Window):
 			draw histogram of specific hist_column
 		2008-02-06
 		"""
-		if not getattr(self, 'column_header', None):
+		if not getattr(self, 'columnHeaders', None):
 			sys.stderr.write("Nothing in columns yet.\n")
 			return
 		self.setUserDataPreprocessingFlags()
@@ -481,9 +545,9 @@ class DataMatrixGuiXYProbe(gtk.Window):
 					sys.stderr.write("x value %s, not good for log10.\n"%(x))
 					continue
 			hist_ls.append(x)
-		title = "%s %s %s"%(self.plot_title, self.column_header[hist_column],
+		title = "%s %s %s"%(self.plot_title, self.columnHeaders[hist_column],
 				yh_matplotlib.constructTitleFromDataSummaryStat(hist_ls))
-		self.ax.set_title(title);	#"Histogram of %s %s"%(self.plot_title, self.column_header[hist_column]))
+		self.ax.set_title(title);	#"Histogram of %s %s"%(self.plot_title, self.columnHeaders[hist_column]))
 		no_of_bins = int(self.entry_no_of_bins.get_text())
 		
 		#if self.x_logScale:
@@ -491,7 +555,7 @@ class DataMatrixGuiXYProbe(gtk.Window):
 		if self.yValuePreProcessor.logScale:
 			self.ax.set_yscale('log')
 		
-		xlabel = "(%s)"%self.column_header[hist_column]
+		xlabel = "(%s)"%self.columnHeaders[hist_column]
 		xlabel = self.decorateAxisLabel(xlabel, self.xValuePreProcessor)
 		if self.xValuePreProcessor.logScale:
 			xlabel = "log10(%s)"%(xlabel)
@@ -509,8 +573,35 @@ class DataMatrixGuiXYProbe(gtk.Window):
 		app1_appbar1.push("%s rows selected."%len(pathlist_strains1))
 		return True
 	
+	def parseDataHeader(self, dataHeaders=None):
+		"""
+		2015.04.16
+		"""
+		no_of_cols = len(dataHeaders)
+		self.columnHeaders = ['']*no_of_cols
+		self.columnTypes = [str]*no_of_cols
+		self.columnEditableFlagList = [False]*no_of_cols
+		for i in xrange(no_of_cols):
+			header = dataHeaders[i]
+			tmp_ls = header.split('|')
+			columnHeader = tmp_ls[0]
+			if len(tmp_ls)>1:
+				columnTypeName = tmp_ls[1]
+			elif i<2:	#by default first two columns are of string type
+				columnTypeName = "string"
+			else:	#by default columns after first two are of numeric type
+				columnTypeName = 'number'
+			column_type = self.typeName2PythonType.get(columnTypeName, str)
+			self.columnHeaders[i] = '%s %s'%(i, columnHeader)
+			self.columnTypes[i] = column_type
+			if column_type==str:
+				self.columnEditableFlagList[i] = True
+		
+	
 	def readInDataToPlot(self, input_fname, sampling_probability=1.0):
 		"""
+		2015.04.16 use parseDataHeader()
+			convert each column data according to self.columnTypes
 		2015.01.23 added argument sampling_probability to sub-sample data
 		2013.07.11 use MatrixFile to read in the file
 		2009-5-20
@@ -522,25 +613,24 @@ class DataMatrixGuiXYProbe(gtk.Window):
 		if sampling_probability>1 or sampling_probability<0:
 			sampling_probability=1.0
 		reader = MatrixFile(inputFname=input_fname)
-		self.column_header=reader.next()
-		for i in range(len(self.column_header)):
-			self.column_header[i] = '%s %s'%(i, self.column_header[i])
-		no_of_cols = len(self.column_header)
-		self.column_types = [str]*2 + [float]*(no_of_cols-2)
-		self.column_editable_flag_ls = [True, True] + [False]*(no_of_cols-2)
-		self.list_2d = []
+		self.inputDataHeaders = reader.next()
+		self.parseDataHeader(self.inputDataHeaders)
+		
+		self.list2D = []
 		for row in reader:
 			if sampling_probability>0 and sampling_probability<1:
 				if random.random()>sampling_probability:	#skip
 					continue
-			float_part = row[2:]
-			try:
-				float_part = map(float, float_part)
-			except:
-				sys.stderr.write('Except type: %s\n'%repr(sys.exc_info()))
-				traceback.print_exc()
-			new_row = row[:2]+float_part
-			self.list_2d.append(new_row)
+			new_row = ['']*len(row)
+			for i in xrange(len(row)):
+				try:
+					new_row[i] = self.columnTypes[i](row[i])
+				except:
+					sys.stderr.write("Error in converting column %s data %s to type %s.\n"%(i, row[i], self.columnTypes[i]))
+					sys.stderr.write('Except type: %s\n'%repr(sys.exc_info()))
+					traceback.print_exc()
+			
+ 			self.list2D.append(new_row)
 		reader.close()
 		self.setupColumns(self.treeview_matrix)
 		#update status to reflect the input filename

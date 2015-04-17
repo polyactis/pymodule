@@ -191,7 +191,7 @@
                         <child>
                           <widget class="GtkImageMenuItem" id="imagemenuitem10">
                             <property name="label">gtk-about</property>
-                            <property name="visible">True</property>
+                            <property name="visible">False</property>
                             <property name="can_focus">False</property>
                             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                             <property name="use_action_appearance">False</property>
@@ -226,7 +226,8 @@
                     <property name="can_focus">False</property>
                     <child>
                       <widget class="GtkCheckButton" id="checkbutton_label_dot">
-                        <property name="label" translatable="yes">Label dot with column:</property>
+                        <property name="label" translatable="yes">Label data upon clicking</property>
+                        <property name="tooltip" translatable="yes">By default, clicking on the XY-plot only prompts console output about data points. Checking this box will also label the data points on the XY-canvas area.</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
@@ -243,8 +244,8 @@
                       <widget class="GtkEntry" id="entry_dot_label_column">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="tooltip" translatable="yes">specifying the column to label the dot clicked in the xy plot</property>
-                        <property name="text" translatable="yes">1</property>
+                        <property name="tooltip" translatable="yes">Specifying the column(s) (0-based indices, separated by any of , / | . - _ = ? : ; " ' ^ % $ @ + ) to label the data points clicked in the XY plot</property>
+                        <property name="text" translatable="yes">0-1%2</property>
                         <property name="primary_icon_activatable">False</property>
                         <property name="secondary_icon_activatable">False</property>
                         <property name="primary_icon_sensitive">True</property>
@@ -632,7 +633,7 @@
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkCheckButton" id="checkPlotOnlySelected">
+                      <widget class="GtkCheckButton" id="checkButtonPlotOnlySelected">
                         <property name="label" translatable="yes">only selected</property>
                         <property name="tooltip" translatable="yes">Check this to plot only the data selected</property>
                         <property name="visible">True</property>
@@ -858,15 +859,58 @@
                 <property name="can_focus">False</property>
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                 <child>
-                  <widget class="GtkLabel" id="label1">
+                  <widget class="GtkHBox" id="hbox_listStoreHeader">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                    <property name="label" translatable="yes">Double click a row to highlight it</property>
+                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                    <child>
+                      <widget class="GtkButton" id="button_UnSelectAll">
+                        <property name="label" translatable="yes">Un-select all rows</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                        <property name="tooltip" translatable="yes">Click to un-select already-selected rows. </property>
+                        <property name="use_action_appearance">False</property>
+                        <signal name="clicked" handler="on_button_UnSelectAll_clicked" swapped="no"/>
+                      </widget>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkLabel" id="label1">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                        <property name="label" translatable="yes">Mouse over here for help: input data format, etc.</property>
+                        <property name="tooltip" translatable="yes">Double click a row to select.
+
+Input matrix file should have a header.
+    	By default first two columns are of string type, thereafter are of float type.
+    	
+    	A user can also append something like "|float" to each header to specify type.
+    	For example:
+    		name|string	position|int	chr|str	value|float
+    	
+    	Numeric value can not be empty. By default -1000 (changeable on the fly) is treated as NA in plotting.
+    	
+    	float/number/double/numeric all means float.
+    	str/string all means string.
+   			</property>
+                      </widget>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
                   </widget>
-                  <packing>
+		  <packing>
                     <property name="expand">False</property>
-                    <property name="fill">False</property>
+                    <property name="fill">True</property>
                     <property name="position">0</property>
                   </packing>
                 </child>
