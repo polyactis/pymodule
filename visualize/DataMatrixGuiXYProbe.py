@@ -299,6 +299,13 @@ class DataMatrixGuiXYProbe(gtk.Window):
 		equationSplitP = re.compile(r'>=|>|=|<|<=')
 		filtersText = self.entry_filters.get_text()
 		logicSplitP.split(filtersText)
+		
+		self.dataLabelColumnIndexAndSeparatorList = splitP.split(inputText)
+		self.dataLabelNumericItemIndexList = []
+		for i in xrange(len(self.dataLabelColumnIndexAndSeparatorList)):
+			if not splitP.match(self.dataLabelColumnIndexAndSeparatorList[i]):	#it's a column index
+				self.dataLabelColumnIndexAndSeparatorList[i] = int(self.dataLabelColumnIndexAndSeparatorList[i])
+				self.dataLabelNumericItemIndexList.append(i)
 
 	
 	def plotXY(self, ax, canvas, liststore, plot_title='', 
