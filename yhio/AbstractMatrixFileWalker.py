@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import csv, random
 from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
-from pymodule.pegasus.mapper.AbstractMapper import AbstractMapper
+from pymodule.mapper.AbstractMapper import AbstractMapper
 from pymodule.yhio.MatrixFile import MatrixFile
 from pymodule.yhio.HDF5MatrixFile import HDF5MatrixFile
 from pymodule.yhio.YHPyTables import YHFile

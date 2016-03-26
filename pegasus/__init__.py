@@ -1,0 +1,5 @@
+from AbstractWorkflow import AbstractWorkflow
+from AbstractNGSWorkflow import AbstractNGSWorkflow
+from AbstractVCFWorkflow import AbstractVCFWorkflow
+from AbstractAlignmentWorkflow import AbstractAlignmentWorkflow
+from AbstractAlignmentAndVCFWorkflow import AbstractAlignmentAndVCFWorkflow
