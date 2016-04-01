@@ -1,1 +1,1 @@
-../pegasus/mapper/extractor/SelectDistantMembersFromGenotypeFile.py
+../mapper/extractor/SelectDistantMembersFromGenotypeFile.py

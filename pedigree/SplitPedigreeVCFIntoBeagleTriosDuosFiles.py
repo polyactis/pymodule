@@ -1,1 +1,1 @@
-../pegasus/mapper/splitter/SplitPedigreeVCFIntoBeagleTriosDuosFiles.py
+../mapper/splitter/SplitPedigreeVCFIntoBeagleTriosDuosFiles.py
