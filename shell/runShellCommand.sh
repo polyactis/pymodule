@@ -1,1 +1,1 @@
-../pegasus/mapper/runShellCommand.sh
+../mapper/runShellCommand.sh
