@@ -439,8 +439,8 @@ def write_data_matrix(data_matrix, output_fname, header, strain_acc_list, catego
 		rows_to_be_tossed_out = set()
 	if cols_to_be_tossed_out==None:
 		cols_to_be_tossed_out = set()
-	
-	writer = csv.writer(open(output_fname, 'w'), delimiter=delimiter)
+
+	writer = csv.writer(openGzipFile(output_fname, 'w'), delimiter=delimiter)
 	
 	if header:
 		new_header = [header[0], header[1]]
@@ -951,6 +951,7 @@ class SNPData(object):
 	
 	def processRowIDColID(self):
 		"""
+		2016.04 stop force-converting data_matrix into int8
 		2010-2-27
 			restore the strain_acc_list if it's None.
 			fix a small bug in it:
@@ -966,7 +967,8 @@ class SNPData(object):
 			correct a bug here, opposite judgement of self.data_matrix
 		"""
 		if not self.isDataMatrixEmpty(self.data_matrix) and self.turn_into_array:
-			self.data_matrix = num.array(self.data_matrix,dtype="int8")
+			
+			self.data_matrix = num.array(self.data_matrix) #, dtype="int8"
 		
 		if self.row_id_ls is None and self.strain_acc_list is not None:
 			self.row_id_ls = []
@@ -1060,30 +1062,34 @@ class SNPData(object):
 				self.category_list = category_list
 		write_data_matrix(self.data_matrix, output_fname, self.header, self.strain_acc_list, self.category_list, **keywords)
 	
-	def PCAOnDataMatrix(self, outputFname=None, noOfPCsToOutput=4):
+	def PCAOnDataMatrix(self, outputFname=None, noOfPCsToOutput=4, toNormalize=False):
 		"""
+		2016.03.28 added argument "normalize"
 		2012.8.24
 		"""
 		sys.stderr.write("Carrying out PCA on data_matrix ...")
 		from pymodule.algorithm.PCA import PCA
 		#T, P, explained_var = pca_module.PCA_svd(phenData_trans.data_matrix, standardize=True)
-		T, P, explained_var = PCA.eig(self.data_matrix, normalize=False)	#normalize=True causes missing value in the covariance matrix
+		T, P, explained_var = PCA.eig(self.data_matrix, toNormalize=toNormalize)	#normalize=True causes missing value in the covariance matrix
 		if outputFname:
-			import csv
-			writer = csv.writer(open(outputFname, 'w'), delimiter='\t')
-			
-			header = ['rowID', 'DummyTime']
+			#import csv
+			#writer = csv.writer(open(outputFname, 'w'), delimiter='\t')
+			from pymodule.yhio import MatrixFile
+			writer = MatrixFile(outputFname, openMode='w', delimiter='\t')
+
+
+			header = ['rowID|string', 'DummyTime|string']
 			for i in xrange(noOfPCsToOutput):
 				header.append('PC%s'%(i+1))
-			writer.writerow(header)
+			writer.writeHeader(header)
 			for i in xrange(min(len(self.row_id_ls), T.shape[0])):
 				row_id = self.row_id_ls[i]
 				if hasattr(T, 'mask'):
 					TVector = T[i, 0:noOfPCsToOutput].tolist()
 				else:
 					TVector = T[i,0:noOfPCsToOutput]
-				data_row = [row_id, '2011'] + TVector
-				writer.writerow(data_row)
+				data_row = [row_id, '2011'] + list(TVector)
+				writer.writeRow(data_row)
 			del writer
 		sys.stderr.write("Done.\n")
 		return PassingData(T=T, P=P, explained_var=explained_var)
