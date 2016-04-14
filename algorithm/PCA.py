@@ -22,6 +22,7 @@ class PCA(object):
 	
 	def normalize(cls, data_matrix, divide_variance=True):
 		"""
+		2016.04.14 bugfix, computing using new_data_matrix instead of data_matrix
 		2008-11-18
 			this is based on Patterson2006a.
 			
@@ -38,9 +39,9 @@ class PCA(object):
 		new_data_matrix = data_matrix.astype(numpy.float)	#change the data type
 		
 		for j in range(no_of_cols):
-			genotype_ls = data_matrix[:,j]
-			col_mean = numpy.mean(genotype_ls)
-			col_var = numpy.var(genotype_ls)
+			columnDataVector = new_data_matrix[:,j]
+			col_mean = numpy.mean(columnDataVector)
+			col_var = numpy.var(columnDataVector)
 			#col_var = col_mean*(1-col_mean)	#2009-9-3 only good for binary matrix
 			if col_mean!=0 and divide_variance and col_var!=0:
 				new_data_matrix[:,j] = (new_data_matrix[:,j]-col_mean)/numpy.sqrt(col_var)
@@ -50,13 +51,13 @@ class PCA(object):
 		return new_data_matrix
 	normalize = classmethod(normalize)
 	
-	def eig(cls, data_matrix, normalize=True):
+	def eig(cls, data_matrix, toNormalize=True):
 		"""
 		2008-11-18
 			numpy.inner(matrix1, matrix2) is weird. matrix1's 2nd dimension is equal to matrix2's 2nd dimension.
 				Not as traditional, matrix1's 2nd dimension is equal to matrix2's 1st dimension.
 		"""
-		if normalize:
+		if toNormalize:
 			new_data_matrix = cls.normalize(data_matrix)
 			new_data_matrix2 = numpy.transpose(new_data_matrix)	#2008-11-20 transpose only to get cov_matrix. a later mulitplication between eigen_vector and new_data_matrix
 			cov_matrix = 1.0/new_data_matrix2.shape[1]*numpy.inner(new_data_matrix2, new_data_matrix2)	#2008-11-19 mysteriously, numpy.tranpose() is not required on the 2nd new_data_matrix, it'll cause ValueError('matrices are not aligned',)
@@ -78,8 +79,8 @@ class PCA(object):
 
 if __name__ == '__main__':
 	from pymodule import ProcessOptions
-	main_class = DrawFTPathway
-	po = ProcessOptions(sys.argv, main_class.option_default_dict, error_doc=main_class.__doc__)
+	main_class = PCA
+	#po = ProcessOptions(sys.argv, main_class.option_default_dict, error_doc=main_class.__doc__)
 	
-	instance = main_class(**po.long_option2value)
-	instance.run()
+	#instance = main_class(**po.long_option2value)
+	#instance.run()
