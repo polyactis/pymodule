@@ -340,6 +340,7 @@ class DataMatrixGuiXYProbe(gtk.Window):
 		y_chosen_ls = []
 		y_chosen_error_ls = []
 		
+		noOfValuesDiscarded = 0
 		chosen_index_set = set(chosen_index_ls)
 		for i in range(len(liststore)):
 			row = liststore[i]
@@ -347,12 +348,15 @@ class DataMatrixGuiXYProbe(gtk.Window):
 			y = row[y_column]
 			if x=='' or y=='':	#2015.04.16 bugfix 2013.07.12 skip if empty cells
 				continue
+				noOfValuesDiscarded += 1
 			x = self.processDataValue(x, self.xValuePreProcessor)
 			if x is None:
 				continue
+				noOfValuesDiscarded += 1
 			y = self.processDataValue(y, self.yValuePreProcessor)
 			if y is None:
 				continue
+				noOfValuesDiscarded += 1
 			#self.filterDataRow()
 			if self.xValuePreProcessor.errorColumnIndex is not None:
 				x_error = row[self.xValuePreProcessor.errorColumnIndex]
@@ -383,6 +387,7 @@ class DataMatrixGuiXYProbe(gtk.Window):
 				x_error_ls.append(x_error)
 				y_error_ls.append(y_error)
 		
+		sys.stderr.write("WARNING: %s values were discarded.\n"%(noOfValuesDiscarded))
 		ax.clear()
 		if self.xValuePreProcessor.logScale:
 			ax.set_xscale('log')
@@ -521,6 +526,7 @@ class DataMatrixGuiXYProbe(gtk.Window):
 	
 	def on_button_PlotHistogram_clicked(self, widget, data=None):
 		"""
+		2016.04.14 bugfix: skip "" /empty cells
 		2015.01.28 add summary stats to title
 		2009-5-20
 			get the number of bins from entry_no_of_bins 
@@ -538,20 +544,26 @@ class DataMatrixGuiXYProbe(gtk.Window):
 		self._idClick = None	#reset the _idClick
 		hist_ls = []
 		hist_column = int(self.entry_hist_column.get_text())
+		noOfValuesDiscarded = 0
 		for i in range(len(self.liststore)):
 			x = self.liststore[i][hist_column]
-			if not x:
+			if x=='':	#2016.04.14 bugfix skip if empty cells  #if not x:
+				noOfValuesDiscarded += 1
 				continue
 			x = self.processDataValue(x, self.xValuePreProcessor)
 			if x is None:
 				continue
+				noOfValuesDiscarded += 1
 			if self.xValuePreProcessor.logScale:
 				if x>0:
 					x = math.log10(x)
 				else:
 					sys.stderr.write("x value %s, not good for log10.\n"%(x))
 					continue
+					noOfValuesDiscarded += 1
 			hist_ls.append(x)
+		sys.stderr.write("WARNING: %s values were discarded.\n"%(noOfValuesDiscarded))
+		
 		title = "%s %s %s"%(self.plot_title, self.columnHeaders[hist_column],
 				yh_matplotlib.constructTitleFromDataSummaryStat(hist_ls))
 		self.ax.set_title(title);	#"Histogram of %s %s"%(self.plot_title, self.columnHeaders[hist_column]))
