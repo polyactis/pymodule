@@ -603,7 +603,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="tooltip" translatable="yes">Specify the column to supply X data</property>
-                        <property name="text" translatable="yes">2</property>
+                        <property name="text" translatable="yes">3</property>
                         <property name="primary_icon_activatable">False</property>
                         <property name="secondary_icon_activatable">False</property>
                         <property name="primary_icon_sensitive">True</property>
@@ -620,7 +620,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="tooltip" translatable="yes">Specify the column to supply Y data</property>
-                        <property name="text" translatable="yes">3</property>
+                        <property name="text" translatable="yes">4</property>
                         <property name="primary_icon_activatable">False</property>
                         <property name="secondary_icon_activatable">False</property>
                         <property name="primary_icon_sensitive">True</property>

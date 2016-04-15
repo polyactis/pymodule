@@ -594,12 +594,16 @@ class DataMatrixGuiXYProbe(gtk.Window):
 	
 	def parseDataHeader(self, dataHeaders=None):
 		"""
+		2016.04.15 inserted a first column to denote order of data
 		2015.04.16
 		"""
 		no_of_cols = len(dataHeaders)
-		self.columnHeaders = ['']*no_of_cols
-		self.columnTypes = [str]*no_of_cols
-		self.columnEditableFlagList = [False]*no_of_cols
+		self.columnHeaders = ['']*(no_of_cols+1)
+		self.columnHeaders[0] = "0 Order"
+		self.columnTypes = [str]*(no_of_cols+1)
+		self.columnTypes[0] = int
+		self.columnEditableFlagList = [False]*(no_of_cols+1)
+		
 		for i in xrange(no_of_cols):
 			header = dataHeaders[i]
 			tmp_ls = header.split('|')
@@ -611,14 +615,15 @@ class DataMatrixGuiXYProbe(gtk.Window):
 			else:	#by default columns after first two are of numeric type
 				columnTypeName = 'number'
 			column_type = self.typeName2PythonType.get(columnTypeName, str)
-			self.columnHeaders[i] = '%s %s'%(i, columnHeader)
-			self.columnTypes[i] = column_type
+			self.columnHeaders[i+1] = '%s %s'%(i+1, columnHeader)
+			self.columnTypes[i+1] = column_type
 			if column_type==str:
-				self.columnEditableFlagList[i] = True
+				self.columnEditableFlagList[i+1] = True
 		
 	
 	def readInDataToPlot(self, input_fname, sampling_probability=1.0):
 		"""
+		2016.04.15 report summary of data and inserted a first column to denote order of data
 		2015.04.16 use parseDataHeader()
 			convert each column data according to self.columnTypes
 		2015.01.23 added argument sampling_probability to sub-sample data
@@ -636,21 +641,32 @@ class DataMatrixGuiXYProbe(gtk.Window):
 		self.parseDataHeader(self.inputDataHeaders)
 		
 		self.list2D = []
+		dimOfRawData = [0,0]
+		dimOfList2D = [0,0]
+		
 		for row in reader:
+			dimOfRawData[0] += 1
+			dimOfRawData[1] = len(row)
+			
 			if sampling_probability>0 and sampling_probability<1:
 				if random.random()>sampling_probability:	#skip
 					continue
-			new_row = ['']*len(row)
+			new_row = ['']*(len(row)+1)	#first column is the order of data
 			for i in xrange(len(row)):
 				try:
-					new_row[i] = self.columnTypes[i](row[i])
+					new_row[i+1] = self.columnTypes[i+1](row[i])
 				except:
-					sys.stderr.write("Error in converting column %s data %s to type %s.\n"%(i, row[i], self.columnTypes[i]))
+					sys.stderr.write("Error in converting column %s data %s to type %s.\n"%(i, row[i], self.columnTypes[i+1]))
 					sys.stderr.write('Except type: %s\n'%repr(sys.exc_info()))
 					traceback.print_exc()
 			
+ 			dimOfList2D[0] += 1
+ 			dimOfList2D[1] = len(new_row)
+			new_row[0] = dimOfList2D[0]	#order of this data
  			self.list2D.append(new_row)
+ 			
 		reader.close()
+		sys.stderr.write("Dimension of raw data: %s. Dimension of displayed data: %s."%(dimOfRawData, dimOfList2D))
 		self.setupColumns(self.treeview_matrix)
 		#update status to reflect the input filename
 		self.app1.set_title(os.path.basename(input_fname))
