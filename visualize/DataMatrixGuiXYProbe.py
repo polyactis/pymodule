@@ -399,7 +399,7 @@ class DataMatrixGuiXYProbe(gtk.Window):
 			if self.x_error_column_index is not None and self.y_error_column_index is not None:
 				ax.errorbar(x_ls, y_ls, xerr=x_error_ls, yerr=y_error_ls, ecolor='g', fmt='o')
 			else:
-				ax.plot(x_ls, y_ls, '.')
+				ax.plot(x_ls, y_ls, 'o', alpha=0.7, linewidth=0, linestyle="None")
 		
 		
 		"""
