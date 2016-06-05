@@ -411,7 +411,7 @@ class DataMatrixGuiXYProbe(gtk.Window):
 		if x_chosen_ls and y_chosen_ls:	#highlight
 			titleWithStats = "Highlighted data\n" + yh_matplotlib.constructTitleFromTwoDataSummaryStat(x_chosen_ls, y_chosen_ls)
 			
-			ax.plot(x_chosen_ls, y_chosen_ls, '.', c='r')
+			ax.plot(x_chosen_ls, y_chosen_ls, 'o', alpha=0.6,  c='r')
 			if self.x_error_column_index is not None and self.y_error_column_index is not None:
 				ax.errorbar(x_chosen_ls, y_chosen_ls, xerr=x_chosen_error_ls, yerr=y_chosen_error_ls, ecolor='r', color='r', fmt='o')
 		else:	#take all data
