@@ -190,6 +190,7 @@ class DataMatrixGuiXYProbe(gtk.Window):
 	
 	def onUserClickCanvas(self, event):
 		"""
+		2016.06.07 bugfix. zero(0) generates false condition while only empty string or None should generate false.
 		2009-3-13
 			use (x_lim[1]-x_lim[0])/200. as the resolution for a dot to be called identical to a data point.
 			similar for the y_data
@@ -208,16 +209,18 @@ class DataMatrixGuiXYProbe(gtk.Window):
 		x_column = int(self.entry_x_column.get_text())
 		y_column = int(self.entry_y_column.get_text())
 		x_lim = self.ax.get_xlim()
-		x_grain_size = (x_lim[1]-x_lim[0])/200.
+		x_grain_size = abs(x_lim[1]-x_lim[0])/200.
 		y_lim = self.ax.get_ylim()
-		y_grain_size = (y_lim[1]-y_lim[0])/200.
+		y_grain_size = abs(y_lim[1]-y_lim[0])/200.
 		if event.button==1:
 			if event.inaxes is not None:
-				print 'data coords', event.xdata, event.ydata
+				sys.stderr.write("x_grain_size: %s, y_grain_size: %s\n"%(x_grain_size, y_grain_size))
+				sys.stderr.write("data coords: %s, %s\n"%(event.xdata, event.ydata))
 				if self.list2D is None:
 					return
 				for row in self.list2D:
-					if row[x_column] and row[y_column]:	#not empty
+					if row[x_column] is not None and row[x_column]!="" and row[y_column] is not None and row[y_column]!="" :	#not empty
+						#2016.06.07
 						try:
 							x_data = float(row[x_column])
 							y_data = float(row[y_column])
@@ -233,7 +236,8 @@ class DataMatrixGuiXYProbe(gtk.Window):
 									self.ax.text(event.xdata, event.ydata, dataLabel, size=8)
 									self.canvas.draw()
 								sys.stderr.write("%s: %s, %s: %s, raw xy=(%s, %s), scaled xy=(%s,%s), dataLabel: %s.\n"%\
-												(self.columnHeaders[0], row[0], self.columnHeaders[1], row[1], row[x_column], row[y_column], x,y, dataLabel))
+												(self.columnHeaders[0], row[0], self.columnHeaders[1], row[1], 
+												row[x_column], row[y_column], x,y, dataLabel))
 						except:
 							sys.stderr.write("Column %s, %s of row (%s), could not be converted to float. skip.\n"%\
 											(x_column, y_column, repr(row)))
