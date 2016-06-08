@@ -664,11 +664,11 @@ class DataMatrixGuiXYProbe(gtk.Window):
 					sys.stderr.write('Except type: %s\n'%repr(sys.exc_info()))
 					traceback.print_exc()
 			
- 			dimOfList2D[0] += 1
- 			dimOfList2D[1] = len(new_row)
+			dimOfList2D[0] += 1
+			dimOfList2D[1] = len(new_row)
 			new_row[0] = dimOfList2D[0]	#order of this data
- 			self.list2D.append(new_row)
- 			
+			self.list2D.append(new_row)
+			
 		reader.close()
 		sys.stderr.write("Dimension of raw data: %s. Dimension of displayed data: %s."%(dimOfRawData, dimOfList2D))
 		self.setupColumns(self.treeview_matrix)
