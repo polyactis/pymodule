@@ -21,12 +21,12 @@ class AbstractDBInteractingClass(AbstractMapper):
 	__doc__ = __doc__
 	
 	option_default_dict = AbstractMapper.option_default_dict.copy()
-	option_default_dict = {
+	option_default_dict.update( {
 						('sshTunnelCredential', 0, ): ['', '', 1, 'a ssh credential to allow machine to access db server. \
 										polyacti@login3, yuhuang@hpc-login2. if empty or port is empty, no tunnel', ],\
 						('logFilename', 0, ): [None, '', 1, 'file to contain logs. use it only if this program is at the end of pegasus workflow \
 		and has no output file'],\
-						}
+						})
 	option_default_dict.update(AbstractMapper.db_option_dict)
 	
 	def __init__(self, inputFnameLs=None, **keywords):

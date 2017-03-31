@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 """
 
 Examples:
@@ -59,7 +59,7 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 #sys.path += [os.path.join(os.path.expanduser('~/script'))]
 from pymodule.db.GenomeDB import *
-from pymodule import PassingData, utils, AbstractDBInteractingJob
+from pymodule import PassingData, utils, AbstractDBInteractingClass
 from pymodule.utils import FigureOutTaxID
 #from pymodule.db import db_connect
 
@@ -83,9 +83,9 @@ class annot_assembly_attr:
 		self.seq_type = None
 		self.comment = None
 
-class chromosome_fasta2db(AbstractDBInteractingJob):
+class chromosome_fasta2db(AbstractDBInteractingClass):
 	__doc__ = __doc__
-	option_default_dict = AbstractDBInteractingJob.option_default_dict.copy()
+	option_default_dict = AbstractDBInteractingClass.option_default_dict.copy()
 	option_default_dict.update({
 							('organism', 0, ): [None, 'g', 1, '2-letter abbreviation for organism. Optional, if specified, only sequence from this organism would be extracted.'],\
 							('sequence_type_id', 0, int):[9, '', 1, 'column SequenceType.id in database GenomeDB'],\
@@ -108,7 +108,7 @@ class chromosome_fasta2db(AbstractDBInteractingJob):
 		2008-07-06
 			use the firstline (header) of the fasta file to extract which chromosome. using filename is unreliable.
 		"""
-		AbstractDBInteractingJob.__init__(self, inputFnameLs=inputFnameLs, **keywords)
+		AbstractDBInteractingClass.__init__(self, inputFnameLs=inputFnameLs, **keywords)
 		#self.connectDB() called within its __init__()
 		
 		
