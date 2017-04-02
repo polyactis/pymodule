@@ -94,7 +94,7 @@ class AnnotAssembly(Entity):
 		table to store meta info of chromosome sequences
 	"""
 	gi = Field(Integer)
-	acc_ver = Field(String(32), unique=True)
+	acc_ver = Field(String(32))
 	accession = Field(String(32))
 	version = Field(Integer)
 	tax_id = Field(Integer)
