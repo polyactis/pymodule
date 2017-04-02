@@ -52,6 +52,8 @@ Description:
 """
 
 import sys, getopt, os, re, gzip
+from apt_pkg import Description
+#from __builtin__ import None
 __doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0])
 
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
@@ -125,10 +127,7 @@ class chromosome_fasta2db(AbstractDBInteractingClass):
 		self.p_chromosome = re.compile(r'chromosome (\w+)[,\n\r]?')	#the last ? means [,\n\r] is optional
 		self.p_acc_ver = re.compile(r'(\w+)\.(\d+)')
 		
-		self.parseFastaDescriptionDict = {1: self.parseFastaDescriptionForGenBank, \
-										2: self.parseFastaDescriptionForWUSTLVervetScaffolds,\
-										3: self.parseFastaDescriptionForFullVervetBACs,\
-										4: self.parseFastaDescriptionForWUSTLVervetChromosomeGenome}
+		self.parseFastaDescriptionDict = {1: self.parseFastaDescriptionForGenebank_hs37d5}
 	
 	def saveRawSequence(self, session, seq_to_db, passingdata, aa_attr_instance):
 		"""
@@ -177,6 +176,36 @@ class chromosome_fasta2db(AbstractDBInteractingClass):
 		comment = header[4]
 		return PassingData(tax_id=_tax_id, gi=gi, comment=comment, acc_ver=acc_ver, chromosome=chromosome)
 
+	def parseFastaDescriptionForGenebank_hs37d5(self, descriptionLine=None, FigureOutTaxID_ins=None):
+		"""
+		>1 dna:chromosome chromosome:GRCh37:1:1:249250621:1
+		>Y dna:chromosome chromosome:GRCh37:Y:2649521:59034049:1
+		>MT gi|251831106|ref|NC_012920.1| Homo sapiens mitochondrion, complete genome
+		>GL000207.1 dna:supercontig supercontig::GL000207.1:1:4262:1
+		>GL000226.1 dna:supercontig supercontig::GL000226.1:1:15008:1
+		>NC_007605
+		>hs37d5
+		"""
+		header = descriptionLine[1:-1]
+		headerList = header.split()
+		#_tax_id = FigureOutTaxID_ins.returnTaxIDGivenSentence(str)
+		
+		chromosome = headerList[0]
+		comment = ' '.join(headerList[1:])
+		gi = None
+		acc_ver = None
+		accitem = re.compile(r'supercontig')
+		if accitem.search(header) is not None:
+			acc_ver = headerList[0]
+		else:	  
+			commentSplit = comment.split("|")
+			if(len(commentSplit) > 4):
+				#deal with MT
+				gi = int(commentSplit[1])
+				acc_ver = commentSplit[3]
+				comment = commentSplit[4]
+		return PassingData(tax_id=None, gi=gi, comment=comment, acc_ver=acc_ver, chromosome=chromosome)
+		
 	def parseFastaDescriptionForWUSTLVervetScaffolds(self, descriptionLine=None, FigureOutTaxID_ins=None):
 		"""
 		2011-7-6
@@ -316,7 +345,7 @@ class chromosome_fasta2db(AbstractDBInteractingClass):
 				new_fasta_block = 1
 				continue
 			if aa_attr_instance is None:
-				aa_attr_instance = db.getAnnotAssembly(gi=headerData.gi, acc_ver=headerData.acc_ver, accession =None, \
+				aa_attr_instance = db.getAnnotAssembly(gi=headerData.gi, acc_ver=headerData.acc_ver, accession=None, \
 						version =version, tax_id=tax_id, chromosome =chromosome, \
 						start =start, stop =None, orientation=None, sequence = None,\
 						raw_sequence_start_id=None, original_path=os.path.abspath(filename),\
@@ -349,7 +378,7 @@ class chromosome_fasta2db(AbstractDBInteractingClass):
 					self.saveRawSequence(db.session, seq_to_db, passingdata, aa_attr_instance)
 					seq = seq[chunk_size:]	#remove the one already in db
 					if self.report:
-						sys.stderr.write("%s\t%s\t%s"%('\x08'*20, no_of_fasta_blocks, passingdata.current_start/chunk_size+1))
+						sys.stderr.write("%s\t%s\t%s"%('\x08'*40, no_of_fasta_blocks, passingdata.current_start/chunk_size+1))
 			if seq:	# last segment from last line
 				self.saveRawSequence(db.session, seq, passingdata, aa_attr_instance)
 			aa_attr_instance.stop = passingdata.current_stop
@@ -358,7 +387,7 @@ class chromosome_fasta2db(AbstractDBInteractingClass):
 			no_of_fasta_blocks += 1
 			if no_of_fasta_blocks>=maxNoOfFastaRecords:
 				break
-		sys.stderr.write("  Number of fasta records/chromosomes: %s.\n"%(no_of_fasta_blocks))
+		sys.stderr.write("\n  Number of fasta records/chromosomes: %s.\n"%(no_of_fasta_blocks))
 		del inf
 	
 	def connectDB(self):
@@ -386,7 +415,7 @@ class chromosome_fasta2db(AbstractDBInteractingClass):
 		session = self.db.session
 		session.begin()
 		for filename in self.inputFnameLs:
-			sys.stderr.write("%d/%d:\t%s "%(self.inputFnameLs.index(filename)+1,\
+			sys.stderr.write("%d/%d:\t%s \n"%(self.inputFnameLs.index(filename)+1,\
 											len(self.inputFnameLs),filename))
 			self.parse_chromosome_fasta_file(db=self.db, filename=filename, tax_id=self.tax_id, version=self.version, \
 											 chunk_size=10000, \
