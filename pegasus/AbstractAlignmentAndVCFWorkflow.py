@@ -9,7 +9,9 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import copy
 from Pegasus.DAX3 import *
-from pymodule import ProcessOptions, getListOutOfStr, PassingData, yh_pegasus, NextGenSeq, utils
+from pymodule import ProcessOptions, getListOutOfStr, PassingData, NextGenSeq, utils
+from pymodule.pegasus import yh_pegasus
+
 from AbstractAlignmentWorkflow import AbstractAlignmentWorkflow
 from AbstractVCFWorkflow import AbstractVCFWorkflow
 

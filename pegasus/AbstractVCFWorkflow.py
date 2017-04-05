@@ -10,7 +10,8 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import copy
 from Pegasus.DAX3 import Executable, File, PFN, Link, Job
-from pymodule import Genome, getListOutOfStr, PassingData, yh_pegasus, NextGenSeq, utils
+from pymodule import Genome, getListOutOfStr, PassingData, NextGenSeq, utils
+from pymodule.pegasus import yh_pegasus
 from pymodule.yhio.MatrixFile import MatrixFile
 from pymodule.yhio.VCFFile import VCFFile
 from AbstractNGSWorkflow import AbstractNGSWorkflow

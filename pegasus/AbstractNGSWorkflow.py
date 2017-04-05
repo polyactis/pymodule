@@ -7,6 +7,7 @@ import sys, os, math
 
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
+sys.path.insert(0, os.path.join(os.path.expanduser('~/src')))
 
 from Pegasus.DAX3 import Executable, File, PFN, Link, Job
 from pymodule import Genome, utils
@@ -52,9 +53,9 @@ class AbstractNGSWorkflow(parentClass):
 						("contigMinRankBySize", 1, int): [1, 'M', 1, 'minimum rank (rank 1=biggest) of a contig/chr to be included in calling'],\
 						('chromosome_type_id', 0, int):[None, '', 1, 'what type of chromosomes to be included, same as table genome.chromosome_type.\n\
 	0 or None: all, 1: autosomes, 2: X, 3:Y, 4: mitochondrial '],\
-						('ref_genome_tax_id', 0, int):[60711, '', 1, 'used to fetch chromosome info from GenomeDB. column GenomeDB.AnnotAssembly.tax_id'],\
+						('ref_genome_tax_id', 0, int):[9606, '', 1, 'used to fetch chromosome info from GenomeDB. column GenomeDB.AnnotAssembly.tax_id'],\
 						('ref_genome_sequence_type_id', 0, int):[1, '', 1, 'used to fetch chromosome info from GenomeDB. column GenomeDB.SequenceType.id 1: assembledChromosome, 9: Scaffold'],\
-						('ref_genome_version', 0, int):[None, '', 1, 'used to fetch chromosome info from GenomeDB. column GenomeDB.AnnotAssembly.version'],\
+						('ref_genome_version', 0, int):[15, '', 1, 'used to fetch chromosome info from GenomeDB. column GenomeDB.AnnotAssembly.version'],\
 						('ref_genome_outdated_index', 0, int):[0, '', 1, 'used to fetch chromosome info from GenomeDB. 0 means not outdated. column GenomeDB.AnnotAssembly.outdated_index'],\
 						
 						('completedAlignment', 0, int):[None, '', 1, 'a flag requiring whether user chooses alignment that has been completed or not.\n\
@@ -74,7 +75,7 @@ class AbstractNGSWorkflow(parentClass):
 						("sequence_filtered", 0, int): [None, 'Q', 1, 'to filter alignments/individual_sequences. None: whatever; 0: unfiltered sequences, 1: filtered sequences: 2: ...'],\
 						("site_id_ls", 0, ): ["", 'S', 1, 'comma/dash-separated list of site IDs. individuals must come from these sites.'],\
 						("country_id_ls", 0, ): ["", '', 1, 'comma/dash-separated list of country IDs. individuals must come from these countries.'],\
-						("tax_id_ls", 0, ): ["60711", '', 1, 'comma/dash-separated list of taxonomy IDs. individuals must come from these taxonomies.'],\
+						("tax_id_ls", 0, ): ["9606", '', 1, 'comma/dash-separated list of taxonomy IDs. individuals must come from these taxonomies.'],\
 						("sequence_type_id_ls", 0, ): ["", '', 1, 'comma/dash-separated list of IndividualSequence.sequence_type_id. Empty for no filtering'],\
 						("sequencer_id_ls", 0, ): ["", '', 1, 'comma/dash-separated list of IndividualSequence.sequencer_id. Empty for no filtering'],\
 						("sequence_batch_id_ls", 0, ): ["", '', 1, 'comma/dash-separated list of IndividualSequence.sequence_batch_id. Empty for no filtering'],\
