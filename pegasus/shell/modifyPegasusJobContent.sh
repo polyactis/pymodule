@@ -21,10 +21,10 @@ if test $# -lt 3; then
 	echo
 	echo "Examples:"
 	echo "	# replace old value TimeToLive with 178000 and overwrite original file"
-	echo "	$0 work/BaseQualityRecalibration/LocalRealignmentBQSR_AlnID2828_2847_vsMethod87.2013.Apr.17T230821/ merge_pegasus-addOrReplaceReadGroupsJava 178000 1"
+	echo "	$0 work/BaseQualityRecalibration/LocalRealignmentBQSR_AlnID2828_2847_vsMethod87.2013.Apr.17T230821/ merge_pegasus-AddOrReplaceReadGroupsJava 178000 1"
 	echo
 	echo "  # dry-run: replace old MaxPermSize in java jobs (original files not affected), .in files."
-	echo "	$0 work/BaseQualityRecalibration/LocalRealignmentBQSR_AlnID2828_2847_vsMethod87.2013.Apr.17T230821/ merge_pegasus-addOrReplaceReadGroupsJava 4000 0 MaxPermSize .in"
+	echo "	$0 work/BaseQualityRecalibration/LocalRealignmentBQSR_AlnID2828_2847_vsMethod87.2013.Apr.17T230821/ merge_pegasus-AddOrReplaceReadGroupsJava 4000 0 MaxPermSize .in"
 	echo
 	echo "	# dry-run, change request_memory"
 	echo "  $0 work/InspectAlignment/InspectPopulationMonkeyAlignment_RefSeq3488_AlnMethod6_GATKDOC.2013.Jun.21T105136/  DOCWalkerJava_ID00 9040 0 request_memory"

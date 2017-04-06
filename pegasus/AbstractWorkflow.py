@@ -33,7 +33,6 @@ class AbstractWorkflow(ADAG):
 						
 					}
 	option_default_dict = {
-						("vervetSrcPath", 1, ): ["%s/script/vervet/src", '', 1, 'vervet source code folder'],\
 						("pymodulePath", 1, ): ["%s/script/pymodule", '', 1, 'path to the pymodule folder'],\
 						("variationSrcPath", 1, ): ["%s/script/variation/src", '', 1, 'variation source code folder'],\
 						("home_path", 1, ): [os.path.expanduser("~"), 'e', 1, 'path to the home directory on the working nodes'],\
@@ -62,7 +61,7 @@ class AbstractWorkflow(ADAG):
 						}
 						#('bamListFname', 1, ): ['/tmp/bamFileList.txt', 'L', 1, 'The file contains path to each bam file, one file per line.'],\
 	
-	pathToInsertHomePathList = ['javaPath', 'pymodulePath', 'vervetSrcPath', 'plinkPath', 'variationSrcPath', 'pegasusCleanupPath',\
+	pathToInsertHomePathList = ['javaPath', 'pymodulePath', 'plinkPath', 'variationSrcPath', 'pegasusCleanupPath',\
 							'pegasusTransferPath']
 
 	def __init__(self, inputArgumentLs=None, **keywords):
@@ -108,7 +107,6 @@ class AbstractWorkflow(ADAG):
 				sys.stderr.write("Warning: %s has empty absolute path. Skip.\n"%(pathName))
 			
 		#self.pymodulePath = self.insertHomePath(self.pymodulePath, self.home_path)
-		#self.vervetSrcPath =  self.insertHomePath(self.vervetSrcPath, self.home_path)
 		
 		
 		# Add executables to the DAX-level replica catalog
@@ -381,24 +379,29 @@ class AbstractWorkflow(ADAG):
 		architecture = self.architecture
 		clusters_size = self.clusters_size
 		site_handler = self.site_handler
-		vervetSrcPath = self.vervetSrcPath
 		
 		
 		#2013.11.22	#2013.06.25 register tabix
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.tabixPath, name='tabix', clusterSizeMultipler=5)
+		self.addOneExecutableFromPathAndAssignProperClusterSize(
+			path=self.tabixPath, name='tabix', clusterSizeMultipler=5)
 		
 		#2013.11.22 2011.12.21	for OutputVCFSiteStat.py
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.vervetSrcPath, "shell/tabixRetrieve.sh"), name='tabixRetrieve', clusterSizeMultipler=1)
+		self.addOneExecutableFromPathAndAssignProperClusterSize(
+			path=os.path.join(self.pymodulePath, "mapper/extractor/tabixRetrieve.sh"), 
+			name='tabixRetrieve', clusterSizeMultipler=1)
 		
 		#2013.11.22 moved from pymodule/polymorphism/FindNewRefCoordinatesGivenVCFFolderWorkflow.py
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, "polymorphism/mapper/LiftOverVCFBasedOnCoordinateMap.py"), \
+		self.addOneExecutableFromPathAndAssignProperClusterSize(
+			path=os.path.join(self.pymodulePath, "polymorphism/mapper/LiftOverVCFBasedOnCoordinateMap.py"), \
 												name='LiftOverVCFBasedOnCoordinateMap', clusterSizeMultipler=1)
 		
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(workflow.pymodulePath, \
+		self.addOneExecutableFromPathAndAssignProperClusterSize(
+			path=os.path.join(workflow.pymodulePath, \
 										"polymorphism/qc/CalculateLociAndGenomeCoveredAtEachSwitchFrequencyThreshold.py"), \
 										name='CalculateLociAndGenomeCoveredAtEachSwitchFrequencyThreshold', clusterSizeMultipler=0.01)
 		
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(workflow.pymodulePath, \
+		self.addOneExecutableFromPathAndAssignProperClusterSize(
+			path=os.path.join(workflow.pymodulePath, \
 										"pegasus/mapper/extractor/ExtractFlankingSequenceForVCFLoci.py"), \
 										name='ExtractFlankingSequenceForVCFLoci', clusterSizeMultipler=2)
 		
@@ -616,7 +619,7 @@ class AbstractWorkflow(ADAG):
 		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'pegasus/mapper/modifier/SplitPlinkLMendelFileSNPIDIntoChrPosition.py'), \
 										name='SplitPlinkLMendelFileSNPIDIntoChrPosition', clusterSizeMultipler=1)
 		
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.vervetSrcPath, "plot/PlotVCFtoolsStat.py"), \
+		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, "plot/PlotVCFtoolsStat.py"), \
 										name='PlotVCFtoolsStat', clusterSizeMultipler=0)
 		
 		#2013.07.19

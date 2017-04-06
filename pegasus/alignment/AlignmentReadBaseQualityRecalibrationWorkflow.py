@@ -56,14 +56,10 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 from Pegasus.DAX3 import *
 from pymodule import ProcessOptions, getListOutOfStr, PassingData, yh_pegasus, NextGenSeq, \
 	figureOutDelimiter, getColName2IndexFromHeader, utils
-#from pymodule.pegasus.AbstractVCFWorkflow import AbstractVCFWorkflow
 from pymodule import VCFFile
-#from AlignmentToCallPipeline import AlignmentToCallPipeline
-#from AbstractVervetWorkflow import AbstractVervetWorkflow
-#from vervet.src.pegasus.AbstractVervetAlignmentAndVCFWorkflow import AbstractVervetAlignmentAndVCFWorkflow
-from vervet.src import AbstractVervetAlignmentAndVCFWorkflow
+from pymodule.pegasus.AbstractAlignmentAndVCFWorkflow import AbstractAlignmentAndVCFWorkflow
 
-parentClass = AbstractVervetAlignmentAndVCFWorkflow
+parentClass = AbstractAlignmentAndVCFWorkflow
 class AlignmentReadBaseQualityRecalibrationWorkflow(parentClass):
 	__doc__ = __doc__
 	option_default_dict = parentClass.option_default_dict.copy()
@@ -427,7 +423,7 @@ class AlignmentReadBaseQualityRecalibrationWorkflow(parentClass):
 				addRGJob = self.addReadGroupInsertionJob(workflow=workflow, individual_alignment=new_individual_alignment, \
 									inputBamFile=alignmentJob.output, \
 									outputBamFile=outputRGBAM,\
-									addOrReplaceReadGroupsJava=self.addOrReplaceReadGroupsJava, \
+									AddOrReplaceReadGroupsJava=self.AddOrReplaceReadGroupsJava, \
 									AddOrReplaceReadGroupsJar=self.AddOrReplaceReadGroupsJar,\
 									parentJobLs=[alignmentJob, indexAlignmentJob], extraDependentInputLs=None, \
 									extraArguments=None, job_max_memory = 2500, transferOutput=False,\
@@ -629,10 +625,14 @@ class AlignmentReadBaseQualityRecalibrationWorkflow(parentClass):
 		#samtools is only used for select alignment, which is very fast, increase the clustering 
 		self.setOrChangeExecutableClusterSize(executable=workflow.samtools, clusterSizeMultipler=1)
 		
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, name='BaseRecalibratorJava', clusterSizeMultipler=1)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, name='PrintRecalibratedReadsJava', clusterSizeMultipler=1)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, name='RealignerTargetCreatorJava', clusterSizeMultipler=1)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, name='IndelRealignerJava', clusterSizeMultipler=1)
+		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, 
+								name='BaseRecalibratorJava', clusterSizeMultipler=1)
+		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, 
+								name='PrintRecalibratedReadsJava', clusterSizeMultipler=1)
+		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, 
+								name='RealignerTargetCreatorJava', clusterSizeMultipler=1)
+		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, 
+								name='IndelRealignerJava', clusterSizeMultipler=1)
 
 
 if __name__ == '__main__':

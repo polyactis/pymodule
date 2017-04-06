@@ -34,7 +34,6 @@ class AbstractNGSWorkflow(parentClass):
 	option_default_dict.update({
 						('ref_ind_seq_id', 1, int): [None, 'a', 1, 'IndividualSequence.id. To pick alignments with this sequence as reference', ],\
 						("samtools_path", 1, ): ["%s/bin/samtools", '', 1, 'samtools binary'],\
-						("platypus_path", 1, ): ["%s/bin/Platypus/Platypus.py", '', 1, 'haplotype caller from http://www.well.ox.ac.uk/platypus'],\
 						("picard_path", 1, ): ["%s/script/picard/dist", '', 1, 'picard folder containing its jar binaries'],\
 						("gatk_path", 1, ): ["%s/script/gatk/dist", '', 1, 'GATK folder containing its jar binaries'],\
 						("gatk2_path", 1, ): ["%s/script/gatk2/", '', 1, 'GATK version 2 or afterwards, no more source code, just binary jar files.'],\
@@ -112,7 +111,7 @@ class AbstractNGSWorkflow(parentClass):
 		"""
 		2011-7-11
 		"""
-		self.pathToInsertHomePathList.extend(['samtools_path', 'platypus_path', 'picard_path', 'gatk_path', 'tabixPath', \
+		self.pathToInsertHomePathList.extend(['samtools_path', 'picard_path', 'gatk_path', 'tabixPath', \
 									'bgzipPath', 'gatk2_path', 'ligateVcfPerlPath',\
 									'vcftoolsPath', 'vcfSubsetPath', 'vcfsorterPath'])
 		#inserted before parentClass.__init__()
@@ -271,7 +270,6 @@ class AbstractNGSWorkflow(parentClass):
 		architecture = self.architecture
 		clusters_size = self.clusters_size
 		site_handler = self.site_handler
-		vervetSrcPath = self.vervetSrcPath
 		
 		executableClusterSizeMultiplierList = []	#2012.8.7 each cell is a tuple of (executable, clusterSizeMultipler (0 if u do not need clustering)
 		
@@ -279,26 +277,20 @@ class AbstractNGSWorkflow(parentClass):
 		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'polymorphism/qc/mapper/FilterLocusBasedOnLocusStatFile.py'), \
 									name='FilterLocusBasedOnLocusStatFile', \
 									clusterSizeMultipler=0.5)
-		#2013.10.07
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.expanduser("~/script/freebayes/bin/freebayes"), \
-											name='freebayes', clusterSizeMultipler=0.5)
+
 		#2013.10.2
 		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, name='CombineBeagleAndPreBeagleVariantsJava', \
 											clusterSizeMultipler=0.6)
 		#2013.10.13
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(vervetSrcPath, "shell/ligateVcf.sh"), \
+		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, "reducer/ligateVcf.sh"), \
 									name="ligateVcf", clusterSizeMultipler=1)
 		#2013.09.17 updated 
 		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, "polymorphism/qc/CheckTwoVCFOverlapCC"), \
 											name='CheckTwoVCFOverlapCC', clusterSizeMultipler=1)
 		
-		#2013.10.07 does not exist anymore
-		#self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.vervetSrcPath, "mapper/SelectAndSplitAlignment.py"), \
-		#									name='selectAndSplit', clusterSizeMultipler=0)
-		
 		selectAndSplitFasta = Executable(namespace=namespace, name="SelectAndSplitFastaRecords", version=version, \
 										os=operatingSystem, arch=architecture, installed=True)
-		selectAndSplitFasta.addPFN(PFN("file://" + os.path.join(self.vervetSrcPath, "mapper/SelectAndSplitFastaRecords.py"), site_handler))
+		selectAndSplitFasta.addPFN(PFN("file://" + os.path.join(self.pymodulePath, "mapper/splitter/SelectAndSplitFastaRecords.py"), site_handler))
 		executableClusterSizeMultiplierList.append((selectAndSplitFasta, 0))
 		
 		BuildBamIndexFilesJava = Executable(namespace=namespace, name="BuildBamIndexFilesJava", version=version, os=operatingSystem,\
@@ -344,138 +336,132 @@ class AbstractNGSWorkflow(parentClass):
 		executableClusterSizeMultiplierList.append((SelectVariantsJava, 0.5))
 		
 		#2013.09.04
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, name='CombineVariantsJava', clusterSizeMultipler=0.3)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, name='CombineVariantsJavaInReduce', \
+		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, 
+															name='CombineVariantsJava', clusterSizeMultipler=0.3)
+		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, 
+															name='CombineVariantsJavaInReduce', \
 															clusterSizeMultipler=0.001)
 		
 		
-		CallVariantBySamtools = Executable(namespace=namespace, name="CallVariantBySamtools", version=version, \
-										os=operatingSystem, arch=architecture, installed=True)
-		CallVariantBySamtools.addPFN(PFN("file://" + os.path.join(self.vervetSrcPath, "shell/CallVariantBySamtools.sh"), site_handler))
-		#clustering is controlled by a separate parameter
-		#CallVariantBySamtools.addProfile(Profile(Namespace.PEGASUS, key="clusters.size", value="%s"%clusters_size))
-		executableClusterSizeMultiplierList.append((CallVariantBySamtools, 0))
+		self.addOneExecutableFromPathAndAssignProperClusterSize(
+			path=os.path.join(self.pymodulePath, "mapper/computer/CallVariantBySamtools.sh"), 
+			name='CallVariantBySamtools', \
+			clusterSizeMultipler=0)
 		
-		GenotypeCallByCoverage = Executable(namespace=namespace, name="GenotypeCallByCoverage", version=version, \
-										os=operatingSystem, arch=architecture, installed=True)
-		GenotypeCallByCoverage.addPFN(PFN("file://" + os.path.join(self.vervetSrcPath, "mapper/GenotypeCallByCoverage.py"), site_handler))
-		executableClusterSizeMultiplierList.append((GenotypeCallByCoverage, 1))
+		self.addOneExecutableFromPathAndAssignProperClusterSize(
+			path=os.path.join(self.pymodulePath, "mapper/computer/GenotypeCallByCoverage.py"), 
+			name='GenotypeCallByCoverage', \
+			clusterSizeMultipler=1)
+		
 		
 		#2013.06.28 use this function 
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.vervetSrcPath, "shell/bgzip_tabix.sh"), \
+		self.addOneExecutableFromPathAndAssignProperClusterSize(
+			path=os.path.join(self.pymodulePath, "shell/bgzip_tabix.sh"), \
 											name='bgzip_tabix', clusterSizeMultipler=4)
 		#bgzip_tabix_in_reduce is used in reduce() functions, on whole-scaffold/chromosome VCFs, less clustering
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.vervetSrcPath, "shell/bgzip_tabix.sh"), \
-											name='bgzip_tabix_in_reduce', clusterSizeMultipler=1)
+		self.addOneExecutableFromPathAndAssignProperClusterSize(
+			path=os.path.join(self.pymodulePath, "shell/bgzip_tabix.sh"), \
+			name='bgzip_tabix_in_reduce', clusterSizeMultipler=1)
 		
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.vervetSrcPath, "shell/vcf_convert.sh"), \
+		self.addOneExecutableFromPathAndAssignProperClusterSize(
+			path=os.path.join(self.pymodulePath, "mapper/converter/vcf_convert.sh"), \
 											name='vcf_convert', clusterSizeMultipler=1)
 		#vcf_convert_in_reduce is used in reduce() functions, on whole-scaffold/chromosome VCFs,
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.vervetSrcPath, "shell/vcf_convert.sh"), \
+		self.addOneExecutableFromPathAndAssignProperClusterSize(
+			path=os.path.join(self.pymodulePath, "mapper/converter/vcf_convert.sh"), \
 											name='vcf_convert_in_reduce', clusterSizeMultipler=0.2)
 		
 		vcf_isec = Executable(namespace=namespace, name="vcf_isec", version=version, \
 										os=operatingSystem, arch=architecture, installed=True)
-		vcf_isec.addPFN(PFN("file://" + os.path.join(self.vervetSrcPath, "shell/vcf_isec.sh"), site_handler))
+		vcf_isec.addPFN(PFN("file://" + os.path.join(self.pymodulePath, "mapper/filter/vcf_isec.sh"), site_handler))
 		executableClusterSizeMultiplierList.append((vcf_isec, 1))
-		
-		vcf_concat = Executable(namespace=namespace, name="vcf_concat", version=version, \
-										os=operatingSystem, arch=architecture, installed=True)
-		vcf_concat.addPFN(PFN("file://" + os.path.join(self.vervetSrcPath, "shell/vcf_concat.sh"), site_handler))
-		executableClusterSizeMultiplierList.append((vcf_concat, 1))
 		
 		#vcfSubsetPath is first argument to vcfSubset
 		vcfSubset = Executable(namespace=namespace, name="vcfSubset", version=version, \
 										os=operatingSystem, arch=architecture, installed=True)
-		vcfSubset.addPFN(PFN("file://" + os.path.join(self.vervetSrcPath, "shell/vcfSubset.sh"), site_handler))
+		vcfSubset.addPFN(PFN("file://" + os.path.join(self.pymodulePath, "mapper/extractor/vcfSubset.sh"), site_handler))
 		vcfSubset.vcfSubsetPath = self.vcfSubsetPath
 		executableClusterSizeMultiplierList.append((vcfSubset, 1))
 		
-		concatGATK = Executable(namespace=namespace, name="concatGATK", version=version, \
-							os=operatingSystem, arch=architecture, installed=True)
-		concatGATK.addPFN(PFN("file://" + os.path.join(self.vervetSrcPath, "shell/vcf_concat.sh"), site_handler))
-		executableClusterSizeMultiplierList.append((concatGATK, 1))
-		
-		concatSamtools = Executable(namespace=namespace, name="concatSamtools", version=version, \
-									os=operatingSystem, arch=architecture, installed=True)
-		concatSamtools.addPFN(PFN("file://" + os.path.join(self.vervetSrcPath, "shell/vcf_concat.sh"), site_handler))
-		executableClusterSizeMultiplierList.append((concatSamtools, 1))
+		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, "reducer/vcf_concat.sh"), 
+					name='vcf_concat', clusterSizeMultipler=1)
+		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, "reducer/vcf_concat.sh"), 
+					name='concatGATK', clusterSizeMultipler=1)
+		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, "reducer/vcf_concat.sh"), 
+					name='concatSamtools', clusterSizeMultipler=1)
 		
 		
 		#2011.12.21 moved from FilterVCFPipeline.py
-		FilterVCFByDepthJava = Executable(namespace=namespace, name="FilterVCFByDepthJava", version=version, os=operatingSystem,\
-											arch=architecture, installed=True)
-		FilterVCFByDepthJava.addPFN(PFN("file://" + self.javaPath, site_handler))
-		executableClusterSizeMultiplierList.append((FilterVCFByDepthJava, 1 ))
-		
+		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, 
+															name='FilterVCFByDepthJava', \
+															clusterSizeMultipler=1)
 		
 		#2012.3.1
-		MergeFiles = Executable(namespace=namespace, name="MergeFiles", \
-							version=version, os=operatingSystem, arch=architecture, installed=True)
-		MergeFiles.addPFN(PFN("file://" + os.path.join(vervetSrcPath, "shell/MergeFiles.sh"), site_handler))
-		executableClusterSizeMultiplierList.append((MergeFiles, 0 ))
+		self.addOneExecutableFromPathAndAssignProperClusterSize(
+			path=os.path.join(self.pymodulePath, "reducer/MergeFiles.sh"), \
+											name='MergeFiles', clusterSizeMultipler=0)
 		
 		#2013.09.17 updated 
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.vervetSrcPath, "mapper/CheckTwoVCFOverlap.py"), \
-											name='CheckTwoVCFOverlap', clusterSizeMultipler=1)
+		self.addOneExecutableFromPathAndAssignProperClusterSize(
+			path=os.path.join(self.pymodulePath, "mapper/computer/CheckTwoVCFOverlap.py"), \
+			name='CheckTwoVCFOverlap', clusterSizeMultipler=1)
 		
 		#2012.9.6
-		AppendInfo2SmartPCAOutput = Executable(namespace=namespace, name="AppendInfo2SmartPCAOutput", version=version, \
-										os=operatingSystem, arch=architecture, installed=True)
-		AppendInfo2SmartPCAOutput.addPFN(PFN("file://" + os.path.join(vervetSrcPath, "mapper/AppendInfo2SmartPCAOutput.py"), site_handler))
-		executableClusterSizeMultiplierList.append((AppendInfo2SmartPCAOutput, 0))
+		self.addOneExecutableFromPathAndAssignProperClusterSize(
+			path=os.path.join(self.pymodulePath, "mapper/modifier/AppendInfo2SmartPCAOutput.py"), \
+											name='AppendInfo2SmartPCAOutput', clusterSizeMultipler=0)
 		
-				
-		AddAlignmentFile2DB = Executable(namespace=namespace, name="AddAlignmentFile2DB", version=version, os=operatingSystem,\
-										arch=architecture, installed=True)
-		AddAlignmentFile2DB.addPFN(PFN("file://" + os.path.join(self.vervetSrcPath, "db/input/AddAlignmentFile2DB.py"), site_handler))
-		executableClusterSizeMultiplierList.append((AddAlignmentFile2DB, 0))
-		
-		
-		MergeSamFilesJava = Executable(namespace=namespace, name="MergeSamFilesJava", version=version, os=operatingSystem,\
-											arch=architecture, installed=True)
-		MergeSamFilesJava.addPFN(PFN("file://" + self.javaPath, site_handler))
-		executableClusterSizeMultiplierList.append((MergeSamFilesJava, 0))
+		self.addOneExecutableFromPathAndAssignProperClusterSize(
+			path=self.javaPath, name='MergeSamFilesJava', clusterSizeMultipler=0)
 		
 		self.addExecutableAndAssignProperClusterSize(executableClusterSizeMultiplierList, defaultClustersSize=self.clusters_size)
 		
 		#2013.07.09 in order to run vcfsorter.pl from http://code.google.com/p/vcfsorter/
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'shell/pipeCommandOutput2File.sh'), name='vcfsorterShellPipe', clusterSizeMultipler=1)
+		self.addOneExecutableFromPathAndAssignProperClusterSize(
+			path=os.path.join(self.pymodulePath, 'shell/pipeCommandOutput2File.sh'), 
+			name='vcfsorterShellPipe', clusterSizeMultipler=1)
 		#2013.11.22 generic pipeCommandOutput2File
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'shell/pipeCommandOutput2File.sh'), name='pipeCommandOutput2File', clusterSizeMultipler=1)
+		self.addOneExecutableFromPathAndAssignProperClusterSize(
+			path=os.path.join(self.pymodulePath, 'shell/pipeCommandOutput2File.sh'), 
+			name='pipeCommandOutput2File', clusterSizeMultipler=1)
 		
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, name='GATKJava', clusterSizeMultipler=0.2)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.samtools_path, name='samtools', clusterSizeMultipler=0.2)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, name='genotyperJava', clusterSizeMultipler=0.1)
+		self.addOneExecutableFromPathAndAssignProperClusterSize(
+			path=self.javaPath, name='GATKJava', clusterSizeMultipler=0.2)
+		self.addOneExecutableFromPathAndAssignProperClusterSize(
+			path=self.samtools_path, name='samtools', clusterSizeMultipler=0.2)
+		self.addOneExecutableFromPathAndAssignProperClusterSize(
+			path=self.javaPath, name='genotyperJava', clusterSizeMultipler=0.1)
 		
 		#clustering is controlled by a separate parameter
 		#genotyperJava.addProfile(Profile(Namespace.PEGASUS, key="clusters.size", value="%s"%clusters_size))
 		
 		#2013.07.10
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, "pegasus/mapper/modifier/AddMissingInfoDescriptionToVCFHeader.py"), \
+		self.addOneExecutableFromPathAndAssignProperClusterSize(
+			path=os.path.join(self.pymodulePath, "pegasus/mapper/modifier/AddMissingInfoDescriptionToVCFHeader.py"), \
 									name='AddMissingInfoDescriptionToVCFHeader', clusterSizeMultipler=1)
 		
 		#2013.06.21
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, "pegasus/mapper/splitter/SplitVCFFile.py"), \
+		self.addOneExecutableFromPathAndAssignProperClusterSize(
+			path=os.path.join(self.pymodulePath, "pegasus/mapper/splitter/SplitVCFFile.py"), \
 									name='SplitVCFFile', clusterSizeMultipler=0.01)
 		#2012.7.25
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, name='MergeVCFReplicateHaplotypesJava', \
+		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, 
+											name='MergeVCFReplicateHaplotypesJava', \
 											clusterSizeMultipler=0.5)
 		
 		#2013.06.13
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, name='BeagleJava', clusterSizeMultipler=0.3)
+		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, 
+															name='BeagleJava', clusterSizeMultipler=0.3)
 		#2013.06.12 use this simple function to register vcftoolsWrapper
 		#vcftoolsPath is first argument to vcftoolsWrapper
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.vervetSrcPath, "shell/vcftoolsWrapper.sh"), \
+		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, "shell/vcftoolsWrapper.sh"), \
 													name='vcftoolsWrapper', clusterSizeMultipler=1)
 		
 		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, name='SortSamFilesJava', clusterSizeMultipler=1)
 		#2013.06.06
 		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, name='PrintReadsJava', clusterSizeMultipler=1)
 		#2013.04.09 
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, name='addOrReplaceReadGroupsJava', clusterSizeMultipler=0.5)
 		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, name='AddOrReplaceReadGroupsJava', clusterSizeMultipler=0.5)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.platypus_path, name='Platypus', clusterSizeMultipler=0)
 		
 	
 	bwaIndexFileSuffixLs = ['amb', 'ann', 'bwt', 'pac', 'sa']
@@ -1617,7 +1603,7 @@ class AbstractNGSWorkflow(parentClass):
 	
 	def addReadGroupInsertionJob(self, workflow=None, individual_alignment=None, inputBamFile=None, \
 								outputBamFile=None,\
-								addOrReplaceReadGroupsJava=None, AddOrReplaceReadGroupsJar=None,\
+								AddOrReplaceReadGroupsJava=None, AddOrReplaceReadGroupsJar=None,\
 								parentJobLs=None, extraDependentInputLs=None, \
 								extraArguments=None, job_max_memory = 2500, transferOutput=False, walltime=180, max_walltime=1200, \
 								needBAMIndexJob=True, **keywords):
@@ -1654,7 +1640,7 @@ class AbstractNGSWorkflow(parentClass):
 			extraDependentInputLs=[]
 		extraDependentInputLs.extend([inputBamFile, AddOrReplaceReadGroupsJar])
 		
-		job= self.addGenericJob(executable=addOrReplaceReadGroupsJava, inputFile=None,\
+		job= self.addGenericJob(executable=AddOrReplaceReadGroupsJava, inputFile=None,\
 							outputFile=None, outputArgumentOption="-o", \
 							parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
 							extraOutputLs=[outputBamFile],\

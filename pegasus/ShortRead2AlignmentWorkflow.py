@@ -18,9 +18,9 @@ from Pegasus.DAX3 import *
 from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
 from pymodule.pegasus import yh_pegasus
 
-from pymodule.pegasus.AbstractNGSWorkflow import AbstractNGSWorkflow
-from alignment.AlignmentReadBaseQualityRecalibrationWorkflow import AlignmentReadBaseQualityRecalibrationWorkflow
+from AbstractNGSWorkflow import AbstractNGSWorkflow
 from AbstractAlignmentAndVCFWorkflow import AbstractAlignmentAndVCFWorkflow
+from pymodule.pegasus.alignment.AlignmentReadBaseQualityRecalibrationWorkflow import AlignmentReadBaseQualityRecalibrationWorkflow
 
 class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityRecalibrationWorkflow):
 	__doc__ = __doc__
@@ -31,13 +31,12 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 							however, only toggle it if you know every input individual_sequence_file is not empty. empty read file fails alignment jobs."],\
 						('additionalArguments', 0, ): ["", '', 1, 'a string of additional arguments passed to aln, not bwasw, add double quote if empty space. i.e. "-q 20"'],\
 						("bwa_path", 1, ): ["%s/bin/bwa", '', 1, 'bwa binary'],\
-						("stampy_path", 1, ): ["%s/bin/stampy.py", '', 1, 'path to stampy.py'],\
 						("alignment_method_name", 1, ): ["bwaShortRead", '', 1, 'alignment_method.short_name from db.\
 								used only when unable to guess based on individual_sequence.sequencer and individual_sequence.sequence_type'],\
 						("needRefIndexJob", 0, int): [0, '', 0, 'need to add a reference index job by bwa?'],\
 						('no_of_aln_threads', 1, int): [1, '', 1, 'number of threads during alignment'],\
 						('alignmentJobClustersSizeFraction', 1, float): [0.01, '', 1, 'alignment job cluster size relative to self.clusters_size, \n\
-	for bwa/PEAlignmentByBWA/LongSEAlignmentByBWA/addOrReplaceReadGroupsJava/SortSamFilesJava/samtools jobs'],\
+	for bwa/PEAlignmentByBWA/LongSEAlignmentByBWA/AddOrReplaceReadGroupsJava/SortSamFilesJava/samtools jobs'],\
 						('notStageOutFinalOutput', 0, int):[0, '', 0, 'toggle to not stage out final output (bam + bam.bai)'],\
 						("coreAlignmentJobWallTimeMultiplier", 1, float): [0.2, '', 1, 'The default wall time is 23 hours (for bwa aln, stampy, etc.).\
 	This option controls walltime by multiplying the default with this number.'],\
@@ -49,7 +48,6 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 						})
 	option_default_dict[('local_realigned', 0, int)][0] = 0	#by default not to apply known-indel-free local re-alignment 
 	
-	connectDB = AlignmentReadBaseQualityRecalibrationWorkflow.connectDB
 	
 	def __init__(self,  **keywords):
 		"""
@@ -61,7 +59,6 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 		AbstractNGSWorkflow.__init__(self, **keywords)
 		
 		self.bwa_path =  self.insertHomePath(self.bwa_path, self.home_path)
-		self.stampy_path =  self.insertHomePath(self.stampy_path, self.home_path)
 		
 		if self.notStageOutFinalOutput:
 			self.stageOutFinalOutput = False
@@ -98,35 +95,36 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 		architecture = workflow.architecture
 		clusters_size = workflow.clusters_size
 		site_handler = workflow.site_handler
-		vervetSrcPath = self.vervetSrcPath
 		
-		executableClusterSizeMultiplierList = []	#2012.8.7 each cell is a tuple of (executable, clusterSizeMultipler (0 if u do not need clustering)		
 		
 		#workflow.BuildBamIndexFilesJava.addProfile(Profile(Namespace.PEGASUS, key="clusters.size", value="%s"%self.alignmentJobClustersSizeFraction))
-		self.setOrChangeExecutableClusterSize(executable=workflow.addOrReplaceReadGroupsJava, clusterSizeMultipler=self.alignmentJobClustersSizeFraction, \
+		self.setOrChangeExecutableClusterSize(executable=workflow.AddOrReplaceReadGroupsJava,
+											clusterSizeMultipler=self.alignmentJobClustersSizeFraction, \
 											defaultClustersSize=None)
-		self.setOrChangeExecutableClusterSize(executable=workflow.samtools, clusterSizeMultipler=self.alignmentJobClustersSizeFraction, \
+		self.setOrChangeExecutableClusterSize(executable=workflow.samtools, 
+											clusterSizeMultipler=self.alignmentJobClustersSizeFraction, \
 											defaultClustersSize=None)
 		
-		self.addExecutableAndAssignProperClusterSize(executableClusterSizeMultiplierList, defaultClustersSize=self.clusters_size)
-		
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.stampy_path, \
-									name="stampy", clusterSizeMultipler=self.alignmentJobClustersSizeFraction)
 		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.bwa_path, \
 									name="bwa", clusterSizeMultipler=self.alignmentJobClustersSizeFraction)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.vervetSrcPath, 'shell/ShortSEAlignmentByBWA.sh'), \
-													name="ShortSEAlignmentByBWA", clusterSizeMultipler=self.alignmentJobClustersSizeFraction)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.vervetSrcPath, 'shell/PEAlignmentByBWA.sh'), \
-									name="PEAlignmentByBWA", clusterSizeMultipler=self.alignmentJobClustersSizeFraction)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.vervetSrcPath, 'shell/LongSEAlignmentByBWA.sh'), \
-									name="LongSEAlignmentByBWA", clusterSizeMultipler=self.alignmentJobClustersSizeFraction)
+		self.addOneExecutableFromPathAndAssignProperClusterSize(
+			path=os.path.join(self.pymodulePath, 'mapper/alignment/ShortSEAlignmentByBWA.sh'), \
+			name="ShortSEAlignmentByBWA", clusterSizeMultipler=self.alignmentJobClustersSizeFraction)
+		self.addOneExecutableFromPathAndAssignProperClusterSize(
+			path=os.path.join(self.pymodulePath, 'mapper/alignment/PEAlignmentByBWA.sh'), \
+			name="PEAlignmentByBWA", clusterSizeMultipler=self.alignmentJobClustersSizeFraction)
+		self.addOneExecutableFromPathAndAssignProperClusterSize(
+			path=os.path.join(self.pymodulePath, 'mapper/alignment/LongSEAlignmentByBWA.sh'), \
+			name="LongSEAlignmentByBWA", clusterSizeMultipler=self.alignmentJobClustersSizeFraction)
 		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, \
-									name="SAM2BAMJava", clusterSizeMultipler=self.alignmentJobClustersSizeFraction)
-		#self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'pegasus/mapper/alignment/BWA_Mem.sh'), \
+						name="SAM2BAMJava", clusterSizeMultipler=self.alignmentJobClustersSizeFraction)
+		#self.addOneExecutableFromPathAndAssignProperClusterSize(
+		#	path=os.path.join(self.pymodulePath, 'pegasus/mapper/alignment/BWA_Mem.sh'), \
 		#							name="BWA_Mem", clusterSizeMultipler=self.alignmentJobClustersSizeFraction)
 		#2014.04.04 use generic pipeCommandOutput2File.sh instead
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'shell/pipeCommandOutput2File.sh'), \
-									name="BWA_Mem", clusterSizeMultipler=self.alignmentJobClustersSizeFraction)
+		self.addOneExecutableFromPathAndAssignProperClusterSize(
+			path=os.path.join(self.pymodulePath, 'shell/pipeCommandOutput2File.sh'), \
+			name="BWA_Mem", clusterSizeMultipler=self.alignmentJobClustersSizeFraction)
 		# 2014.04.04 pipeCommandOutput2File need this file dependency
 		self.registerOneExecutableAsFile(pythonVariableName="bwaExecutableFile", path=self.bwa_path)
 		
@@ -248,18 +246,17 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 	def registerISQFileObjLsToWorkflow(self, fileObjectLs=None, workflow=None, data_dir=None):
 		'''
 		2012-2.24
-			similar to registerFileToWorkflow but for a different input
 		'''
 		
-		newFilePair = []
+		newFileObjLs = []
 		for fileObject in fileObjectLs:
 			relativePath = fileObject.db_entry.path
 			fastqF = File(relativePath)
 			fastqF.addPFN(PFN("file://" + fileObject.path, self.input_site_handler))
 			workflow.addFile(fastqF)
 			fileObject.fastqF = fastqF
-			newFilePair.append(fileObject)
-		return newFilePair
+			newFileObjLs.append(fileObject)
+		return newFileObjLs
 
 
 	def addRefIndexJobAndItsOutputAsParent(self, workflow=None, refIndexJob=None, childJob=None):
@@ -279,7 +276,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 					alignment_method=None, outputDir=None, \
 					PEAlignmentByBWA=None, ShortSEAlignmentByBWA=None, LongSEAlignmentByBWA=None, \
 					java=None, SortSamFilesJava=None, SortSamJar=None,\
-					addOrReplaceReadGroupsJava=None, AddOrReplaceReadGroupsJar=None,\
+					AddOrReplaceReadGroupsJava=None, AddOrReplaceReadGroupsJar=None,\
 					no_of_aln_threads=3, stampy=None, transferOutput=False, **keywords):
 		"""
 		2014.4.4
@@ -431,7 +428,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 					alignment_method=None, outputDir=None, namespace=None, version=None,\
 					PEAlignmentByBWA=None, ShortSEAlignmentByBWA=None, LongSEAlignmentByBWA=None, \
 					java=None, SortSamFilesJava=None, SortSamJar=None,\
-					addOrReplaceReadGroupsJava=None, AddOrReplaceReadGroupsJar=None,\
+					AddOrReplaceReadGroupsJava=None, AddOrReplaceReadGroupsJar=None,\
 					no_of_aln_threads=3, maxMissingAlignmentFraction=None, maxNoOfGaps=None, \
 					transferOutput=False, **keywords):
 		"""
@@ -620,7 +617,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 					alignment_method=None, outputDir=None, namespace=None, version=None,\
 					PEAlignmentByBWA=None, ShortSEAlignmentByBWA=None, LongSEAlignmentByBWA=None, \
 					java=None, SortSamFilesJava=None, SortSamJar=None,\
-					addOrReplaceReadGroupsJava=None, AddOrReplaceReadGroupsJar=None,\
+					AddOrReplaceReadGroupsJava=None, AddOrReplaceReadGroupsJar=None,\
 					no_of_aln_threads=3, maxMissingAlignmentFraction=None, maxNoOfGaps=None, \
 					extraArgumentList=None, transferOutput=False, **keywords):
 		"""
@@ -696,7 +693,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 					alignment_method=None, outputDir=None, namespace=None, version=None,\
 					PEAlignmentByBWA=None, ShortSEAlignmentByBWA=None, LongSEAlignmentByBWA=None, \
 					java=None, SortSamFilesJava=None, SortSamJar=None,\
-					addOrReplaceReadGroupsJava=None, AddOrReplaceReadGroupsJar=None,\
+					AddOrReplaceReadGroupsJava=None, AddOrReplaceReadGroupsJar=None,\
 					no_of_aln_threads=3, stampy=None, \
 					maxMissingAlignmentFraction=None, maxNoOfGaps=None, addBamIndexJob=False,\
 					transferOutput=False, **keywords):
@@ -714,7 +711,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 							PEAlignmentByBWA=PEAlignmentByBWA, ShortSEAlignmentByBWA=ShortSEAlignmentByBWA, \
 							LongSEAlignmentByBWA=LongSEAlignmentByBWA,\
 							java=java, SortSamFilesJava=SortSamFilesJava, SortSamJar=SortSamJar,\
-							addOrReplaceReadGroupsJava=addOrReplaceReadGroupsJava, AddOrReplaceReadGroupsJar=AddOrReplaceReadGroupsJar,\
+							AddOrReplaceReadGroupsJava=AddOrReplaceReadGroupsJava, AddOrReplaceReadGroupsJar=AddOrReplaceReadGroupsJar,\
 							no_of_aln_threads=no_of_aln_threads, stampy=stampy)
 		
 		2013.04.27 used to be 'mem', now is 'bwamem' in db
@@ -757,7 +754,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 						PEAlignmentByBWA=PEAlignmentByBWA, ShortSEAlignmentByBWA=ShortSEAlignmentByBWA, \
 						LongSEAlignmentByBWA=LongSEAlignmentByBWA,\
 						java=java, SortSamFilesJava=SortSamFilesJava, SortSamJar=SortSamJar,\
-						addOrReplaceReadGroupsJava=addOrReplaceReadGroupsJava, AddOrReplaceReadGroupsJar=AddOrReplaceReadGroupsJar,\
+						AddOrReplaceReadGroupsJava=AddOrReplaceReadGroupsJava, AddOrReplaceReadGroupsJar=AddOrReplaceReadGroupsJar,\
 						no_of_aln_threads=no_of_aln_threads, stampy=stampy,\
 						transferOutput=transferOutput)
 		elif alignment_method.short_name.find('bwamem')==0:	#2013.04.27 used to be 'mem', now is 'bwamem'
@@ -770,7 +767,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 						PEAlignmentByBWA=PEAlignmentByBWA, ShortSEAlignmentByBWA=ShortSEAlignmentByBWA, \
 						LongSEAlignmentByBWA=LongSEAlignmentByBWA,\
 						java=java, SortSamFilesJava=SortSamFilesJava, SortSamJar=SortSamJar,\
-						addOrReplaceReadGroupsJava=addOrReplaceReadGroupsJava, AddOrReplaceReadGroupsJar=AddOrReplaceReadGroupsJar,\
+						AddOrReplaceReadGroupsJava=AddOrReplaceReadGroupsJava, AddOrReplaceReadGroupsJar=AddOrReplaceReadGroupsJar,\
 						no_of_aln_threads=no_of_aln_threads, maxMissingAlignmentFraction=maxMissingAlignmentFraction, maxNoOfGaps=maxNoOfGaps,\
 						transferOutput=transferOutput)
 		elif alignment_method.short_name.find('bwa')==0:
@@ -783,7 +780,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 						PEAlignmentByBWA=PEAlignmentByBWA, ShortSEAlignmentByBWA=ShortSEAlignmentByBWA, \
 						LongSEAlignmentByBWA=LongSEAlignmentByBWA,\
 						java=java, SortSamFilesJava=SortSamFilesJava, SortSamJar=SortSamJar,\
-						addOrReplaceReadGroupsJava=addOrReplaceReadGroupsJava, AddOrReplaceReadGroupsJar=AddOrReplaceReadGroupsJar,\
+						AddOrReplaceReadGroupsJava=AddOrReplaceReadGroupsJava, AddOrReplaceReadGroupsJar=AddOrReplaceReadGroupsJar,\
 						no_of_aln_threads=no_of_aln_threads,  maxMissingAlignmentFraction=maxMissingAlignmentFraction, maxNoOfGaps=maxNoOfGaps, \
 						transferOutput=transferOutput)
 		else:
@@ -814,7 +811,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 			addRGJob = self.addReadGroupInsertionJob(workflow=workflow, individual_alignment=individual_alignment, \
 								inputBamFile=sam_convert_job.output, \
 								outputBamFile=outputRGBAM,\
-								addOrReplaceReadGroupsJava=addOrReplaceReadGroupsJava, \
+								AddOrReplaceReadGroupsJava=AddOrReplaceReadGroupsJava, \
 								AddOrReplaceReadGroupsJar=AddOrReplaceReadGroupsJar,\
 								parentJobLs=[sam_convert_job], extraDependentInputLs=None, \
 								extraArguments=None, job_max_memory = 2500, walltime=80, \

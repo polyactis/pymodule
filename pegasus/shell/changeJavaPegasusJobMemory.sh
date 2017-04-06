@@ -18,10 +18,10 @@ if test $# -lt 6; then
 	echo
 	echo "Examples:"
 	echo "	# dry-run: Leave MaxPermSize alone, modify Xmx and total memory request"
-	echo "	$0 work/BaseQualityRecalibration/LocalRealignmentBQSR_AlnID2828_2847_vsMethod87.2013.Apr.17T230821/ merge_pegasus-addOrReplaceReadGroupsJava 3500 7000 -1 12000 0"
+	echo "	$0 work/BaseQualityRecalibration/LocalRealignmentBQSR_AlnID2828_2847_vsMethod87.2013.Apr.17T230821/ merge_pegasus-AddOrReplaceReadGroupsJava 3500 7000 -1 12000 0"
 	echo
 	echo "  # dry-run: set MaxPermSize to 8000 (Mb) and total memory request to 12000, leave Xmx unchanged."
-	echo "	$0 work/BaseQualityRecalibration/LocalRealignmentBQSR_AlnID2828_2847_vsMethod87.2013.Apr.17T230821/ merge_pegasus-addOrReplaceReadGroupsJava 4000 0 8000 12000 0"
+	echo "	$0 work/BaseQualityRecalibration/LocalRealignmentBQSR_AlnID2828_2847_vsMethod87.2013.Apr.17T230821/ merge_pegasus-AddOrReplaceReadGroupsJava 4000 0 8000 12000 0"
 	echo
 	echo
 	echo

@@ -596,7 +596,7 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(parentClass, BlastWorkflow, Sh
 				PEAlignmentByBWA=workflow.PEAlignmentByBWA, ShortSEAlignmentByBWA=workflow.ShortSEAlignmentByBWA, \
 				LongSEAlignmentByBWA=workflow.LongSEAlignmentByBWA,\
 				java=workflow.java, SortSamFilesJava=workflow.SortSamFilesJava, SortSamJar=workflow.SortSamJar,\
-				addOrReplaceReadGroupsJava=workflow.addOrReplaceReadGroupsJava, \
+				AddOrReplaceReadGroupsJava=workflow.AddOrReplaceReadGroupsJava, \
 				AddOrReplaceReadGroupsJar=workflow.AddOrReplaceReadGroupsJar,\
 				no_of_aln_threads=self.no_of_aln_threads,\
 				stampy=workflow.stampy, \

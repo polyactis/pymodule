@@ -118,7 +118,7 @@ class AbstractAlignmentWorkflow(AbstractNGSWorkflow):
 			job.addArguments(','.join(fileArgumentLs))
 	
 	def addAddRG2BamJobsAsNeeded(self, workflow=None, alignmentDataLs=None, site_handler=None, input_site_handler=None, \
-							addOrReplaceReadGroupsJava=None, AddOrReplaceReadGroupsJar=None, \
+							AddOrReplaceReadGroupsJava=None, AddOrReplaceReadGroupsJar=None, \
 							BuildBamIndexFilesJava=None, BuildBamIndexJar=None, \
 							mv=None, \
 							data_dir=None, tmpDir="/tmp", **keywords):
@@ -168,7 +168,7 @@ class AbstractAlignmentWorkflow(AbstractNGSWorkflow):
 				
 				# the add-read-group job
 				#addRGJob = Job(namespace=namespace, name=addRGExecutable.name, version=version)
-				addRGJob = Job(namespace=workflow.namespace, name=addOrReplaceReadGroupsJava.name, version=workflow.version)
+				addRGJob = Job(namespace=workflow.namespace, name=AddOrReplaceReadGroupsJava.name, version=workflow.version)
 				outputRGSAM = File(os.path.join(addRG2BamDir, os.path.basename(alignment.path)))
 				
 				addRGJob.addArguments(javaMemRequirement, '-jar', AddOrReplaceReadGroupsJar, \

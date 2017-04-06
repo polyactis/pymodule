@@ -171,7 +171,7 @@ class AlignmentReduceReadsWorkflow(parentClass):
 				addRGJob = self.addReadGroupInsertionJob(workflow=workflow, individual_alignment=new_individual_alignment, \
 									inputBamFile=alignmentJob.output, \
 									outputBamFile=outputRGBAM,\
-									addOrReplaceReadGroupsJava=self.addOrReplaceReadGroupsJava, \
+									AddOrReplaceReadGroupsJava=self.AddOrReplaceReadGroupsJava, \
 									AddOrReplaceReadGroupsJar=self.AddOrReplaceReadGroupsJar,\
 									parentJobLs=[alignmentJob, indexAlignmentJob], extraDependentInputLs=None, \
 									extraArguments=None, job_max_memory = 2500, transferOutput=False)
