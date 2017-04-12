@@ -2,7 +2,7 @@
 """
 Examples:
 	#testing merge three identical genotype files
-	%s -o /tmp/ccc.tsv /tmp/call_1.tsv /tmp/call_1.tsv /tmp/call_1.tsv
+	%s -o /tmp/ccc.tsv --inputDelimiter tab /tmp/call_1.tsv /tmp/call_1.tsv /tmp/call_1.tsv
 	
 	%s 
 	
@@ -125,7 +125,6 @@ class ReduceMatrixByMergeColumnsWithSameKey(AbstractReducer):
 		"""
 		newHeader = []
 		key2dataLs = {}	#key is the keyColumn, dataLs corresponds to the sum of each column from valueColumnLs 
-		delimiter = None
 		noOfDataColumnsFromPriorFiles = 0
 		for inputFname in self.inputFnameLs:
 			if not os.path.isfile(inputFname):
@@ -136,8 +135,9 @@ class ReduceMatrixByMergeColumnsWithSameKey(AbstractReducer):
 			reader = None
 			try:
 				inputFile = utils.openGzipFile(inputFname)
-				delimiter = figureOutDelimiter(inputFile)
-				reader = MatrixFile(inputFile=inputFile, delimiter=delimiter)
+				if self.inputDelimiter is None or self.inputDelimiter=='':
+					self.inputDelimiter = figureOutDelimiter(inputFile)
+				reader = MatrixFile(inputFile=inputFile, delimiter=self.inputDelimiter)
 			except:
 				sys.stderr.write('Except type: %s\n'%repr(sys.exc_info()))
 				import traceback
@@ -149,7 +149,7 @@ class ReduceMatrixByMergeColumnsWithSameKey(AbstractReducer):
 				self.handleNewHeader(header, newHeader, self.keyColumnLs, valueColumnLs, keyColumnSet=self.keyColumnSet)
 				if self.noHeader:	#2012.8.10
 					inputFile.seek(0)
-					reader = MatrixFile(inputFile=inputFile, delimiter=delimiter)
+					reader = MatrixFile(inputFile=inputFile, delimiter=self.inputDelimiter)
 			except:	#in case something wrong (i.e. file is empty)
 				sys.stderr.write('Except type: %s\n'%repr(sys.exc_info()))
 				import traceback
@@ -177,7 +177,7 @@ class ReduceMatrixByMergeColumnsWithSameKey(AbstractReducer):
 			noOfDataColumnsFromPriorFiles += len(valueColumnLs)
 		if self.noHeader:	#2012.8.10
 			newHeader = None
-		returnData = PassingData(key2dataLs=key2dataLs, delimiter=delimiter, header=newHeader)
+		returnData = PassingData(key2dataLs=key2dataLs, delimiter=self.inputDelimiter, header=newHeader)
 		return returnData
 	
 	def run(self):
@@ -187,7 +187,8 @@ class ReduceMatrixByMergeColumnsWithSameKey(AbstractReducer):
 			pdb.set_trace()
 		
 		returnData = self.traverse()
-		self.outputFinalData(self.outputFname, key2dataLs=returnData.key2dataLs, delimiter=returnData.delimiter, header=returnData.header)
+		self.outputFinalData(self.outputFname, key2dataLs=returnData.key2dataLs, 
+							delimiter=returnData.delimiter, header=returnData.header)
 
 if __name__ == '__main__':
 	main_class = ReduceMatrixByMergeColumnsWithSameKey

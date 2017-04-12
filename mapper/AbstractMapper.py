@@ -39,6 +39,8 @@ class AbstractMapper(object):
 							}
 	option_default_dict = {
 						('inputFname', 0, ): [None, 'i', 1, 'input file.', ],\
+						('inputDelimiter', 0, ): [None, '', 1, 'delimiter of input file: tab, space, or coma. literally, \
+						supply one of 3 prior english words, it will translate. if not given, it will guess. ', ],\
 						("home_path", 1, ): [os.path.expanduser("~"), 'e', 1, 'path to the home directory on the working nodes'],\
 						('outputFname', 0, ): [None, 'o', 1, 'output file'],\
 						('outputFnamePrefix', 0, ): [None, 'O', 1, 'output filename prefix (optional).'],\
@@ -66,6 +68,13 @@ class AbstractMapper(object):
 		if self.inputFnameLs and not getattr(self, 'inputFname', None):
 			self.inputFname = self.inputFnameLs[0]
 		
+		if getattr(self, 'inputDelimiter', None):
+			if self.inputDelimiter=='tab':
+				self.inputDelimiter = '\t'
+			if self.inputDelimiter=='space':
+				self.inputDelimiter = ' '
+			if self.inputDelimiter=='coma':
+				self.inputDelimiter = ','
 		self.connectDB()
 		#2012.8.14 an expression that searches any character in a string
 		self.p_char = re.compile(r'[a-df-zA-DF-Z\-]$')	#no 'e' or 'E', used in scientific number, add '-' and append '$'
