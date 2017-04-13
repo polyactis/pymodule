@@ -39,7 +39,7 @@ class AbstractNGSWorkflow(parentClass):
 						("gatk2_path", 1, ): ["%s/script/gatk2/", '', 1, 'GATK version 2 or afterwards, no more source code, just binary jar files.'],\
 						('tabixPath', 1, ): ["%s/bin/tabix", '', 1, 'path to the tabix binary', ],\
 						('bgzipPath', 1, ): ["%s/bin/bgzip", '', 1, 'path to the bgzip binary', ],\
-						('vcftoolsPath', 1, ): ["%s/bin/vcftools", '', 1, 'path to the vcftools binary', ],\
+						('vcftoolsPath', 1, ): ["%s/bin/vcftools/vcftools", '', 1, 'path to the vcftools binary', ],\
 						('vcfSubsetPath', 1, ): ["%s/bin/vcf-subset", '', 1, 'path to the vcf-subset program', ],\
 						("ligateVcfPerlPath", 1, ): ["%s/bin/umake/scripts/ligateVcf.pl", '', 1, 'path to ligateVcf.pl'],\
 						("vcfsorterPath", 1, ): ["%s/bin/vcfsorter.pl", '', 1, 'path to vcfsorter.pl, http://code.google.com/p/vcfsorter/'],\
@@ -228,9 +228,9 @@ class AbstractNGSWorkflow(parentClass):
 		"""
 		parentClass.registerJars(self)
 		#2013.06.23
-		self.registerOneJar(name="Beagle4Jar", path=os.path.expanduser('~/bin/Beagle/beagle4.jar'))
+		#self.registerOneJar(name="Beagle4Jar", path=os.path.expanduser('~/bin/Beagle/beagle4.jar'))
 		#2013.06.13
-		self.registerOneJar(name="BeagleJar", path=os.path.expanduser('~/bin/Beagle/beagle.jar'))
+		#self.registerOneJar(name="BeagleJar", path=os.path.expanduser('~/bin/Beagle/beagle.jar'))
 		
 		#add the MergeSamFiles.jar file into workflow
 		self.registerOneJar(name="MergeSamFilesJar", path=os.path.join(self.picard_path, 'MergeSamFiles.jar'))
@@ -243,11 +243,11 @@ class AbstractNGSWorkflow(parentClass):
 		self.registerOneJar(name="MarkDuplicatesJar", path=os.path.join(self.picard_path, 'MarkDuplicates.jar'))
 		self.registerOneJar(name="SplitReadFileJar", path=os.path.join(self.picard_path, 'SplitReadFile.jar'))
 		
-		self.registerOneJar(name="GenomeAnalysisTKJar", path=os.path.join(self.gatk_path, 'GenomeAnalysisTK.jar'))
+		#self.registerOneJar(name="GenomeAnalysisTKJar", path=os.path.join(self.gatk_path, 'GenomeAnalysisTK.jar'))
 		
 		#have to be a different folder, otherwise name clash with the old gatk jar file
-		self.registerOneJar(name="GenomeAnalysisTK2Jar", path=os.path.join(self.gatk2_path, 'GenomeAnalysisTK.jar'),\
-						folderName='gatk2Jar')
+		#self.registerOneJar(name="GenomeAnalysisTK2Jar", path=os.path.join(self.gatk2_path, 'GenomeAnalysisTK.jar'),\
+		#				folderName='gatk2Jar')
 		self.registerOneJar(name="SortSamJar", path=os.path.join(self.picard_path, 'SortSam.jar'))
 		self.registerOneJar(name="SamFormatConverterJar", path=os.path.join(self.picard_path, 'SamFormatConverter.jar'))
 		
