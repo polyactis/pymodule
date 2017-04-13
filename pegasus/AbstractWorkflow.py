@@ -19,7 +19,7 @@ class AbstractWorkflow(ADAG):
 	db_option_dict = {
 					('drivername', 1,):['postgresql', 'v', 1, 'which type of database? mysql or postgresql', ],\
 					('hostname', 1, ): ['localhost', 'z', 1, 'hostname of the db server', ],\
-					('dbname', 1, ): ['vervetdb', 'd', 1, 'database name', ],\
+					('dbname', 1, ): ['', 'd', 1, 'database name', ],\
 					('schema', 0, ): ['public', 'k', 1, 'database schema name', ],\
 					('db_user', 1, ): [None, 'u', 1, 'database username', ],\
 					('db_passwd', 1, ): [None, 'p', 1, 'database password', ],\
