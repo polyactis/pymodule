@@ -402,7 +402,7 @@ class AbstractWorkflow(ADAG):
 		
 		self.addOneExecutableFromPathAndAssignProperClusterSize(
 			path=os.path.join(workflow.pymodulePath, \
-										"pegasus/mapper/extractor/ExtractFlankingSequenceForVCFLoci.py"), \
+										"mapper/extractor/ExtractFlankingSequenceForVCFLoci.py"), \
 										name='ExtractFlankingSequenceForVCFLoci', clusterSizeMultipler=2)
 		
 		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(workflow.pymodulePath, \
