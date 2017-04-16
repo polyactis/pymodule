@@ -285,8 +285,8 @@ class AbstractNGSWorkflow(parentClass):
 		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, "reducer/ligateVcf.sh"), \
 									name="ligateVcf", clusterSizeMultipler=1)
 		#2013.09.17 updated 
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, "polymorphism/qc/CheckTwoVCFOverlapCC"), \
-											name='CheckTwoVCFOverlapCC', clusterSizeMultipler=1)
+		#self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, "polymorphism/qc/CheckTwoVCFOverlapCC"), \
+		#									name='CheckTwoVCFOverlapCC', clusterSizeMultipler=1)
 		
 		selectAndSplitFasta = Executable(namespace=namespace, name="SelectAndSplitFastaRecords", version=version, \
 										os=operatingSystem, arch=architecture, installed=True)
@@ -437,12 +437,12 @@ class AbstractNGSWorkflow(parentClass):
 		
 		#2013.07.10
 		self.addOneExecutableFromPathAndAssignProperClusterSize(
-			path=os.path.join(self.pymodulePath, "pegasus/mapper/modifier/AddMissingInfoDescriptionToVCFHeader.py"), \
+			path=os.path.join(self.pymodulePath, "mapper/modifier/AddMissingInfoDescriptionToVCFHeader.py"), \
 									name='AddMissingInfoDescriptionToVCFHeader', clusterSizeMultipler=1)
 		
 		#2013.06.21
 		self.addOneExecutableFromPathAndAssignProperClusterSize(
-			path=os.path.join(self.pymodulePath, "pegasus/mapper/splitter/SplitVCFFile.py"), \
+			path=os.path.join(self.pymodulePath, "mapper/splitter/SplitVCFFile.py"), \
 									name='SplitVCFFile', clusterSizeMultipler=0.01)
 		#2012.7.25
 		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, 

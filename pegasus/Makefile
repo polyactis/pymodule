@@ -1,5 +1,5 @@
 #SUBDIRS defined before including the common makefile
-SUBDIRS	= mapper reducer
+SUBDIRS	= 
 
 include ../Makefile.common
 

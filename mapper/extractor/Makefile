@@ -12,4 +12,4 @@ SelectRowsFromMatrixCC:	%:	%.o $(SharedLibTargets)
 	-$(CXXCOMPILER) $< $(SharedLibTargets) $(CXXFLAGS) $(CXXLDFLAGS) -o $@
 
 
-include ../../../Makefile.common
+include ../../Makefile.common

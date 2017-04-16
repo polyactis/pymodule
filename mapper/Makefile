@@ -11,5 +11,5 @@ CalculateMedianMeanOfInputColumn:	%:	%.o
 
 SRCS	= CalculateColCorBetweenTwoHDF5.cc FindMaxLDBetweenPeakAndEachLocus.cc CalculateMedianMeanOfInputColumn.cc
 
-include ../../Makefile.common
+include ../Makefile.common
 #all:	$(CXXTARGETS) $(CTARGETS) CalculateColCorBetweenTwoHDF5

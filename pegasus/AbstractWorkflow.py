@@ -421,13 +421,13 @@ class AbstractWorkflow(ADAG):
 		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'statistics/GenomeMovingAverageStatistics.py'), \
 										name='GenomeMovingAverageStatistics', clusterSizeMultipler=0.1)
 		#2013.08.23
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'pegasus/reducer/ReduceSameChromosomeAlignmentDepthFiles'), \
+		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'reducer/ReduceSameChromosomeAlignmentDepthFiles'), \
 										name='ReduceSameChromosomeAlignmentDepthFiles', clusterSizeMultipler=0.5)
 		#2013.08.23 c++ version of SelectRowsFromMatrix.py
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'pegasus/mapper/extractor/SelectRowsFromMatrixCC'), \
+		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'mapper/extractor/SelectRowsFromMatrixCC'), \
 										name='SelectRowsFromMatrixCC', clusterSizeMultipler=1)
 		#2012.08.13 SelectRowsFromMatrix is a derivative of AbstractMatrixFileWalker, so use addAbstractMatrixFileWalkerJob()
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'pegasus/mapper/extractor/SelectRowsFromMatrix.py'), \
+		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'mapper/extractor/SelectRowsFromMatrix.py'), \
 										name='SelectRowsFromMatrix', clusterSizeMultipler=1)
 		
 		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'shell/mkdirWrap.sh'), \
@@ -457,7 +457,7 @@ class AbstractWorkflow(ADAG):
 		
 		SelectLineBlockFromFile = Executable(namespace=namespace, name="SelectLineBlockFromFile", \
 							version=version, os=operatingSystem, arch=architecture, installed=True)
-		SelectLineBlockFromFile.addPFN(PFN("file://" + os.path.join(self.pymodulePath, "pegasus/mapper/extractor/SelectLineBlockFromFile.py"), \
+		SelectLineBlockFromFile.addPFN(PFN("file://" + os.path.join(self.pymodulePath, "mapper/extractor/SelectLineBlockFromFile.py"), \
 										site_handler))
 		executableClusterSizeMultiplierList.append((SelectLineBlockFromFile, 1))
 		
@@ -489,7 +489,7 @@ class AbstractWorkflow(ADAG):
 		#2012.8.13
 		OutputVCFSiteGap = Executable(namespace=namespace, name="OutputVCFSiteGap", \
 							version=version, os=operatingSystem, arch=architecture, installed=True)
-		OutputVCFSiteGap.addPFN(PFN("file://" + os.path.join(self.pymodulePath, "pegasus/mapper/computer/OutputVCFSiteGap.py"), site_handler))
+		OutputVCFSiteGap.addPFN(PFN("file://" + os.path.join(self.pymodulePath, "mapper/computer/OutputVCFSiteGap.py"), site_handler))
 		executableClusterSizeMultiplierList.append((OutputVCFSiteGap, 1))
 		
 		java = Executable(namespace=namespace, name="java", version=version, os=operatingSystem, arch=architecture, installed=True)
@@ -539,7 +539,7 @@ class AbstractWorkflow(ADAG):
 		
 		ConvertVCF2BjarniFormat = Executable(namespace=namespace, name="ConvertVCF2BjarniFormat", \
 											version=version, os=operatingSystem, arch=architecture, installed=True)
-		ConvertVCF2BjarniFormat.addPFN(PFN("file://" +  os.path.join(self.pymodulePath, "pegasus/mapper/converter/ConvertVCF2BjarniFormat.py"), site_handler))
+		ConvertVCF2BjarniFormat.addPFN(PFN("file://" +  os.path.join(self.pymodulePath, "mapper/converter/ConvertVCF2BjarniFormat.py"), site_handler))
 		executableClusterSizeMultiplierList.append((ConvertVCF2BjarniFormat, 1))
 		
 		
@@ -573,20 +573,20 @@ class AbstractWorkflow(ADAG):
 		
 		calcula = Executable(namespace=namespace, name="calcula", \
 							version=version, os=operatingSystem, arch=architecture, installed=True)
-		calcula.addPFN(PFN("file://" + os.path.join(self.pymodulePath, "pegasus/mapper/CalculatePairwiseDistanceOutOfSNPXStrainMatrix.py"), \
+		calcula.addPFN(PFN("file://" + os.path.join(self.pymodulePath, "mapper/CalculatePairwiseDistanceOutOfSNPXStrainMatrix.py"), \
 						site_handler))
 		executableClusterSizeMultiplierList.append((calcula, 0.02))
 		
 		CalculatePairwiseDistanceOutOfSNPXStrainMatrix = Executable(namespace=namespace, name="CalculatePairwiseDistanceOutOfSNPXStrainMatrix", \
 							version=version, os=operatingSystem, arch=architecture, installed=True)
 		CalculatePairwiseDistanceOutOfSNPXStrainMatrix.addPFN(PFN("file://" + \
-						os.path.join(self.pymodulePath, "pegasus/mapper/CalculatePairwiseDistanceOutOfSNPXStrainMatrix.py"), \
+						os.path.join(self.pymodulePath, "mapper/CalculatePairwiseDistanceOutOfSNPXStrainMatrix.py"), \
 						site_handler))
 		executableClusterSizeMultiplierList.append((CalculatePairwiseDistanceOutOfSNPXStrainMatrix, 0.5))
 		
 		CalculateMedianMeanOfInputColumn = Executable(namespace=namespace, name="CalculateMedianMeanOfInputColumn", version=version, os=operatingSystem,\
 								arch=architecture, installed=True)
-		CalculateMedianMeanOfInputColumn.addPFN(PFN("file://" + os.path.join(self.pymodulePath, "pegasus/mapper/CalculateMedianMeanOfInputColumn"), site_handler))
+		CalculateMedianMeanOfInputColumn.addPFN(PFN("file://" + os.path.join(self.pymodulePath, "mapper/CalculateMedianMeanOfInputColumn"), site_handler))
 		executableClusterSizeMultiplierList.append((CalculateMedianMeanOfInputColumn, 1))
 		
 		SampleRows = Executable(namespace=namespace, name="SampleRows", version=version, \
@@ -604,19 +604,19 @@ class AbstractWorkflow(ADAG):
 		ExtractConsensusSequenceFromAlignment = Executable(namespace=namespace, name="ExtractConsensusSequenceFromAlignment", version=version, \
 						os=operatingSystem, arch=architecture, installed=True)
 		ExtractConsensusSequenceFromAlignment.addPFN(PFN("file://" + \
-			os.path.join(self.pymodulePath, "pegasus/mapper/alignment/ExtractConsensusSequenceFromAlignment.sh"), site_handler))
+			os.path.join(self.pymodulePath, "mapper/alignment/ExtractConsensusSequenceFromAlignment.sh"), site_handler))
 		executableClusterSizeMultiplierList.append((ExtractConsensusSequenceFromAlignment, 1))
 		
 		#2013.2.4, wrapper around psmc's splitfa, a program that splits fasta files
 		splitfa = Executable(namespace=namespace, name="splitfa", version=version, \
 						os=operatingSystem, arch=architecture, installed=True)
-		splitfa.addPFN(PFN("file://" + os.path.join(self.pymodulePath, "pegasus/mapper/splitter/splitfa.sh"), site_handler))
+		splitfa.addPFN(PFN("file://" + os.path.join(self.pymodulePath, "mapper/splitter/splitfa.sh"), site_handler))
 		executableClusterSizeMultiplierList.append((splitfa, 1))
 		
 		self.addExecutableAndAssignProperClusterSize(executableClusterSizeMultiplierList, defaultClustersSize=self.clusters_size)
 		
 		#2013.07.24
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'pegasus/mapper/modifier/SplitPlinkLMendelFileSNPIDIntoChrPosition.py'), \
+		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'mapper/modifier/SplitPlinkLMendelFileSNPIDIntoChrPosition.py'), \
 										name='SplitPlinkLMendelFileSNPIDIntoChrPosition', clusterSizeMultipler=1)
 		
 		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, "plot/PlotVCFtoolsStat.py"), \
@@ -626,36 +626,36 @@ class AbstractWorkflow(ADAG):
 		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'pedigree/CalculateMendelErrorRateGivenPlinkOutput.py'), \
 										name='CalculateMendelErrorRateGivenPlinkOutput', clusterSizeMultipler=1)
 		#2013.07.19
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'pegasus/mapper/modifier/AppendExtraPedigreeIndividualsToTPED.py'), \
+		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'mapper/modifier/AppendExtraPedigreeIndividualsToTPED.py'), \
 										name='AppendExtraPedigreeIndividualsToTPED', clusterSizeMultipler=1)
 		
 		#2013.2.7 convert, an image swissknife program, part of imagemagick 
 		self.addOneExecutableFromPathAndAssignProperClusterSize(path="file:///usr/bin/convert", \
 												name='convertImage', clusterSizeMultipler=1)
 		#2013.2.10
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, "pegasus/mapper/runShellCommand.sh"), \
+		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, "mapper/runShellCommand.sh"), \
 												name='runShellCommand', clusterSizeMultipler=1)
 		
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'pegasus/mapper/converter/ConvertMSOutput2FASTQ.py'), \
+		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'mapper/converter/ConvertMSOutput2FASTQ.py'), \
 										name='ConvertMSOutput2FASTQ', clusterSizeMultipler=1)
 		
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'pegasus/mapper/extractor/SelectChromosomeSequences.py'), \
+		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'mapper/extractor/SelectChromosomeSequences.py'), \
 										name='SelectChromosomeSequences', clusterSizeMultipler=0.5)
 		
-		#2013.2.11 moved from vervet/src/reduce to pymodule/pegasus/reducer
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'pegasus/reducer/MergeGenotypeMatrix.py'), \
+		#2013.2.11 moved from vervet/src/reduce to pymodule/reducer
+		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'reducer/MergeGenotypeMatrix.py'), \
 										name='MergeGenotypeMatrix', clusterSizeMultipler=0.2)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'pegasus/reducer/MergeSameHeaderTablesIntoOne.py'), \
+		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'reducer/MergeSameHeaderTablesIntoOne.py'), \
 										name='mergeSameHeaderTablesIntoOne', clusterSizeMultipler=0)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'pegasus/reducer/MergeSameHeaderTablesIntoOne.py'), \
+		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'reducer/MergeSameHeaderTablesIntoOne.py'), \
 										name='MergeSameHeaderTablesIntoOne', clusterSizeMultipler=0)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'pegasus/reducer/ReduceMatrixByAverageColumnsWithSameKey.py'), \
+		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'reducer/ReduceMatrixByAverageColumnsWithSameKey.py'), \
 										name='ReduceMatrixByAverageColumnsWithSameKey', clusterSizeMultipler=0)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'pegasus/reducer/ReduceMatrixByChosenColumn.py'), \
+		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'reducer/ReduceMatrixByChosenColumn.py'), \
 										name='ReduceMatrixByChosenColumn', clusterSizeMultipler=0)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'pegasus/reducer/ReduceMatrixByMergeColumnsWithSameKey.py'), \
+		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'reducer/ReduceMatrixByMergeColumnsWithSameKey.py'), \
 										name='ReduceMatrixByMergeColumnsWithSameKey', clusterSizeMultipler=0)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'pegasus/reducer/ReduceMatrixBySumSameKeyColsAndThenDivide.py'), \
+		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'reducer/ReduceMatrixBySumSameKeyColsAndThenDivide.py'), \
 										name='ReduceMatrixBySumSameKeyColsAndThenDivide', clusterSizeMultipler=0)
 		
 		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'plot/PlotGenomeWideData.py'), \
@@ -666,7 +666,7 @@ class AbstractWorkflow(ADAG):
 		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'shell/sortHeaderAware.sh'), \
 										name='sortHeaderAware', clusterSizeMultipler=1)
 		
-		self.sortExecutableFile = self.registerOneExecutableAsFile(path=os.path.expanduser("~/bin/sort"))
+		self.sortExecutableFile = self.registerOneExecutableAsFile(path=os.path.expanduser("/usr/bin/sort"))
 		self.bgzipExecutableFile = self.registerOneExecutableAsFile(path=os.path.expanduser("~/bin/bgzip"))	#2013.11.22
 		
 		"""

@@ -2,7 +2,7 @@
 .SUFFIXES:	.i .cc .c .so .o _wrap.o .py
 .PHONY:	swig clean_subdirs subdirs $(SUBDIRS)
 
-IncludeDirs = -I ~/script/ -I ~/script/vcflib/
+IncludeDirs = -I ~/script/ -I ~/script/vcflib/ -I /usr/include/hdf5/serial/ 
 BoostLib  = -lboost_program_options -lboost_iostreams
 HDF5Lib  = -lhdf5_cpp -lhdf5 
 

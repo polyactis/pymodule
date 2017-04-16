@@ -99,16 +99,15 @@ class AbstractVCFWorkflow(parentClass, AbstractNGSWorkflow):
 		architecture = self.architecture
 		clusters_size = self.clusters_size
 		site_handler = self.site_handler
-		vervetSrcPath = self.vervetSrcPath
 		
 		executableClusterSizeMultiplierList = []	#2012.8.7 each cell is a tuple of (executable, clusterSizeMultipler (0 if u do not need clustering)
 		
 		#2012.8.30 moved from vervet/src/AddVCFFolder2DBWorkflow.py
-		AddVCFFile2DB = Executable(namespace=namespace, name="AddVCFFile2DB", \
-											version=version, \
-											os=operatingSystem, arch=architecture, installed=True)
-		AddVCFFile2DB.addPFN(PFN("file://" + os.path.join(vervetSrcPath, "db/input/AddVCFFile2DB.py"), site_handler))
-		executableClusterSizeMultiplierList.append((AddVCFFile2DB, 1))
+#		AddVCFFile2DB = Executable(namespace=namespace, name="AddVCFFile2DB", \
+#											version=version, \
+#											os=operatingSystem, arch=architecture, installed=True)
+#		AddVCFFile2DB.addPFN(PFN("file://" + os.path.join(vervetSrcPath, "db/input/AddVCFFile2DB.py"), site_handler))
+#		executableClusterSizeMultiplierList.append((AddVCFFile2DB, 1))
 		
 		FilterVCFSNPCluster = Executable(namespace=namespace, name="FilterVCFSNPCluster", version=version, os=operatingSystem, arch=architecture, installed=True)
 		FilterVCFSNPCluster.addPFN(PFN("file://" +  os.path.join(self.pymodulePath, "pegasus/mapper/filter/FilterVCFSNPCluster.py"), site_handler))
@@ -136,9 +135,9 @@ class AbstractVCFWorkflow(parentClass, AbstractNGSWorkflow):
 		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, "polymorphism/qc/CalculateSameSiteConcordanceInVCF.py"), \
 									name='CalculateSameSiteConcordanceInVCF', clusterSizeMultipler=1)
 		
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, "pegasus/mapper/extractor/ExtractInfoFromVCF.py"), \
+		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, "mapper/extractor/ExtractInfoFromVCF.py"), \
 									name='ExtractInfoFromVCF', clusterSizeMultipler=1)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(vervetSrcPath, "mapper/ExtractSamplesFromVCF.py"), \
+		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, "mapper/extractor/ExtractSamplesFromVCF.py"), \
 									name='ExtractSamplesFromVCF', clusterSizeMultipler=1)
 	
 	def registerCommonExecutables(self, workflow=None):
