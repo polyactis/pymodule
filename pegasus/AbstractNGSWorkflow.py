@@ -166,7 +166,7 @@ class AbstractNGSWorkflow(parentClass):
 			wrapper so that derivatives could call it easily
 		"""
 		if db is None:
-			db = self.db
+			db = self.db_main
 		alignmentLs = db.getAlignments(self.ref_ind_seq_id, ind_seq_id_ls=self.ind_seq_id_ls, ind_aln_id_ls=self.ind_aln_id_ls,\
 										alignment_method_id=self.alignment_method_id, data_dir=self.data_dir,\
 										individual_sequence_file_raw_id_type=self.individual_sequence_file_raw_id_type,\
@@ -2916,7 +2916,7 @@ Contig966       3160    50
 			
 		2013.04.09 for subsequent children to override
 		"""
-		return self.db.isThisAlignmentComplete(individual_alignment=individual_alignment, data_dir=data_dir,\
+		return self.db_main.isThisAlignmentComplete(individual_alignment=individual_alignment, data_dir=data_dir,\
 											returnFalseIfInexitentFile=returnFalseIfInexitentFile, **keywords)
 
 	def isThisInputAlignmentComplete(self, individual_alignment=None, data_dir=None, returnFalseIfInexitentFile=True, \
@@ -2926,7 +2926,7 @@ Contig966       3160    50
 			watch returnFalseIfInexitentFile is True (because you need the file for an input)
 		
 		"""
-		return self.db.isThisAlignmentComplete(individual_alignment=individual_alignment, data_dir=data_dir, \
+		return self.db_main.isThisAlignmentComplete(individual_alignment=individual_alignment, data_dir=data_dir, \
 											returnFalseIfInexitentFile=returnFalseIfInexitentFile, **keywords)
 	
 if __name__ == '__main__':

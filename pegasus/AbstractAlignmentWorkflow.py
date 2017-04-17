@@ -657,10 +657,10 @@ class AbstractAlignmentWorkflow(AbstractNGSWorkflow):
 		workflow = pdata.workflow
 		
 		if self.needSplitChrIntervalData:	#2013.06.21 defined in AbstractNGSWorkflow.__init__()
-			if self.alignmentDepthIntervalMethodShortName and self.db and self.db.checkAlignmentDepthIntervalMethod(short_name=self.alignmentDepthIntervalMethodShortName):
+			if self.alignmentDepthIntervalMethodShortName and self.db_main and self.db_main.checkAlignmentDepthIntervalMethod(short_name=self.alignmentDepthIntervalMethodShortName):
 				#2013.09.01 fetch intervals from db
 				#make sure it exists in db first
-				chr2IntervalDataLs = self.getChr2IntervalDataLsFromDBAlignmentDepthInterval(db=self.db, \
+				chr2IntervalDataLs = self.getChr2IntervalDataLsFromDBAlignmentDepthInterval(db=self.db_main, \
 									intervalSize=self.intervalSize, intervalOverlapSize=self.intervalOverlapSize,\
 									alignmentDepthIntervalMethodShortName=self.alignmentDepthIntervalMethodShortName, \
 									alignmentDepthMinFold=self.alignmentDepthMinFold, alignmentDepthMaxFold=self.alignmentDepthMaxFold, \

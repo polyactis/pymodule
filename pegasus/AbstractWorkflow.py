@@ -298,7 +298,7 @@ class AbstractWorkflow(ADAG):
 		"""
 		2013.1.25 placeholder, to establish db connection
 		"""
-		self.db = None
+		self.db_main = None
 	
 	def processListArguments(self, listArgumentName_data_type_ls=None, emptyContent=[]):
 		"""
@@ -2553,15 +2553,15 @@ class AbstractWorkflow(ADAG):
 			import pdb
 			pdb.set_trace()
 		
-		if getattr(self, 'db', None):
-			session = self.db.session
+		if getattr(self, 'db_main', None):
+			session = self.db_main.session
 			session.begin(subtransactions=True)
 		
 			if not self.data_dir:
-				self.data_dir = self.db.data_dir
+				self.data_dir = self.db_main.data_dir
 			
 			if not self.local_data_dir:
-				self.local_data_dir = self.db.data_dir
+				self.local_data_dir = self.db_main.data_dir
 		
 		self.workflow = self.initiateWorkflow()
 		
@@ -2586,8 +2586,8 @@ class AbstractWorkflow(ADAG):
 			self.writeXML(outf)
 			self.isDAGWrittenToDisk = True
 		
-		if getattr(self, 'db', None):	#bugfix
-			session = self.db.session
+		if getattr(self, 'db_main', None):	#bugfix
+			session = self.db_main.session
 			if self.commit:
 				session.commit()
 			else:

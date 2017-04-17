@@ -66,7 +66,7 @@ class TestMapReduceGenomeFileWorkflow(parentClass):
 					db_passwd=self.db_passwd, hostname=self.hostname, dbname=self.dbname, schema=self.schema)
 		db_vervet.setup(create_tables=False)
 		self.db_vervet = db_vervet
-		self.db = db_vervet	#2013.04.09
+		self.db_main = db_vervet	#2013.04.09
 		
 		if not self.data_dir:
 			self.data_dir = db_vervet.data_dir

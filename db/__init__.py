@@ -381,7 +381,7 @@ class ElixirDB(object):
 			#my_logger.addHandler(handler)
 			my_logger.setLevel(logging.DEBUG)
 		
-		#self.setup_engine()	#2012.12.18 it needs __metadata__ , __session__ from each db-definition file itself
+		##self.setup_engine()	#2012.12.18 it needs __metadata__, __session__ from each db-definition file to be ready. can't be run here.
 		self.READMEClass = None	#2012.12.18 required to figure out data_dir
 		self._data_dir = None	#2012.11.13
 		
@@ -396,11 +396,12 @@ class ElixirDB(object):
 		if argument1Name in keywords and argument2Name not in keywords:
 			keywords[argument2Name] = keywords[argument1Name]
 		return keywords
-		
-	def setup_engine(self, metadata=None, session=None, entities=[]):
+	
+	def setup_postgres_schema(self, entities=[]):
 		"""
-		2008-10-09
-			a common theme for all other databases
+		20170416
+			setup schema for each table properly for postgres
+			split from setup_engine()
 		"""
 		from elixir.options import using_table_options_handler
 		if getattr(self, 'schema', None):	#for postgres
@@ -409,6 +410,13 @@ class ElixirDB(object):
 					using_table_options_handler(entity, schema=self.schema)	#2012.5.16 this changes the entity._descriptor.table_fullname
 					#if self.schema!='public':
 					#	entity._descriptor.tablename = '%s.%s'%(self.schema, entity._descriptor.tablename)	#2012.5.16 change the tablename
+	
+	def setup_engine(self, metadata=None, session=None, entities=[]):
+		"""
+		2008-10-09
+			a common theme for all other databases
+		"""
+		self.setup_postgres_schema(entities)
 		#2008-10-05 MySQL typically close connections after 8 hours resulting in a "MySQL server has gone away" error.
 		metadata.bind = create_engine(self._url, pool_recycle=self.pool_recycle, echo=self.sql_echo)	#, convert_unicode=True, encoding="utf8")
 		self.metadata = metadata
