@@ -38,7 +38,8 @@ from pymodule.Genome import GeneModel	#2010-9-21 although "from Genome import Ge
 			#it causes problem in cPickle.load() because Genome is not directly visible outside.
 from __init__ import get_sequence_segment
 
-__session__ = scoped_session(sessionmaker(autoflush=False, autocommit=True))
+__session_factory__ = sessionmaker(autoflush=False, autocommit=True)
+__session__ = scoped_session(__session_factory__)
 #__metadata__ = ThreadLocalMetaData() #2008-11-04 not good for pylon
 
 __metadata__ = MetaData()
@@ -55,7 +56,7 @@ class SequenceType(Entity):
 	updated_by = Field(String(256))
 	date_created = Field(DateTime, default=datetime.now)
 	date_updated = Field(DateTime)
-	using_options(tablename='sequence_type')
+	using_options(tablename='sequence_type', metadata=__metadata__, session=__session__)
 	using_table_options(mysql_engine='InnoDB')
 
 class RawSequence(Entity):
@@ -74,7 +75,7 @@ class RawSequence(Entity):
 	start = Field(Integer)
 	stop = Field(Integer)
 	sequence = Field(String(10000))	#each fragment is 10kb
-	using_options(tablename='raw_sequence')
+	using_options(tablename='raw_sequence', metadata=__metadata__, session=__session__)
 	using_table_options(mysql_engine='InnoDB')
 	using_table_options(UniqueConstraint('annot_assembly_id', 'start', 'stop'))
 
@@ -116,7 +117,7 @@ class AnnotAssembly(Entity):
 	updated_by = Field(String(256))
 	date_created = Field(DateTime, default=datetime.now)
 	date_updated = Field(DateTime)
-	using_options(tablename='annot_assembly')
+	using_options(tablename='annot_assembly', metadata=__metadata__, session=__session__)
 	using_table_options(mysql_engine='InnoDB')
 	using_table_options(UniqueConstraint('accession', 'version','tax_id','chromosome', 'start', 'stop', \
 								'orientation', 'sequence_type_id', 'chromosome_type_id',\
@@ -133,7 +134,7 @@ class ChromosomeType(Entity):
 	updated_by = Field(String(256))
 	date_created = Field(DateTime, default=datetime.now)
 	date_updated = Field(DateTime)
-	using_options(tablename='chromosome_type')
+	using_options(tablename='chromosome_type', metadata=__metadata__, session=__session__)
 	using_table_options(mysql_engine='InnoDB')
 
 class GenomeAnnotation(Entity):
@@ -155,7 +156,7 @@ class GenomeAnnotation(Entity):
 	updated_by = Field(String(256))
 	date_created = Field(DateTime, default=datetime.now)
 	date_updated = Field(DateTime)
-	using_options(tablename='genome_annotation')
+	using_options(tablename='genome_annotation', metadata=__metadata__, session=__session__)
 	using_table_options(mysql_engine='InnoDB')
 	using_table_options(UniqueConstraint('strand', 'start', 'stop', 'annot_assembly_id',\
 										'genome_annotation_type_id'))
@@ -172,7 +173,7 @@ class GenomeAnnotationType(Entity):
 	updated_by = Field(String(256))
 	date_created = Field(DateTime, default=datetime.now)
 	date_updated = Field(DateTime)
-	using_options(tablename='genome_annotation_type')
+	using_options(tablename='genome_annotation_type', metadata=__metadata__, session=__session__)
 	using_table_options(mysql_engine='InnoDB')
 
 class EntrezgeneType(Entity):
@@ -185,7 +186,7 @@ class EntrezgeneType(Entity):
 	updated_by = Field(String(256))
 	date_created = Field(DateTime, default=datetime.now)
 	date_updated = Field(DateTime)
-	using_options(tablename='entrezgene_type')
+	using_options(tablename='entrezgene_type', metadata=__metadata__, session=__session__)
 	using_table_options(mysql_engine='InnoDB')
 
 	"""
@@ -212,7 +213,7 @@ class EntrezgeneMapping(Entity):
 	updated_by = Field(String(256))
 	date_created = Field(DateTime, default=datetime.now)
 	date_updated = Field(DateTime)
-	using_options(tablename='entrezgene_mapping')
+	using_options(tablename='entrezgene_mapping', metadata=__metadata__, session=__session__)
 	using_table_options(mysql_engine='InnoDB')
 	"""
 
@@ -225,7 +226,7 @@ class GeneCommentaryType(Entity):
 	updated_by = Field(String(256))
 	date_created = Field(DateTime, default=datetime.now)
 	date_updated = Field(DateTime)
-	using_options(tablename='gene_commentary_type')
+	using_options(tablename='gene_commentary_type', metadata=__metadata__, session=__session__)
 	using_table_options(mysql_engine='InnoDB')
 
 class GeneCommentary(Entity):
@@ -254,7 +255,7 @@ class GeneCommentary(Entity):
 	updated_by = Field(String(256))
 	date_created = Field(DateTime, default=datetime.now)
 	date_updated = Field(DateTime)
-	using_options(tablename='gene_commentary')
+	using_options(tablename='gene_commentary', metadata=__metadata__, session=__session__)
 	using_table_options(mysql_engine='InnoDB')
 	using_table_options(UniqueConstraint('gene_id', 'start', 'stop', 'gene_commentary_type_id', 'gene_commentary_id'))
 	
@@ -590,7 +591,7 @@ class GeneSegment(Entity):
 	updated_by = Field(String(256))
 	date_created = Field(DateTime, default=datetime.now)
 	date_updated = Field(DateTime)
-	using_options(tablename='gene_segment')
+	using_options(tablename='gene_segment', metadata=__metadata__, session=__session__)
 	using_table_options(mysql_engine='InnoDB')
 	using_table_options(UniqueConstraint('gene_commentary_id', 'start', 'stop', 'gene_commentary_type_id'))
 
@@ -635,7 +636,7 @@ class Gene(Entity):
 	updated_by = Field(String(256))
 	date_created = Field(DateTime, default=datetime.now)
 	date_updated = Field(DateTime)
-	using_options(tablename='gene')
+	using_options(tablename='gene', metadata=__metadata__, session=__session__)
 	using_table_options(mysql_engine='InnoDB')
 	using_table_options(UniqueConstraint('tax_id', 'locustag', 'chromosome', 'strand', 'start', 'stop', 'entrezgene_type_id', 'annot_assembly_id'))
 
@@ -692,7 +693,7 @@ class GeneFamily(Entity):
 	updated_by = Field(String(256))
 	date_created = Field(DateTime, default=datetime.now)
 	date_updated = Field(DateTime)
-	using_options(tablename='gene_family')
+	using_options(tablename='gene_family', metadata=__metadata__, session=__session__)
 	using_table_options(mysql_engine='InnoDB')
 
 class README(Entity):
@@ -702,7 +703,7 @@ class README(Entity):
 	updated_by = Field(String(256))
 	date_created = Field(DateTime, default=datetime.now)
 	date_updated = Field(DateTime)
-	using_options(tablename='readme')
+	using_options(tablename='readme', metadata=__metadata__, session=__session__)
 	using_table_options(mysql_engine='InnoDB')
 
 class Gene_symbol2id(Entity):
@@ -1186,7 +1187,7 @@ class GenomeDatabase(ElixirDB):
 		2008-07-09
 		"""
 		ElixirDB.__init__(self, **keywords)
-		self.setup_engine(metadata=__metadata__, session=__session__, entities=entities)
+		self.setup_engine(metadata=__metadata__, Session=__session__, session_factory=__session_factory__, entities=entities)
 		#2011-3-25
 		self.tax_id2genomeData = {}
 	
