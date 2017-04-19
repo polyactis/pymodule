@@ -6,7 +6,6 @@ of trouble in understanding how to use adapter involved in TreadlocalDatabaseTra
 """
 import sys, os, math
 bit_number = math.log(sys.maxint)/math.log(2)
-#if bit_number>40:       #64bit
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
@@ -15,7 +14,6 @@ from sqlalchemy.engine.url import URL
 from sqlalchemy import Table, create_engine
 from sqlalchemy.orm import mapper, relation
 from sqlalchemy.orm import scoped_session, sessionmaker
-from elixir import using_table_options
 from pymodule import utils
 
 def supplantFilePathWithNewDataDir(filePath="", oldDataDir=None, newDataDir=None):
@@ -60,7 +58,6 @@ def supplantFilePathWithNewDataDir(filePath="", oldDataDir=None, newDataDir=None
 	return newFilePath
 
 class TableClass(object):
-	using_table_options(mysql_engine='InnoDB')
 	"""
 	2008-05-03
 		a base class for any class to hold a db table.
@@ -188,180 +185,26 @@ class AbstractTableWithFilename(TableClass):
 		2012.12.28
 		"""
 		self.short_name = self.getShortName()
-		
 
-class Database(object):
+class DBAncestor(object):
 	__doc__ = __doc__
-	option_default_dict = {('v', 'drivername', 1, '', 1, ):'mysql',\
-							('z', 'hostname', 1, '', 1, ):'papaya.usc.edu',\
-							('d', 'dbname',1, '', 1, ):None,\
-							('k', 'schema',0, '', 1, ):None,\
-							('u', 'db_user',1, '', 1, ):None,\
-							('p', 'db_passwd',1, '', 1, ):None,\
-							('o', 'port', 1, '', 0, ):None,\
-							('c', 'commit', 0, '', 0, int):0,\
-							('b', 'debug', 0, '', 0, int):0,\
-							('r', 'report', 0, '', 0, int):0}
-	"""
-	2008-02-28
-		argument_default_dict is a dictionary of default arguments, the key is a tuple, ('argument_name', is_argument_required, argument_type)
-		argument_type is optional
-	"""
-	def __init__(self, **keywords):
-		from pymodule import process_function_arguments, turn_option_default_dict2argument_default_dict
-		argument_default_dict = turn_option_default_dict2argument_default_dict(self.option_default_dict)
-		self.ad = process_function_arguments(keywords, argument_default_dict, error_doc=self.__doc__, class_to_have_attr=self)
-		
-		self._threadlocal = threading.local()
-		self.tables = {}
-		self.mappers = {}
-		self._engine = None
-		
-	#@property
-	def _url(self):
-		return URL(drivername=self.drivername, db_passwd=self.db_user,
-				   password=self.db_passwd, host=self.hostname,
-				   port=self.port, database=self.dbname)
-	_url = property(_url)
-	
-	def _setup_tables(self, metadata, tables):
-		"""Map the database structure to SQLAlchemy Table objects
-		"""
-		"""
-		tables['call_QC'] = Table('call_QC', metadata, autoload=True)
-		"""
-		pass
-	
-	def _setup_mappers(self, tables, mappers):
-		"""Map the database Tables to SQLAlchemy Mapper objects
-		"""
-		"""
-		mappers['call_QC'] = mapper(Call_QC, tables['call_QC'], properties={'call_info_obj': relation(Call_Info),\
-																		'qc_method_obj':relation(QCMethod)})
-		"""
-		pass
-	
-	#@property
-	def _engine_properties(self):
-		return {}
-	_engine_properties = property(_engine_properties)
-	
-	def invalidate(self):
-		self._initialize_engine()
-		
-	# IDatabase implementation - code using (not setting up) the database
-	# uses this
-	
-	#@property
-	def session(self):
-		"""
-		2008-07-09
-			use the new sessionmaker() in version 0.4 to create Session
-			use scoped_session to create a thread-local context
-		"""
-		if getattr(self._threadlocal, 'session', None) is None:
-			# Without this, we may not have mapped things properly, nor
-			# will we necessarily start a transaction when the client
-			# code begins to use the session.
-			ignore = self.engine
-			Session = scoped_session(sessionmaker(autoflush=True, transactional=True, bind=self.engine))
-			self._threadlocal.session = Session()
-		return self._threadlocal.session
-	session = property(session)
-	
-	#@property
-	def connection(self):
-		return self.engine.contextual_connect()
-	connection = property(connection)
-	
-	#@property
-	def engine(self):
-		if self._engine is None:
-			self._initialize_engine()
-		
-		return self._engine
-	engine = property(engine)
-	
-	# Helper methods
-	
-	def _initialize_engine(self):
-		"""
-		metadata.create_all()	#2008-07-09 create all tables
-		2008-07-09
-			close and reset the old session if self._threadlocal.session is not None
-			change  self._metadata to metadata in "self.tables[name] = table.tometadata(metadata)"
-		2008-07-08
-			for postgres, set the schema	(doesn't work)
-		"""
-		kwargs = dict(self._engine_properties).copy()
-		if 'strategy' not in kwargs:
-			kwargs['strategy'] = 'threadlocal'
-		if 'convert_unicode' not in kwargs:
-			kwargs['convert_unicode'] = True
-		
-		engine = sqlalchemy.create_engine(self._url, **kwargs)
-		metadata = sqlalchemy.MetaData(engine)
-		
-		if getattr(self._threadlocal, 'session', None) is not None:	#2008-07-09 close and reset the old session
-			self._threadlocal.session.close()
-			self._threadlocal.session = None
-		"""
-		if getattr(self, 'schema', None):	#2008-07-08 for postgres, set the schema, doesn't help. specify "schema=" in Table()
-			con = engine.connect()
-			con.execute("set search_path to %s"%self.schema)
-			#sys.stderr.write('set schema')
-			metadata.bind = con	#necessary. otherwise, schema is still not set.
-		"""
-		
-		# We will only initialize once, but we may rebind metadata if
-		# necessary
-
-		if not self.tables:
-			self._setup_tables(metadata, self.tables)
-			metadata.create_all()	#2008-07-09 create all tables
-			self._setup_mappers(self.tables, self.mappers)
-		else:
-			for name, table in self.tables.items():
-				self.tables[name] = table.tometadata(metadata)	#2008-07-09 change self._metadata to metadata
-		
-		self._engine = engine
-		self._metadata = metadata
-
-class ElixirDB(object):
-	"""
-	2008-11-07
-		add option sql_echo
-	2008-10-07 add option pool_recycle
-	2008-08-07
-		expose metadata from elixir
-	2008-07-11
-		elixir db base class
-	"""
-	
-	option_default_dict = {('drivername', 1,):['postgres', 'v', 1, 'which type of database? mysql or postgres', ],\
+	option_default_dict = {('drivername', 1,):['postgresql', 'v', 1, 'which type of database? mysql or postgres', ],\
 							('hostname', 1, ):['localhost', 'z', 1, 'hostname of the db server', ],\
 							('dbname', 1, ):[None, 'd', 1, 'database name',],\
 							('schema', 0, ): [None, 'k', 1, 'database schema name', ],\
 							('db_user', 1, ):[None, 'u', 1, 'database username',],\
 							('db_passwd', 1, ):[None, 'p', 1, 'database password', ],\
-							('port', 0, ):[None, '', 1, 'database port number'],\
+							('port', 0, int):[5432, '', 1, 'database port number'],\
 							('pool_recycle', 0, int):[3600, '', 1, 'the length of time to keep connections open before recycling them.'],\
 							('echo_pool', 0, bool):[False, 'e', 0, 'if True, the connection pool will log all checkouts/checkins to the logging stream, which defaults to sys.stdout.'],\
-							('sql_echo', 0, ):[False, '', 1, 'wanna echo the underlying sql of every sql query'],\
+							('sql_echo', 0, bool):[False, '', 0, 'wanna echo the underlying sql of every sql query'],\
 							('commit',0, int): [0, 'c', 0, 'commit db transaction'],\
 							('debug', 0, int):[0, 'b', 0, 'toggle debug mode'],\
 							('report', 0, int):[0, 'r', 0, 'toggle report, more verbose stdout/stderr.']}
-	#from elixir import metadata	#2008-08-07
-	#metadata = metadata
 	def __init__(self, **keywords):
 		"""
-		2008-07-09
+		20170419 common ancestor of Database and ElixirDB
 		"""
-		#2013.1.10 backwards compatibility
-		keywords = self._setInputArgumentsEquivalentValue(keywords=keywords, argument1Name='username', argument2Name='db_user')
-		keywords = self._setInputArgumentsEquivalentValue(keywords=keywords, argument1Name='password', argument2Name='db_passwd')
-		keywords = self._setInputArgumentsEquivalentValue(keywords=keywords, argument1Name='database', argument2Name='dbname')
-		
 		from pymodule import ProcessOptions
 		ProcessOptions.process_function_arguments(keywords, self.option_default_dict, error_doc=self.__doc__, class_to_have_attr=self)
 		if self.echo_pool:	#2010-9-19 passing echo_pool to create_engine() causes error. all pool log disappeared.
@@ -385,87 +228,22 @@ class ElixirDB(object):
 		self.READMEClass = None	#2012.12.18 required to figure out data_dir
 		self._data_dir = None	#2012.11.13
 		
+		self._engine = None
+		self._session = None
+		self._url = None
+		
 		if hasattr(self, 'debug') and self.debug:
 			import pdb
 			pdb.set_trace()
+
 	
-	def _setInputArgumentsEquivalentValue(self, keywords=None, argument1Name=None, argument2Name=None):
-		"""
-		2013.1.10 to deal with transition that 'username' is now changed to 'db_user' and etc.
-		"""
-		if argument1Name in keywords and argument2Name not in keywords:
-			keywords[argument2Name] = keywords[argument1Name]
-		return keywords
-	
-	def setup_postgres_schema(self, entities=[]):
-		"""
-		20170416
-			setup schema for each table properly for postgres
-			split from setup_engine()
-		"""
-		from elixir.options import using_table_options_handler
-		if getattr(self, 'schema', None):	#for postgres
-			for entity in entities:
-				if entity.__module__==self.__module__:	#entity in the same module
-					using_table_options_handler(entity, schema=self.schema)	#2012.5.16 this changes the entity._descriptor.table_fullname
-					#if self.schema!='public':
-					#	entity._descriptor.tablename = '%s.%s'%(self.schema, entity._descriptor.tablename)	#2012.5.16 change the tablename
-	
-	def setup_engine(self, metadata=None, session=None, entities=[]):
-		"""
-		2008-10-09
-			a common theme for all other databases
-		"""
-		self.setup_postgres_schema(entities)
-		#2008-10-05 MySQL typically close connections after 8 hours resulting in a "MySQL server has gone away" error.
-		metadata.bind = create_engine(self._url, pool_recycle=self.pool_recycle, echo=self.sql_echo)	#, convert_unicode=True, encoding="utf8")
-		self.metadata = metadata
-		self.session = session
-		#2012.12.28
-		self.cleanUpMetadatas()
-	
-	def cleanUpMetadatas(self):
-		"""
-		2012.12.28 because GenomeDB, TaxonomyDB are by default imported into the namespace through pymodule all the time
-			their unbound metadata is automatically added into elixir's metadatas variable.
-			which caused this error if create_tables=True:
-			
-				  File "/home/crocea/script/variation/src/db/Stock_250kDB.py", line 2582, in setup
-				    setup_all(create_tables=create_tables)      #create_tables=True causes setup_all to call elixir.create_all(), which in turn calls me
-				tadata.create_all()
-				  File "/usr/local/lib/python2.7/dist-packages/elixir/__init__.py", line 98, in setup_all
-				    create_all(*args, **kwargs)
-				  File "/usr/local/lib/python2.7/dist-packages/elixir/__init__.py", line 76, in create_all
-				    md.create_all(*args, **kwargs)
-				  File "/usr/local/lib/python2.7/dist-packages/sqlalchemy/schema.py", line 2560, in create_all
-				    bind = _bind_or_error(self)
-				  File "/usr/local/lib/python2.7/dist-packages/sqlalchemy/schema.py", line 3176, in _bind_or_error
-				    raise exc.UnboundExecutionError(msg)
-				sqlalchemy.exc.UnboundExecutionError: The MetaData is not bound to an Engine or Connection.  Execution can not proceed without a databas
-				e to execute against.  Either execute with an explicit connection or assign the MetaData's .bind to enable implicit execution.
-		"""
-		import elixir
-		newMetadatas = set()
-		for md in elixir.metadatas:
-			if md.bind is not None:
-				newMetadatas.add(md)
-		elixir.metadatas = newMetadatas
-	
-	def setup(self, create_tables=True):
-		"""
-		2008-10-09
-			add option create_tables
-		2008-08-26
-		"""
-		from elixir import setup_all
-		setup_all(create_tables=create_tables)	#create_tables=True causes setup_all to call elixir.create_all(),
-				#which in turn calls metadata.create_all()
-	
-	def _url(self):
-		return URL(drivername=self.drivername, username=self.db_user,
+	@property
+	def url(self):
+		if self._url is None:
+			self._url = URL(drivername=self.drivername, username=self.db_user,
 				password=self.db_passwd, host=self.hostname,
 				port=self.port, database=self.dbname)
-	_url = property(_url)
+		return self._url
 	
 	@property
 	def data_dir(self):
@@ -997,6 +775,179 @@ def get_sequence_segment(curs, gi=None, start=None, stop=None, annot_assembly_id
 		segment.reverse()	#only 
 		segment = ''.join(segment)
 	return segment
+
+
+
+class Database(DBAncestor):
+	__doc__ = __doc__
+	option_default_dict = DBAncestor.option_default_dict.copy()
+	
+	def __init__(self, **keywords):
+		DBAncestor.__init__(self, **keywords)
+	
+	@property
+	def engine(self):
+		if self._engine is None:
+			self._engine = create_engine(self.url, pool_recycle=self.pool_recycle, echo=self.sql_echo)
+		return self._engine
+
+	@property
+	def session(self):
+		if self._session is None:
+			SessionClass = scoped_session(sessionmaker(autoflush=False, autocommit=True, bind=self.engine))
+			self._session = SessionClass()
+		return self._session
+
+	@property
+	def data_dir(self):
+		"""
+		2012.3.23
+			(learnt from VervetDB)
+			get the master directory in which all files attached to this db are stored.
+		"""
+		if not self._data_dir:
+			if self.READMEClass:
+				data_dirEntry = self.session.query(self.READMEClass).filter_by(title='data_dir').first()
+				if not data_dirEntry or not data_dirEntry.description:
+					# todo: need to test data_dirEntry.description is writable to the user
+					sys.stderr.write("data_dir not available in db or not accessible on the harddisk. Raise exception.\n")
+					raise
+					self._data_dir = None
+				else:
+					self._data_dir = data_dirEntry.description
+		return self._data_dir
+
+	def setup(self, create_tables=True):
+		if create_tables:
+			Base.metadata.create_all(self.engine)
+
+	def SessionDown(self):
+		self.session.close()
+
+class ElixirDB(DBAncestor):
+	"""
+	2008-11-07
+		add option sql_echo
+	2008-10-07 add option pool_recycle
+	2008-08-07
+		expose metadata from elixir
+	2008-07-11
+		elixir db base class
+	"""
+	
+	option_default_dict = DBAncestor.option_default_dict.copy()
+	#from elixir import metadata	#2008-08-07
+	#metadata = metadata
+	def __init__(self, **keywords):
+		"""
+		2008-07-09
+		"""
+		#2013.1.10 backwards compatibility
+		keywords = self._setInputArgumentsEquivalentValue(keywords=keywords, argument1Name='username', argument2Name='db_user')
+		keywords = self._setInputArgumentsEquivalentValue(keywords=keywords, argument1Name='password', argument2Name='db_passwd')
+		keywords = self._setInputArgumentsEquivalentValue(keywords=keywords, argument1Name='database', argument2Name='dbname')
+
+		self.metadata = None
+		self.SessionClass = None
+		self.session_factory = None
+		
+		DBAncestor.__init__(self, **keywords)
+		
+	
+	@property
+	def engine(self):
+		if self._engine is None:
+			self._engine = create_engine(self.url, pool_recycle=self.pool_recycle, echo=self.sql_echo)
+			#, convert_unicode=True, encoding="utf8")
+			self.metadata.bind = self._engine
+		return self._engine
+
+	@property
+	def session(self):
+		if self._session is None:
+			#SessionClass = scoped_session(sessionmaker(autoflush=False, autocommit=True, bind=self.engine))
+			self.session_factory.bind = self.engine
+			#SessionClass = scoped_session(self.session_factory)
+			self._session = self.SessionClass
+		return self._session
+	   
+	def _setInputArgumentsEquivalentValue(self, keywords=None, argument1Name=None, argument2Name=None):
+		"""
+		2013.1.10 to deal with transition that 'username' is now changed to 'db_user' and etc.
+		"""
+		if argument1Name in keywords and argument2Name not in keywords:
+			keywords[argument2Name] = keywords[argument1Name]
+		return keywords
+	
+	def setup_postgres_schema(self, entities=[]):
+		"""
+		20170416
+			setup schema for each table properly for postgres
+			split from setup_engine()
+		"""
+		from elixir.options import using_table_options_handler
+		if getattr(self, 'schema', None):	#for postgres
+			for entity in entities:
+				if entity.__module__==self.__module__:	#entity in the same module
+					#2012.5.16 this changes the entity._descriptor.table_fullname
+					using_table_options_handler(entity, schema=self.schema)	
+					#using_table_options_handler(entity, session=self.session)	
+					#using_table_options_handler(entity, metadata=self.metadata)	
+					
+					#if self.schema!='public':
+					#	entity._descriptor.tablename = '%s.%s'%(self.schema, entity._descriptor.tablename)	#2012.5.16 change the tablename
+	
+	def setup_engine(self, metadata=None, Session=None, session_factory=None, entities=[]):
+		"""
+		2008-10-09
+			a common theme for all other databases
+		"""
+		#2008-10-05 MySQL typically close connections after 8 hours resulting in a "MySQL server has gone away" error.
+		self.metadata = metadata
+		self.SessionClass = Session
+		self.session_factory = session_factory
+		sys.stderr.write("self.session: %s\n"%self.session)
+		self.setup_postgres_schema(entities)
+		#2012.12.28
+		self.cleanUpMetadatas()
+	
+	def cleanUpMetadatas(self):
+		"""
+		2012.12.28 because GenomeDB, TaxonomyDB are by default imported into the namespace through pymodule all the time
+			their unbound metadata is automatically added into elixir's metadatas variable.
+			which caused this error if create_tables=True:
+			
+				  File "/home/crocea/script/variation/src/db/Stock_250kDB.py", line 2582, in setup
+					setup_all(create_tables=create_tables)	  #create_tables=True causes setup_all to call elixir.create_all(), which in turn calls me
+				tadata.create_all()
+				  File "/usr/local/lib/python2.7/dist-packages/elixir/__init__.py", line 98, in setup_all
+					create_all(*args, **kwargs)
+				  File "/usr/local/lib/python2.7/dist-packages/elixir/__init__.py", line 76, in create_all
+					md.create_all(*args, **kwargs)
+				  File "/usr/local/lib/python2.7/dist-packages/sqlalchemy/schema.py", line 2560, in create_all
+					bind = _bind_or_error(self)
+				  File "/usr/local/lib/python2.7/dist-packages/sqlalchemy/schema.py", line 3176, in _bind_or_error
+					raise exc.UnboundExecutionError(msg)
+				sqlalchemy.exc.UnboundExecutionError: The MetaData is not bound to an Engine or Connection.  Execution can not proceed without a databas
+				e to execute against.  Either execute with an explicit connection or assign the MetaData's .bind to enable implicit execution.
+		"""
+		import elixir
+		newMetadatas = set()
+		for md in elixir.metadatas:
+			if md.bind is not None:
+				newMetadatas.add(md)
+		elixir.metadatas = newMetadatas
+	
+	def setup(self, create_tables=True):
+		"""
+		2008-10-09
+			add option create_tables
+		2008-08-26
+		"""
+		from elixir import setup_all
+		setup_all(create_tables=create_tables)	#create_tables=True causes setup_all to call elixir.create_all(),
+				#which in turn calls metadata.create_all()
+
 
 if __name__ == '__main__':
 	from pymodule import process_options, generate_program_doc
