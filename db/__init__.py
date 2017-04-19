@@ -15,6 +15,7 @@ from sqlalchemy import Table, create_engine
 from sqlalchemy.orm import mapper, relation
 from sqlalchemy.orm import scoped_session, sessionmaker
 from pymodule import utils
+import copy
 
 def supplantFilePathWithNewDataDir(filePath="", oldDataDir=None, newDataDir=None):
 	"""
@@ -198,6 +199,7 @@ class DBAncestor(object):
 							('pool_recycle', 0, int):[3600, '', 1, 'the length of time to keep connections open before recycling them.'],\
 							('echo_pool', 0, bool):[False, 'e', 0, 'if True, the connection pool will log all checkouts/checkins to the logging stream, which defaults to sys.stdout.'],\
 							('sql_echo', 0, bool):[False, '', 0, 'wanna echo the underlying sql of every sql query'],\
+							('is_elixir', 0, int):[0, '', 0, 'if the db class is elixir based, if yes. The query way is different.'],\
 							('commit',0, int): [0, 'c', 0, 'commit db transaction'],\
 							('debug', 0, int):[0, 'b', 0, 'toggle debug mode'],\
 							('report', 0, int):[0, 'r', 0, 'toggle report, more verbose stdout/stderr.']}
@@ -249,12 +251,12 @@ class DBAncestor(object):
 	def data_dir(self):
 		"""
 		2012.3.23
-			(learnt from VervetDB)
 			get the master directory in which all files attached to this db are stored.
 		"""
 		if not self._data_dir:
 			if self.READMEClass:
-				data_dirEntry = self.READMEClass.query.filter_by(title='data_dir').first()
+				query = self.queryTable(self.READMEClass)
+				data_dirEntry = query.filter_by(title='data_dir').first()
 				if not data_dirEntry or not data_dirEntry.description:
 					# todo: need to test data_dirEntry.description is writable to the user
 					sys.stderr.write("data_dir not available in db or not accessible on the harddisk. Raise exception.\n")
@@ -264,6 +266,15 @@ class DBAncestor(object):
 					self._data_dir = data_dirEntry.description
 		return self._data_dir
 	
+	def queryTable(self, TableClass=None):
+		"""
+		"""
+		if self.is_elixir:
+			query = TableClass.query
+		else:
+			query = self.session.query(TableClass)
+		return query
+	
 	def checkIfEntryInTable(self, TableClass=None, short_name=None, id=None):
 		"""
 		2013.04.03 bugfix. query = query.filter_by...
@@ -271,7 +282,7 @@ class DBAncestor(object):
 		2013.3.14
 			this could be used as generic way to query tables with short_name (unique) & id columns
 		"""
-		query = TableClass.query
+		query = self.queryTable(TableClass)
 		if short_name or id:
 			if short_name:
 				query = query.filter_by(short_name=short_name)
@@ -380,21 +391,7 @@ class DBAncestor(object):
 		db_entry.md5sum = md5sum
 		self.session.add(db_entry)
 		self.session.flush()
-	"""
-	#2012.7.14 update the md5sum for the existing db entries
-		TableClass = VervetDB.IndividualAlignment
-		TableClass = VervetDB.IndividualSequenceFile
-		for db_entry in TableClass.query:
-			if db_entry.md5sum is None:
-				absPath = os.path.join(db_vervet.data_dir, db_entry.path)
-				if db_entry.path and os.path.isfile(absPath):
-					sys.stderr.write("md5sum on %s ... "%(db_entry.path))
-					db_vervet.updateDBEntryMD5SUM(db_entry=db_entry, absPath=absPath)
-					sys.stderr.write("\n")
-		db_vervet.session.flush()
-		db_vervet.session.commit()
-		sys.exit(0)
-	"""
+
 	def updateDBEntryPathFileSize(self, db_entry=None, data_dir=None, absPath=None, \
 								file_path_column_name='path', file_size_column_name='file_size'):
 		"""
@@ -780,7 +777,7 @@ def get_sequence_segment(curs, gi=None, start=None, stop=None, annot_assembly_id
 
 class Database(DBAncestor):
 	__doc__ = __doc__
-	option_default_dict = DBAncestor.option_default_dict.copy()
+	option_default_dict = copy.deepcopy(DBAncestor.option_default_dict)
 	
 	def __init__(self, **keywords):
 		DBAncestor.__init__(self, **keywords)
@@ -797,25 +794,6 @@ class Database(DBAncestor):
 			SessionClass = scoped_session(sessionmaker(autoflush=False, autocommit=True, bind=self.engine))
 			self._session = SessionClass()
 		return self._session
-
-	@property
-	def data_dir(self):
-		"""
-		2012.3.23
-			(learnt from VervetDB)
-			get the master directory in which all files attached to this db are stored.
-		"""
-		if not self._data_dir:
-			if self.READMEClass:
-				data_dirEntry = self.session.query(self.READMEClass).filter_by(title='data_dir').first()
-				if not data_dirEntry or not data_dirEntry.description:
-					# todo: need to test data_dirEntry.description is writable to the user
-					sys.stderr.write("data_dir not available in db or not accessible on the harddisk. Raise exception.\n")
-					raise
-					self._data_dir = None
-				else:
-					self._data_dir = data_dirEntry.description
-		return self._data_dir
 
 	def setup(self, create_tables=True):
 		if create_tables:
@@ -834,8 +812,8 @@ class ElixirDB(DBAncestor):
 	2008-07-11
 		elixir db base class
 	"""
-	
-	option_default_dict = DBAncestor.option_default_dict.copy()
+	option_default_dict = copy.deepcopy(DBAncestor.option_default_dict)
+	option_default_dict[('is_elixir', 0, int)][0]=1
 	#from elixir import metadata	#2008-08-07
 	#metadata = metadata
 	def __init__(self, **keywords):
