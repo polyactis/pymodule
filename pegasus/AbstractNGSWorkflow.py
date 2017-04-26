@@ -37,13 +37,13 @@ class AbstractNGSWorkflow(parentClass):
 						("picard_path", 1, ): ["%s/script/picard/dist", '', 1, 'picard folder containing its jar binaries'],\
 						("gatk_path", 1, ): ["%s/script/gatk/dist", '', 1, 'GATK folder containing its jar binaries'],\
 						("gatk2_path", 1, ): ["%s/script/gatk2/", '', 1, 'GATK version 2 or afterwards, no more source code, just binary jar files.'],\
+						('picardJarPath', 1, ): ["%s/script/picard.broad/build/libs/picard.jar", '', 1, 'path to the new picard jar', ],\
 						('tabixPath', 1, ): ["%s/bin/tabix", '', 1, 'path to the tabix binary', ],\
 						('bgzipPath', 1, ): ["%s/bin/bgzip", '', 1, 'path to the bgzip binary', ],\
 						('vcftoolsPath', 1, ): ["%s/bin/vcftools/vcftools", '', 1, 'path to the vcftools binary', ],\
 						('vcfSubsetPath', 1, ): ["%s/bin/vcftools/vcf-subset", '', 1, 'path to the vcf-subset program', ],\
 						("ligateVcfPerlPath", 1, ): ["%s/bin/ligateVcf.pl", '', 1, 'path to ligateVcf.pl'],\
 						("vcfsorterPath", 1, ): ["%s/bin/vcfsorter.pl", '', 1, 'path to vcfsorter.pl, http://code.google.com/p/vcfsorter/'],\
-						
 						
 						#to filter chromosomes
 						('maxContigID', 0, int): [None, 'x', 1, 'if contig/chromosome(non-sex) ID > this number, it will not be included. If None or 0, no restriction.', ],\
@@ -113,7 +113,7 @@ class AbstractNGSWorkflow(parentClass):
 		"""
 		self.pathToInsertHomePathList.extend(['samtools_path', 'picard_path', 'gatk_path', 'tabixPath', \
 									'bgzipPath', 'gatk2_path', 'ligateVcfPerlPath',\
-									'vcftoolsPath', 'vcfSubsetPath', 'vcfsorterPath'])
+									'vcftoolsPath', 'vcfSubsetPath', 'vcfsorterPath', 'picardJarPath'])
 		#inserted before parentClass.__init__()
 		parentClass.__init__(self, **keywords)
 		#from pymodule import ProcessOptions
@@ -250,7 +250,9 @@ class AbstractNGSWorkflow(parentClass):
 		#				folderName='gatk2Jar')
 		self.registerOneJar(name="SortSamJar", path=os.path.join(self.picard_path, 'SortSam.jar'))
 		self.registerOneJar(name="SamFormatConverterJar", path=os.path.join(self.picard_path, 'SamFormatConverter.jar'))
-		
+		#20170425
+		self.registerOneJar(name="PicardJar", path=os.path.join(self.picardJarPath))
+
 	def registerCustomJars(self, workflow=None, ):
 		"""
 		2012.1.9
