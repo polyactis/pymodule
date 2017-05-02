@@ -22,7 +22,7 @@ class AbstractAlignmentAndVCFWorkflow(parentClass, AbstractVCFWorkflow):
 	option_default_dict.update({
 						('inputDir', 0, ): ['', 'L', 1, 'input folder that contains vcf or vcf.gz files', ],\
 						('minDepth', 0, float): [0, 'm', 1, 'minimum depth for a call to regarded as non-missing', ],\
-						
+
 						('intervalOverlapSize', 1, int): [300000, 'U', 1, 'overlap #bps/#loci between adjacent intervals from one contig/chromosome,\
 				only used for TrioCaller, not for SAMtools/GATK', ],\
 						('intervalSize', 1, int): [5000000, 'Z', 1, '#bps/#loci for adjacent intervals from one contig/chromosome (alignment or VCF)', ],\
@@ -32,16 +32,16 @@ class AbstractAlignmentAndVCFWorkflow(parentClass, AbstractVCFWorkflow):
 		2012.1.17
 		"""
 		parentClass.__init__(self, **keywords)
-	
+
 	registerAllInputFiles = AbstractVCFWorkflow.registerAllInputFiles
-	
+
 	def setup(self, inputVCFData=None, chr2IntervalDataLs=None, **keywords):
 		"""
 		2013.04.01 derive chr2VCFJobData only when inputVCFData is available
 		2013.1.25
 		"""
 		pdata = parentClass.setup(self, chr2IntervalDataLs=chr2IntervalDataLs, inputVCFData=inputVCFData, **keywords)
-		
+
 		#2012.8.26 so that each recalibration will pick up the right vcf
 		chr2VCFJobData = {}
 		if inputVCFData:
@@ -51,14 +51,14 @@ class AbstractAlignmentAndVCFWorkflow(parentClass, AbstractVCFWorkflow):
 				chr2VCFJobData[chromosome] = jobData
 		pdata.chr2VCFJobData = chr2VCFJobData
 		return pdata
-	
+
 	def registerCustomExecutables(self, workflow=None):
-		
+
 		"""
 		"""
 		parentClass.registerCustomExecutables(self, workflow=workflow)
 		AbstractVCFWorkflow.registerCustomExecutables(self, workflow=workflow)
-		
+
 		if workflow is None:
 			workflow = self
 		namespace = workflow.namespace
@@ -67,12 +67,12 @@ class AbstractAlignmentAndVCFWorkflow(parentClass, AbstractVCFWorkflow):
 		architecture = workflow.architecture
 		clusters_size = workflow.clusters_size
 		site_handler = workflow.site_handler
-		vervetSrcPath = self.vervetSrcPath
-		
+		#vervetSrcPath = self.vervetSrcPath
+
 		#2012.8.7 each cell is a tuple of (executable, clusterSizeMultipler (0 if u do not need clustering)
 		executableClusterSizeMultiplierList = []
 		self.addExecutableAndAssignProperClusterSize(executableClusterSizeMultiplierList, defaultClustersSize=self.clusters_size)
-	
+
 
 	def run(self):
 		"""
@@ -80,7 +80,7 @@ class AbstractAlignmentAndVCFWorkflow(parentClass, AbstractVCFWorkflow):
 		"""
 		pdata = self.setup_run()
 		workflow = pdata.workflow
-		
+
 		inputData = self.registerAllInputFiles(inputDir=self.inputDir, input_site_handler=self.input_site_handler, \
 											checkEmptyVCFByReading=self.checkEmptyVCFByReading,\
 											pegasusFolderName=self.pegasusFolderName)
@@ -99,7 +99,7 @@ class AbstractAlignmentAndVCFWorkflow(parentClass, AbstractVCFWorkflow):
 				needFastaIndexJob=self.needFastaIndexJob, needFastaDictJob=self.needFastaDictJob, \
 				data_dir=self.data_dir, no_of_gatk_threads = 1, transferOutput=True,\
 				outputDirPrefix=self.pegasusFolderName)
-		
+
 		self.end_run()
 
 if __name__ == '__main__':

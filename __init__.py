@@ -35,7 +35,7 @@ from yhio.TwoSNPData import TwoSNPData, QualityControl
 from yhio.HDF5MatrixFile import HDF5MatrixFile, addAttributeDictToYHTableInHDF5Group
 from yhio.YHPyTables import YHTable, YHFile, YHSingleTableFile, castPyTablesRowIntoPassingData
 from yhio.Association import AssociationTable, AssociationTableFile, LocusMapTable, LocusMapTableFile
-from yhio.AssociationLandscape import AssociationLandscapeTable, AssociationLandscapeTableFile  
+from yhio.AssociationLandscape import AssociationLandscapeTable, AssociationLandscapeTableFile
 from yhio.AssociationPeak import AssociationPeakTable, AssociationPeakTableFile
 from yhio.AssociationLocus import AssociationLocusTable, AssociationLocus2PeakTable, AssociationLocusTableFile
 
@@ -52,7 +52,7 @@ from Genome import GeneModel
 
 #2012.11.18
 from AbstractDBInteractingClass import AbstractDBInteractingClass
-#from pegasus import yh_pegasus
+from pegasus import yh_pegasus
 #from pegasus.AbstractWorkflow import AbstractWorkflow
 #from pegasus.AbstractNGSWorkflow import AbstractNGSWorkflow
 #from pegasus.AbstractVCFWorkflow import AbstractVCFWorkflow
