@@ -54,7 +54,7 @@ class AbstractWorkflow(ADAG):
 						("tmpDir", 1, ): ["/tmp/", '', 1, 'for MarkDuplicates.jar, etc., default is /tmp/ but sometimes it is too small'],\
 						('max_walltime', 1, int):[4320, '', 1, 'maximum wall time any job could have, in minutes. 20160=2 weeks.\n\
 	used in addGenericJob().'],\
-						('jvmVirtualByPhysicalMemoryRatio', 1, float):[1.25, '', 1, "if a job's virtual memory (usually 1.2X of JVM resident memory) exceeds request, it will be killed on hoffman2. Hence this argument"],\
+						('jvmVirtualByPhysicalMemoryRatio', 1, float):[1.0, '', 1, "if a job's virtual memory (usually 1.2X of JVM resident memory) exceeds request, it will be killed on hoffman2. Hence this argument"],\
 						('debug', 0, int):[0, 'b', 0, 'toggle debug mode'],\
 						('needSSHDBTunnel', 0, int):[0, 'H', 0, 'DB-interacting jobs need a ssh tunnel (running on cluster behind firewall).'],\
 						('report', 0, int):[0, 'r', 0, 'toggle report, more verbose stdout/stderr.']
@@ -1436,7 +1436,8 @@ class AbstractWorkflow(ADAG):
 			extraOutputLs = []
 
 
-		memRequirementObject = self.getJVMMemRequirment(job_max_memory=job_max_memory, minMemory=2000)
+		
+		memRequirementObject = self.getJVMMemRequirment(job_max_memory=job_max_memory, minMemory=4000)
 		job_max_memory = memRequirementObject.memRequirement
 		javaMemRequirement = memRequirementObject.memRequirementInStr
 
@@ -1695,10 +1696,10 @@ class AbstractWorkflow(ADAG):
 						transferOutput=transferOutput, \
 						extraArgumentList=extraArgumentList, job_max_memory=job_max_memory, **keywords)
 		return job
-
-	def getJVMMemRequirment(self, job_max_memory=5000, minMemory=2000, permSizeFraction=0.2,
+	def getJVMMemRequirment(self, job_max_memory=5000, minMemory=2000, permSizeFraction=0,
 						MaxPermSizeUpperBound=35000):
 		"""
+		20170502 Java 8 does not support PermSize anymore. set permSizeFraction to 0.
 		2013.10.27 handle when job_max_memory is None and minMemory is None.
 		#2013.06.07 if a job's virtual memory (1.2X=self.jvmVirtualByPhysicalMemoryRatio, of memory request) exceeds request, it'll abort.
 			so set memRequirement accordingly.
@@ -1715,19 +1716,19 @@ class AbstractWorkflow(ADAG):
 			job_max_memory = 5000
 		if minMemory is None:
 			minMemory = 2000
-		MaxPermSize_user = int(job_max_memory*permSizeFraction)
+		#MaxPermSize_user = int(job_max_memory*permSizeFraction)
 		mxMemory_user = int(job_max_memory*(1-permSizeFraction))
-		MaxPermSize= min(MaxPermSizeUpperBound, max(minMemory/2, MaxPermSize_user))
-		PermSize=MaxPermSize*3/4
+		#MaxPermSize= min(MaxPermSizeUpperBound, max(minMemory/2, MaxPermSize_user))
+		#PermSize=MaxPermSize*3/4
 		mxMemory = max(minMemory, mxMemory_user)
 		msMemory = mxMemory*3/4
 		#-XX:+UseGCOverheadLimit
 			#Use a policy that limits the proportion of the VM's time that is spent in GC before an OutOfMemory error is thrown. (Introduced in 6.)
 		#-XX:-UseGCOverheadLimit would disable the policy.
-		memRequirementInStr = "-Xms%sm -Xmx%sm -XX:PermSize=%sm -XX:MaxPermSize=%sm"%\
-				(msMemory, mxMemory, PermSize, MaxPermSize)
-
-		memRequirement = int((MaxPermSize + mxMemory)*self.jvmVirtualByPhysicalMemoryRatio)
+		memRequirementInStr = "-Xms%sm -Xmx%sm"%(msMemory, mxMemory)	# -XX:PermSize=%sm -XX:MaxPermSize=%sm"%\
+					#, PermSize, MaxPermSize)
+		
+		memRequirement = int(mxMemory*self.jvmVirtualByPhysicalMemoryRatio)
 		#2013.06.07 if a job's virtual memory (1.2X of memory request) exceeds request, it'll abort.
 		return PassingData(memRequirementInStr=memRequirementInStr, memRequirement=memRequirement)
 
