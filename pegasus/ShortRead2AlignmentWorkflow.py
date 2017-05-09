@@ -644,7 +644,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 			extraArgumentList.append(additionalArguments)
 		if no_of_aln_threads:
 			extraArgumentList.append("-t %s"%no_of_aln_threads)
-		aln_job_max_memory = 2600	#in MB, 2.5GB is enough for 4.5G gzipped fastq versus 480K contigs (total size~3G)
+		aln_job_max_memory = 7000 #in MB, 2.5GB is enough for 4.5G gzipped fastq versus 480K contigs (total size~3G)
 
 		#2013.3.1 change the walltime by multiplying it
 		baseAlnJobWalltime = int(1380*self.coreAlignmentJobWallTimeMultiplier)
@@ -923,8 +923,8 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 		MarkDupOutputF = outputBamFile
 		MarkDupOutputMetricF = File('%s.metric'%(bamFnamePrefix))	#2013.2.27 bugfix
 
-		memRequirementData = self.getJVMMemRequirment(job_max_memory=job_max_memory, minMemory=2000, \
-													permSizeFraction=0.3)
+		memRequirementData = self.getJVMMemRequirment(job_max_memory=job_max_memory, minMemory=8000, \
+													permSizeFraction=0.2)
 		job_max_memory = memRequirementData.memRequirement
 		javaMemRequirement = memRequirementData.memRequirementInStr
 
