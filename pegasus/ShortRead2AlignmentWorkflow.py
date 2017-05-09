@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """
 Examples:
-	%s 
-	
+	%s
+
 Description:
 	2012.11.14 a read-alignment workflow, extracted from vervet/src/ShortRead2AlignmentPipeline.py.
 """
@@ -40,15 +40,15 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 						('notStageOutFinalOutput', 0, int):[0, '', 0, 'toggle to not stage out final output (bam + bam.bai)'],\
 						("coreAlignmentJobWallTimeMultiplier", 1, float): [0.2, '', 1, 'The default wall time is 23 hours (for bwa aln, stampy, etc.).\
 	This option controls walltime by multiplying the default with this number.'],\
-						
+
 							}
 	option_default_dict.update(alignment_option_dict.copy())
 	option_default_dict.update({
 						('refSequenceFname', 1, ): ["", '', 1, 'path to the reference file', ],\
 						})
-	option_default_dict[('local_realigned', 0, int)][0] = 0	#by default not to apply known-indel-free local re-alignment 
-	
-	
+	option_default_dict[('local_realigned', 0, int)][0] = 0	#by default not to apply known-indel-free local re-alignment
+
+
 	def __init__(self,  **keywords):
 		"""
 		2012.3.29
@@ -57,19 +57,19 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 		2011-7-11
 		"""
 		AbstractNGSWorkflow.__init__(self, **keywords)
-		
+
 		self.bwa_path =  self.insertHomePath(self.bwa_path, self.home_path)
-		
+
 		if self.notStageOutFinalOutput:
 			self.stageOutFinalOutput = False
 		else:
 			self.stageOutFinalOutput = True
-		
+
 		if self.noCheckEmptyReadFile:
 			self.ignoreEmptyReadFile = False
 		else:
 			self.ignoreEmptyReadFile = True
-	
+
 	def registerCustomJars(self, workflow=None):
 		"""
 		2012.1.9
@@ -77,7 +77,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 		if workflow is None:
 			workflow = self
 		AbstractNGSWorkflow.registerCustomJars(self, workflow=workflow)
-	
+
 	def registerCustomExecutables(self, workflow=None):
 		"""
 		2012.5.3
@@ -88,23 +88,23 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 			workflow = self
 		AbstractNGSWorkflow.registerCustomExecutables(self, workflow=workflow)
 		AlignmentReadBaseQualityRecalibrationWorkflow.registerCustomExecutables(self, workflow=workflow)
-		
+
 		namespace = workflow.namespace
 		version = workflow.version
 		operatingSystem = workflow.operatingSystem
 		architecture = workflow.architecture
 		clusters_size = workflow.clusters_size
 		site_handler = workflow.site_handler
-		
-		
+
+
 		#workflow.BuildBamIndexFilesJava.addProfile(Profile(Namespace.PEGASUS, key="clusters.size", value="%s"%self.alignmentJobClustersSizeFraction))
 		self.setOrChangeExecutableClusterSize(executable=workflow.AddOrReplaceReadGroupsJava,
 											clusterSizeMultipler=self.alignmentJobClustersSizeFraction, \
 											defaultClustersSize=None)
-		self.setOrChangeExecutableClusterSize(executable=workflow.samtools, 
+		self.setOrChangeExecutableClusterSize(executable=workflow.samtools,
 											clusterSizeMultipler=self.alignmentJobClustersSizeFraction, \
 											defaultClustersSize=None)
-		
+
 		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.bwa_path, \
 									name="bwa", clusterSizeMultipler=self.alignmentJobClustersSizeFraction)
 		self.addOneExecutableFromPathAndAssignProperClusterSize(
@@ -127,7 +127,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 			name="BWA_Mem", clusterSizeMultipler=self.alignmentJobClustersSizeFraction)
 		# 2014.04.04 pipeCommandOutput2File need this file dependency
 		self.registerOneExecutableAsFile(pythonVariableName="bwaExecutableFile", path=self.bwa_path)
-		
+
 		#self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, name='RealignerTargetCreatorJava', clusterSizeMultipler=0.7)
 		#self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, name='IndelRealignerJava', clusterSizeMultipler=0.2)
 
@@ -154,14 +154,14 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 			workflow = self
 		if bwaIndexFileSuffixLs is None:
 			bwaIndexFileSuffixLs = self.bwaIndexFileSuffixLs	#self.bwaIndexFileSuffixLs is defined in AbstractNGSWorkflow
-		
+
 		if refSequenceBaseCount is None:	#default	#maybe add a base count job here
 			index_algorithm = 'bwtsw'
 		elif refSequenceBaseCount<500000000:	#500 million
 			index_algorithm = "is"
 		else:
 			index_algorithm = "bwtsw"
-		
+
 		refFastaFile = refFastaFList[0]
 		extraArgumentList = ["index", "-a", index_algorithm, refFastaFile]
 		extraOutputLs = []
@@ -177,7 +177,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 						key2ObjectForJob=None,\
 						job_max_memory=job_max_memory, walltime=walltime)
 		return bwa_index_job
-	
+
 	def addStampyGenomeIndexHashJob(self, workflow=None, executable=None, refFastaFList=None, \
 						parentJobLs=None, job_max_memory=100, walltime = 60, \
 						extraDependentInputLs=None, \
@@ -189,7 +189,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 		"""
 		stampyGenomeIndexJob= Job(namespace=workflow.namespace, name=executable.name, version=workflow.version)
 		refFastaFile = refFastaFList[0]
-		
+
 		genomeIndexFile = File('%s.stidx'%(refFastaFile.name))
 		stampyGenomeIndexJob.addArguments("-G ", refFastaFile, refFastaFile)
 		stampyGenomeIndexJob.uses(refFastaFile, transfer=True, register=True, link=Link.INPUT)
@@ -201,22 +201,22 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 		for parentJob in parentJobLs:
 			workflow.depends(parent=parentJob, child=stampyGenomeIndexJob)
 		yh_pegasus.setJobProperRequirement(stampyGenomeIndexJob, job_max_memory=job_max_memory, walltime=walltime)
-		
+
 		stampyGenomeHashJob = Job(namespace=workflow.namespace, name=executable.name, version=workflow.version)
 		stampyGenomeHashJob.addArguments("-g", refFastaFile, "-H", refFastaFile)
-		
+
 		stampyGenomeHashJob.uses(refFastaFile, transfer=True, register=True, link=Link.INPUT)
 		genomeHashFile = File('%s.sthash'%(refFastaFile.name))
 		#genomeIndexFile is input to this stampyGenomeHashJob but mark it as output otherwise it'll get auto-cleaned by pegasus
 		stampyGenomeHashJob.uses(genomeIndexFile, transfer=transferOutput, register=True, link=Link.OUTPUT)
 		stampyGenomeHashJob.uses(genomeHashFile, transfer=transferOutput, register=True, link=Link.OUTPUT)
 		stampyGenomeHashJob.outputLs = [genomeIndexFile, genomeHashFile]
-		
+
 		workflow.addJob(stampyGenomeHashJob)
 		workflow.depends(parent=stampyGenomeIndexJob, child=stampyGenomeHashJob)
 		yh_pegasus.setJobProperRequirement(stampyGenomeHashJob, job_max_memory=job_max_memory, walltime=walltime)
 		"""
-		
+
 		refFastaFile = refFastaFList[0]
 		genomeIndexFile = File('%s.stidx'%(refFastaFile.name))
 		extraOutputLs = [genomeIndexFile]
@@ -229,7 +229,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 						extraArguments=None, extraArgumentList=extraArgumentList, \
 						key2ObjectForJob=None,\
 						job_max_memory=job_max_memory, walltime=walltime)
-		
+
 		genomeHashFile = File('%s.sthash'%(refFastaFile.name))
 		extraOutputLs = [genomeHashFile, genomeIndexFile]
 		extraArgumentList = ["-H", refFastaFile]
@@ -242,12 +242,12 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 						key2ObjectForJob=None,\
 						job_max_memory=job_max_memory, walltime=walltime)
 		return stampyGenomeHashJob
-	
+
 	def registerISQFileObjLsToWorkflow(self, fileObjectLs=None, workflow=None, data_dir=None):
 		'''
 		2012-2.24
 		'''
-		
+
 		newFileObjLs = []
 		for fileObject in fileObjectLs:
 			relativePath = fileObject.db_entry.path
@@ -269,7 +269,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 		for output in refIndexJob.outputLs:
 			self.addJobUse(childJob, file=output, transfer=True, register=True, link=Link.INPUT)
 			#childJob.uses(output, transfer=True, register=True, link=Link.INPUT)
-	
+
 	def addStampyAlignmentJob(self, workflow=None, fileObjectLs=None, \
 					refFastaFList=None, bwa=None, additionalArguments=None, \
 					samtools=None, refIndexJob=None, parentJobLs=None,\
@@ -289,7 +289,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 				--alignquals                       (SAM format) Compute posterior alignment probabilities (YQ tag)
 		2012.2.26
 			handle read files with quality_score_format="Illumina" (post 1.3 solexa).
-			
+
 		2012.2.24
 			alignment job for stampy
 			no_of_aln_threads is only for bwa.
@@ -302,7 +302,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 		"""
 		aln_job_max_memory = 6000	#in MB, bwa needs 3G. stampy needs 3G.
 		#bwa: memory 2.5GB is enough for 4.5G gzipped fastq versus 480K contigs (total size~3G)
-		
+
 		bwasw_job_max_memory = 3800	#in MB, same ref, bwasw needs more memory
 		samse_job_max_memory = 4500	#in MB
 		sampe_job_max_memory = 6000	#in MB
@@ -310,19 +310,19 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 		#2013.3.1 change the walltime by multiplying it
 		baseAlnJobWalltime = int(1380*self.coreAlignmentJobWallTimeMultiplier)
 			#1380 is 23 hours, because all reads are stored in chunks of 5-million-read files
-		
+
 		refFastaFile = refFastaFList[0]
 		firstFileObject = fileObjectLs[0]
 		read_count = firstFileObject.db_entry.read_count
 		aln_job_walltime = self.scaleJobWalltimeOrMemoryBasedOnInput(realInputVolume=read_count, \
 								baseInputVolume=4000000, baseJobPropertyValue=baseAlnJobWalltime, \
 								minJobPropertyValue=baseAlnJobWalltime*2/3, maxJobPropertyValue=baseAlnJobWalltime*5).value
-								
+
 		fastqF = firstFileObject.fastqF
 		relativePath = fastqF.name
 		fileBasenamePrefix = utils.getRealPrefixSuffixOfFilenameWithVariableSuffix(os.path.basename(relativePath))[0]
 		outputSamFile = File('%s.sam'%(os.path.join(outputDir, fileBasenamePrefix)))
-		
+
 		alignmentJob = Job(namespace=workflow.namespace, name=stampy.name, version=workflow.version)
 		# make sure to use ', rather than ", to wrap the bwaoptions. double-quote(") would disappear during xml translation.
 		alignmentJob.addArguments(" --bwa=%s "%(yh_pegasus.getAbsPathOutOfExecutable(bwa)), \
@@ -335,7 +335,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 		alignmentJob.uses(outputSamFile, transfer=transferOutput, register=True, link=Link.OUTPUT)
 		alignmentJob.output = outputSamFile
 		alignmentJob.fileBasenamePrefix = fileBasenamePrefix
-		
+
 		for refFastaFile in refFastaFList:
 			alignmentJob.uses(refFastaFile, transfer=True, register=True, link=Link.INPUT)
 		yh_pegasus.setJobProperRequirement(alignmentJob, job_max_memory=aln_job_max_memory, \
@@ -355,7 +355,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 				if parentJob:
 					workflow.depends(parent=parentJob, child=alignmentJob)
 		return alignmentJob
-	
+
 	def addBWAAlignmentJob(self, workflow=None, executable=None, bwaCommand='aln', fileObject=None, outputFile=None,\
 					refFastaFList=None, no_of_aln_threads=3, \
 					maxMissingAlignmentFraction=None, maxNoOfGaps=None, additionalArguments=None, \
@@ -381,7 +381,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 		alignmentJob.uses(saiOutput, transfer=False, register=True, link=Link.OUTPUT)
 		yh_pegasus.setJobProperRequirement(alignmentJob, job_max_memory=aln_job_max_memory, \
 										no_of_cpus=no_of_aln_threads, walltime=aln_job_walltime)
-		
+
 		workflow.addJob(alignmentJob)
 		"""
 		if extraArgumentList is None:
@@ -400,16 +400,16 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 		extraArgumentList.extend(["-f", outputFile])
 		extraArgumentList.append(refFastaFList[0])
 		extraArgumentList.append(fileObject.fastqF)
-		
+
 		if extraDependentInputLs is None:
 			extraDependentInputLs = []
 		extraDependentInputLs.extend(refFastaFList[:])
 		extraDependentInputLs.append(fileObject.fastqF)
-		
+
 		if extraOutputLs is None:
 			extraOutputLs = []
 		extraOutputLs = [outputFile]
-		
+
 		alignmentJob = self.addGenericJob(executable=executable, inputFile=None, outputFile=None, \
 						parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
 						extraOutputLs=extraOutputLs,\
@@ -420,7 +420,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 		if refIndexJob:
 			self.addRefIndexJobAndItsOutputAsParent(workflow, refIndexJob, childJob=alignmentJob)
 		return alignmentJob
-	
+
 	def addBWAAlignmentWrapJob(self, workflow=None, fileObjectLs=None, \
 					refFastaFList=None, bwa=None, additionalArguments=None, \
 					samtools=None, \
@@ -462,21 +462,21 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 			namespace = workflow.namespace
 		if version is None:
 			version = workflow.version
-		
+
 		aln_job_max_memory = 2600	#in MB, 2.5GB is enough for 4.5G gzipped fastq versus 480K contigs (total size~3G)
 		bwasw_job_max_memory = 3800	#in MB, same ref, bwasw needs more memory
 		samse_job_max_memory = 4500	#in MB
 		sampe_job_max_memory = 6000	#in MB
 		addRGJob_max_memory = 2500	#in MB
-		
+
 		#2013.3.1 change the walltime by multiplying it
 		baseAlnJobWalltime = int(1380*self.coreAlignmentJobWallTimeMultiplier)
 			#1380 is 23 hours, because all reads are stored in chunks of 5-million-read files
-		
+
 		memRequirementData = self.getJVMMemRequirment(job_max_memory=addRGJob_max_memory, minMemory=2000)
 		job_max_memory = memRequirementData.memRequirement
 		javaMemRequirement = memRequirementData.memRequirementInStr
-		
+
 		if len(fileObjectLs)==1:	#single end
 			fileObject = fileObjectLs[0]
 			fastqF = fileObject.fastqF
@@ -487,7 +487,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 			aln_job_walltime = self.scaleJobWalltimeOrMemoryBasedOnInput(realInputVolume=read_count, \
 								baseInputVolume=4000000, baseJobPropertyValue=baseAlnJobWalltime, \
 								minJobPropertyValue=baseAlnJobWalltime*2/3, maxJobPropertyValue=baseAlnJobWalltime*5).value
-								
+
 			if alignment_method.command.find('aln')>=0 and sequencer.short_name!='454' and \
 						(sequence_type and sequence_type.read_length_mean is not None \
 						and sequence_type.read_length_mean<150):	#short single-end read
@@ -503,7 +503,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 					extraDependentInputLs=None, extraOutputLs=None, transferOutput=transferOutput, \
 					extraArguments=None, extraArgumentList=None, job_max_memory=aln_job_max_memory, \
 					key2ObjectForJob=None, walltime=aln_job_walltime)
-				
+
 				alignmentSamF = File('%s.sam.gz'%(os.path.join(outputDir, fileBasenamePrefix)))
 				sai2samJob = Job(namespace=namespace, name=ShortSEAlignmentByBWA.name, version=version)
 				sai2samJob.addArguments(refFastaFList[0], saiOutput, fastqF, alignmentSamF)
@@ -516,14 +516,14 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 				workflow.addJob(sai2samJob)
 				self.addJobDependency(workflow=workflow, parentJob=alignmentJob, childJob=sai2samJob)
 				workflow.no_of_jobs += 1
-				
+
 			elif alignment_method.command.find('bwasw')>=0 or sequencer.short_name=='454' or \
 						(sequence_type and sequence_type.read_length_mean is not None \
 						and sequence_type.read_length_mean>150):	#long single-end read
 				fileBasenamePrefix = utils.getRealPrefixSuffixOfFilenameWithVariableSuffix(os.path.basename(relativePath))[0]
 				alignmentSamF = File('%s.sam.gz'%(os.path.join(outputDir, fileBasenamePrefix)))
 				alignmentJob = Job(namespace=namespace, name=LongSEAlignmentByBWA.name, version=version)
-				
+
 				alignmentJob.addArguments(refFastaFList[0], fastqF, alignmentSamF, repr(no_of_aln_threads))
 				for refFastaFile in refFastaFList:
 					alignmentJob.uses(refFastaFile, transfer=True, register=True, link=Link.INPUT)
@@ -534,7 +534,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 				#fake a sai2samJob
 				sai2samJob = alignmentJob
 				workflow.no_of_jobs += 1
-			
+
 		elif len(fileObjectLs)==2:	#paired end
 			fileObject = fileObjectLs[0]
 			fastqF1 = fileObject.fastqF
@@ -545,7 +545,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 			aln_job_walltime = self.scaleJobWalltimeOrMemoryBasedOnInput(realInputVolume=read_count, \
 								baseInputVolume=4000000, baseJobPropertyValue=baseAlnJobWalltime, \
 								minJobPropertyValue=baseAlnJobWalltime*2/3, maxJobPropertyValue=baseAlnJobWalltime*5).value
-								
+
 			#fastqF1, format, sequence_type = fileObjectLs[0][:3]
 			#fastqF2, format, sequence_type = fileObjectLs[1][:3]
 			fileBasenamePrefix = utils.getRealPrefixSuffixOfFilenameWithVariableSuffix(os.path.basename(relativePath))[0]
@@ -565,14 +565,14 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 				relativePath = fastqF.name
 				sequence_type = fileObject.db_entry.individual_sequence.sequence_type
 				sequencer = fileObject.db_entry.individual_sequence.sequencer
-				
+
 				#fastqF, format, sequence_type = fileObject[:3]
-				
+
 				#relativePath, format, sequence_type = fileObject[:3]
 				tmp_fname_prefix = utils.getRealPrefixSuffixOfFilenameWithVariableSuffix(os.path.basename(relativePath))[0]
 				outputFname = os.path.join(outputDir, '%s.sai'%tmp_fname_prefix)
 				saiOutput = File(outputFname)
-				
+
 				alignmentJob = self.addBWAAlignmentJob(workflow=workflow, executable=bwa, bwaCommand=alignment_method.command, \
 									fileObject=fileObject, outputFile=saiOutput,\
 					refFastaFList=refFastaFList, no_of_aln_threads=no_of_aln_threads, \
@@ -582,11 +582,11 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 					extraDependentInputLs=None, extraOutputLs=None, transferOutput=transferOutput, \
 					extraArguments=None, extraArgumentList=None, job_max_memory=aln_job_max_memory, \
 					key2ObjectForJob=None, walltime=aln_job_walltime)
-				
+
 				sai2samJob.addArguments(saiOutput)
 				sai2samJob.uses(saiOutput, transfer=True, register=True, link=Link.INPUT)
 				workflow.depends(parent=alignmentJob, child=sai2samJob)
-			
+
 			#add a pair of fastq files to sampe in the end
 			for fileObject in fileObjectLs:
 				fastqF = fileObject.fastqF
@@ -597,7 +597,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 			sys.stderr.write("addBWAAlignmentWrapJob Error: %s (!=1, !=2) file objects (%s).\n"%\
 							(len(fileObjectLs), fileObjectLs))
 			raise
-		
+
 		sai2samJob.uses(alignmentSamF, transfer=transferOutput, register=True, link=Link.OUTPUT)
 		sai2samJob.output = alignmentSamF
 		sai2samJob.outputLs = [alignmentSamF]
@@ -609,7 +609,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 				if parentJob:
 					self.addJobDependency(workflow=workflow, parentJob=parentJob, childJob=sai2samJob)
 		return sai2samJob
-	
+
 	def addBWAMemAlignmentJob(self, workflow=None, fileObjectLs=None, \
 					refFastaFList=None, bwa=None, additionalArguments=None, \
 					samtools=None, \
@@ -635,7 +635,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 			namespace = workflow.namespace
 		if version is None:
 			version = workflow.version
-		
+
 		if extraArgumentList is None:
 			extraArgumentList = []
 		extraArgumentList.append(alignment_method.command)	#add mem first
@@ -645,13 +645,13 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 		if no_of_aln_threads:
 			extraArgumentList.append("-t %s"%no_of_aln_threads)
 		aln_job_max_memory = 2600	#in MB, 2.5GB is enough for 4.5G gzipped fastq versus 480K contigs (total size~3G)
-		
+
 		#2013.3.1 change the walltime by multiplying it
 		baseAlnJobWalltime = int(1380*self.coreAlignmentJobWallTimeMultiplier)
 			#1380 is 23 hours, because all reads are stored in chunks of 5-million-read files
-		
+
 		refFastaFile = refFastaFList[0]
-		
+
 		if len(fileObjectLs)==1 or len(fileObjectLs)==2:	#paired end	#single end
 			fileObject = fileObjectLs[0]
 			fastqF = fileObject.fastqF
@@ -660,14 +660,14 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 			aln_job_walltime = self.scaleJobWalltimeOrMemoryBasedOnInput(realInputVolume=read_count, \
 									baseInputVolume=4000000, baseJobPropertyValue=baseAlnJobWalltime, \
 									minJobPropertyValue=baseAlnJobWalltime*2/3, maxJobPropertyValue=baseAlnJobWalltime*5).value
-									
+
 			fileBasenamePrefix = utils.getRealPrefixSuffixOfFilenameWithVariableSuffix(os.path.basename(relativePath))[0]
 			alignmentSamF = File('%s.sam.gz'%(os.path.join(outputDir, fileBasenamePrefix)))
-			
+
 			fastqFileList = [fileObject.fastqF for fileObject in fileObjectLs]
 			extraArgumentList.extend(["-a -M", refFastaFile] + fastqFileList)
 			extraDependentInputLs=fastqFileList + refFastaFList
-			
+
 			alignmentJob = self.addGenericPipeCommandOutput2FileJob(executable=self.BWA_Mem, executableFile=self.bwaExecutableFile, \
 					outputFile=alignmentSamF, \
 					parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
@@ -680,13 +680,13 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 			sys.stderr.write("addBWAMemAlignmentJob Error: %s (!=1, !=2) file objects (%s).\n"%\
 							(len(fileObjectLs), fileObjectLs))
 			raise
-		
-		
+
+
 		alignmentJob.fileBasenamePrefix = fileBasenamePrefix
 		if refIndexJob:
 			self.addRefIndexJobAndItsOutputAsParent(workflow, refIndexJob, childJob=alignmentJob)
 		return alignmentJob
-	
+
 	def addAlignmentJob(self, workflow=None, fileObjectLs=None, individual_alignment=None, \
 					refFastaFList=None, bwa=None, additionalArguments=None, \
 					samtools=None, refIndexJob=None, parentJobLs=None, \
@@ -699,7 +699,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 					transferOutput=False, **keywords):
 		"""
 		Examples:
-		
+
 		#2012.9.19 individual_alignment is passed as None so that ReadGroup addition job is not added in addAlignmentJob()
 		alignmentJob, alignmentOutput = self.addAlignmentJob(workflow=workflow, fileObjectLs=newFileObjLs, \
 							individual_alignment=None, \
@@ -713,7 +713,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 							java=java, SortSamFilesJava=SortSamFilesJava, SortSamJar=SortSamJar,\
 							AddOrReplaceReadGroupsJava=AddOrReplaceReadGroupsJava, AddOrReplaceReadGroupsJar=AddOrReplaceReadGroupsJar,\
 							no_of_aln_threads=no_of_aln_threads, stampy=stampy)
-		
+
 		2013.04.27 used to be 'mem', now is 'bwamem' in db
 		2013.04.04 new alignment method (bwa-mem) from Heng Li
 		2012.10.18 add argument addBamIndexJob,
@@ -743,7 +743,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 				1. aln doesn't use pipe, outputs to sai files.
 				2. sampe/samse, convert, sort => connected through pipe
 		"""
-		
+
 		if alignment_method.short_name=='stampy':
 			alignmentJob = self.addStampyAlignmentJob(workflow=workflow, fileObjectLs=fileObjectLs,\
 						refFastaFList=refFastaFList, bwa=bwa, \
@@ -787,12 +787,12 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 			sys.stderr.write("Alignment method %s is not supported.\n"%(alignment_method.short_name))
 			sys.exit(3)
 		fileBasenamePrefix = alignmentJob.fileBasenamePrefix
-		
-		## convert sam into bam	
+
+		## convert sam into bam
 		bamOutputF = File(os.path.join(outputDir, "%s.bam"%(fileBasenamePrefix)))
 		#2013.3.18
 		sam_convert_job = self.addSAM2BAMJob(inputFile=alignmentJob.output, outputFile=bamOutputF,\
-					executable=self.SAM2BAMJava, SamFormatConverterJar=self.SamFormatConverterJar,\
+					executable=self.SAM2BAMJava, SamFormatConverterJar=self.PicardJar,\
 					parentJobLs=[alignmentJob], extraDependentInputLs=None, \
 					extraArguments=None, job_max_memory = 3000, walltime=80, transferOutput=transferOutput)
 		"""
@@ -819,7 +819,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 			sortAlnParentJob = addRGJob
 		else:
 			sortAlnParentJob = sam_convert_job
-		
+
 		"""
 		# 2010-2-4
 			sort it so that it could be used for merge
@@ -832,13 +832,13 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 					parentJobLs=[sortAlnParentJob], extraDependentInputLs=None, \
 					extraArguments=None, job_max_memory = 2500, walltime=80, \
 					transferOutput=transferOutput, needBAMIndexJob=addBamIndexJob)
-		
+
 		if addBamIndexJob:
 				returnJob = sortAlignmentJob.bamIndexJob	#bamIndexJob.parentJobLs[0] is sortAlignmentJob.
 		else:
 				returnJob = sortAlignmentJob
 		return returnJob, returnJob.output
-	
+
 	def addSAM2BAMJob(self, inputFile=None, outputFile=None,\
 					executable=None, SamFormatConverterJar=None,\
 					parentJobLs=None, extraDependentInputLs=None, \
@@ -851,15 +851,15 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 		memRequirementData = self.getJVMMemRequirment(job_max_memory=job_max_memory, minMemory=2000)
 		job_max_memory = memRequirementData.memRequirement
 		javaMemRequirement = memRequirementData.memRequirementInStr
-		
-		extraArgumentList = [memRequirementData.memRequirementInStr, '-jar', SamFormatConverterJar,\
+
+		extraArgumentList = [memRequirementData.memRequirementInStr, '-jar', SamFormatConverterJar, "SamFormatConverter", \
 							"I=", inputFile, "O=", outputFile, "VALIDATION_STRINGENCY=LENIENT"]
 		if extraArguments:
 			extraArgumentList.append(extraArguments)
 		if extraDependentInputLs is None:
 			extraDependentInputLs=[]
 		extraDependentInputLs.extend([inputFile, SamFormatConverterJar])
-		
+
 		job= self.addGenericJob(executable=executable, inputFile=None,\
 							parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
 							extraOutputLs=[outputFile],\
@@ -868,7 +868,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 							job_max_memory=memRequirementData.memRequirement, walltime=walltime,\
 							**keywords)
 		return job
-	
+
 	def addAlignmentMergeBySAMtoolsJob(self, workflow, AlignmentJobAndOutputLs=[], outputBamFile=None,samtools=None,\
 					java=None, MergeSamFilesJava=None, \
 					BuildBamIndexFilesJava=None, BuildBamIndexJar=None, \
@@ -898,14 +898,14 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 			merge_sam_job.uses(alignmentOutput, transfer=True, register=True, link=Link.INPUT)
 			merge_sam_job.uses(outputBamFile, transfer=transferOutput, register=True, link=Link.OUTPUT)
 			workflow.addJob(merge_sam_job)
-		
+
 		# add the index job on the merged bam file
 		bamIndexJob = self.addBAMIndexJob(BuildBamIndexFilesJava=BuildBamIndexFilesJava, \
 						BuildBamIndexJar=BuildBamIndexJar, \
 						inputBamF=outputBamFile, parentJobLs=[merge_sam_job], \
 						transferOutput=transferOutput, javaMaxMemory=javaMaxMemory, walltime=180)
 		return merge_sam_job, bamIndexJob
-	
+
 	def addMarkDupJob(self, workflow, parentJobLs=[], inputBamF=None, inputBaiF=None, outputBamFile=None,\
 					MarkDuplicatesJava=None, MarkDuplicatesJar=None, tmpDir="/Network/Data/vervet/vervetPipeline/tmp/",\
 					BuildBamIndexFilesJava=None, BuildBamIndexJar=None, \
@@ -922,13 +922,13 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 		bamFnamePrefix = os.path.splitext(outputBamFile.name)[0]
 		MarkDupOutputF = outputBamFile
 		MarkDupOutputMetricF = File('%s.metric'%(bamFnamePrefix))	#2013.2.27 bugfix
-		
+
 		memRequirementData = self.getJVMMemRequirment(job_max_memory=job_max_memory, minMemory=2000, \
 													permSizeFraction=0.3)
 		job_max_memory = memRequirementData.memRequirement
 		javaMemRequirement = memRequirementData.memRequirementInStr
-		
-		MarkDupJob.addArguments(javaMemRequirement, '-jar', MarkDuplicatesJar, "MAX_FILE_HANDLES=500",\
+
+		MarkDupJob.addArguments(javaMemRequirement, '-jar', MarkDuplicatesJar, "MarkDuplicates", "MAX_FILE_HANDLES=500",\
 			"VALIDATION_STRINGENCY=LENIENT", "ASSUME_SORTED=true", "INPUT=", inputBamF, \
 			'OUTPUT=', MarkDupOutputF, "M=", MarkDupOutputMetricF, "MAX_RECORDS_IN_RAM=500000",\
 			"TMP_DIR=%s"%tmpDir)
@@ -946,8 +946,8 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 		for parentJob in parentJobLs:
 			if parentJob:
 				workflow.depends(parent=parentJob, child=MarkDupJob)
-		
-		
+
+
 		# add the index job on the bam file
 		bamIndexJob = self.addBAMIndexJob(BuildBamIndexFilesJava=BuildBamIndexFilesJava, \
 								BuildBamIndexJar=BuildBamIndexJar, \
@@ -955,7 +955,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 								parentJobLs=[MarkDupJob], namespace=namespace, version=version,\
 								transferOutput=transferOutput, walltime=max(180, int(walltime/3)))
 		return MarkDupJob, bamIndexJob
-		
+
 	def addSAMtoolsCalmdJob(self, workflow, samtoolsCalmd=None, inputBamF=None, \
 					refFastaFList=None, outputBamF=None, \
 					parentJob=None, \
@@ -979,13 +979,13 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 		workflow.addJob(job)
 		if parentJob:
 			workflow.depends(parent=parentJob, child=job)
-			
+
 		# add the index job on the bam
 		return self.addBAMIndexJob(BuildBamIndexFilesJava=BuildBamIndexFilesJava, BuildBamIndexJar=BuildBamIndexJar, \
 					inputBamF=outputBamF,\
 					parentJobLs=[job], namespace=namespace, version=version,\
 					transferOutput=transferOutput)
-	
+
 	def addLocalRealignmentSubWorkflow(self, workflow=None, chr2IntervalDataLs=None, registerReferenceData=None, \
 					alignmentData=None,\
 					inputBamF=None, \
@@ -1004,11 +1004,11 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 				(extract the exact interval out of bam if 1kb is added to both ends of input interval)
 			merge all intervals back into one bam
 			index the merged bam
-			
+
 		"""
 		chrIDSet = set(chr2IntervalDataLs.keys())
 		chr2VCFJobData = {}
-		
+
 		if self.report:
 			sys.stderr.write("Adding local indel-realignment jobs for %s chromosomes/contigs ..."%\
 							(len(chrIDSet)))
@@ -1016,15 +1016,15 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 
 		topOutputDir = "%sMap"%(outputDirPrefix)
 		topOutputDirJob = self.addMkDirJob(outputDir=topOutputDir)
-		
-		
+
+
 		reduceOutputDir = "%sReduce"%(outputDirPrefix)
 		reduceOutputDirJob = self.addMkDirJob(outputDir=reduceOutputDir)
-		
-		
+
+
 		returnData = PassingData()
 		returnData.jobDataLs = []
-		
+
 		#2012.9.22 AlignmentJobAndOutputLs is a relic.
 		#	but it's similar to mapEachIntervalDataLs but designed for addAlignmentMergeJob(),
 		#	so AlignmentJobAndOutputLs gets re-set for every alignment.
@@ -1035,38 +1035,38 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 		passingData = PassingData(AlignmentJobAndOutputLs=[], \
 					alignmentData = alignmentData,\
 					bamFnamePrefix=None, \
-					
+
 					outputDirPrefix=outputDirPrefix, \
 					topOutputDirJob=topOutputDirJob,\
-					
+
 					reduceOutputDirJob = reduceOutputDirJob,\
-					
+
 					refFastaFList=refFastaFList, \
 					registerReferenceData= registerReferenceData,\
 					refFastaF=refFastaFList[0],\
-					
+
 					fastaDictJob = None,\
 					refFastaDictF = None,\
 					fastaIndexJob = None,\
 					refFastaIndexF = None,\
-					
+
 					chrIDSet=chrIDSet,\
 					chr2IntervalDataLs=chr2IntervalDataLs,\
-					
+
 					mapEachAlignmentData = None,\
 					mapEachChromosomeData=None, \
 					mapEachIntervalData=None,\
 					reduceBeforeEachAlignmentData = None, \
 					reduceAfterEachAlignmentData=None,\
 					reduceAfterEachChromosomeData=None,\
-					
+
 					mapEachAlignmentDataLs = [],\
 					mapEachChromosomeDataLs=[], \
 					mapEachIntervalDataLs=[],\
 					reduceBeforeEachAlignmentDataLs = [], \
 					reduceAfterEachAlignmentDataLs=[],\
 					reduceAfterEachChromosomeDataLs=[],\
-					
+
 					gzipReduceAfterEachChromosomeFolderJob=None,\
 					gzipReduceBeforeEachAlignmentFolderJob = None,\
 					gzipReduceAfterEachAlignmentFolderJob = None,\
@@ -1080,19 +1080,19 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 		parentJobLs = alignmentData.jobLs
 		bamF = alignmentData.bamF
 		baiF = alignmentData.baiF
-		
+
 		bamFnamePrefix = alignment.getReadGroup()
-		
+
 		passingData.AlignmentJobAndOutputLs = []
 		passingData.bamFnamePrefix = bamFnamePrefix
 		passingData.individual_alignment = alignment
 		passingData.alignmentData = alignmentData
-		
-		
+
+
 		self.mapReduceOneAlignment(workflow=workflow, alignmentData=alignmentData, passingData=passingData, \
 						chrIDSet=chrIDSet, chr2IntervalDataLs=chr2IntervalDataLs, chr2VCFJobData=chr2VCFJobData, \
 						outputDirPrefix=outputDirPrefix, transferOutput=transferOutput, skipChromosomeIfVCFMissing=False)
-		
+
 		"""
 		2013.03.31 not needed
 		reduceAfterEachAlignmentData = self.reduceAfterEachAlignment(workflow=workflow, \
@@ -1103,7 +1103,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 											transferOutput=False, data_dir=data_dir, **keywords)
 		passingData.reduceAfterEachAlignmentData = reduceAfterEachAlignmentData
 		passingData.reduceAfterEachAlignmentDataLs.append(reduceAfterEachAlignmentData)
-		
+
 		"""
 		AlignmentJobAndOutputLs = passingData.AlignmentJobAndOutputLs
 		mergedBamFile = File(os.path.join(topOutputDirJob.output, '%s_realigned.bam'%(bamFnamePrefix)))
@@ -1114,11 +1114,11 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 					BuildBamIndexFilesJava=workflow.IndexMergedBamIndexJava, BuildBamIndexJar=workflow.BuildBamIndexJar, \
 					mv=workflow.mv, parentJobLs=[topOutputDirJob], \
 					transferOutput=False)
-		
+
 		if self.report:
 			sys.stderr.write("%s jobs.\n"%(self.no_of_jobs))
 		return alignmentMergeJob, bamIndexJob
-	
+
 	def mapEachInterval(self, workflow=None, alignmentData=None, intervalData=None,\
 							VCFJobData=None, passingData=None, reduceBeforeEachAlignmentData=None,\
 							mapEachChromosomeData=None, transferOutput=False, **keywords):
@@ -1135,7 +1135,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 							mapEachChromosomeData=mapEachChromosomeData, transferOutput=transferOutput, \
 							**keywords)
 		return returnData
-	
+
 if __name__ == '__main__':
 	main_class = ShortRead2AlignmentWorkflow
 	po = ProcessOptions(sys.argv, main_class.option_default_dict, error_doc=main_class.__doc__)
