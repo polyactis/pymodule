@@ -193,8 +193,8 @@ failedWorkflowLogFname=$failedWorkflowLogFnameDefault
 echo "Submitting to $computingSiteName for computing."
 echo "runningWorkflowLogFname is $runningWorkflowLogFname."
 echo "failedWorkflowLogFname is $failedWorkflowLogFname."
-echo "UCLA_CLUSTER_SCRATCH is $UCLA_CLUSTER_SCRATCH."
-echo "UCLA_CLUSTER_LOCAL_SCRATCH is $UCLA_CLUSTER_LOCAL_SCRATCH."
+#echo "UCLA_CLUSTER_SCRATCH is $UCLA_CLUSTER_SCRATCH."
+#echo "UCLA_CLUSTER_LOCAL_SCRATCH is $UCLA_CLUSTER_LOCAL_SCRATCH."
 echo "storageSiteName is $storageSiteName."
 echo "Final workflow submit option is $submitOption."
 
