@@ -6,8 +6,7 @@
 import sys, os, math
 
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/src')))
+sys.path.insert(0, os.path.expanduser('~/script'))
 
 from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
 from pymodule.yhio import NextGenSeq
