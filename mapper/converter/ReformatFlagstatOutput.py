@@ -17,16 +17,15 @@ import sys, os, math
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
+sys.path.insert(0, os.path.expanduser('~/script'))
 
-import csv
+import csv, copy
 from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
-from pymodule.yhio.VCFFile import VCFFile
-from pymodule.pegasus.mapper.AbstractMapper import AbstractMapper
+from pymodule.pegasus.mapper.AbstractMapper import AbstractMapper as ParentClass
 
-class ReformatFlagstatOutput(AbstractMapper):
+class ReformatFlagstatOutput(ParentClass):
 	__doc__ = __doc__
-	option_default_dict = AbstractMapper.option_default_dict.copy()
+	option_default_dict = copy.deepcopy(ParentClass.option_default_dict)
 	option_default_dict.pop(('outputFnamePrefix', 0, ))
 	option_default_dict.update({
 						('alignmentID', 1, ): [None, 'a', 1, 'ID of this alignment from which all the stats are extracted.'],\
@@ -35,7 +34,7 @@ class ReformatFlagstatOutput(AbstractMapper):
 	def __init__(self,  **keywords):
 		"""
 		"""
-		AbstractMapper.__init__(self, **keywords)
+		ParentClass.__init__(self, **keywords)
 		import re;
 		self.numberGrabPattern = re.compile(r'^(\d+) \+ (\d+)')
 	
