@@ -268,6 +268,10 @@ class DBAncestor(object):
 	
 	def queryTable(self, TableClass=None):
 		"""
+		201704
+			usage: 
+				db_entry = db_main.queryTable(PMDB.IndividualSequenceFileRaw).filter_by(md5sum=md5sum).first()
+				db_entry = db_main.queryTable(DBClass.IndividualAlignment).get(self.individual_alignment_id)
 		"""
 		if self.is_elixir:
 			query = TableClass.query

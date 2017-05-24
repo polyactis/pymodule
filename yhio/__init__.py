@@ -4,7 +4,7 @@
 """
 import os, sys
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
+sys.path.insert(0, os.path.expanduser('~/script'))
 
 from CNV import CNVCompare, CNVSegmentBinarySearchTreeKey, get_overlap_ratio
 from HDF5MatrixFile import HDF5MatrixFile

@@ -3,7 +3,7 @@
 """
 import os, sys
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
+sys.path.insert(0, os.path.expanduser('~/script'))
 
 from ProcessOptions import ProcessOptions, generate_program_doc, process_options, process_function_arguments, turn_option_default_dict2argument_default_dict
 from utils import PassingData, PassingDataList, dict_map, importNumericArray, figureOutDelimiter, get_gene_symbol2gene_id_set, \
