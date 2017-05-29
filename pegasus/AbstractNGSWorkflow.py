@@ -34,8 +34,8 @@ class AbstractNGSWorkflow(parentClass):
 						('ref_ind_seq_id', 1, int): [None, 'a', 1, 'IndividualSequence.id. To pick alignments with this sequence as reference', ],\
 						("samtools_path", 1, ): ["%s/bin/samtools", '', 1, 'samtools binary'],\
 						("picard_path", 1, ): ["%s/script/picard/dist", '', 1, 'picard folder containing its jar binaries'],\
-						("gatk_path", 1, ): ["%s/script/gatk/dist", '', 1, 'GATK folder containing its jar binaries'],\
-						("gatk2_path", 1, ): ["%s/script/gatk2/", '', 1, 'GATK version 2 or afterwards, no more source code, just binary jar files.'],\
+						("gatk_path", 1, ): ["%s/bin/GenomeAnalysisTK1_6_9.jar", '', 1, 'my custom GATK 1.6.9 jar compiled from https://github.com/polyactis/gatk using jdk 1.6'],\
+						("gatk2_path", 1, ): ["%s/bin/GenomeAnalysisTK.jar", '', 1, 'jar of GATK version 2 or afterwards.'],\
 						('picardJarPath', 1, ): ["%s/script/picard.broad/build/libs/picard.jar", '', 1, 'path to the new picard jar', ],\
 						('tabixPath', 1, ): ["%s/bin/tabix", '', 1, 'path to the tabix binary', ],\
 						('bgzipPath', 1, ): ["%s/bin/bgzip", '', 1, 'path to the bgzip binary', ],\
@@ -119,10 +119,6 @@ class AbstractNGSWorkflow(parentClass):
 		#from pymodule import ProcessOptions
 		#self.ad = ProcessOptions.process_function_arguments(keywords, self.option_default_dict, error_doc=self.__doc__, \
 		#												class_to_have_attr=self)
-#		self.samtools_path = self.insertHomePath(self.samtools_path, self.home_path)
-#		self.picard_path =  self.insertHomePath(self.picard_path, self.home_path)
-#		self.gatk_path =  self.insertHomePath(self.gatk_path, self.home_path)
-#		self.tabixPath =  self.insertHomePath(self.tabixPath, self.home_path)
 
 		self.chr_pattern = Genome.chr_pattern
 		self.contig_id_pattern = Genome.contig_id_pattern
@@ -243,11 +239,10 @@ class AbstractNGSWorkflow(parentClass):
 		self.registerOneJar(name="MarkDuplicatesJar", path=os.path.join(self.picard_path, 'MarkDuplicates.jar'))
 		self.registerOneJar(name="SplitReadFileJar", path=os.path.join(self.picard_path, 'SplitReadFile.jar'))
 
-		#self.registerOneJar(name="GenomeAnalysisTKJar", path=os.path.join(self.gatk_path, 'GenomeAnalysisTK.jar'))
+		self.registerOneJar(name="GenomeAnalysisTKJar", path=self.gatk_path)
 
 		#have to be a different folder, otherwise name clash with the old gatk jar file
-		#self.registerOneJar(name="GenomeAnalysisTK2Jar", path=os.path.join(self.gatk2_path, 'GenomeAnalysisTK.jar'),\
-		#				folderName='gatk2Jar')
+		self.registerOneJar(name="GenomeAnalysisTK2Jar", path=self.gatk2_path, folderName='gatk2Jar')
 		self.registerOneJar(name="SortSamJar", path=os.path.join(self.picard_path, 'SortSam.jar'))
 		self.registerOneJar(name="SamFormatConverterJar", path=os.path.join(self.picard_path, 'SamFormatConverter.jar'))
 		#20170425
