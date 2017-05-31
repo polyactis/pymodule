@@ -468,6 +468,8 @@ def getListOutOfStr(list_in_str=None, data_type=int, separator1=',', separator2=
 		
 	"""
 	list_to_return = []
+	if list_in_str=='' or list_in_str is None:
+		return list_to_return
 	list_in_str = list_in_str.strip()	#2013.04.09
 	if list_in_str=='' or list_in_str is None:
 		return list_to_return

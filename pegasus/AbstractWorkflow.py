@@ -54,6 +54,8 @@ class AbstractWorkflow(ADAG):
 						('max_walltime', 1, int):[4320, '', 1, 'maximum wall time any job could have, in minutes. 20160=2 weeks.\n\
 	used in addGenericJob().'],\
 						('jvmVirtualByPhysicalMemoryRatio', 1, float):[1.0, '', 1, "if a job's virtual memory (usually 1.2X of JVM resident memory) exceeds request, it will be killed on hoffman2. Hence this argument"],\
+						("thisModulePath", 1, ): ["%s", '', 1, 'path of the module that owns this program. \
+					used to add executables from this module.'],\
 						('debug', 0, int):[0, 'b', 0, 'toggle debug mode'],\
 						('needSSHDBTunnel', 0, int):[0, 'H', 0, 'DB-interacting jobs need a ssh tunnel (running on cluster behind firewall).'],\
 						('report', 0, int):[0, 'r', 0, 'toggle report, more verbose stdout/stderr.']
@@ -61,7 +63,7 @@ class AbstractWorkflow(ADAG):
 						#('bamListFname', 1, ): ['/tmp/bamFileList.txt', 'L', 1, 'The file contains path to each bam file, one file per line.'],\
 
 	pathToInsertHomePathList = ['javaPath', 'pymodulePath', 'plinkPath', 'variationSrcPath', 'pegasusCleanupPath',\
-							'pegasusTransferPath']
+							'pegasusTransferPath', "thisModulePath"]
 
 	def __init__(self, inputArgumentLs=None, **keywords):
 		"""

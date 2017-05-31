@@ -23,14 +23,12 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 from Pegasus.DAX3 import Executable, File, PFN
 from pymodule import ProcessOptions, PassingData, utils
 from pymodule.pegasus import yh_pegasus
-from pymodule.pegasus.AbstractNGSWorkflow import AbstractNGSWorkflow
+from pymodule.pegasus.AbstractNGSWorkflow import AbstractNGSWorkflow as ParentClass
 from pymodule.yhio.FastaFile import FastaFile
 
-parentClass = AbstractNGSWorkflow
-
-class MapReduceGenomeFileWorkflow(parentClass):
+class MapReduceGenomeFileWorkflow(ParentClass):
 	__doc__ = __doc__
-	option_default_dict = parentClass.option_default_dict.copy()
+	option_default_dict = ParentClass.option_default_dict.copy()
 	option_default_dict.update({
 						('inputDir', 0, ): ['', 'I', 1, 'input folder that contains vcf or vcf.gz files', ],\
 						})
@@ -47,7 +45,7 @@ class MapReduceGenomeFileWorkflow(parentClass):
 		"""
 		
 		self.needSplitChrIntervalData = True
-		parentClass.__init__(self, **keywords)
+		ParentClass.__init__(self, **keywords)
 		self.needSplitChrIntervalData = True
 		
 		self.mapReduceType = 1	#2013.06.27 type 1: split VCF with fixed number of sites
@@ -63,7 +61,7 @@ class MapReduceGenomeFileWorkflow(parentClass):
 		2012.9.24
 			place holder.
 		"""
-		parentClass.connectDB(self)
+		ParentClass.connectDB(self)
 		
 		self.registerReferenceData = None
 		self.refFastaFList= None
@@ -415,12 +413,12 @@ class MapReduceGenomeFileWorkflow(parentClass):
 		2013.04.07 wrap all standard pre-run() related functions into this function.
 			setting up for run(), called by run()
 		"""
-		pdata = parentClass.setup_run(self)
+		pdata = ParentClass.setup_run(self)
 		
 		#self.chr2size = {}
 		#self.chr2size = set(['Contig149'])	#temporary when testing Contig149
 		#self.chr2size = set(['1MbBAC'])	#temporary when testing the 1Mb-BAC (formerly vervet_path2)
-		if self.needSplitChrIntervalData:	#2013.06.21 defined in parentClass.__init__()
+		if self.needSplitChrIntervalData:	#2013.06.21 defined in ParentClass.__init__()
 			chr2IntervalDataLs = self.getChr2IntervalDataLsBySplitChrSize(chr2size=self.chr2size, \
 													intervalSize=self.intervalSize, \
 													intervalOverlapSize=self.intervalOverlapSize)

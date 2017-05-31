@@ -15,12 +15,11 @@ from pymodule.pegasus import yh_pegasus
 from pymodule.yhio.MatrixFile import MatrixFile
 from pymodule.yhio.VCFFile import VCFFile
 from AbstractNGSWorkflow import AbstractNGSWorkflow
-from MapReduceGenomeFileWorkflow import MapReduceGenomeFileWorkflow
-parentClass = MapReduceGenomeFileWorkflow
+from MapReduceGenomeFileWorkflow import MapReduceGenomeFileWorkflow as ParentClass
 
-class AbstractVCFWorkflow(parentClass, AbstractNGSWorkflow):
+class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 	__doc__ = __doc__
-	option_default_dict = copy.deepcopy(parentClass.option_default_dict)
+	option_default_dict = copy.deepcopy(ParentClass.option_default_dict)
 	option_default_dict.update({
 						('minDepth', 0, float): [0, 'm', 1, 'minimum depth for a call to regarded as non-missing', ],\
 						
@@ -41,13 +40,13 @@ class AbstractVCFWorkflow(parentClass, AbstractNGSWorkflow):
 		"""
 		2012.1.17
 		"""
-		parentClass.__init__(self, **keywords)
+		ParentClass.__init__(self, **keywords)
 	
 	def extra__init__(self):
 		"""
 		2013.2.14
 		"""
-		parentClass.extra__init__(self)
+		ParentClass.extra__init__(self)
 		if getattr(self, "inputDir", None):
 			self.inputDir = os.path.abspath(self.inputDir)
 		
@@ -91,7 +90,7 @@ class AbstractVCFWorkflow(parentClass, AbstractNGSWorkflow):
 		"""
 		if not workflow:
 			workflow = self
-		parentClass.registerExecutables(self, workflow=workflow)
+		ParentClass.registerExecutables(self, workflow=workflow)
 		
 		namespace = self.namespace
 		version = self.version
@@ -143,7 +142,7 @@ class AbstractVCFWorkflow(parentClass, AbstractNGSWorkflow):
 	def registerCommonExecutables(self, workflow=None):
 		"""
 		"""
-		parentClass.registerCommonExecutables(self, workflow=workflow)
+		ParentClass.registerCommonExecutables(self, workflow=workflow)
 	
 	def registerAllInputFiles(self, workflow=None, inputDir=None, input_site_handler=None, \
 					checkEmptyVCFByReading=False, pegasusFolderName='',\
@@ -674,7 +673,7 @@ class AbstractVCFWorkflow(parentClass, AbstractNGSWorkflow):
 						(len(intervalJobLs), bigIntervalSize, self.no_of_jobs))
 		returnData = PassingData(jobDataLs=[])
 		_intervalJobLs = []
-		startIntervalData = None	#an instance of IntervalData in parentClass()
+		startIntervalData = None	#an instance of IntervalData in ParentClass()
 		for intervalJob in intervalJobLs:
 			intervalData = intervalJob.intervalData
 			if startIntervalData is None:
@@ -736,7 +735,7 @@ class AbstractVCFWorkflow(parentClass, AbstractNGSWorkflow):
 					transferOutput=True, **keywords):
 		"""
 		"""
-		return parentClass.reduceEachInput(self, workflow=workflow, chromosome=chromosome, \
+		return ParentClass.reduceEachInput(self, workflow=workflow, chromosome=chromosome, \
 						passingData=passingData, mapEachIntervalDataLs=mapEachIntervalDataLs, transferOutput=transferOutput,\
 						**keywords)
 
@@ -1071,7 +1070,7 @@ class AbstractVCFWorkflow(parentClass, AbstractNGSWorkflow):
 		#self.chr2size = {}
 		#self.chr2size = set(['Contig149'])	#temporary when testing Contig149
 		#self.chr2size = set(['1MbBAC'])	#temporary when testing the 1Mb-BAC (formerly vervet_path2)
-		if self.needSplitChrIntervalData:	#2013.06.21 defined in parentClass.__init__()
+		if self.needSplitChrIntervalData:	#2013.06.21 defined in ParentClass.__init__()
 			chr2IntervalDataLs = self.getChr2IntervalDataLsBySplitChrSize(chr2size=self.chr2size, \
 													intervalSize=self.intervalSize, \
 													intervalOverlapSize=self.intervalOverlapSize)

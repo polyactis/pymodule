@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.expanduser('~/script'))
 
 import csv, copy
 from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
-from pymodule.pegasus.mapper.AbstractMapper import AbstractMapper as ParentClass
+from pymodule.mapper.AbstractMapper import AbstractMapper as ParentClass
 
 class ReformatFlagstatOutput(ParentClass):
 	__doc__ = __doc__
