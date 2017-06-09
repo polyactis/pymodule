@@ -1717,6 +1717,8 @@ class AbstractWorkflow(ADAG):
 			job_max_memory = 5000
 		if minMemory is None:
 			minMemory = 2000
+		#20170609 permSizeFraction is set to 0 due to newer Java no longer needs it.
+		permSizeFraction = 0
 		#MaxPermSize_user = int(job_max_memory*permSizeFraction)
 		mxMemory_user = int(job_max_memory*(1-permSizeFraction))
 		#MaxPermSize= min(MaxPermSizeUpperBound, max(minMemory/2, MaxPermSize_user))
