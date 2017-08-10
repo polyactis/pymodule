@@ -800,10 +800,10 @@ class Database(DBAncestor):
 			self._session = SessionClass()
 		return self._session
 
-	def setup(self, create_tables=True):
+	def setup(self, create_tables=True, Base=None):
 		if create_tables:
-			from sqlalchemy.ext.declarative import declarative_base
-			Base = declarative_base()
+			#from sqlalchemy.ext.declarative import declarative_base
+			#Base = declarative_base()
 			Base.metadata.create_all(self.engine)
 
 	def SessionDown(self):
