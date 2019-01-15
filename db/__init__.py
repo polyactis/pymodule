@@ -256,14 +256,14 @@ class DBAncestor(object):
 		if not self._data_dir:
 			if self.READMEClass:
 				query = self.queryTable(self.READMEClass)
-				data_dirEntry = query.filter_by(title='data_dir').first()
-				if not data_dirEntry or not data_dirEntry.description:
-					# todo: need to test data_dirEntry.description is writable to the user
+				data_dir_entry = query.filter_by(title='data_dir').first()
+				if not data_dir_entry or not data_dir_entry.description:
+					# todo: need to test data_dir_entry.description is writable to the user
 					sys.stderr.write("data_dir not available in db or not accessible on the harddisk. Raise exception.\n")
-					raise
 					self._data_dir = None
+					raise Exception("data_dir not available in db or not accessible on the harddisk.")
 				else:
-					self._data_dir = data_dirEntry.description
+					self._data_dir = data_dir_entry.description
 		return self._data_dir
 	
 	def queryTable(self, TableClass=None):
@@ -450,7 +450,7 @@ class DBAncestor(object):
 		returnCode = utils.copyFile(srcFilename=srcFilename, dstFilename=dstFilename)
 		if returnCode!=0:
 			sys.stderr.write("ERROR during utils.copyFile. check stderr message just ahead of this.\n")
-			raise
+			raise Exception("ERROR during utils.copyFile. check stderr message just ahead of this.")
 		if logMessage:
 			logMessage += "file %s has been copied to %s.\n"%(srcFilename, dstFilename)
 		if srcFilenameLs:
