@@ -13,7 +13,7 @@ from utils import PassingData, PassingDataList, dict_map, importNumericArray, fi
 from plot import yh_matplotlib, yh_matplotlib_artists
 from plot.yh_matplotlib import assignMatPlotlibHueColorToLs, drawName2FCLegend
 
-from db import GenomeDB, TaxonomyDB
+#from db import GenomeDB, TaxonomyDB
 
 from algorithm import pca_module
 from algorithm.PCA import PCA
