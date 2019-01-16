@@ -72,7 +72,7 @@ class YHTable(tables.Table, YHTableInHDF5Group):
 	2012.12.16 adapted from http://pytables.github.com/cookbook/simple_table.html
 	"""
 	#mimics the sqlalchemy
-	query = tables.Table.readWhere
+	query = tables.Table.read_where
 	
 	def __init__(self, parentNode=None, tableName=None,\
 				description=None, rowDefinition=None,\
