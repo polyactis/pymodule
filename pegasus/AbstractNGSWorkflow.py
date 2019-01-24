@@ -2369,7 +2369,7 @@ Contig966       3160    50
 		sys.stderr.write("Getting %s contigs with rank (by size) between %s and %s  ..."%\
 						(no_of_contigs_to_fetch, contigMinRankBySize, contigMaxRankBySize))
 
-		from pymodule import GenomeDB
+		from pymodule.db import GenomeDB
 		db_genome = GenomeDB.GenomeDatabase(drivername=self.drivername, username=self.db_user,
 						password=self.db_passwd, hostname=self.hostname, database=self.dbname, schema="genome")
 		db_genome.setup(create_tables=False)
