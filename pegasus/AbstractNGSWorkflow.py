@@ -1555,7 +1555,7 @@ class AbstractNGSWorkflow(parentClass):
 
 	def addSortAlignmentJob(self, workflow=None, inputBamFile=None, \
 					outputBamFile=None,\
-					SortSamFilesJava=None, SortSamJar=None,\
+					SortSamFilesJava=None, SortSamJar=None, tmpDir=None,\
 					parentJobLs=None, extraDependentInputLs=None, \
 					extraArguments=None, job_max_memory = 2500, transferOutput=False, \
 					walltime=180, needBAMIndexJob=True, **keywords):
@@ -1570,7 +1570,7 @@ class AbstractNGSWorkflow(parentClass):
 
 		extraArgumentList = [memRequirementData.memRequirementInStr, '-jar', SortSamJar, "SortSam",\
 							"SORT_ORDER=coordinate", "I=", inputBamFile, \
-							"O=", outputBamFile, "VALIDATION_STRINGENCY=LENIENT"]
+							"O=", outputBamFile, "VALIDATION_STRINGENCY=LENIENT", "TMP_DIR=%s"%tmpDir]
 					#not including 'SORT_ORDER=coordinate'
 					#(adding the SORT_ORDER doesn't do sorting but it marks the header as sorted so that BuildBamIndexJar won't fail.)
 		if extraArguments:

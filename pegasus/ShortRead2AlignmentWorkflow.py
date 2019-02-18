@@ -427,7 +427,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 					refIndexJob=None, parentJobLs=None,\
 					alignment_method=None, outputDir=None, namespace=None, version=None,\
 					PEAlignmentByBWA=None, ShortSEAlignmentByBWA=None, LongSEAlignmentByBWA=None, \
-					java=None, SortSamFilesJava=None, SortSamJar=None,\
+					java=None, 
 					AddOrReplaceReadGroupsJava=None, AddOrReplaceReadGroupsJar=None,\
 					no_of_aln_threads=3, maxMissingAlignmentFraction=None, maxNoOfGaps=None, \
 					transferOutput=False, **keywords):
@@ -616,7 +616,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 					refIndexJob=None, parentJobLs=None,\
 					alignment_method=None, outputDir=None, namespace=None, version=None,\
 					PEAlignmentByBWA=None, ShortSEAlignmentByBWA=None, LongSEAlignmentByBWA=None, \
-					java=None, SortSamFilesJava=None, SortSamJar=None,\
+					java=None, 
 					AddOrReplaceReadGroupsJava=None, AddOrReplaceReadGroupsJar=None,\
 					no_of_aln_threads=3, maxMissingAlignmentFraction=None, maxNoOfGaps=None, \
 					extraArgumentList=None, transferOutput=False, **keywords):
@@ -694,7 +694,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 					PEAlignmentByBWA=None, ShortSEAlignmentByBWA=None, LongSEAlignmentByBWA=None, \
 					java=None, SortSamFilesJava=None, SortSamJar=None,\
 					AddOrReplaceReadGroupsJava=None, AddOrReplaceReadGroupsJar=None,\
-					no_of_aln_threads=3, stampy=None, \
+					no_of_aln_threads=3, stampy=None, tmpDir=None,\
 					maxMissingAlignmentFraction=None, maxNoOfGaps=None, addBamIndexJob=False,\
 					transferOutput=False, **keywords):
 		"""
@@ -753,8 +753,8 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 						outputDir=outputDir, namespace=namespace, version=version,\
 						PEAlignmentByBWA=PEAlignmentByBWA, ShortSEAlignmentByBWA=ShortSEAlignmentByBWA, \
 						LongSEAlignmentByBWA=LongSEAlignmentByBWA,\
-						java=java, SortSamFilesJava=SortSamFilesJava, SortSamJar=SortSamJar,\
-						AddOrReplaceReadGroupsJava=AddOrReplaceReadGroupsJava, AddOrReplaceReadGroupsJar=AddOrReplaceReadGroupsJar,\
+						java=java, AddOrReplaceReadGroupsJava=AddOrReplaceReadGroupsJava, 
+						AddOrReplaceReadGroupsJar=AddOrReplaceReadGroupsJar,
 						no_of_aln_threads=no_of_aln_threads, stampy=stampy,\
 						transferOutput=transferOutput)
 		elif alignment_method.short_name.find('bwamem')==0:	#2013.04.27 used to be 'mem', now is 'bwamem'
@@ -766,10 +766,10 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 						outputDir=outputDir, namespace=namespace, version=version,\
 						PEAlignmentByBWA=PEAlignmentByBWA, ShortSEAlignmentByBWA=ShortSEAlignmentByBWA, \
 						LongSEAlignmentByBWA=LongSEAlignmentByBWA,\
-						java=java, SortSamFilesJava=SortSamFilesJava, SortSamJar=SortSamJar,\
-						AddOrReplaceReadGroupsJava=AddOrReplaceReadGroupsJava, AddOrReplaceReadGroupsJar=AddOrReplaceReadGroupsJar,\
-						no_of_aln_threads=no_of_aln_threads, maxMissingAlignmentFraction=maxMissingAlignmentFraction, maxNoOfGaps=maxNoOfGaps,\
-						transferOutput=transferOutput)
+						java=java, AddOrReplaceReadGroupsJava=AddOrReplaceReadGroupsJava, 
+						AddOrReplaceReadGroupsJar=AddOrReplaceReadGroupsJar,\
+						no_of_aln_threads=no_of_aln_threads, maxMissingAlignmentFraction=maxMissingAlignmentFraction, 
+						maxNoOfGaps=maxNoOfGaps, transferOutput=transferOutput)
 		elif alignment_method.short_name.find('bwa')==0:
 			alignmentJob = self.addBWAAlignmentWrapJob(workflow=workflow, fileObjectLs=fileObjectLs, \
 						refFastaFList=refFastaFList, bwa=bwa, \
@@ -779,10 +779,10 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 						outputDir=outputDir, namespace=namespace, version=version,\
 						PEAlignmentByBWA=PEAlignmentByBWA, ShortSEAlignmentByBWA=ShortSEAlignmentByBWA, \
 						LongSEAlignmentByBWA=LongSEAlignmentByBWA,\
-						java=java, SortSamFilesJava=SortSamFilesJava, SortSamJar=SortSamJar,\
-						AddOrReplaceReadGroupsJava=AddOrReplaceReadGroupsJava, AddOrReplaceReadGroupsJar=AddOrReplaceReadGroupsJar,\
-						no_of_aln_threads=no_of_aln_threads,  maxMissingAlignmentFraction=maxMissingAlignmentFraction, maxNoOfGaps=maxNoOfGaps, \
-						transferOutput=transferOutput)
+						java=java, AddOrReplaceReadGroupsJava=AddOrReplaceReadGroupsJava, 
+						AddOrReplaceReadGroupsJar=AddOrReplaceReadGroupsJar,\
+						no_of_aln_threads=no_of_aln_threads,  maxMissingAlignmentFraction=maxMissingAlignmentFraction, 
+						maxNoOfGaps=maxNoOfGaps, transferOutput=transferOutput)
 		else:
 			sys.stderr.write("Alignment method %s is not supported.\n"%(alignment_method.short_name))
 			sys.exit(3)
@@ -828,7 +828,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 		sortBamF = File('%s.bam'%(bam_output_fname_prefix))
 		sortAlignmentJob = self.addSortAlignmentJob(workflow=workflow, inputBamFile=sortAlnParentJob.output, \
 					outputBamFile=sortBamF,\
-					SortSamFilesJava=SortSamFilesJava, SortSamJar=SortSamJar,\
+					SortSamFilesJava=SortSamFilesJava, SortSamJar=SortSamJar, tmpDir=tmpDir,\
 					parentJobLs=[sortAlnParentJob], extraDependentInputLs=None, \
 					extraArguments=None, job_max_memory = 2500, walltime=80, \
 					transferOutput=transferOutput, needBAMIndexJob=addBamIndexJob)
