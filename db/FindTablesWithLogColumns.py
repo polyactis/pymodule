@@ -30,13 +30,14 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 class FindTablesWithLogColumns(object):
 	__doc__ = __doc__
 	option_default_dict = {('drivername', 1,):['postgresql', 'v', 1, 'which type of database? mysql or postgresql', ],\
-						('hostname', 1, ): ['localhost', 'z', 1, 'hostname of the db server', ],\
-						('dbname', 1, ): ['graphdb', 'd', 1, 'stock_250k database name', ],\
-						('schema', 0, ): [None, 'k', 1, 'database schema name (postgresql only)', ],\
-						('db_user', 1, ): [None, 'u', 1, 'database username', ],\
-						('db_passwd', 1, ): [None, 'p', 1, 'database password', ],\
-						('debug', 0, int):[0, 'b', 0, 'toggle debug mode'],\
-						('report', 0, int):[0, 'r', 0, 'toggle report, more verbose stdout/stderr.']}
+				('hostname', 1, ): ['localhost', 'z', 1, 'hostname of the db server', ],\
+				('port', 0, int):[5432, '', 1, 'the database server port number on the host. Default mysql is 3306.'],\
+				('dbname', 1, ): ['graphdb', 'd', 1, 'stock_250k database name', ],\
+				('schema', 0, ): [None, 'k', 1, 'database schema name (postgresql only)', ],\
+				('db_user', 1, ): [None, 'u', 1, 'database username', ],\
+				('db_passwd', 1, ): [None, 'p', 1, 'database password', ],\
+				('debug', 0, int):[0, 'b', 0, 'toggle debug mode'],\
+				('report', 0, int):[0, 'r', 0, 'toggle report, more verbose stdout/stderr.']}
 	
 	def __init__(self,  **keywords):
 		"""
@@ -51,12 +52,12 @@ class FindTablesWithLogColumns(object):
 		"""
 		if self.drivername=='mysql':
 			import MySQLdb
-			conn = MySQLdb.connect(db=self.dbname, host=self.hostname, user = self.db_user, passwd = self.db_passwd)
+			conn = MySQLdb.connect(db=self.dbname, host=self.hostname, user = self.db_user, passwd = self.db_passwd, port=self.port)
 			cursor = conn.cursor()
 		elif self.drivername=='postgresql':
 			import psycopg2
-			conn_string = "host='%s' dbname='%s' user='%s' password='%s'"%(self.hostname, self.dbname, \
-																	self.db_user, self.db_passwd)
+			conn_string = "host='%s' port='%s' dbname='%s' user='%s' password='%s'"%(self.hostname, self.port, self.dbname, \
+							self.db_user, self.db_passwd)
 			conn = psycopg2.connect(conn_string)
 			cursor = conn.cursor()
 			if self.schema:
