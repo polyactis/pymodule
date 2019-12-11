@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2009-12-15 http://wj32.wordpress.com/2007/10/08/binary-search-tree-with-heaps-more-features/
 
@@ -262,7 +262,7 @@ class node(object):
 		if not item is None:
 			return item.data
 		else:
-			raise KeyError, key
+			raise KeyError(key)
 
 	def __setitem__(self, key, data):
 		"""Set an item. RAISES KeyError IF the key doesn't exist (unlike in binary_tree)."""
@@ -270,7 +270,7 @@ class node(object):
 		item = self.find(key)
 
 		if item is None:
-			raise KeyError, key
+			raise KeyError(key)
 		else:
 			item.data = data
 
@@ -365,7 +365,7 @@ class binary_tree(object):
 			return
 
 		if key == trail[-1].key:
-			raise KeyError, "key %s already in tree" % key
+			raise KeyError("key %s already in tree" % key)
 		elif key < trail[-1].key:
 			trail[-1].left = node(key, data)
 			self.__count += 1
@@ -379,7 +379,7 @@ class binary_tree(object):
 		"""Remove a node from the tree. Raises KeyError if the key doesn't exist."""
 
 		if self.root is None:
-			raise KeyError, key
+			raise KeyError(key)
 
 		value = isinstance(key, node) and key.key or key
 		trail = self.follow(value)
@@ -387,7 +387,7 @@ class binary_tree(object):
 		attr = ""
 
 		if value != trail[-1].key:
-			raise KeyError, key
+			raise KeyError(key)
 
 		if len(trail) == 1:
 			object = self
@@ -556,7 +556,7 @@ class binary_tree(object):
 		if not self.root is None:
 			return self.root[key]
 		else:
-			raise KeyError, key
+			raise KeyError(key)
 
 	def __setitem__(self, key, data):
 		"""Set an item. Adds one if it isn't already present."""
@@ -628,30 +628,30 @@ if __name__ == "__main__":
 	tree3 = binary_tree()
 	tree3["a"] = 1
 
-	print "Binary Tree Test\n"
-	print "Node Count: %d" % len(tree)
-	print "Depth: %d" % tree.depth()
-	print "Optimum Depth: %f (%d) (%f%% depth efficiency)" % (tree.optimumdepth(), math.ceil(tree.optimumdepth()),
-															  math.ceil(tree.optimumdepth()) / tree.depth())
-	print "Min: %s" % repr(tree.min())
-	print "Max: %s" % repr(tree.max())
-	print "Efficiency: %f%% (total possible used: %d, total wasted: %d): " % (tree.efficiency() * 100,
-																			  len(tree) / tree.efficiency(),
-																			  (len(tree) / tree.efficiency()) - len(tree))
-	print "List of Layers:\n\t" + repr(tree.listlayers()) + "\n"
-	print "\"Recursive\" List:\n\t" + repr(tree.listrecursive()) + "\n"
-	print "List of Keys:\n\t" + repr(tree.listkeys()) + "\n"
-	print "List of Data:\n\t" + repr(tree.listdata()) + "\n"
-	print "List of Nodes:\n\t" + repr(tree.listnodes()) + "\n"
-	print "Dictionary:\n\t" + repr(tree.dict()) + "\n"
-	print "Formatted Tree:\n" + tree.formattree() + "\n"
-	print "Formatted Tree (Root in Middle):\n" + tree.formattreemiddle() + "\n"
-	print "tree2 == tree3: " + repr(tree2 == tree3)
-	print "\"lisp\" in tree: " + repr("lisp" in tree)
-	print "tree[\"d\"]: " + repr(tree["d"])
-	print "tree.root[\"d\"]: " + repr(tree.root["d"])
+	print("Binary Tree Test\n")
+	print("Node Count: %d" % len(tree))
+	print("Depth: %d" % tree.depth())
+	print("Optimum Depth: %f (%d) (%f%% depth efficiency)" % (tree.optimumdepth(), math.ceil(tree.optimumdepth()),
+												  math.ceil(tree.optimumdepth()) / tree.depth()))
+	print("Min: %s" % repr(tree.min()))
+	print("Max: %s" % repr(tree.max()))
+	print("Efficiency: %f%% (total possible used: %d, total wasted: %d): " % (tree.efficiency() * 100,
+															  len(tree) / tree.efficiency(),
+															  (len(tree) / tree.efficiency()) - len(tree)))
+	print("List of Layers:\n\t" + repr(tree.listlayers()) + "\n")
+	print("\"Recursive\" List:\n\t" + repr(tree.listrecursive()) + "\n")
+	print("List of Keys:\n\t" + repr(tree.listkeys()) + "\n")
+	print("List of Data:\n\t" + repr(tree.listdata()) + "\n")
+	print("List of Nodes:\n\t" + repr(tree.listnodes()) + "\n")
+	print("Dictionary:\n\t" + repr(tree.dict()) + "\n")
+	print("Formatted Tree:\n" + tree.formattree() + "\n")
+	print("Formatted Tree (Root in Middle):\n" + tree.formattreemiddle() + "\n")
+	print("tree2 == tree3: " + repr(tree2 == tree3))
+	print("\"lisp\" in tree: " + repr("lisp" in tree))
+	print("tree[\"d\"]: " + repr(tree["d"]))
+	print("tree.root[\"d\"]: " + repr(tree.root["d"]))
 
-	print "Clearing tree..."
+	print("Clearing tree...")
 	tree.clear()
 
 	count = 1000000
@@ -664,7 +664,7 @@ if __name__ == "__main__":
 	except:
 		choseni = count / 2
 
-	print "Adding %d random numbers to the tree..." % count
+	print("Adding %d random numbers to the tree..." % count)
 
 	while i:
 		i -= 1
@@ -679,25 +679,25 @@ if __name__ == "__main__":
 		except Exception:
 			pass
 
-	print "Done adding, press Enter to continue."
+	print("Done adding, press Enter to continue.")
 	sys.stdin.readline()
 
-	print "Finding %d" % chosennumber
+	print("Finding %d" % chosennumber)
 	tree.find(chosennumber)
-	print "Found %d" % chosennumber
-	print "Node Count: %d" % len(tree)
-	print "Depth: %d" % tree.depth()
-	print "Optimum Depth: %f (%d) (%f%% depth efficiency)" % (tree.optimumdepth(), math.ceil(tree.optimumdepth()),
-															  math.ceil(tree.optimumdepth()) / tree.depth())
-	print "Min: %s" % repr(tree.min())
-	print "Max: %s" % repr(tree.max())
-	print "Efficiency: %f%% (total possible used: %d, total wasted: %d): " % (tree.efficiency() * 100,
-																			  tree.possibleused(),
-																			  (tree.possibleused() - len(tree)))
-	#print "Formatted Tree (Root in Middle):\n" + tree.formattreemiddle() + "\n"
-	print "Removing all nodes..."
+	print("Found %d" % chosennumber)
+	print("Node Count: %d" % len(tree))
+	print("Depth: %d" % tree.depth())
+	print("Optimum Depth: %f (%d) (%f%% depth efficiency)" % (tree.optimumdepth(), math.ceil(tree.optimumdepth()),
+															  math.ceil(tree.optimumdepth()) / tree.depth()))
+	print("Min: %s" % repr(tree.min()))
+	print("Max: %s" % repr(tree.max()))
+	print("Efficiency: %f%% (total possible used: %d, total wasted: %d): " % (tree.efficiency() * 100,
+																	  tree.possibleused(),
+																	  (tree.possibleused() - len(tree))))
+	#print("Formatted Tree (Root in Middle):\n" + tree.formattreemiddle() + "\n")
+	print("Removing all nodes...")
 
 	for key in tree.listkeys():
 		del tree[key]
 
-	print "Done removing."
+	print("Done removing.")

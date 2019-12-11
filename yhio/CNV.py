@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2013.1.27 coordinates are all 1-based and inclusive (??), start=1,stop=100 means [1,100]?? 
 2009-10-31
@@ -836,9 +836,9 @@ def turnSegmentGWRIntoRBDict(gwr, extend_dist=20000, min_reciprocal_overlap=0.6,
 												min_reciprocal_overlap=min_reciprocal_overlap)
 		rbDict[segmentKey] = segment
 	if report:
-		print "\tDepth of rbDict: %d" % (rbDict.depth())
-		print "\tOptimum Depth: %f (%d) (%f%% depth efficiency)" % (rbDict.optimumdepth(), math.ceil(rbDict.optimumdepth()),
-															  math.ceil(rbDict.optimumdepth()) / rbDict.depth())
+		print("\tDepth of rbDict: %d" % (rbDict.depth()))
+		print("\tOptimum Depth: %f (%d) (%f%% depth efficiency)" % (rbDict.optimumdepth(), math.ceil(rbDict.optimumdepth()),
+				math.ceil(rbDict.optimumdepth()) / rbDict.depth()))
 	sys.stderr.write("%s objects converted.\n"%len(rbDict))
 	return rbDict
 
@@ -1285,42 +1285,42 @@ if __name__ == "__main__":
 		segmentKey = CNVSegmentBinarySearchTreeKey(chromosome=cnv[0], span_ls=cnv[1], min_reciprocal_overlap=min_reciprocal_overlap)
 		tree[segmentKey] = cnv
 	
-	print "Binary Tree Test\n"
-	print "Node Count: %d" % len(tree)
-	print "Depth: %d" % tree.depth()
-	print "Optimum Depth: %f (%d) (%f%% depth efficiency)" % (tree.optimumdepth(), math.ceil(tree.optimumdepth()),
-															  math.ceil(tree.optimumdepth()) / tree.depth())
+	print("Binary Tree Test\n")
+	print("Node Count: %d" % len(tree))
+	print("Depth: %d" % tree.depth())
+	print("Optimum Depth: %f (%d) (%f%% depth efficiency)" % (tree.optimumdepth(), math.ceil(tree.optimumdepth()),
+													  math.ceil(tree.optimumdepth()) / tree.depth()))
 	
-	print "Efficiency: %f%% (total possible used: %d, total wasted: %d)" % (tree.efficiency() * 100,
-																			  len(tree) / tree.efficiency(),
-																			  (len(tree) / tree.efficiency()) - len(tree))
+	print("Efficiency: %f%% (total possible used: %d, total wasted: %d)" % (tree.efficiency() * 100,
+													  len(tree) / tree.efficiency(),
+													  (len(tree) / tree.efficiency()) - len(tree)))
 	"""
-	print "Min: %s" % repr(tree.min())
-	print "Max: %s" % repr(tree.max())
+	print("Min: %s" % repr(tree.min()))
+	print("Max: %s" % repr(tree.max()))
 	
-	print "List of Layers:\n\t" + repr(tree.listlayers()) + "\n"
-	print "\"Recursive\" List:\n\t" + repr(tree.listrecursive()) + "\n"
-	print "List of Keys:\n\t" + repr(tree.listkeys()) + "\n"
-	print "List of Data:\n\t" + repr(tree.listdata()) + "\n"
-	print "List of Nodes:\n\t" + repr(tree.listnodes()) + "\n"
-	print "Dictionary:\n\t" + repr(tree.dict()) + "\n"
-	print "Formatted Tree:\n" + tree.formattree() + "\n"
-	print "Formatted Tree (Root in Middle):\n" + tree.formattreemiddle() + "\n"
+	print("List of Layers:\n\t" + repr(tree.listlayers()) + "\n")
+	print("\"Recursive\" List:\n\t" + repr(tree.listrecursive()) + "\n")
+	print("List of Keys:\n\t" + repr(tree.listkeys()) + "\n")
+	print("List of Data:\n\t" + repr(tree.listdata()) + "\n")
+	print("List of Nodes:\n\t" + repr(tree.listnodes()) + "\n")
+	print("Dictionary:\n\t" + repr(tree.dict()) + "\n")
+	print("Formatted Tree:\n" + tree.formattree() + "\n")
+	print("Formatted Tree (Root in Middle):\n" + tree.formattreemiddle() + "\n")
 	"""
 	test_cnv_ls = [	[2,(50000,)], [3,(43214,43219)], [3,(43214,78788)], [5, (43242,)], [5,(144,566)], [5, (144, 1000)], [5, (50000, 70000)]]
 	for test_cnv in test_cnv_ls:
 		segmentKey = CNVSegmentBinarySearchTreeKey(chromosome=test_cnv[0], span_ls=test_cnv[1], \
 												min_reciprocal_overlap=min_reciprocal_overlap)
-		print "segmentKey", segmentKey
+		print("segmentKey", segmentKey)
 		if segmentKey in tree:
 			targetSegment = tree.get(segmentKey)
 			#if targetSegment:
-			print "\tIn tree with target", targetSegment
+			print("\tIn tree with target", targetSegment)
 			node_ls = []
 			tree.findNodes(segmentKey, node_ls)
-			print "\tfindNodes()", [node.value for node in node_ls]
+			print("\tfindNodes()", [node.value for node in node_ls])
 		else:
-			print "\tNot in tree"
+			print("\tNot in tree")
 	
 	
 	"""
@@ -1333,9 +1333,9 @@ if __name__ == "__main__":
 			segmentKey2 = CNVSegmentBinarySearchTreeKey(chromosome=cnv2[0], span_ls=cnv2[1], \
 					min_reciprocal_overlap=min_reciprocal_overlap)
 			print segmentKey1, "vs", segmentKey2
-			print ">", segmentKey1>segmentKey2
-			print ">=", segmentKey1>=segmentKey2
-			print "<", segmentKey1<segmentKey2
-			print "<=", segmentKey1<=segmentKey2
-			print "==", segmentKey1==segmentKey2
+			print(">", segmentKey1>segmentKey2)
+			print(">=", segmentKey1>=segmentKey2)
+			print("<", segmentKey1<segmentKey2)
+			print("<=", segmentKey1<=segmentKey2)
+			print("==", segmentKey1==segmentKey2)
 	"""

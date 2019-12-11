@@ -1,11 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2008-04-28
 A wrapper on top of sqlalchemy around a database. Mostly copied from collective.lead.Database. Can't directly use it because
 of trouble in understanding how to use adapter involved in TreadlocalDatabaseTransactions.
 """
 import sys, os, math
-bit_number = math.log(sys.maxint)/math.log(2)
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
@@ -191,10 +190,10 @@ class DBAncestor(object):
 	__doc__ = __doc__
 	option_default_dict = {('drivername', 1,):['postgresql', 'v', 1, 'which type of database? mysql or postgres', ],\
 							('hostname', 1, ):['localhost', 'z', 1, 'hostname of the db server', ],\
-							('dbname', 1, ):[None, 'd', 1, 'database name',],\
-							('schema', 0, ): [None, 'k', 1, 'database schema name', ],\
-							('db_user', 1, ):[None, 'u', 1, 'database username',],\
-							('db_passwd', 1, ):[None, 'p', 1, 'database password', ],\
+							('dbname', 1, ):["", 'd', 1, 'database name',],\
+							('schema', 0, ): ["", 'k', 1, 'database schema name', ],\
+							('db_user', 1, ):["", 'u', 1, 'database username',],\
+							('db_passwd', 1, ):["", 'p', 1, 'database password', ],\
 							('port', 0, int):[5432, '', 1, 'database port number'],\
 							('pool_recycle', 0, int):[3600, '', 1, 'the length of time to keep connections open before recycling them.'],\
 							('echo_pool', 0, bool):[False, 'e', 0, 'if True, the connection pool will log all checkouts/checkins to the logging stream, which defaults to sys.stdout.'],\

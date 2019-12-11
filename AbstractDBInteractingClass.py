@@ -12,10 +12,10 @@ import sys, os, math
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
-from ProcessOptions import ProcessOptions
-import utils
-from utils import PassingData
-from mapper.AbstractMapper import AbstractMapper
+from . ProcessOptions import ProcessOptions
+from . import utils
+from . utils import PassingData
+from . mapper.AbstractMapper import AbstractMapper
 
 class AbstractDBInteractingClass(AbstractMapper):
 	__doc__ = __doc__

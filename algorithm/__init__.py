@@ -366,8 +366,6 @@ if __name__ == '__main__':
 	testSmoothFullData()
 	
 	element_ls = [1,6,7]
-	print listSubsets(element_ls, subset_size=1)
-	
-	print listSubsets(element_ls, subset_size=2)
-	
-	print listSubsets(element_ls)
+	print(listSubsets(element_ls, subset_size=1))
+	print(listSubsets(element_ls, subset_size=2))
+	print(listSubsets(element_ls))

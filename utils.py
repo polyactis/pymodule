@@ -679,7 +679,8 @@ def Denary2Binary(n):
 		# tested with Python24   vegaseat	6/1/2005
 	'''
 	bStr = ''
-	if n < 0:  raise ValueError, "must be a positive integer"
+	if n < 0:
+		raise ValueError("must be a positive integer")
 	if n == 0: return '0'
 	while n > 0:
 		bStr = str(n % 2) + bStr
@@ -1118,4 +1119,4 @@ returnZeroFunc = lambda: 0
 
 if __name__ == '__main__':
 	FigureOutTaxID_ins = FigureOutTaxID()
-	print FigureOutTaxID_ins.returnTaxIDGivenSentence('>gi|172045488|ref|NW_001867254.1| Physcomitrella patens subsp. patens PHYPAscaffold_10696, whole genome shotgun sequence')
+	print(FigureOutTaxID_ins.returnTaxIDGivenSentence(">gi|172045488|ref|NW_001867254.1| Physcomitrella patens subsp. patens PHYPAscaffold_10696"))

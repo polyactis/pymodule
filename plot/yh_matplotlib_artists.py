@@ -134,7 +134,7 @@ class Gene(Polygon):
 				elif shape == 'full':
 					coords=concatenate([left_half_arrow,right_half_arrow[::-1]])
 				else:
-					raise ValueError, "Got unknown shape: %s" % shape
+					raise ValueError("Got unknown shape: %s" % shape)
 			dx = end_ls[-1]-start_ls[0]
 			x = start_ls[0] + x_offset
 			dy = 0
@@ -356,7 +356,7 @@ class ExonIntronCollection20081130(PolyCollection, LineCollection):
 		renderer.close_group('polycollection')
 
 def on_canvas_pick(event):
-	print dir(event)
+	print(dir(event))
 	import pdb
 	pdb.set_trace()
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 
 Description:
@@ -18,9 +18,9 @@ import re
 class AbstractMapper(object):
 	__doc__ = __doc__
 	db_option_dict = {
-					('drivername', 1,):['postgresql', '', 1, 'which type of database? mysql or postgresql', ],\
+					('drivername', 1,):['postgresql', 'v', 1, 'which type of database? mysql or postgresql', ],\
 					('hostname', 1, ): ['localhost', 'z', 1, 'hostname of the db server', ],\
-					('dbname', 1, ): ['vervetdb', '', 1, 'database name', ],\
+					('dbname', 1, ): ['vervetdb', 'd', 1, 'database name', ],\
 					('schema', 0, ): [None, '', 1, 'database schema name', ],\
 					('db_user', 1, ): [None, 'u', 1, 'database username', ],\
 					('db_passwd', 1, ): [None, '', 1, 'database password', ],\

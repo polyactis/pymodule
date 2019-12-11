@@ -1,5 +1,5 @@
 import os, sys
-from utils import getListOutOfStr
+from . utils import getListOutOfStr
 
 def process_function_arguments(keywords, argument_default_dict, error_doc='', class_to_have_attr=None, howto_deal_with_required_none=1, default_value_in_list=0):
 	"""
@@ -212,7 +212,7 @@ class ProcessOptions(object):
 		short_option2long_option = {}
 		long_option2has_argument = {}
 		options_with_no_short_option = []
-		for option_key, option_value in option_default_dict.iteritems():
+		for option_key, option_value in option_default_dict.items():
 			long_option = option_key[0]
 			if type(option_value)==list and len(option_value)>=4:
 				default_value, short_option, has_argument, description_for_option = option_value[:4]
@@ -253,7 +253,7 @@ class ProcessOptions(object):
 			std_option_default_dict[option_key] = [default_value, short_option, has_argument, description_for_option]
 		#deal with the rest with no short_option specified
 		#always assume has_argument=1
-		chr_ordinal_ls = range(97, 97+26) + range(65, 65+26)	#potential candidates
+		chr_ordinal_ls = list(range(97, 97+26)) + list(range(65, 65+26))	#potential candidates
 		eng_letter_ls = map(chr, chr_ordinal_ls)
 		eng_letters = ''.join(eng_letter_ls)
 		for option_key in options_with_no_short_option:
@@ -315,14 +315,14 @@ class ProcessOptions(object):
 		
 		#sort the options in short_option ascending order
 		option_key_ls_to_be_sorted = []
-		for option_key, option_value in self.std_option_default_dict.iteritems():
+		for option_key, option_value in self.std_option_default_dict.items():
 			if option_key[0] == 'help':	#help would be appended in the end
 				continue
 			option_key_ls_to_be_sorted.append((option_value[1], option_key))	#option_value[1] = short_option
-		option_key_ls_to_be_sorted.sort()
+		#print(option_key_ls_to_be_sorted)	
+		#option_key_ls_to_be_sorted.sort() #20191210 error in python3: '<' not supported between instances of 'NoneType' and 'str'
 		
 		for short_option, option_key in option_key_ls_to_be_sorted:
-			
 			option_value = self.std_option_default_dict[option_key]
 			default_value, short_option, has_argument, description_for_option = option_value
 			long_option, is_option_required = option_key[0:2]
@@ -428,8 +428,7 @@ class ProcessOptions(object):
 			argument_default_dict = option_default_dict in prepare_for_getopt()
 			The only difference is that value of this argument_default_dict could be non-list, which is plain default_value. To be compatible with previous argument_default_dict.
 		"""
-		import sys
-		argument_key_ls = argument_default_dict.keys()
+		argument_key_ls = list(argument_default_dict.keys())
 		argument_key_ls.sort()
 		argument_key_ls.reverse()	#to keep 'user' appearing in front of 'password'.
 		ad = {}
@@ -443,7 +442,7 @@ class ProcessOptions(object):
 				argument_type = argument_key[2]
 			else:
 				argument_type = None
-			if keywords.has_key(argument):
+			if argument in keywords:
 				if keywords[argument] is not '' and keywords[argument] is not None:	# 2009-10-07 "is not ''" works for character numpy.array, while "!=''" doesn't in if-condition.
 					#only when keywords has this argument and it's not nothing. change default_value
 					if argument_type!=None:	#cast to the desired type
@@ -514,7 +513,7 @@ def turn_option_default_dict2argument_default_dict(option_default_dict):
 		to avoid repetitive code
 	"""
 	argument_default_dict = {}
-	for option_key, default_value in option_default_dict.iteritems():
+	for option_key, default_value in option_default_dict.items():
 		short_option, long_option, has_argument, description_for_option, is_option_required = option_key[0:5]
 		if len(option_key)==6:
 			argument_type = option_key[5]

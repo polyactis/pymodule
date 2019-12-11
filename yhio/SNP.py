@@ -1427,8 +1427,8 @@ class SNPData(object):
 					rows_with_too_many_NAs_set.add(i)
 		if debug:
 			print
-			print 'rows_with_too_many_NAs_set'
-			print rows_with_too_many_NAs_set
+			print('rows_with_too_many_NAs_set')
+			print(rows_with_too_many_NAs_set)
 		passingdata = PassingData(rows_with_too_many_NAs_set=rows_with_too_many_NAs_set, row_index2missing_fraction=row_index2missing_fraction)
 		sys.stderr.write("%s strains removed, done.\n"%len(rows_with_too_many_NAs_set))
 		return passingdata
@@ -1477,8 +1477,8 @@ class SNPData(object):
 					cols_with_too_many_NAs_set.add(j)
 		if debug:
 			print
-			print 'cols_with_too_many_NAs_set'
-			print cols_with_too_many_NAs_set
+			print('cols_with_too_many_NAs_set')
+			print(cols_with_too_many_NAs_set)
 		passingdata = PassingData(cols_with_too_many_NAs_set=cols_with_too_many_NAs_set, col_index2missing_fraction=col_index2missing_fraction)
 		sys.stderr.write("%s cols removed, done.\n"%(len(cols_with_too_many_NAs_set)))
 		return passingdata
@@ -1562,10 +1562,10 @@ class SNPData(object):
 					sys.stderr.write("Warning: more than 2 alleles at SNP %s (id=%s).\n"%(j, snpData.col_id_ls[j]))
 			MAF = min(allele2count_ls[j].values())/float(sum(allele2count_ls[j].values()))
 			"""
-			print MAF
-			print j
-			print snpData.col_id_ls[j]
-			print allele2count_ls[j]
+			print(MAF)
+			print(j)
+			print(snpData.col_id_ls[j])
+			print(allele2count_ls[j])
 			"""
 			if MAF>=min_MAF:
 				col_id_to_be_kept_ls.append(col_id)
@@ -2567,7 +2567,7 @@ class GenomeWideResult(object):
 		
 		#separate each chromosome
 		for chr in chr_ls:
-		#	print chr
+		#	print(chr)
 			ax.axvline(chr_id2cumu_start[chr], linestyle='--', color='k', linewidth=0.8)
 		
 		if drawBonferroni:
