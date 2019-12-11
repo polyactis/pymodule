@@ -289,15 +289,15 @@ class DBAncestor(object):
 		if short_name or id:
 			if id is not None:
 				db_entry = query.get(id)	#20170419 not sure if it's right. For elixir, it should be TableClass.get(id)
+				return db_entry
 			if short_name:
 				query = query.filter_by(short_name=short_name)
 				db_entry = query.first()
-				return db_entry
 		else:
 			sys.stderr.write("Either short_name (%s) or id (%s) have to be non-None.\n"%(short_name, id))
 			raise
-		db_entry = query.first()
 		no_of_entries = query.count()
+		db_entry = query.first()
 		if no_of_entries>1:
 			sys.stderr.write("Error, query table %s by short_name=%s, id=%s returns %s entries (>1).\n"%\
 							(TableClass, short_name, id, no_of_entries))
