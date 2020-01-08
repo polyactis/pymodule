@@ -1,0 +1,12 @@
+**/*.pyc
+cmake-build-debug
+.cproject
+.autotools
+.depend
+.project
+.pydevproject
+.settings
+.tags
+.tags1
+.vscode
+.idea
