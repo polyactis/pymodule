@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Examples:
 	#for postgres tables
@@ -39,8 +39,8 @@ CREATE TRIGGER before_update_%s BEFORE UPDATE ON %s
 DELIMITER ;
 """
 
-postgres_trigger = """
-create function insert_%s() returns trigger as '
+postgres_function = """
+create function set_default_created_by() returns trigger as '
 	begin
 	if new.created_by is null then
 		new.created_by := current_user;
@@ -53,20 +53,22 @@ create function insert_%s() returns trigger as '
 	'
 	language plpgsql;
 
-create trigger insert_%s before insert on %s
-	for each row execute procedure insert_%s();
-
-create function update_%s() returns trigger as '
+create function set_default_updated_by() returns trigger as '
 	begin
-	new.date_updated := current_timestamp;
 	new.updated_by := current_user;
+	new.date_updated := current_timestamp;
 	return new;
 	end;
 	'
 	language plpgsql;
+"""
+
+postgres_trigger = """
+create trigger insert_%s before insert on %s
+	for each row execute procedure set_default_created_by();
 
 create trigger update_%s before update on %s
-	for each row execute procedure update_%s();
+	for each row execute procedure set_default_updated_by();
 """
         
 class OutputSQLTrigger(object):
@@ -90,17 +92,19 @@ class OutputSQLTrigger(object):
 	def printMySQLTrigger(self, table_name):
 		"""
 		"""
-		print mysql_trigger%(table_name, table_name, table_name, table_name)
+		print(mysql_trigger%(table_name, table_name, table_name, table_name))
 		
 	def printPostGresTrigger(self, table_name):
-		print postgres_trigger%(table_name, table_name, table_name, table_name, table_name, table_name, table_name, table_name)
+		print(postgres_trigger%(table_name, table_name, table_name, table_name))
 	
 	def run(self):
 		"""
 		2008-07-27
 		"""
 		if self.type==1 and self.schema:
-			print "set search_path to %s;"%(self.schema)
+			print("set search_path to %s;"%(self.schema))
+		if self.type==1:
+			print(postgres_function)
 		for table_name in self.table_names:
 			self.printTriggerDict[self.type](table_name)
 
