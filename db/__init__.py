@@ -807,7 +807,7 @@ class Database(DBAncestor):
 		"""
 		if self._engine is None:
 			self._engine = create_engine(self.url, pool_recycle=self.pool_recycle, 
-				echo=self.sql_echo, executemanymode='values',
+				echo=self.sql_echo, executemany_mode='values',
 				executemany_values_page_size=10000, executemany_batch_page_size=500)
 		return self._engine
 
