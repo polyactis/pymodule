@@ -857,6 +857,7 @@ def sumOfReciprocals(n):
 
 def get_md5sum(filename, md5sum_command = 'md5sum'):
 	"""
+	20200120 python3, convert md5sum from bytes (binary) to utf-8.
 	2012.1.27
 		copied from variation/src/Array2DB_250k.py
 	"""
@@ -868,7 +869,7 @@ def get_md5sum(filename, md5sum_command = 'md5sum'):
 		sys.stderr.write("%s %s failed with stderr: %s.\n"%(md5sum_command, filename, md5sum_stderr_out))
 		sys.exit(4)
 	else:
-		return md5sum_stdout_out.split()[0]
+		return md5sum_stdout_out.split()[0].decode("utf-8")
 
 def getDateStampedFilename(filename):
 	"""
