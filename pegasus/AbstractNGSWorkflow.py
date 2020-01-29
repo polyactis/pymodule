@@ -12,19 +12,17 @@ from Pegasus.DAX3 import Executable, File, PFN, Link, Job
 from pymodule import Genome, utils
 from pymodule import ProcessOptions
 from pymodule.Genome import IntervalData
-from pymodule.yhio import NextGenSeq
-from pymodule.pegasus import yh_pegasus
 from pymodule.utils import PassingData
+from pymodule.yhio import NextGenSeq
 from pymodule.yhio.VCFFile import VCFFile
 from pymodule.yhio.MatrixFile import MatrixFile
 from pymodule.yhio.AlignmentDepthIntervalFile import AlignmentDepthIntervalFile
 from pymodule.yhio.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey
 from pymodule.algorithm.RBTree import RBDict
-from AbstractWorkflow import AbstractWorkflow
+import yh_pegasus
+from AbstractBioinfoWorkflow import AbstractBioinfoWorkflow
 
-
-
-parentClass = AbstractWorkflow
+parentClass = AbstractBioinfoWorkflow
 class AbstractNGSWorkflow(parentClass):
     __doc__ = __doc__
     option_default_dict = parentClass.option_default_dict.copy()
@@ -256,209 +254,186 @@ class AbstractNGSWorkflow(parentClass):
 
     def registerExecutables(self, workflow=None):
         """
-        2012.8.7 remove noDefaultClustersSizeExecutableList, use executableClusterSizeMultiplierList instead
-        2012.1.9 a symlink to registerCommonExecutables()
         """
         parentClass.registerExecutables(self, workflow=workflow)
 
-        namespace = self.namespace
-        version = self.version
-        operatingSystem = self.operatingSystem
-        architecture = self.architecture
-        clusters_size = self.clusters_size
-        site_handler = self.site_handler
-
-        executableClusterSizeMultiplierList = []	#2012.8.7 each cell is a tuple of (executable, clusterSizeMultipler (0 if u do not need clustering)
-
         #2014.01.08
-        self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'polymorphism/qc/mapper/FilterLocusBasedOnLocusStatFile.py'), \
-                                    name='FilterLocusBasedOnLocusStatFile', \
-                                    clusterSizeMultipler=0.5)
+        self.addExecutableFromPath(path=os.path.join(self.pymodulePath, \
+                'polymorphism/qc/mapper/FilterLocusBasedOnLocusStatFile.py'), \
+            name='FilterLocusBasedOnLocusStatFile', \
+            clusterSizeMultipler=0.5)
 
         #2013.10.2
-        self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, name='CombineBeagleAndPreBeagleVariantsJava', \
-                                            clusterSizeMultipler=0.6)
+        self.addExecutableFromPath(path=self.javaPath, \
+            name='CombineBeagleAndPreBeagleVariantsJava', \
+            clusterSizeMultipler=0.6)
         #2013.10.13
-        self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, "reducer/ligateVcf.sh"), \
-                                    name="ligateVcf", clusterSizeMultipler=1)
+        self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "reducer/ligateVcf.sh"), \
+            name="ligateVcf", clusterSizeMultipler=1)
         #2013.09.17 updated
-        #self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, "polymorphism/qc/CheckTwoVCFOverlapCC"), \
-        #									name='CheckTwoVCFOverlapCC', clusterSizeMultipler=1)
+        #self.addExecutableFromPath(
+        #   path=os.path.join(self.pymodulePath, "polymorphism/qc/CheckTwoVCFOverlapCC"), \
+        #   name='CheckTwoVCFOverlapCC', clusterSizeMultipler=1)
 
-        selectAndSplitFasta = Executable(namespace=namespace, name="SelectAndSplitFastaRecords", version=version, \
-                                        os=operatingSystem, arch=architecture, installed=True)
-        selectAndSplitFasta.addPFN(PFN("file://" + os.path.join(self.pymodulePath, "mapper/splitter/SelectAndSplitFastaRecords.py"), site_handler))
-        executableClusterSizeMultiplierList.append((selectAndSplitFasta, 0))
+        self.addExecutableFromPath(path=os.path.join(self.pymodulePath, \
+            "mapper/splitter/SelectAndSplitFastaRecords.py"),\
+            name='SelectAndSplitFastaRecords', clusterSizeMultipler=0)
 
-        BuildBamIndexFilesJava = Executable(namespace=namespace, name="BuildBamIndexFilesJava", version=version, os=operatingSystem,\
-                                            arch=architecture, installed=True)
-        BuildBamIndexFilesJava.addPFN(PFN("file://" + self.javaPath, site_handler))
-        executableClusterSizeMultiplierList.append((BuildBamIndexFilesJava, 0.5))
-
+        self.addExecutableFromPath(path=self.javaPath,
+            name='BuildBamIndexFilesJava', clusterSizeMultipler=0.5)
         #2012.9.21 same as BuildBamIndexFilesJava, but no clustering
-        IndexMergedBamIndexJava =  Executable(namespace=namespace, name="IndexMergedBamIndexJava", version=version, os=operatingSystem,\
-                                            arch=architecture, installed=True)
-        IndexMergedBamIndexJava.addPFN(PFN("file://" + self.javaPath, site_handler))
-        executableClusterSizeMultiplierList.append((IndexMergedBamIndexJava, 0))
+        self.addExecutableFromPath(path=self.javaPath,
+            name='IndexMergedBamIndexJava', clusterSizeMultipler=0)
+        self.addExecutableFromPath(path=self.javaPath,
+            name='CreateSequenceDictionaryJava', clusterSizeMultipler=0)
 
-        CreateSequenceDictionaryJava = Executable(namespace=namespace, name="CreateSequenceDictionaryJava", version=version, os=operatingSystem,\
-                                            arch=architecture, installed=True)
-        CreateSequenceDictionaryJava.addPFN(PFN("file://" + self.javaPath, site_handler))
-        executableClusterSizeMultiplierList.append((CreateSequenceDictionaryJava, 0))
-
-        DOCWalkerJava = Executable(namespace=namespace, name="DOCWalkerJava", version=version, os=operatingSystem,\
-                                            arch=architecture, installed=True)
+        self.addExecutableFromPath(path=self.javaPath,
+            name='DOCWalkerJava', clusterSizeMultipler=0.05)
         #no clusters_size for this because it could run on a whole bam for hours
-        #DOCWalkerJava.addProfile(Profile(Namespace.PEGASUS, key="clusters.size", value="%s"%clusters_size))
-        DOCWalkerJava.addPFN(PFN("file://" + self.javaPath, site_handler))
-        executableClusterSizeMultiplierList.append((DOCWalkerJava, 0.05))
-
-        VariousReadCountJava = Executable(namespace=namespace, name="VariousReadCountJava", version=version, os=operatingSystem,\
-                                            arch=architecture, installed=True)
-        VariousReadCountJava.addPFN(PFN("file://" + self.javaPath, site_handler))
+        self.addExecutableFromPath(path=self.javaPath,
+            name='VariousReadCountJava', clusterSizeMultipler=0)
         #no clusters_size for this because it could run on a whole bam for hours
-        #VariousReadCountJava.addProfile(Profile(Namespace.PEGASUS, key="clusters.size", value="%s"%clusters_size))
-        executableClusterSizeMultiplierList.append((VariousReadCountJava, 0))
+        self.addExecutableFromPath(path=self.javaPath,
+            name='MarkDuplicatesJava', clusterSizeMultipler=0)
 
+        self.addExecutableFromPath(path=os.path.join(self.pymodulePath, \
+                "mapper/filter/vcf_isec.sh"),\
+            name='vcf_isec', clusterSizeMultipler=1)
+        self.addExecutableFromPath(path=os.path.join(self.pymodulePath, \
+            "mapper/extractor/vcfSubset.sh"),\
+            name='vcfSubset', clusterSizeMultipler=1)
+        #vcfSubsetPath is first argument to vcfSubset
+        self.vcfSubset.vcfSubsetPath = self.vcfSubsetPath
 
-        MarkDuplicatesJava = Executable(namespace=namespace, name="MarkDuplicatesJava", version=version, os=operatingSystem,\
-                                            arch=architecture, installed=True)
-        MarkDuplicatesJava.addPFN(PFN("file://" + self.javaPath, site_handler))
-        #MarkDuplicatesJava.addProfile(Profile(Namespace.PEGASUS, key="clusters.size", value="%s"%clusters_size))
-        executableClusterSizeMultiplierList.append((MarkDuplicatesJava, 0))
-
-        SelectVariantsJava = Executable(namespace=namespace, name="SelectVariantsJava", version=version, os=operatingSystem,\
-                                            arch=architecture, installed=True)
-        SelectVariantsJava.addPFN(PFN("file://" + self.javaPath, site_handler))
-        executableClusterSizeMultiplierList.append((SelectVariantsJava, 0.5))
+        self.addExecutableFromPath(path=self.javaPath,
+            name='SelectVariantsJava', clusterSizeMultipler=0.5)
 
         #2013.09.04
-        self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath,
-                                                            name='CombineVariantsJava', clusterSizeMultipler=0.3)
-        self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath,
-                                                            name='CombineVariantsJavaInReduce', \
-                                                            clusterSizeMultipler=0.001)
+        self.addExecutableFromPath(path=self.javaPath,
+            name='CombineVariantsJava', clusterSizeMultipler=0.3)
+        self.addExecutableFromPath(path=self.javaPath,
+            name='CombineVariantsJavaInReduce', \
+            clusterSizeMultipler=0.001)
 
 
-        self.addOneExecutableFromPathAndAssignProperClusterSize(
-            path=os.path.join(self.pymodulePath, "mapper/computer/CallVariantBySamtools.sh"),
+        self.addExecutableFromPath(
+            path=os.path.join(self.pymodulePath, \
+                "mapper/computer/CallVariantBySamtools.sh"),
             name='CallVariantBySamtools', \
             clusterSizeMultipler=0)
 
-        self.addOneExecutableFromPathAndAssignProperClusterSize(
-            path=os.path.join(self.pymodulePath, "mapper/computer/GenotypeCallByCoverage.py"),
+        self.addExecutableFromPath(
+            path=os.path.join(self.pymodulePath, \
+                "mapper/computer/GenotypeCallByCoverage.py"),
             name='GenotypeCallByCoverage', \
             clusterSizeMultipler=1)
 
 
         #2013.06.28 use this function
-        self.addOneExecutableFromPathAndAssignProperClusterSize(
+        self.addExecutableFromPath(
             path=os.path.join(self.pymodulePath, "shell/bgzip_tabix.sh"), \
-                                            name='bgzip_tabix', clusterSizeMultipler=4)
-        #bgzip_tabix_in_reduce is used in reduce() functions, on whole-scaffold/chromosome VCFs, less clustering
-        self.addOneExecutableFromPathAndAssignProperClusterSize(
+            name='bgzip_tabix', clusterSizeMultipler=4)
+        #bgzip_tabix_in_reduce is used in reduce() functions, 
+        # on whole-scaffold/chromosome VCFs, less clustering
+        self.addExecutableFromPath(
             path=os.path.join(self.pymodulePath, "shell/bgzip_tabix.sh"), \
             name='bgzip_tabix_in_reduce', clusterSizeMultipler=1)
 
-        self.addOneExecutableFromPathAndAssignProperClusterSize(
+        self.addExecutableFromPath(
             path=os.path.join(self.pymodulePath, "mapper/converter/vcf_convert.sh"), \
-                                            name='vcf_convert', clusterSizeMultipler=1)
+            name='vcf_convert', clusterSizeMultipler=1)
         #vcf_convert_in_reduce is used in reduce() functions, on whole-scaffold/chromosome VCFs,
-        self.addOneExecutableFromPathAndAssignProperClusterSize(
+        self.addExecutableFromPath(
             path=os.path.join(self.pymodulePath, "mapper/converter/vcf_convert.sh"), \
-                                            name='vcf_convert_in_reduce', clusterSizeMultipler=0.2)
+            name='vcf_convert_in_reduce', clusterSizeMultipler=0.2)
 
-        vcf_isec = Executable(namespace=namespace, name="vcf_isec", version=version, \
-                                        os=operatingSystem, arch=architecture, installed=True)
-        vcf_isec.addPFN(PFN("file://" + os.path.join(self.pymodulePath, "mapper/filter/vcf_isec.sh"), site_handler))
-        executableClusterSizeMultiplierList.append((vcf_isec, 1))
-
-        #vcfSubsetPath is first argument to vcfSubset
-        vcfSubset = Executable(namespace=namespace, name="vcfSubset", version=version, \
-                                        os=operatingSystem, arch=architecture, installed=True)
-        vcfSubset.addPFN(PFN("file://" + os.path.join(self.pymodulePath, "mapper/extractor/vcfSubset.sh"), site_handler))
-        vcfSubset.vcfSubsetPath = self.vcfSubsetPath
-        executableClusterSizeMultiplierList.append((vcfSubset, 1))
-
-        self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, "reducer/vcf_concat.sh"),
-                    name='vcf_concat', clusterSizeMultipler=1)
-        self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, "reducer/vcf_concat.sh"),
-                    name='concatGATK', clusterSizeMultipler=1)
-        self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, "reducer/vcf_concat.sh"),
-                    name='concatSamtools', clusterSizeMultipler=1)
+        self.addExecutableFromPath(
+            path=os.path.join(self.pymodulePath, "reducer/vcf_concat.sh"),
+            name='vcf_concat', clusterSizeMultipler=1)
+        self.addExecutableFromPath(
+            path=os.path.join(self.pymodulePath, "reducer/vcf_concat.sh"),
+            name='concatGATK', clusterSizeMultipler=1)
+        self.addExecutableFromPath(
+            path=os.path.join(self.pymodulePath, "reducer/vcf_concat.sh"),
+            name='concatSamtools', clusterSizeMultipler=1)
 
 
         #2011.12.21 moved from FilterVCFPipeline.py
-        self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath,
-                                                            name='FilterVCFByDepthJava', \
-                                                            clusterSizeMultipler=1)
+        self.addExecutableFromPath(path=self.javaPath,
+                        name='FilterVCFByDepthJava', \
+                        clusterSizeMultipler=1)
 
         #2012.3.1
-        self.addOneExecutableFromPathAndAssignProperClusterSize(
+        self.addExecutableFromPath(
             path=os.path.join(self.pymodulePath, "reducer/MergeFiles.sh"), \
-                                            name='MergeFiles', clusterSizeMultipler=0)
+            name='MergeFiles', clusterSizeMultipler=0)
 
         #2013.09.17 updated
-        self.addOneExecutableFromPathAndAssignProperClusterSize(
-            path=os.path.join(self.pymodulePath, "mapper/computer/CheckTwoVCFOverlap.py"), \
+        self.addExecutableFromPath(
+            path=os.path.join(self.pymodulePath, \
+                "mapper/computer/CheckTwoVCFOverlap.py"), \
             name='CheckTwoVCFOverlap', clusterSizeMultipler=1)
 
         #2012.9.6
-        self.addOneExecutableFromPathAndAssignProperClusterSize(
-            path=os.path.join(self.pymodulePath, "mapper/modifier/AppendInfo2SmartPCAOutput.py"), \
-                                            name='AppendInfo2SmartPCAOutput', clusterSizeMultipler=0)
+        self.addExecutableFromPath(
+            path=os.path.join(self.pymodulePath, \
+                "mapper/modifier/AppendInfo2SmartPCAOutput.py"), \
+            name='AppendInfo2SmartPCAOutput', clusterSizeMultipler=0)
 
-        self.addOneExecutableFromPathAndAssignProperClusterSize(
+        self.addExecutableFromPath(
             path=self.javaPath, name='MergeSamFilesJava', clusterSizeMultipler=0)
 
-        self.addExecutableAndAssignProperClusterSize(executableClusterSizeMultiplierList, defaultClustersSize=self.clusters_size)
-
         #2013.07.09 in order to run vcfsorter.pl from http://code.google.com/p/vcfsorter/
-        self.addOneExecutableFromPathAndAssignProperClusterSize(
+        self.addExecutableFromPath(
             path=os.path.join(self.pymodulePath, 'shell/pipeCommandOutput2File.sh'),
             name='vcfsorterShellPipe', clusterSizeMultipler=1)
         #2013.11.22 generic pipeCommandOutput2File
-        self.addOneExecutableFromPathAndAssignProperClusterSize(
+        self.addExecutableFromPath(
             path=os.path.join(self.pymodulePath, 'shell/pipeCommandOutput2File.sh'),
             name='pipeCommandOutput2File', clusterSizeMultipler=1)
 
-        self.addOneExecutableFromPathAndAssignProperClusterSize(
+        self.addExecutableFromPath(
             path=self.javaPath, name='GATKJava', clusterSizeMultipler=0.2)
-        self.addOneExecutableFromPathAndAssignProperClusterSize(
+        self.addExecutableFromPath(
             path=self.samtools_path, name='samtools', clusterSizeMultipler=0.2)
-        self.addOneExecutableFromPathAndAssignProperClusterSize(
+        self.addExecutableFromPath(
             path=self.javaPath, name='genotyperJava', clusterSizeMultipler=0.1)
 
         #clustering is controlled by a separate parameter
         #genotyperJava.addProfile(Profile(Namespace.PEGASUS, key="clusters.size", value="%s"%clusters_size))
 
         #2013.07.10
-        self.addOneExecutableFromPathAndAssignProperClusterSize(
-            path=os.path.join(self.pymodulePath, "mapper/modifier/AddMissingInfoDescriptionToVCFHeader.py"), \
-                                    name='AddMissingInfoDescriptionToVCFHeader', clusterSizeMultipler=1)
+        self.addExecutableFromPath(
+            path=os.path.join(self.pymodulePath, \
+                "mapper/modifier/AddMissingInfoDescriptionToVCFHeader.py"), \
+            name='AddMissingInfoDescriptionToVCFHeader', clusterSizeMultipler=1)
 
         #2013.06.21
-        self.addOneExecutableFromPathAndAssignProperClusterSize(
+        self.addExecutableFromPath(
             path=os.path.join(self.pymodulePath, "mapper/splitter/SplitVCFFile.py"), \
-                                    name='SplitVCFFile', clusterSizeMultipler=0.01)
+            name='SplitVCFFile', clusterSizeMultipler=0.01)
         #2012.7.25
-        self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath,
-                                            name='MergeVCFReplicateHaplotypesJava', \
-                                            clusterSizeMultipler=0.5)
+        self.addExecutableFromPath(path=self.javaPath,
+                    name='MergeVCFReplicateHaplotypesJava', \
+                    clusterSizeMultipler=0.5)
 
         #2013.06.13
-        self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath,
-                                                            name='BeagleJava', clusterSizeMultipler=0.3)
+        self.addExecutableFromPath(path=self.javaPath,
+                name='BeagleJava', clusterSizeMultipler=0.3)
         #2013.06.12 use this simple function to register vcftoolsWrapper
         #vcftoolsPath is first argument to vcftoolsWrapper
-        self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, "shell/vcftoolsWrapper.sh"), \
-                                                    name='vcftoolsWrapper', clusterSizeMultipler=1)
+        self.addExecutableFromPath(
+            path=os.path.join(self.pymodulePath, "shell/vcftoolsWrapper.sh"), \
+            name='vcftoolsWrapper', clusterSizeMultipler=1)
 
-        self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, name='SortSamFilesJava', clusterSizeMultipler=1)
+        self.addExecutableFromPath(path=self.javaPath, name='SortSamFilesJava', \
+            clusterSizeMultipler=1)
         #2013.06.06
-        self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, name='PrintReadsJava', clusterSizeMultipler=1)
+        self.addExecutableFromPath(path=self.javaPath, name='PrintReadsJava', \
+            clusterSizeMultipler=1)
         #2013.04.09
-        self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, name='AddOrReplaceReadGroupsJava', clusterSizeMultipler=0.5)
+        self.addExecutableFromPath(path=self.javaPath, \
+            name='AddOrReplaceReadGroupsJava', clusterSizeMultipler=0.5)
 
 
     bwaIndexFileSuffixLs = ['amb', 'ann', 'bwt', 'pac', 'sa']

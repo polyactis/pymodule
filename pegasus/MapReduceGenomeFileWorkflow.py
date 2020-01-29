@@ -22,9 +22,9 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 from Pegasus.DAX3 import Executable, File, PFN
 from pymodule import ProcessOptions, PassingData, utils
-from pymodule.pegasus import yh_pegasus
-from pymodule.pegasus.AbstractNGSWorkflow import AbstractNGSWorkflow as ParentClass
 from pymodule.yhio.FastaFile import FastaFile
+import yh_pegasus
+from AbstractNGSWorkflow import AbstractNGSWorkflow as ParentClass
 
 class MapReduceGenomeFileWorkflow(ParentClass):
 	__doc__ = __doc__

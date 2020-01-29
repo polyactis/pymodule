@@ -8,10 +8,10 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import copy
-from Pegasus.DAX3 import *
-from pymodule import ProcessOptions, getListOutOfStr, PassingData, NextGenSeq, utils
-from pymodule.pegasus import yh_pegasus
-
+from Pegasus.DAX3 import Executable, File, PFN, Link, Job
+from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
+from pymodule.yhio import NextGenSeq
+import yh_pegasus
 from AbstractNGSWorkflow import AbstractNGSWorkflow
 
 class AbstractAlignmentWorkflow(AbstractNGSWorkflow):
@@ -630,22 +630,7 @@ class AbstractAlignmentWorkflow(AbstractNGSWorkflow):
 		"""
 		"""
 		AbstractNGSWorkflow.registerCustomExecutables(self, workflow=workflow)
-
-		if workflow is None:
-			workflow = self
-		namespace = workflow.namespace
-		version = workflow.version
-		operatingSystem = workflow.operatingSystem
-		architecture = workflow.architecture
-		clusters_size = workflow.clusters_size
-		site_handler = workflow.site_handler
-		#vervetSrcPath = self.vervetSrcPath
-
-		#2012.8.7 each cell is a tuple of (executable, clusterSizeMultipler (0 if u do not need clustering)
-		executableClusterSizeMultiplierList = []
-
-		self.addExecutableAndAssignProperClusterSize(executableClusterSizeMultiplierList, defaultClustersSize=self.clusters_size)
-		#self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, name="exampleJava", clusterSizeMultipler=0.3)
+		#self.addExecutableFromPath(path=self.javaPath, name="exampleJava", clusterSizeMultipler=0.3)
 
 	def setup_run(self):
 		"""

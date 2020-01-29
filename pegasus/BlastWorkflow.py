@@ -23,10 +23,9 @@ __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
+from Pegasus.DAX3 import Executable, File, PFN, Link, Job
 from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
-from pymodule.pegasus import yh_pegasus
-
-from Pegasus.DAX3 import *
+import yh_pegasus
 from AbstractWorkflow import AbstractWorkflow
 
 class BlastWorkflow(AbstractWorkflow):
@@ -209,7 +208,7 @@ class BlastWorkflow(AbstractWorkflow):
 		SplitFastaFile.addPFN(PFN("file://" + os.path.join(self.pymodulePath, 'pegasus/mapper/splitter/SplitFastaFile.py'), site_handler))
 		executableClusterSizeMultiplierList.append((SplitFastaFile, 0.1))
 		
-		self.addExecutableAndAssignProperClusterSize(executableClusterSizeMultiplierList, defaultClustersSize=self.clusters_size)
+		self.addExecutables(executableClusterSizeMultiplierList, defaultClustersSize=self.clusters_size)
 
 	
 	def addMakeBlastDBJob(self, executable=None, inputFile=None, \

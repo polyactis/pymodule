@@ -10,10 +10,11 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import copy
 from Pegasus.DAX3 import Executable, File, PFN, Link, Job
-from pymodule import Genome, getListOutOfStr, PassingData, NextGenSeq, utils
-from pymodule.pegasus import yh_pegasus
+from pymodule import Genome, getListOutOfStr, PassingData, utils
 from pymodule.yhio.MatrixFile import MatrixFile
 from pymodule.yhio.VCFFile import VCFFile
+from pymodule.yhio import NextGenSeq
+import yh_pegasus
 from AbstractNGSWorkflow import AbstractNGSWorkflow
 from MapReduceGenomeFileWorkflow import MapReduceGenomeFileWorkflow as ParentClass
 
@@ -92,52 +93,36 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 			workflow = self
 		ParentClass.registerExecutables(self, workflow=workflow)
 		
-		namespace = self.namespace
-		version = self.version
-		operatingSystem = self.operatingSystem
-		architecture = self.architecture
-		clusters_size = self.clusters_size
-		site_handler = self.site_handler
-		
-		executableClusterSizeMultiplierList = []	#2012.8.7 each cell is a tuple of (executable, clusterSizeMultipler (0 if u do not need clustering)
-		
 		#2012.8.30 moved from vervet/src/AddVCFFolder2DBWorkflow.py
-#		AddVCFFile2DB = Executable(namespace=namespace, name="AddVCFFile2DB", \
-#											version=version, \
-#											os=operatingSystem, arch=architecture, installed=True)
-#		AddVCFFile2DB.addPFN(PFN("file://" + os.path.join(vervetSrcPath, "db/input/AddVCFFile2DB.py"), site_handler))
-#		executableClusterSizeMultiplierList.append((AddVCFFile2DB, 1))
+		#self.addExecutableFromPath(path=os.path.join(vervetSrcPath, \
+		#	"db/input/AddVCFFile2DB.py"),
+		#	name='AddVCFFile2DB', clusterSizeMultipler=1)
 		
-		FilterVCFSNPCluster = Executable(namespace=namespace, name="FilterVCFSNPCluster", version=version, os=operatingSystem, arch=architecture, installed=True)
-		FilterVCFSNPCluster.addPFN(PFN("file://" +  os.path.join(self.pymodulePath, "pegasus/mapper/filter/FilterVCFSNPCluster.py"), site_handler))
-		executableClusterSizeMultiplierList.append((FilterVCFSNPCluster, 1))
-		
-		JuxtaposeAlleleFrequencyFromMultiVCFInput = Executable(namespace=namespace, name="JuxtaposeAlleleFrequencyFromMultiVCFInput", \
-											version=version, os=operatingSystem, arch=architecture, installed=True)
-		JuxtaposeAlleleFrequencyFromMultiVCFInput.addPFN(PFN("file://" + os.path.join(self.pymodulePath, \
-											"pegasus/mapper/extractor/JuxtaposeAlleleFrequencyFromMultiVCFInput.py"), \
-											site_handler))
-		executableClusterSizeMultiplierList.append((JuxtaposeAlleleFrequencyFromMultiVCFInput, 1))
-		
-		self.addExecutableAndAssignProperClusterSize(executableClusterSizeMultiplierList, defaultClustersSize=self.clusters_size)
-		
+		self.addExecutableFromPath(path=os.path.join(self.pymodulePath, \
+				"pegasus/mapper/filter/FilterVCFSNPCluster.py"),
+				name='FilterVCFSNPCluster', \
+				clusterSizeMultipler=1)
+		self.addExecutableFromPath(path=os.path.join(self.pymodulePath, \
+				"pegasus/mapper/extractor/JuxtaposeAlleleFrequencyFromMultiVCFInput.py"),
+				name='JuxtaposeAlleleFrequencyFromMultiVCFInput', \
+				clusterSizeMultipler=1)		
 		
 		#2013.07.12
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, name='SelectVariantsJavaInReduce', \
-															clusterSizeMultipler=0.001)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, "polymorphism/qc/RemoveRedundantLociFromVCF.py"), \
-									name='RemoveRedundantLociFromVCF_InReduce', clusterSizeMultipler=0)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, "polymorphism/qc/RemoveRedundantLociFromVCF.py"), \
-									name='RemoveRedundantLociFromVCF', clusterSizeMultipler=1)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, "polymorphism/qc/ClearVCFBasedOnSwitchDensity.py"), \
-									name='ClearVCFBasedOnSwitchDensity', clusterSizeMultipler=1)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, "polymorphism/qc/CalculateSameSiteConcordanceInVCF.py"), \
-									name='CalculateSameSiteConcordanceInVCF', clusterSizeMultipler=1)
+		self.addExecutableFromPath(path=self.javaPath, name='SelectVariantsJavaInReduce', \
+				clusterSizeMultipler=0.001)
+		self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "polymorphism/qc/RemoveRedundantLociFromVCF.py"), \
+				name='RemoveRedundantLociFromVCF_InReduce', clusterSizeMultipler=0)
+		self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "polymorphism/qc/RemoveRedundantLociFromVCF.py"), \
+				name='RemoveRedundantLociFromVCF', clusterSizeMultipler=1)
+		self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "polymorphism/qc/ClearVCFBasedOnSwitchDensity.py"), \
+				name='ClearVCFBasedOnSwitchDensity', clusterSizeMultipler=1)
+		self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "polymorphism/qc/CalculateSameSiteConcordanceInVCF.py"), \
+				name='CalculateSameSiteConcordanceInVCF', clusterSizeMultipler=1)
 		
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, "mapper/extractor/ExtractInfoFromVCF.py"), \
-									name='ExtractInfoFromVCF', clusterSizeMultipler=1)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, "mapper/extractor/ExtractSamplesFromVCF.py"), \
-									name='ExtractSamplesFromVCF', clusterSizeMultipler=1)
+		self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "mapper/extractor/ExtractInfoFromVCF.py"), \
+				name='ExtractInfoFromVCF', clusterSizeMultipler=1)
+		self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "mapper/extractor/ExtractSamplesFromVCF.py"), \
+				name='ExtractSamplesFromVCF', clusterSizeMultipler=1)
 	
 	def registerCommonExecutables(self, workflow=None):
 		"""

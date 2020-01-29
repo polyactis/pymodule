@@ -795,15 +795,15 @@ class Database(DBAncestor):
 			sqlalchemy 1.3.7 has support for the psycopg2 "execute_values()" feature
 			Batch insert is a lot faster than the default approach.
 
-			The executemany_batch_page_size and executemany_values_page_size arguments 
-				control how many parameter sets should be represented in each execution. 
-				Because “values” mode implies a fallback down to “batch” mode for
-				non-INSERT statements, there are two independent page size arguments. 
-				For each, the default value of None means to use psycopg2’s defaults, 
-				which at the time of this writing are quite low at 100. For the 
-				execute_values method, a number as high as 10000 may prove to be performant,
-				whereas for execute_batch, as the number represents full statements 
-				repeated, a number closer to the default of 100 is likely more appropriate:
+		The executemany_batch_page_size and executemany_values_page_size arguments 
+			control how many parameter sets should be represented in each execution. 
+			Because "values" mode implies a fallback down to "batch" mode for
+			non-INSERT statements, there are two independent page size arguments. 
+			For each, the default value of None means to use psycopg2's defaults, 
+			which at the time of this writing are quite low at 100. For the 
+			execute_values method, a number as high as 10000 may prove to be performant,
+			whereas for execute_batch, as the number represents full statements 
+			repeated, a number closer to the default of 100 is likely more appropriate:
 		"""
 		if self._engine is None:
 			self._engine = create_engine(self.url, pool_recycle=self.pool_recycle, 

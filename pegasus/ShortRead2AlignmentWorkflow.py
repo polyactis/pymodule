@@ -89,47 +89,39 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 		AbstractNGSWorkflow.registerCustomExecutables(self, workflow=workflow)
 		AlignmentReadBaseQualityRecalibrationWorkflow.registerCustomExecutables(self, workflow=workflow)
 
-		namespace = workflow.namespace
-		version = workflow.version
-		operatingSystem = workflow.operatingSystem
-		architecture = workflow.architecture
-		clusters_size = workflow.clusters_size
-		site_handler = workflow.site_handler
-
-
 		#workflow.BuildBamIndexFilesJava.addProfile(Profile(Namespace.PEGASUS, key="clusters.size", value="%s"%self.alignmentJobClustersSizeFraction))
 		self.setOrChangeExecutableClusterSize(executable=workflow.AddOrReplaceReadGroupsJava,
-											clusterSizeMultipler=self.alignmentJobClustersSizeFraction, \
-											defaultClustersSize=None)
+				clusterSizeMultipler=self.alignmentJobClustersSizeFraction, \
+				defaultClustersSize=None)
 		self.setOrChangeExecutableClusterSize(executable=workflow.samtools,
-											clusterSizeMultipler=self.alignmentJobClustersSizeFraction, \
-											defaultClustersSize=None)
+				clusterSizeMultipler=self.alignmentJobClustersSizeFraction, \
+				defaultClustersSize=None)
 
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.bwa_path, \
-									name="bwa", clusterSizeMultipler=self.alignmentJobClustersSizeFraction)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(
+		self.addExecutableFromPath(path=self.bwa_path, \
+			name="bwa", clusterSizeMultipler=self.alignmentJobClustersSizeFraction)
+		self.addExecutableFromPath(
 			path=os.path.join(self.pymodulePath, 'mapper/alignment/ShortSEAlignmentByBWA.sh'), \
 			name="ShortSEAlignmentByBWA", clusterSizeMultipler=self.alignmentJobClustersSizeFraction)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(
+		self.addExecutableFromPath(
 			path=os.path.join(self.pymodulePath, 'mapper/alignment/PEAlignmentByBWA.sh'), \
 			name="PEAlignmentByBWA", clusterSizeMultipler=self.alignmentJobClustersSizeFraction)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(
+		self.addExecutableFromPath(
 			path=os.path.join(self.pymodulePath, 'mapper/alignment/LongSEAlignmentByBWA.sh'), \
 			name="LongSEAlignmentByBWA", clusterSizeMultipler=self.alignmentJobClustersSizeFraction)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, \
-						name="SAM2BAMJava", clusterSizeMultipler=self.alignmentJobClustersSizeFraction)
-		#self.addOneExecutableFromPathAndAssignProperClusterSize(
+		self.addExecutableFromPath(path=self.javaPath, \
+			name="SAM2BAMJava", clusterSizeMultipler=self.alignmentJobClustersSizeFraction)
+		#self.addExecutableFromPath(
 		#	path=os.path.join(self.pymodulePath, 'pegasus/mapper/alignment/BWA_Mem.sh'), \
 		#							name="BWA_Mem", clusterSizeMultipler=self.alignmentJobClustersSizeFraction)
 		#2014.04.04 use generic pipeCommandOutput2File.sh instead
-		self.addOneExecutableFromPathAndAssignProperClusterSize(
+		self.addExecutableFromPath(
 			path=os.path.join(self.pymodulePath, 'shell/pipeCommandOutput2File.sh'), \
 			name="BWA_Mem", clusterSizeMultipler=self.alignmentJobClustersSizeFraction)
 		# 2014.04.04 pipeCommandOutput2File need this file dependency
 		self.registerOneExecutableAsFile(pythonVariableName="bwaExecutableFile", path=self.bwa_path)
 
-		#self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, name='RealignerTargetCreatorJava', clusterSizeMultipler=0.7)
-		#self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, name='IndelRealignerJava', clusterSizeMultipler=0.2)
+		#self.addExecutableFromPath(path=self.javaPath, name='RealignerTargetCreatorJava', clusterSizeMultipler=0.7)
+		#self.addExecutableFromPath(path=self.javaPath, name='IndelRealignerJava', clusterSizeMultipler=0.2)
 
 	def addBWAReferenceIndexJob(self, workflow=None, refFastaFList=None, refSequenceBaseCount=3000000000, bwa=None,\
 					bwaIndexFileSuffixLs = None,\
