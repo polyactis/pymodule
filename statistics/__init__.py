@@ -29,7 +29,7 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import numpy, random
 from pymodule import getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter
-from pymodule import yh_matplotlib
+from pymodule.plot import yh_matplotlib
 
 def calculateChiSqStatOfDeltaVector(dataVector=None, mean=None, std=None):
 	"""
