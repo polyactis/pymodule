@@ -75,8 +75,6 @@ def registerOneInputFile(workflow=None, inputFname=None, input_site_handler=None
         add argument folderName, which will put the file in specific pegasus workflow folder
     2011.12.21
     """
-    if input_site_handler is None:
-        input_site_handler = self.input_site_handler
     if not pegasusFileName:
         if useAbsolutePathAsPegasusFileName:
             pegasusFileName = os.path.abspath(inputFname)	#this will stop symlinking/transferring , and also no need to indicate them as file dependency for jobs.
