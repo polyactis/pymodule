@@ -387,10 +387,6 @@ class AbstractNGSWorkflow(ParentClass):
         self.addExecutableFromPath(
             path=os.path.join(self.pymodulePath, 'shell/pipeCommandOutput2File.sh'),
             name='vcfsorterShellPipe', clusterSizeMultipler=1)
-        #2013.11.22 generic pipeCommandOutput2File
-        self.addExecutableFromPath(
-            path=os.path.join(self.pymodulePath, 'shell/pipeCommandOutput2File.sh'),
-            name='pipeCommandOutput2File', clusterSizeMultipler=1)
 
         self.addExecutableFromPath(
             path=self.javaPath, name='GATKJava', clusterSizeMultipler=0.2)

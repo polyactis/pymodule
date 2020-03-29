@@ -1,7 +1,7 @@
 #!/bin/bash
 if test $# -lt 2
 then
-	echo "Usage: $0 commandPath outputFname [commandArguments]"
+	echo "Usage: $0 outputFname commandPath [commandArguments]"
 	echo
 	echo "Note:"
 	echo "	1. This shell script runs the command, specified by commandPath, and pipes its output to outputFname."
@@ -9,15 +9,15 @@ then
 	echo "	2. If outputFname is .gz, the output will be gzipped."
 	echo
 	echo "Example:"
-	echo "	$0 ~/bin/samtools output.depth.tsv.gz depth input.bam"
-	echo "	$0 ~/bin/samtools flagstat.output.tsv flagstat input.bam"
+	echo "	$0 output.depth.tsv.gz ~/bin/samtools depth input.bam"
+	echo "	$0 flagstat.output.tsv ~/bin/samtools flagstat input.bam"
 exit
 fi
 set -e
 set -vx
 
-commandPath=$1
-outputFname=$2
+outputFname=$1
+commandPath=$2
 shift
 shift
 #after 2 shift, all arguments left
