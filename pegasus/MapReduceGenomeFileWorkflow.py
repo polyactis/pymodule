@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Examples:
 	#
@@ -20,7 +20,7 @@ __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
-from Pegasus.DAX3 import Executable, File, PFN
+from pegapy3.DAX3 import Executable, File, PFN
 from pymodule import ProcessOptions, PassingData, utils
 from pymodule.yhio.FastaFile import FastaFile
 import yh_pegasus
@@ -427,16 +427,16 @@ class MapReduceGenomeFileWorkflow(ParentClass):
 		inputData = None
 		firstInputJobData = None
 		if getattr(self, 'inputDir', None):
-			inputData = self.registerAllInputFiles(inputDir=self.inputDir, input_site_handler=self.input_site_handler, \
-											pegasusFolderName=self.pegasusFolderName,\
-											inputSuffixSet=self.inputSuffixSet,\
-											indexFileSuffixSet=set(['.tbi', '.fai']),\
-											checkEmptyInputByReading=getattr(self, 'checkEmptyInputByReading', None),\
-											maxContigID=self.maxContigID, \
-											minContigID=self.minContigID,\
-											db_vervet=getattr(self, 'db_vervet', None), \
-											needToKnowNoOfLoci=getattr(self, 'needToKnowNoOfLoci', True),\
-											minNoOfLociInInput=getattr(self, 'minNoOfLociInInput', 10))
+			inputData = self.registerFilesOfInputDir(inputDir=self.inputDir, input_site_handler=self.input_site_handler, \
+								pegasusFolderName=self.pegasusFolderName,\
+								inputSuffixSet=self.inputSuffixSet,\
+								indexFileSuffixSet=set(['.tbi', '.fai']),\
+								checkEmptyInputByReading=getattr(self, 'checkEmptyInputByReading', None),\
+								maxContigID=self.maxContigID, \
+								minContigID=self.minContigID,\
+								db_vervet=getattr(self, 'db_vervet', None), \
+								needToKnowNoOfLoci=getattr(self, 'needToKnowNoOfLoci', True),\
+								minNoOfLociInInput=getattr(self, 'minNoOfLociInInput', 10))
 			if inputData and inputData.jobDataLs:
 				firstInputJobData = inputData.jobDataLs[0]
 				#job=None, jobLs=[], vcfFile=inputF, tbi_F=tbi_F, file=inputF, fileLs=[inputF, tbi_F]

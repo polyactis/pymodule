@@ -19,7 +19,7 @@ if test $# -lt 3 ; then
 	exit 1
 fi
 
-shellDir=~/script/shell/
+shellDir=`dirname $0`
 source $shellDir/common.sh
 
 inputFname=$1

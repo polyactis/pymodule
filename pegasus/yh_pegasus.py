@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 2011-10-11
 	module that deals with pegasus-related stuff
@@ -6,7 +5,7 @@
 import os, sys
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-from Pegasus.DAX3 import Executable, File, Job, Link, PFN, Profile, Namespace
+from pegapy3.DAX3 import Executable, File, Job, Link, PFN, Profile, Namespace
 from pymodule.utils import PassingData
 
 def addMkDirJob(workflow=None, mkdir=None, outputDir=None, namespace=None, version=None,\

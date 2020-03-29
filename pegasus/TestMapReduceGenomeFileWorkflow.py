@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 """
 Examples:
-	#
-	%s  ...
-	
 	#2013.11.24
 	%s -I ./LiftPolymorphismCoordinates/FindNewRefCoordinates_Method109_vs_3488_BWA_F49.2013.Jul.19T141746/folderReduceGzip/
 		-H -C 30 -j hcondor -l hcondor -D ~/NetworkData/vervet/db/ -t ~/NetworkData/vervet/db/
@@ -15,7 +12,7 @@ Description:
 		parent class is AbstractNGSWorkflow.
 """
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
+__doc__ = __doc__%(sys.argv[0])
 
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
@@ -26,11 +23,11 @@ from pymodule.yhio.FastaFile import FastaFile
 import yh_pegasus
 from MapReduceGenomeFileWorkflow import MapReduceGenomeFileWorkflow
 
-parentClass = MapReduceGenomeFileWorkflow
+ParentClass = MapReduceGenomeFileWorkflow
 
-class TestMapReduceGenomeFileWorkflow(parentClass):
+class TestMapReduceGenomeFileWorkflow(ParentClass):
 	__doc__ = __doc__
-	option_default_dict = parentClass.option_default_dict.copy()
+	option_default_dict = ParentClass.option_default_dict.copy()
 	option_default_dict.update({
 						})
 	
@@ -46,7 +43,7 @@ class TestMapReduceGenomeFileWorkflow(parentClass):
 		"""
 		
 		self.needSplitChrIntervalData = True
-		parentClass.__init__(self, **keywords)
+		ParentClass.__init__(self, **keywords)
 		self.needSplitChrIntervalData = True
 	
 		#2013.11.25 output is already gzipped
@@ -58,7 +55,7 @@ class TestMapReduceGenomeFileWorkflow(parentClass):
 		2012.9.24
 			place holder.
 		"""
-		parentClass.connectDB(self)
+		ParentClass.connectDB(self)
 		
 		from vervet.src import VervetDB
 		
@@ -79,7 +76,7 @@ class TestMapReduceGenomeFileWorkflow(parentClass):
 		"""
 		if not workflow:
 			workflow = self
-		parentClass.registerExecutables(self, workflow=workflow)
+		ParentClass.registerExecutables(self, workflow=workflow)
 		
 		self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "polymorphism/mapper/ComputeLiftOverLocusProbability.py"),\
 				name='ComputeLiftOverLocusProbability', \
@@ -91,7 +88,7 @@ class TestMapReduceGenomeFileWorkflow(parentClass):
 		"""
 		if workflow is None:
 			workflow = self
-		returnData = parentClass.preReduce(self, workflow=workflow, outputDirPrefix=outputDirPrefix,\
+		returnData = ParentClass.preReduce(self, workflow=workflow, outputDirPrefix=outputDirPrefix,\
 								passingData=passingData, transferOutput=transferOutput, **keywords)
 		#add a stat merge job and a genome wide plot job
 		outputFile = File(os.path.join(self.reduceOutputDirJob.output, 'locusLiftOverProbability.tsv'))

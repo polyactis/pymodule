@@ -22,7 +22,6 @@ shift
 arguments=$*
 
 shellDir=`dirname $0`
-shellDir=~/script/pymodule/shell
 source $shellDir/common.sh
 exitIfNonZeroExitCode
 

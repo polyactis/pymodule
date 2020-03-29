@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2013.1.25 an abstract class for pegasus workflows that work on alignment & VCF files.
 """
@@ -8,7 +8,7 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import copy
-from Pegasus.DAX3 import Executable, File, PFN, Link, Job
+from pegapy3.DAX3 import Executable, File, PFN, Link, Job
 from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
 from pymodule.yhio import NextGenSeq
 import yh_pegasus
@@ -33,7 +33,7 @@ class AbstractAlignmentAndVCFWorkflow(parentClass, AbstractVCFWorkflow):
 		"""
 		parentClass.__init__(self, **keywords)
 
-	registerAllInputFiles = AbstractVCFWorkflow.registerAllInputFiles
+	registerFilesOfInputDir = AbstractVCFWorkflow.registerFilesOfInputDir
 
 	def setup(self, inputVCFData=None, chr2IntervalDataLs=None, **keywords):
 		"""
@@ -66,7 +66,7 @@ class AbstractAlignmentAndVCFWorkflow(parentClass, AbstractVCFWorkflow):
 		pdata = self.setup_run()
 		workflow = pdata.workflow
 
-		inputData = self.registerAllInputFiles(inputDir=self.inputDir, input_site_handler=self.input_site_handler, \
+		inputData = self.registerFilesOfInputDir(inputDir=self.inputDir, input_site_handler=self.input_site_handler, \
 											checkEmptyVCFByReading=self.checkEmptyVCFByReading,\
 											pegasusFolderName=self.pegasusFolderName)
 		if len(inputData.jobDataLs)<=0:

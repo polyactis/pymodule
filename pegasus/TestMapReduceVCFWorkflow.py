@@ -1,9 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Examples:
-	#
-	%s  ...
-	
 	#2013.07.31 
 	%s -I LiftPolymorphismCoordinates/FindNewRefCoordinates_Method109_vs_3488_BWA_F99.2013.Jul.11T191341/folderReduceLiftOverVCF/
 		-H -C 1 -j hcondor -l hcondor -D /u/home/p/polyacti/NetworkData/vervet/db/ -t /u/home/p/polyacti/NetworkData/vervet/db/
@@ -14,7 +11,7 @@ Description:
 	2013.07.12 a test bed for AbstractVCFWorkflow
 """
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
+__doc__ = __doc__%(sys.argv[0])
 
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
@@ -25,11 +22,11 @@ from pymodule.yhio.FastaFile import FastaFile
 import yh_pegasus
 from AbstractVCFWorkflow import AbstractVCFWorkflow
 
-parentClass = AbstractVCFWorkflow
+ParentClass = AbstractVCFWorkflow
 
-class TestMapReduceVCFWorkflow(parentClass):
+class TestMapReduceVCFWorkflow(ParentClass):
 	__doc__ = __doc__
-	option_default_dict = parentClass.option_default_dict.copy()
+	option_default_dict = ParentClass.option_default_dict.copy()
 	option_default_dict.update({
 						})
 	
@@ -44,14 +41,14 @@ class TestMapReduceVCFWorkflow(parentClass):
 		"""
 		
 		self.needSplitChrIntervalData = False
-		parentClass.__init__(self, **keywords)
+		ParentClass.__init__(self, **keywords)
 		self.needSplitChrIntervalData = False
 		
 	def preReduce(self, workflow=None, outputDirPrefix="", passingData=None, transferOutput=True, **keywords):
 		"""
 		2012.9.17
 		"""
-		returnData = parentClass.preReduce(self, workflow=workflow, outputDirPrefix=outputDirPrefix,\
+		returnData = ParentClass.preReduce(self, workflow=workflow, outputDirPrefix=outputDirPrefix,\
 								passingData=passingData, transferOutput=transferOutput, **keywords)
 		
 		self.statDirJob = self.addMkDirJob(outputDir="%sStat"%(outputDirPrefix))
@@ -179,7 +176,7 @@ class TestMapReduceVCFWorkflow(parentClass):
 			
 		"""
 		self.needSplitChrIntervalData = False
-		pdata = parentClass.setup_run(self)
+		pdata = ParentClass.setup_run(self)
 		return self
 
 if __name__ == '__main__':

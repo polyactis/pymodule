@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2012.5.23
     a common class for other pymodule workflows
@@ -102,6 +102,9 @@ class AbstractWorkflow(Workflow):
         2012.1.9
         """
         Workflow.registerExecutables(self)
+        
+        #2013.2.7 convert, an image swissknife program, part of imagemagick
+        self.addExecutableFromPath(path="/usr/bin/convert", name='convertImage', clusterSizeMultipler=1)
 
         #2013.08.23 c++ version of SelectRowsFromMatrix.py
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, 'mapper/extractor/SelectRowsFromMatrixCC'), \
@@ -109,12 +112,6 @@ class AbstractWorkflow(Workflow):
         #2012.08.13 SelectRowsFromMatrix is a derivative of AbstractMatrixFileWalker, so use addAbstractMatrixFileWalkerJob()
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, 'mapper/extractor/SelectRowsFromMatrix.py'), \
                                         name='SelectRowsFromMatrix', clusterSizeMultipler=1)
-
-        #mkdirWrap is different from mkdir that it doesn't report error when the directory is already there.
-        self.addExecutableFromPath(path=os.path.join(self.pymodulePath, 'shell/mkdirWrap.sh'), \
-                                        name='mkdirWrap', clusterSizeMultipler=1)
-        self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "shell/gzip.sh"), 
-            name='gzip', clusterSizeMultipler=1)
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "mapper/extractor/SelectLineBlockFromFile.py"), 
             name='SelectLineBlockFromFile', clusterSizeMultipler=1)
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "plot/AbstractPlot.py"), 
@@ -127,12 +124,9 @@ class AbstractWorkflow(Workflow):
         #2012.8.15 ancestor of SelectRowsFromMatrix,
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "yhio/AbstractMatrixFileWalker.py"), 
             name='AbstractMatrixFileWalker', clusterSizeMultipler=1)
-        
         self.addExecutableFromPath(path=self.javaPath, name='java', clusterSizeMultipler=1)
-
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "plot/DrawMatrix.py"), 
             name='DrawMatrix', clusterSizeMultipler=1)
-
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "plot/Draw2DHistogramOfMatrix.py"), 
             name='Draw2DHistogramOfMatrix', clusterSizeMultipler=1)
         # C++ binary
@@ -140,13 +134,6 @@ class AbstractWorkflow(Workflow):
             name='CalculateMedianMeanOfInputColumn', clusterSizeMultipler=1)
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "statistics/SampleRows.py"), 
             name='SampleRows', clusterSizeMultipler=1)
-
-        #2013.2.7 convert, an image swissknife program, part of imagemagick
-        self.addExecutableFromPath(path="/usr/bin/convert", name='convertImage', clusterSizeMultipler=1)
-        #2013.2.10
-        self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "mapper/runShellCommand.sh"), \
-                name='runShellCommand', clusterSizeMultipler=1)
-
         #2013.2.11 all reducers
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "statistics/EstimateOutliersIn2DData.py"), \
                 name='EstimateOutliersIn2DData', clusterSizeMultipler=0)
@@ -162,15 +149,7 @@ class AbstractWorkflow(Workflow):
                 name='ReduceMatrixByMergeColumnsWithSameKey', clusterSizeMultipler=0)
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, 'reducer/ReduceMatrixBySumSameKeyColsAndThenDivide.py'), \
                 name='ReduceMatrixBySumSameKeyColsAndThenDivide', clusterSizeMultipler=0)
-
-        self.addExecutableFromPath(path=os.path.join(self.pymodulePath, 'shell/pipeCommandOutput2File.sh'), \
-                name='pipeCommandOutput2File', clusterSizeMultipler=1)
-        #2013.01.10
-        self.addExecutableFromPath(path=os.path.join(self.pymodulePath, 'shell/sortHeaderAware.sh'), \
-                name='sortHeaderAware', clusterSizeMultipler=1)
-        #this will serve as a dependent input file to a shell wrapper, shell/sortHeaderAware.sh.
-        self.sortExecutableFile = self.registerOneExecutableAsFile(path="/usr/bin/sort")
-
+    
     def addSortJob(self, executable=None, executableFile=None, \
                     inputFile=None, outputFile=None, noOfHeaderLines=0, \
                     parentJobLs=None, extraDependentInputLs=None, extraOutputLs=None, transferOutput=False, \

@@ -1,19 +1,19 @@
 #!/bin/bash
-# 2013.03.25
 if test $# -lt 2
 then
 	echo "Usage: $0 commandPath outputFname [commandArguments]"
 	echo
 	echo "Note:"
-	echo "	1. This shell script runs the commandPath, with optional commandArguments, and pipes its output to outputFname."
-	echo "	2. outputFname could be gzipped or not. It detects it and output accordingly."
+	echo "	1. This shell script runs the command, specified by commandPath, and pipes its output to outputFname."
+	echo "     The commandArguments will be added to the command."
+	echo "	2. If outputFname is .gz, the output will be gzipped."
 	echo
 	echo "Example:"
 	echo "	$0 ~/bin/samtools output.depth.tsv.gz depth input.bam"
 	echo "	$0 ~/bin/samtools flagstat.output.tsv flagstat input.bam"
 exit
 fi
-
+set -e
 set -vx
 
 commandPath=$1

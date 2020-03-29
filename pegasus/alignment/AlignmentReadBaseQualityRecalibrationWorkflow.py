@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Examples:
 	# 2012.9.21 run base quality recalibration on VRC alignments (-S 447), individual_sequence_id from 639-642 (--ind_seq_id_ls ...)
@@ -53,18 +53,18 @@ __doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0])
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
-from Pegasus.DAX3 import *
+from pegapy3.DAX3 import Executable, File, PFN, Link, Job
 from pymodule import ProcessOptions, getListOutOfStr, PassingData, yh_pegasus, NextGenSeq, \
 	figureOutDelimiter, getColName2IndexFromHeader, utils
 from pymodule import VCFFile
 from pymodule.pegasus.AbstractAlignmentAndVCFWorkflow import AbstractAlignmentAndVCFWorkflow
 
-parentClass = AbstractAlignmentAndVCFWorkflow
-class AlignmentReadBaseQualityRecalibrationWorkflow(parentClass):
+ParentClass = AbstractAlignmentAndVCFWorkflow
+class AlignmentReadBaseQualityRecalibrationWorkflow(ParentClass):
 	__doc__ = __doc__
-	option_default_dict = parentClass.option_default_dict.copy()
-	option_default_dict.update(parentClass.commonAlignmentWorkflowOptionDict.copy())
-	option_default_dict.update(parentClass.partitionWorkflowOptionDict.copy())
+	option_default_dict = ParentClass.option_default_dict.copy()
+	option_default_dict.update(ParentClass.commonAlignmentWorkflowOptionDict.copy())
+	option_default_dict.update(ParentClass.partitionWorkflowOptionDict.copy())
 	option_default_dict.update({
 				('new_mask_genotype_method_id', 0, int):[None, '', 1, 'which genotype method is used to mask out polymorphic sites for newly-recalibrated of alignment.\n\
 	This is different from --mask_genotype_method_id, which is used to filter input alignments and should be set to None (leave it at default) for this purpose..'],\
@@ -92,7 +92,7 @@ class AlignmentReadBaseQualityRecalibrationWorkflow(parentClass):
 	def __init__(self,  **keywords):
 		"""
 		"""
-		parentClass.__init__(self, **keywords)
+		ParentClass.__init__(self, **keywords)
 		self.chr2IndelVCFJobData = None	#2013.04.04 mark this variable. setup in setup()
 		self.candidateCountCovariatesJob = None	#2013.04.09 this BQSR count-variates job encompasses one of the top big intervals.
 			# replacing equivalent jobs for small intervals (not accurate if intervals are too small)
@@ -579,15 +579,16 @@ class AlignmentReadBaseQualityRecalibrationWorkflow(parentClass):
 		2013.04.07
 			register the indel vcfs
 		"""
-		pdata = parentClass.setup(self, inputVCFData=inputVCFData, chr2IntervalDataLs=chr2IntervalDataLs, **keywords)
+		pdata = ParentClass.setup(self, inputVCFData=inputVCFData, chr2IntervalDataLs=chr2IntervalDataLs, **keywords)
 		
 		##2013.04.09 used in case a corresponding VCFFile for one interval is not available for BQSR
 		biggestChromosome = pdata.chrSizeIDList[0][1]
 		self.randomSNPVCFJobDataForBQSR = pdata.chr2VCFJobData[biggestChromosome]
 		
-		self.indelVCFInputData = self.registerAllInputFiles(inputDir=self.indelVCFFolder, input_site_handler=self.input_site_handler, \
-											checkEmptyVCFByReading=self.checkEmptyVCFByReading,\
-											pegasusFolderName="%sIndelVCF"%self.pegasusFolderName)
+		self.indelVCFInputData = self.registerFilesOfInputDir(inputDir=self.indelVCFFolder, 
+				input_site_handler=self.input_site_handler, \
+				checkEmptyVCFByReading=self.checkEmptyVCFByReading,\
+				pegasusFolderName="%sIndelVCF"%self.pegasusFolderName)
 		#2012.8.26 so that each recalibration will pick up the right vcf
 		chr2IndelVCFJobData = {}
 		if self.indelVCFInputData:
@@ -614,7 +615,7 @@ class AlignmentReadBaseQualityRecalibrationWorkflow(parentClass):
 		"""
 		2011-11-28
 		"""
-		parentClass.registerCustomExecutables(self, workflow=workflow)
+		ParentClass.registerCustomExecutables(self, workflow=workflow)
 		
 		if workflow is None:
 			workflow = self

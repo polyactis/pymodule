@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2020/01/29
     an abstract class for pegasus workflows that work on bioinformatic data
@@ -10,21 +10,20 @@ sys.path.insert(0, os.path.expanduser('~/script'))
 
 
 from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
-from pymodule.pegasus import yh_pegasus
-
-from Pegasus.DAX3 import Executable, File, PFN, Link, Job
+from pegapy3.DAX3 import Executable, File, PFN, Link, Job
 from AbstractWorkflow import AbstractWorkflow
+import yh_pegasus
 
-parentClass = AbstractWorkflow
-class AbstractBioinfoWorkflow(parentClass):
+ParentClass = AbstractWorkflow
+class AbstractBioinfoWorkflow(ParentClass):
     __doc__ = __doc__
-    option_default_dict = parentClass.option_default_dict.copy()
+    option_default_dict = ParentClass.option_default_dict.copy()
 
     def __init__(self,  **keywords):
         """
         20200129
         """
-        parentClass.__init__(self, **keywords)
+        ParentClass.__init__(self, **keywords)
 
     def registerPlinkExecutables(self, workflow=None):
         if not workflow:

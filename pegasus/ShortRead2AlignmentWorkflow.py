@@ -14,13 +14,12 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 
 import copy
-from Pegasus.DAX3 import *
+from pegapy3.DAX3 import Executable, File, PFN, Link, Job
 from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
 from pymodule.pegasus import yh_pegasus
-
 from AbstractNGSWorkflow import AbstractNGSWorkflow
 from AbstractAlignmentAndVCFWorkflow import AbstractAlignmentAndVCFWorkflow
-from pymodule.pegasus.alignment.AlignmentReadBaseQualityRecalibrationWorkflow import AlignmentReadBaseQualityRecalibrationWorkflow
+from alignment.AlignmentReadBaseQualityRecalibrationWorkflow import AlignmentReadBaseQualityRecalibrationWorkflow
 
 class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityRecalibrationWorkflow):
 	__doc__ = __doc__

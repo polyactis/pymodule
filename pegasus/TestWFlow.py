@@ -1,6 +1,6 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 """
-  for pegasus
+An example Pegasus workflow that does not use class.
 """
 import copy
 import sys, os

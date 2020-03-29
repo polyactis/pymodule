@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2011-11-22
     a common class for pegasus workflows that work on NGS (next-gen sequencing) data
@@ -22,11 +22,11 @@ from pymodule.algorithm.RBTree import RBDict
 import yh_pegasus
 from AbstractBioinfoWorkflow import AbstractBioinfoWorkflow
 
-parentClass = AbstractBioinfoWorkflow
-class AbstractNGSWorkflow(parentClass):
+ParentClass = AbstractBioinfoWorkflow
+class AbstractNGSWorkflow(ParentClass):
     __doc__ = __doc__
-    option_default_dict = parentClass.option_default_dict.copy()
-    option_default_dict.update(parentClass.db_option_dict)
+    option_default_dict = ParentClass.option_default_dict.copy()
+    option_default_dict.update(ParentClass.db_option_dict)
 
     option_default_dict.update({
                         ('ref_ind_seq_id', 1, int): [None, 'a', 1, 'IndividualSequence.id. To pick alignments with this sequence as reference', ],\
@@ -112,8 +112,8 @@ class AbstractNGSWorkflow(parentClass):
                                     'bgzipPath', 'gatk2_path', 'ligateVcfPerlPath',\
                                     'vcftoolsPath', 'vcfSubsetPath', 'vcfsorterPath', 'picardJarPath',\
                                     ])
-        #inserted before parentClass.__init__()
-        parentClass.__init__(self, **keywords)
+        #inserted before ParentClass.__init__()
+        ParentClass.__init__(self, **keywords)
         #from pymodule import ProcessOptions
         #self.ad = ProcessOptions.process_function_arguments(keywords, self.option_default_dict, error_doc=self.__doc__, \
         #												class_to_have_attr=self)
@@ -127,7 +127,7 @@ class AbstractNGSWorkflow(parentClass):
         """
         2013.2.15
         """
-        parentClass.extra__init__(self)
+        ParentClass.extra__init__(self)
 
         if hasattr(self, 'contigMaxRankBySize') and hasattr(self, 'contigMinRankBySize'):
             #2013.2.6 non-public schema dbs should be connected before the main vervetdb or other db (schema=public) is connected.
@@ -220,7 +220,7 @@ class AbstractNGSWorkflow(parentClass):
         2011-11-22
             register jars to be used in the worflow
         """
-        parentClass.registerJars(self)
+        ParentClass.registerJars(self)
         #2013.06.23
         #self.registerOneJar(name="Beagle4Jar", path=os.path.expanduser('~/bin/Beagle/beagle4.jar'))
         #2013.06.13
@@ -250,12 +250,12 @@ class AbstractNGSWorkflow(parentClass):
         """
         2012.1.9
         """
-        parentClass.registerCustomJars(self, workflow=workflow)
+        ParentClass.registerCustomJars(self, workflow=workflow)
 
     def registerExecutables(self, workflow=None):
         """
         """
-        parentClass.registerExecutables(self, workflow=workflow)
+        ParentClass.registerExecutables(self, workflow=workflow)
 
         #2014.01.08
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, \
@@ -501,7 +501,7 @@ class AbstractNGSWorkflow(parentClass):
         2012.1.9
             abstract function
         """
-        parentClass.registerCustomExecutables(self, workflow=workflow)
+        ParentClass.registerCustomExecutables(self, workflow=workflow)
 
 
     def addRefFastaFaiIndexJob(self, workflow=None, samtools=None, refFastaF=None, \

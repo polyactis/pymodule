@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Examples:
 
@@ -26,11 +26,12 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 from pegapy3.DAX3 import Executable, File, PFN, Link, Job
 from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
 import yh_pegasus
-from AbstractWorkflow import AbstractWorkflow
+from AbstractBioinfoWorkflow import AbstractBioinfoWorkflow
 
-class BlastWorkflow(AbstractWorkflow):
+ParentClass = AbstractBioinfoWorkflow
+class BlastWorkflow(ParentClass):
 	__doc__ = __doc__
-	option_default_dict = AbstractWorkflow.option_default_dict.copy()
+	option_default_dict = ParentClass.option_default_dict.copy()
 	option_default_dict.update({
 						("inputFname", 1, ): ["", 'i', 1, 'the input fasta file'],\
 						("formatdbPath", 1, ): ["/usr/bin/formatdb", 'f', 1, 'path to formatdb, index fasta database file'],\
@@ -48,7 +49,7 @@ class BlastWorkflow(AbstractWorkflow):
 		"""
 		2012.5.23
 		"""
-		AbstractWorkflow.__init__(self, **keywords)
+		ParentClass.__init__(self, **keywords)
 	
 	def getNoOfSequencesFromFasta(self, inputFastaFname=None):
 		"""
@@ -240,15 +241,7 @@ class BlastWorkflow(AbstractWorkflow):
 		"""
 		2011-7-11
 		"""
-		
-		if self.debug:
-			import pdb
-			pdb.set_trace()
-		
-		self.registerJars()
-		self.registerExecutables()
-		self.registerCustomExecutables()
-		
+		self.setup_run()
 		
 		inputData = PassingData(jobDataLs = [])
 		inputFile = self.registerOneInputFile(inputFname=self.inputFname, folderName=self.pegasusFolderName)

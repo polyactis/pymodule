@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2012.1.17
 	a common class for pegasus workflows that work on VCF variant files
@@ -9,7 +9,7 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import copy
-from Pegasus.DAX3 import Executable, File, PFN, Link, Job
+from pegapy3.DAX3 import Executable, File, PFN, Link, Job
 from pymodule import Genome, getListOutOfStr, PassingData, utils
 from pymodule.yhio.MatrixFile import MatrixFile
 from pymodule.yhio.VCFFile import VCFFile
@@ -129,7 +129,7 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 		"""
 		ParentClass.registerCommonExecutables(self, workflow=workflow)
 	
-	def registerAllInputFiles(self, workflow=None, inputDir=None, input_site_handler=None, \
+	def registerFilesOfInputDir(self, workflow=None, inputDir=None, input_site_handler=None, \
 					checkEmptyVCFByReading=False, pegasusFolderName='',\
 					maxContigID=None, minContigID=None, db_vervet=None, needToKnowNoOfLoci=False,
 					minNoOfLociInVCF=None, includeIndelVCF=True, notToUseDBToInferVCFNoOfLoci=None):
@@ -1064,7 +1064,7 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 		inputData = None
 		firstVCFJobData = None
 		if getattr(self, 'inputDir', None):	#2013.05.20 bugfix
-			inputData = self.registerAllInputFiles(inputDir=self.inputDir, input_site_handler=self.input_site_handler, \
+			inputData = self.registerFilesOfInputDir(inputDir=self.inputDir, input_site_handler=self.input_site_handler, \
 											checkEmptyVCFByReading=self.checkEmptyVCFByReading,\
 											pegasusFolderName=self.pegasusFolderName,\
 											maxContigID=self.maxContigID, \

@@ -8,7 +8,7 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import copy
-from Pegasus.DAX3 import Executable, File, PFN, Link, Job
+from pegapy3.DAX3 import Executable, File, PFN, Link, Job
 from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
 from pymodule.yhio import NextGenSeq
 import yh_pegasus

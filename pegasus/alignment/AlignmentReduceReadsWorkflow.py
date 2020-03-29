@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Examples:
 	#2013.04.12 test on one outdated alignment (--local_realigned 0 --alignment_outdated_index 1)
@@ -28,19 +28,19 @@ __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
-from Pegasus.DAX3 import *
+from pegapy3.DAX3 import Executable, File, PFN, Link, Job
 from pymodule import ProcessOptions, getListOutOfStr, PassingData, yh_pegasus, NextGenSeq, \
 	figureOutDelimiter, getColName2IndexFromHeader, utils
 #from pymodule.pegasus.AbstractVCFWorkflow import AbstractVCFWorkflow
 from pymodule import VCFFile
 from vervet.src import AbstractVervetAlignmentWorkflow
 
-parentClass = AbstractVervetAlignmentWorkflow
-class AlignmentReduceReadsWorkflow(parentClass):
+ParentClass = AbstractVervetAlignmentWorkflow
+class AlignmentReduceReadsWorkflow(ParentClass):
 	__doc__ = __doc__
-	option_default_dict = parentClass.option_default_dict.copy()
-	option_default_dict.update(parentClass.commonAlignmentWorkflowOptionDict.copy())
-	option_default_dict.update(parentClass.partitionWorkflowOptionDict.copy())
+	option_default_dict = ParentClass.option_default_dict.copy()
+	option_default_dict.update(ParentClass.commonAlignmentWorkflowOptionDict.copy())
+	option_default_dict.update(ParentClass.partitionWorkflowOptionDict.copy())
 	option_default_dict.update({
 							})
 	option_default_dict[('intervalSize', 1, int)][0] = 20000000
@@ -51,7 +51,7 @@ class AlignmentReduceReadsWorkflow(parentClass):
 	def __init__(self,  **keywords):
 		"""
 		"""
-		parentClass.__init__(self, **keywords)
+		ParentClass.__init__(self, **keywords)
 		self.chr2IndelVCFJobData = None	#2013.04.04 mark this variable. setup in setup()
 		self.candidateCountCovariatesJob = None	#2013.04.09 this BQSR count-variates job encompasses one of the top big intervals.
 			# replacing equivalent jobs for small intervals (not accurate if intervals are too small)
@@ -243,7 +243,7 @@ class AlignmentReduceReadsWorkflow(parentClass):
 		"""
 		2011-11-28
 		"""
-		parentClass.registerCustomExecutables(self, workflow=workflow)
+		ParentClass.registerCustomExecutables(self, workflow=workflow)
 		
 		if workflow is None:
 			workflow = self
