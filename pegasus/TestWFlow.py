@@ -5,13 +5,13 @@
 import copy
 import sys, os
 from argparse import ArgumentParser
-from Pegasus.DAX3 import Executable, File, PFN, Profile, Namespace, Link, ADAG, Use, Job, Dependency
+from pegapy3.DAX3 import Executable, File, PFN, Profile, Namespace, Link, ADAG, Use, Job, Dependency
+
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/src')))
 site_handler = "ycondor"
 version = "1.0"
 namespace = "pegasus"
-
 
 def registerExecutefile(workflow, executeFile):
     architecture = "x86_64"
@@ -60,7 +60,7 @@ def registerOneInputFile(workflow=None, inputFname=None, input_site_handler=None
                             pegasusFileName=None, checkFileExistence=True):
     """
     Examples:
-        pegasusFile = self.registerOneInputFile(workflow=workflow, inputFname=path, input_site_handler=site_handler, \
+        pegasusFile = registerOneInputFile(workflow=workflow, inputFname=path, input_site_handler=site_handler, \
                                         folderName=folderName, useAbsolutePathAsPegasusFileName=useAbsolutePathAsPegasusFileName)
     2013.06.29 added argument checkFileExistence
     2013.04.07 raise if inputFname is not a file

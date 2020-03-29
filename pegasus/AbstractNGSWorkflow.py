@@ -8,7 +8,7 @@ import sys, os, math
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.expanduser('~/script'))
 
-from Pegasus.DAX3 import Executable, File, PFN, Link, Job
+from pegapy3.DAX3 import Executable, File, PFN, Link, Job
 from pymodule import Genome, utils
 from pymodule import ProcessOptions
 from pymodule.Genome import IntervalData
@@ -1054,7 +1054,7 @@ class AbstractNGSWorkflow(parentClass):
         examples
             add input file to this job via
                 gatkUnionJob = self.addGATKCombineVariantsJob(...)
-                self.addInputToStatMergeJob(statMergeJob=gatkUnionJob, parentJobLs=[gatk_job], \
+                self.addInputToMergeJob(statMergeJob=gatkUnionJob, parentJobLs=[gatk_job], \
                                         inputArgumentOption="--variant")
             OR through the inputFileList argument
                 gatkUnionJob = self.addGATKCombineVariantsJob(.., inputFileList=[gatk_job.output, ...])
@@ -1069,7 +1069,7 @@ class AbstractNGSWorkflow(parentClass):
                         extraArguments=None, extraArgumentList=['--assumeIdenticalSamples'], extraDependentInputLs=None)
 
             for intervalJob in intervalJobLs:
-                self.addInputToStatMergeJob(statMergeJob=concatJob, inputF=intervalJob.output, inputArgumentOption="--variant",\
+                self.addInputToMergeJob(statMergeJob=concatJob, inputF=intervalJob.output, inputArgumentOption="--variant",\
                                 parentJobLs=[intervalJob], extraDependentInputLs=intervalJob.outputLs[1:])
 
         2012.2.26 replacing addVCFConcatJob using GATK's CombineVariants analysis-type
@@ -1340,11 +1340,11 @@ class AbstractNGSWorkflow(parentClass):
                     extraDependentInputLs=None, transferOutput=False, extraArguments=None, job_max_memory=1000, \
                     perSampleMismatchFraction=False)
         if statMergeJob:
-            self.addInputToStatMergeJob(statMergeJob=statMergeJob, \
+            self.addInputToMergeJob(statMergeJob=statMergeJob, \
                             inputF=vcfFilterStatJob.output , \
                             parentJobLs=[vcfFilterStatJob])
         for _statMergeJob in statMergeJobLs:
-            self.addInputToStatMergeJob(statMergeJob=_statMergeJob, \
+            self.addInputToMergeJob(statMergeJob=_statMergeJob, \
                             inputF=vcfFilterStatJob.output , \
                             parentJobLs=[vcfFilterStatJob])
         return vcfFilterStatJob

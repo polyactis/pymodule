@@ -19,11 +19,11 @@ __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
-from Pegasus.DAX3 import Executable, File, PFN
+from pegapy3.DAX3 import Executable, File, PFN
 from pymodule import ProcessOptions, PassingData
-from pymodule.pegasus import yh_pegasus
-from pymodule.pegasus.AbstractVCFWorkflow import AbstractVCFWorkflow
 from pymodule.yhio.FastaFile import FastaFile
+import yh_pegasus
+from AbstractVCFWorkflow import AbstractVCFWorkflow
 
 parentClass = AbstractVCFWorkflow
 
@@ -168,7 +168,7 @@ class TestMapReduceVCFWorkflow(parentClass):
 		
 		for mapEachIntervalDataLs in passingData.mapEachIntervalDataLsLs:
 			for mapEachIntervalData in mapEachIntervalDataLs:
-				self.addInputToStatMergeJob(statMergeJob=reduceJob, \
+				self.addInputToMergeJob(statMergeJob=reduceJob, \
 						parentJobLs=[mapEachIntervalData.mapJob])
 		
 		return returnData

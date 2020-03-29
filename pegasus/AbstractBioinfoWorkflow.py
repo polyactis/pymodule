@@ -56,7 +56,227 @@ class AbstractBioinfoWorkflow(parentClass):
             'pedigree/CalculateMendelErrorRateGivenPlinkOutput.py'), \
             name='CalculateMendelErrorRateGivenPlinkOutput', clusterSizeMultipler=1)
 
+    def getTopNumberOfContigs(self, **keywords):
+        """
+        2013.2.6 placeholder
+        """
+        pass
 
+    def registerBlastNucleotideDatabaseFile(self, ntDatabaseFname=None, input_site_handler=None, folderName=""):
+        """
+        2013.3.20 yh_pegasus.registerRefFastaFile() returns a PassingData
+        2012.10.8
+            moved from BlastWorkflow.py
+        2012.5.23
+        """
+        if input_site_handler is None:
+            input_site_handler = self.input_site_handler
+        return yh_pegasus.registerRefFastaFile(workflow=self, refFastaFname=ntDatabaseFname, registerAffiliateFiles=True, \
+                                    input_site_handler=input_site_handler,\
+                                    checkAffiliateFileExistence=True, addPicardDictFile=False, \
+                                    affiliateFilenameSuffixLs=['nin', 'nhr', 'nsq'],\
+                                    folderName=folderName)
+
+    def registerRefFastaFile(self, workflow=None, refFastaFname=None, registerAffiliateFiles=True, \
+                        input_site_handler='local',\
+                        checkAffiliateFileExistence=True, addPicardDictFile=True,\
+                        affiliateFilenameSuffixLs=['fai', 'amb', 'ann', 'bwt', 'pac', 'sa', 'rbwt', 'rpac', 'rsa', \
+                        'stidx', 'sthash'], folderName="reference"):
+        """
+        2013.07.08 convenient function that calls yh_pegasus.registerRefFastaFile instead
+        """
+        if input_site_handler is None:
+            input_site_handler = self.input_site_handler
+        return yh_pegasus.registerRefFastaFile(workflow=self, refFastaFname=refFastaFname, \
+                        registerAffiliateFiles=registerAffiliateFiles, \
+                        input_site_handler=input_site_handler, \
+                        checkAffiliateFileExistence=checkAffiliateFileExistence, \
+                        addPicardDictFile=addPicardDictFile, affiliateFilenameSuffixLs=affiliateFilenameSuffixLs, \
+                        folderName=folderName)
+    
+    def addPlinkJob(self, workflow=None, executable=None, inputFileList=None, parentPlinkJob=None,\
+                tpedFile=None, tfamFile=None,\
+                pedFile=None, famFile=None, mapFile=None, bedFile=None, bimFile=None,\
+                inputFnamePrefix=None, inputOption='--file', \
+                outputFnamePrefix=None, outputOption='--out',\
+                makeBED=False, calculateMendelError=False, checkSex=False, \
+                LDPruneWindowSize=100, LDPruneWindowShiftSize=5, LDPruneByPairwiseR2=False, LDPruneMinR2=0.1,\
+                LDPruneByRegression=False, LDPruneMinVarianceInflationFactor=2,\
+                estimatePairwiseGenomeWideIBD=False, estimatePairwiseGenomeWideIBDFreqFile=None, \
+                extractSNPFile=None, recodeOutput=False, recodeTransposeOutput=False, estimateAlleFrequency=False, \
+                mergeListFile=None,\
+                parentJobLs=None, extraDependentInputLs=None, transferOutput=False, \
+                extraArguments=None, extraArgumentList=None, extraOutputLs =None, \
+                job_max_memory=2000, **keywords):
+        """
+        i.e.
+
+            bedFnamePrefix = os.path.join(topOutputDir, '%s_bed'%(commonPrefix))
+            convertSingleTPED2BEDJob = self.addPlinkJob(executable=self.plink, inputFileList=[],
+                                tpedFile=modifyTPEDJob.output, tfamFile=tfamJob.tfamFile,\
+                outputFnamePrefix=bedFnamePrefix, outputOption='--out',\
+                makeBED=True, \
+                extraDependentInputLs=None, transferOutput=transferOutput, \
+                extraArguments=None, job_max_memory=2000,\
+                parentJobLs = convertSingleTPED2BEDParentJobLs)
+
+
+            convertMergedTPED2BEDJob = self.addPlinkJob(executable=self.plink, inputFileList=[tpedFileMergeJob.output, tfamJob.tfamFile], \
+                            inputFnamePrefix=mergedPlinkFnamePrefix, inputOption='--tfile', \
+                outputFnamePrefix=mergedPlinkBEDFnamePrefix, outputOption='--out',\
+                makeBED=True, \
+                extraDependentInputLs=None, transferOutput=transferOutput, \
+                extraArguments=None, job_max_memory=2000, parentJobLs=[mergedOutputDirJob, tpedFileMergeJob, tfamJob])
+
+            mendelFnamePrefix = os.path.join(setupData.mapDirJob.output, '%s'%(commonPrefix))
+            if inputJob.output.name[-4:]=='tped':	#2013.07.25 make sure addPlinkJob could get the right tfamFile
+                inputJob.tfamFile = tfamJob.tfamFile
+            plinkMendelJob = self.addPlinkJob(executable=self.plink, \
+                    parentPlinkJob=inputJob,\
+                    outputFnamePrefix=mendelFnamePrefix, outputOption='--out',\
+                    calculateMendelError=True, \
+                    extraDependentInputLs=None, transferOutput=transferOneContigPlinkOutput, \
+                    extraArguments=None, job_max_memory=2000,\
+                    parentJobLs =[setupData.mapDirJob, tfamJob]+ jobData.jobLs)
+
+        for plink mendel, LD-prune and other jobs, add extraArguments="--allow-no-sex" to include individuals without sex
+
+        2013.07.25 added parentPlinkJob (returned from this function), and parse input from that job
+        2013.07.24 added argument recodeTransposeOutput (--recode --transpose)
+        2012.8.28
+            add argument
+                estimateAlleFrequency, estimate frequency of input file. "--nonfounders" could be added as well.
+                estimatePairwiseGenomeWideIBDFreqFile, is the file from which IBD check could draw frequency (rather than estimate from founders)
+
+        2012.8.9
+            inputFileList is a list of pegasus Files (.ped, .fam, or .tped, .tfam, etc.) or could be supplied individually.
+
+            inputOption could be, "--file" for .ped .map ; "--tfile" for .tped, .tfam; or '--bfile' for .bed, .fam, .bim
+
+            if extractSNPFile or mergeListFile is given, either recodeOutput or makeBED have to be on. otherwise, no output.
+            http://pngu.mgh.harvard.edu/~purcell/plink/index.shtml
+
+
+
+        """
+        if extraDependentInputLs is None:
+            extraDependentInputLs = []
+        if inputFileList:
+            extraDependentInputLs.extend(inputFileList)
+
+        if extraArgumentList is None:
+            extraArgumentList = []
+        if extraOutputLs is None:
+            extraOutputLs = []
+        key2ObjectForJob = {}
+
+        #2013.07.25
+        if parentPlinkJob:
+            if bedFile is None:
+                bedFile = getattr(parentPlinkJob, 'bedFile', None)
+            if famFile is None:
+                famFile = getattr(parentPlinkJob, 'famFile', None)
+            if bimFile is None:
+                bimFile = getattr(parentPlinkJob, 'bimFile', None)
+            if tpedFile is None:
+                tpedFile = getattr(parentPlinkJob, 'tpedFile', None)
+            if tfamFile is None:
+                tfamFile = getattr(parentPlinkJob, 'tfamFile', None)
+            if mapFile is None:
+                mapFile = getattr(parentPlinkJob, 'mapFile', None)
+            if pedFile is None:
+                pedFile = getattr(parentPlinkJob, 'pedFile', None)
+            if famFile is None:
+                famFile = getattr(parentPlinkJob, 'famFile', None)
+
+        if inputOption and inputFnamePrefix:
+            extraArgumentList.extend([inputOption, inputFnamePrefix])
+        if tpedFile:
+            extraDependentInputLs.append(tpedFile)
+            extraArgumentList.extend(["--tped", tpedFile])
+        if tfamFile:
+            extraDependentInputLs.append(tfamFile)
+            extraArgumentList.extend(["--tfam", tfamFile])
+        if pedFile:
+            extraDependentInputLs.append(pedFile)
+            extraArgumentList.extend(["--ped", pedFile])
+        if famFile:
+            extraDependentInputLs.append(famFile)
+            extraArgumentList.extend(["--fam", famFile])
+        if mapFile:
+            extraDependentInputLs.append(mapFile)
+            extraArgumentList.extend(["--map", mapFile])
+        if bedFile:
+            extraDependentInputLs.append(bedFile)
+            extraArgumentList.extend(["--bed", bedFile])
+        if bimFile:
+            extraDependentInputLs.append(bimFile)
+            extraArgumentList.extend(["--bim", bimFile])
+
+        if outputFnamePrefix and outputOption:
+            extraArgumentList.extend([outputOption, outputFnamePrefix])
+        else:
+            outputFnamePrefix = 'plink'
+
+
+        suffixAndNameTupleList = []	# a list of tuples , in each tuple, 1st element is the suffix. 2nd element is the proper name of the suffix.
+            #job.$nameFile will be the way to access the file.
+            #if 2nd element (name) is missing, suffix[1:].replace('.', '_') is the name (dot replaced by _)
+        if makeBED:
+            extraArgumentList.append('--make-bed')
+            suffixAndNameTupleList.extend([['.bed',], ('.fam',), ['.bim',]])		#, binary map file, is excluded for now
+        if calculateMendelError:
+            extraArgumentList.append('--mendel')
+            suffixAndNameTupleList.extend([('.mendel',), ('.imendel',), ('.fmendel',), ('.lmendel',)])
+            #its output is not tab-delimited. rather it's space (multi) delimited.
+        if checkSex:
+            extraArgumentList.append('--check-sex')
+            suffixAndNameTupleList.extend([('.sexcheck',), ('.hh', )])	#.sexcheck file is accessible as job.sexcheckFile.
+                #.hh is heterozygous haplotype genotypes
+        if LDPruneByPairwiseR2:
+            extraArgumentList.append('--indep-pairwise %s %s %s'%(LDPruneWindowSize, LDPruneWindowShiftSize, LDPruneMinR2))
+            suffixAndNameTupleList.extend([('.prune.in',), ('.prune.out',)])	#".prune.in" is accessible as job.prune_inFile
+        if LDPruneByRegression:
+            extraArgumentList.append('--indep %s %s %s'%(LDPruneWindowSize, LDPruneWindowShiftSize, LDPruneMinVarianceInflationFactor))
+            suffixAndNameTupleList.extend([('.prune.in',), ('.prune.out',)])	#".prune.in" is accessible as job.prune_inFile
+        if estimatePairwiseGenomeWideIBD:
+            extraArgumentList.append('--genome')
+            suffixAndNameTupleList.extend([('.genome',)])	#.genome is accessible as job.genomeFile
+            if estimatePairwiseGenomeWideIBDFreqFile:	#2012.8.28
+                extraArgumentList.extend(['--read-freq', estimatePairwiseGenomeWideIBDFreqFile])
+                extraDependentInputLs.append(estimatePairwiseGenomeWideIBDFreqFile)
+        if extractSNPFile:
+            extraArgumentList.extend(['--extract', extractSNPFile])
+            extraDependentInputLs.append(extractSNPFile)
+        if recodeOutput:
+            extraArgumentList.extend(['--recode',])
+            suffixAndNameTupleList.extend([('.ped',), ('.map',)])
+        if recodeTransposeOutput:
+            extraArgumentList.extend(['--recode', "--transpose"])
+            suffixAndNameTupleList.extend([('.tped',), ('.tfam',)])
+        if estimateAlleFrequency:	#2012.8.28
+            extraArgumentList.append('--freq')
+            suffixAndNameTupleList.extend([('.frq',)])
+
+        if mergeListFile:
+            extraArgumentList.extend(['--merge-list', mergeListFile])
+            extraDependentInputLs.append(mergeListFile)
+        if extraArguments:
+            extraArgumentList.append(extraArguments)
+
+
+        self.setupMoreOutputAccordingToSuffixAndNameTupleList(outputFnamePrefix=outputFnamePrefix, suffixAndNameTupleList=suffixAndNameTupleList, \
+                                                    extraOutputLs=extraOutputLs, key2ObjectForJob=key2ObjectForJob)
+        #2013.07.24 add it in the end
+        logFile = File('%s.log'%(outputFnamePrefix))	#2012.8.10 left in the folder dying
+        extraOutputLs.append(logFile)
+
+        job= self.addGenericJob(executable=executable, inputFile=None, outputFile=None, \
+                parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
+                extraOutputLs=extraOutputLs,\
+                transferOutput=transferOutput, \
+                extraArgumentList=extraArgumentList, key2ObjectForJob=key2ObjectForJob, job_max_memory=job_max_memory, **keywords)
+        return job
 
     def registerExecutables(self, workflow=None):
         """

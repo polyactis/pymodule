@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Examples:
 	#
@@ -20,10 +20,10 @@ __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
-from Pegasus.DAX3 import Executable, File, PFN
+from pegapy3.DAX3 import Executable, File, PFN
 from pymodule import ProcessOptions, PassingData, utils
-from pymodule.pegasus import yh_pegasus
 from pymodule.yhio.FastaFile import FastaFile
+import yh_pegasus
 from MapReduceGenomeFileWorkflow import MapReduceGenomeFileWorkflow
 
 parentClass = MapReduceGenomeFileWorkflow
@@ -222,10 +222,10 @@ class TestMapReduceGenomeFileWorkflow(parentClass):
 		mapEachIntervalDataLs = chromosome2mapEachIntervalDataLs.get(chromosome)
 		for mapEachIntervalData in mapEachIntervalDataLs:
 			for jobData in mapEachIntervalData.jobDataLs:
-				self.addInputToStatMergeJob(statMergeJob=reduceChromosomeJob, parentJobLs=[jobData.job])
+				self.addInputToMergeJob(statMergeJob=reduceChromosomeJob, parentJobLs=[jobData.job])
 			
 		#add the reduction job to final stat merge job
-		self.addInputToStatMergeJob(statMergeJob=self.reduceJob, parentJobLs=[reduceChromosomeJob])
+		self.addInputToMergeJob(statMergeJob=self.reduceJob, parentJobLs=[reduceChromosomeJob])
 		
 		return returnData
 	

@@ -502,7 +502,7 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 					outputDirJob=outputDirJob, needBGzipAndTabixJob=needBGzipAndTabixJob,\
 					transferOutput=transferOutput, job_max_memory=job_max_memory, walltime=walltime, \
 					**keywords)
-			self.addInputToStatMergeJob(statMergeJob=unionJob, inputF=subUnionJobData.file,\
+			self.addInputToMergeJob(statMergeJob=unionJob, inputF=subUnionJobData.file,\
 								parentJobLs=subUnionJobData.jobLs, extraDependentInputLs=subUnionJobData.fileLs,\
 								inputArgumentOption="--variant")
 		
@@ -551,8 +551,8 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 		
 		for intervalJob in intervalJobLs:
 			#add this output to the union job
-			# 2012.6.1 done it through addInputToStatMergeJob()
-			self.addInputToStatMergeJob(statMergeJob=concatJob, inputF=intervalJob.output, \
+			# 2012.6.1 done it through addInputToMergeJob()
+			self.addInputToMergeJob(statMergeJob=concatJob, inputF=intervalJob.output, \
 							parentJobLs=[intervalJob], extraDependentInputLs=intervalJob.outputLs[1:])
 		
 		if needBGzipAndTabixJob:
@@ -616,7 +616,7 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 					extraArguments=None, extraArgumentList=['--assumeIdenticalSamples'], extraDependentInputLs=None)
 		
 		for intervalJob in intervalJobLs:
-			self.addInputToStatMergeJob(statMergeJob=concatJob, inputF=intervalJob.output, inputArgumentOption="--variant",\
+			self.addInputToMergeJob(statMergeJob=concatJob, inputF=intervalJob.output, inputArgumentOption="--variant",\
 							parentJobLs=[intervalJob], extraDependentInputLs=intervalJob.outputLs[1:])
 		
 		

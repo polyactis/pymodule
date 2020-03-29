@@ -1,36 +1,35 @@
 #!/bin/bash
 
 source ~/.bash_profile
-
+# stop & exit if any error
 set -e
 
 TOPDIR=`pwd`
-
 storageSiteNameDefault="local"
 submitOptionDefault="--submit"
 scratchTypeDefault="1"
 cleanupClustersSizeDefault=15
 
-#2013.04.24
+#2013.04.24 two files to store the names of the successfully-submitted and submit-failed workflows respectively.
 runningWorkflowLogFnameDefault=runningWorkflows.txt
 failedWorkflowLogFnameDefault=failedWorkflows.txt
 
 # figure out where Pegasus is installed
 export PEGASUS_HOME=`which pegasus-plan | sed 's/\/bin\/*pegasus-plan//'`
 if [ "x$PEGASUS_HOME" = "x" ]; then
-	echo "Unable to determine location of your Pegasus install"
+	echo "Unable to determine the location of your Pegasus installation."
 	echo "Please make sure pegasus-plan is in your path"
 	exit 1
 fi 
 echo "pegasus home is " $PEGASUS_HOME
 
-# 2011-8-28 same as the submitted user's home directory
+# 20110828 same as the submitter's home directory
 # it's a must to export HOME in condor environment because HOME is not set by default.
 HOME_DIR=$HOME
 
 PEGASUS_PYTHON_LIB_DIR=`$PEGASUS_HOME/bin/pegasus-config --python`
-VCF_PERL5LIB=script/vcftools/perl
 
+#a random number
 freeSpace="50000G"
 
 
@@ -136,12 +135,11 @@ echo "Final workflow submit option is $submitOption."
 
 
 
-# 2012.7.31 the two lines below are added to any condor cluster that do not use shared file system or filesystem that is not good at handling numerous small files in one folder
+# The following two lines shall be added to any condor cluster that do not use shared file system or 
+# 	a filesystem that is not good at handling numerous small files in one folder.
 #		<profile namespace="condor" key="should_transfer_files">YES</profile>
 #		<profile namespace="condor" key="when_to_transfer_output">ON_EXIT_OR_EVICT</profile>
 #
-#<profile namespace="env" key="PERL5LIB">$HOME_DIR/$VCF_PERL5LIB</profile>
-
 # create the site catalog
 #		<profile namespace="env" key="PYTHONPATH">$PYTHONPATH:$PEGASUS_PYTHON_LIB_DIR</profile>
 cat >sites.xml <<EOF
