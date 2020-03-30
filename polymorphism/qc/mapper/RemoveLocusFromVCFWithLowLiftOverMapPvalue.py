@@ -22,10 +22,10 @@ from pymodule import ProcessOptions, MatrixFile, PassingData
 from pymodule.yhio.VCFFile import VCFFile
 from pymodule.pegasus.mapper.AbstractVCFMapper import AbstractVCFMapper
 
-parentClass = AbstractVCFMapper
-class RemoveLocusFromVCFWithLowLiftOverMapPvalue(parentClass):
+ParentClass = AbstractVCFMapper
+class RemoveLocusFromVCFWithLowLiftOverMapPvalue(ParentClass):
 	__doc__ = __doc__
-	option_default_dict = parentClass.option_default_dict.copy()
+	option_default_dict = ParentClass.option_default_dict.copy()
 	option_default_dict.update({
 						('liftOverLocusMapPvalueFname', 1, ): ['', '', 1, ' output of ComputeLiftOverLocusProbability.py', ],\
 						('minLiftOverMapPvalue', 1, float): [0.5, '', 1, 'locus with mapPvalue lower than this would be removed.', ],\
@@ -33,7 +33,7 @@ class RemoveLocusFromVCFWithLowLiftOverMapPvalue(parentClass):
 	def __init__(self, inputFnameLs=None, **keywords):
 		"""
 		"""
-		parentClass.__init__(self, inputFnameLs=inputFnameLs, **keywords)
+		ParentClass.__init__(self, inputFnameLs=inputFnameLs, **keywords)
 	
 	
 	def getLocusNewID2mapPvalue(self, liftOverLocusMapPvalueFname=None):

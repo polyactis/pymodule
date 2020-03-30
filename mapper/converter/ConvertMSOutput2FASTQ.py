@@ -70,13 +70,13 @@ class ConvertMSOutput2FASTQ(AbstractMapper):
 				individualAlleleList = []
 				if self.ploidy==2:
 					nextSampleContent = inf.next().strip()
-					for i in xrange(len(content)):
+					for i in range(len(content)):
 						individualAlleleList.append('%s%s'%(content[i], nextSampleContent[i]))
 				else:	#haploid
-					for i in xrange(len(content)):
+					for i in range(len(content)):
 						individualAlleleList.append(content[i])
 				outputBaseList = []
-				for i in xrange(len(individualAlleleList)):
+				for i in range(len(individualAlleleList)):
 					if individualAlleleList[i]=='00':
 						outputBaseList.append(self.defaultBase)
 					elif individualAlleleList[i]=='11':
@@ -131,9 +131,9 @@ class ConvertMSOutput2FASTQ(AbstractMapper):
 				segsitesLineContent = inf.next().strip()
 				no_of_segsites = int(segsitesLineContent.split()[-1])
 				if no_of_segsites==0:	#2013.05.09 no segregating sites, fill it with reference bases.
-					for i in xrange(0, noOfHaplotypesDefault, self.ploidy):	#go through each indivdiual at a time
+					for i in range(0, noOfHaplotypesDefault, self.ploidy):	#go through each indivdiual at a time
 						individualByGenotypeMatrix.append([])
-						for j in xrange(self.chromosomeLengthToSimulate):
+						for j in range(self.chromosomeLengthToSimulate):
 							individualByGenotypeMatrix[i].append(self.defaultBase)
 					continue
 				no_of_sites = int(inf.next().strip())
@@ -143,7 +143,7 @@ class ConvertMSOutput2FASTQ(AbstractMapper):
 			elif isSampleBegun:
 				polymorphicPosition, haplotypeAlleleList = content.split()
 				polymorphicPosition = int(polymorphicPosition)
-				for i in xrange(0, len(haplotypeAlleleList), self.ploidy):	#go through each indivdiual at a time
+				for i in range(0, len(haplotypeAlleleList), self.ploidy):	#go through each indivdiual at a time
 					if no_of_segsites_encountered==0:	#first time adding genotype
 						individualByGenotypeMatrix.append([])
 					individualGenotype = haplotypeAlleleList[i*self.ploidy:(i+1)*self.ploidy]
@@ -157,7 +157,7 @@ class ConvertMSOutput2FASTQ(AbstractMapper):
 						het_in_number = SNP.nt2number.get(het_in_nt)
 						individualGenotype_in_nt = SNP.number2single_char_nt.get(het_in_number)
 					
-					for j in xrange(previousPolymorhicSitePosition+1, polymorphicPosition):
+					for j in range(previousPolymorhicSitePosition+1, polymorphicPosition):
 						individualByGenotypeMatrix[i].append(self.defaultBase)
 					individualByGenotypeMatrix[i].append(individualGenotype_in_nt)
 				no_of_segsites_encountered  += 1

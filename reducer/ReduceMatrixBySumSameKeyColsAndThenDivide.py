@@ -59,7 +59,7 @@ class ReduceMatrixBySumSameKeyColsAndThenDivide(ReduceMatrixByChosenColumn):
 		for key, dataLs in key2dataLs.iteritems():
 			no_of_value_columns = len(dataLs)
 			if self.operatorType==3:
-				for i in xrange(no_of_value_columns):	#2014.1.9 do not iterate over dataLs (for data in dataLs) as dataLs is expanding ... 
+				for i in range(no_of_value_columns):	#2014.1.9 do not iterate over dataLs (for data in dataLs) as dataLs is expanding ... 
 					data = dataLs[i]
 					if self.fixedValueDenominator!=0:
 						ratio = float(data)/self.fixedValueDenominator

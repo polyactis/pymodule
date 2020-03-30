@@ -176,7 +176,7 @@ class node(object):
 
 		l.append([self])
 
-		for i in xrange(self.depth() - 1):
+		for i in range(self.depth() - 1):
 			l.append(self.listlayer(self, i))
 
 		return l

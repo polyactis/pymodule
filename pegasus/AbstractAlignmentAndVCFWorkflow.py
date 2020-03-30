@@ -8,17 +8,17 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import copy
-from pegapy3.DAX3 import Executable, File, PFN, Link, Job
+from pegaflow.DAX3 import Executable, File, PFN, Link, Job
 from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
 from pymodule.yhio import NextGenSeq
 import yh_pegasus
 from AbstractAlignmentWorkflow import AbstractAlignmentWorkflow
 from AbstractVCFWorkflow import AbstractVCFWorkflow
 
-parentClass = AbstractAlignmentWorkflow
-class AbstractAlignmentAndVCFWorkflow(parentClass, AbstractVCFWorkflow):
+ParentClass = AbstractAlignmentWorkflow
+class AbstractAlignmentAndVCFWorkflow(ParentClass, AbstractVCFWorkflow):
 	__doc__ = __doc__
-	option_default_dict = copy.deepcopy(parentClass.option_default_dict)
+	option_default_dict = copy.deepcopy(ParentClass.option_default_dict)
 	option_default_dict.update({
 						('inputDir', 0, ): ['', 'L', 1, 'input folder that contains vcf or vcf.gz files', ],\
 						('minDepth', 0, float): [0, 'm', 1, 'minimum depth for a call to regarded as non-missing', ],\
@@ -31,7 +31,7 @@ class AbstractAlignmentAndVCFWorkflow(parentClass, AbstractVCFWorkflow):
 		"""
 		2012.1.17
 		"""
-		parentClass.__init__(self, **keywords)
+		ParentClass.__init__(self, **keywords)
 
 	registerFilesOfInputDir = AbstractVCFWorkflow.registerFilesOfInputDir
 
@@ -40,7 +40,7 @@ class AbstractAlignmentAndVCFWorkflow(parentClass, AbstractVCFWorkflow):
 		2013.04.01 derive chr2VCFJobData only when inputVCFData is available
 		2013.1.25
 		"""
-		pdata = parentClass.setup(self, chr2IntervalDataLs=chr2IntervalDataLs, inputVCFData=inputVCFData, **keywords)
+		pdata = ParentClass.setup(self, chr2IntervalDataLs=chr2IntervalDataLs, inputVCFData=inputVCFData, **keywords)
 
 		#2012.8.26 so that each recalibration will pick up the right vcf
 		chr2VCFJobData = {}
@@ -56,7 +56,7 @@ class AbstractAlignmentAndVCFWorkflow(parentClass, AbstractVCFWorkflow):
 
 		"""
 		"""
-		parentClass.registerCustomExecutables(self, workflow=workflow)
+		ParentClass.registerCustomExecutables(self, workflow=workflow)
 		AbstractVCFWorkflow.registerCustomExecutables(self, workflow=workflow)
 
 	def run(self):

@@ -65,7 +65,7 @@ def parseOneVCFRow(row, col_name2index, col_index_individual_name_ls, sample_id2
 	altBaseLs = altBase.split(',')	#altBase could be just "C" or "C,G" (multi-nucleotide)
 	alleleLs = [refBase] + altBaseLs
 	alleleNumber2Base = {'.':'NA'}
-	for i in xrange(len(alleleLs)):
+	for i in range(len(alleleLs)):
 		alleleNumber2Base[repr(i)] = alleleLs[i]
 	
 	format_column = row[col_name2index['FORMAT']]
@@ -475,7 +475,7 @@ class VCFFile(object):
 		col_index_individual_name_ls = []
 		
 		counter = 0
-		for i in xrange(sampleStartingColumn, no_of_cols):
+		for i in range(sampleStartingColumn, no_of_cols):
 			individualName = header[i].strip()
 			col_index = col_name2index.get(individualName)
 			if not individualName:	#ignore empty column

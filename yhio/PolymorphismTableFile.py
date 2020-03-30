@@ -326,7 +326,7 @@ class PolymorphismTableFile(YHFile):
 		random_individual_id = numpy.random.randint(1, no_of_individuals+1, size=1)
 		polymorphismData = OneIndividualPolymorphismData(isPhased=self.isPhased, ploid=self.ploidy)
 		if self.isPhased and self.ploidy>0:
-			for i in xrange(1,self.ploidy+1):
+			for i in range(1,self.ploidy+1):
 				haplotype = self.getOneHaplotype(individual_id=random_individual_id, chromosome_copy=i)
 				polymorphismData.addHaplotype(haplotype)
 		else:
@@ -667,7 +667,7 @@ class PolymorphismTableFile(YHFile):
 		chr_start_stop_list.sort()	#make sure it's sorted
 		if ploidy is None:
 			ploidy=self.ploidy
-		for i in xrange(len(chr_start_stop_list)):
+		for i in range(len(chr_start_stop_list)):
 			chromosomeName, start, stop = chr_start_stop_list[i][:3]
 			if chromosomeName:
 				chromosomeEntry = self.getChromosome(name=chromosomeName, length=chromosomeLength, speciesName=speciesName,\
@@ -694,9 +694,9 @@ class PolymorphismTableFile(YHFile):
 		counter = 0
 		for individualName, polymorphismData in individualName2polymorphismData.iteritems():
 			individual_id = self.getIndividual(individualName, speciesName=speciesName, ploidy=ploidy).id
-			for i in xrange(len(polymorphismData.haplotypeList)):
+			for i in range(len(polymorphismData.haplotypeList)):
 				haplotype = polymorphismData.haplotypeList[i]
-				for j in xrange(len(haplotype)):
+				for j in range(len(haplotype)):
 					locus_id = locus_index2id.get(j)
 					if locus_id is None:
 						sys.stderr.write("Error: no locus_id for locus index %s.\n"%(j))

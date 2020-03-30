@@ -39,9 +39,9 @@ class ReduceMatrixByAverageColumnsWithSameKey(ReduceMatrixByChosenColumn):
 		key = self.generateKey(row, keyColumnLs)
 		if key not in key2dataLs:
 			key2dataLs[key] = []	#
-			for i in xrange(len(valueColumnLs)):	#[[]]*len(valueColumnLs) will fail. every [] is a reference to one [].
+			for i in range(len(valueColumnLs)):	#[[]]*len(valueColumnLs) will fail. every [] is a reference to one [].
 				key2dataLs[key].append([])
-		for i in xrange(len(valueColumnLs)):
+		for i in range(len(valueColumnLs)):
 			columnIndex = valueColumnLs[i]
 			if columnIndex<len(row):
 				value = float(row[columnIndex])
@@ -60,7 +60,7 @@ class ReduceMatrixByAverageColumnsWithSameKey(ReduceMatrixByChosenColumn):
 		valueColHeader = header[no_of_key_columns:]
 		newValueColHeader = []
 		no_of_value_columns = len(valueColHeader)
-		for i in xrange(no_of_value_columns):
+		for i in range(no_of_value_columns):
 			valueColName = valueColHeader[i]
 			newValueColHeader += ['mean_%s'%(valueColName), 'median_%s'%(valueColName), 'stdev_%s'%(valueColName)]
 		
@@ -68,7 +68,7 @@ class ReduceMatrixByAverageColumnsWithSameKey(ReduceMatrixByChosenColumn):
 			if key not in newKey2DataLs:
 				newKey2DataLs[key] = []
 			no_of_value_columns = len(dataLs)
-			for i in xrange(no_of_value_columns):
+			for i in range(no_of_value_columns):
 				meanValue = numpy.mean(dataLs[i])
 				medianValue = numpy.median(dataLs[i])
 				stdev = numpy.std(dataLs[i])

@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
 from pymodule.pegasus import yh_pegasus
-from pegapy3.DAX3 import Executable, File, PFN, Link, Job
+from pegaflow.DAX3 import Executable, File, PFN, Link, Job
 from AbstractWorkflow import AbstractWorkflow
 
 class WgetWorkflow(AbstractWorkflow):

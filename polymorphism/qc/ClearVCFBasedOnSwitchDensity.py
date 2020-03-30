@@ -21,10 +21,10 @@ from pymodule import ProcessOptions, MatrixFile, PassingData
 from pymodule.yhio.VCFFile import VCFFile
 from pymodule.pegasus.mapper.AbstractVCFMapper import AbstractVCFMapper
 
-parentClass = AbstractVCFMapper
-class ClearVCFBasedOnSwitchDensity(parentClass):
+ParentClass = AbstractVCFMapper
+class ClearVCFBasedOnSwitchDensity(ParentClass):
 	__doc__ = __doc__
-	option_default_dict = parentClass.option_default_dict.copy()
+	option_default_dict = ParentClass.option_default_dict.copy()
 	option_default_dict.update({
 					('switchPointFname', 0, ): ['', '', 1, 'file that has switch points information, output of FindSNPPositionOnNewRefFromFlanking???Output.py ', ],\
 					('maxSwitchDensity', 0, float): [0.01, '', 1, 'Maximum switch density (#switches/#loci) for one interval to be included in final variants', ],\
@@ -32,7 +32,7 @@ class ClearVCFBasedOnSwitchDensity(parentClass):
 	def __init__(self, inputFnameLs=None, **keywords):
 		"""
 		"""
-		parentClass.__init__(self, inputFnameLs=inputFnameLs, **keywords)
+		ParentClass.__init__(self, inputFnameLs=inputFnameLs, **keywords)
 	
 	
 	def readInSwitchDensity(self, inputFname=None):

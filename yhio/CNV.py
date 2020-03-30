@@ -794,7 +794,7 @@ def mergeOverlappingAmongSegments(segment_ls):
 	"""
 	segment_ls.sort()	#make sure in chromosmal order
 	new_segment_ls = []
-	for i in xrange(len(segment_ls)):
+	for i in range(len(segment_ls)):
 		segment = segment_ls[i]
 		if len(new_segment_ls)>0:
 			previous_segment = new_segment_ls[-1]
@@ -878,7 +878,7 @@ def getProbeIntensityDataFromProbeXArray(input_fname, data_type=numpy.float32, \
 	header = reader.next()
 	intensity_col_index_ls = []
 	type_of_given_array_id = type(array_id)	#2010-7-28 
-	for i in xrange(len(header)):
+	for i in range(len(header)):
 		label = header[i]
 		if label not in nonIntensityColumnLabelSet:	# it's array_id if it's not in nonIntensityColumnLabelSet.
 			_array_id = type_of_given_array_id(label)	#2010-7-28 cast to whatever type array_id is of.
@@ -1152,7 +1152,7 @@ def get_chr2start_stop_index(chr_pos_ls):
 	no_of_probes = len(chr_pos_ls)
 	chr2start_stop_index = {}
 	old_chr = None
-	for i in xrange(no_of_probes):
+	for i in range(no_of_probes):
 		chromosome = chr_pos_ls[i][0]
 		if chromosome not in chr2start_stop_index:
 			chr2start_stop_index[chromosome] = [i]

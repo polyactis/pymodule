@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 
 import copy
-from pegapy3.DAX3 import Executable, File, PFN, Link, Job
+from pegaflow.DAX3 import Executable, File, PFN, Link, Job
 from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
 from pymodule.pegasus import yh_pegasus
 from AbstractNGSWorkflow import AbstractNGSWorkflow
@@ -659,7 +659,8 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 			extraArgumentList.extend(["-a -M", refFastaFile] + fastqFileList)
 			extraDependentInputLs=fastqFileList + refFastaFList
 
-			alignmentJob = self.addGenericPipeCommandOutput2FileJob(executable=self.BWA_Mem, executableFile=self.bwaExecutableFile, \
+			alignmentJob = self.addPipeCommandOutput2FileJob(executable=self.BWA_Mem, \
+					commandFile=self.bwaExecutableFile, \
 					outputFile=alignmentSamF, \
 					parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
 					extraOutputLs=None, transferOutput=transferOutput, \

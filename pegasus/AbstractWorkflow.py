@@ -10,59 +10,62 @@ sys.path.insert(0, os.path.expanduser('~/script'))
 
 from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
 import yh_pegasus
-from pegapy3.Workflow import Workflow
-from pegapy3.DAX3 import Executable, File, PFN, Profile, Namespace, Link, Use, Job, Dependency
+from pegaflow.Workflow import Workflow
+from pegaflow.DAX3 import Executable, File, PFN, Profile, Namespace, Link, Use, Job, Dependency
 
 class AbstractWorkflow(Workflow):
     __doc__ = __doc__
     db_option_dict = {
-                    ('drivername', 1,):['postgresql', 'v', 1, 'which type of database? mysql or postgresql', ],\
-                    ('hostname', 1, ): ['localhost', 'z', 1, 'hostname of the db server', ],\
-                    ('dbname', 1, ): ['', 'd', 1, 'database name', ],\
-                    ('schema', 0, ): ['public', 'k', 1, 'database schema name', ],\
-                    ('db_user', 1, ): [None, 'u', 1, 'database username', ],\
-                    ('db_passwd', 1, ): [None, 'p', 1, 'database password', ],\
-                    ('port', 0, ):[None, '', 1, 'database port number'],\
-                    ('commit', 0, ):[None, '', 0, 'commit database transaction if there is db transaction'],\
-                    ("data_dir", 0, ): ["", 't', 1, 'the base directory where all db-affiliated files are stored. '
-                                    'If not given, use the default stored in db.'],\
-                    ("local_data_dir", 0, ): ["", 'D', 1, 'this one should contain same files as data_dir but accessible locally. '
-                            'If not given, use the default stored in db (db.data_dir). This argument is used to find all input files available.\n '
-                            'It should be different from data_dir only when you generate a workflow on one computer and execute it on another which has different data_dir.'],\
+        ('drivername', 1,):['postgresql', 'v', 1, 'which type of database? mysql or postgresql', ],\
+        ('hostname', 1, ): ['localhost', 'z', 1, 'hostname of the db server', ],\
+        ('dbname', 1, ): ['', 'd', 1, 'database name', ],\
+        ('schema', 0, ): ['public', 'k', 1, 'database schema name', ],\
+        ('db_user', 1, ): [None, 'u', 1, 'database username', ],\
+        ('db_passwd', 1, ): [None, 'p', 1, 'database password', ],\
+        ('port', 0, ):[None, '', 1, 'database port number'],\
+        ('commit', 0, ):[None, '', 0, 'commit database transaction if there is db transaction'],\
+        ("data_dir", 0, ): ["", 't', 1, 'the base directory where all db-affiliated files are stored. '
+                        'If not given, use the default stored in db.'],\
+        ("local_data_dir", 0, ): ["", 'D', 1, 'this one should contain same files as data_dir but accessible locally. '
+            'If not given, use the default stored in db (db.data_dir). This argument is used to find all input files available.\n '
+            'It should be different from data_dir only when you generate a workflow on one computer and execute it on another which has different data_dir.'],\
 
-                    }
+        }
     option_default_dict = {
-                        ("pymodulePath", 1, ): ["%s/script/pymodule", '', 1, 'path to the pymodule folder'],\
-                        ("variationSrcPath", 1, ): ["%s/script/variation/src", '', 1, 'variation source code folder'],\
-                        ("home_path", 1, ): [os.path.expanduser("~"), 'e', 1, 'path to the home directory on the working nodes'],\
-                        ("javaPath", 1, ): ["%s/bin/jdk/bin/java", 'J', 1, 'path to java interpreter binary'],\
-                        ("plinkPath", 1, ): ["%s/bin/plink", '', 1, 'path to the plink binary, http://pngu.mgh.harvard.edu/~purcell/plink/index.shtml'],\
-                        ("pegasusCleanupPath", 1, ): ["%s/bin/pegasus/bin/pegasus-cleanup", '', 1, 'path to pegasus-cleanup executable, it will be registered and run on local universe of condor pool (rather than the vanilla universe)'],\
-                        ("pegasusTransferPath", 1, ): ["%s/bin/pegasus/bin/pegasus-transfer", '', 1, 'path to pegasus-transfer executable, it will be registered and run on local universe of condor pool (rather than the vanilla universe)'],\
-                        ("site_handler", 1, ): ["condorpool", 'l', 1, 'which site to run the jobs: condorpool, hoffman2'],\
-                        ("input_site_handler", 1, ): ["local", 'j', 1, 'which site has all the input files: local, condorpool, hoffman2. '
-                            'If site_handler is condorpool, this must be condorpool and files will be symlinked. '
-                            'If site_handler is hoffman2, input_site_handler=local induces file transfer and input_site_handler=hoffman2 induces symlink.'],\
-                        ('clusters_size', 1, int):[30, 'C', 1, 'For short jobs that will be clustered, how many of them should be clustered int one'],\
-                        ('pegasusFolderName', 0, ): ['folder', 'F', 1, 'the folder relative to pegasus workflow root to contain input & output. '
-                                'It will be created during the pegasus staging process. It is useful to separate multiple workflows. '
-                                'If empty, everything is in the pegasus root.', ],\
-                        ('inputSuffixList', 0, ): [None, '', 1, 'coma-separated list of input file suffices. If None, any suffix. '
-                            'Suffix include the dot, (i.e. .tsv). Typical zip suffices are excluded (.gz, .bz2, .zip, .bz).'],\
-                        ('outputFname', 1, ): [None, 'o', 1, 'xml workflow output file'],\
-                        ("tmpDir", 1, ): ["/tmp/", '', 1, 'for MarkDuplicates.jar, etc., default is /tmp/ but sometimes it is too small'],\
-                        ('max_walltime', 1, int):[4320, '', 1, 'maximum wall time any job could have, in minutes. 20160=2 weeks.\n'
-                            'used in addGenericJob().'],\
-                        ('jvmVirtualByPhysicalMemoryRatio', 1, float):[1.0, '', 1, 
-                            "if a job's virtual memory (usually 1.2X of JVM resident memory) exceeds request, "
-                            "it will be killed on hoffman2. Hence this argument"],\
-                        ("thisModulePath", 1, ): ["%s", '', 1, 'path of the module that owns this program. '
-                            'used to add executables from this module.'],\
-                        ('debug', 0, int):[0, 'b', 0, 'toggle debug mode'],\
-                        ('needSSHDBTunnel', 0, int):[0, 'H', 0, 'DB-interacting jobs need a ssh tunnel (running on cluster behind firewall).'],\
-                        ('report', 0, int):[0, 'r', 0, 'toggle report, more verbose stdout/stderr.']
-                        }
-                        #('bamListFname', 1, ): ['/tmp/bamFileList.txt', 'L', 1, 'The file contains path to each bam file, one file per line.'],\
+        ("pymodulePath", 1, ): ["%s/script/pymodule", '', 1, 'path to the pymodule folder'],\
+        ("variationSrcPath", 1, ): ["%s/script/variation/src", '', 1, 'variation source code folder'],\
+        ("home_path", 1, ): [os.path.expanduser("~"), 'e', 1, 'path to the home directory on the working nodes'],\
+        ("javaPath", 1, ): ["%s/bin/jdk/bin/java", 'J', 1, 'the path to java binary'],\
+        ("plinkPath", 1, ): ["%s/bin/plink", '', 1, 'path to the plink binary, http://pngu.mgh.harvard.edu/~purcell/plink/index.shtml'],\
+        ("pegasusCleanupPath", 1, ): ["%s/bin/pegasus/bin/pegasus-cleanup", '', 1, \
+            'path to pegasus-cleanup executable, it will be registered and run on local universe of condor pool (rather than the vanilla universe)'],\
+        ("pegasusTransferPath", 1, ): ["%s/bin/pegasus/bin/pegasus-transfer", '', 1, \
+            'path to pegasus-transfer executable, it will be registered and run on local universe of condor pool (rather than the vanilla universe)'],\
+        ("site_handler", 1, ): ["condorpool", 'l', 1, 'which site to run the jobs: condorpool, hoffman2'],\
+        ("input_site_handler", 1, ): ["local", 'j', 1, 'which site has all the input files: local, condorpool, hoffman2. '
+            'If site_handler is condorpool, this must be condorpool and files will be symlinked. '
+            'If site_handler is hoffman2, input_site_handler=local induces file transfer and input_site_handler=hoffman2 induces symlink.'],\
+        ('clusters_size', 1, int):[30, 'C', 1, 'For short jobs that will be clustered, how many of them should be clustered int one'],\
+        ('pegasusFolderName', 0, ): ['folder', 'F', 1, \
+            'the folder relative to pegasus workflow root to contain input & output. '
+                'It will be created during the pegasus staging process. It is useful to separate multiple workflows. '
+                'If empty, everything is in the pegasus root.', ],\
+        ('inputSuffixList', 0, ): [None, '', 1, 'coma-separated list of input file suffices. If None, any suffix. '
+            'Suffix include the dot, (i.e. .tsv). Typical zip suffices are excluded (.gz, .bz2, .zip, .bz).'],\
+        ('outputFname', 1, ): [None, 'o', 1, 'xml workflow output file'],\
+        ("tmpDir", 1, ): ["/tmp/", '', 1, 'for MarkDuplicates.jar, etc., default is /tmp/ but sometimes it is too small'],\
+        ('max_walltime', 1, int):[4320, '', 1, 'maximum wall time any job could have, in minutes. 20160=2 weeks.\n'
+            'used in addGenericJob().'],\
+        ('jvmVirtualByPhysicalMemoryRatio', 1, float):[1.0, '', 1, 
+            "if a job's virtual memory (usually 1.2X of JVM resident memory) exceeds request, "
+            "it will be killed on hoffman2. Hence this argument"],\
+        ("thisModulePath", 1, ): ["%s", '', 1, 'path of the module that owns this program. '
+            'used to add executables from this module.'],\
+        ('debug', 0, int):[0, 'b', 0, 'toggle debug mode'],\
+        ('needSSHDBTunnel', 0, int):[0, 'H', 0, 'DB-interacting jobs need a ssh tunnel (running on cluster behind firewall).'],\
+        ('report', 0, int):[0, 'r', 0, 'toggle report, more verbose stdout/stderr.']
+        }
+        #('bamListFname', 1, ): ['/tmp/bamFileList.txt', 'L', 1, 'The file contains path to each bam file, one file per line.'],\
 
     pathToInsertHomePathList = ['javaPath', 'pymodulePath', 'plinkPath', 'variationSrcPath', 'pegasusCleanupPath',\
                             'pegasusTransferPath', "thisModulePath"]
@@ -124,7 +127,6 @@ class AbstractWorkflow(Workflow):
         #2012.8.15 ancestor of SelectRowsFromMatrix,
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "yhio/AbstractMatrixFileWalker.py"), 
             name='AbstractMatrixFileWalker', clusterSizeMultipler=1)
-        self.addExecutableFromPath(path=self.javaPath, name='java', clusterSizeMultipler=1)
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "plot/DrawMatrix.py"), 
             name='DrawMatrix', clusterSizeMultipler=1)
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "plot/Draw2DHistogramOfMatrix.py"), 
@@ -149,50 +151,6 @@ class AbstractWorkflow(Workflow):
                 name='ReduceMatrixByMergeColumnsWithSameKey', clusterSizeMultipler=0)
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, 'reducer/ReduceMatrixBySumSameKeyColsAndThenDivide.py'), \
                 name='ReduceMatrixBySumSameKeyColsAndThenDivide', clusterSizeMultipler=0)
-    
-    def addSortJob(self, executable=None, executableFile=None, \
-                    inputFile=None, outputFile=None, noOfHeaderLines=0, \
-                    parentJobLs=None, extraDependentInputLs=None, extraOutputLs=None, transferOutput=False, \
-                    extraArguments=None, extraArgumentList=None, sshDBTunnel=None,\
-                    job_max_memory=2000, walltime=120, **keywords):
-        """
-        Examples:
-
-            sortedSNPID2NewCoordinateFile = File(os.path.join(reduceOutputDirJob.output, 'SNPID2NewCoordinates.sorted.tsv.gz'))
-            sortSNPID2NewCoordinatesJob = self.addSortJob(inputFile=reduceJob.output, \
-                        outputFile=sortedSNPID2NewCoordinateFile, noOfHeaderLines=1, \
-                        parentJobLs=[reduceJob], \
-                        extraOutputLs=None, transferOutput=False, \
-                        extraArgumentList=["-k3,3 -k4,4n"], \
-                        sshDBTunnel=None,\
-                        job_max_memory=4000, walltime=120)
-            # -t$'\t' for sort has to be removed as it won't be passed correctly.
-            # the default sort field separator (non-blank to blank) works if no-blank is part of each cell value.
-        2014.01.10 use sortHeaderAware executable (from pymodule/shell)
-        2013.11.27 use unix sort to sort a file
-
-        """
-        if executable is None:
-            executable = self.sortHeaderAware
-        #if executableFile is None:
-        #	executableFile = self.sortExecutableFile
-        if extraDependentInputLs is None:
-            extraDependentInputLs = []
-        if extraArgumentList is None:
-            extraArgumentList = []
-
-        extraArgumentList.insert(0, "%s"%(noOfHeaderLines))
-        job = self.addGenericJob(executable=executable, \
-                    inputFile=inputFile, inputArgumentOption="", \
-                    outputFile=outputFile, outputArgumentOption="",
-                    parentJobLs=parentJobLs, \
-                    extraDependentInputLs=extraDependentInputLs, \
-                    extraOutputLs=extraOutputLs, transferOutput=transferOutput, \
-                    extraArguments=extraArguments, \
-                    extraArgumentList=extraArgumentList, \
-                    sshDBTunnel=sshDBTunnel,\
-                    job_max_memory=job_max_memory, walltime=walltime)
-        return job
 
     def addStatMergeJob(self, statMergeProgram=None, outputF=None, \
                     parentJobLs=None, extraOutputLs=None,\
@@ -275,148 +233,7 @@ class AbstractWorkflow(Workflow):
                         job_max_memory=job_max_memory, key2ObjectForJob=key2ObjectForJob,\
                         **keywords)
         return job
-
-    def addGenericDBJob(self, executable=None, inputFile=None, inputArgumentOption="-i", \
-                    inputFileList=None, argumentForEachFileInInputFileList=None,\
-                    outputFile=None, outputArgumentOption="-o", \
-                    parentJobLs=None, extraDependentInputLs=None, extraOutputLs=None, transferOutput=False, \
-                    extraArguments=None, extraArgumentList=None, job_max_memory=2000,  sshDBTunnel=None, \
-                    key2ObjectForJob=None, objectWithDBArguments=None, walltime=None, **keywords):
-        """
-        2013.3.25 bugfix. moved most post-addGenericDBJob code into addGenericJob()
-        2012.10.6
-            similar to addGenericJob but these are generic jobs that need db-interacting arguments.
-
-            Argument inputFileList is a list of input files to be added to commandline as the last arguments.
-                they would also be added as the job's dependent input.
-                Difference from extraDependentInputLs: the latter is purely for dependency purpose, not added as input arguments.
-                    So if files have been put in inputFileList, then they shouldn't be in extraDependentInputLs.
-        """
-        if objectWithDBArguments is None:
-            objectWithDBArguments = self
-        job = self.addGenericJob(executable=executable, \
-                        inputFile=inputFile, inputArgumentOption=inputArgumentOption, \
-                        outputFile=outputFile, outputArgumentOption=outputArgumentOption, \
-                        inputFileList=inputFileList, argumentForEachFileInInputFileList=argumentForEachFileInInputFileList, \
-                        parentJobLs=parentJobLs, \
-                        extraDependentInputLs=extraDependentInputLs, extraOutputLs=extraOutputLs, \
-                        transferOutput=transferOutput, extraArguments=extraArguments, extraArgumentList=extraArgumentList,\
-                        job_max_memory=job_max_memory, sshDBTunnel=sshDBTunnel, key2ObjectForJob=key2ObjectForJob,\
-                        objectWithDBArguments=objectWithDBArguments, walltime=walltime,\
-                        **keywords)
-
-        #2012.10.6 set the job.input
-        if getattr(job, 'input', None) is None and job.inputLs:
-            job.input = job.inputLs[0]
-        return job
-
-    def addGenericFile2DBJob(self, executable=None, inputFile=None, inputArgumentOption="-i", \
-                    inputFileList=None, argumentForEachFileInInputFileList=None,\
-                    outputFile=None, outputArgumentOption="-o", \
-                    data_dir=None, logFile=None, commit=False,\
-                    parentJobLs=None, extraDependentInputLs=None, extraOutputLs=None, transferOutput=False, \
-                    extraArguments=None, extraArgumentList=None, job_max_memory=2000,  sshDBTunnel=None, \
-                    key2ObjectForJob=None, objectWithDBArguments=None, **keywords):
-        """
-
-            job = self.addGenericFile2DBJob(executable=executable, inputFile=None, inputArgumentOption="-i", \
-                    outputFile=None, outputArgumentOption="-o", inputFileList=None, \
-                    data_dir=None, logFile=logFile, commit=commit,\
-                    parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
-                    extraOutputLs=None, transferOutput=transferOutput, \
-                    extraArguments=extraArguments, extraArgumentList=extraArgumentList, \
-                    job_max_memory=job_max_memory,  sshDBTunnel=sshDBTunnel, walltime=walltime,\
-                    key2ObjectForJob=None, objectWithDBArguments=self, **keywords)
-
-        2012.12.21 a generic wrapper for jobs that "inserting" data (from file) into database
-        """
-        if extraArgumentList is None:
-            extraArgumentList = []
-        if extraOutputLs is None:
-            extraOutputLs = []
-
-        if data_dir:
-            extraArgumentList.append('--data_dir %s'%(data_dir))
-        if commit:
-            extraArgumentList.append('--commit')
-        if logFile:
-            extraArgumentList.extend(["--logFilename", logFile])
-            extraOutputLs.append(logFile)
-        #do not pass the inputFileList to addGenericJob() because db arguments need to be added before them.
-        job = self.addGenericDBJob(executable=executable, inputFile=inputFile, \
-                        inputArgumentOption=inputArgumentOption, \
-                        inputFileList=inputFileList, argumentForEachFileInInputFileList=argumentForEachFileInInputFileList,\
-                        outputFile=outputFile, \
-                        outputArgumentOption=outputArgumentOption, \
-                        parentJobLs=parentJobLs, \
-                        extraDependentInputLs=extraDependentInputLs, extraOutputLs=extraOutputLs, \
-                        transferOutput=transferOutput, extraArguments=extraArguments, extraArgumentList=extraArgumentList,\
-                        job_max_memory=job_max_memory, sshDBTunnel=sshDBTunnel, key2ObjectForJob=key2ObjectForJob,\
-                        objectWithDBArguments=objectWithDBArguments, **keywords)
-        return job
-
-    def addGenericJavaJob(self, executable=None, jarFile=None, \
-                    inputFile=None, inputArgumentOption=None, \
-                    inputFileList=None,argumentForEachFileInInputFileList=None,\
-                    outputFile=None, outputArgumentOption=None,\
-                    frontArgumentList=None, extraArguments=None, extraArgumentList=None, extraOutputLs=None, \
-                    extraDependentInputLs=None, \
-                    parentJobLs=None, transferOutput=True, job_max_memory=2000,\
-                    key2ObjectForJob=None, no_of_cpus=None, walltime=120, sshDBTunnel=None, **keywords):
-        """
-        2013.3.23 a generic function to add Java jobs
-
-            fastaDictJob = self.addGenericJavaJob(executable=CreateSequenceDictionaryJava, jarFile=CreateSequenceDictionaryJar, \
-                    inputFile=refFastaF, inputArgumentOption="REFERENCE=", \
-                    inputFileList=None, argumentForEachFileInInputFileList=None,\
-                    outputFile=refFastaDictF, outputArgumentOption="OUTPUT=",\
-                    parentJobLs=parentJobLs, transferOutput=transferOutput, job_max_memory=job_max_memory,\
-                    frontArgumentList=None, extraArguments=None, extraArgumentList=None, extraOutputLs=None, \
-                    extraDependentInputLs=None, no_of_cpus=None, walltime=walltime, sshDBTunnel=None, **keywords)
-        """
-        if executable is None:
-            executable = self.java
-        if frontArgumentList is None:
-            frontArgumentList = []
-        if extraArgumentList is None:
-            extraArgumentList = []
-        if extraDependentInputLs is None:
-            extraDependentInputLs = []
-        if extraOutputLs is None:
-            extraOutputLs = []
-
-
-        
-        memRequirementObject = self.getJVMMemRequirment(job_max_memory=job_max_memory, minMemory=4000)
-        job_max_memory = memRequirementObject.memRequirement
-        javaMemRequirement = memRequirementObject.memRequirementInStr
-
-        frontArgumentList = [javaMemRequirement, '-jar', jarFile] + frontArgumentList	#put java stuff in front of other fron arguments
-        extraDependentInputLs.append(jarFile)
-        job = self.addGenericJob(executable=executable, inputFile=inputFile, \
-                    inputArgumentOption=inputArgumentOption,  inputFileList=inputFileList,\
-                    argumentForEachFileInInputFileList=argumentForEachFileInInputFileList,\
-                    outputFile=outputFile, outputArgumentOption=outputArgumentOption, \
-                    parentJob=None, parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
-                    extraOutputLs=extraOutputLs, \
-                    transferOutput=transferOutput, \
-                    frontArgumentList=frontArgumentList, extraArguments=extraArguments, \
-                    extraArgumentList=extraArgumentList, job_max_memory=job_max_memory,  sshDBTunnel=sshDBTunnel, \
-                    key2ObjectForJob=key2ObjectForJob, no_of_cpus=no_of_cpus, walltime=walltime, **keywords)
-
-        return job
-
-    def setJobOutputFileTransferFlag(self, job=None, transferOutput=False, outputLs=None):
-        """
-        2012.8.17
-            assume all output files in job.outputLs
-        """
-        if outputLs is None and getattr(job, 'outputLs', None):
-            outputLs = job.outputLs
-
-        for output in outputLs:
-            job.uses(output, transfer=transferOutput, register=True, link=Link.OUTPUT)
-
+    
     def addCalculateDepthMeanMedianModeJob(self, executable=None, \
                             inputFile=None, outputFile=None, alignmentID=None, fractionToSample=0.001, \
                             whichColumn=None, maxNumberOfSamplings=1E7, inputStatName=None,\
@@ -447,24 +264,6 @@ class AbstractWorkflow(Workflow):
                 transferOutput=transferOutput, \
                 extraArgumentList=extraArgumentList, key2ObjectForJob=None, \
                 sshDBTunnel=None, job_max_memory=job_max_memory, **keywords)
-        return job
-
-    def addDBArgumentsToOneJob(self, job=None, objectWithDBArguments=None):
-        """
-        2012.8.17
-            use long arguments , rather than short ones
-        2012.6.5
-            tired of adding all these arguments to db-interacting jobs
-        """
-        if objectWithDBArguments is None:
-            objectWithDBArguments = self
-        job.addArguments("--drivername", objectWithDBArguments.drivername, "--hostname", objectWithDBArguments.hostname, \
-                        "--dbname", objectWithDBArguments.dbname, \
-                        "--db_user", objectWithDBArguments.db_user, "--db_passwd %s"%objectWithDBArguments.db_passwd)
-        if objectWithDBArguments.schema:
-            job.addArguments("--schema", objectWithDBArguments.schema)
-        if getattr(objectWithDBArguments, 'port', None):
-            job.addArguments("--port=%s"%(objectWithDBArguments.port))
         return job
 
     def addDBGenomeArgumentsToOneJob(self, job=None, objectWithDBArguments=None):
@@ -498,7 +297,6 @@ class AbstractWorkflow(Workflow):
         """
         if report:
             sys.stderr.write("Adding gzip jobs for %s input job data ... "%(len(inputData.jobDataLs)))
-
         returnData = PassingData(topOutputDirJob=None)
         returnData.jobDataLs = []
         if inputData:
@@ -576,54 +374,6 @@ class AbstractWorkflow(Workflow):
                         transferOutput=transferOutput, \
                         extraArgumentList=extraArgumentList, job_max_memory=job_max_memory, **keywords)
         return job
-    def getJVMMemRequirment(self, job_max_memory=5000, minMemory=2000, permSizeFraction=0,
-                        MaxPermSizeUpperBound=35000):
-        """
-        20170502 Java 8 does not support PermSize anymore. set permSizeFraction to 0.
-        2013.10.27 handle when job_max_memory is None and minMemory is None.
-        #2013.06.07 if a job's virtual memory (1.2X=self.jvmVirtualByPhysicalMemoryRatio, of memory request) exceeds request, it'll abort.
-            so set memRequirement accordingly.
-        2013.05.01 lower permSizeFraction from 0.4 to 0.2
-            minimum for MaxPermSize is now minMemory/2
-        2013.04.01
-            now job_max_memory = MaxPermSize + mxMemory, unless either is below minMemory
-            added argument permSizeFraction, MaxPermSizeUpperBound
-        2012.8.2
-            job_max_memory could be set by user to lower than minMemory.
-            but minMemory makes sure it's never too low.
-        """
-        if job_max_memory is None:
-            job_max_memory = 5000
-        if minMemory is None:
-            minMemory = 2000
-        #20170609 permSizeFraction is set to 0 due to newer Java no longer needs it.
-        permSizeFraction = 0
-        #MaxPermSize_user = int(job_max_memory*permSizeFraction)
-        mxMemory_user = int(job_max_memory*(1-permSizeFraction))
-        #MaxPermSize= min(MaxPermSizeUpperBound, max(minMemory/2, MaxPermSize_user))
-        #PermSize=MaxPermSize*3/4
-        mxMemory = max(minMemory, mxMemory_user)
-        msMemory = mxMemory*3/4
-        #-XX:+UseGCOverheadLimit
-            #Use a policy that limits the proportion of the VM's time that is spent in GC before an OutOfMemory error is thrown. (Introduced in 6.)
-        #-XX:-UseGCOverheadLimit would disable the policy.
-        memRequirementInStr = "-Xms%sm -Xmx%sm"%(msMemory, mxMemory)	# -XX:PermSize=%sm -XX:MaxPermSize=%sm"%\
-                    #, PermSize, MaxPermSize)
-        
-        memRequirement = int(mxMemory*self.jvmVirtualByPhysicalMemoryRatio)
-        #2013.06.07 if a job's virtual memory (1.2X of memory request) exceeds request, it'll abort.
-        return PassingData(memRequirementInStr=memRequirementInStr, memRequirement=memRequirement)
-
-    def scaleJobWalltimeOrMemoryBasedOnInput(self, realInputVolume=10, baseInputVolume=4, baseJobPropertyValue=120, \
-                                            minJobPropertyValue=120, maxJobPropertyValue=1440):
-        """
-        2013.04.04
-            assume it's integer
-            walltime is in minutes.
-        """
-        walltime = min(max(minJobPropertyValue, float(realInputVolume)/float(baseInputVolume)*baseJobPropertyValue), \
-                                    maxJobPropertyValue)	#in minutes
-        return PassingData(value=int(walltime))
 
     def addPlotLDJob(self, executable=None, inputFile=None, inputFileList=None, outputFile=None, \
                     outputFnamePrefix=None,
@@ -730,7 +480,7 @@ class AbstractWorkflow(Workflow):
 
         2013.07.26 added argument tax_id, sequence_type_id, chrOrder
         2013.05.27 remove argument positiveLog, rename logWhichColumn to logY
-        2012.10.6 use addGenericDBJob() instead of addGenericJob()
+        2012.10.6 use addDBJob() instead of addGenericJob()
         2012.8.31 add argument positiveLog and valueForNonPositiveYValue
         # whichColumnPlotLabel and xColumnPlotLabel should not contain spaces or ( or ). because they will disrupt shell commandline
 
@@ -796,7 +546,7 @@ class AbstractWorkflow(Workflow):
 
         if extraArguments:
             extraArgumentList.append(extraArguments)
-        job= self.addGenericDBJob(executable=executable, inputFile=None, outputFile=None, \
+        job= self.addDBJob(executable=executable, inputFile=None, outputFile=None, \
                 inputFileList=inputFileList, \
                 parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
                 extraOutputLs=extraOutputLs,\
@@ -1205,7 +955,8 @@ class AbstractWorkflow(Workflow):
                             extraArguments=extraArguments, transferOutput=transferOutput, job_max_memory=job_max_memory, \
                             **keywords)
 
-    def setupMoreOutputAccordingToSuffixAndNameTupleList(self, outputFnamePrefix=None, suffixAndNameTupleList=None, extraOutputLs=None, key2ObjectForJob=None):
+    def setupMoreOutputAccordingToSuffixAndNameTupleList(self, outputFnamePrefix=None, \
+            suffixAndNameTupleList=None, extraOutputLs=None, key2ObjectForJob=None):
         """
         2012.8.16
             split from addPlinkJob()
@@ -1224,15 +975,51 @@ class AbstractWorkflow(Workflow):
 if __name__ == '__main__':
     from argparse import ArgumentParser
     ap = ArgumentParser()
-    ap.add_argument("-i", "--input_file", type=str, required=True,
-                    help="the path to the input file.")
-    ap.add_argument("-o", "--output_file", type=str, required=True,
-                    help="the path to the output file.")
-    ap.add_argument("-s", "--source_code_dir", type=str, 
-            default=os.path.expanduser('~/src/mygit/'), 
-            help="the path to the source code dir. (default: %(default)s)")
+    ap.add_argument("-l", "--site_handler", type=str, required=True,
+            help="The name of the computing site where the jobs run and executables are stored. "
+            "Check your Pegasus configuration in submit.sh.")
+    ap.add_argument("-j", "--input_site_handler", type=str,
+            help="It is the name of the site that has all the input files."
+            "Possible values can be 'local' or same as site_handler."
+            "If not given, it is asssumed to be the same as site_handler and the input files will be symlinked into the running folder."
+            "If input_site_handler=local, the input files will be transferred to the computing site by pegasus-transfer.")
+    ap.add_argument("-C", "--clusters_size", type=int, default=30,
+            help="Default: %(default)s. "
+            "This number decides how many of pegasus jobs should be clustered into one job. "
+            "Good if your workflow contains many quick jobs. "
+            "It will reduce Pegasus monitor I/O.")
+    ap.add_argument("-o", "--output_path", type=str, required=True,
+            help="The path to the output file that will contain the Pegasus DAG.")
+    ap.add_argument("-F", "--pegasusFolderName", type=str,
+            help='The path relative to the workflow running root. '
+            'This folder will contain pegasus input & output. '
+            'It will be created during the pegasus staging process. '
+            'It is useful to separate multiple sub-workflows. '
+            'If empty or None, everything is in the pegasus root.')
+    ap.add_argument("--inputSuffixList", type=str,
+            help='Coma-separated list of input file suffices. Used to exclude input files.'
+            'If None, no exclusion. The dot is part of the suffix, .tsv not tsv.'
+            'Common zip suffices (.gz, .bz2, .zip, .bz) will be ignored in obtaining the suffix.')
+    ap.add_argument("--tmpDir", type=str, default='/tmp/',
+            help='Default: %(default)s. A local folder for some jobs (MarkDup) to store temp data.'
+                '/tmp/ can be too small sometimes.')
+    ap.add_argument("--max_walltime", type=int, default=4320,
+            help='Default: %(default)s. Maximum wall time for any job, in minutes. 4320=3 days.'
+            'Used in addGenericJob(). Most clusters have upper limit for runtime.')
+    ap.add_argument("--jvmVirtualByPhysicalMemoryRatio", type=float, default=1.2,
+            help='Default: %(default)s. '
+            'If a job virtual memory (usually 1.2X of JVM resident memory) exceeds request, '
+            "it will be killed on some clusters. This will make sure your job requests enough memory.")
+    ap.add_argument("--debug", action='store_true',
+            help='Toggle debug mode.')
+    ap.add_argument("--report", action='store_true',
+            help="Toggle verbose mode. Default: %(default)s.")
+    ap.add_argument("--needSSHDBTunnel", action='store_true',
+            help="If all DB-interacting jobs need a ssh tunnel to access a database that is inaccessible to computing nodes.")
     args = ap.parse_args()
-
-    main_class = AbstractWorkflow
-    instance = AbstractWorkflow(args.arguments, args.output_file)
-    instance.run()
+    instance = AbstractWorkflow(site_handler=args.site_handler, input_site_handler='ycondor', clusters_size=30, \
+            pegasusFolderName='folder', inputSuffixList=None, output_path=args.output_path, \
+            tmpDir='/tmp/', max_walltime=4320, jvmVirtualByPhysicalMemoryRatio=1.2,\
+            debug=False, needSSHDBTunnel=False, report=False)
+    instance.setup_run()
+    instance.end_run()

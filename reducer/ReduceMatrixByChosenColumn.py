@@ -58,7 +58,7 @@ class ReduceMatrixByChosenColumn(ReduceMatrixByMergeColumnsWithSameKey):
 		key = self.generateKey(row, keyColumnLs)
 		if key not in key2dataLs:
 			key2dataLs[key] = []	#0]*len(valueColumnLs)
-		for i in xrange(len(valueColumnLs)):
+		for i in range(len(valueColumnLs)):
 			columnIndex = valueColumnLs[i]
 			if columnIndex<len(row):
 				if len(key2dataLs[key])<=i:	#2012.1.17 extend it upon request.

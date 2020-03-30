@@ -120,7 +120,7 @@ def testVerticalSurface():
 	#remove the gap in x & y
 	needed_index_ls = [0,5]
 	#for i in [0, 5]:
-	#	for j in xrange(no_of_phenotypes):
+	#	for j in range(no_of_phenotypes):
 	#		needed_index_ls.append(no_of_phenotypes*i+j)
 	#for i in range(0, no_of_phenotypes):
 	#	needed_index_ls.append(2*i)

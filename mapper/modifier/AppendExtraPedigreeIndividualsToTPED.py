@@ -22,10 +22,10 @@ import csv
 from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils, MatrixFile
 from pymodule.mapper.filter.ModifyTPED import ModifyTPED
 
-parentClass = ModifyTPED
-class AppendExtraPedigreeIndividualsToTPED(parentClass):
+ParentClass = ModifyTPED
+class AppendExtraPedigreeIndividualsToTPED(ParentClass):
 	__doc__ = __doc__
-	option_default_dict = parentClass.option_default_dict.copy()
+	option_default_dict = ParentClass.option_default_dict.copy()
 	option_default_dict.pop(('run_type', 1, int))
 	option_default_dict.pop(('mendelErrorFname', 0, ))
 	option_default_dict.pop(('newChr', 0, ))
@@ -35,7 +35,7 @@ class AppendExtraPedigreeIndividualsToTPED(parentClass):
 	def __init__(self,  **keywords):
 		"""
 		"""
-		parentClass.__init__(self, **keywords)
+		ParentClass.__init__(self, **keywords)
 	
 	
 	def run(self):

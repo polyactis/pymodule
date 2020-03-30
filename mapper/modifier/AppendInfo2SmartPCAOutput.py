@@ -82,7 +82,7 @@ class AppendInfo2SmartPCAOutput(AbstractVervetMapper):
 		reader = MatrixFile(inputFname)
 		header = reader.next()
 		newHeader = ['individualID']
-		for i in xrange(1, len(header)):
+		for i in range(1, len(header)):
 			newHeader.append('PC%s'%(i))
 		newHeader.extend(['sex|string', 'country|string', 'site-id', 'site-name|string', 'latitude', 'longitude', 'ucla_id|string', \
 						'tax_id|string',\

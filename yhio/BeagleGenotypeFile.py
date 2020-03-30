@@ -22,7 +22,7 @@ Description:
 		
 		for individualID, firstHaplotypeIndex in beagleFile.snpData.col_id2col_index.iteritems():
 			haplotypeList = []
-			for j in xrange(firstHaplotypeIndex, firstHaplotypeIndex+self.ploidy):
+			for j in range(firstHaplotypeIndex, firstHaplotypeIndex+self.ploidy):
 				haplotypeList.append(beagleFile.snpData.data_matrix[:,j]) 
 			# another way
 			#haplotypeList = beagleFile.getHaplotypeListOfOneSample(individualID)
@@ -109,19 +109,19 @@ class BeagleGenotypeFile(MatrixFile):
 		headerLineData = self.next()
 		if headerLineData.lineIndicator=='I':
 			self.header = headerLineData.genotypeList
-			for i in xrange(2,len(self.header), self.ploidy):
+			for i in range(2,len(self.header), self.ploidy):
 				self.sampleIDList.append(self.header[i])
 		else:
 			if headerLineData.lineIndicator=='M':	#there is no header line. roll back to beginning
 				self.csvFile.seek(0)
 			#make up a header
 			self.header = []
-			for i in xrange(0, len(headerLineData.genotypeList),self.ploidy):
+			for i in range(0, len(headerLineData.genotypeList),self.ploidy):
 				sampleID = 'sampleColumn%s'%(i)
 				self.sampleIDList.append(sampleID)
-				for j in xrange(self.ploidy):	#same samples in multiple columns
+				for j in range(self.ploidy):	#same samples in multiple columns
 					self.header.append(sampleID)
-		for i in xrange(len(self.header)):
+		for i in range(len(self.header)):
 			sampleID = self.header[i]
 			if sampleID not in self.col_name2index:
 				self.col_name2index[sampleID] = i	# only first haplotype is recorded if ploidy >1
@@ -139,7 +139,7 @@ class BeagleGenotypeFile(MatrixFile):
 		self._completeSNPData()
 		haplotypeList = []
 		firstHaplotypeIndex = self.snpData.col_id2col_index.get(sampleID)
-		for j in xrange(firstHaplotypeIndex, firstHaplotypeIndex+self.ploidy):
+		for j in range(firstHaplotypeIndex, firstHaplotypeIndex+self.ploidy):
 			#
 			haplotypeList.append(self.snpData.data_matrix[:,j])
 		return haplotypeList
@@ -170,7 +170,7 @@ class BeagleGenotypeFile(MatrixFile):
 		sampleStartIndex = self.getSampleIndexGivenSampleID(sampleID)
 		locusIndex = self.snpData.row_id2row_index.get(locusID)
 		sampleIndexList = []
-		for i in xrange(sampleStartIndex, sampleStartIndex+self.ploidy):
+		for i in range(sampleStartIndex, sampleStartIndex+self.ploidy):
 			sampleIndexList.append(i)
 		return self.snpData.data_matrix[locusIndex, sampleIndexList]
 	
@@ -252,7 +252,7 @@ class BeagleGenotypeFile(MatrixFile):
 								(repr(self.sampleIDList[:3]), repr(self.locusIDList[:3]),  ))
 				raise
 		self.writerow(['I', 'id'] + self.sampleIDList)
-		for i in xrange(len(self.locusIDList)):
+		for i in range(len(self.locusIDList)):
 			locusID = self.locusIDList[i]
 			genotypeList = self.haplotypeMatrix[i:]
 			oneRow = ['M', locusID] + genotypeList

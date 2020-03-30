@@ -22,16 +22,16 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 from pymodule import ProcessOptions, MatrixFile, PassingData
 from pymodule.pegasus.mapper.AbstractMapper import AbstractMapper
 
-parentClass = AbstractMapper
-class CalculateLociAndGenomeCoveredAtEachSwitchFrequencyThreshold(parentClass):
+ParentClass = AbstractMapper
+class CalculateLociAndGenomeCoveredAtEachSwitchFrequencyThreshold(ParentClass):
 	__doc__ = __doc__
-	option_default_dict = parentClass.option_default_dict.copy()
+	option_default_dict = ParentClass.option_default_dict.copy()
 	option_default_dict.update({
 				})
 	def __init__(self, inputFnameLs=None, **keywords):
 		"""
 		"""
-		parentClass.__init__(self, inputFnameLs=inputFnameLs, **keywords)
+		ParentClass.__init__(self, inputFnameLs=inputFnameLs, **keywords)
 	
 	def readInStats(self, inputFname=None):
 		"""
@@ -93,7 +93,7 @@ class CalculateLociAndGenomeCoveredAtEachSwitchFrequencyThreshold(parentClass):
 		maxSwitchFrequencyLs = []
 		cumulativeRegionSpanLs = []
 		cumulativeNoOfLociLs = []
-		for i in xrange(len(data_matrix)):
+		for i in range(len(data_matrix)):
 			switchFrequency, regionSpan, noOfLoci = data_matrix[i]
 			maxSwitchFrequencyLs.append(switchFrequency)
 			if i==0:

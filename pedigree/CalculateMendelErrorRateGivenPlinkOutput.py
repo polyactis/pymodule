@@ -39,11 +39,11 @@ from pymodule.yhio.MatrixFile import MatrixFile
 from pymodule.yhio.PlinkPedigreeFile import PlinkPedigreeFile
 from pymodule.pegasus.mapper.AbstractMapper import AbstractMapper
 
-parentClass = AbstractMapper
-class CalculateMendelErrorRateGivenPlinkOutput(parentClass):
+ParentClass = AbstractMapper
+class CalculateMendelErrorRateGivenPlinkOutput(ParentClass):
 	__doc__ = __doc__
 	
-	option_default_dict = parentClass.option_default_dict
+	option_default_dict = ParentClass.option_default_dict
 	option_default_dict.update({
 			('inputMendelErrorColumnHeader', 0, ): ["meanMendelError", '', 1, 'stat column header in inputFname, \n\
 	to be divided by the number of nuclear families with both parents in pedigree'],\
@@ -56,7 +56,7 @@ class CalculateMendelErrorRateGivenPlinkOutput(parentClass):
 	def __init__(self, inputFnameLs=None, **keywords):
 		"""
 		"""
-		parentClass.__init__(self, inputFnameLs=inputFnameLs, **keywords)
+		ParentClass.__init__(self, inputFnameLs=inputFnameLs, **keywords)
 	
 	def getNoOfFamiliesAndKidsGivenParentSetSize(self, noOfParents2FamilyData=None, parentSetSize=2):
 		"""

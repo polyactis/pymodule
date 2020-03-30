@@ -26,10 +26,10 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 from pymodule import ProcessOptions, utils
 from pymodule.yhio.AbstractGenomeFileWalker import AbstractGenomeFileWalker
 
-parentClass = AbstractGenomeFileWalker
-class OutputGenomeAnnotation(parentClass):
+ParentClass = AbstractGenomeFileWalker
+class OutputGenomeAnnotation(ParentClass):
 	__doc__ = __doc__
-	option_default_dict = parentClass.option_default_dict.copy()
+	option_default_dict = ParentClass.option_default_dict.copy()
 	#option_default_dict.update(AbstractMapper.db_option_dict.copy())
 	option_default_dict.pop(('inputFname', 0, ))
 	option_default_dict.update({
@@ -41,7 +41,7 @@ class OutputGenomeAnnotation(parentClass):
 	def __init__(self, inputFnameLs=None, **keywords):
 		"""
 		"""
-		parentClass.__init__(self, inputFnameLs=inputFnameLs, **keywords)	#self.connectDB() called within its __init__()
+		ParentClass.__init__(self, inputFnameLs=inputFnameLs, **keywords)	#self.connectDB() called within its __init__()
 		self.annotation_type_id_list = utils.getListOutOfStr(list_in_str=self.annotation_type_id_list, data_type=int)
 		self.annotation_type_id_set = set(self.annotation_type_id_list)
 	
@@ -49,7 +49,7 @@ class OutputGenomeAnnotation(parentClass):
 		"""
 		2013.08.28
 		"""
-		parentClass.setup(self, **keywords)
+		ParentClass.setup(self, **keywords)
 		
 		header = [self.chromosomeHeader, self.positionHeader, "genome_annotation_type_id", self.whichColumnHeader]
 		self.writer.writerow(header)
@@ -62,7 +62,7 @@ class OutputGenomeAnnotation(parentClass):
 			for genome_annotation in annot_assembly.genome_annotation_list:
 				if genome_annotation.genome_annotation_type_id in self.annotation_type_id_set:
 					real_counter += 1
-					for i in xrange(genome_annotation.start, genome_annotation.stop+1):
+					for i in range(genome_annotation.start, genome_annotation.stop+1):
 						annotation_row = [annot_assembly.chromosome, i, genome_annotation.genome_annotation_type_id, 1]
 						self.writer.writerow(annotation_row)
 						counter += 1

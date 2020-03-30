@@ -88,7 +88,7 @@ class PlotLD(AbstractPlot):
 		writer = csv.writer(outf, delimiter='\t')
 		header = ['distance', 'reducedR2']
 		writer.writerow(header)
-		for i in xrange(len(n_x_ls)):
+		for i in range(len(n_x_ls)):
 			data_row = [n_x_ls[i], n_y_ls[i]]
 			writer.writerow(data_row)
 		del writer

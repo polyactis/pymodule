@@ -520,7 +520,7 @@ def getSuccinctStrOutOfList(ls=None, step=1, separator=','):
     #ls_copy[0]
     spanStopValue = None
     span_tuple_ls = []
-    for i in xrange(len(ls_copy)):
+    for i in range(len(ls_copy)):
         if spanStartValue is None:
             spanStartValue = ls_copy[i]
             spanStopValue = spanStartValue

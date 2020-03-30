@@ -5,7 +5,7 @@ An example Pegasus workflow that does not use class.
 import copy
 import sys, os
 from argparse import ArgumentParser
-from pegapy3.DAX3 import Executable, File, PFN, Profile, Namespace, Link, ADAG, Use, Job, Dependency
+from pegaflow.DAX3 import Executable, File, PFN, Profile, Namespace, Link, ADAG, Use, Job, Dependency
 
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/src')))

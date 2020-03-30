@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Examples:
 	%s 
@@ -121,7 +121,7 @@ class YHTable(tables.Table, YHTableInHDF5Group):
 		self.rowID2rowIndex = {}
 		self.colIDList = []
 		self.colID2colIndex = {}
-		for i in xrange(len(self.colnames)):
+		for i in range(len(self.colnames)):
 			colID = self.colnames[i]
 			self.colIDList.append(colID)
 			self.colID2colIndex[colID] = i
@@ -184,7 +184,7 @@ class YHTable(tables.Table, YHTableInHDF5Group):
 				4: raw dictionary. access by oneCell[colname]
 		"""
 		row = self.row
-		for i in xrange(len(self.colnames)):	#assuming data in oneCell is in the same order as tableObject.colnames
+		for i in range(len(self.colnames)):	#assuming data in oneCell is in the same order as tableObject.colnames
 			colname = self.colnames[i]
 			if colname=='id':	#auto-increment the ID column if it exists
 				self.no_of_rows += 1
@@ -770,7 +770,7 @@ class YHFile(tables.File, HDF5MatrixFile):
 		tableObject.writeOneCell(oneCell, cellType=cellType)
 		"""
 		row = tableObject.row
-		for i in xrange(len(tableObject.colnames)):	#assuming data in oneCell is in the same order as tableObject.colnames
+		for i in range(len(tableObject.colnames)):	#assuming data in oneCell is in the same order as tableObject.colnames
 			colname = tableObject.colnames[i]
 			row[colname] = oneCell[i]
 		row.append()
@@ -845,7 +845,7 @@ def castPyTablesEntryIntoPassingData(entry=None):
 		
 	"""
 	pdata = PassingData()
-	for i in xrange(len(entry.dtype.names)):
+	for i in range(len(entry.dtype.names)):
 		colname = entry.dtype.names[i]
 		setattr(pdata, colname, entry[i])
 	return pdata

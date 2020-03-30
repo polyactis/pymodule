@@ -173,7 +173,7 @@ class DataMatrixGuiXYProbe(gtk.Window):
 		splitP= re.compile(r'([,/|\.\-_=\?:;"\'^%$@+])')	#any single character included could be used as splitter
 		self.dataLabelColumnIndexAndSeparatorList = splitP.split(inputText)
 		self.dataLabelNumericItemIndexList = []
-		for i in xrange(len(self.dataLabelColumnIndexAndSeparatorList)):
+		for i in range(len(self.dataLabelColumnIndexAndSeparatorList)):
 			if not splitP.match(self.dataLabelColumnIndexAndSeparatorList[i]):	#it's a column index
 				self.dataLabelColumnIndexAndSeparatorList[i] = int(self.dataLabelColumnIndexAndSeparatorList[i])
 				self.dataLabelNumericItemIndexList.append(i)
@@ -306,7 +306,7 @@ class DataMatrixGuiXYProbe(gtk.Window):
 		
 		self.dataLabelColumnIndexAndSeparatorList = splitP.split(inputText)
 		self.dataLabelNumericItemIndexList = []
-		for i in xrange(len(self.dataLabelColumnIndexAndSeparatorList)):
+		for i in range(len(self.dataLabelColumnIndexAndSeparatorList)):
 			if not splitP.match(self.dataLabelColumnIndexAndSeparatorList[i]):	#it's a column index
 				self.dataLabelColumnIndexAndSeparatorList[i] = int(self.dataLabelColumnIndexAndSeparatorList[i])
 				self.dataLabelNumericItemIndexList.append(i)
@@ -608,7 +608,7 @@ class DataMatrixGuiXYProbe(gtk.Window):
 		self.columnTypes[0] = int
 		self.columnEditableFlagList = [False]*(no_of_cols+1)
 		
-		for i in xrange(no_of_cols):
+		for i in range(no_of_cols):
 			header = dataHeaders[i]
 			tmp_ls = header.split('|')
 			columnHeader = tmp_ls[0]
@@ -656,7 +656,7 @@ class DataMatrixGuiXYProbe(gtk.Window):
 				if random.random()>sampling_probability:	#skip
 					continue
 			new_row = ['']*(len(row)+1)	#first column is the order of data
-			for i in xrange(len(row)):
+			for i in range(len(row)):
 				try:
 					new_row[i+1] = self.columnTypes[i+1](row[i])
 				except:

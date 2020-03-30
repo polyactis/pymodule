@@ -180,7 +180,7 @@ class TAIRGeneXML2GenomeDB:
 		
 		# 2010-8-18 get all the introns
 		no_of_exons = len(EXON_box_ls)
-		for i in xrange(no_of_exons):
+		for i in range(no_of_exons):
 			EXON = EXON_box_ls[i]
 			start, stop = EXON[:2]
 			gene_segment = GeneSegment(start=min(start, stop), stop=max(start, stop))

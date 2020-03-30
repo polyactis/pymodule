@@ -9,7 +9,7 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import copy
-from pegapy3.DAX3 import Executable, File, PFN, Link, Job
+from pegaflow.DAX3 import Executable, File, PFN, Link, Job
 from pymodule import Genome, getListOutOfStr, PassingData, utils
 from pymodule.yhio.MatrixFile import MatrixFile
 from pymodule.yhio.VCFFile import VCFFile
@@ -271,8 +271,9 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 			suffixAndNameTupleList.append(['_unit%s.vcf'%(i), 'unit%s'%(i)])
 		if extraArguments:
 			extraArgumentList.append(extraArguments)
-		self.setupMoreOutputAccordingToSuffixAndNameTupleList(outputFnamePrefix=outputFnamePrefix, suffixAndNameTupleList=suffixAndNameTupleList, \
-													extraOutputLs=extraOutputLs, key2ObjectForJob=key2ObjectForJob)
+		self.setupMoreOutputAccordingToSuffixAndNameTupleList(outputFnamePrefix=outputFnamePrefix, \
+			suffixAndNameTupleList=suffixAndNameTupleList, \
+			extraOutputLs=extraOutputLs, key2ObjectForJob=key2ObjectForJob)
 		
 		job = self.addGenericJob(executable=executable, inputFile=inputFile, outputFile=None, \
 				parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \

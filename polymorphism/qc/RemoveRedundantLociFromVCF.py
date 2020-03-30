@@ -25,16 +25,16 @@ from pymodule import SNP
 from pymodule.yhio.SNP import nt2number
 from CalculateSameSiteConcordanceInVCF import CalculateSameSiteConcordanceInVCF
 
-parentClass = CalculateSameSiteConcordanceInVCF
-class RemoveRedundantLociFromVCF(parentClass):
+ParentClass = CalculateSameSiteConcordanceInVCF
+class RemoveRedundantLociFromVCF(ParentClass):
 	__doc__ = __doc__
-	option_default_dict = parentClass.option_default_dict.copy()
+	option_default_dict = ParentClass.option_default_dict.copy()
 	option_default_dict.update({
 						})
 	def __init__(self, inputFnameLs=None, **keywords):
 		"""
 		"""
-		parentClass.__init__(self, inputFnameLs=inputFnameLs, **keywords)
+		ParentClass.__init__(self, inputFnameLs=inputFnameLs, **keywords)
 	
 	def run(self):
 		if self.debug:

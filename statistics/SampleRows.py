@@ -113,9 +113,9 @@ class SampleRows(AbstractMatrixFileWalker):
 								sampledRowIndexSet.add(randomIndex)
 					sampledRowIndexList = list(sampledRowIndexSet)
 			else:
-				sampledRowIndexList = random.sample(xrange(noOfTotalRows), self.sampleSize)
+				sampledRowIndexList = random.sample(range(noOfTotalRows), self.sampleSize)
 		else:	#take all
-			sampledRowIndexList = xrange(noOfTotalRows)
+			sampledRowIndexList = range(noOfTotalRows)
 		for i in sampledRowIndexList:
 			row = self.data_matrix[i]
 			self.invariantPData.writer.writerow(row)

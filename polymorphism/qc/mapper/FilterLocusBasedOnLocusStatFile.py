@@ -21,10 +21,10 @@ from pymodule import ProcessOptions, MatrixFile, PassingData
 from pymodule.yhio.VCFFile import VCFFile
 from pymodule.pegasus.mapper.AbstractVCFMapper import AbstractVCFMapper
 
-parentClass = AbstractVCFMapper
-class FilterLocusBasedOnLocusStatFile(parentClass):
+ParentClass = AbstractVCFMapper
+class FilterLocusBasedOnLocusStatFile(ParentClass):
 	__doc__ = __doc__
-	option_default_dict = parentClass.option_default_dict.copy()
+	option_default_dict = ParentClass.option_default_dict.copy()
 	option_default_dict.update({
 						('runType', 1, int): ['', '', 1, ' runType 1: locus missing fraction, header is (locusID, occurrence_byFixedValue).', ],\
 						('statFname', 1, ): ['', '', 1, ' locus statistics file, usually one locus per line, depending on runType.', ],\
@@ -34,7 +34,7 @@ class FilterLocusBasedOnLocusStatFile(parentClass):
 	def __init__(self, inputFnameLs=None, **keywords):
 		"""
 		"""
-		parentClass.__init__(self, inputFnameLs=inputFnameLs, **keywords)
+		ParentClass.__init__(self, inputFnameLs=inputFnameLs, **keywords)
 		
 		self.getLocusID2StatFunctionDict = {1: self.getLocusID2MissingFraction,}
 	

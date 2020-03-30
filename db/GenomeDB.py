@@ -543,7 +543,7 @@ class GeneCommentary(Entity):
 			sequence = self.getSequence([[self.start, firstBoxStart-1]])
 			outf.write("%s"%(sequence.lower()))
 		
-		for i in xrange(len(box_ls)):
+		for i in range(len(box_ls)):
 			box = box_ls[i]
 			sequence = self.getSequence([[box[0], box[1]]])
 			outf.write("%s"%(sequence.upper()))
@@ -1343,7 +1343,7 @@ class GenomeDatabase(ElixirDB):
 											intron_number = 0,\
 											utr_number = 0,\
 											exon_number = 0)
-					for i in xrange(no_of_boxes):
+					for i in range(no_of_boxes):
 						if row.strand == "-1":	#reverse
 							box = box_ls[-i-1]
 						else:

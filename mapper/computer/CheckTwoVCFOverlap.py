@@ -172,7 +172,7 @@ class CheckTwoVCFOverlap(AbstractVCFMapper):
 		for locus_id in overlapping_sites_set:
 			row_index1 = vcfFile1.locus_id2row_index[locus_id]
 			row_index2 = vcfFile2.locus_id2row_index[locus_id]
-			for j in xrange(len(overlapping_sample_id_list)):
+			for j in range(len(overlapping_sample_id_list)):
 				sample_id = overlapping_sample_id_list[j]
 				col_index1 = vcfFile1.sample_id2index.get(sample_id)
 				col_index2 = vcfFile2.sample_id2index.get(sample_id)
@@ -187,12 +187,12 @@ class CheckTwoVCFOverlap(AbstractVCFMapper):
 						#do nothing
 						pass
 		matchFractionLs = [-1]*no_of_samples_to_compare
-		for j in xrange(no_of_samples_to_compare):
+		for j in range(no_of_samples_to_compare):
 			if no_of_non_NA_pairs_per_sample_ls[j]>0:
 				matchFractionLs[j] = no_of_matches_per_sample_ls[j]/float(no_of_non_NA_pairs_per_sample_ls[j])
 		
 		writer.writerow(header)
-		for i in xrange(no_of_samples_to_compare):
+		for i in range(no_of_samples_to_compare):
 			data_row = [overlapping_sample_id_list[i], no_of_matches_per_sample_ls[i], no_of_non_NA_pairs_per_sample_ls[i],\
 					matchFractionLs[i]]
 			writer.writerow(data_row)

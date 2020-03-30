@@ -36,10 +36,10 @@ from pymodule import SNP
 import pysam
 import numpy
 
-parentClass = AbstractVCFMapper
-class MarkGenotypeMissingByAlignmentQuality(parentClass):
+ParentClass = AbstractVCFMapper
+class MarkGenotypeMissingByAlignmentQuality(ParentClass):
 	__doc__ = __doc__
-	option_default_dict = parentClass.option_default_dict.copy()
+	option_default_dict = ParentClass.option_default_dict.copy()
 	option_default_dict.update({
 					('alignmentFilename', 1, ): [None, '', 1, 'alignment file in bam format corresponding to the sample in VCF file', ],\
 					('alignmentMedianDepth', 1, float): [None, '', 1, 'global median coverage of the alignment file', ],\
@@ -52,7 +52,7 @@ class MarkGenotypeMissingByAlignmentQuality(parentClass):
 	def __init__(self, inputFnameLs=None, **keywords):
 		"""
 		"""
-		parentClass.__init__(self, inputFnameLs=inputFnameLs, **keywords)
+		ParentClass.__init__(self, inputFnameLs=inputFnameLs, **keywords)
 		
 		if not self.sampleID:
 			self.sampleID = os.path.basename(self.alignmentFilename)

@@ -218,7 +218,7 @@ class DiGraphWrapper(DiGraph, GraphWrapper):
 		"""
 		shortestPath = nx.astar_path(self.undirectedGraph, source=nodeID1, target=nodeID2)
 		pathWithDirection = []
-		for i in xrange(len(shortestPath)-1):
+		for i in range(len(shortestPath)-1):
 			if self.has_edge(shortestPath[i], shortestPath[i+1]):
 				edgeDirection = +1
 			elif self.has_edge(shortestPath[i+1], shortestPath[i]):

@@ -75,7 +75,7 @@ class JuxtaposeAlleleFrequencyFromMultiVCFInput(AbstractVCFMapper):
 		for locus_id in locus_id_list:
 			locus_id_str_ls = map(str, locus_id)
 			data_row = ['_'.join(locus_id_str_ls)]
-			for i in xrange(len(locus2frequencyList)):
+			for i in range(len(locus2frequencyList)):
 				locus2frequency = locus2frequencyList[i]
 				frequency = locus2frequency.get(locus_id, defaultNullFrequency)
 				data_row.append(frequency)

@@ -106,7 +106,7 @@ class ExtractSamplesFromVCF(AbstractVervetMapper):
 			newHeaderLength = len(newHeader)
 			for vcfRecord in vcfFile:
 				data_row =vcfRecord.row[:vcfFile.sampleStartingColumn]
-				for i in xrange(vcfFile.sampleStartingColumn, oldHeaderLength):
+				for i in range(vcfFile.sampleStartingColumn, oldHeaderLength):
 					if i in col_index2sampleID:
 						data_row.append(vcfRecord.row[i])
 				outVCFFile.writer.writerow(data_row)

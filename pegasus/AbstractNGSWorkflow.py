@@ -8,7 +8,7 @@ import sys, os, math
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.expanduser('~/script'))
 
-from pegapy3.DAX3 import Executable, File, PFN, Link, Job
+from pegaflow.DAX3 import Executable, File, PFN, Link, Job
 from pymodule import Genome, utils
 from pymodule import ProcessOptions
 from pymodule.Genome import IntervalData
@@ -542,7 +542,7 @@ class AbstractNGSWorkflow(ParentClass):
             sys.stderr.write("Error: CreateSequenceDictionaryJar is nothing (%s) inside addRefFastaDictJob(). Quit.\n"%\
                             (CreateSequenceDictionaryJar))
             raise
-        fastaDictJob = self.addGenericJavaJob(executable=CreateSequenceDictionaryJava, jarFile=CreateSequenceDictionaryJar, \
+        fastaDictJob = self.addJavaJob(executable=CreateSequenceDictionaryJava, jarFile=CreateSequenceDictionaryJar, \
                     inputFile=refFastaF, inputArgumentOption="REFERENCE=", \
                     inputFileList=None, argumentForEachFileInInputFileList=None,\
                     outputFile=refFastaDictF, outputArgumentOption="OUTPUT=",\
@@ -887,7 +887,7 @@ class AbstractNGSWorkflow(ParentClass):
         extraOutputLs.append(logFile)
         key2ObjectForJob['logFile'] = logFile	#this would be accessible as job.logFile
 
-        job = self.addGenericJavaJob(executable=executable, jarFile=BeagleJar, \
+        job =self.addJavaJob(executable=executable, jarFile=BeagleJar, \
                     inputFile=None, inputArgumentOption=None, \
                     inputFileList=None, argumentForEachFileInInputFileList=None,\
                     outputFile=None, outputArgumentOption=None,\
@@ -1570,11 +1570,12 @@ class AbstractNGSWorkflow(ParentClass):
         return job
 
     def addReadGroupInsertionJob(self, workflow=None, individual_alignment=None, inputBamFile=None, \
-                                outputBamFile=None,\
-                                AddOrReplaceReadGroupsJava=None, AddOrReplaceReadGroupsJar=None,\
-                                parentJobLs=None, extraDependentInputLs=None, \
-                                extraArguments=None, job_max_memory = 2500, transferOutput=False, walltime=180, max_walltime=1200, \
-                                needBAMIndexJob=True, **keywords):
+                    outputBamFile=None,\
+                    AddOrReplaceReadGroupsJava=None, AddOrReplaceReadGroupsJar=None,\
+                    parentJobLs=None, extraDependentInputLs=None, \
+                    extraArguments=None, job_max_memory = 2500, \
+                    transferOutput=False, walltime=180, max_walltime=1200, \
+                    needBAMIndexJob=True, **keywords):
         """
         2013.04.09 moved from ShortRead2AlignmentWorkflow.py
             added argument needBAMIndexJob and the bamIndexJob
@@ -1609,13 +1610,13 @@ class AbstractNGSWorkflow(ParentClass):
         extraDependentInputLs.extend([inputBamFile, AddOrReplaceReadGroupsJar])
 
         job= self.addGenericJob(executable=AddOrReplaceReadGroupsJava, inputFile=None,\
-                            outputFile=None, outputArgumentOption="-o", \
-                            parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
-                            extraOutputLs=[outputBamFile],\
-                            transferOutput=transferOutput, \
-                            extraArgumentList=extraArgumentList, \
-                            job_max_memory=memRequirementData.memRequirement, walltime=walltime, max_walltime=max_walltime,\
-                            **keywords)
+                    outputFile=None, outputArgumentOption="-o", \
+                    parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
+                    extraOutputLs=[outputBamFile],\
+                    transferOutput=transferOutput, \
+                    extraArgumentList=extraArgumentList, \
+                    job_max_memory=memRequirementData.memRequirement, walltime=walltime, max_walltime=max_walltime,\
+                    **keywords)
         if needBAMIndexJob:
             # add the index job on the bam file
             bamIndexJob = self.addBAMIndexJob(BuildBamIndexFilesJava=self.BuildBamIndexFilesJava, \
@@ -1776,8 +1777,9 @@ class AbstractNGSWorkflow(ParentClass):
         if extraArguments:
             extraArgumentList.append(extraArguments)
 
-        #self.setupMoreOutputAccordingToSuffixAndNameTupleList(outputFnamePrefix=outputFnamePrefix, suffixAndNameTupleList=suffixAndNameTupleList, \
-        #											extraOutputLs=extraOutputLs, key2ObjectForJob=key2ObjectForJob)
+        #self.setupMoreOutputAccordingToSuffixAndNameTupleList(outputFnamePrefix=outputFnamePrefix, \
+        #       suffixAndNameTupleList=suffixAndNameTupleList, \
+        #		extraOutputLs=extraOutputLs, key2ObjectForJob=key2ObjectForJob)
         job= self.addGenericJob(executable=executable, inputFile=vcf1, outputFile=outputFile, \
                         parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
                         extraOutputLs=extraOutputLs,\
@@ -2613,7 +2615,7 @@ Contig966       3160    50
                     job_max_memory=10, sshDBTunnel=0, **keywords):
         """
         2013.08.06 added extraArgumentList
-        2013.3.24 use addGenericFile2DBJob()
+        2013.3.24 use addData2DBJob()
         2012.5.8 add sshDBTunnel
         2012.4.3
         """
@@ -2628,7 +2630,7 @@ Contig966       3160    50
             extraArgumentList.append(extraArguments)
         if inputFileList:
             extraDependentInputLs.extend(inputFileList)
-        job = self.addGenericFile2DBJob(workflow=workflow, executable=executable, \
+        job = self.addData2DBJob(workflow=workflow, executable=executable, \
                     inputFile=inputFile, inputArgumentOption=inputArgumentOption, \
                     inputFileList=inputFileList, \
                     outputFile=outputFile, outputArgumentOption=outputArgumentOption, \
@@ -2640,7 +2642,7 @@ Contig966       3160    50
                     key2ObjectForJob=key2ObjectForJob, objectWithDBArguments=self, **keywords)
         return job
 
-    def addSamtoolsFlagstatJob(self, workflow=None, executable=None, samtoolsExecutableFile=None, \
+    def addSamtoolsFlagstatJob(self, executable=None, samtoolsExecutableFile=None, \
                     inputFile=None, outputFile=None, \
                     parentJobLs=None, extraDependentInputLs=None, transferOutput=False, \
                     extraArguments=None, job_max_memory=2000, walltime=120, **keywords):
@@ -2656,8 +2658,8 @@ Contig966       3160    50
         if extraDependentInputLs is None:
             extraDependentInputLs = []
         extraDependentInputLs.append(inputFile)
-        job = self.addGenericPipeCommandOutput2FileJob(workflow=workflow, executable=executable, \
-                    executableFile=samtoolsExecutableFile, \
+        job = self.addPipeCommandOutput2FileJob(executable=executable, \
+                    commandFile=samtoolsExecutableFile, \
                     outputFile=outputFile, \
                     parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
                     extraOutputLs=None, transferOutput=transferOutput, \
@@ -2786,7 +2788,7 @@ Contig966       3160    50
                 if alignmentOutput:
                     alignmentOutputLs.append(alignmentOutput)
                         #2013.04.01
-            merge_sam_job = self.addGenericJavaJob(executable=MergeSamFilesJava, jarFile=self.PicardJar, \
+            merge_sam_job = self.addJavaJob(executable=MergeSamFilesJava, jarFile=self.PicardJar, \
                     inputFile=None, inputArgumentOption=None, \
                     inputFileList=alignmentOutputLs, argumentForEachFileInInputFileList="INPUT=",\
                     outputFile=outputBamFile, outputArgumentOption="OUTPUT=",\

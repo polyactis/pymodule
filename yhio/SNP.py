@@ -1079,10 +1079,10 @@ class SNPData(object):
 
 
 			header = ['rowID|string', 'DummyTime|string']
-			for i in xrange(noOfPCsToOutput):
+			for i in range(noOfPCsToOutput):
 				header.append('PC%s'%(i+1))
 			writer.writeHeader(header)
-			for i in xrange(min(len(self.row_id_ls), T.shape[0])):
+			for i in range(min(len(self.row_id_ls), T.shape[0])):
 				row_id = self.row_id_ls[i]
 				if hasattr(T, 'mask'):
 					TVector = T[i, 0:noOfPCsToOutput].tolist()
@@ -1100,7 +1100,7 @@ class SNPData(object):
 		"""
 		snpData = SNPData(row_id_ls=copy.deepcopy(row_id_ls), col_id_ls=copy.deepcopy(self.col_id_ls),\
 						data_matrix=copy.deepcopy(self.data_matrix))
-		for i in xrange(len(row_id_ls)):
+		for i in range(len(row_id_ls)):
 			row_id = row_id_ls[i]
 			
 			oldRowIndex = self.row_id2row_index.get(row_id)
@@ -1113,7 +1113,7 @@ class SNPData(object):
 		"""
 		snpData = SNPData(row_id_ls=copy.deepcopy(self.row_id_ls), col_id_ls=copy.deepcopy(col_id_ls), \
 						data_matrix=copy.deepcopy(self.data_matrix))
-		for i in xrange(len(col_id_ls)):
+		for i in range(len(col_id_ls)):
 			col_id = col_id_ls[i]
 			
 			oldColIndex = self.col_id2col_index.get(col_id)
@@ -1246,8 +1246,8 @@ class SNPData(object):
 		if no_of_rows!=no_of_cols:
 			sys.stderr.write("matrix is not symmetric. no_of_rows=%s, no_of_cols=%s. Skip.\n"%(no_of_rows, no_of_cols))
 			return
-		for i in xrange(no_of_rows):
-			for j in xrange(i+1, no_of_rows):
+		for i in range(no_of_rows):
+			for j in range(i+1, no_of_rows):
 				if self.data_matrix[i][j]==missingDataValue:
 					row_i_id = self.row_id_ls[i]
 					row_j_id = self.row_id_ls[j]
@@ -1279,7 +1279,7 @@ class SNPData(object):
 		
 		new_row_id_ls = []
 		slice_index_ls = []
-		for i in xrange(no_of_rows):
+		for i in range(no_of_rows):
 			row_id = self.row_id_ls[i]
 			if row_id in to_be_removed_row_id_set:
 				continue
@@ -1650,7 +1650,7 @@ class SNPData(object):
 		# but if col-id is already chr_pos, it's fine.
 		new_col_id_ls = []
 		data_matrix_col_index_to_be_kept = []
-		for i in xrange(len(self.col_id_ls)):
+		for i in range(len(self.col_id_ls)):
 			snp_id = self.col_id_ls[i]
 			chr_pos = db.get_chr_pos_given_db_id2chr_pos(snp_id,)
 			if chr_pos is not None:
@@ -1902,7 +1902,7 @@ class SNPData(object):
 			row_id1 = self.row_id_ls[i]
 			no_of_mismatches = 0
 			no_of_non_NA_pairs = 0
-			for col_index in xrange(len(self.col_id_ls)):
+			for col_index in range(len(self.col_id_ls)):
 				if self.data_matrix[i][col_index] not in NA_set:
 					no_of_non_NA_pairs += 1
 					if self.data_matrix[i][col_index] != ref_allele:
@@ -2648,7 +2648,7 @@ class GenomeWideResult(object):
 		 H5T_IEEE_F32LE "correlation";
 			}
 		"""
-		for i in xrange(d1_length):
+		for i in range(d1_length):
 			locus1_id = d1[i][0]
 			score = d1[i][2]	#correlation
 			if takeAbsValue:
@@ -2775,7 +2775,7 @@ class GenomeWideResult(object):
 		self.data_obj_id2index = {}
 		self.chr_pos2index = {}
 		self.locus_db_id2index = {}
-		for i in xrange(len(self.data_obj_ls)):
+		for i in range(len(self.data_obj_ls)):
 			data_obj = self.data_obj_ls[i]
 			data_obj_index = i
 			data_obj.index = i

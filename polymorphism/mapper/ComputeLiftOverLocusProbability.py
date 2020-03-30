@@ -29,10 +29,10 @@ from pymodule.yhio.AbstractMatrixFileWalker import AbstractMatrixFileWalker
 import numpy
 from scipy.stats import norm
 
-parentClass = AbstractMatrixFileWalker
-class ComputeLiftOverLocusProbability(parentClass):
+ParentClass = AbstractMatrixFileWalker
+class ComputeLiftOverLocusProbability(ParentClass):
 	__doc__ = __doc__
-	option_default_dict = parentClass.option_default_dict.copy()
+	option_default_dict = ParentClass.option_default_dict.copy()
 	option_default_dict.update({
 						('locusIntervalDeltaOutputFname', 1, ): ['', '', 1, 'file that would contain delta of intervals from old and new coordinate system. \
 	Used to check if normal distribution on each chromosome. Output format: oldChromosome, oldStart, oldStop, newChromosome, newStart, newStop, intervalDelta.', ],\
@@ -45,7 +45,7 @@ class ComputeLiftOverLocusProbability(parentClass):
 	def __init__(self, inputFnameLs=None, **keywords):
 		"""
 		"""
-		parentClass.__init__(self, inputFnameLs=inputFnameLs, **keywords)
+		ParentClass.__init__(self, inputFnameLs=inputFnameLs, **keywords)
 
 	def setup(self, **keywords):
 		"""

@@ -75,7 +75,7 @@ class LargeFastaFileTraverse:
 		files = os.listdir(input_dir)
 		no_of_total_files = len(files)
 		
-		for i in xrange(no_of_total_files):
+		for i in range(no_of_total_files):
 			fname = files[i]
 			input_fname = os.path.join(input_dir, fname)
 			sys.stderr.write("\t %s/%s %s ..."%(i+1, no_of_total_files, fname))

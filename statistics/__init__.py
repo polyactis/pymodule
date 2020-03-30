@@ -44,7 +44,7 @@ def calculateChiSqStatOfDeltaVector(dataVector=None, mean=None, std=None):
 	chiSqStat = 0
 	noOfNonMissing = 0
 	chiSqMinusLogPvalue = None
-	for i in xrange(len(dataVector)):
+	for i in range(len(dataVector)):
 		delta = dataVector[i]
 		if delta is not None:
 			Z = abs((delta-mean)/std)	#2012.8.23 take absolute value, since it's always P(X>a), negative z-score gets wrong portion.
@@ -190,16 +190,16 @@ def movingAverage(listOfList=None, no_of_steps=100, needReorderData=True, reduce
 	step = (firstList[-1]-firstList[0])/float(no_of_steps)
 	stepIndex2Data = {}
 	noOfLists = len(listOfList)
-	for j in xrange(len(firstList)):
+	for j in range(len(firstList)):
 		x = firstList[j]
 		stepIndex = int(x/step)	#figure which bracket/bag all the data from this column should fall into.
 		if stepIndex not in stepIndex2Data:
 			stepIndex2Data[stepIndex] = PassingData(listOfList=[])
-			for i in xrange(noOfLists):
+			for i in range(noOfLists):
 				stepIndex2Data[stepIndex].listOfList.append([])
 		#y = y_ls[j]
 		#stepIndex2Data[stepIndex].listOfList[0].append(x)
-		for i in xrange(noOfLists):
+		for i in range(noOfLists):
 			valueAtThatList = listOfList[i][j]
 			stepIndex2Data[stepIndex].listOfList[i].append(valueAtThatList)
 	
@@ -212,7 +212,7 @@ def movingAverage(listOfList=None, no_of_steps=100, needReorderData=True, reduce
 	
 	n_x_ls = []
 	returnListOfList = []
-	for i in xrange(noOfLists):
+	for i in range(noOfLists):
 		returnListOfList.append([])
 	
 	for stepIndex in stepIndexList:
@@ -221,7 +221,7 @@ def movingAverage(listOfList=None, no_of_steps=100, needReorderData=True, reduce
 		if len(subListOfList[0])<minNoOfTotal:
 			continue
 		
-		for i in xrange(noOfLists):
+		for i in range(noOfLists):
 			if i==0 and reduceType==3:
 				_reduceFunction = numpy.median
 			else:

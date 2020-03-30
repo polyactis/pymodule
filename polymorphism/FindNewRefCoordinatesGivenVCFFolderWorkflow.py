@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Examples:
 	#2012.10.09 on hoffman condor, no clustering (-C0), always need db connection on hcondor (-H)
@@ -45,7 +45,7 @@ __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
-from Pegasus.DAX3 import Executable, File, PFN
+from pegaflow.DAX3 import Executable, File, PFN
 from pymodule import ProcessOptions, PassingData
 from pymodule.pegasus import yh_pegasus
 from pymodule.pegasus.AbstractVCFWorkflow import AbstractVCFWorkflow
@@ -53,11 +53,11 @@ from pymodule.pegasus.BlastWorkflow import BlastWorkflow
 from pymodule.pegasus.ShortRead2AlignmentWorkflow import ShortRead2AlignmentWorkflow
 from pymodule.yhio.FastaFile import FastaFile
 
-parentClass = AbstractVCFWorkflow
+ParentClass = AbstractVCFWorkflow
 
-class FindNewRefCoordinatesGivenVCFFolderWorkflow(parentClass, BlastWorkflow, ShortRead2AlignmentWorkflow):
+class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, ShortRead2AlignmentWorkflow):
 	__doc__ = __doc__
-	option_default_dict = parentClass.option_default_dict.copy()
+	option_default_dict = ParentClass.option_default_dict.copy()
 	option_default_dict.update(ShortRead2AlignmentWorkflow.alignment_option_dict.copy())
 	option_default_dict.update({
 						('oldRefFastaFname', 1, ): ['', '', 1, 'path to the old reference sequence file (on which input VCF is based)', ],\
@@ -91,7 +91,7 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(parentClass, BlastWorkflow, Sh
 		"""
 		self.pathToInsertHomePathList.extend(['formatdbPath', 'blastallPath'])
 		
-		parentClass.__init__(self, **keywords)
+		ParentClass.__init__(self, **keywords)
 		ShortRead2AlignmentWorkflow.__init__(self, **keywords)
 		
 		self.oldRefFastaFname = os.path.abspath(self.oldRefFastaFname)
@@ -108,7 +108,7 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(parentClass, BlastWorkflow, Sh
 		"""
 		2012.9.17
 		"""
-		returnData = parentClass.preReduce(self, workflow=workflow, outputDirPrefix=outputDirPrefix,\
+		returnData = ParentClass.preReduce(self, workflow=workflow, outputDirPrefix=outputDirPrefix,\
 								passingData=passingData, transferOutput=transferOutput, **keywords)
 		
 		self.statDirJob = self.addMkDirJob(outputDir="%sStat"%(outputDirPrefix))
@@ -408,7 +408,7 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(parentClass, BlastWorkflow, Sh
 		2012.10.18
 		"""
 		#super(FindNewRefCoordinatesGivenVCFFolderWorkflow, self).registerCustomJars(workflow=workflow)
-		parentClass.registerCustomJars(self, workflow)
+		ParentClass.registerCustomJars(self, workflow)
 		ShortRead2AlignmentWorkflow.registerCustomJars(self, workflow)
 		BlastWorkflow.registerCustomJars(self, workflow)
 	
@@ -419,7 +419,7 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(parentClass, BlastWorkflow, Sh
 		if workflow==None:
 			workflow=self
 		
-		parentClass.registerCustomExecutables(self, workflow)
+		ParentClass.registerCustomExecutables(self, workflow)
 		ShortRead2AlignmentWorkflow.registerCustomExecutables(self, workflow)
 		BlastWorkflow.registerCustomExecutables(self, workflow)
 		
@@ -701,8 +701,8 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(parentClass, BlastWorkflow, Sh
 		# vcfsorter, from http://code.google.com/p/vcfsorter/ 
 		#vcfsorter.pl genome.dict myvcf > mynewvcf.file 2>STDERR
 		sortedVCFFile = File(os.path.join(self.liftOverMapDirJob.output, '%s.s3.LiftOverSorted.vcf'%(intervalFileBasenamePrefix)))
-		vcfSorterJob = self.addGenericPipeCommandOutput2FileJob(executable=self.vcfsorterShellPipe, \
-					executableFile=self.vcfsorterExecutableFile, \
+		vcfSorterJob = self.addPipeCommandOutput2FileJob(executable=self.vcfsorterShellPipe, \
+					commandFile=self.vcfsorterExecutableFile, \
 					outputFile=sortedVCFFile, \
 					parentJobLs=[liftoverVariantsJob, self.liftOverMapDirJob], \
 					extraDependentInputLs=[self.newRegisterReferenceData.refPicardFastaDictF, liftoverVariantsJob.output], \
@@ -928,7 +928,7 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(parentClass, BlastWorkflow, Sh
 			
 			#sort each vcf file
 			sortedVCFFile = File(os.path.join(self.liftOverReduceDirJob.output, '%s.sorted.vcf'%(seqTitle)))
-			vcfSorterJob = self.addGenericPipeCommandOutput2FileJob(executable=None, executableFile=self.vcfsorterExecutableFile, \
+			vcfSorterJob = self.addPipeCommandOutput2FileJob(commandFile=self.vcfsorterExecutableFile, \
 					outputFile=sortedVCFFile, \
 					parentJobLs=[removeRedundantLociFromVCFJob, self.liftOverReduceDirJob], \
 					extraDependentInputLs=[self.newRegisterReferenceData.refPicardFastaDictF, removeRedundantLociFromVCFJob.output], \
@@ -949,7 +949,7 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(parentClass, BlastWorkflow, Sh
 		2013.07.08
 			
 		"""
-		pdata = parentClass.setup_run(self)
+		pdata = ParentClass.setup_run(self)
 		
 		self.oldRegisterReferenceData = yh_pegasus.registerRefFastaFile(workflow=pdata.workflow, \
 							refFastaFname=self.oldRefFastaFname, \

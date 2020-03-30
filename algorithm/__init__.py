@@ -245,7 +245,7 @@ def smoothFullData(fullData, smooth_type_id=3, no_of_overview_points=1500):
 			nextWindowStart = windowStart + int(windowSize/2)
 			data_in_window = []
 			no_of_data_before_nextWindowStart = 0
-			for i in xrange(len(fullData)):
+			for i in range(len(fullData)):
 				data = fullData[i]
 				if (data['start']>=windowStart and data['start']<=windowStop) or ( data['stop'] <=windowStop and data['stop']>=windowStart):
 					data_in_window.append(data)
@@ -314,7 +314,7 @@ class LD(object):
 		snp1_allele2index = {}
 		snp2_allele2index = {}
 		no_of_individuals = min(len(locus1_allele_ls), len(locus2_allele_ls))
-		for k in xrange(no_of_individuals):
+		for k in range(no_of_individuals):
 			snp1_allele = locus1_allele_ls[k]
 			snp2_allele = locus2_allele_ls[k]
 			snp1_allele_index = cls.fill_in_snp_allele2index(snp1_allele, snp1_allele2index)

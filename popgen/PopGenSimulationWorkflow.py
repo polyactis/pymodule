@@ -22,14 +22,14 @@ __doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0])
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
-from Pegasus.DAX3 import *
+from pegaflow.DAX3 import Executable, File, PFN, Link, Job
 from pymodule import ProcessOptions, PassingData, AbstractWorkflow, utils
 from pymodule.pegasus import yh_pegasus
 
-parentClass = AbstractWorkflow
-class PopGenSimulationWorkflow(parentClass):
+ParentClass = AbstractWorkflow
+class PopGenSimulationWorkflow(ParentClass):
 	__doc__ = __doc__
-	option_default_dict = parentClass.option_default_dict.copy()
+	option_default_dict = ParentClass.option_default_dict.copy()
 	#option_default_dict.pop(('inputDir', 0, ))
 	
 	
@@ -57,19 +57,19 @@ class PopGenSimulationWorkflow(parentClass):
 
 	def __init__(self,  **keywords):
 		"""
-		2012.9.17 call parentClass.__init__() directly
+		2012.9.17 call ParentClass.__init__() directly
 		2011-7-11
 		"""
 		self.pathToInsertHomePathList.extend(['sfs_code_path'])
 		
-		parentClass.__init__(self, **keywords)
+		ParentClass.__init__(self, **keywords)
 		
 		if hasattr(self, 'simulateLocusLengthList', None):
 			self.simulateLocusLengthList = utils.getListOutOfStr(self.simulateLocusLengthList, data_type=int)
 		else:
 			self.simulateLocusLengthList = []
 	
-	def addMSSimulationJob(self, executableFile=None, outputFile=None, \
+	def addMSSimulationJob(self, commandFile=None, outputFile=None, \
 					recombinationRate=None, mutationRate=None, \
 					initialEffectivePopulationSize=50000,\
 					otherParametersPassedToPopGenSimulator="",\
@@ -86,8 +86,8 @@ class PopGenSimulationWorkflow(parentClass):
 			theta (Effective population mutation rate) = 4N*mu*simulateLocusLength
 		
 		"""
-		if executableFile is None:
-			executableFile = self.msHOT_liteExecutableFile
+		if commandFile is None:
+			commandFile = self.msHOT_liteExecutableFile
 		if extraArgumentList is None:
 			extraArgumentList = []
 		if simulateLocusLengthList:
@@ -124,8 +124,8 @@ class PopGenSimulationWorkflow(parentClass):
 		if lh3SpecificOutput:	#only for msHOT-lite from lh3_foreign
 			extraArgumentList.append("-l")
 		commandline = " ".join(extraArgumentList)
-		job = self.addGenericPipeCommandOutput2FileJob(executable=self.msShellPipe, \
-					executableFile=executableFile, \
+		job = self.addPipeCommandOutput2FileJob(executable=self.msShellPipe, \
+					commandFile=commandFile, \
 					outputFile=outputFile, \
 					parentJobLs=parentJobLs, extraDependentInputLs=None,\
 					extraOutputLs=extraOutputLs, transferOutput=transferOutput, \
@@ -185,7 +185,7 @@ class PopGenSimulationWorkflow(parentClass):
 		
 		#add output pedigree job
 		
-		for i in xrange(self.noOfReplicates):
+		for i in range(self.noOfReplicates):
 			popGenSimulationFolderJob = self.addMkDirJob(outputDir=os.path.join(mapDirJob.output, 'popGenSim%s'%(i)), \
 														parentJobLs=[mapDirJob])
 			#pending user choice, use ms/sfs-code/slim/ms & slim combination 
@@ -237,7 +237,7 @@ class PopGenSimulationWorkflow(parentClass):
 		"""
 		2013.2.26
 		"""
-		parentClass.registerCustomExecutables(self, workflow=workflow)
+		ParentClass.registerCustomExecutables(self, workflow=workflow)
 		
 		namespace = self.namespace
 		version = self.version

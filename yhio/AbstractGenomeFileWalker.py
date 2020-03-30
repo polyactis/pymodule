@@ -22,13 +22,13 @@ from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
 from pymodule.db import GenomeDB
 from pymodule.yhio.AbstractMatrixFileWalker import AbstractMatrixFileWalker
 
-parentClass = AbstractMatrixFileWalker
+ParentClass = AbstractMatrixFileWalker
 
-class AbstractGenomeFileWalker(parentClass):
+class AbstractGenomeFileWalker(ParentClass):
 	__doc__ = __doc__
-	option_default_dict = parentClass.option_default_dict.copy()
-	option_default_dict.update(parentClass.genome_db_option_dict.copy())
-	#option_default_dict.update(parentClass.db_option_dict.copy())
+	option_default_dict = ParentClass.option_default_dict.copy()
+	option_default_dict.update(ParentClass.genome_db_option_dict.copy())
+	#option_default_dict.update(ParentClass.db_option_dict.copy())
 	
 	genome_option_dict = {
 					('chromosomeHeader', 1, ): ['chromosome', '', 1, 'header of the column that designates chromosome info' ],\
@@ -47,7 +47,7 @@ class AbstractGenomeFileWalker(parentClass):
 	def __init__(self, inputFnameLs=None, **keywords):
 		"""
 		"""
-		parentClass.__init__(self, inputFnameLs=inputFnameLs, **keywords)	#self.connectDB() called within its __init__()
+		ParentClass.__init__(self, inputFnameLs=inputFnameLs, **keywords)	#self.connectDB() called within its __init__()
 	
 	def _loadGenomeStructureFromDB(self):
 		"""
@@ -73,7 +73,7 @@ class AbstractGenomeFileWalker(parentClass):
 		2013.07.31
 			construct an RBTree dictionary map between windows and their data
 		"""
-		parentClass.setup(self, **keywords)
+		ParentClass.setup(self, **keywords)
 		self._loadGenomeStructureFromDB()
 	
 

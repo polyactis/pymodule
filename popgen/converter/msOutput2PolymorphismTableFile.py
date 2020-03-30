@@ -125,7 +125,7 @@ class msOutput2PolymorphismTableFile(AbstractMapper):
 				
 				# add the individuals
 				if not individualsAdded:
-					for individualIndex in xrange(0, len(haplotypeAlleleList), self.ploidy):	#go through each indivdiual at a time
+					for individualIndex in range(0, len(haplotypeAlleleList), self.ploidy):	#go through each indivdiual at a time
 						individualIndex = individualIndex/self.ploidy
 						populationName = '%s.%s'%(speciesName, populationIndex)
 						individualName = '%s.%s.%s'%(speciesName, populationIndex, individualIndex)
@@ -136,11 +136,11 @@ class msOutput2PolymorphismTableFile(AbstractMapper):
 					individualsAdded = True
 				
 				#add allele for all individuals	
-				for individualIndex in xrange(0, len(haplotypeAlleleList), self.ploidy):
+				for individualIndex in range(0, len(haplotypeAlleleList), self.ploidy):
 					individualIndex = individualIndex/self.ploidy
 					individualGenotype = haplotypeAlleleList[individualIndex*self.ploidy:(individualIndex+1)*self.ploidy]
 					
-					for chromosome_copy in xrange(len(individualGenotype)):
+					for chromosome_copy in range(len(individualGenotype)):
 						individualName = '%s.%s.%s'%(speciesName, populationIndex, individualIndex)
 						polymorphismName = 'ind%s.locus%s.c%s'%(individualName, locus.name, chromosome_copy)
 						outputPolymorphismFile.getPolymorphism(name=polymorphismName, individualName=individualName, \

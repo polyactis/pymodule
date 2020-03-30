@@ -22,11 +22,11 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 from pymodule import ProcessOptions
 from pymodule.yhio.AbstractMatrixFileWalker import AbstractMatrixFileWalker
 
-parentClass=AbstractMatrixFileWalker
+ParentClass=AbstractMatrixFileWalker
 
-class ExtractInfoFromVCF(parentClass):
+class ExtractInfoFromVCF(ParentClass):
 	__doc__ = __doc__
-	option_default_dict = parentClass.option_default_dict.copy()
+	option_default_dict = ParentClass.option_default_dict.copy()
 	option_default_dict.update({
 						('infoKey', 1, ): ['HaplotypeScore', 'k', 1, 'the key of the INFO to be extracted'],\
 						}
@@ -37,7 +37,7 @@ class ExtractInfoFromVCF(parentClass):
 		"""
 		2011-7-12
 		"""
-		parentClass.__init__(self, inputFnameLs=inputFnameLs, **keywords)
+		ParentClass.__init__(self, inputFnameLs=inputFnameLs, **keywords)
 	
 	
 	def processRow(self, row=None, pdata=None):

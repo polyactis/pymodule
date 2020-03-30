@@ -48,15 +48,15 @@ from pymodule.ProcessOptions import  ProcessOptions
 from pymodule.utils import PassingData
 from BeagleGenotypeFile import BeagleGenotypeFile
 
-parentClass = BeagleGenotypeFile
-class BeagleLikelihoodFile(parentClass):
+ParentClass = BeagleGenotypeFile
+class BeagleLikelihoodFile(ParentClass):
 	__doc__ = __doc__
-	option_default_dict = copy.deepcopy(parentClass.option_default_dict)
+	option_default_dict = copy.deepcopy(ParentClass.option_default_dict)
 	option_default_dict.update({
 						#('delimiter', 0, ): [' ', '', 1, 'delimiter for Beagle likelihood format is single-space'],\
 						})
 	def __init__(self, inputFname=None, **keywords):
-		parentClass.__init__(self, inputFname=inputFname, **keywords)
+		ParentClass.__init__(self, inputFname=inputFname, **keywords)
 	
 	def constructColName2IndexFromHeader(self):
 		"""
@@ -71,7 +71,7 @@ class BeagleLikelihoodFile(parentClass):
 		"""
 		self.header = self.next().genotypeLikelihoodList
 		self.col_name2index = {}
-		for i in xrange(len(self.header)):
+		for i in range(len(self.header)):
 			sampleID = self.header[i]
 			if sampleID not in self.col_name2index:
 				self.col_name2index[sampleID] = []

@@ -99,7 +99,7 @@ class ReduceMatrixByMergeColumnsWithSameKey(AbstractReducer):
 		originalHeaderLength = len(oldHeader)
 		if len(newHeader)==0:	#add the key columns into the new header
 			self.appendSelectedCellIntoGivenList(newHeader, oldHeader, keyColumnLs)
-		for i in xrange(originalHeaderLength):
+		for i in range(originalHeaderLength):
 			if i not in keyColumnSet:
 				valueColumnLs.append(i)
 		self.appendSelectedCellIntoGivenList(newHeader, oldHeader, valueColumnLs)

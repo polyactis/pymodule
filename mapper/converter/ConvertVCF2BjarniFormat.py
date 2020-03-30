@@ -64,12 +64,12 @@ class ConvertVCF2BjarniFormat(object):
 		
 		locus_id_and_row_index_ls = locus_id2row_index.items()
 		locus_id_and_row_index_ls.sort(cmp=sortCMPBySecondTupleValue)
-		for i in xrange(len(locus_id_and_row_index_ls)):
+		for i in range(len(locus_id_and_row_index_ls)):
 			locus_id, row_index = locus_id_and_row_index_ls[i]
 			data_row = data_matrix[i]
 			refName, pos = locus_id[:2]
 			# if data_row is shorter than read_group_col_index_ls, add "NA" to fill it up
-			for j in xrange(len(data_row), len(read_group_col_index_ls)):
+			for j in range(len(data_row), len(read_group_col_index_ls)):
 				data_row.append('NA')
 			writer.writerow([refName, pos] + data_row)
 		del writer

@@ -48,13 +48,13 @@ from pymodule.db import GenomeDB
 from AbstractPlot import AbstractPlot
 from pymodule.yhio.AbstractGenomeFileWalker import AbstractGenomeFileWalker
 
-parentClass = AbstractPlot
-class PlotGenomeWideData(parentClass, AbstractGenomeFileWalker):
+ParentClass = AbstractPlot
+class PlotGenomeWideData(ParentClass, AbstractGenomeFileWalker):
 	__doc__ = __doc__
 	#
-	option_default_dict = copy.deepcopy(parentClass.option_default_dict)
-	#option_default_dict.update(parentClass.db_option_dict.copy())
-	option_default_dict.update(parentClass.genome_db_option_dict.copy())
+	option_default_dict = copy.deepcopy(ParentClass.option_default_dict)
+	#option_default_dict.update(ParentClass.db_option_dict.copy())
+	option_default_dict.update(ParentClass.genome_db_option_dict.copy())
 	
 	# 2013.07.31 use AbstractGenomeFileWalker's genome_option_dict
 	option_default_dict.update(AbstractGenomeFileWalker.genome_option_dict.copy())
@@ -82,7 +82,7 @@ class PlotGenomeWideData(parentClass, AbstractGenomeFileWalker):
 	def __init__(self, inputFnameLs=None, **keywords):
 		"""
 		"""
-		parentClass.__init__(self, inputFnameLs=inputFnameLs, **keywords)
+		ParentClass.__init__(self, inputFnameLs=inputFnameLs, **keywords)
 	
 	def getNumberOfData(self, pdata):
 		"""
@@ -94,7 +94,7 @@ class PlotGenomeWideData(parentClass, AbstractGenomeFileWalker):
 		"""
 		2012.12.7 setup chr2xy_ls
 		"""
-		pdata = parentClass.preFileFunction(self, **keywords)
+		pdata = ParentClass.preFileFunction(self, **keywords)
 		pdata.chr2xy_ls = {}
 		return pdata
 	
@@ -209,7 +209,7 @@ class PlotGenomeWideData(parentClass, AbstractGenomeFileWalker):
 					#else:
 					self.xtick_labels.append("")
 		
-		parentClass.setup(self, **keywords)
+		ParentClass.setup(self, **keywords)
 	
 	def handleXLabel(self, **keywords):
 		"""
@@ -236,7 +236,7 @@ class PlotGenomeWideData(parentClass, AbstractGenomeFileWalker):
 						horizontalalignment='center',
 						verticalalignment='top', )	#transform = ax.transAxes
 		
-		return parentClass.handleXLabel(self, **keywords)
+		return ParentClass.handleXLabel(self, **keywords)
 		"""
 		if getattr(self, 'xColumnPlotLabel', None):
 			xlabel = self.xColumnPlotLabel

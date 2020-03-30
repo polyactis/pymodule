@@ -104,7 +104,7 @@ class SFS_CODE_Output2PolymorphismTableFile(AbstractMapper):
 		populationSizeList = map(int, populationSizeLine[3:-1].split(','))
 		totalPopulationSize = sum(populationSizeList)
 		populationPureName2populationSize = {}
-		for populationIndex in xrange(len(populationSizeList)):
+		for populationIndex in range(len(populationSizeList)):
 			#add population + size
 			populationSize = populationSizeList[populationIndex]
 			populationName = '%s.%s'%(speciesName, populationIndex)
@@ -114,16 +114,16 @@ class SFS_CODE_Output2PolymorphismTableFile(AbstractMapper):
 		#. add individuals (from "MALES:3;" )
 		maleStartIndexLine = inputFile.next().strip()
 		maleStartIndexList = map(int, maleStartIndexLine[6:-1].split(','))
-		for populationIndex in xrange(len(maleStartIndexList)):
+		for populationIndex in range(len(maleStartIndexList)):
 			maleStartIndex = maleStartIndexList[populationIndex]
 			populationPureName = repr(populationIndex)
 			populationName = '%s.%s'%(speciesName, populationPureName)
-			for individualIndex in xrange(maleStartIndex):	#females first
+			for individualIndex in range(maleStartIndex):	#females first
 				individualName = '%s.%s.%s'%(speciesName, populationPureName, individualIndex)
 				outputPolymorphismFile.addIndividual(name=individualName, family_id = None, father_name = None, \
 					mother_name = None, sex = 2, phenotype = None, \
 					populationName=populationName, speciesName=speciesName, ploidy=ploidy)
-			for individualIndex in xrange(maleStartIndex, 2*maleStartIndex):	#males
+			for individualIndex in range(maleStartIndex, 2*maleStartIndex):	#males
 				individualName = '%s.%s.%s'%(speciesName, populationPureName, individualIndex)
 				outputPolymorphismFile.addIndividual(name=individualName, family_id = None, father_name = None, \
 					mother_name = None, sex = 1, phenotype = None, \
@@ -193,7 +193,7 @@ class SFS_CODE_Output2PolymorphismTableFile(AbstractMapper):
 					#find the populations in which the mutation is fixed, and then calculate the alt_allele_frequency
 						#if mutation is fixed in any population, noOfChromosomes counts only chromosomes in the mutation-segregating populations
 					noOfChromosomes = 0
-					for i in xrange(len(populationHaplotypeIndexList)):
+					for i in range(len(populationHaplotypeIndexList)):
 						populationHaplotypeIndex = populationHaplotypeIndexList[i]
 						populationPureName, haplotypeIndex = populationHaplotypeIndex.split('.')
 						haplotypeIndex = int(haplotypeIndex)

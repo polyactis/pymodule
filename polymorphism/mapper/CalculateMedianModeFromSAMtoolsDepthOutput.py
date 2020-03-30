@@ -58,7 +58,7 @@ class CalculateMedianModeFromSAMtoolsDepthOutput(ParentClass):
 		
 		reader = csv.reader(inf, delimiter=figureOutDelimiter(inf))
 		header = None
-		for i in xrange(self.noOfLinesInHeader):
+		for i in range(self.noOfLinesInHeader):
 			if i==0:
 				header = reader.next()	#first line is taken as header
 			else:

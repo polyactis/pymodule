@@ -51,7 +51,7 @@ class ConvertYuSNPFormat2VCF(AbstractMapper):
 		self.writer.writeMetaAndHeader()
 		
 		counter = 0
-		for j in xrange(len(snpData.col_id_ls)):
+		for j in range(len(snpData.col_id_ls)):
 			snp_id = snpData.col_id_ls[j]
 			chromosome, start = snp_id.split('_')[:2]
 			genotype_ls = snpData.data_matrix[:,j]

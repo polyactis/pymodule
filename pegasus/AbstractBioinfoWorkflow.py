@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.expanduser('~/script'))
 
 
 from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
-from pegapy3.DAX3 import Executable, File, PFN, Link, Job
+from pegaflow.DAX3 import Executable, File, PFN, Link, Job
 from AbstractWorkflow import AbstractWorkflow
 import yh_pegasus
 
@@ -264,8 +264,9 @@ class AbstractBioinfoWorkflow(ParentClass):
             extraArgumentList.append(extraArguments)
 
 
-        self.setupMoreOutputAccordingToSuffixAndNameTupleList(outputFnamePrefix=outputFnamePrefix, suffixAndNameTupleList=suffixAndNameTupleList, \
-                                                    extraOutputLs=extraOutputLs, key2ObjectForJob=key2ObjectForJob)
+        self.setupMoreOutputAccordingToSuffixAndNameTupleList(outputFnamePrefix=outputFnamePrefix, \
+            suffixAndNameTupleList=suffixAndNameTupleList, \
+            extraOutputLs=extraOutputLs, key2ObjectForJob=key2ObjectForJob)
         #2013.07.24 add it in the end
         logFile = File('%s.log'%(outputFnamePrefix))	#2012.8.10 left in the folder dying
         extraOutputLs.append(logFile)

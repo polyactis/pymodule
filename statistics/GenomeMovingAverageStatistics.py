@@ -26,10 +26,10 @@ from pymodule.yhio.AbstractGenomeFileWalker import AbstractGenomeFileWalker
 from pymodule.algorithm.RBTree import RBDict
 from pymodule.yhio.CNV import CNVSegmentBinarySearchTreeKey
 
-parentClass = AbstractGenomeFileWalker
-class GenomeMovingAverageStatistics(parentClass):
+ParentClass = AbstractGenomeFileWalker
+class GenomeMovingAverageStatistics(ParentClass):
 	__doc__ = __doc__
-	option_default_dict = parentClass.option_default_dict.copy()
+	option_default_dict = ParentClass.option_default_dict.copy()
 	#option_default_dict.update(AbstractMapper.db_option_dict.copy())
 	option_default_dict.update({
 					('windowSize', 0, int): [200000, '', 1, 'size of the moving window'], \
@@ -44,7 +44,7 @@ class GenomeMovingAverageStatistics(parentClass):
 	def __init__(self, inputFnameLs=None, **keywords):
 		"""
 		"""
-		parentClass.__init__(self, inputFnameLs=inputFnameLs, **keywords)	#self.connectDB() called within its __init__()
+		ParentClass.__init__(self, inputFnameLs=inputFnameLs, **keywords)	#self.connectDB() called within its __init__()
 		
 		#2013.07.31
 		fractionFunction = lambda ls: sum([a>=self.minValueForFraction for a in ls])/float(len(ls))
@@ -57,7 +57,7 @@ class GenomeMovingAverageStatistics(parentClass):
 		2013.07.31
 			construct an RBTree dictionary map between windows and their data
 		"""
-		parentClass.setup(self, **keywords)
+		ParentClass.setup(self, **keywords)
 		
 		sys.stderr.write("Constructing segmentKey2dataLsRBDict ...")
 		self.segmentKey2dataLsRBDict = RBDict()

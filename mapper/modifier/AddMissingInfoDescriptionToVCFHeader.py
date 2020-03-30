@@ -30,10 +30,10 @@ from pymodule.utils import sortCMPBySecondTupleValue
 from pymodule.yhio.VCFFile import VCFFile
 from pymodule.mapper.AbstractVCFMapper import AbstractVCFMapper
 
-parentClass = AbstractVCFMapper
-class AddMissingInfoDescriptionToVCFHeader(parentClass):
+ParentClass = AbstractVCFMapper
+class AddMissingInfoDescriptionToVCFHeader(ParentClass):
 	__doc__ = __doc__
-	option_default_dict = parentClass.option_default_dict.copy()
+	option_default_dict = ParentClass.option_default_dict.copy()
 	option_default_dict.update({
 						}
 						)
@@ -50,7 +50,7 @@ class AddMissingInfoDescriptionToVCFHeader(parentClass):
 	def __init__(self, inputFnameLs=None, **keywords):
 		"""
 		"""
-		parentClass.__init__(self, inputFnameLs=inputFnameLs, **keywords)
+		ParentClass.__init__(self, inputFnameLs=inputFnameLs, **keywords)
 	
 	
 	def getAllInfoTags(self, inputFname=None, **keywords):

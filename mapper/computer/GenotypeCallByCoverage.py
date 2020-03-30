@@ -322,7 +322,7 @@ class GenotypeCallByCoverage(object):
 		
 		locus_id_and_row_index_ls = locus_id2row_index.items()
 		locus_id_and_row_index_ls.sort(cmp=sortCMPBySecondTupleValue)
-		for i in xrange(len(locus_id_and_row_index_ls)):
+		for i in range(len(locus_id_and_row_index_ls)):
 			locus_id, row_index = locus_id_and_row_index_ls[i]
 			data_row = data_matrix[i]
 			if refNameSet:
@@ -332,7 +332,7 @@ class GenotypeCallByCoverage(object):
 				refBase = refSeq[pos-1]
 				data_row[0] = refBase	#2011-7-18
 			# if data_row is shorter than read_group_col_index_ls, add "NA" to fill it up
-			for j in xrange(len(data_row), len(read_group_col_index_ls)):
+			for j in range(len(data_row), len(read_group_col_index_ls)):
 				data_row.append('NA')
 			writer.writerow([locus_id, locus_id] + data_row)
 		del writer
@@ -348,7 +348,7 @@ class GenotypeCallByCoverage(object):
 		no_of_cols = len(header)
 		individual_name2col_index = {}	#individual's column name -> an opened file handler to store genetic data
 		counter = 0
-		for i in xrange(sampleStartingColumn, no_of_cols):
+		for i in range(sampleStartingColumn, no_of_cols):
 			individualName = header[i]
 			col_index = col_name2index.get(individualName)
 			if not individualName:	#ignore empty column
