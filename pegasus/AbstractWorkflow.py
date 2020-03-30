@@ -496,8 +496,6 @@ class AbstractWorkflow(Workflow):
         2012.8.2 bugfix.
         2012.7.19
         """
-        if workflow is None:
-            workflow = self
         if report:
             sys.stderr.write("Adding gzip jobs for %s input job data ... "%(len(inputData.jobDataLs)))
 
@@ -507,7 +505,7 @@ class AbstractWorkflow(Workflow):
             if len(inputData.jobDataLs)>0:
                 if topOutputDirJob is None:
                     topOutputDir = "%sGzip"%(outputDirPrefix)
-                    topOutputDirJob = yh_pegasus.addMkDirJob(workflow, mkdir=workflow.mkdirWrap, outputDir=topOutputDir)
+                    topOutputDirJob = self.addMkDirJob(outputDir=topOutputDir)
 
                 returnData.topOutputDirJob = topOutputDirJob
                 for jobData in inputData.jobDataLs:
@@ -518,7 +516,7 @@ class AbstractWorkflow(Workflow):
                         extraArgumentList = []
                         #make sure set inputArgumentOption&outputArgumentOption to None, \
                         # otherwise addGenericJob will add "-i" and "-o" in front of it
-                        job= self.addGenericJob(executable=workflow.gzip, inputFile=inputF,
+                        job= self.addGenericJob(executable=self.gzip, inputFile=inputF,
                                     inputArgumentOption=None, outputArgumentOption=None,  outputFile=outputF, \
                                     parentJobLs=[topOutputDirJob]+jobData.jobLs, extraDependentInputLs=None, \
                                     extraOutputLs=[],\

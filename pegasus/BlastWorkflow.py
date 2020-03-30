@@ -83,7 +83,7 @@ class BlastWorkflow(ParentClass):
 			job.addArguments(extraArguments)
 		job.uses(inputFile, transfer=True, register=True, link=Link.INPUT)
 		job.outputList = []
-		for i in xrange(noOfSplitFiles):	#start from 0
+		for i in range(noOfSplitFiles):	#start from 0
 			splitFname = utils.comeUpSplitFilename(outputFnamePrefix=outputFnamePrefix, suffixLength=suffixLength, fileOrder=i,\
 											filenameSuffix=filenameSuffix)
 			splitFile = File(splitFname)

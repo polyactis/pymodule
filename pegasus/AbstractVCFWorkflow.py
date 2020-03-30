@@ -267,7 +267,7 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 		suffixAndNameTupleList = []	# a list of tuples , in each tuple, 1st element is the suffix. 2nd element is the proper name of the suffix.
 			#job.$nameFile will be the way to access the file.
 			#if 2nd element (name) is missing, suffix[1:].replace('.', '_') is the name (dot replaced by _) 
-		for i in xrange(1, noOfUnits+1):
+		for i in range(1, noOfUnits+1):
 			suffixAndNameTupleList.append(['_unit%s.vcf'%(i), 'unit%s'%(i)])
 		if extraArguments:
 			extraArgumentList.append(extraArguments)
@@ -489,7 +489,7 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 			This function goes around the limitation in the number of open files on cluster.
 			combine a long list of interval jobs in 2 steps.
 		"""
-		for i in xrange(0, len(intervalJobLs), maxNoOfIntervalJobsInOneUnion):
+		for i in range(0, len(intervalJobLs), maxNoOfIntervalJobsInOneUnion):
 			subIntervalJobLs = intervalJobLs[i:i+maxNoOfIntervalJobsInOneUnion]
 			firstIntervalJob = subIntervalJobLs[0]
 			lastIntervalJob = subIntervalJobLs[-1]
@@ -769,7 +769,7 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 			if noOfIntervals==1:	#no splitting
 				returnData.jobDataLs.append(jobData)
 			else:
-				for i in xrange(noOfIntervals):
+				for i in range(noOfIntervals):
 					_start = filenameParseData.start + i*intervalSize
 					if i==noOfIntervals-1:
 						_stop = filenameParseData.stop
@@ -922,7 +922,7 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 				passingData.intervalDataLs = chr2IntervalDataLs.get(chromosome)
 			else:
 				pass
-			for i in xrange(len(jobDataLs)):	#each input job is one VCF 
+			for i in range(len(jobDataLs)):	#each input job is one VCF 
 				jobData = jobDataLs[i]
 				passingData.jobData = jobData
 				passingData.VCFJobData = jobData
@@ -950,7 +950,7 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 					#noOfUnits = max(1, utils.getNoOfUnitsNeededToCoverN(N=jobData.file.noOfLoci, s=intervalSize, o=intervalOverlapSize)-1)
 					noOfUnits = splitVCFJob.noOfUnits
 					jobData.file.noOfUnits = noOfUnits	#2013.06.14
-					for unitNumber in xrange(1, noOfUnits+1):
+					for unitNumber in range(1, noOfUnits+1):
 						splitVCFFile = getattr(splitVCFJob, 'unit%sFile'%(unitNumber), None)
 						if splitVCFFile is not None:
 							passingData.splitVCFFile = splitVCFFile
