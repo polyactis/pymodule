@@ -64,7 +64,7 @@ class TableClass(object):
 		to assign (key, value) to a class corresponding to a table
 	"""
 	def __init__(self, **keywords):
-		for key, value in keywords.iteritems():
+		for key, value in keywords.items():
 			setattr(self, key, value)
 	
 	def __str__(self):

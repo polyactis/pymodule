@@ -366,7 +366,7 @@ class VCFFile(object):
 		self.writer.writeMetaAndHeader()
 		
 		for vcfRecord in self.reader:
-			for sampleID, sample_index in vcfRecord.sample_id2index.iteritems():
+			for sampleID, sample_index in vcfRecord.sample_id2index.items():
 				beagleFile = self.sampleID2BeagleFile.get(sampleID)
 				beagleGenotype = beagleFile.getGenotypeOfOneSampleOneLocus(sampleID=sampleID, locusID=None)
 				vcfRecord.setGenotypeCallForOneSample(sampleID=sampleID, genotype='%s|%s'%(beagleGenotype[0], beagleGenotype[1]))
@@ -708,7 +708,7 @@ class VCFFile(object):
 			pos = int(pos)
 			refBase = vcfRecord.data_row[0].get("GT")[0]
 			
-			for sample_id, sample_index in self.sample_id2index.iteritems():
+			for sample_id, sample_index in self.sample_id2index.items():
 				if sample_id=='ref':	#ignore the reference
 					continue
 				if sample_id not in sampleID2data:

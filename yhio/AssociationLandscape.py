@@ -89,7 +89,7 @@ class AssociationLandscapeTableFile(AssociationTableFile):
 		#landscapeTableObject = self.getTableObject(tableName=tableName)
 		
 		"""
-		for attributeName, value in landscapeTableObject.getAttributes().iteritems():
+		for attributeName, value in landscapeTableObject.getAttributes().items():
 			self.HDF5AttributeNameLs.append(attributeName)
 			setattr(returnData, attributeName, value)
 		"""

@@ -198,7 +198,7 @@ class GenotypeCallByCoverage(object):
 				
 				found_one_het = False	#2011 flag to see if any het in all samples is called at this locus.
 				allele2count = {}	#2011-3-29
-				for read_group, base2count in read_group2base2count.iteritems():
+				for read_group, base2count in read_group2base2count.items():
 					depth = read_group2depth.get(read_group)
 					col_index = read_group2col_index.get(read_group)
 					
@@ -467,7 +467,7 @@ class GenotypeCallByCoverage(object):
 				format_column_name2index = getColName2IndexFromHeader(format_column_ls)
 				data_row = ['NA']*(len(individual_name2col_index)+1)	# extra 1 for the ref
 				allele2count = {}
-				for individual_name, individual_col_index in individual_name2col_index.iteritems():
+				for individual_name, individual_col_index in individual_name2col_index.items():
 					read_group = individual_name
 					if read_group not in read_group2col_index:
 						read_group2col_index[read_group] = len(read_group2col_index)
@@ -605,7 +605,7 @@ class GenotypeCallByCoverage(object):
 		locus_id2row_index = vcfFile.locus_id2row_index
 		#2012.8.20 locus_id2row_index from VCFFile is using (chr, pos) as key, not chr_pos
 		new_locus_id2row_index = {}
-		for locus_id, row_index  in locus_id2row_index.iteritems():
+		for locus_id, row_index  in locus_id2row_index.items():
 			new_locus_id = '%s_%s'%(locus_id[0], locus_id[1])
 			new_locus_id2row_index[new_locus_id] = row_index
 		locus_id2row_index = new_locus_id2row_index

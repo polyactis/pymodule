@@ -160,7 +160,7 @@ class QualityControl(object):
 		no_of_non_NA_pairs = 0
 		no_of_NAs = 0
 		no_of_totals = 0
-		for col_id1, col_index1 in col_id2col_index1.iteritems():
+		for col_id1, col_index1 in col_id2col_index1.items():
 			if col_id1 in col_id12col_id2:
 				col_id2 = col_id12col_id2[col_id1]
 				col_index2 = col_id2col_index2[col_id2]
@@ -203,7 +203,7 @@ class QualityControl(object):
 		counter_no_valid_pairs = 0
 		counter_no_relative_valid_pairs = 0
 		counter_no_valid_non_NA_pairs = 0
-		for row_id1, row_id2 in row_id12row_id2.iteritems():
+		for row_id1, row_id2 in row_id12row_id2.items():
 			counter += 1
 			row_index1 = row_id2row_index1[row_id1]
 			row_index2 = row_id2row_index2[row_id2]
@@ -255,12 +255,12 @@ class QualityControl(object):
 		row_id2pairwise_dist = {}
 		counter = 0
 		counter_with_valid_non_NA_pairs = 0
-		for row_id1, row_index1 in row_id2row_index1.iteritems():
+		for row_id1, row_index1 in row_id2row_index1.items():
 			pairwise_dist = []
-			for row_id2, row_index2 in row_id2row_index2.iteritems():
+			for row_id2, row_index2 in row_id2row_index2.items():
 				no_of_mismatches = 0
 				no_of_non_NA_pairs = 0
-				for col_id1, col_id2 in col_id12col_id2.iteritems():
+				for col_id1, col_id2 in col_id12col_id2.items():
 					col_index1 = col_id2col_index1[col_id1]
 					col_index2 = col_id2col_index2[col_id2]
 					if data_matrix1[row_index1][col_index1]>0 and data_matrix2[row_index2][col_index2]>0:
@@ -290,7 +290,7 @@ class QualityControl(object):
 			used to throw away unreliable pairwise comparisons
 		"""
 		new_row_id2pairwise_dist = {}
-		for row_id, pairwise_dist_ls in row_id2pairwise_dist.iteritems():
+		for row_id, pairwise_dist_ls in row_id2pairwise_dist.items():
 			new_pairwise_dist_ls = []
 			for row in pairwise_dist_ls:
 				mismatch_rate, row_id2, no_of_mismatches, no_of_non_NA_pairs = row
@@ -351,7 +351,7 @@ class QualityControl(object):
 		no_of_non_NA_pairs = 0
 		no_of_NAs = 0
 		no_of_totals = 0
-		for row_id1, row_index1 in row_id2row_index1.iteritems():
+		for row_id1, row_index1 in row_id2row_index1.items():
 			if row_id1 in row_id12row_id2:
 				row_id2 = row_id12row_id2[row_id1]
 				row_index2 = row_id2row_index2[row_id2]
@@ -398,7 +398,7 @@ class QualityControl(object):
 		counter_no_valid_pairs = 0
 		counter_no_relative_valid_pairs = 0
 		counter_no_valid_non_NA_pairs = 0
-		for col_id1, col_id2 in col_id12col_id2.iteritems():
+		for col_id1, col_id2 in col_id12col_id2.items():
 			counter += 0
 			col_index1 = col_id2col_index1[col_id1]
 			col_index2 = col_id2col_index2[col_id2]
@@ -491,7 +491,7 @@ class QualityControl(object):
 		if self.report or self.debug:
 			sys.stderr.write("Wrapping diff_matrix with row, column names ...")
 		number_nt_ls = []
-		for number, nt in number2nt.iteritems():
+		for number, nt in number2nt.items():
 			number_nt_ls.append([number, nt])
 		number_nt_ls.sort()
 		row_name_ls = [row[1] for row in number_nt_ls]
@@ -693,7 +693,7 @@ class QualityControl(object):
 		if event.button==1:
 			if event.inaxes is not None:
 				print 'data coords', event.xdata, event.ydata
-				for key, value in self.row_id2NA_mismatch_rate.iteritems():
+				for key, value in self.row_id2NA_mismatch_rate.items():
 					NA_rate, mismatch_rate = value[:2]
 					if abs(NA_rate-event.xdata)<0.005 and abs(mismatch_rate-event.ydata)<0.005:
 						pylab.text(event.xdata, event.ydata, self.row_id2info[key], size=8)
@@ -714,7 +714,7 @@ class QualityControl(object):
 		if event.button==1:
 			if event.inaxes is not None:
 				print 'data coords', event.xdata, event.ydata
-				for key, value in self.col_id2NA_mismatch_rate.iteritems():
+				for key, value in self.col_id2NA_mismatch_rate.items():
 					NA_rate, mismatch_rate = value[:2]
 					if abs(NA_rate-event.xdata)<0.005 and abs(mismatch_rate-event.ydata)<0.005:
 						pylab.text(event.xdata, event.ydata, key, size=8)
@@ -869,7 +869,7 @@ class QualityControl(object):
 		counter = 0
 		real_counter = 0
 		no_of_entries_in_db = 0
-		for row_id, pairwise_dist_ls in row_id2pairwise_dist.iteritems():
+		for row_id, pairwise_dist_ls in row_id2pairwise_dist.items():
 			for pairwise_dist in pairwise_dist_ls:
 				counter += 1
 				mismatch_rate, row_id2, no_of_mismatches, no_of_non_NA_pairs = pairwise_dist
@@ -1400,7 +1400,7 @@ class TwoSNPData(QualityControl):
 			for i in 
 		"""
 		col_indices_wanted_set = set()		
-		for col_id1, col_id2 in self.col_id12col_id2.iteritems():
+		for col_id1, col_id2 in self.col_id12col_id2.items():
 			col_index1 = self.SNPData1.col_id2col_index[col_id1]
 			for i in range(max(0, col_index1-no_of_loci_to_sample_around_on_each_side), min(col_index1+no_of_loci_to_sample_around_on_each_side+1, no_of_cols)):
 				col_indices_wanted_set.add(i)

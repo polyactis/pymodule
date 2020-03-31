@@ -183,7 +183,7 @@ class SelectDistantMembersFromGenotypeFile(AbstractMatrixFileWalker):
 		# weigh each unique individual based on its sequencing coverage + no of offspring => probability mass for each individual
 		sys.stderr.write("Weighing each individual , assigning probability mass  ...")
 		individualID2probabilityMass = {}
-		for individualID, familyContext in individualID2familyContext.iteritems():
+		for individualID, familyContext in individualID2familyContext.items():
 			outDegreeQuotient = outDegreeContainer.normalizeValue(familyContext.familySize)
 			individualCoverageQuotient = individualCoverageContainer.normalizeValue(familyContext.individualCoverage)
 			#familyCoverageQuotient = familyCoverageContainer.normalizeValue(familyContext.familyCoverage)

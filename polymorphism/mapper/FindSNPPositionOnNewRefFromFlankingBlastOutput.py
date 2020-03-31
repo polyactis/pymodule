@@ -287,7 +287,7 @@ queryID queryStart      queryEnd        queryLength     targetChr       targetSt
 				'newChr', 'newRefStart', 'newRefStop',  \
 				"newRefBase", 'targetAlignmentSpan', 'targetAlignmentStart', 'targetAlignmentStop']
 		writer.writerow(header)
-		for querySNPID, newRefCoordinateLs in querySNPID2NewReferenceCoordinateLs.iteritems():
+		for querySNPID, newRefCoordinateLs in querySNPID2NewReferenceCoordinateLs.items():
 			if len(newRefCoordinateLs)==1:
 				newRefCoordinate = newRefCoordinateLs[0]
 				data_row = [querySNPID, newRefCoordinate.queryStrand, \
@@ -324,7 +324,7 @@ queryID queryStart      queryEnd        queryLength     targetChr       targetSt
 						(len(querySNPID2NewReferenceCoordinateLs), querySNPID2NewRefCoordinateOutputFname))
 		writer = csv.writer(open(querySNPID2NewRefCoordinateOutputFname, 'w'), delimiter='\t')
 		chainID=1
-		for querySNPID, newRefCoordinateLs in querySNPID2NewReferenceCoordinateLs.iteritems():
+		for querySNPID, newRefCoordinateLs in querySNPID2NewReferenceCoordinateLs.items():
 			if len(newRefCoordinateLs)==1:
 				newRefCoordinate = newRefCoordinateLs[0]
 				data_row = ["chain", 1, \
@@ -356,7 +356,7 @@ queryID queryStart      queryEnd        queryLength     targetChr       targetSt
 		sys.stderr.write("Converting querySNPID2NewReferenceCoordinateLs to oldCoordinateKey2newCoordinateDataLs ... ")
 		oldCoordinateKey2newCoordinateDataLs = {}
 		counter = 0
-		for querySNPID, newRefCoordinateLs in querySNPID2NewReferenceCoordinateLs.iteritems():
+		for querySNPID, newRefCoordinateLs in querySNPID2NewReferenceCoordinateLs.items():
 			oldCoordinateKey = None
 			counter += len(newRefCoordinateLs)
 			for newRefCoordinate in newRefCoordinateLs:
@@ -437,7 +437,7 @@ queryID queryStart      queryEnd        queryLength     targetChr       targetSt
 		statFile.writeHeader(header)
 		noOfTotalSwitchPoints = 0
 		noOfTotalLoci = 0
-		for oldChromosome, switchData in oldChromosome2SwitchData.iteritems():
+		for oldChromosome, switchData in oldChromosome2SwitchData.items():
 			if switchData.noOfLociWithUniqueHit>0:
 				switchPointFraction = switchData.noOfSwitchPoints/float(switchData.noOfLociWithUniqueHit)
 			else:
@@ -510,7 +510,7 @@ Sample  Geno    SNP
 					continue
 		data_matrix = numpy.zeros([len(row_id_ls), len(col_id2index)], dtype=numpy.int8)
 		
-		for row_col_index, genotype in row_col_index2genotype.iteritems():
+		for row_col_index, genotype in row_col_index2genotype.items():
 			row_index, col_index = row_col_index[:2]
 			data_matrix[row_index, col_index] = SNP.nt2number[genotype]
 		sys.stderr.write("\n")

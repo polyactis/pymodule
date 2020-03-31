@@ -87,7 +87,7 @@ class CombinePhasedBeagleOutputsIntoVCF(AbstractMatrixFileWalker):
 		counter = 0
 		no_of_loci = 0
 		for vcfRecord in self.reader:
-			for sampleID, sample_index in vcfRecord.sample_id2index.iteritems():
+			for sampleID, sample_index in vcfRecord.sample_id2index.items():
 				beagleFile = self.sampleID2BeagleFile.get(sampleID)
 				"""
 				if beagleFile is None:

@@ -231,7 +231,7 @@ class PlotGenomeWideData(ParentClass, AbstractGenomeFileWalker):
 				"""
 				pass
 			else:
-				for chromosome, labelXPosition in self.chrID2labelXPosition.iteritems():
+				for chromosome, labelXPosition in self.chrID2labelXPosition.items():
 					pylab.text(labelXPosition, self.yMin, "%s"%(chromosome),\
 						horizontalalignment='center',
 						verticalalignment='top', )	#transform = ax.transAxes

@@ -183,7 +183,7 @@ class ModifyTPED(AbstractMapper):
 			writer = MatrixFile(inputFname=outputFname, openMode='w', delimiter='\t')
 			header = ["individualID", "noOfGenotypesMarkedMissing"]
 			writer.writeHeader(header)
-			for individual_index, no_of_genotype_marked_missing in individual_index2no_of_genotype_marked_missing.iteritems():
+			for individual_index, no_of_genotype_marked_missing in individual_index2no_of_genotype_marked_missing.items():
 				individual_id = individualIDList[individual_index]
 				writer.writerow([individual_id, no_of_genotype_marked_missing])
 			writer.close()

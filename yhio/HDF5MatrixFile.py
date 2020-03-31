@@ -145,7 +145,7 @@ class YHTableInHDF5Group(object):
 		self._processRowIDColID()
 		#pass the HDF5Group attributes to this object itself, it ran into "can't set attribute error".
 		# conflict with existing property
-		#for attributeName, attributeValue in self.h5Group.attrs.iteritems():
+		#for attributeName, attributeValue in self.h5Group.attrs.items():
 		#	object.__setattr__(self, attributeName, attributeValue)
 	
 	def _processRowIDColID(self):
@@ -479,7 +479,7 @@ class HDF5MatrixFile(MatrixFile):
 		"""
 		2012.11.16
 		"""
-		for tableName, h5Group in self.hdf5File.iteritems():
+		for tableName, h5Group in self.hdf5File.items():
 			tableObject = YHTableInHDF5Group(h5Group=h5Group, newGroup=False,\
 										dataMatrixDtype=self.dtype)
 			self._appendNewTable(tableObject)
@@ -674,7 +674,7 @@ def addAttributeDictToYHTableInHDF5Group(tableObject=None, attributeDict=None):
 		numpy.array could replace list.
 	"""
 	if tableObject is not None and attributeDict is not None:
-		for attributeName, attributeValue in attributeDict.iteritems():
+		for attributeName, attributeValue in attributeDict.items():
 			doItOrNot = False
 			if type(attributeValue)==numpy.ndarray:
 				if hasattr(attributeValue, '__len__') and attributeValue.size>0:

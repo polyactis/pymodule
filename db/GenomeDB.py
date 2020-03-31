@@ -1011,7 +1011,7 @@ class OneGenomeData(PassingData):
 		#chr_id_ls = self.chr_id2size.keys()
 		"""
 		if self.chrOrder==2:
-			size_chr_id_ls = [(value, key) for key, value in self.chr_id2size.iteritems()]
+			size_chr_id_ls = [(value, key) for key, value in self.chr_id2size.items()]
 			size_chr_id_ls.sort()
 			size_chr_id_ls.reverse()
 			chr_id_ls = [row[1] for row in size_chr_id_ls]
@@ -1061,7 +1061,7 @@ class OneGenomeData(PassingData):
 		"""
 		chr_id_ls = self.chr_id2size.keys()
 		if self.chrOrder==2:
-			size_chr_id_ls = [(value, key) for key, value in self.chr_id2size.iteritems()]
+			size_chr_id_ls = [(value, key) for key, value in self.chr_id2size.items()]
 			size_chr_id_ls.sort()
 			size_chr_id_ls.reverse()
 			chr_id_ls = [row[1] for row in size_chr_id_ls]
@@ -1107,7 +1107,7 @@ class OneGenomeData(PassingData):
 			self.chr_id2cumu_start = (self.tax_id, self.chr_gap)
 		
 		self._chr_id2centromere ={}
-		for chr_id, annot_assembly in self._chr_id2annot_assembly.iteritems():
+		for chr_id, annot_assembly in self._chr_id2annot_assembly.items():
 			for genome_annotation in annot_assembly.genome_annotation_list:
 				if genome_annotation.genome_annotation_type_id==1:
 					self._chr_id2centromere[chr_id] = genome_annotation
@@ -1147,7 +1147,7 @@ class OneGenomeData(PassingData):
 			self.chr_id2size = [tax_id,]
 		if self._chr_id2cumu_start is None:
 			self.chr_id2cumu_start = (tax_id, chr_gap)
-		for chr_id, cumu_start in self.chr_id2cumu_start.iteritems():
+		for chr_id, cumu_start in self.chr_id2cumu_start.items():
 			chr_size = self.chr_id2size.get(chr_id)
 			span_ls=[cumu_start+1, cumu_start+chr_size]
 			segmentKey = CNVSegmentBinarySearchTreeKey(chromosome=0, \

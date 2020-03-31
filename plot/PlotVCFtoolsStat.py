@@ -158,7 +158,7 @@ class PlotVCFtoolsStat(PlotTrioInconsistencyOverFrequency, AbstractMatrixFileWal
 		
 		self.chr_id2cumu_start = oneGenomeData.chr_id2cumu_start
 		"""
-		size_chr_id_ls = [(value, key) for key, value in chr2size.iteritems()]
+		size_chr_id_ls = [(value, key) for key, value in chr2size.items()]
 		size_chr_id_ls.sort()
 		size_chr_id_ls.reverse()
 		"""

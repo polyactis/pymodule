@@ -62,7 +62,7 @@ class GenomeMovingAverageStatistics(ParentClass):
 		sys.stderr.write("Constructing segmentKey2dataLsRBDict ...")
 		self.segmentKey2dataLsRBDict = RBDict()
 		counter =0
-		for chromosome, chromosomeSize in self.oneGenomeData.chr_id2size.iteritems():
+		for chromosome, chromosomeSize in self.oneGenomeData.chr_id2size.items():
 			no_of_intervals = max(1, int(math.ceil(chromosomeSize/float(self.windowSize)))-1)
 			for i in range(no_of_intervals):
 				originalStartPos = i*self.windowSize + 1

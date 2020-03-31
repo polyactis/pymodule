@@ -20,7 +20,7 @@ Description:
 		beagleFile = BeagleGenotypeFile(inputFname='/tmp/input.bgl.gz')
 		beagleFile.readInAllHaplotypes()
 		
-		for individualID, firstHaplotypeIndex in beagleFile.snpData.col_id2col_index.iteritems():
+		for individualID, firstHaplotypeIndex in beagleFile.snpData.col_id2col_index.items():
 			haplotypeList = []
 			for j in range(firstHaplotypeIndex, firstHaplotypeIndex+self.ploidy):
 				haplotypeList.append(beagleFile.snpData.data_matrix[:,j]) 

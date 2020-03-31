@@ -139,7 +139,7 @@ class CNVSegmentBinarySearchTreeKey(object):
 			self.span = 0
 		if self.stop<self.start:
 			sys.stderr.write("Warning: not supposed to happen. stop %s is smaller than start %s.\n"%(self.stop, self.start))
-		for key, value in keywords.iteritems():	#2010-8-2
+		for key, value in keywords.items():	#2010-8-2
 			setattr(self, key, value)
 	
 	def __lt__(self, other):

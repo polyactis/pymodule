@@ -106,7 +106,7 @@ class SplitVCFFile(AbstractVCFMapper):
 		
 		vcfFile.close()
 		#close all output files
-		for unitNumber, outVCFFile in unitNumber2OutVCFFile.iteritems():
+		for unitNumber, outVCFFile in unitNumber2OutVCFFile.items():
 			outVCFFile.close()
 		
 		sys.stderr.write("%s loci split into %s files.\n"%(counter, len(unitNumber2OutVCFFile)))

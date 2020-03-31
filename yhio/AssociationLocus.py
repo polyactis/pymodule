@@ -107,7 +107,7 @@ class AssociationLocusTableFile(YHFile):
 		associationLocusRBDict.locusPadding = locusPadding
 		associationLocusRBDict.HDF5AttributeNameLs = []
 		
-		for attributeName, value in tableObject.getAttributes().iteritems():
+		for attributeName, value in tableObject.getAttributes().items():
 			associationLocusRBDict.HDF5AttributeNameLs.append(attributeName)
 			setattr(associationLocusRBDict, attributeName, value)
 		

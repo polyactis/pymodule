@@ -72,7 +72,7 @@ class AssociationPeakTableFile(YHFile):
 		associationPeakRBDict.peakPadding = self.peakPadding
 		associationPeakRBDict.HDF5AttributeNameLs = []
 		
-		for attributeName, value in self.getAttributes().iteritems():
+		for attributeName, value in self.getAttributes().items():
 			associationPeakRBDict.HDF5AttributeNameLs.append(attributeName)
 			setattr(associationPeakRBDict, attributeName, value)
 		

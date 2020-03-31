@@ -197,7 +197,7 @@ class PlinkPedigreeFile(MatrixFile):
 		2013.07.19
 		"""
 		sys.stderr.write("\t%s\t%s\t%s\t%s\t%s\n"%("parentSetSize", "noOfFamilies", "noOfParents", "noOfKids", "noOfUniqueIndividuals"))
-		for noOfParents, familyData in noOfParents2FamilyData.iteritems():
+		for noOfParents, familyData in noOfParents2FamilyData.items():
 			parentIDSet = familyData.parentIDSet
 			childIDSet = familyData.childIDSet
 			individualIDSet = familyData.individualIDSet

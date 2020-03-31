@@ -238,7 +238,7 @@ def get_nt_number2diff_matrix_index(number2nt):
 	sys.stderr.write("Getting nt_number2diff_matrix_index from nt2number ...")
 	nt_number2diff_matrix_index = {}
 	number_nt_ls = []
-	for number, nt in number2nt.iteritems():
+	for number, nt in number2nt.items():
 		if type(number)==int:	#2009-5-18 number2nt contains num.nan
 			number_nt_ls.append([number,nt])
 	number_nt_ls.sort()
@@ -749,7 +749,7 @@ def readAdjacencyListDataIntoMatrix(inputFname=None, rowIDHeader=None, colIDHead
 	
 	dataMatrix = numpy.zeros([no_of_rows, no_of_cols], dtype=matrixDefaultDataType)
 	dataMatrix[:] = defaultValue
-	for idPair, data in  idPair2data.iteritems():
+	for idPair, data in  idPair2data.items():
 		rowID = idPair[0]
 		colID = idPair[1]
 		id1_index = row_id2index.get(rowID)
@@ -1220,7 +1220,7 @@ class SNPData(object):
 		"""
 		"""
 		negative_missing_count_row_id_ls = []
-		for row_id, missing_data in row_id2missing_data.iteritems():
+		for row_id, missing_data in row_id2missing_data.items():
 			if row_id not in to_be_removed_row_id_set:
 				negative_missing_count = -missing_data.missing_count
 				negative_missing_count_row_id_ls.append((negative_missing_count, row_id))
@@ -1880,7 +1880,7 @@ class SNPData(object):
 		sys.stderr.write("Outputting row pairwise distance to %s ... "%outputFname)
 		import csv
 		writer = csv.writer(open(outputFname, 'w'), delimiter='\t')
-		for row_id, pairwise_dist in row_id2pairwise_dist.iteritems():
+		for row_id, pairwise_dist in row_id2pairwise_dist.items():
 			for dist in pairwise_dist:
 				mismatch_rate, row_id2, no_of_mismatches, no_of_non_NA_pairs = dist[:4]
 				data_row = [row_id, row_id2, mismatch_rate, no_of_mismatches, no_of_non_NA_pairs]
@@ -1967,7 +1967,7 @@ class SNPData(object):
 			a different mechanism than getRowIndexGivenRowID().
 		"""
 		index_ls = []
-		for col_id, col_index in self.col_id2col_index.iteritems():
+		for col_id, col_index in self.col_id2col_index.items():
 			if colIDHashFunction:
 				col_id = colIDHashFunction(col_id)
 			if col_id in query_set:	# found it
@@ -2860,7 +2860,7 @@ class DataObject(object):
 		self.beta_pvalue_list = []	#2013.1.9
 		
 		self.comment = None
-		for key, value in keywords.iteritems():
+		for key, value in keywords.items():
 			setattr(self, key, value)
 		
 		#2012.11.18 convenient purpose
@@ -3218,7 +3218,7 @@ class SNPInfo(object):
 		"""
 		2009-2-18 allow any type of keywords
 		"""
-		for argument_key, argument_value in keywords.iteritems():
+		for argument_key, argument_value in keywords.items():
 			setattr(self, argument_key, argument_value)
 	
 	def getSnpsIDGivenChrPos(self, chromosome, position):
@@ -3304,7 +3304,7 @@ def getGenomeWideResultFromHDF5MatrixFile(inputFname=None, reader=None, tableNam
 				reader = HDF5MatrixFile(inputFname, openMode='r')
 		associationTableObject = reader.getTableObject(tableName=tableName)
 	
-	for attributeName, value in associationTableObject.getAttributes().iteritems():
+	for attributeName, value in associationTableObject.getAttributes().items():
 		setattr(gwr, attributeName, value)
 	gwr.setResultID(associationTableObject.getAttribute('result_id'))
 	gwr.do_log10_transformation = do_log10_transformation	#2013.1.11

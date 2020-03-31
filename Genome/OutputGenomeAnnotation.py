@@ -58,7 +58,7 @@ class OutputGenomeAnnotation(ParentClass):
 		
 		counter = 0
 		real_counter = 0
-		for chr_id, annot_assembly in self.oneGenomeData._chr_id2annot_assembly.iteritems():
+		for chr_id, annot_assembly in self.oneGenomeData._chr_id2annot_assembly.items():
 			for genome_annotation in annot_assembly.genome_annotation_list:
 				if genome_annotation.genome_annotation_type_id in self.annotation_type_id_set:
 					real_counter += 1

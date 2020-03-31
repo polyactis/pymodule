@@ -199,7 +199,7 @@ class MapReduceGenomeFileWorkflow(ParentClass):
 		
 		firstInterval = True
 		
-		for chromosome, intervalDataLs in chr2IntervalDataLs.iteritems():
+		for chromosome, intervalDataLs in chr2IntervalDataLs.items():
 			passingData.chromosome = chromosome
 			mapEachChromosomeData = self.mapEachChromosome(workflow=workflow, chromosome=chromosome, \
 										passingData=passingData, \

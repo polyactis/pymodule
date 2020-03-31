@@ -113,7 +113,7 @@ class SplitPedigreeVCFIntoBeagleTriosDuosFiles(AbstractVCFMapper):
 					familySize2SampleIDList[familySize].extend(memberList)
 		
 		sys.stderr.write("\tFamilySize\tNoOfIndividuals\n")
-		for familySize, sampleIDList in familySize2SampleIDList.iteritems():
+		for familySize, sampleIDList in familySize2SampleIDList.items():
 			sys.stderr.write("\t%s\t%s\n"%(familySize, len(sampleIDList)))
 		return PassingData(familyID2MemberList=None, familySize2SampleIDList=familySize2SampleIDList,\
 						beagleLikelihoodFile=beagleLikelihoodFile)
@@ -144,7 +144,7 @@ class SplitPedigreeVCFIntoBeagleTriosDuosFiles(AbstractVCFMapper):
 		familySize2BeagleFileHandler = {}
 		familySize2SampleIDList =  pedigreeFamilyData.familySize2SampleIDList
 		counter = 0
-		for familySize, sampleIDList in familySize2SampleIDList.iteritems():
+		for familySize, sampleIDList in familySize2SampleIDList.items():
 			if familySize not in familySize2BeagleFileHandler:
 				tmpOutputFnamePrefix = '%s_familySize%s'%(outputFnamePrefix, familySize)
 				writer = MatrixFile(inputFname='%s.bgl'%(tmpOutputFnamePrefix), openMode='w', delimiter=' ')
@@ -209,7 +209,7 @@ class SplitPedigreeVCFIntoBeagleTriosDuosFiles(AbstractVCFMapper):
 			counter += 1
 			familySize2CallList = {}
 			genotypeLikelihoodList = oneLocus.genotypeLikelihoodList
-			for familySize, sampleIDList in familySize2SampleIDList.iteritems():
+			for familySize, sampleIDList in familySize2SampleIDList.items():
 				if familySize not in familySize2CallList:
 					familySize2CallList[familySize] = []
 				for sampleID in sampleIDList:
@@ -248,7 +248,7 @@ class SplitPedigreeVCFIntoBeagleTriosDuosFiles(AbstractVCFMapper):
 							diploidCall = ['?', '?']
 						familySize2CallList[familySize].extend(diploidCall)
 			
-			for familySize, callList in familySize2CallList.iteritems():
+			for familySize, callList in familySize2CallList.items():
 				if familySize==1:
 					rowHeaderList = [oneLocus.markerID, oneLocus.alleleA, oneLocus.alleleB]
 				else:
@@ -278,7 +278,7 @@ class SplitPedigreeVCFIntoBeagleTriosDuosFiles(AbstractVCFMapper):
 									markersFile=beagleFileData.markersFile)
 		
 		#close all output files
-		for familySize, beagleFileHandler in beagleFileData.familySize2BeagleFileHandler.iteritems():
+		for familySize, beagleFileHandler in beagleFileData.familySize2BeagleFileHandler.items():
 			beagleFileHandler.close()
 		beagleFileData.markersFile.close()
 		pedigreeFamilyData.beagleLikelihoodFile.close()

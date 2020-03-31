@@ -17,7 +17,7 @@ class GeneModel(object):
 			a class to hold all stuff related to a gene (Gene+EntrezgeneMapping)
 			it's hierarchical. Its gene_commentaries contains also GeneModel.
 		"""
-		for argument_key, argument_value in keywords.iteritems():
+		for argument_key, argument_value in keywords.items():
 			setattr(self, argument_key, argument_value)
 		if not hasattr(self, 'gene_commentaries'):
 			self.gene_commentaries = []

@@ -941,7 +941,7 @@ class AbstractNGSWorkflow(ParentClass):
         extraOutputLs = []	#first is the markers file
         extraOutputLs.append(markerFile)
         key2File['markerFile'] = markerFile
-        for familySize, familyLs in pedigreeSplitStructure.familySize2familyLs.iteritems():
+        for familySize, familyLs in pedigreeSplitStructure.familySize2familyLs.items():
             if familyLs:	#non-empty
                 outputFile = File('%s_familySize%s.bgl'%(outputFnamePrefix, familySize))
                 key2File['size%sFile'%(familySize)] = outputFile
@@ -2360,7 +2360,7 @@ Contig966       3160    50
                         (len(dc), maxContigID, minContigID))
         if (maxContigID is not None and maxContigID!=0) and (minContigID is not None and minContigID!=0):
             new_dc = {}
-            for contig, data in dc.iteritems():
+            for contig, data in dc.items():
                 try:
                     contigID = int(self.getContigIDFromFname(contig))
                     included = True
@@ -2463,7 +2463,7 @@ Contig966       3160    50
         intervalFile = self.registerOneInputFile(inputFname=intervalFname, folderName=folderName)
         chr2IntervalDataLs = {}
         counter = 0
-        for chr, startStopDataLs in chr2StartStopDataLs.iteritems():
+        for chr, startStopDataLs in chr2StartStopDataLs.items():
             for startStopData in startStopDataLs:
                 blockStartLineNumber = startStopData.startLineNumber
                 blockStopLineNumber = startStopData.stopLineNumber
@@ -2497,7 +2497,7 @@ Contig966       3160    50
                                                                         intervalOverlapSize))
         chr2IntervalDataLs = {}
         counter =0
-        for chromosome, chromosomeSize in chr2size.iteritems():
+        for chromosome, chromosomeSize in chr2size.items():
             no_of_intervals = max(1, int(math.ceil(chromosomeSize/float(intervalSize)))-1)
             for i in range(no_of_intervals):
                 originalStartPos = i*intervalSize + 1
@@ -2574,7 +2574,7 @@ Contig966       3160    50
         sys.stderr.write("Splitting alignment depth intervals (depth %sX median - %sX median depth), minAlignmentDepthIntervalLength=%s) into size=%s intervals, overlap=%s,  ... "%\
                     (alignmentDepthMinFold, alignmentDepthMaxFold, minAlignmentDepthIntervalLength, intervalSize, intervalOverlapSize))
         chr2IntervalDataLs = {}
-        for chromosome, alignmentDepthIntervalData in chr2alignmentDepthIntervalData.iteritems():
+        for chromosome, alignmentDepthIntervalData in chr2alignmentDepthIntervalData.items():
             intervalLs = alignmentDepthIntervalData.intervalLs
             chromosomeSize = alignmentDepthIntervalData.chromosomeSize
             for interval  in intervalLs:

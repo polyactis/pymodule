@@ -75,7 +75,7 @@ class QCVisualize(DataMatrixGuiXYProbe):
 			types = [str]*2 + [float]*2 + [int]*4
 		"""
 		list_2d = []
-		for id, NA_mismatch_rate in id2NA_mismatch_rate.iteritems():
+		for id, NA_mismatch_rate in id2NA_mismatch_rate.items():
 			if id in id2info:
 				info = id2info[id]
 			else:

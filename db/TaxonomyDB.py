@@ -486,7 +486,7 @@ class TaxonomyDB(ElixirDB):
 		2008-07-29
 		"""
 		tax_id_to_return = None
-		for scientific_name, tax_id in self.scientific_name2tax_id.iteritems():
+		for scientific_name, tax_id in self.scientific_name2tax_id.items():
 			if sentence.find(scientific_name)>=0:
 				tax_id_to_return = tax_id
 				break

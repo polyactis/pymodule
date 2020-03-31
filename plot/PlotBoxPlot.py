@@ -79,7 +79,7 @@ class PlotBoxPlot(AbstractPlot):
 		xValueList = []
 		y2DList = []
 		noOfBoxPlotsBefore = len(self.boxPlotXLabelList)
-		for xValue, yValueList in xValue2yValueLs.iteritems():
+		for xValue, yValueList in xValue2yValueLs.items():
 			xValueList.append(xValue)
 			self.boxPlotXLabelList.append(xValue)
 			y2DList.append(yValueList)

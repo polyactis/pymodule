@@ -692,7 +692,7 @@ class PolymorphismTableFile(YHFile):
 		if locus_index2id is None:
 			locus_index2id = self._locus_index2id
 		counter = 0
-		for individualName, polymorphismData in individualName2polymorphismData.iteritems():
+		for individualName, polymorphismData in individualName2polymorphismData.items():
 			individual_id = self.getIndividual(individualName, speciesName=speciesName, ploidy=ploidy).id
 			for i in range(len(polymorphismData.haplotypeList)):
 				haplotype = polymorphismData.haplotypeList[i]

@@ -107,7 +107,7 @@ def drawLegend(matrix_value2label, matrix_value2color, font=None):
 	char_width, char_height = char_dimension
 	label_ls = []
 	matrix_value_ls = []
-	for matrix_value, color in matrix_value2color.iteritems():
+	for matrix_value, color in matrix_value2color.items():
 		matrix_value_ls.append(matrix_value)
 		label_ls.append(matrix_value2label[matrix_value])
 	max_label_len = max(map(len, label_ls))

@@ -435,7 +435,7 @@ class AbstractAlignmentWorkflow(AbstractNGSWorkflow):
 			chr2VCFJobData is None.
 		"""
 		chrIDSet = set(self.chr2size.keys())
-		chrSizeIDList = [(chromosomeSize, chromosome) for chromosome, chromosomeSize in self.chr2size.iteritems()]
+		chrSizeIDList = [(chromosomeSize, chromosome) for chromosome, chromosomeSize in self.chr2size.items()]
 		chrSizeIDList.sort()
 		chrSizeIDList.reverse()	#from big to small
 		return PassingData(chrIDSet=chrIDSet, chr2VCFJobData=None, chrSizeIDList=chrSizeIDList)

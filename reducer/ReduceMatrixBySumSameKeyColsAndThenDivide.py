@@ -56,7 +56,7 @@ class ReduceMatrixBySumSameKeyColsAndThenDivide(ReduceMatrixByChosenColumn):
 					else:
 						header.append('%s_by_%s'%(valueColHeader[0], valueColHeader[1]))
 			
-		for key, dataLs in key2dataLs.iteritems():
+		for key, dataLs in key2dataLs.items():
 			no_of_value_columns = len(dataLs)
 			if self.operatorType==3:
 				for i in range(no_of_value_columns):	#2014.1.9 do not iterate over dataLs (for data in dataLs) as dataLs is expanding ... 

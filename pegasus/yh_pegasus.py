@@ -97,7 +97,7 @@ def registerRefFastaFile(workflow=None, refFastaFname=None, registerAffiliateFil
 				missingSuffixSet.add(suffix)
 				continue
 			suffix2PathToFileLs[suffix]= pathToFile
-		for suffix, pathToFile in suffix2PathToFileLs.iteritems():
+		for suffix, pathToFile in suffix2PathToFileLs.items():
 			if checkAffiliateFileExistence and not os.path.isfile(pathToFile):
 				sys.stderr.write("Warning: %s don't exist or not a file on file system. skip registration.\n"%(pathToFile))
 				continue

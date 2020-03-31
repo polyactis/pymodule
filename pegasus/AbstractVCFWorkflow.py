@@ -384,7 +384,7 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 		intervalFile = self.registerOneInputFile(inputFname=vcfFname, folderName=folderName)
 		chr2IntervalDataLs = {}
 		counter = 0
-		for chromosome, startStopDataLs in chr2StartStopDataLs.iteritems():
+		for chromosome, startStopDataLs in chr2StartStopDataLs.items():
 			for startStopData in startStopDataLs:
 				blockStartLineNumber = startStopData.startLineNumber
 				blockStopLineNumber = startStopData.stopLineNumber
@@ -903,7 +903,7 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 		gzipReduceFolderJob = None
 		gzipPreReduceFolderJob = None
 		no_of_vcf_files = 0
-		for chromosome, jobDataLs in chr2jobDataLs.iteritems():
+		for chromosome, jobDataLs in chr2jobDataLs.items():
 			passingData.chromosome = chromosome
 			mapEachChromosomeData = self.mapEachChromosome(workflow=workflow, chromosome=chromosome, \
 										passingData=passingData, \

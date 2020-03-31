@@ -116,7 +116,7 @@ class ExtractSamplesFromVCF(AbstractVervetMapper):
 			outf = open(outputFname, 'w')
 			if outputFormat==2:
 				outf.write("sampleID\n")
-			for col_index, sampleID in col_index2sampleID.iteritems():
+			for col_index, sampleID in col_index2sampleID.items():
 				outf.write("%s\n"%(sampleID))
 			outf.close()
 		vcfFile.close()

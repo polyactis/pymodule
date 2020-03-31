@@ -146,7 +146,7 @@ class LocusMapTableFile(YHFile):
 		
 		sys.stderr.write("Reading the locus map from HDF5 file %s ..."%(self.inputFname))
 		"""
-		for attributeName, value in self.getAttributes().iteritems():
+		for attributeName, value in self.getAttributes().items():
 			HDF5AttributeNameLs.append(attributeName)
 			setattr(, attributeName, value)
 		"""
@@ -214,7 +214,7 @@ def getAssociationLandscapeDataFromHDF5File(inputFname=None, associationTableNam
 	reader = HDF5MatrixFile(inputFname, openMode='r')
 	landscapeTableObject = reader.getTableObject(tableName=landscapeTableName)
 	returnData.HDF5AttributeNameLs = []
-	for attributeName, value in landscapeTableObject.getAttributes().iteritems():
+	for attributeName, value in landscapeTableObject.getAttributes().items():
 		returnData.HDF5AttributeNameLs.append(attributeName)
 		setattr(returnData, attributeName, value)
 	
@@ -295,7 +295,7 @@ def constructAssociationPeakRBDictFromHDF5File(inputFname=None, peakPadding=1000
 	associationPeakRBDict.HDF5AttributeNameLs = []
 	
 	tableObject = reader.getTableObject(tableName=tableName)
-	for attributeName, value in tableObject.getAttributes().iteritems():
+	for attributeName, value in tableObject.getAttributes().items():
 		associationPeakRBDict.HDF5AttributeNameLs.append(attributeName)
 		setattr(associationPeakRBDict, attributeName, value)
 	
@@ -373,7 +373,7 @@ def constructAssociationLocusRBDictFromHDF5File(inputFname=None, locusPadding=0,
 	associationLocusRBDict.locusPadding = locusPadding
 	associationLocusRBDict.HDF5AttributeNameLs = []
 	tableObject = reader.getTableObject(tableName=tableName)
-	for attributeName, value in tableObject.getAttributes().iteritems():
+	for attributeName, value in tableObject.getAttributes().items():
 		associationLocusRBDict.HDF5AttributeNameLs.append(attributeName)
 		setattr(associationLocusRBDict, attributeName, value)
 	

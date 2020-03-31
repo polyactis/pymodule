@@ -64,7 +64,7 @@ class ReduceMatrixByAverageColumnsWithSameKey(ReduceMatrixByChosenColumn):
 			valueColName = valueColHeader[i]
 			newValueColHeader += ['mean_%s'%(valueColName), 'median_%s'%(valueColName), 'stdev_%s'%(valueColName)]
 		
-		for key, dataLs in key2dataLs.iteritems():
+		for key, dataLs in key2dataLs.items():
 			if key not in newKey2DataLs:
 				newKey2DataLs[key] = []
 			no_of_value_columns = len(dataLs)

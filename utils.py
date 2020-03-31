@@ -38,7 +38,7 @@ class PassingData(object):
         2008-5-12
             add keyword handling
         """
-        for argument_key, argument_value in keywords.iteritems():
+        for argument_key, argument_value in keywords.items():
             setattr(self, argument_key, argument_value)
             #setattr(self, argument_key, argument_value)
         
@@ -100,7 +100,7 @@ class PassingDataList(list, object):
         object.__setattr__(self, 'attributeName2Index', {})
         #watch: self (list) may contains items not recorded in attributeName2Index. 
         
-        for argument_key, argument_value in keywords.iteritems():
+        for argument_key, argument_value in keywords.items():
             setattr(self, argument_key, argument_value)
             #setattr(self, argument_key, argument_value)
         
@@ -111,7 +111,7 @@ class PassingDataList(list, object):
         """
         return_ls = []
         try:
-            for attributeName, index in self.attributeName2Index.iteritems():
+            for attributeName, index in self.attributeName2Index.items():
                 value = self[index]
                 #if attribute_name.find('__')==0:	#ignore the 
                 #	continue
@@ -175,7 +175,7 @@ class PassingDataList(list, object):
         try:
             attributeName2Index = object.__getattribute__(self, 'attributeName2Index')
             attributeToBeDeleted = None		
-            for attributeName, index in attributeName2Index.iteritems():
+            for attributeName, index in attributeName2Index.items():
                 if index==indexToDelete:
                     attributeToBeDeleted = attributeName
                     break
@@ -427,7 +427,7 @@ class FigureOutTaxID(object):
         2008-07-29
         """
         tax_id_to_return = None
-        for scientific_name, tax_id in self.scientific_name2tax_id.iteritems():
+        for scientific_name, tax_id in self.scientific_name2tax_id.items():
             if sentence.find(scientific_name)>=0:
                 tax_id_to_return = tax_id
                 break

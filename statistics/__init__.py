@@ -306,7 +306,7 @@ class DiscreteProbabilityMassContainer(object):
 		"""
 		from pymodule.yhio.CNV import CNVSegmentBinarySearchTreeKey
 		startProbMass = 0.0
-		for discreteVariable, probabilityMass in dc.iteritems():
+		for discreteVariable, probabilityMass in dc.items():
 			segmentKey = CNVSegmentBinarySearchTreeKey(chromosome="1", span_ls=[startProbMass, startProbMass+probabilityMass], \
 												min_reciprocal_overlap=0.001, isDataDiscrete=False)
 						#min_reciprocal_overlap=1: must be complete overlap in order for two objects occupying same key
