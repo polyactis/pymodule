@@ -134,7 +134,7 @@ class QualityControl(object):
 			if ecotypeid in strain_acc2row_index2:
 				row_id12row_id2[strain_acc] = ecotypeid
 			else:
-				print 'Failure:', strain_acc
+				print('Failure:', strain_acc)
 		sys.stderr.write("Done.\n")
 		return strain_acc2row_index1, strain_acc2row_index2, row_id12row_id2
 	
@@ -538,7 +538,7 @@ class QualityControl(object):
 																				self.nt_number2diff_matrix_index, self.col_id2col_index1, \
 																				self.col_id2col_index2, self.col_id12col_id2, \
 																				self.row_id2row_index1, self.row_id2row_index2, self.row_id12row_id2)
-		print self.diff_matrix
+		print(self.diff_matrix)
 		i = 0
 		if self.latex_output_fname:
 			outf = open(self.latex_output_fname, 'w')
@@ -670,7 +670,7 @@ class QualityControl(object):
 			except:
 				import traceback
 				traceback.print_exc()
-				print sys.exc_info()
+				print(sys.exc_info())
 				row_id2info[row_id] = '%s'%repr(row_id)
 		return row_id2info
 	
@@ -692,12 +692,12 @@ class QualityControl(object):
 		x, y = event.x, event.y
 		if event.button==1:
 			if event.inaxes is not None:
-				print 'data coords', event.xdata, event.ydata
+				print('data coords', event.xdata, event.ydata)
 				for key, value in self.row_id2NA_mismatch_rate.items():
 					NA_rate, mismatch_rate = value[:2]
 					if abs(NA_rate-event.xdata)<0.005 and abs(mismatch_rate-event.ydata)<0.005:
 						pylab.text(event.xdata, event.ydata, self.row_id2info[key], size=8)
-						print "row id: %s, NA_mismatch data: %s, info: %s"%(key, value, self.row_id2info[key])
+						print("row id: %s, NA_mismatch data: %s, info: %s"%(key, value, self.row_id2info[key]))
 	
 	def on_click_col(self, event):
 		"""
@@ -713,12 +713,12 @@ class QualityControl(object):
 		x, y = event.x, event.y
 		if event.button==1:
 			if event.inaxes is not None:
-				print 'data coords', event.xdata, event.ydata
+				print('data coords', event.xdata, event.ydata)
 				for key, value in self.col_id2NA_mismatch_rate.items():
 					NA_rate, mismatch_rate = value[:2]
 					if abs(NA_rate-event.xdata)<0.005 and abs(mismatch_rate-event.ydata)<0.005:
 						pylab.text(event.xdata, event.ydata, key, size=8)
-						print "col id: %s, NA_mismatch data: %s"%(key, value)
+						print("col id: %s, NA_mismatch data: %s"%(key, value))
 	
 	def plot_NA_mismatch_rate(self, NA_mismatch_rate_ls, on_click_func, title=''):
 		"""

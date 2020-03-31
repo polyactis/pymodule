@@ -90,7 +90,7 @@ class PlotVCFtoolsStat(PlotTrioInconsistencyOverFrequency, AbstractMatrixFileWal
 			sys.stderr.write('Except type: %s\n'%repr(sys.exc_info()))
 			import traceback
 			traceback.print_exc()
-			print sys.exc_info()
+			print(sys.exc_info())
 			return
 		
 		chr_id_index = col_name2index.get(chrColumnHeader, None)

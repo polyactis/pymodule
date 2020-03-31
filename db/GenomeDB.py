@@ -1945,12 +1945,12 @@ if __name__ == '__main__':
 	i = 0
 	block_size = 10
 	rows = Gene.query.offset(i).limit(block_size)
-	print dir(rows)
+	print(dir(rows))
 	while rows.count()!=0:
-		print rows.count()
+		print(rows.count())
 		for row in rows:
 			i += 1
-			print row.id, row.ncbi_gene_id, row.gene_symbol
+			print(row.id, row.ncbi_gene_id, row.gene_symbol)
 		if i>=5*block_size:
 			break
 		rows = Gene.query.offset(i).limit(block_size)

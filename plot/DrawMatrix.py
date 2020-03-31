@@ -643,7 +643,7 @@ Default is to combine them.'],\
 		from pymodule.yhio.SNP import read_data
 		from pymodule.utils import figureOutDelimiter, PassingData
 		delimiter = figureOutDelimiter(self.input_fname)
-		print delimiter
+		print(delimiter)
 		header, row_label_ls1, row_label_ls2, data_matrix = read_data(self.input_fname, matrix_data_type=float, delimiter='\t')
 		import numpy
 		data_matrix = numpy.array(data_matrix)
