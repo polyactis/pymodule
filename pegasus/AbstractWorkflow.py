@@ -188,7 +188,7 @@ class AbstractWorkflow(Workflow):
                     outputFile=None, outputArgumentOption=None, density=None, \
                     resizeDimension=None, \
                     parentJobLs=None, extraDependentInputLs=None, extraOutputLs=None, transferOutput=False, \
-                    frontArgumentList=None, extraArguments=None, extraArgumentList=None, job_max_memory=2000,\
+                    frontArgumentList=None, extraArguments=None, extraArgumentList=None, job_max_memory=200,\
                     key2ObjectForJob=None, **keywords):
         """
         2013.2.7 use imagemagick's convert to convert images. examples:
@@ -335,7 +335,7 @@ class AbstractWorkflow(Workflow):
 
     def addAbstractMapperLikeJob(self, executable=None, \
                     inputVCF=None, inputF=None, outputF=None, extraOutputLs=None,\
-                    parentJobLs=None, transferOutput=True, job_max_memory=2000,\
+                    parentJobLs=None, transferOutput=True, job_max_memory=200,\
                     extraArguments=None, extraArgumentList=None, extraDependentInputLs=None, \
                     sshDBTunnel=None, **keywords):
         """
@@ -359,7 +359,7 @@ class AbstractWorkflow(Workflow):
     def addSelectLineBlockFromFileJob(self, executable=None, inputFile=None, outputFile=None,\
                     startLineNumber=None, stopLineNumber=None, parentJobLs=None, extraDependentInputLs=None, \
                     transferOutput=False, \
-                    extraArguments=None, job_max_memory=2000, **keywords):
+                    extraArguments=None, job_max_memory=200, **keywords):
         """
         2012.7.30
         """
@@ -385,7 +385,7 @@ class AbstractWorkflow(Workflow):
                     minDist=None, maxDist=None, movingAverageType=2,\
                     parentJobLs=None, \
                     extraDependentInputLs=None, \
-                    extraArgumentList=None, extraArguments=None, transferOutput=True,  job_max_memory=2000, **keywords):
+                    extraArgumentList=None, extraArguments=None, transferOutput=True,  job_max_memory=200, **keywords):
         """
         2012.10.25
             expose argument missingDataNotation, minDist, maxDist
@@ -459,7 +459,7 @@ class AbstractWorkflow(Workflow):
                             tax_id=60711, sequence_type_id=1, chrOrder=None,\
                             parentJobLs=None, \
                             extraDependentInputLs=None, \
-                            extraArguments=None, transferOutput=True, job_max_memory=2000, sshDBTunnel=False, **keywords):
+                            extraArguments=None, transferOutput=True, job_max_memory=200, sshDBTunnel=False, **keywords):
         """
         Examples
             outputFnamePrefix = os.path.join(plotOutputDir, 'noOfMendelErrors_along_chromosome')
@@ -569,7 +569,7 @@ class AbstractWorkflow(Workflow):
                             inputFileFormat=1, outputFileFormat=None,\
                             parentJobLs=None, extraDependentInputLs=None, \
                             extraArguments=None, extraArgumentList=None, \
-                            transferOutput=True, job_max_memory=2000, \
+                            transferOutput=True, job_max_memory=200, \
                             objectWithDBGenomeArguments=None, sshDBTunnel=False, \
                             **keywords):
 
@@ -659,7 +659,7 @@ class AbstractWorkflow(Workflow):
                     inputFileFormat=None, outputFileFormat=None,\
                     parentJob=None, parentJobLs=None, \
                     extraDependentInputLs=None, extraOutputLs=None, \
-                    extraArgumentList=None, extraArguments=None, transferOutput=True,  job_max_memory=2000, \
+                    extraArgumentList=None, extraArguments=None, transferOutput=True,  job_max_memory=200, \
                     sshDBTunnel=False, key2ObjectForJob=None, \
                     objectWithDBArguments=None, **keywords):
         """
@@ -779,7 +779,7 @@ class AbstractWorkflow(Workflow):
                     inputFileFormat=None, outputFileFormat=None,\
                     parentJob=None, parentJobLs=None, extraOutputLs=None, \
                     extraDependentInputLs=None, extraArgumentList=None, \
-                    extraArguments=None, transferOutput=True,  job_max_memory=2000, sshDBTunnel=False, \
+                    extraArguments=None, transferOutput=True,  job_max_memory=200, sshDBTunnel=False, \
                     objectWithDBArguments=None, **keywords):
         """
         2012.11.25 more arguments, logY, inputFileFormat, outputFileFormat
@@ -825,7 +825,7 @@ class AbstractWorkflow(Workflow):
                     inputFileFormat=None, outputFileFormat=None,\
                     parentJob=None, parentJobLs=None, \
                     extraDependentInputLs=None, extraArgumentList=None, \
-                    extraArguments=None, transferOutput=True,  job_max_memory=2000, sshDBTunnel=False, \
+                    extraArguments=None, transferOutput=True,  job_max_memory=200, sshDBTunnel=False, \
                     objectWithDBGenomeArguments=None, **keywords):
         """
         2013.07.31
@@ -871,7 +871,7 @@ class AbstractWorkflow(Workflow):
                     logCount=False, inputFileFormat=None, \
                     parentJobLs=None, \
                     extraDependentInputLs=None, \
-                    extraArguments=None, transferOutput=True,  job_max_memory=2000, **keywords):
+                    extraArguments=None, transferOutput=True,  job_max_memory=200, **keywords):
         """
         #no spaces or parenthesis or any other shell-vulnerable letters in the x or y axis labels (whichColumnPlotLabel, xColumnPlotLabel)
         2013.08.15 added argument xScaleLog, yScaleLog, legendType
@@ -924,7 +924,7 @@ class AbstractWorkflow(Workflow):
                 zColumnHeader=None, \
                 parentJobLs=None, \
                 extraDependentInputLs=None, \
-                extraArgumentList=None, extraArguments=None, transferOutput=True,  job_max_memory=2000, **keywords):
+                extraArgumentList=None, extraArguments=None, transferOutput=True,  job_max_memory=200, **keywords):
         """
         2013.2.8 added argument inputFileFormat
         2013.2.7 executable could be None, default is self.Draw2DHistogramOfMatrix
