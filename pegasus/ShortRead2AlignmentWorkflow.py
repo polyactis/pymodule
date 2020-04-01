@@ -12,11 +12,10 @@ __doc__ = __doc__%(sys.argv[0])
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
-
 import copy
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job
 from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
-from pymodule.pegasus from pegaflow import Workflow
+from pegaflow import Workflow
 from AbstractNGSWorkflow import AbstractNGSWorkflow
 from AbstractAlignmentAndVCFWorkflow import AbstractAlignmentAndVCFWorkflow
 from alignment.AlignmentReadBaseQualityRecalibrationWorkflow import AlignmentReadBaseQualityRecalibrationWorkflow
@@ -89,10 +88,10 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 		AlignmentReadBaseQualityRecalibrationWorkflow.registerCustomExecutables(self, workflow=workflow)
 
 		#workflow.BuildBamIndexFilesJava.addProfile(Profile(Namespace.PEGASUS, key="clusters.size", value="%s"%self.alignmentJobClusterSizeFraction))
-		self.setOrChangeExecutableClusterSize(executable=workflow.AddOrReplaceReadGroupsJava,
+		self.setExecutableClusterSize(executable=workflow.AddOrReplaceReadGroupsJava,
 				clusterSizeMultipler=self.alignmentJobClusterSizeFraction, \
 				defaultClusterSize=None)
-		self.setOrChangeExecutableClusterSize(executable=workflow.samtools,
+		self.setExecutableClusterSize(executable=workflow.samtools,
 				clusterSizeMultipler=self.alignmentJobClusterSizeFraction, \
 				defaultClusterSize=None)
 
