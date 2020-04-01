@@ -23,8 +23,8 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 from pegaflow.DAX3 import Executable, File, PFN
 from pymodule import ProcessOptions, PassingData, utils
 from pymodule.yhio.FastaFile import FastaFile
-import yh_pegasus
-from AbstractNGSWorkflow import AbstractNGSWorkflow as ParentClass
+from pegaflow import Workflow
+from . AbstractNGSWorkflow import AbstractNGSWorkflow as ParentClass
 
 class MapReduceGenomeFileWorkflow(ParentClass):
 	__doc__ = __doc__
@@ -80,14 +80,12 @@ class MapReduceGenomeFileWorkflow(ParentClass):
 		self.topOutputDirJob = self.addMkDirJob(outputDir="%sRun"%(outputDirPrefix))
 		passingData.topOutputDirJob = self.topOutputDirJob
 		
-		mapDirJob = yh_pegasus.addMkDirJob(workflow, mkdir=workflow.mkdirWrap, \
-										outputDir="%sMap"%(outputDirPrefix))
+		mapDirJob = self.addMkDirJob(outputDir="%sMap"%(outputDirPrefix))
 		passingData.mapDirJob = mapDirJob
 		returnData.mapDirJob = mapDirJob
 		self.mapDirJob = mapDirJob
 		
-		reduceOutputDirJob = yh_pegasus.addMkDirJob(workflow, mkdir=workflow.mkdirWrap, \
-												outputDir="%sReduce"%(outputDirPrefix))
+		reduceOutputDirJob = self.addMkDirJob(outputDir="%sReduce"%(outputDirPrefix))
 		passingData.reduceOutputDirJob = reduceOutputDirJob
 		returnData.reduceOutputDirJob = reduceOutputDirJob
 		

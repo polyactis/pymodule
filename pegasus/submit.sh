@@ -8,7 +8,7 @@ TOPDIR=`pwd`
 storageSiteNameDefault="local"
 submitOptionDefault="--submit"
 scratchTypeDefault="1"
-cleanupClustersSizeDefault=15
+cleanupClusterSizeDefault=15
 
 #2013.04.24 two files to store the names of the successfully-submitted and submit-failed workflows respectively.
 runningWorkflowLogFnameDefault=runningWorkflows.txt
@@ -35,13 +35,13 @@ freeSpace="50000G"
 
 if test $# -lt 2 ; then
 	echo "Usage:"
-	echo "  $0 dagFile computingSiteName [keepIntermediateFiles] [cleanupClustersSize] [scratchType] [submitOption] [storageSiteName] [finalOutputDir] [submitFolderName]"
+	echo "  $0 dagFile computingSiteName [keepIntermediateFiles] [cleanupClusterSize] [scratchType] [submitOption] [storageSiteName] [finalOutputDir] [submitFolderName]"
 	echo ""
 	echo "Note:"
-	echo "	#. computingSiteName is the computing cluster on which the jobs will run. Options are: local (single-node), ycondor (the whole cluster). The site in dagFile should match this."
+	echo "	#. computingSiteName is the computing cluster on which the jobs will run. Options are: local (single-node), condor (the whole cluster). The site in dagFile should match this."
 	echo ""
 	echo "	#. keepIntermediateFiles (setting it to 1 means no cleanup, otherwise or default is cleanup.). It changes the default submit option ($submitOptionDefault) to --submit --cleanup none ."
-	echo "	#. cleanupClustersSize controls how many jobs get clustered into one on each level. Default is $cleanupClustersSizeDefault ."
+	echo "	#. cleanupClusterSize controls how many jobs get clustered into one on each level. Default is $cleanupClusterSizeDefault ."
 	echo "	#. scratchType is the type of scratch file system to use."
 	echo "		Only valid for hcondor site. "
 	echo
@@ -57,14 +57,14 @@ if test $# -lt 2 ; then
 	echo ""
 	echo "Examples:"
 	echo "	#plan & submit and do not keep intermediate files, cleanup clustering=30"
-	echo "	$0 dags/TrioInconsistency15DistantVRC.xml ycondor"
-	echo "	$0 dags/TrioInconsistency/TrioInconsistency15DistantVRC.xml ycondor 0 30"
+	echo "	$0 dags/TrioInconsistency15DistantVRC.xml condor"
+	echo "	$0 dags/TrioInconsistency/TrioInconsistency15DistantVRC.xml condor 0 30"
 	echo
-	echo "	#plan & submit, keep intermediate files, cleanupClustersSize=10 doesn't matter, run on scratch type 2 on hcondor"
+	echo "	#plan & submit, keep intermediate files, cleanupClusterSize=10 doesn't matter, run on scratch type 2 on hcondor"
 	echo "	$0 dags/TrioInconsistency15DistantVRC.xml hcondor 1 10 2"
 	echo
-	echo "	#only planning, no running (keepIntermediateFiles & cleanupClustersSize & scratchType do not matter) by assigning empty spaces to submitOption"
-	echo "	$0 dags/TrioInconsistency15DistantVRC.xml ycondor 0 20 1 \"  \" "
+	echo "	#only planning, no running (keepIntermediateFiles & cleanupClusterSize & scratchType do not matter) by assigning empty spaces to submitOption"
+	echo "	$0 dags/TrioInconsistency15DistantVRC.xml condor 0 20 1 \"  \" "
 	echo
 	echo "	#run the workflow while keeping intermediate files. good for testing in which you often need to modify .dag.rescue log to backtrack finished jobs"
 	echo "	$0 dags/TrioInconsistency/TrioInconsistency15DistantVRC.xml hcondor 1 20 1 \"--submit\" local TrioInconsistency/TrioInconsistency15DistantVRC_20110929T1726 TrioInconsistency/TrioInconsistency15DistantVRC_20110929T1726 "
@@ -74,7 +74,7 @@ fi
 dagFile=$1
 computingSiteName=$2
 keepIntermediateFiles=$3
-cleanupClustersSize=$4
+cleanupClusterSize=$4
 shift
 scratchType=$4
 submitOption=$5
@@ -88,12 +88,12 @@ if test "$keepIntermediateFiles" = "1"; then
 fi
 
 #2013.03.26
-if test -z "$cleanupClustersSize"
+if test -z "$cleanupClusterSize"
 then
-	cleanupClustersSize=$cleanupClustersSizeDefault
+	cleanupClusterSize=$cleanupClusterSizeDefault
 fi
 
-echo cleanupClustersSize is $cleanupClustersSize.
+echo cleanupClusterSize is $cleanupClusterSize.
 
 
 echo "Default submitOption is changed to $submitOptionDefault."
@@ -178,12 +178,12 @@ cat >sites.xml <<EOF
 		<profile namespace="env" key="HOME">$HOME</profile>
 		<profile namespace="env" key="PATH" >$HOME_DIR/bin:$PATH</profile>
 	</site>
-	<site  handle="ycondor" arch="x86_64" os="LINUX">
+	<site  handle="condor" arch="x86_64" os="LINUX">
 		<grid  type="gt2" contact="localhost/jobmanager-fork" scheduler="Fork" jobtype="auxillary"/>
 		<grid  type="gt2" contact="localhost/jobmanager-fork" scheduler="unknown" jobtype="compute"/>
 		<head-fs>
 			<scratch>
-				<!-- this is where the computing output will be at for ycondor site -->
+				<!-- this is where the computing output will be at for condor site -->
 				<local>
 					<!-- this is used by condor local universe executables (i.e. pegasus-cleanup/transfer if you setup that way) -->
 					<file-server protocol="file" url="file://" mount-point="$TOPDIR/scratch"/>
@@ -196,7 +196,7 @@ cat >sites.xml <<EOF
 				</shared>
 			</scratch>
 			<storage>
-				<!-- this is where the final output will be staged when the storageSiteName is "ycondor", otherwise never used. -->
+				<!-- this is where the final output will be staged when the storageSiteName is "condor", otherwise never used. -->
 				<local>
 					<!-- this is used when pegasus-cleanup/transfer are set in condor local universe) -->
 					<file-server protocol="file" url="file://" mount-point="$TOPDIR/$finalOutputDir"/>
@@ -224,7 +224,7 @@ export CLASSPATH=.:$PEGASUS_HOME/lib/pegasus.jar:$CLASSPATH
 echo Java CLASSPATH is $CLASSPATH
 
 #2013.03.30 "--force " was once added due to a bug. it'll stop file reuse.
-commandLine="pegasus-plan -Dpegasus.file.cleanup.clusters.size=$cleanupClustersSize --conf pegasusrc --sites $computingSiteName --dax $dagFile --dir work --relative-dir $submitFolderName --output-site $storageSiteName --cluster horizontal $submitOption "
+commandLine="pegasus-plan -Dpegasus.file.cleanup.clusters.size=$cleanupClusterSize --conf pegasusrc --sites $computingSiteName --dax $dagFile --dir work --relative-dir $submitFolderName --output-site $storageSiteName --cluster horizontal $submitOption "
 
 echo commandLine is $commandLine
 

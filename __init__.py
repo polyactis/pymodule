@@ -50,7 +50,6 @@ from . algorithm.BinarySearchTree import binary_tree
 
 
 #2012.11.18
-#from pegasus import yh_pegasus
 #from pegasus.AbstractWorkflow import AbstractWorkflow
 #from pegasus.AbstractNGSWorkflow import AbstractNGSWorkflow
 #from pegasus.AbstractVCFWorkflow import AbstractVCFWorkflow

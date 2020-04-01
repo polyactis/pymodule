@@ -11,9 +11,8 @@ import copy
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job
 from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
 from pymodule.yhio import NextGenSeq
-import yh_pegasus
-from AbstractAlignmentWorkflow import AbstractAlignmentWorkflow
-from AbstractVCFWorkflow import AbstractVCFWorkflow
+from . AbstractAlignmentWorkflow import AbstractAlignmentWorkflow
+from . AbstractVCFWorkflow import AbstractVCFWorkflow
 
 ParentClass = AbstractAlignmentWorkflow
 class AbstractAlignmentAndVCFWorkflow(ParentClass, AbstractVCFWorkflow):

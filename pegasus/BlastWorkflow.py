@@ -25,7 +25,7 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job
 from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
-import yh_pegasus
+from pegaflow import Workflow
 from AbstractBioinfoWorkflow import AbstractBioinfoWorkflow
 
 ParentClass = AbstractBioinfoWorkflow
@@ -91,7 +91,7 @@ class BlastWorkflow(ParentClass):
 			job.outputList.append(splitFile)
 			job.uses(splitFile, transfer=transferOutput, register=True, link=Link.OUTPUT)
 			
-		yh_pegasus.setJobProperRequirement(job, job_max_memory=job_max_memory)
+		Workflow.setJobResourceRequirement(job, job_max_memory=job_max_memory)
 		self.addJob(job)
 		for parentJob in parentJobLs:
 			if parentJob:
@@ -133,7 +133,7 @@ class BlastWorkflow(ParentClass):
 		no_of_jobs= 0
 		
 		topOutputDir = "%sBlast"%(outputDirPrefix)
-		topOutputDirJob = yh_pegasus.addMkDirJob(self, mkdir=self.mkdirWrap, outputDir=topOutputDir)
+		topOutputDirJob = self.addMkDirJob(outputDir=topOutputDir)
 		no_of_jobs += 1
 		
 		allBlastResultFile = File(os.path.join(topOutputDir, 'blast.tsv'))
@@ -185,7 +185,7 @@ class BlastWorkflow(ParentClass):
 		version = self.version
 		operatingSystem = self.operatingSystem
 		architecture = self.architecture
-		clusters_size = self.clusters_size
+		cluster_size = self.cluster_size
 		site_handler = self.site_handler
 		
 		executableClusterSizeMultiplierList = []	#2012.8.7 each cell is a tuple of (executable, clusterSizeMultipler (0 if u do not need clustering)		
@@ -209,7 +209,7 @@ class BlastWorkflow(ParentClass):
 		SplitFastaFile.addPFN(PFN("file://" + os.path.join(self.pymodulePath, 'pegasus/mapper/splitter/SplitFastaFile.py'), site_handler))
 		executableClusterSizeMultiplierList.append((SplitFastaFile, 0.1))
 		
-		self.addExecutables(executableClusterSizeMultiplierList, defaultClustersSize=self.clusters_size)
+		self.setExecutablesClusterSize(executableClusterSizeMultiplierList, defaultClusterSize=self.cluster_size)
 
 	
 	def addMakeBlastDBJob(self, executable=None, inputFile=None, \

@@ -9,7 +9,6 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.expanduser('~/script'))
 
 from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
-import yh_pegasus
 from pegaflow.Workflow import Workflow
 from pegaflow.DAX3 import Executable, File, PFN, Profile, Namespace, Link, Use, Job, Dependency
 
@@ -45,7 +44,7 @@ class AbstractWorkflow(Workflow):
         ("input_site_handler", 1, ): ["local", 'j', 1, 'which site has all the input files: local, condorpool, hoffman2. '
             'If site_handler is condorpool, this must be condorpool and files will be symlinked. '
             'If site_handler is hoffman2, input_site_handler=local induces file transfer and input_site_handler=hoffman2 induces symlink.'],\
-        ('clusters_size', 1, int):[30, 'C', 1, 'For short jobs that will be clustered, how many of them should be clustered int one'],\
+        ('cluster_size', 1, int):[30, 'C', 1, 'For short jobs that will be clustered, how many of them should be clustered int one'],\
         ('pegasusFolderName', 0, ): ['folder', 'F', 1, \
             'the folder relative to pegasus workflow root to contain input & output. '
                 'It will be created during the pegasus staging process. It is useful to separate multiple workflows. '
@@ -983,7 +982,7 @@ if __name__ == '__main__':
             "Possible values can be 'local' or same as site_handler."
             "If not given, it is asssumed to be the same as site_handler and the input files will be symlinked into the running folder."
             "If input_site_handler=local, the input files will be transferred to the computing site by pegasus-transfer.")
-    ap.add_argument("-C", "--clusters_size", type=int, default=30,
+    ap.add_argument("-C", "--cluster_size", type=int, default=30,
             help="Default: %(default)s. "
             "This number decides how many of pegasus jobs should be clustered into one job. "
             "Good if your workflow contains many quick jobs. "
@@ -1017,7 +1016,7 @@ if __name__ == '__main__':
     ap.add_argument("--needSSHDBTunnel", action='store_true',
             help="If all DB-interacting jobs need a ssh tunnel to access a database that is inaccessible to computing nodes.")
     args = ap.parse_args()
-    instance = AbstractWorkflow(site_handler=args.site_handler, input_site_handler='ycondor', clusters_size=30, \
+    instance = AbstractWorkflow(site_handler=args.site_handler, input_site_handler='condor', cluster_size=30, \
             pegasusFolderName='folder', inputSuffixList=None, output_path=args.output_path, \
             tmpDir='/tmp/', max_walltime=4320, jvmVirtualByPhysicalMemoryRatio=1.2,\
             debug=False, needSSHDBTunnel=False, report=False)

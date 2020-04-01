@@ -46,8 +46,8 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 from pegaflow.DAX3 import Executable, File, PFN
+from pegaflow import Workflow
 from pymodule import ProcessOptions, PassingData
-from pymodule.pegasus import yh_pegasus
 from pymodule.pegasus.AbstractVCFWorkflow import AbstractVCFWorkflow
 from pymodule.pegasus.BlastWorkflow import BlastWorkflow
 from pymodule.pegasus.ShortRead2AlignmentWorkflow import ShortRead2AlignmentWorkflow
@@ -136,7 +136,7 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, Sh
 				sys.stderr.write(".\n")
 		else:	#bwa
 			registerReferenceData = self.registerBWAIndexFile(refFastaFname=self.newRefFastaFname, \
-												folderName=self.pegasusFolderName, input_site_handler=self.input_site_handler)
+												folderName=self.pegasusFolderName)
 			passingData.newRefFastaFileList = registerReferenceData.refFastaFList
 			if registerReferenceData.needBWARefIndexJob:	#2013.3.20
 				sys.stderr.write("Adding bwa reference index job ...")
@@ -421,18 +421,13 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, Sh
 		
 		ParentClass.registerCustomExecutables(self, workflow)
 		ShortRead2AlignmentWorkflow.registerCustomExecutables(self, workflow)
-		BlastWorkflow.registerCustomExecutables(self, workflow)
-		
-		
-		executableClusterSizeMultiplierList = []	#2012.8.7 each cell is a tuple of (executable, clusterSizeMultipler (0 if u do not need clustering)		
-		self.addExecutableAndAssignProperClusterSize(executableClusterSizeMultiplierList, defaultClustersSize=self.clusters_size)
-		
-		
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, name='LiftoverVariants', clusterSizeMultipler=0.5)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, name='FilterLiftedVariants', clusterSizeMultipler=0.5)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, "polymorphism/qc/mapper/RemoveLocusFromVCFWithLowLiftOverMapPvalue.py"), \
+		BlastWorkflow.registerCustomExecutables(self, workflow)		
+
+		self.addExecutableFromPath(path=self.javaPath, name='LiftoverVariants', clusterSizeMultipler=0.5)
+		self.addExecutableFromPath(path=self.javaPath, name='FilterLiftedVariants', clusterSizeMultipler=0.5)
+		self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "polymorphism/qc/mapper/RemoveLocusFromVCFWithLowLiftOverMapPvalue.py"), \
 												name='RemoveLocusFromVCFWithLowLiftOverMapPvalue', clusterSizeMultipler=1)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, "polymorphism/mapper/ComputeLiftOverLocusProbability.py"),\
+		self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "polymorphism/mapper/ComputeLiftOverLocusProbability.py"),\
 											name='ComputeLiftOverLocusProbability', \
 											clusterSizeMultipler=1)
 	
@@ -951,16 +946,14 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, Sh
 		"""
 		pdata = ParentClass.setup_run(self)
 		
-		self.oldRegisterReferenceData = yh_pegasus.registerRefFastaFile(workflow=pdata.workflow, \
+		self.oldRegisterReferenceData = self.registerRefFastaFile(
 							refFastaFname=self.oldRefFastaFname, \
 							registerAffiliateFiles=True, \
-							input_site_handler=self.input_site_handler,\
 							checkAffiliateFileExistence=True)
 		
-		self.newRegisterReferenceData = yh_pegasus.registerRefFastaFile(workflow=pdata.workflow, \
+		self.newRegisterReferenceData = self.registerRefFastaFile(
 							refFastaFname=self.newRefFastaFname, \
 							registerAffiliateFiles=True, \
-							input_site_handler=self.input_site_handler,\
 							checkAffiliateFileExistence=True)
 		
 		sys.stderr.write(" %s files related to the old reference %s; %s files related to new reference, %s.\n"%\

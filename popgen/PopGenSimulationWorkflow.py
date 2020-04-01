@@ -23,8 +23,8 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job
+from pegaflow import Workflow
 from pymodule import ProcessOptions, PassingData, AbstractWorkflow, utils
-from pymodule.pegasus import yh_pegasus
 
 ParentClass = AbstractWorkflow
 class PopGenSimulationWorkflow(ParentClass):
@@ -243,30 +243,30 @@ class PopGenSimulationWorkflow(ParentClass):
 		version = self.version
 		operatingSystem = self.operatingSystem
 		architecture = self.architecture
-		clusters_size = self.clusters_size
+		cluster_size = self.cluster_size
 		site_handler = self.site_handler
 		vervetSrcPath = self.vervetSrcPath
 		
 		#2013.3.8
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.expanduser(self.sfs_code_path), \
+		self.addExecutableFromPath(path=os.path.expanduser(self.sfs_code_path), \
 												name="sfs_code", clusterSizeMultipler=0.05)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.expanduser(self.slim_path), \
+		self.addExecutableFromPath(path=os.path.expanduser(self.slim_path), \
 												name="slim", clusterSizeMultipler=0.3)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.expanduser(self.msHOT_lite_path), \
+		self.addExecutableFromPath(path=os.path.expanduser(self.msHOT_lite_path), \
 												name="msHOT_lite", clusterSizeMultipler=0.5)
 		self.registerOneExecutableAsFile(pythonVariableName="msHOT_liteExecutableFile", path=self.msHOT_lite_path)
 		
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'shell/pipeCommandOutput2File.sh'), \
+		self.addExecutableFromPath(path=os.path.join(self.pymodulePath, 'shell/pipeCommandOutput2File.sh'), \
 										name='msShellPipe', clusterSizeMultipler=1)
 		
-		self.addOneExecutableFromPathAndAssignProperClusterSize(\
+		self.addExecutableFromPath(\
 										path=os.path.join(self.vervetSrcPath, 'db/input/AddPopGenSimulation2DB.py'), \
 										name="AddPopGenSimulation2DB", clusterSizeMultipler=0.2)
 		
-		self.addOneExecutableFromPathAndAssignProperClusterSize(\
+		self.addExecutableFromPath(\
 										path=os.path.join(self.pymodulePath, 'popgen/converter/SFS_CODE_Output2PolymorphismTableFile.py'), \
 										name="SFS_CODE_Output2PolymorphismTableFile", clusterSizeMultipler=0.2)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(\
+		self.addExecutableFromPath(\
 										path=os.path.join(self.pymodulePath, 'popgen/converter/msOutput2PolymorphismTableFile.py'), \
 										name="msOutput2PolymorphismTableFile", clusterSizeMultipler=0.2)
 		

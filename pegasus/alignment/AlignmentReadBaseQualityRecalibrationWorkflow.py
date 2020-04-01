@@ -24,7 +24,7 @@ Examples:
 		-e /u/home/eeskin/polyacti
 		--indelVCFFolder ...
 		--local_data_dir /u/home/eeskin/polyacti/NetworkData/vervet/db/ --data_dir /u/home/eeskin/polyacti/NetworkData/vervet/db/
-		--clusters_size 5 --needSSHDBTunnel -J ~/bin/jdk/bin/java --new_mask_genotype_method_id 41
+		--cluster_size 5 --needSSHDBTunnel -J ~/bin/jdk/bin/java --new_mask_genotype_method_id 41
 		 --commit --skipDoneAlignment
 	
 	# 2013.3.19 use sequence coverage to filter alignments
@@ -34,7 +34,7 @@ Examples:
 		-l hcondor -j hcondor -z localhost -u yh --intervalSize 10000000 --intervalOverlapSize 30000
 		-e /u/home/eeskin/polyacti --contigMaxRankBySize 250
 		--local_data_dir /u/home/eeskin/polyacti/NetworkData/vervet/db/ --data_dir /u/home/eeskin/polyacti/NetworkData/vervet/db/
-		--clusters_size 5 --needSSHDBTunnel -J ~/bin/jdk/bin/java --new_mask_genotype_method_id 41
+		--cluster_size 5 --needSSHDBTunnel -J ~/bin/jdk/bin/java --new_mask_genotype_method_id 41
 		--indelVCFFolder ~/NetworkData/vervet/db/genotype_file/method_88 --commit --skipDoneAlignment
 		# --ref_genome_version 2 #(optional, as by default, it gets the outdated_index=0 reference chromosomes from GenomeDB)
 		# --ref_genome_outdated_index 1 #to get old reference. incompatible here as alignment is based on 3280, new ref.
@@ -54,7 +54,8 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job
-from pymodule import ProcessOptions, getListOutOfStr, PassingData, yh_pegasus, NextGenSeq, \
+from pegaflow import Workflow
+from pymodule import ProcessOptions, getListOutOfStr, PassingData, NextGenSeq, \
 	figureOutDelimiter, getColName2IndexFromHeader, utils
 from pymodule import VCFFile
 from pymodule.pegasus.AbstractAlignmentAndVCFWorkflow import AbstractAlignmentAndVCFWorkflow
@@ -611,28 +612,22 @@ class AlignmentReadBaseQualityRecalibrationWorkflow(ParentClass):
 										data_dir=self.data_dir, local_realigned=1)
 		return self.db.isThisAlignmentComplete(individual_alignment=new_individual_alignment, data_dir=data_dir)
 	
-	def registerCustomExecutables(self, workflow=None):
+	def registerCustomExecutables(self):
 		"""
 		2011-11-28
 		"""
-		ParentClass.registerCustomExecutables(self, workflow=workflow)
-		
-		if workflow is None:
-			workflow = self
-		
-		executableClusterSizeMultiplierList = []	#2012.8.7 each cell is a tuple of (executable, clusterSizeMultipler (0 if u do not need clustering)
-		self.addExecutableAndAssignProperClusterSize(executableClusterSizeMultiplierList, defaultClustersSize=self.clusters_size)
+		ParentClass.registerCustomExecutables(self)
 		
 		#samtools is only used for select alignment, which is very fast, increase the clustering 
-		self.setOrChangeExecutableClusterSize(executable=workflow.samtools, clusterSizeMultipler=1)
+		self.setOrChangeExecutableClusterSize(executable=self.samtools, clusterSizeMultipler=1)
 		
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, 
+		self.addExecutableFromPath(path=self.javaPath, 
 								name='BaseRecalibratorJava', clusterSizeMultipler=1)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, 
+		self.addExecutableFromPath(path=self.javaPath, 
 								name='PrintRecalibratedReadsJava', clusterSizeMultipler=1)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, 
+		self.addExecutableFromPath(path=self.javaPath, 
 								name='RealignerTargetCreatorJava', clusterSizeMultipler=1)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, 
+		self.addExecutableFromPath(path=self.javaPath, 
 								name='IndelRealignerJava', clusterSizeMultipler=1)
 
 

@@ -4,7 +4,7 @@ Examples:
 	#2013.04.12 test on one outdated alignment (--local_realigned 0 --alignment_outdated_index 1)
 	%s --ind_aln_id_ls 552 --ref_ind_seq_id 524  --ref_genome_outdated_index 1 -o dags/ReduceReads/ReduceReadsAln552.xml
 		-l condorpool -j condorpool -z uclaOffice -u yh --intervalSize 20000000
-		--intervalOverlapSize 0 --contigMaxRankBySize 1000  --clusters_size 5
+		--intervalOverlapSize 0 --contigMaxRankBySize 1000  --cluster_size 5
 		-J ~/bin/jdk/bin/java --commit --skipDoneAlignment --local_realigned 0 --alignment_outdated_index 1
 	
 	# 2013.04.12 use sequence coverage to filter alignments
@@ -13,7 +13,7 @@ Examples:
 		-l hcondor -j hcondor -z localhost -u yh --intervalSize 20000000 --intervalOverlapSize 0
 		-e /u/home/eeskin/polyacti --contigMaxRankBySize 250
 		--local_data_dir /u/home/eeskin/polyacti/NetworkData/vervet/db/ --data_dir /u/home/eeskin/polyacti/NetworkData/vervet/db/
-		--clusters_size 5 --needSSHDBTunnel -J ~/bin/jdk/bin/java
+		--cluster_size 5 --needSSHDBTunnel -J ~/bin/jdk/bin/java
 		--commit --skipDoneAlignment
 		# --ref_genome_version 2 #(optional, as by default, it gets the outdated_index=0 reference chromosomes from GenomeDB)
 		# --ref_genome_outdated_index 1 #to get old reference. incompatible here as alignment is based on 3280, new ref.
@@ -29,10 +29,11 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job
-from pymodule import ProcessOptions, getListOutOfStr, PassingData, yh_pegasus, NextGenSeq, \
+from pegaflow import Workflow
+from pymodule import ProcessOptions, getListOutOfStr, PassingData, NextGenSeq, \
 	figureOutDelimiter, getColName2IndexFromHeader, utils
 #from pymodule.pegasus.AbstractVCFWorkflow import AbstractVCFWorkflow
-from pymodule import VCFFile
+from pymodule.yhio.VCFFile import VCFFile
 from vervet.src import AbstractVervetAlignmentWorkflow
 
 ParentClass = AbstractVervetAlignmentWorkflow
@@ -239,20 +240,12 @@ class AlignmentReduceReadsWorkflow(ParentClass):
 		return stockAnswer	
 			
 	
-	def registerCustomExecutables(self, workflow=None):
+	def registerCustomExecutables(self):
 		"""
 		2011-11-28
 		"""
-		ParentClass.registerCustomExecutables(self, workflow=workflow)
-		
-		if workflow is None:
-			workflow = self
-		
-		executableClusterSizeMultiplierList = []	#2012.8.7 each cell is a tuple of (executable, clusterSizeMultipler (0 if u do not need clustering)
-		self.addExecutableAndAssignProperClusterSize(executableClusterSizeMultiplierList, defaultClustersSize=self.clusters_size)
-		self.setOrChangeExecutableClusterSize(executable=workflow.samtools, clusterSizeMultipler=1)
-		
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, name='ReduceReadsJava', \
+		self.setOrChangeExecutableClusterSize(executable=self.samtools, clusterSizeMultipler=1)
+		self.addExecutableFromPath(path=self.javaPath, name='ReduceReadsJava', \
 															clusterSizeMultipler=1)
 
 

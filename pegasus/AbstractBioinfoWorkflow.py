@@ -11,8 +11,7 @@ sys.path.insert(0, os.path.expanduser('~/script'))
 
 from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job
-from AbstractWorkflow import AbstractWorkflow
-import yh_pegasus
+from . AbstractWorkflow import AbstractWorkflow
 
 ParentClass = AbstractWorkflow
 class AbstractBioinfoWorkflow(ParentClass):
@@ -61,38 +60,106 @@ class AbstractBioinfoWorkflow(ParentClass):
         """
         pass
 
-    def registerBlastNucleotideDatabaseFile(self, ntDatabaseFname=None, input_site_handler=None, folderName=""):
+    def registerBlastNucleotideDatabaseFile(self, ntDatabaseFname=None,  folderName=""):
         """
-        2013.3.20 yh_pegasus.registerRefFastaFile() returns a PassingData
         2012.10.8
             moved from BlastWorkflow.py
         2012.5.23
         """
-        if input_site_handler is None:
-            input_site_handler = self.input_site_handler
-        return yh_pegasus.registerRefFastaFile(workflow=self, refFastaFname=ntDatabaseFname, registerAffiliateFiles=True, \
-                                    input_site_handler=input_site_handler,\
+        return self.registerRefFastaFile(refFastaFname=ntDatabaseFname, registerAffiliateFiles=True, \
                                     checkAffiliateFileExistence=True, addPicardDictFile=False, \
                                     affiliateFilenameSuffixLs=['nin', 'nhr', 'nsq'],\
                                     folderName=folderName)
 
-    def registerRefFastaFile(self, workflow=None, refFastaFname=None, registerAffiliateFiles=True, \
-                        input_site_handler='local',\
+    def registerRefFastaFile(self, refFastaFname=None, registerAffiliateFiles=True, \
                         checkAffiliateFileExistence=True, addPicardDictFile=True,\
                         affiliateFilenameSuffixLs=['fai', 'amb', 'ann', 'bwt', 'pac', 'sa', 'rbwt', 'rpac', 'rsa', \
                         'stidx', 'sthash'], folderName="reference"):
         """
-        2013.07.08 convenient function that calls yh_pegasus.registerRefFastaFile instead
+        suffix here doesn't include ".".
+        
+        2013.08.23 bugfix, check if workflow has a file registered before adding it
+        2013.3.26 added refSAMtoolsFastaIndexF, refPicardFastaDictF into returnData
+        2013.3.20 deduce needBWARefIndexJob, needSAMtoolsFastaIndexJob, needPicardFastaDictJob, needStampyRefIndexJob from missing suffixes
+        2010.10.10 added argument folderName
+        2012.5.23
+            add an argument "addPicardDictFile" to offer user option to exclude this file (i.e. in registerBlastNucleotideDatabaseFile)
+        2012.2.24
+            dict is via picard, also required for GATK
+            fai is via "samtools faidx" (index reference). also required for GATK
+            amb', 'ann', 'bwt', 'pac', 'sa', 'rbwt', 'rpac', 'rsa' are all bwa index.
+            stidx is stampy index.
+            sthash is stampy hash.
+        2012.2.23
+            add two suffixes, stidx (stampy index) and sthash (stampy hash)
+        2011-11-11
+            if needAffiliatedFiles,
+                all other files, with suffix in affiliateFilenameSuffixLs, will be registered (symlinked or copied) as well.
         """
-        if input_site_handler is None:
-            input_site_handler = self.input_site_handler
-        return yh_pegasus.registerRefFastaFile(workflow=self, refFastaFname=refFastaFname, \
-                        registerAffiliateFiles=registerAffiliateFiles, \
-                        input_site_handler=input_site_handler, \
-                        checkAffiliateFileExistence=checkAffiliateFileExistence, \
-                        addPicardDictFile=addPicardDictFile, affiliateFilenameSuffixLs=affiliateFilenameSuffixLs, \
-                        folderName=folderName)
-    
+        returnData = PassingData(refFastaFList = [], needBWARefIndexJob=False, needSAMtoolsFastaIndexJob=False, \
+                                needPicardFastaDictJob=False, needStampyRefIndexJob=False, needBlastMakeDBJob=False,\
+                                refPicardFastaDictF=None, refSAMtoolsFastaIndexF=None)
+        missingSuffixSet = set()	#2013.3.20
+        
+        if registerAffiliateFiles:
+            refFastaF = File(os.path.join(folderName, os.path.basename(refFastaFname)))	#use relative path, otherwise, it'll go to absolute path
+            # Add it into replica only when needed.
+            refFastaF.addPFN(PFN("file://" + refFastaFname, self.input_site_handler))
+            if not self.hasFile(refFastaF):	#2013.08.12
+                self.addFile(refFastaF)
+            returnData.refFastaFList.append(refFastaF)
+            # If it's not needed, assume the index is done and all relevant files are in absolute path.
+            # and no replica transfer
+            
+            #add extra affiliated files
+            suffix2PathToFileLs = {}
+            if addPicardDictFile:	#2012.5.23
+                picardDictSuffix = 'dict'
+                pathToFile = '%s.%s'%(os.path.splitext(refFastaFname)[0], picardDictSuffix)	#remove ".fasta" from refFastaFname
+                if checkAffiliateFileExistence and not os.path.isfile(pathToFile):
+                    sys.stderr.write("Warning: %s don't exist or not a file on file system. skip registration.\n"%(pathToFile))
+                    missingSuffixSet.add(picardDictSuffix)
+                    #suffix2PathToFileLs.append(pathToFile)
+                else:
+                    suffix2PathToFileLs[picardDictSuffix] = pathToFile
+            for suffix in affiliateFilenameSuffixLs:
+                pathToFile = '%s.%s'%(refFastaFname, suffix)
+                if checkAffiliateFileExistence and not os.path.isfile(pathToFile):
+                    sys.stderr.write("Warning: %s don't exist or not a file on file system. skip registration.\n"%(pathToFile))
+                    missingSuffixSet.add(suffix)
+                    continue
+                suffix2PathToFileLs[suffix]= pathToFile
+            for suffix, pathToFile in suffix2PathToFileLs.items():
+                if checkAffiliateFileExistence and not os.path.isfile(pathToFile):
+                    sys.stderr.write("Warning: %s don't exist or not a file on file system. skip registration.\n"%(pathToFile))
+                    continue
+                affiliateF = File(os.path.join(folderName, os.path.basename(pathToFile)))
+                #use relative path, otherwise, it'll go to absolute path
+                affiliateF.addPFN(PFN("file://" + pathToFile, self.input_site_handler))
+                if not self.hasFile(affiliateF):	#2013.08.12
+                    self.addFile(affiliateF)
+                returnData.refFastaFList.append(affiliateF)
+                
+                if suffix=='dict':	#2013.3.26
+                    returnData.refPicardFastaDictF = affiliateF
+                elif suffix=='fai':
+                    returnData.refSAMtoolsFastaIndexF = affiliateF
+        else:
+            refFastaF = File(os.path.join(folderName, os.path.basename(refFastaFname)))
+            returnData.refFastaFList.append(refFastaF)
+        if 'bwt' in missingSuffixSet or 'pac' in missingSuffixSet:
+            returnData.needBWARefIndexJob = True
+        if 'fai' in missingSuffixSet:
+            returnData.needSAMtoolsFastaIndexJob = True
+            returnData.needPicardFastaDictJob = True
+        if 'stidx' in missingSuffixSet or 'sthash' in missingSuffixSet:
+            returnData.needStampyRefIndexJob = True
+        if 'dict' in missingSuffixSet:
+            returnData.needPicardFastaDictJob = True
+        if 'nin' in missingSuffixSet or 'nhr' in missingSuffixSet or 'nsq' in missingSuffixSet:
+            returnData.needBlastMakeDBJob = True
+        return returnData
+
     def addPlinkJob(self, workflow=None, executable=None, inputFileList=None, parentPlinkJob=None,\
                 tpedFile=None, tfamFile=None,\
                 pedFile=None, famFile=None, mapFile=None, bedFile=None, bimFile=None,\
@@ -289,7 +356,7 @@ class AbstractBioinfoWorkflow(ParentClass):
         version = self.version
         operatingSystem = self.operatingSystem
         architecture = self.architecture
-        clusters_size = self.clusters_size
+        cluster_size = self.cluster_size
         site_handler = self.site_handler
 
 
@@ -395,7 +462,7 @@ class AbstractBioinfoWorkflow(ParentClass):
         splitfa.addPFN(PFN("file://" + os.path.join(self.pymodulePath, "mapper/splitter/splitfa.sh"), site_handler))
         executableClusterSizeMultiplierList.append((splitfa, 1))
 
-        self.addExecutables(executableClusterSizeMultiplierList, defaultClustersSize=self.clusters_size)
+        self.setExecutablesClusterSize(executableClusterSizeMultiplierList, defaultClusterSize=self.cluster_size)
 
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "plot/PlotVCFtoolsStat.py"), \
                                         name='PlotVCFtoolsStat', clusterSizeMultipler=0)

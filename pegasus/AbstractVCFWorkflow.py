@@ -14,9 +14,9 @@ from pymodule import Genome, getListOutOfStr, PassingData, utils
 from pymodule.yhio.MatrixFile import MatrixFile
 from pymodule.yhio.VCFFile import VCFFile
 from pymodule.yhio import NextGenSeq
-import yh_pegasus
-from AbstractNGSWorkflow import AbstractNGSWorkflow
-from MapReduceGenomeFileWorkflow import MapReduceGenomeFileWorkflow as ParentClass
+from pegaflow import Workflow
+from . AbstractNGSWorkflow import AbstractNGSWorkflow
+from . MapReduceGenomeFileWorkflow import MapReduceGenomeFileWorkflow as ParentClass
 
 class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 	__doc__ = __doc__

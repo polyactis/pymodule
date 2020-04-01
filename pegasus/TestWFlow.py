@@ -9,7 +9,7 @@ from pegaflow.DAX3 import Executable, File, PFN, Profile, Namespace, Link, ADAG,
 
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/src')))
-site_handler = "ycondor"
+site_handler = "condor"
 version = "1.0"
 namespace = "pegasus"
 
@@ -25,7 +25,7 @@ def registerExecutefile(workflow, executeFile):
     return executeName
 
 
-def setJobToProperMemoryRequirement(job=None, job_max_memory=500, no_of_cpus=1,
+def setJobResourceRequirement(job=None, job_max_memory=500, no_of_cpus=1,
                                     walltime=180, sshDBTunnel=0):
     """
         set walltime default to 120 minutes (2 hours)
@@ -144,7 +144,7 @@ if __name__ == '__main__':
                                     file_output_transfer=[select_gene_outfile],
                                     file_output_notransfer=None,
             argv=['-i', input_file, '-n %s'%(i), '-t 1 -o ', select_gene_outfile])
-        setJobToProperMemoryRequirement(job=select_gene_job)
+        setJobResourceRequirement(job=select_gene_job)
         workflow_AC.addJob(select_gene_job)
 
         backtest_out_fpath = 'backtest_outfile_de' + str(i)+'.csv'
@@ -154,7 +154,7 @@ if __name__ == '__main__':
                                     file_output_transfer=[backtest_outfile],
                                     file_output_notransfer=None,
                                     argv=[select_gene_outfile, backtest_outfile])
-        setJobToProperMemoryRequirement(job=back_test_job, job_max_memory=2048)
+        setJobResourceRequirement(job=back_test_job, job_max_memory=2048)
         workflow_AC.addJob(back_test_job)
         workflow_AC.addDependency(Dependency(parent=select_gene_job, child=back_test_job))
     workflow_AC.writeXML(open(args.output_file, 'w'))

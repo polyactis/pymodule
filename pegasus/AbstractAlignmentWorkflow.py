@@ -11,8 +11,8 @@ import copy
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job
 from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
 from pymodule.yhio import NextGenSeq
-import yh_pegasus
-from AbstractNGSWorkflow import AbstractNGSWorkflow
+from pegaflow import Workflow
+from . AbstractNGSWorkflow import AbstractNGSWorkflow
 
 class AbstractAlignmentWorkflow(AbstractNGSWorkflow):
 	__doc__ = __doc__
@@ -183,7 +183,7 @@ class AbstractAlignmentWorkflow(AbstractNGSWorkflow):
 				addRGJob.uses(bamF, transfer=True, register=True, link=Link.INPUT)
 				addRGJob.uses(baiF, transfer=True, register=True, link=Link.INPUT)
 				addRGJob.uses(outputRGSAM, transfer=True, register=True, link=Link.OUTPUT)
-				yh_pegasus.setJobProperRequirement(addRGJob, job_max_memory=job_max_memory)
+				Workflow.setJobResourceRequirement(addRGJob, job_max_memory=job_max_memory)
 				for parentJob in parentJobLs:
 					if parentJob:
 						workflow.depends(parent=parentJob, child=addRGJob)
@@ -217,7 +217,7 @@ class AbstractAlignmentWorkflow(AbstractNGSWorkflow):
 
 				index_sam_job
 
-				yh_pegasus.setJobProperRequirement(index_sam_job, job_max_memory=indexJobMaxMem)
+				Workflow.setJobResourceRequirement(index_sam_job, job_max_memory=indexJobMaxMem)
 
 				workflow.addJob(index_sam_job)
 				workflow.depends(parent=mvJob, child=index_sam_job)

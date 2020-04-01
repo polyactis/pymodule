@@ -9,6 +9,7 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.expanduser('~/script'))
 
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job
+from pegaflow import Workflow
 from pymodule import Genome, utils
 from pymodule import ProcessOptions
 from pymodule.Genome import IntervalData
@@ -19,8 +20,7 @@ from pymodule.yhio.MatrixFile import MatrixFile
 from pymodule.yhio.AlignmentDepthIntervalFile import AlignmentDepthIntervalFile
 from pymodule.yhio.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey
 from pymodule.algorithm.RBTree import RBDict
-import yh_pegasus
-from AbstractBioinfoWorkflow import AbstractBioinfoWorkflow
+from . AbstractBioinfoWorkflow import AbstractBioinfoWorkflow
 
 ParentClass = AbstractBioinfoWorkflow
 class AbstractNGSWorkflow(ParentClass):
@@ -289,10 +289,10 @@ class AbstractNGSWorkflow(ParentClass):
 
         self.addExecutableFromPath(path=self.javaPath,
             name='DOCWalkerJava', clusterSizeMultipler=0.05)
-        #no clusters_size for this because it could run on a whole bam for hours
+        #no cluster_size for this because it could run on a whole bam for hours
         self.addExecutableFromPath(path=self.javaPath,
             name='VariousReadCountJava', clusterSizeMultipler=0)
-        #no clusters_size for this because it could run on a whole bam for hours
+        #no cluster_size for this because it could run on a whole bam for hours
         self.addExecutableFromPath(path=self.javaPath,
             name='MarkDuplicatesJava', clusterSizeMultipler=0)
 
@@ -396,7 +396,7 @@ class AbstractNGSWorkflow(ParentClass):
             path=self.javaPath, name='genotyperJava', clusterSizeMultipler=0.1)
 
         #clustering is controlled by a separate parameter
-        #genotyperJava.addProfile(Profile(Namespace.PEGASUS, key="clusters.size", value="%s"%clusters_size))
+        #genotyperJava.addProfile(Profile(Namespace.PEGASUS, key="clusters.size", value="%s"%cluster_size))
 
         #2013.07.10
         self.addExecutableFromPath(
@@ -439,15 +439,12 @@ class AbstractNGSWorkflow(ParentClass):
         """
         2012.10.10
         """
-        if input_site_handler is None:
-            input_site_handler = self.input_site_handler
-        return yh_pegasus.registerRefFastaFile(workflow=self, refFastaFname=refFastaFname, registerAffiliateFiles=True, \
-                                    input_site_handler=input_site_handler,\
+        return self.registerRefFastaFile(refFastaFname=refFastaFname, registerAffiliateFiles=True, \
                                     checkAffiliateFileExistence=True, addPicardDictFile=False, \
                                     affiliateFilenameSuffixLs=self.bwaIndexFileSuffixLs,\
                                     folderName=folderName)
 
-    def addBAMIndexJob(self, workflow=None, BuildBamIndexFilesJava=None, BuildBamIndexJar=None, \
+    def addBAMIndexJob(self, BuildBamIndexFilesJava=None, BuildBamIndexJar=None, \
                     inputBamF=None,\
                     extraArguments=None, parentJobLs=None, extraDependentInputLs=None, \
                     transferOutput=True, job_max_memory=None, javaMaxMemory=2500,\
@@ -1415,7 +1412,7 @@ class AbstractNGSWorkflow(ParentClass):
         job.uses(inputFile, transfer=True, register=True, link=Link.INPUT)
         job.uses(outputFile, transfer=transferOutput, register=True, link=Link.OUTPUT)
         job.output = outputFile
-        yh_pegasus.setJobProperRequirement(job, job_max_memory=job_max_memory)
+        Workflow.setJobResourceRequirement(job, job_max_memory=job_max_memory)
         self.addJob(job)
         for parentJob in parentJobLs:
             if parentJob:
@@ -1833,7 +1830,7 @@ class AbstractNGSWorkflow(ParentClass):
         self.addJob(filterByDepthJob)
         for parentJob in parentJobLs:
             self.depends(parent=parentJob, child=filterByDepthJob)
-        yh_pegasus.setJobProperRequirement(filterByDepthJob, job_max_memory=job_max_memory)
+        Workflow.setJobResourceRequirement(filterByDepthJob, job_max_memory=job_max_memory)
         self.no_of_jobs += 1
         return filterByDepthJob
 
@@ -2214,7 +2211,7 @@ Contig966       3160    50
         job.uses(vcf1, transfer=True, register=True, link=Link.INPUT)
         job.uses(vcf2, transfer=True, register=True, link=Link.INPUT)
         job.uses(snpMisMatchStatFile, transfer=transferOutput, register=True, link=Link.OUTPUT)
-        yh_pegasus.setJobProperRequirement(job, job_max_memory=job_max_memory)
+        Workflow.setJobResourceRequirement(job, job_max_memory=job_max_memory)
         self.addJob(job)
         for input in extraDependentInputLs:
             job.uses(input, transfer=True, register=True, link=Link.INPUT)
@@ -2223,7 +2220,7 @@ Contig966       3160    50
                 self.depends(parent=parentJob, child=job)
         return job
 
-    def addTabixRetrieveJob(self, workflow=None, executable=None, tabixPath=None, \
+    def addTabixRetrieveJob(self, executable=None, tabixPath=None, \
                             inputF=None, outputF=None, regionOfInterest=None, includeHeader=True,\
                             parentJobLs=None, job_max_memory=100, extraDependentInputLs=None, \
                             transferOutput=False, **keywords):
@@ -2264,10 +2261,8 @@ Contig966       3160    50
             run something like below to extract data from regionOfInterest out of bgzipped&tabix-indexed file.
                 tabix sorted.gff.gz chr1:10,000,000-20,000,000
         """
-        if workflow is None:
-            workflow = self
         if executable is None:
-            executable = workflow.tabixRetrieve
+            executable = self.tabixRetrieve
         extraArgumentList=[]
         extraArgumentList.append(regionOfInterest)
         if includeHeader:
@@ -2289,8 +2284,7 @@ Contig966       3160    50
         2013.1.25 placeholder, usually from database. such as:
             refSequence = VervetDB.IndividualSequence.get(self.ref_ind_seq_id)
             refFastaFname = os.path.join(self.data_dir, refSequence.path)
-            refFastaFList = yh_pegasus.registerRefFastaFile(workflow, refFastaFname, registerAffiliateFiles=True, \
-                                input_site_handler=self.input_site_handler,\
+            refFastaFList = self.registerRefFastaFile(refFastaFname, registerAffiliateFiles=True, \
                                 checkAffiliateFileExistence=True)
             return refFastaFList
 
