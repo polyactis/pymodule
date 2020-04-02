@@ -238,7 +238,7 @@ class WgetWorkflow(AbstractWorkflow):
         2012.6.27
         """
         self.addExecutableFromPath(path=pathToWget, \
-                name="wget", clusterSizeMultipler=1)
+                name="wget", clusterSizeMultiplier=1)
     
     def run(self):
         """

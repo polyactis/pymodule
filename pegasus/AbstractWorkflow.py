@@ -106,50 +106,50 @@ class AbstractWorkflow(Workflow):
         Workflow.registerExecutables(self)
         
         #2013.2.7 convert, an image swissknife program, part of imagemagick
-        self.addExecutableFromPath(path="/usr/bin/convert", name='convertImage', clusterSizeMultipler=1)
+        self.addExecutableFromPath(path="/usr/bin/convert", name='convertImage', clusterSizeMultiplier=1)
 
         #2013.08.23 c++ version of SelectRowsFromMatrix.py
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, 'mapper/extractor/SelectRowsFromMatrixCC'), \
-                                        name='SelectRowsFromMatrixCC', clusterSizeMultipler=1)
+                                        name='SelectRowsFromMatrixCC', clusterSizeMultiplier=1)
         #2012.08.13 SelectRowsFromMatrix is a derivative of AbstractMatrixFileWalker, so use addAbstractMatrixFileWalkerJob()
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, 'mapper/extractor/SelectRowsFromMatrix.py'), \
-                                        name='SelectRowsFromMatrix', clusterSizeMultipler=1)
+                                        name='SelectRowsFromMatrix', clusterSizeMultiplier=1)
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "mapper/extractor/SelectLineBlockFromFile.py"), 
-            name='SelectLineBlockFromFile', clusterSizeMultipler=1)
+            name='SelectLineBlockFromFile', clusterSizeMultiplier=1)
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "plot/AbstractPlot.py"), 
-            name='AbstractPlot', clusterSizeMultipler=1)
+            name='AbstractPlot', clusterSizeMultiplier=1)
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "plot/PlotYAsBar.py"), 
-            name='PlotYAsBar', clusterSizeMultipler=1)
+            name='PlotYAsBar', clusterSizeMultiplier=1)
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "plot/DrawHistogram.py"), 
-            name='DrawHistogram', clusterSizeMultipler=1)
+            name='DrawHistogram', clusterSizeMultiplier=1)
 
         #2012.8.15 ancestor of SelectRowsFromMatrix,
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "yhio/AbstractMatrixFileWalker.py"), 
-            name='AbstractMatrixFileWalker', clusterSizeMultipler=1)
+            name='AbstractMatrixFileWalker', clusterSizeMultiplier=1)
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "plot/DrawMatrix.py"), 
-            name='DrawMatrix', clusterSizeMultipler=1)
+            name='DrawMatrix', clusterSizeMultiplier=1)
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "plot/Draw2DHistogramOfMatrix.py"), 
-            name='Draw2DHistogramOfMatrix', clusterSizeMultipler=1)
+            name='Draw2DHistogramOfMatrix', clusterSizeMultiplier=1)
         # C++ binary
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "mapper/CalculateMedianMeanOfInputColumn"), 
-            name='CalculateMedianMeanOfInputColumn', clusterSizeMultipler=1)
+            name='CalculateMedianMeanOfInputColumn', clusterSizeMultiplier=1)
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "statistics/SampleRows.py"), 
-            name='SampleRows', clusterSizeMultipler=1)
+            name='SampleRows', clusterSizeMultiplier=1)
         #2013.2.11 all reducers
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "statistics/EstimateOutliersIn2DData.py"), \
-                name='EstimateOutliersIn2DData', clusterSizeMultipler=0)
+                name='EstimateOutliersIn2DData', clusterSizeMultiplier=0)
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, 'reducer/MergeSameHeaderTablesIntoOne.py'), \
-                name='mergeSameHeaderTablesIntoOne', clusterSizeMultipler=0)
+                name='mergeSameHeaderTablesIntoOne', clusterSizeMultiplier=0)
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, 'reducer/MergeSameHeaderTablesIntoOne.py'), \
-                name='MergeSameHeaderTablesIntoOne', clusterSizeMultipler=0)
+                name='MergeSameHeaderTablesIntoOne', clusterSizeMultiplier=0)
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, 'reducer/ReduceMatrixByAverageColumnsWithSameKey.py'), \
-                name='ReduceMatrixByAverageColumnsWithSameKey', clusterSizeMultipler=0)
+                name='ReduceMatrixByAverageColumnsWithSameKey', clusterSizeMultiplier=0)
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, 'reducer/ReduceMatrixByChosenColumn.py'), \
-                name='ReduceMatrixByChosenColumn', clusterSizeMultipler=0)
+                name='ReduceMatrixByChosenColumn', clusterSizeMultiplier=0)
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, 'reducer/ReduceMatrixByMergeColumnsWithSameKey.py'), \
-                name='ReduceMatrixByMergeColumnsWithSameKey', clusterSizeMultipler=0)
+                name='ReduceMatrixByMergeColumnsWithSameKey', clusterSizeMultiplier=0)
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, 'reducer/ReduceMatrixBySumSameKeyColsAndThenDivide.py'), \
-                name='ReduceMatrixBySumSameKeyColsAndThenDivide', clusterSizeMultipler=0)
+                name='ReduceMatrixBySumSameKeyColsAndThenDivide', clusterSizeMultiplier=0)
 
     def addStatMergeJob(self, statMergeProgram=None, outputF=None, \
                     parentJobLs=None, extraOutputLs=None,\

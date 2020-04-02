@@ -188,7 +188,7 @@ class BlastWorkflow(ParentClass):
 		cluster_size = self.cluster_size
 		site_handler = self.site_handler
 		
-		executableClusterSizeMultiplierList = []	#2012.8.7 each cell is a tuple of (executable, clusterSizeMultipler (0 if u do not need clustering)		
+		executableClusterSizeMultiplierList = []	#2012.8.7 each cell is a tuple of (executable, clusterSizeMultiplier (0 if u do not need clustering)		
 		blastall = Executable(namespace=namespace, name="blastall", version=version, os=operatingSystem, \
 							arch=architecture, installed=True)
 		blastall.addPFN(PFN("file://" + os.path.join(self.blastallPath), site_handler))

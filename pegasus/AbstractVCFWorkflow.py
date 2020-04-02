@@ -96,33 +96,33 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 		#2012.8.30 moved from vervet/src/AddVCFFolder2DBWorkflow.py
 		#self.addExecutableFromPath(path=os.path.join(vervetSrcPath, \
 		#	"db/input/AddVCFFile2DB.py"),
-		#	name='AddVCFFile2DB', clusterSizeMultipler=1)
+		#	name='AddVCFFile2DB', clusterSizeMultiplier=1)
 		
 		self.addExecutableFromPath(path=os.path.join(self.pymodulePath, \
 				"pegasus/mapper/filter/FilterVCFSNPCluster.py"),
 				name='FilterVCFSNPCluster', \
-				clusterSizeMultipler=1)
+				clusterSizeMultiplier=1)
 		self.addExecutableFromPath(path=os.path.join(self.pymodulePath, \
 				"pegasus/mapper/extractor/JuxtaposeAlleleFrequencyFromMultiVCFInput.py"),
 				name='JuxtaposeAlleleFrequencyFromMultiVCFInput', \
-				clusterSizeMultipler=1)		
+				clusterSizeMultiplier=1)		
 		
 		#2013.07.12
 		self.addExecutableFromPath(path=self.javaPath, name='SelectVariantsJavaInReduce', \
-				clusterSizeMultipler=0.001)
+				clusterSizeMultiplier=0.001)
 		self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "polymorphism/qc/RemoveRedundantLociFromVCF.py"), \
-				name='RemoveRedundantLociFromVCF_InReduce', clusterSizeMultipler=0)
+				name='RemoveRedundantLociFromVCF_InReduce', clusterSizeMultiplier=0)
 		self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "polymorphism/qc/RemoveRedundantLociFromVCF.py"), \
-				name='RemoveRedundantLociFromVCF', clusterSizeMultipler=1)
+				name='RemoveRedundantLociFromVCF', clusterSizeMultiplier=1)
 		self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "polymorphism/qc/ClearVCFBasedOnSwitchDensity.py"), \
-				name='ClearVCFBasedOnSwitchDensity', clusterSizeMultipler=1)
+				name='ClearVCFBasedOnSwitchDensity', clusterSizeMultiplier=1)
 		self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "polymorphism/qc/CalculateSameSiteConcordanceInVCF.py"), \
-				name='CalculateSameSiteConcordanceInVCF', clusterSizeMultipler=1)
+				name='CalculateSameSiteConcordanceInVCF', clusterSizeMultiplier=1)
 		
 		self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "mapper/extractor/ExtractInfoFromVCF.py"), \
-				name='ExtractInfoFromVCF', clusterSizeMultipler=1)
+				name='ExtractInfoFromVCF', clusterSizeMultiplier=1)
 		self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "mapper/extractor/ExtractSamplesFromVCF.py"), \
-				name='ExtractSamplesFromVCF', clusterSizeMultipler=1)
+				name='ExtractSamplesFromVCF', clusterSizeMultiplier=1)
 	
 	def registerCommonExecutables(self, workflow=None):
 		"""

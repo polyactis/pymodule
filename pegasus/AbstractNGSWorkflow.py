@@ -261,139 +261,139 @@ class AbstractNGSWorkflow(ParentClass):
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, \
                 'polymorphism/qc/mapper/FilterLocusBasedOnLocusStatFile.py'), \
             name='FilterLocusBasedOnLocusStatFile', \
-            clusterSizeMultipler=0.5)
+            clusterSizeMultiplier=0.5)
 
         #2013.10.2
         self.addExecutableFromPath(path=self.javaPath, \
             name='CombineBeagleAndPreBeagleVariantsJava', \
-            clusterSizeMultipler=0.6)
+            clusterSizeMultiplier=0.6)
         #2013.10.13
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "reducer/ligateVcf.sh"), \
-            name="ligateVcf", clusterSizeMultipler=1)
+            name="ligateVcf", clusterSizeMultiplier=1)
         #2013.09.17 updated
         #self.addExecutableFromPath(
         #   path=os.path.join(self.pymodulePath, "polymorphism/qc/CheckTwoVCFOverlapCC"), \
-        #   name='CheckTwoVCFOverlapCC', clusterSizeMultipler=1)
+        #   name='CheckTwoVCFOverlapCC', clusterSizeMultiplier=1)
 
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, \
             "mapper/splitter/SelectAndSplitFastaRecords.py"),\
-            name='SelectAndSplitFastaRecords', clusterSizeMultipler=0)
+            name='SelectAndSplitFastaRecords', clusterSizeMultiplier=0)
 
         self.addExecutableFromPath(path=self.javaPath,
-            name='BuildBamIndexFilesJava', clusterSizeMultipler=0.5)
+            name='BuildBamIndexFilesJava', clusterSizeMultiplier=0.5)
         #2012.9.21 same as BuildBamIndexFilesJava, but no clustering
         self.addExecutableFromPath(path=self.javaPath,
-            name='IndexMergedBamIndexJava', clusterSizeMultipler=0)
+            name='IndexMergedBamIndexJava', clusterSizeMultiplier=0)
         self.addExecutableFromPath(path=self.javaPath,
-            name='CreateSequenceDictionaryJava', clusterSizeMultipler=0)
+            name='CreateSequenceDictionaryJava', clusterSizeMultiplier=0)
 
         self.addExecutableFromPath(path=self.javaPath,
-            name='DOCWalkerJava', clusterSizeMultipler=0.05)
+            name='DOCWalkerJava', clusterSizeMultiplier=0.05)
         #no cluster_size for this because it could run on a whole bam for hours
         self.addExecutableFromPath(path=self.javaPath,
-            name='VariousReadCountJava', clusterSizeMultipler=0)
+            name='VariousReadCountJava', clusterSizeMultiplier=0)
         #no cluster_size for this because it could run on a whole bam for hours
         self.addExecutableFromPath(path=self.javaPath,
-            name='MarkDuplicatesJava', clusterSizeMultipler=0)
+            name='MarkDuplicatesJava', clusterSizeMultiplier=0)
 
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, \
                 "mapper/filter/vcf_isec.sh"),\
-            name='vcf_isec', clusterSizeMultipler=1)
+            name='vcf_isec', clusterSizeMultiplier=1)
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, \
             "mapper/extractor/vcfSubset.sh"),\
-            name='vcfSubset', clusterSizeMultipler=1)
+            name='vcfSubset', clusterSizeMultiplier=1)
         #vcfSubsetPath is first argument to vcfSubset
         self.vcfSubset.vcfSubsetPath = self.vcfSubsetPath
 
         self.addExecutableFromPath(path=self.javaPath,
-            name='SelectVariantsJava', clusterSizeMultipler=0.5)
+            name='SelectVariantsJava', clusterSizeMultiplier=0.5)
 
         #2013.09.04
         self.addExecutableFromPath(path=self.javaPath,
-            name='CombineVariantsJava', clusterSizeMultipler=0.3)
+            name='CombineVariantsJava', clusterSizeMultiplier=0.3)
         self.addExecutableFromPath(path=self.javaPath,
             name='CombineVariantsJavaInReduce', \
-            clusterSizeMultipler=0.001)
+            clusterSizeMultiplier=0.001)
 
 
         self.addExecutableFromPath(
             path=os.path.join(self.pymodulePath, \
                 "mapper/computer/CallVariantBySamtools.sh"),
             name='CallVariantBySamtools', \
-            clusterSizeMultipler=0)
+            clusterSizeMultiplier=0)
 
         self.addExecutableFromPath(
             path=os.path.join(self.pymodulePath, \
                 "mapper/computer/GenotypeCallByCoverage.py"),
             name='GenotypeCallByCoverage', \
-            clusterSizeMultipler=1)
+            clusterSizeMultiplier=1)
 
 
         #2013.06.28 use this function
         self.addExecutableFromPath(
             path=os.path.join(self.pymodulePath, "shell/bgzip_tabix.sh"), \
-            name='bgzip_tabix', clusterSizeMultipler=4)
+            name='bgzip_tabix', clusterSizeMultiplier=4)
         #bgzip_tabix_in_reduce is used in reduce() functions, 
         # on whole-scaffold/chromosome VCFs, less clustering
         self.addExecutableFromPath(
             path=os.path.join(self.pymodulePath, "shell/bgzip_tabix.sh"), \
-            name='bgzip_tabix_in_reduce', clusterSizeMultipler=1)
+            name='bgzip_tabix_in_reduce', clusterSizeMultiplier=1)
 
         self.addExecutableFromPath(
             path=os.path.join(self.pymodulePath, "mapper/converter/vcf_convert.sh"), \
-            name='vcf_convert', clusterSizeMultipler=1)
+            name='vcf_convert', clusterSizeMultiplier=1)
         #vcf_convert_in_reduce is used in reduce() functions, on whole-scaffold/chromosome VCFs,
         self.addExecutableFromPath(
             path=os.path.join(self.pymodulePath, "mapper/converter/vcf_convert.sh"), \
-            name='vcf_convert_in_reduce', clusterSizeMultipler=0.2)
+            name='vcf_convert_in_reduce', clusterSizeMultiplier=0.2)
 
         self.addExecutableFromPath(
             path=os.path.join(self.pymodulePath, "reducer/vcf_concat.sh"),
-            name='vcf_concat', clusterSizeMultipler=1)
+            name='vcf_concat', clusterSizeMultiplier=1)
         self.addExecutableFromPath(
             path=os.path.join(self.pymodulePath, "reducer/vcf_concat.sh"),
-            name='concatGATK', clusterSizeMultipler=1)
+            name='concatGATK', clusterSizeMultiplier=1)
         self.addExecutableFromPath(
             path=os.path.join(self.pymodulePath, "reducer/vcf_concat.sh"),
-            name='concatSamtools', clusterSizeMultipler=1)
+            name='concatSamtools', clusterSizeMultiplier=1)
 
 
         #2011.12.21 moved from FilterVCFPipeline.py
         self.addExecutableFromPath(path=self.javaPath,
                         name='FilterVCFByDepthJava', \
-                        clusterSizeMultipler=1)
+                        clusterSizeMultiplier=1)
 
         #2012.3.1
         self.addExecutableFromPath(
             path=os.path.join(self.pymodulePath, "reducer/MergeFiles.sh"), \
-            name='MergeFiles', clusterSizeMultipler=0)
+            name='MergeFiles', clusterSizeMultiplier=0)
 
         #2013.09.17 updated
         self.addExecutableFromPath(
             path=os.path.join(self.pymodulePath, \
                 "mapper/computer/CheckTwoVCFOverlap.py"), \
-            name='CheckTwoVCFOverlap', clusterSizeMultipler=1)
+            name='CheckTwoVCFOverlap', clusterSizeMultiplier=1)
 
         #2012.9.6
         self.addExecutableFromPath(
             path=os.path.join(self.pymodulePath, \
                 "mapper/modifier/AppendInfo2SmartPCAOutput.py"), \
-            name='AppendInfo2SmartPCAOutput', clusterSizeMultipler=0)
+            name='AppendInfo2SmartPCAOutput', clusterSizeMultiplier=0)
 
         self.addExecutableFromPath(
-            path=self.javaPath, name='MergeSamFilesJava', clusterSizeMultipler=0)
+            path=self.javaPath, name='MergeSamFilesJava', clusterSizeMultiplier=0)
 
         #2013.07.09 in order to run vcfsorter.pl from http://code.google.com/p/vcfsorter/
         self.addExecutableFromPath(
             path=os.path.join(self.pymodulePath, 'shell/pipeCommandOutput2File.sh'),
-            name='vcfsorterShellPipe', clusterSizeMultipler=1)
+            name='vcfsorterShellPipe', clusterSizeMultiplier=1)
 
         self.addExecutableFromPath(
-            path=self.javaPath, name='GATKJava', clusterSizeMultipler=0.2)
+            path=self.javaPath, name='GATKJava', clusterSizeMultiplier=0.2)
         self.addExecutableFromPath(
-            path=self.samtools_path, name='samtools', clusterSizeMultipler=0.2)
+            path=self.samtools_path, name='samtools', clusterSizeMultiplier=0.2)
         self.addExecutableFromPath(
-            path=self.javaPath, name='genotyperJava', clusterSizeMultipler=0.1)
+            path=self.javaPath, name='genotyperJava', clusterSizeMultiplier=0.1)
 
         #clustering is controlled by a separate parameter
         #genotyperJava.addProfile(Profile(Namespace.PEGASUS, key="clusters.size", value="%s"%cluster_size))
@@ -402,34 +402,34 @@ class AbstractNGSWorkflow(ParentClass):
         self.addExecutableFromPath(
             path=os.path.join(self.pymodulePath, \
                 "mapper/modifier/AddMissingInfoDescriptionToVCFHeader.py"), \
-            name='AddMissingInfoDescriptionToVCFHeader', clusterSizeMultipler=1)
+            name='AddMissingInfoDescriptionToVCFHeader', clusterSizeMultiplier=1)
 
         #2013.06.21
         self.addExecutableFromPath(
             path=os.path.join(self.pymodulePath, "mapper/splitter/SplitVCFFile.py"), \
-            name='SplitVCFFile', clusterSizeMultipler=0.01)
+            name='SplitVCFFile', clusterSizeMultiplier=0.01)
         #2012.7.25
         self.addExecutableFromPath(path=self.javaPath,
                     name='MergeVCFReplicateHaplotypesJava', \
-                    clusterSizeMultipler=0.5)
+                    clusterSizeMultiplier=0.5)
 
         #2013.06.13
         self.addExecutableFromPath(path=self.javaPath,
-                name='BeagleJava', clusterSizeMultipler=0.3)
+                name='BeagleJava', clusterSizeMultiplier=0.3)
         #2013.06.12 use this simple function to register vcftoolsWrapper
         #vcftoolsPath is first argument to vcftoolsWrapper
         self.addExecutableFromPath(
             path=os.path.join(self.pymodulePath, "shell/vcftoolsWrapper.sh"), \
-            name='vcftoolsWrapper', clusterSizeMultipler=1)
+            name='vcftoolsWrapper', clusterSizeMultiplier=1)
 
         self.addExecutableFromPath(path=self.javaPath, name='SortSamFilesJava', \
-            clusterSizeMultipler=1)
+            clusterSizeMultiplier=1)
         #2013.06.06
         self.addExecutableFromPath(path=self.javaPath, name='PrintReadsJava', \
-            clusterSizeMultipler=1)
+            clusterSizeMultiplier=1)
         #2013.04.09
         self.addExecutableFromPath(path=self.javaPath, \
-            name='AddOrReplaceReadGroupsJava', clusterSizeMultipler=0.5)
+            name='AddOrReplaceReadGroupsJava', clusterSizeMultiplier=0.5)
 
 
     bwaIndexFileSuffixLs = ['amb', 'ann', 'bwt', 'pac', 'sa']

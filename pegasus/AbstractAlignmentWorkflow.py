@@ -630,7 +630,7 @@ class AbstractAlignmentWorkflow(AbstractNGSWorkflow):
 		"""
 		"""
 		AbstractNGSWorkflow.registerCustomExecutables(self, workflow=workflow)
-		#self.addExecutableFromPath(path=self.javaPath, name="exampleJava", clusterSizeMultipler=0.3)
+		#self.addExecutableFromPath(path=self.javaPath, name="exampleJava", clusterSizeMultiplier=0.3)
 
 	def setup_run(self):
 		"""

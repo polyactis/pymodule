@@ -244,9 +244,9 @@ class AlignmentReduceReadsWorkflow(ParentClass):
 		"""
 		2011-11-28
 		"""
-		self.setExecutableClusterSize(executable=self.samtools, clusterSizeMultipler=1)
+		self.setExecutableClusterSize(executable=self.samtools, clusterSizeMultiplier=1)
 		self.addExecutableFromPath(path=self.javaPath, name='ReduceReadsJava', \
-											clusterSizeMultipler=1)
+											clusterSizeMultiplier=1)
 
 
 if __name__ == '__main__':

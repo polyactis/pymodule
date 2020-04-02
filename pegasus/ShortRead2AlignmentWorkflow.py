@@ -89,37 +89,37 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 
 		#workflow.BuildBamIndexFilesJava.addProfile(Profile(Namespace.PEGASUS, key="clusters.size", value="%s"%self.alignmentJobClusterSizeFraction))
 		self.setExecutableClusterSize(executable=workflow.AddOrReplaceReadGroupsJava,
-				clusterSizeMultipler=self.alignmentJobClusterSizeFraction, \
+				clusterSizeMultiplier=self.alignmentJobClusterSizeFraction, \
 				defaultClusterSize=None)
 		self.setExecutableClusterSize(executable=workflow.samtools,
-				clusterSizeMultipler=self.alignmentJobClusterSizeFraction, \
+				clusterSizeMultiplier=self.alignmentJobClusterSizeFraction, \
 				defaultClusterSize=None)
 
 		self.addExecutableFromPath(path=self.bwa_path, \
-			name="bwa", clusterSizeMultipler=self.alignmentJobClusterSizeFraction)
+			name="bwa", clusterSizeMultiplier=self.alignmentJobClusterSizeFraction)
 		self.addExecutableFromPath(
 			path=os.path.join(self.pymodulePath, 'mapper/alignment/ShortSEAlignmentByBWA.sh'), \
-			name="ShortSEAlignmentByBWA", clusterSizeMultipler=self.alignmentJobClusterSizeFraction)
+			name="ShortSEAlignmentByBWA", clusterSizeMultiplier=self.alignmentJobClusterSizeFraction)
 		self.addExecutableFromPath(
 			path=os.path.join(self.pymodulePath, 'mapper/alignment/PEAlignmentByBWA.sh'), \
-			name="PEAlignmentByBWA", clusterSizeMultipler=self.alignmentJobClusterSizeFraction)
+			name="PEAlignmentByBWA", clusterSizeMultiplier=self.alignmentJobClusterSizeFraction)
 		self.addExecutableFromPath(
 			path=os.path.join(self.pymodulePath, 'mapper/alignment/LongSEAlignmentByBWA.sh'), \
-			name="LongSEAlignmentByBWA", clusterSizeMultipler=self.alignmentJobClusterSizeFraction)
+			name="LongSEAlignmentByBWA", clusterSizeMultiplier=self.alignmentJobClusterSizeFraction)
 		self.addExecutableFromPath(path=self.javaPath, \
-			name="SAM2BAMJava", clusterSizeMultipler=self.alignmentJobClusterSizeFraction)
+			name="SAM2BAMJava", clusterSizeMultiplier=self.alignmentJobClusterSizeFraction)
 		#self.addExecutableFromPath(
 		#	path=os.path.join(self.pymodulePath, 'pegasus/mapper/alignment/BWA_Mem.sh'), \
-		#							name="BWA_Mem", clusterSizeMultipler=self.alignmentJobClusterSizeFraction)
+		#							name="BWA_Mem", clusterSizeMultiplier=self.alignmentJobClusterSizeFraction)
 		#2014.04.04 use generic pipeCommandOutput2File.sh instead
 		self.addExecutableFromPath(
 			path=os.path.join(self.pymodulePath, 'shell/pipeCommandOutput2File.sh'), \
-			name="BWA_Mem", clusterSizeMultipler=self.alignmentJobClusterSizeFraction)
+			name="BWA_Mem", clusterSizeMultiplier=self.alignmentJobClusterSizeFraction)
 		# 2014.04.04 pipeCommandOutput2File need this file dependency
 		self.registerOneExecutableAsFile(pythonVariableName="bwaExecutableFile", path=self.bwa_path)
 
-		#self.addExecutableFromPath(path=self.javaPath, name='RealignerTargetCreatorJava', clusterSizeMultipler=0.7)
-		#self.addExecutableFromPath(path=self.javaPath, name='IndelRealignerJava', clusterSizeMultipler=0.2)
+		#self.addExecutableFromPath(path=self.javaPath, name='RealignerTargetCreatorJava', clusterSizeMultiplier=0.7)
+		#self.addExecutableFromPath(path=self.javaPath, name='IndelRealignerJava', clusterSizeMultiplier=0.2)
 
 	def addBWAReferenceIndexJob(self, workflow=None, refFastaFList=None, refSequenceBaseCount=3000000000, bwa=None,\
 					bwaIndexFileSuffixLs = None,\

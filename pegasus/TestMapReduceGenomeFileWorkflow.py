@@ -80,7 +80,7 @@ class TestMapReduceGenomeFileWorkflow(ParentClass):
 		
 		self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "polymorphism/mapper/ComputeLiftOverLocusProbability.py"),\
 				name='ComputeLiftOverLocusProbability', \
-				clusterSizeMultipler=1)
+				clusterSizeMultiplier=1)
 	
 	def preReduce(self, workflow=None, outputDirPrefix="", passingData=None, transferOutput=True, **keywords):
 		"""

@@ -249,26 +249,26 @@ class PopGenSimulationWorkflow(ParentClass):
 		
 		#2013.3.8
 		self.addExecutableFromPath(path=os.path.expanduser(self.sfs_code_path), \
-												name="sfs_code", clusterSizeMultipler=0.05)
+												name="sfs_code", clusterSizeMultiplier=0.05)
 		self.addExecutableFromPath(path=os.path.expanduser(self.slim_path), \
-												name="slim", clusterSizeMultipler=0.3)
+												name="slim", clusterSizeMultiplier=0.3)
 		self.addExecutableFromPath(path=os.path.expanduser(self.msHOT_lite_path), \
-												name="msHOT_lite", clusterSizeMultipler=0.5)
+												name="msHOT_lite", clusterSizeMultiplier=0.5)
 		self.registerOneExecutableAsFile(pythonVariableName="msHOT_liteExecutableFile", path=self.msHOT_lite_path)
 		
 		self.addExecutableFromPath(path=os.path.join(self.pymodulePath, 'shell/pipeCommandOutput2File.sh'), \
-										name='msShellPipe', clusterSizeMultipler=1)
+										name='msShellPipe', clusterSizeMultiplier=1)
 		
 		self.addExecutableFromPath(\
 										path=os.path.join(self.vervetSrcPath, 'db/input/AddPopGenSimulation2DB.py'), \
-										name="AddPopGenSimulation2DB", clusterSizeMultipler=0.2)
+										name="AddPopGenSimulation2DB", clusterSizeMultiplier=0.2)
 		
 		self.addExecutableFromPath(\
 										path=os.path.join(self.pymodulePath, 'popgen/converter/SFS_CODE_Output2PolymorphismTableFile.py'), \
-										name="SFS_CODE_Output2PolymorphismTableFile", clusterSizeMultipler=0.2)
+										name="SFS_CODE_Output2PolymorphismTableFile", clusterSizeMultiplier=0.2)
 		self.addExecutableFromPath(\
 										path=os.path.join(self.pymodulePath, 'popgen/converter/msOutput2PolymorphismTableFile.py'), \
-										name="msOutput2PolymorphismTableFile", clusterSizeMultipler=0.2)
+										name="msOutput2PolymorphismTableFile", clusterSizeMultiplier=0.2)
 		
 	def run(self):
 		"""

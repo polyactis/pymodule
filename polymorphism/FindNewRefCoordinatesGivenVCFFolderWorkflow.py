@@ -423,13 +423,13 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, Sh
 		ShortRead2AlignmentWorkflow.registerCustomExecutables(self, workflow)
 		BlastWorkflow.registerCustomExecutables(self, workflow)		
 
-		self.addExecutableFromPath(path=self.javaPath, name='LiftoverVariants', clusterSizeMultipler=0.5)
-		self.addExecutableFromPath(path=self.javaPath, name='FilterLiftedVariants', clusterSizeMultipler=0.5)
+		self.addExecutableFromPath(path=self.javaPath, name='LiftoverVariants', clusterSizeMultiplier=0.5)
+		self.addExecutableFromPath(path=self.javaPath, name='FilterLiftedVariants', clusterSizeMultiplier=0.5)
 		self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "polymorphism/qc/mapper/RemoveLocusFromVCFWithLowLiftOverMapPvalue.py"), \
-												name='RemoveLocusFromVCFWithLowLiftOverMapPvalue', clusterSizeMultipler=1)
+												name='RemoveLocusFromVCFWithLowLiftOverMapPvalue', clusterSizeMultiplier=1)
 		self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "polymorphism/mapper/ComputeLiftOverLocusProbability.py"),\
 											name='ComputeLiftOverLocusProbability', \
-											clusterSizeMultipler=1)
+											clusterSizeMultiplier=1)
 	
 	def addFindNewRefCoordinateJob(self, workflow=None, executable=None, inputFile=None, \
 							maxNoOfMismatches=None, minNoOfIdentities=None, minIdentityFraction=None,\

@@ -29,30 +29,30 @@ class AbstractBioinfoWorkflow(ParentClass):
             workflow = self
         
         self.addExecutableFromPath(path=self.plinkPath, \
-            name='plink', clusterSizeMultipler=1)
+            name='plink', clusterSizeMultiplier=1)
         self.addExecutableFromPath(path=self.plinkPath, \
-            name='plinkNoClustering', clusterSizeMultipler=0)
+            name='plinkNoClustering', clusterSizeMultiplier=0)
 
         #2012.8.10 different plinks so that you can differentiate between different types of plink jobs
         self.addExecutableFromPath(path=self.plinkPath, \
-            name='plinkMerge', clusterSizeMultipler=0)
+            name='plinkMerge', clusterSizeMultiplier=0)
         self.addExecutableFromPath(path=self.plinkPath, \
-            name='plinkIBD', clusterSizeMultipler=0)
+            name='plinkIBD', clusterSizeMultiplier=0)
         self.addExecutableFromPath(path=self.plinkPath, \
-            name='plinkConvert', clusterSizeMultipler=1)
+            name='plinkConvert', clusterSizeMultiplier=1)
         self.addExecutableFromPath(path=self.plinkPath, \
-            name='plinkLDPrune', clusterSizeMultipler=1)
+            name='plinkLDPrune', clusterSizeMultiplier=1)
         self.addExecutableFromPath(path=self.plinkPath, \
-            name='plinkExtract', clusterSizeMultipler=1)
+            name='plinkExtract', clusterSizeMultiplier=1)
         #2013.07.24
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, \
             'mapper/modifier/SplitPlinkLMendelFileSNPIDIntoChrPosition.py'), \
-            name='SplitPlinkLMendelFileSNPIDIntoChrPosition', clusterSizeMultipler=1)
+            name='SplitPlinkLMendelFileSNPIDIntoChrPosition', clusterSizeMultiplier=1)
         
         #2013.07.19
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, \
             'pedigree/CalculateMendelErrorRateGivenPlinkOutput.py'), \
-            name='CalculateMendelErrorRateGivenPlinkOutput', clusterSizeMultipler=1)
+            name='CalculateMendelErrorRateGivenPlinkOutput', clusterSizeMultiplier=1)
 
     def getTopNumberOfContigs(self, **keywords):
         """
@@ -362,47 +362,47 @@ class AbstractBioinfoWorkflow(ParentClass):
 
         #2013.11.22	#2013.06.25 register tabix
         self.addExecutableFromPath(
-            path=self.tabixPath, name='tabix', clusterSizeMultipler=5)
+            path=self.tabixPath, name='tabix', clusterSizeMultiplier=5)
 
         #2013.11.22 2011.12.21	for OutputVCFSiteStat.py
         self.addExecutableFromPath(
             path=os.path.join(self.pymodulePath, "mapper/extractor/tabixRetrieve.sh"),
-            name='tabixRetrieve', clusterSizeMultipler=1)
+            name='tabixRetrieve', clusterSizeMultiplier=1)
 
         #2013.11.22 moved from pymodule/polymorphism/FindNewRefCoordinatesGivenVCFFolderWorkflow.py
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, \
             "polymorphism/mapper/LiftOverVCFBasedOnCoordinateMap.py"), \
-            name='LiftOverVCFBasedOnCoordinateMap', clusterSizeMultipler=1)
+            name='LiftOverVCFBasedOnCoordinateMap', clusterSizeMultiplier=1)
 
         self.addExecutableFromPath(path=os.path.join(workflow.pymodulePath, \
             "polymorphism/qc/CalculateLociAndGenomeCoveredAtEachSwitchFrequencyThreshold.py"), \
-            name='CalculateLociAndGenomeCoveredAtEachSwitchFrequencyThreshold', clusterSizeMultipler=0.01)
+            name='CalculateLociAndGenomeCoveredAtEachSwitchFrequencyThreshold', clusterSizeMultiplier=0.01)
 
         self.addExecutableFromPath(path=os.path.join(workflow.pymodulePath, \
                 "mapper/extractor/ExtractFlankingSequenceForVCFLoci.py"), \
-            name='ExtractFlankingSequenceForVCFLoci', clusterSizeMultipler=2)
+            name='ExtractFlankingSequenceForVCFLoci', clusterSizeMultiplier=2)
 
         self.addExecutableFromPath(path=os.path.join(workflow.pymodulePath, \
             "polymorphism/mapper/FindSNPPositionOnNewRefFromFlankingBlastOutput.py"), \
-            name='FindSNPPositionOnNewRefFromFlankingBlastOutput', clusterSizeMultipler=2)
+            name='FindSNPPositionOnNewRefFromFlankingBlastOutput', clusterSizeMultiplier=2)
 
         self.addExecutableFromPath(path=os.path.join(workflow.pymodulePath, \
             "polymorphism/mapper/FindSNPPositionOnNewRefFromFlankingBWAOutput.py"), \
-            name='FindSNPPositionOnNewRefFromFlankingBWAOutput', clusterSizeMultipler=1)
+            name='FindSNPPositionOnNewRefFromFlankingBWAOutput', clusterSizeMultiplier=1)
 
 
         #2013.08.28
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, 'Genome/OutputGenomeAnnotation.py'), \
-            name='OutputGenomeAnnotation', clusterSizeMultipler=0.01)
+            name='OutputGenomeAnnotation', clusterSizeMultiplier=0.01)
         #2013.07.31
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, 'statistics/GenomeMovingAverageStatistics.py'), \
-            name='GenomeMovingAverageStatistics', clusterSizeMultipler=0.1)
+            name='GenomeMovingAverageStatistics', clusterSizeMultiplier=0.1)
         #2013.08.23
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, 'reducer/ReduceSameChromosomeAlignmentDepthFiles'), \
-            name='ReduceSameChromosomeAlignmentDepthFiles', clusterSizeMultipler=0.5)
+            name='ReduceSameChromosomeAlignmentDepthFiles', clusterSizeMultiplier=0.5)
 
         #executableList = []
-        executableClusterSizeMultiplierList = []	#2012.8.7 each cell is a tuple of (executable, clusterSizeMultipler (0 if u do not need clustering)
+        executableClusterSizeMultiplierList = []	#2012.8.7 each cell is a tuple of (executable, clusterSizeMultiplier (0 if u do not need clustering)
         #noClusteringExecutableSet = set()	#2012.8.2 you don't want to cluster for some jobs.
 
         PlotLD = Executable(namespace=namespace, name="PlotLD", version=version, os=operatingSystem, arch=architecture, installed=True)
@@ -465,23 +465,23 @@ class AbstractBioinfoWorkflow(ParentClass):
         self.setExecutablesClusterSize(executableClusterSizeMultiplierList, defaultClusterSize=self.cluster_size)
 
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "plot/PlotVCFtoolsStat.py"), \
-                                        name='PlotVCFtoolsStat', clusterSizeMultipler=0)
+                                        name='PlotVCFtoolsStat', clusterSizeMultiplier=0)
         
         #2013.07.19
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, 'mapper/modifier/AppendExtraPedigreeIndividualsToTPED.py'), \
-                                        name='AppendExtraPedigreeIndividualsToTPED', clusterSizeMultipler=1)
+                                        name='AppendExtraPedigreeIndividualsToTPED', clusterSizeMultiplier=1)
 
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, 'mapper/converter/ConvertMSOutput2FASTQ.py'), \
-                                        name='ConvertMSOutput2FASTQ', clusterSizeMultipler=1)
+                                        name='ConvertMSOutput2FASTQ', clusterSizeMultiplier=1)
 
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, 'mapper/extractor/SelectChromosomeSequences.py'), \
-                                        name='SelectChromosomeSequences', clusterSizeMultipler=0.5)
+                                        name='SelectChromosomeSequences', clusterSizeMultiplier=0.5)
 
         #2013.2.11 moved from vervet/src/reduce to pymodule/reducer
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, 'reducer/MergeGenotypeMatrix.py'), \
-                                        name='MergeGenotypeMatrix', clusterSizeMultipler=0.2)
+                                        name='MergeGenotypeMatrix', clusterSizeMultiplier=0.2)
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, 'plot/PlotGenomeWideData.py'), \
-                                        name='PlotGenomeWideData', clusterSizeMultipler=1)
+                                        name='PlotGenomeWideData', clusterSizeMultiplier=1)
 
         self.bgzipExecutableFile = self.registerOneExecutableAsFile(path=os.path.expanduser("~/bin/bgzip"))	#2013.11.22
 
