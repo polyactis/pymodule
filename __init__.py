@@ -47,14 +47,3 @@ from . algorithm.BinarySearchTree import binary_tree
 #from . yhio.AbstractMatrixFileWalker import AbstractMatrixFileWalker
 #from . yhio.latex import outputMatrixInLatexTable, outputFigureInLatex
 #from . yhio.FastaFile import FastaFile
-
-
-#2012.11.18
-#from pegasus.AbstractWorkflow import AbstractWorkflow
-#from pegasus.AbstractNGSWorkflow import AbstractNGSWorkflow
-#from pegasus.AbstractVCFWorkflow import AbstractVCFWorkflow
-#from pegasus.AbstractAlignmentWorkflow import AbstractAlignmentWorkflow
-#from pegasus.AbstractAlignmentAndVCFWorkflow import AbstractAlignmentAndVCFWorkflow
-#from pegasus.mapper.AbstractMapper import AbstractMapper
-#from pegasus.mapper.AbstractVCFMapper import AbstractVCFMapper
-#from pegasus.mapper.AbstractDBInteractingJob import AbstractDBInteractingJob
