@@ -7,7 +7,6 @@ import os, sys
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 import re
-from Bio import SeqIO
 from pymodule import utils
 
 
@@ -104,6 +103,7 @@ def countNoOfChromosomesBasesInFastQFile(inputFname=None):
 	no_of_bases = 0
 	inf = utils.openGzipFile(inputFname)
 	try:
+		from Bio import SeqIO
 		for seq_record in SeqIO.parse(inf, 'fastq'):
 			no_of_chromosomes += 1
 			no_of_bases += len(seq_record)

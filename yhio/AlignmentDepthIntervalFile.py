@@ -21,8 +21,8 @@ sys.path.insert(0, os.path.expanduser('~/script'))
 
 import copy, numpy
 from pymodule.ProcessOptions import  ProcessOptions
-from pymodule import utils, PassingData
-from MatrixFile import MatrixFile
+from pymodule import PassingData
+from . MatrixFile import MatrixFile
 
 class AlignmentDepthIntervalFile(MatrixFile):
 	__doc__ = __doc__

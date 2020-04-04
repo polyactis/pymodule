@@ -12,7 +12,6 @@ from pymodule.ProcessOptions import  ProcessOptions
 from pymodule.utils import dict_map, importNumericArray, figureOutDelimiter, PassingData, getColName2IndexFromHeader,\
 	openGzipFile
 from pymodule.db import TableClass
-from pymodule.yhio.HDF5MatrixFile import HDF5MatrixFile, addAttributeDictToYHTableInHDF5Group
 
 pa_has_characters = re.compile(r'[a-zA-Z_]')
 
@@ -2733,6 +2732,7 @@ class GenomeWideResult(object):
 			rowDefinition  = AssociationTable
 			OutputFileClass = AssociationTableFile
 		else:
+			from pymodule.yhio.HDF5MatrixFile import HDF5MatrixFile
 			rowDefinition = [('locus_id','i8'),('chromosome', HDF5MatrixFile.varLenStrType), ('start','i8'), ('stop', 'i8'), \
 					('score', 'f8'), ('MAC', 'i8'), ('MAF', 'f8'), ('genotype_var_perc', 'f8')]
 			OutputFileClass = HDF5MatrixFile
@@ -2746,6 +2746,7 @@ class GenomeWideResult(object):
 				sys.stderr.write("Error: no writer(%s) or filename(%s) to dump.\n"%(writer, filename))
 				sys.exit(3)
 		if attributeDict:
+			from pymodule.yhio.HDF5MatrixFile import addAttributeDictToYHTableInHDF5Group
 			addAttributeDictToYHTableInHDF5Group(tableObject=tableObject, attributeDict=attributeDict)
 		if self.results_method_id:
 			tableObject.addAttribute(name='result_id', value=self.results_method_id)
@@ -3238,11 +3239,12 @@ class SNPInfo(object):
 		return alleles
 
 
-def getGenomeWideResultFromHDF5MatrixFile(inputFname=None, reader=None, tableName='association', tableObject=None, min_value_cutoff=None, \
-										do_log10_transformation=False, pdata=None,\
-							construct_chr_pos2index=False, construct_data_obj_id2index=False, construct_locus_db_id2index=False,\
-							chr_pos2index=None, max_value_cutoff=None, \
-							OR_min_max=False, report=True, inputFileType=1, **keywords):
+def getGenomeWideResultFromHDF5MatrixFile(inputFname=None, reader=None, \
+		tableName='association', tableObject=None, min_value_cutoff=None, \
+		do_log10_transformation=False, pdata=None,\
+		construct_chr_pos2index=False, construct_data_obj_id2index=False, construct_locus_db_id2index=False,\
+		chr_pos2index=None, max_value_cutoff=None, \
+		OR_min_max=False, report=True, inputFileType=1, **keywords):
 	"""
 	2013.1.15 maf or mac =-1 means NA.
 	2012.12.16 added argument inputFileType
@@ -3301,6 +3303,7 @@ def getGenomeWideResultFromHDF5MatrixFile(inputFname=None, reader=None, tableNam
 				from pymodule.yhio.Association import AssociationTableFile
 				reader = AssociationTableFile(inputFname, openMode='r', autoRead=False)
 			else:
+				from pymodule.yhio.HDF5MatrixFile import HDF5MatrixFile
 				reader = HDF5MatrixFile(inputFname, openMode='r')
 		associationTableObject = reader.getTableObject(tableName=tableName)
 	
