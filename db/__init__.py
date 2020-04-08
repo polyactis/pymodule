@@ -372,7 +372,6 @@ class DBAncestor(object):
 		2012.7.13
 			if absPath is given, take that , rather than construct it from data_dir and db_entry.path
 		"""
-		from pymodule import utils
 		if data_dir is None:
 			data_dir = self.data_dir
 		
@@ -404,7 +403,6 @@ class DBAncestor(object):
 		2012.7.13
 			if absPath is given, take that , rather than construct it from data_dir and db_entry.path
 		"""
-		from pymodule import utils
 		if data_dir is None:
 			data_dir = self.data_dir
 		
