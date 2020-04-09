@@ -173,7 +173,7 @@ class PMDB(Database):
             short_name = None
         query = self.session.query(Site)
         if country:
-            query = quer.filter_by(country_id=country.id)
+            query = query.filter_by(country_id=country.id)
         if short_name:
             query = query.filter_by(short_name=short_name)
         if city:
