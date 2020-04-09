@@ -15,7 +15,7 @@ from pymodule.reducer.AbstractReducer import AbstractReducer
 from pegaflow.DAX3 import Executable, PFN, File
 from sqlalchemy.sql import text
 from . AbstractAccuWorkflow import AbstractAccuWorkflow
-from Sunset.db import PMDB
+from pymodule.db import SunsetDB
 
 parentClass = AbstractAccuWorkflow
 class DownsampleWorkflow(parentClass):
@@ -43,18 +43,18 @@ class DownsampleWorkflow(parentClass):
         SampleFolder = "%swithSeed1.0" % (DownSamplePrefix)
         SampleFolderJob = self.addMkDirJob(executable=workflow.mkdirWrap, outputDir=SampleFolder)
 
-        alignNormal = self.db_main.queryTable(PMDB.IndividualAlignment).get(idDict['normalFile'])
+        alignNormal = self.db_main.queryTable(SunsetDB.IndividualAlignment).get(idDict['normalFile'])
         alignNormalFilePath = os.path.join(data_dir, alignNormal.path)
         inputNormalBamFile = self.registerOneInputFile(inputFname=alignNormalFilePath)
         coverageNormal = int(alignNormal.mean_depth)
-        #alignNormalIndiv = self.db_main.queryTable(PMDB.IndividualSequence).get(alignNormal.ind_seq_id)
+        #alignNormalIndiv = self.db_main.queryTable(SunsetDB.IndividualSequence).get(alignNormal.ind_seq_id)
         #coverageNormal = int(alignNormalIndiv.coverage)
 
-        alignTumor = self.db_main.queryTable(PMDB.IndividualAlignment).get(idDict['tumorFile'])
+        alignTumor = self.db_main.queryTable(SunsetDB.IndividualAlignment).get(idDict['tumorFile'])
         alignTumorFilePath = os.path.join(data_dir, alignTumor.path)
         inputTumorBamFile = self.registerOneInputFile(inputFname=alignTumorFilePath)
         coverageTumor = int(alignTumor.mean_depth)
-        #alignTumorIndiv = self.db_main.queryTable(PMDB.IndividualSequence).get(alignTumor.ind_seq_id)
+        #alignTumorIndiv = self.db_main.queryTable(SunsetDB.IndividualSequence).get(alignTumor.ind_seq_id)
         #coverageTumor = int(alignTumorIndiv.coverage)
 
         job_max_memory = "5000"

@@ -70,7 +70,7 @@ from pegaflow.DAX3 import File, Link, Job
 from pymodule import ProcessOptions, utils, PassingData
 from pymodule.pegasus import yh_pegasus
 from pymodule.pegasus.AbstractAlignmentWorkflow import AbstractAlignmentWorkflow
-from Sunset.db import PMDB as DBClass
+from pymodule.db import SunsetDB as DBClass
 from Sunset.pegasus.AbstractAccuWorkflow import AbstractAccuWorkflow
 ParentClass = AbstractAlignmentWorkflow
 

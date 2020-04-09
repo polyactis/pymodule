@@ -128,7 +128,7 @@ from pymodule.pegasus import yh_pegasus
 from pymodule.pegasus.ShortRead2AlignmentWorkflow import ShortRead2AlignmentWorkflow
 from pymodule.pegasus.AbstractNGSWorkflow import AbstractNGSWorkflow
 from pymodule.pegasus.alignment.AlignmentReadBaseQualityRecalibrationWorkflow import AlignmentReadBaseQualityRecalibrationWorkflow
-from Sunset.db import PMDB
+from pymodule.db import SunsetDB
 from AbstractAccuWorkflow import AbstractAccuWorkflow as ParentClass
 
 class ShortRead2AlignmentPipeline(ParentClass, ShortRead2AlignmentWorkflow):
@@ -535,7 +535,7 @@ class ShortRead2AlignmentPipeline(ParentClass, ShortRead2AlignmentWorkflow):
 						excludeContaminant=self.excludeContaminant, \
 						report=True)
 
-		refSequence = self.db_main.queryTable(PMDB.IndividualSequence).get(self.ref_ind_seq_id)
+		refSequence = self.db_main.queryTable(SunsetDB.IndividualSequence).get(self.ref_ind_seq_id)
 
 
 

@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.expanduser('~/src'))
 import copy
 from pymodule import ProcessOptions
 from Sunset.mapper.AbstractAccuMapper import AbstractAccuMapper as ParentClass
-from Sunset.db import PMDB as DBClass
+from pymodule.db import SunsetDB as DBClass
 
 class UpdateAlignmentDepthIntervalMethodNoOfIntervals(ParentClass):
 	__doc__ = __doc__

@@ -6,7 +6,7 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/src')))
 from pymodule import ProcessOptions, PassingData, utils
 from Sunset.mapper.AbstractAccuMapper import AbstractAccuMapper as ParentClass
-from Sunset.db import PMDB as DBClass
+from pymodule.db import SunsetDB as DBClass
 
 class RegisterIndividualSequence2DB(ParentClass):
 	"""

@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.expanduser('~/script'))
 sys.path.insert(0, os.path.expanduser('~/src'))
 
 from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils, yh_pegasus
-from Sunset.db import PMDB as DBClass
+from pymodule.db import SunsetDB as DBClass
 from Sunset.pegasus.AbstractAccuWorkflow import AbstractAccuWorkflow as ParentClass
 
 class InspectBaseQualityPipeline(ParentClass):

@@ -27,7 +27,7 @@ from pegaflow.DAX3 import File, Link, PFN, Job
 from pymodule.pegasus import yh_pegasus
 from pymodule.pegasus.AbstractNGSWorkflow import AbstractNGSWorkflow
 
-from Sunset.db import PMDB as DBClass
+from pymodule.db import SunsetDB as DBClass
 from Sunset.pegasus.AbstractAccuWorkflow import AbstractAccuWorkflow as ParentClass
 
 

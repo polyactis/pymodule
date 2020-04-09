@@ -16,17 +16,17 @@ parser.add_argument('-s','--schema', default='sunset', help='the password used i
 parser.add_argument('-u','--db_user', default='cl', help='database username')
 args = parser.parse_args()
 
-from Sunset.db import PMDB
-db_main = PMDB.PMDB(drivername='postgresql', db_user=args.db_user,db_passwd=args.password, 
+from pymodule.db import SunsetDB
+db_main = SunsetDB.SunsetDB(drivername='postgresql', db_user=args.db_user,db_passwd=args.password, 
                         hostname=args.hostname, dbname=args.dbname, schema=args.schema)
 db_main.setup(create_tables=False)
 session = db_main.session
 
-from Sunset.db.PMDB import IndividualSequence, IndividualAlignment, IndividualSequenceFile
+from pymodule.db.SunsetDB import IndividualSequence, IndividualAlignment, IndividualSequenceFile
 
 workflow_AC = ADAG("pegasus_test")
 site_handle = "ycondor"
-picard_path = "/simm/home/cl/software/picard.jar"
+picard_path = "/y/home/cl/software/picard.jar"
 
 def registerExecutefile(workflow, executeFile):
     architecture = "x86_64"
@@ -107,8 +107,8 @@ for each_num in f_in:
     the_id = int(each_num)
     fastqfile_p1_list = []
     fastqfile_p2_list = []
-    f_name_1 = '/simm/Sunset/qualityconversion/fastqfilename/p_%s_1' %the_id
-    f_name_2 = '/simm/Sunset/qualityconversion/fastqfilename/p_%s_2' %the_id
+    f_name_1 = '/y/Sunset/qualityconversion/fastqfilename/p_%s_1' %the_id
+    f_name_2 = '/y/Sunset/qualityconversion/fastqfilename/p_%s_2' %the_id
     with open(f_name_1,'r') as f_name1, open(f_name_2,'r') as f_name2:
         for f1 in f_name1:
             fastqfile_p1_list.append(f1)

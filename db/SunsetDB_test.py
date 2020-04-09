@@ -9,7 +9,7 @@ Examples:
     
 Description:
     2017.03.17
-    This is the ORM architecture of PMDB.
+    This is the ORM architecture of SunsetDB.
 """
 import sys, os, math, copy
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
@@ -131,7 +131,7 @@ class README(Base, TableClass):
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
 
-class PMDB(Database):
+class SunsetDB(Database):
     __doc__ = __doc__
     option_default_dict = copy.deepcopy(Database.option_default_dict)
     def __init__(self, **keywords):
@@ -211,7 +211,7 @@ class PMDB(Database):
         return db_entry
     
 if __name__ == '__main__':
-    main_class = PMDB
+    main_class = SunsetDB
     po = ProcessOptions(sys.argv, main_class.option_default_dict, error_doc=main_class.__doc__)
     instance = main_class(**po.long_option2value)
     #instance.setup(create_tables=True)

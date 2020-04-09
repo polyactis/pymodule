@@ -9,7 +9,7 @@ Examples:
 	
 Description:
 	2017.03.17
-	This is the ORM architecture of PMDB, build on top of elixir.
+	This is the ORM architecture of SunsetDB, build on top of elixir.
 """
 import sys, os, copy
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
@@ -37,7 +37,7 @@ from pymodule.VCFFile import VCFFile
 from pymodule.mapper.computer.CountFastqReadBaseCount import CountFastqReadBaseCount
 
 Base = declarative_base()
-#20190111 have to set it staticaly because PMDB is undefined at this point and it has to be defined after this.
+#20190111 have to set it staticaly because SunsetDB is undefined at this point and it has to be defined after this.
 _schemaname_ = "sunset"
 
 	
@@ -1636,7 +1636,7 @@ class GenotypeMethod(Base, AbstractTableWithFilename):
 		2012.7.12
 		"""
 		if data_dir is None:
-			data_dir = PMDB.get_data_dir()
+			data_dir = SunsetDB.get_data_dir()
 		return utils.getFileOrFolderSize(os.path.join(data_dir, self.path))
 	
 class GenotypeFile(Base, AbstractTableWithFilename):
@@ -1702,7 +1702,7 @@ class GenotypeFile(Base, AbstractTableWithFilename):
 		2012.7.12
 		"""
 		if data_dir is None:
-			data_dir = PMDB.get_data_dir()
+			data_dir = SunsetDB.get_data_dir()
 		return utils.getFileOrFolderSize(os.path.join(data_dir, self.path))
 
 
@@ -1941,7 +1941,7 @@ class PhenotypeMethod(Base, TableClass):
 			return True
 		return False
 
-class PMDB(Database):
+class SunsetDB(Database):
 	__doc__ = __doc__
 	option_default_dict = copy.deepcopy(Database.option_default_dict)
 	option_default_dict.update({
@@ -2302,7 +2302,7 @@ class PMDB(Database):
 					if completedAlignment==isAlignmentCompleted:
 						pass
 					else:
-						sys.stderr.write("PMDB.getAlignments() warning: completeness (%s) of alignment %s, (file=%s, read_group=%s, file_size=%s) does not match given(%s). Skip.\n"%\
+						sys.stderr.write("SunsetDB.getAlignments() warning: completeness (%s) of alignment %s, (file=%s, read_group=%s, file_size=%s) does not match given(%s). Skip.\n"%\
 										(isAlignmentCompleted, row.id, row.path, row.getReadGroup(), row.file_size, completedAlignment))
 						continue
 				abs_path = os.path.join(data_dir, row.path)
@@ -2310,7 +2310,7 @@ class PMDB(Database):
 					if os.path.isfile(abs_path):
 						alignmentLs.append(row)
 					else:
-						sys.stderr.write("PMDB.getAlignments() Warning: file %s does not exist. so skipping this alignment.\n"%(abs_path))
+						sys.stderr.write("SunsetDB.getAlignments() Warning: file %s does not exist. so skipping this alignment.\n"%(abs_path))
 				else:
 					alignmentLs.append(row)
 				
@@ -2376,7 +2376,7 @@ class PMDB(Database):
 	def getAlignmentsFromVCFFile(self, inputFname=None):
 		"""
 		2013.1.2. moved from db/OutputVRCPedigreeInTFAMGivenOrderFromFile.py
-			inputFname is a VCFFile containing genotypes from alignments of PMDB
+			inputFname is a VCFFile containing genotypes from alignments of SunsetDB
 		"""
 		vcfFile = VCFFile(inputFname=inputFname)
 		alignmentLs = self.getAlignmentsFromVCFSampleIDList(vcfFile.getSampleIDList())
@@ -2527,7 +2527,7 @@ class PMDB(Database):
 				if completedAlignment==isAlignmentCompleted:
 					pass
 				else:
-					sys.stderr.write("PMDB.getAlignments() warning: completeness (%s) of alignment %s, (file=%s, read_group=%s) does not match given(%s). Skip.\n"%\
+					sys.stderr.write("SunsetDB.getAlignments() warning: completeness (%s) of alignment %s, (file=%s, read_group=%s) does not match given(%s). Skip.\n"%\
 									(isAlignmentCompleted, alignment.id, alignment.path, alignment.getReadGroup(), completedAlignment))
 					continue
 			if alignment_method_id is not None and alignment.alignment_method_id!=alignment_method_id:
@@ -4476,7 +4476,7 @@ class PMDB(Database):
 		
 	
 if __name__ == '__main__':
-	main_class = PMDB
+	main_class = SunsetDB
 	po = ProcessOptions(sys.argv, main_class.option_default_dict, error_doc=main_class.__doc__)
 	schema = po.long_option2value["schema"]
 	if schema != _schemaname_:
