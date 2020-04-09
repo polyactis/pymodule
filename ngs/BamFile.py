@@ -8,22 +8,18 @@
 import os, sys
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-from pymodule.ProcessOptions import  ProcessOptions
-from pymodule.utils import dict_map, importNumericArray, figureOutDelimiter, PassingData
-import copy
+from pymodule.utils import PassingData
 import pysam
-
-num = importNumericArray()
-numpy = num
 
 
 class BamFile(pysam.Samfile):
-	__doc__ = __doc__
-	option_default_dict = {('inputFname', 1, ): [None, 'o', 1, 'a bam input file.'],\
-						('openMode', 1, ): ['rb', '', 1, 'rb: bam file. r: sam file.'],\
-						('debug', 0, int):[0, 'b', 0, 'toggle debug mode'],\
-						('report', 0, int):[0, 'r', 0, 'toggle report, more verbose stdout/stderr.']}
-
+	"""
+	inputFname: a bam input file.
+	openMode: 'rb: bam file. r: sam file.
+	2011-7-11 A class wrapper for SAM/BAM file. 
+		It is an extension of pysam.Samfile:
+		http://wwwfgu.anat.ox.ac.uk/~andreas/documentation/samtools/api.html#pysam.Samfile
+	"""
 	def __init__(self, inputFname, openMode, **keywords):
 		"""
 		2011-7-11
@@ -31,11 +27,7 @@ class BamFile(pysam.Samfile):
 		pysam.Samfile.__init__(self, inputFname, openMode, **keywords)
 		self.inputFname = inputFname
 		self.openMode = openMode
-		"""
-		from pymodule import ProcessOptions
-		self.ad = ProcessOptions.process_function_arguments(keywords, self.option_default_dict, error_doc=self.__doc__, \
-														class_to_have_attr=self)
-		"""
+	
 	def traverseBamByRead(self, processor=None):
 		"""
 		2011-7-10
