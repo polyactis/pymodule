@@ -49,9 +49,9 @@ Examples:
 		--minNoOfReads 4000000
 		
 	# 2017.04.28 added TCGA sequences (.bam) into db
-	%s -i /simm/Sunset/tcga/HNSC_TCGA/ --hostname pdc -u huangyu -j ycondor -l ycondor 
+	%s -i /y/Sunset/tcga/HNSC_TCGA/ --hostname pdc -u huangyu -j ycondor -l ycondor 
 		-o dags/unpackTCGAHNSCSamples.xml -y6
-		--tissueSourceSiteFname /simm/Sunset/tcga/tcga_code_tables/tissueSourceSite.tsv 
+		--tissueSourceSiteFname /y/Sunset/tcga/tcga_code_tables/tissueSourceSite.tsv 
 		--minNoOfReads 8000000 --dbname pmdb -k xiandao --ref_ind_seq_id 1 --commit
 	
 Description:
@@ -1155,12 +1155,12 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
 	def getHCC1187SamplesFromInputDir(self, db_main=None, inputDir=None, tax_id=None):
 		"""
 		20170607
-		inputDir is /simm/home/luozhihui/Downloads/
+		inputDir is /y/home/luozhihui/Downloads/
 		
-			114G /simm/home/luozhihui/Downloads/HCC1187BL_S1.bam
-			8.7M /simm/home/luozhihui/Downloads/HCC1187BL_S1.bam.bai
-			237G /simm/home/luozhihui/Downloads/HCC1187C_S1.bam
-			8.7M /simm/home/luozhihui/Downloads/HCC1187C_S1.bam.bai
+			114G /y/home/luozhihui/Downloads/HCC1187BL_S1.bam
+			8.7M /y/home/luozhihui/Downloads/HCC1187BL_S1.bam.bai
+			237G /y/home/luozhihui/Downloads/HCC1187C_S1.bam
+			8.7M /y/home/luozhihui/Downloads/HCC1187C_S1.bam.bai
 		"""
 		sys.stderr.write("Getting HCC1187 samples from %s... \n"%inputDir)
 		counter = 0

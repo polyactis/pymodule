@@ -170,9 +170,9 @@ if __name__ == "__main__":
         raw_path = session.query(IndividualSequenceFile.path).filter(
             IndividualSequenceFile.individual_sequence_id == the_id).all()[1][0]
 
-        ripe_path=os.path.join('/simm/Sunset/db',raw_path)
+        ripe_path=os.path.join('/y/Sunset/db',raw_path)
         if not os.path.exists(ripe_path):
-            ripe_path=os.path.join('/simm/backup/db',raw_path)
+            ripe_path=os.path.join('/y/backup/db',raw_path)
             if not os.path.exists(ripe_path):
                 sys.stderr.write("The path %s is not exist! "%ripe_path)
                 exit(1)

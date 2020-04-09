@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 run Accurity in the  workflow
-    ./downsample.py --outputFname dags/runDownsample_median.xml --data_dir /simm/Sunset/db/ \
+    ./downsample.py --outputFname dags/runDownsample_median.xml --data_dir /y/Sunset/db/ \
     --drivername postgresql --hostname pdc --dbname pmdb --db_user luozhihui \
     --db_passwd yfishLab2113 --schema xiandao --ref_ind_seq_id 1 -l ycondor -j ycondor
 """
@@ -141,9 +141,9 @@ class DownsampleWorkflow(parentClass):
                                                 walltime=mergeAlignmentWalltime, \
                                                 parentJobLs=[SampleFolderJob, purityFolderJob])
             normal_part_refer = self.registerOneInputFile(
-                inputFname="/simm/Sunset/workflow/real_data/downsample/normal_0.2.bam",folderName=os.path.join(puritySampleFolder,purityDir))
+                inputFname="/y/Sunset/workflow/real_data/downsample/normal_0.2.bam",folderName=os.path.join(puritySampleFolder,purityDir))
             normal_bam_bai = self.registerOneInputFile(
-                inputFname="/simm/Sunset/workflow/real_data/downsample/normal_0.2.bam.bai",folderName=os.path.join(puritySampleFolder,purityDir))
+                inputFname="/y/Sunset/workflow/real_data/downsample/normal_0.2.bam.bai",folderName=os.path.join(puritySampleFolder,purityDir))
             pair_bam_file_list.append([mergedBamFile, normal_part_refer])
             AccurityJob = self.doAllAccurityAlignmentJob(workflow=workflow, data_dir=None,  normal_bam_bai=normal_bam_bai,\
                                                          pair_bam_file_list=pair_bam_file_list,\
