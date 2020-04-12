@@ -8,9 +8,9 @@ The modules are mostly related to bioinformatics projects focusing on next-gener
 
 # Prerequisites
 
-# INSTALL
+# Install
 
 ```sh
-pip3 install pymodule
+pip3 install ./
 ```
 
