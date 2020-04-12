@@ -20,7 +20,7 @@ from pymodule.yhio.MatrixFile import MatrixFile
 from pymodule.yhio.AlignmentDepthIntervalFile import AlignmentDepthIntervalFile
 from pymodule.yhio.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey
 from pymodule.algorithm.RBTree import RBDict
-from . AbstractBioinfoWorkflow import AbstractBioinfoWorkflow
+from pymodule.pegasus.AbstractBioinfoWorkflow import AbstractBioinfoWorkflow
 
 ParentClass = AbstractBioinfoWorkflow
 class AbstractNGSWorkflow(ParentClass):
