@@ -17,6 +17,7 @@ def create_manifest_file():
     f = None
     try:
         f = open('MANIFEST.in', 'w')
+        f.write('include *.py\n')
         f.write('global-exclude *.py[cod]\n')
     finally:
         if f:
