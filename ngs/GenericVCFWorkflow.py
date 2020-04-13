@@ -57,15 +57,17 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 import csv, copy
 from pymodule import ProcessOptions, getListOutOfStr, PassingData, \
 	figureOutDelimiter, getColName2IndexFromHeader, utils
-from pymodule import VCFFile
+from pymodule.ngs.io import VCFFile
 from pegaflow.DAX3 import File, Executable
 from pegaflow import Workflow
 #from pymodule.pegasus.AbstractVCFWorkflow import AbstractVCFWorkflow
-from vervet.src import VervetDB, AbstractVervetWorkflow
+from pymodule.db import SunsetDB
+from . AbstractNGSWorkflow import AbstractNGSWorkflow
 
-class GenericVCFWorkflow(AbstractVervetWorkflow):
+ParentClass = AbstractNGSWorkflow
+class GenericVCFWorkflow(ParentClass):
 	__doc__ = __doc__
-	option_default_dict = copy.deepcopy(AbstractVervetWorkflow.option_default_dict)
+	option_default_dict = copy.deepcopy(ParentClass.option_default_dict)
 	option_default_dict.update({
 						('individualUCLAIDFname', 0, ): [None, 'i', 1, 'a file containing individual ucla_id in each row. one column with header UCLAID. ', ],\
 						('vcfSampleIDFname', 0, ): [None, 'w', 1, 'a file containing the sample ID (a composite ID including ucla_id) each row. \
@@ -96,7 +98,7 @@ class GenericVCFWorkflow(AbstractVervetWorkflow):
 	def __init__(self,  **keywords):
 		"""
 		"""
-		AbstractVervetWorkflow.__init__(self, **keywords)
+		ParentClass.__init__(self, **keywords)
 	
 	def addVCF2PlinkJobs(self, workflow=None, inputData=None, db_vervet=None, minMAC=None, minMAF=None,\
 						maxSNPMissingRate=None, transferOutput=True,\
@@ -772,7 +774,7 @@ class GenericVCFWorkflow(AbstractVervetWorkflow):
 		"""
 		2011-11-28
 		"""
-		AbstractVervetWorkflow.registerCustomExecutables(self, workflow=workflow)
+		ParentClass.registerCustomExecutables(self, workflow=workflow)
 		if workflow is None:
 			workflow = self
 		namespace = workflow.namespace
@@ -869,7 +871,7 @@ class GenericVCFWorkflow(AbstractVervetWorkflow):
 			self.addAlignmentReadGroup2UCLAIDJobs(workflow, inputData=inputData, db_vervet=self.db_vervet, transferOutput=True,\
 						maxContigID=self.maxContigID, outputDirPrefix="")
 		elif self.run_type==5:
-			refSequence = VervetDB.IndividualSequence.get(self.ref_ind_seq_id)
+			refSequence = SunsetDB.IndividualSequence.get(self.ref_ind_seq_id)
 			refFastaFname = os.path.join(self.data_dir, refSequence.path)
 			registerReferenceData = self.registerRefFastaFile(workflow, refFastaFname, registerAffiliateFiles=True, \
 								input_site_handler=self.input_site_handler,\

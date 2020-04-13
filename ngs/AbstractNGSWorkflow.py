@@ -21,6 +21,7 @@ from pymodule.yhio.AlignmentDepthIntervalFile import AlignmentDepthIntervalFile
 from pymodule.yhio.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey
 from pymodule.algorithm.RBTree import RBDict
 from pymodule.pegasus.AbstractBioinfoWorkflow import AbstractBioinfoWorkflow
+from pymodule.db import SunsetDB
 
 ParentClass = AbstractBioinfoWorkflow
 class AbstractNGSWorkflow(ParentClass):
@@ -153,6 +154,39 @@ class AbstractNGSWorkflow(ParentClass):
         self.vcfSubsetExecutableFile = self.registerOneExecutableAsFile(path=self.vcfSubsetPath)
         self.vcfsorterExecutableFile = self.registerOneExecutableAsFile(path=self.vcfsorterPath)
 
+    def connectDB(self):
+        """
+        establish db_main connection for all derivative classes
+        """
+        ParentClass.connectDB(self)	#2013.11.25
+
+        self.db_main = SunsetDB.SunsetDB(drivername=self.drivername, db_user=self.db_user,
+                    db_passwd=self.db_passwd, hostname=self.hostname, \
+                    dbname=self.dbname, schema=self.schema)
+        self.db_main.setup(create_tables=False)
+
+        if not self.data_dir:
+            self.data_dir = self.db_main.data_dir
+
+        if not self.local_data_dir:
+            self.local_data_dir = self.db_main.data_dir
+
+        #self.refFastaFList = self.getReferenceSequence(workflow=self)	#2013.1.25 done in run()
+
+
+    def getReferenceSequence(self, **keywords):
+        """
+        Must be run after connectDB()
+        """
+        print(f"Getting reference sequences (id={self.ref_ind_seq_id})...", flush=True)
+        refSequence = self.db_main.queryTable(SunsetDB.IndividualSequence).get(self.ref_ind_seq_id)
+        refFastaFname = os.path.join(self.data_dir, refSequence.path)
+        registerReferenceData = self.registerRefFastaFile(refFastaFname=refFastaFname, \
+                            registerAffiliateFiles=True, \
+                            checkAffiliateFileExistence=True)
+
+        print(f" {len(registerReferenceData.refFastaFList)} files.", flush=True)
+        return registerReferenceData
 
     def getAlignments(self, db=None):
         """
@@ -2278,18 +2312,6 @@ Contig966       3160    50
                     walltime= 60)
 
         return job
-
-    def getReferenceSequence(self, workflow=None, **keywords):
-        """
-        2013.1.25 placeholder, usually from database. such as:
-            refSequence = VervetDB.IndividualSequence.get(self.ref_ind_seq_id)
-            refFastaFname = os.path.join(self.data_dir, refSequence.path)
-            refFastaFList = self.registerRefFastaFile(refFastaFname, registerAffiliateFiles=True, \
-                                checkAffiliateFileExistence=True)
-            return refFastaFList
-
-        """
-        sys.stderr.write("Getting reference sequences (placeholder) ... nothing \n")
 
     def getContigIDFromFname(self, filename):
         """

@@ -21,9 +21,9 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.expanduser('~/script'))
 sys.path.insert(0, os.path.expanduser('~/src'))
 
-import subprocess, cStringIO, copy
-from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
+import subprocess, copy
 from pegaflow.DAX3 import File, Link, PFN, Job
+from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
 from pymodule.pegasus import yh_pegasus
 from pymodule.pegasus.AbstractNGSWorkflow import AbstractNGSWorkflow
 
