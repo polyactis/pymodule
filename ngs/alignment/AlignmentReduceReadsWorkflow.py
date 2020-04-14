@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 """
+Description:
+	20130411 a workflow that does ReduceReads for all alignments in map-reduce fashion.
+		preferably on local_realigned=1 alignments. It is set to 1 by default.
+
 Examples:
 	#2013.04.12 test on one outdated alignment (--local_realigned 0 --alignment_outdated_index 1)
 	%s --ind_aln_id_ls 552 --ref_ind_seq_id 524  --ref_genome_outdated_index 1 -o dags/ReduceReads/ReduceReadsAln552.xml
@@ -12,15 +16,11 @@ Examples:
 		--ref_ind_seq_id 3280 -o dags/ReduceReads/ReduceReads_ISQ632_3230_coverage0_2.xml
 		-l hcondor -j hcondor -z localhost -u yh --intervalSize 20000000 --intervalOverlapSize 0
 		-e /u/home/eeskin/polyacti --contigMaxRankBySize 250
-		--local_data_dir /u/home/eeskin/polyacti/NetworkData/vervet/db/ --data_dir /u/home/eeskin/polyacti/NetworkData/vervet/db/
+		--local_data_dir NetworkData/vervet/db/ --data_dir NetworkData/vervet/db/
 		--cluster_size 5 --needSSHDBTunnel -J ~/bin/jdk/bin/java
 		--commit --skipDoneAlignment
 		# --ref_genome_version 2 #(optional, as by default, it gets the outdated_index=0 reference chromosomes from GenomeDB)
 		# --ref_genome_outdated_index 1 #to get old reference. incompatible here as alignment is based on 3280, new ref.
-	
-Description:
-	#2013.04.11 workflow that carries out ReduceReads for all alignments in map-reduce fashion.
-		preferably on local_realigned=1 alignments. It is set to 1 by default.
 """
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
@@ -33,7 +33,7 @@ from pegaflow import Workflow
 from palos import ProcessOptions, getListOutOfStr, PassingData, NextGenSeq, \
 	figureOutDelimiter, getColName2IndexFromHeader, utils
 #from palos.pegasus.AbstractVCFWorkflow import AbstractVCFWorkflow
-from palos.io.VCFFile import VCFFile
+from palos.ngs.io.VCFFile import VCFFile
 from vervet.src import AbstractVervetAlignmentWorkflow
 
 ParentClass = AbstractVervetAlignmentWorkflow

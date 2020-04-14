@@ -124,11 +124,10 @@ sys.path.insert(0, os.path.expanduser('~/src'))
 import copy
 from pegaflow.DAX3 import Executable, File, PFN, Profile, Namespace
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
-from palos.pegasus import yh_pegasus
-from palos.pegasus.ShortRead2AlignmentWorkflow import ShortRead2AlignmentWorkflow
-from palos.pegasus.AbstractNGSWorkflow import AbstractNGSWorkflow
-from palos.pegasus.alignment.AlignmentReadBaseQualityRecalibrationWorkflow import AlignmentReadBaseQualityRecalibrationWorkflow
 from palos.db import SunsetDB
+from palos.pegasus.ShortRead2AlignmentWorkflow import ShortRead2AlignmentWorkflow
+from palos.ngs.AbstractNGSWorkflow import AbstractNGSWorkflow
+from . AlignmentReadBaseQualityRecalibrationWorkflow import AlignmentReadBaseQualityRecalibrationWorkflow
 from AbstractAccuWorkflow import AbstractAccuWorkflow as ParentClass
 
 class ShortRead2AlignmentPipeline(ParentClass, ShortRead2AlignmentWorkflow):
@@ -541,8 +540,9 @@ class ShortRead2AlignmentPipeline(ParentClass, ShortRead2AlignmentWorkflow):
 
 		#2011-11-16 new way of registering reference fasta file. but still dont' want to trasnfer 7Gb of data
 		refFastaFname = os.path.join(self.data_dir, refSequence.path)
-		registerReferenceData = yh_pegasus.registerRefFastaFile(workflow, refFastaFname, registerAffiliateFiles=True, input_site_handler=self.input_site_handler,\
-						checkAffiliateFileExistence=True)
+		registerReferenceData = self.registerRefFastaFile(refFastaFname, registerAffiliateFiles=True, 
+			input_site_handler=self.input_site_handler,\
+			checkAffiliateFileExistence=True)
 
 
 		self.addAllAlignmentJobs(db_main=self.db_main, individualSequenceID2FilePairLs=None, \

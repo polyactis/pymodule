@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import csv
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
-from palos.pegasus.mapper.AbstractMapper import AbstractMapper
+from palos.mapper.AbstractMapper import AbstractMapper
 import networkx as nx
 
 class DrawDBReferenceGraph(AbstractMapper):

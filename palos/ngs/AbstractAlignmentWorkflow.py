@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 import copy
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
-from palos.io import NextGenSeq
+from palos.ngs import NextGenSeq
 from pegaflow import Workflow
 from . AbstractNGSWorkflow import AbstractNGSWorkflow
 
