@@ -46,7 +46,7 @@ def find_package_data(dirname):
 
 
 setup_args = dict(
-    name="Pymodule",
+    name="Palos",
     version="0.0.2",
     author="Yu S. Huang",
     author_email="polyactis@gmail.com",
@@ -54,7 +54,7 @@ setup_args = dict(
     long_description_content_type="text/markdown",
     long_description=README,
     license="Apache2",
-    url="https://gitlab.yfish.x/horseshoe/pymodule",
+    url="https://github.com/polyactis/pymodule",
     python_requires=">=3.5",
     classifiers=[
         "Intended Audience :: Developers",
@@ -65,7 +65,7 @@ setup_args = dict(
         "Topic :: Scientific/Engineering",
         "Topic :: Utilities",
     ],
-    packages=find_packages(exclude=['.test*']),
+    packages=find_packages(include=['palos', 'palos.*'], exclude=['.test*']),
     package_data={
         # If any package contains *.sh files, include them:
         "": ["*.sh", "*.md"],
