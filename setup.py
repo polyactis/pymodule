@@ -47,10 +47,10 @@ def find_package_data(dirname):
 
 setup_args = dict(
     name="Palos",
-    version="0.0.2",
+    version="0.0.1",
     author="Yu S. Huang",
     author_email="polyactis@gmail.com",
-    description="Misc Python modules",
+    description="Misc Python modules developed and used by the yfish group",
     long_description_content_type="text/markdown",
     long_description=README,
     license="Apache2",
