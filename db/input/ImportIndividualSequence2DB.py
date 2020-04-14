@@ -87,14 +87,16 @@ sys.path.insert(0, os.path.expanduser('~/script'))
 sys.path.insert(0, os.path.expanduser('~/src'))
 
 import copy, re, csv
+from pegaflow.DAX3 import File
 from pymodule import ProcessOptions, PassingData, MatrixFile, utils
 from pymodule.pegasus import yh_pegasus
-from pegaflow.DAX3 import File
-from . AbstractAccuWorkflow import AbstractAccuWorkflow
+from pymodule.ngs.AbstractNGSWorkflow import AbstractNGSWorkflow
 
-class ImportIndividualSequence2DB(AbstractAccuWorkflow):
+ParentClass=AbstractNGSWorkflow
+
+class ImportIndividualSequence2DB(ParentClass):
 	__doc__ = __doc__
-	option_default_dict = copy.deepcopy(AbstractAccuWorkflow.option_default_dict)
+	option_default_dict = copy.deepcopy(ParentClass.option_default_dict)
 	option_default_dict.update({
 						('input', 1, ): ['', 'i', 1, 'if it is a folder, take all .bam/.sam/.fastq files recursively. If it is a file, every line should be a path to the input file.', ],\
 						('bamFname2MonkeyIDMapFname', 0, ): ['', '', 1, 'a tsv version of WUSTL xls file detailing what monkey is in which bam file.', ],\
@@ -112,7 +114,7 @@ class ImportIndividualSequence2DB(AbstractAccuWorkflow):
 		"""
 		2011-8-3
 		"""
-		AbstractAccuWorkflow.__init__(self, **keywords)
+		ParentClass.__init__(self, **keywords)
 		self.addJobsDict = {1: self.addJobsToProcessTCGAData,
 						2: self.addJobsToProcessHCC1187Data}
 	
