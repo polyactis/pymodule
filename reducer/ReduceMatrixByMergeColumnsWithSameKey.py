@@ -23,7 +23,7 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 import copy
 from palos import ProcessOptions, figureOutDelimiter, utils, PassingData
 from palos.io.MatrixFile import MatrixFile
-from AbstractReducer import AbstractReducer
+from palos.reducer.AbstractReducer import AbstractReducer
 
 class ReduceMatrixByMergeColumnsWithSameKey(AbstractReducer):
 	__doc__ = __doc__
