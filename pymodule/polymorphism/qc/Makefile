@@ -4,7 +4,7 @@ CXXLDFLAGS 	= $(BoostLib)
 CTARGETS	= 
 
 ExtraTargets	= CheckTwoVCFOverlapCC
-SharedLibTargets	= ~/script/pymodule/yhio/AbstractMatrixFileWalkerCC.so 
+SharedLibTargets	= ~/script/pymodule/io/AbstractMatrixFileWalkerCC.so 
 
 CheckTwoVCFOverlapCC:	%:	%.o $(SharedLibTargets)
 	-$(CXXCOMPILER) $< ~/script/vcflib/libvcf.a $(SharedLibTargets) $(CXXFLAGS) -o $@ $(CXXLDFLAGS)

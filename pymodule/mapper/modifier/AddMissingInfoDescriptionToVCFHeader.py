@@ -27,7 +27,7 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 import cStringIO, re, csv
 from pymodule import ProcessOptions, figureOutDelimiter
 from pymodule.utils import sortCMPBySecondTupleValue
-from pymodule.yhio.VCFFile import VCFFile
+from pymodule.io.VCFFile import VCFFile
 from pymodule.mapper.AbstractVCFMapper import AbstractVCFMapper
 
 ParentClass = AbstractVCFMapper

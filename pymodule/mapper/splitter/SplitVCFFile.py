@@ -26,7 +26,7 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import copy
 from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
-from pymodule.yhio.VCFFile import VCFFile
+from pymodule.io.VCFFile import VCFFile
 from pymodule.mapper.AbstractVCFMapper import AbstractVCFMapper
 
 class SplitVCFFile(AbstractVCFMapper):

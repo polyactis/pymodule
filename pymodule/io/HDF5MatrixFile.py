@@ -62,7 +62,7 @@ import h5py
 import numpy
 from pymodule.utils import PassingData, PassingDataList,getListOutOfStr 
 from pymodule.ProcessOptions import  ProcessOptions
-from pymodule.yhio.MatrixFile import MatrixFile
+from pymodule.io.MatrixFile import MatrixFile
 varLenStrType = h5py.new_vlen(str)
 
 class YHTableInHDF5Group(object):

@@ -23,7 +23,7 @@ from Bio.SeqRecord import SeqRecord
 from Bio.Alphabet import IUPAC
 from pymodule import ProcessOptions, utils
 from pymodule import AbstractMapper
-from pymodule.yhio.PolymorphismTableFile import PolymorphismTableFile
+from pymodule.io.PolymorphismTableFile import PolymorphismTableFile
 
 class msOutput2PolymorphismTableFile(AbstractMapper):
 	__doc__ = __doc__

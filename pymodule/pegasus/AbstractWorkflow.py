@@ -124,7 +124,7 @@ class AbstractWorkflow(Workflow):
             name='DrawHistogram', clusterSizeMultiplier=1)
 
         #2012.8.15 ancestor of SelectRowsFromMatrix,
-        self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "yhio/AbstractMatrixFileWalker.py"), 
+        self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "io/AbstractMatrixFileWalker.py"), 
             name='AbstractMatrixFileWalker', clusterSizeMultiplier=1)
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "plot/DrawMatrix.py"), 
             name='DrawMatrix', clusterSizeMultiplier=1)

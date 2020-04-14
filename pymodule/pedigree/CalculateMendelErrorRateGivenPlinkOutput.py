@@ -35,8 +35,8 @@ import random
 import networkx as nx
 from pymodule import ProcessOptions
 from pymodule.utils import PassingData
-from pymodule.yhio.MatrixFile import MatrixFile
-from pymodule.yhio.PlinkPedigreeFile import PlinkPedigreeFile
+from pymodule.io.MatrixFile import MatrixFile
+from pymodule.io.PlinkPedigreeFile import PlinkPedigreeFile
 from pymodule.pegasus.mapper.AbstractMapper import AbstractMapper
 
 ParentClass = AbstractMapper

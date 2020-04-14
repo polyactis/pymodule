@@ -640,7 +640,7 @@ Default is to combine them.'],\
 		2008-09-10
 			in case chop the whole figure into blocks, swap col_block_index and row_block_index to make row first, column 2nd
 		"""
-		from pymodule.yhio.SNP import read_data
+		from pymodule.io.SNP import read_data
 		from pymodule.utils import figureOutDelimiter, PassingData
 		delimiter = figureOutDelimiter(self.input_fname)
 		print(delimiter)

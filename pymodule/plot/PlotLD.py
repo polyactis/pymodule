@@ -28,7 +28,7 @@ import csv
 import numpy, random, pylab
 from pymodule import ProcessOptions, getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter
 from pymodule import yh_matplotlib, GenomeDB, statistics
-from pymodule.yhio.AbstractMatrixFileWalker import AbstractMatrixFileWalker
+from pymodule.io.AbstractMatrixFileWalker import AbstractMatrixFileWalker
 from AbstractPlot import AbstractPlot
 
 class PlotLD(AbstractPlot):

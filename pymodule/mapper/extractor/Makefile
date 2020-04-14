@@ -4,7 +4,7 @@ CXXLDFLAGS	= $(BoostLib)
 CTARGETS	= 
 
 ExtraTargets	= SelectRowsFromMatrixCC
-SharedLibTargets	= ~/script/pymodule/yhio/AbstractMatrixFileWalkerCC.so
+SharedLibTargets	= ~/script/pymodule/io/AbstractMatrixFileWalkerCC.so
 
 SRCS	= SelectRowsFromMatrixCC.cc
 

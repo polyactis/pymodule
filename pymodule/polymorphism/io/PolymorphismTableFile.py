@@ -15,8 +15,8 @@ import networkx as nx
 from tables import UInt64Col, Float64Col, StringCol, UInt16Col, Int64Col
 from pymodule.utils import PassingData, PassingDataList
 from pymodule.ProcessOptions import  ProcessOptions
-from pymodule.yhio.YHPyTables import YHTable, YHFile, castPyTablesEntryIntoPassingData
-from pymodule.yhio.SNP import SNPData
+from pymodule.io.YHPyTables import YHTable, YHFile, castPyTablesEntryIntoPassingData
+from pymodule.io.SNP import SNPData
 
 class SpeciesTable(tables.IsDescription):
 	"""

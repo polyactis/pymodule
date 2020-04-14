@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 from pegaflow.DAX3 import Executable, File, PFN
 from pymodule import ProcessOptions, PassingData, utils
-from pymodule.yhio.FastaFile import FastaFile
+from pymodule.io.FastaFile import FastaFile
 from pegaflow import Workflow
 from . AbstractNGSWorkflow import AbstractNGSWorkflow as ParentClass
 

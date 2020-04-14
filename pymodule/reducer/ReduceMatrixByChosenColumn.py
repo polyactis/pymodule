@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 from pymodule import ProcessOptions, figureOutDelimiter, utils, PassingData
-from pymodule.yhio.MatrixFile import MatrixFile
+from pymodule.io.MatrixFile import MatrixFile
 from ReduceMatrixByMergeColumnsWithSameKey import ReduceMatrixByMergeColumnsWithSameKey
 
 class ReduceMatrixByChosenColumn(ReduceMatrixByMergeColumnsWithSameKey):

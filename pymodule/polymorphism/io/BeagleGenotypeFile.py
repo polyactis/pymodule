@@ -52,7 +52,7 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 import copy, numpy
 from pymodule import utils, PassingData
 from pymodule.ProcessOptions import ProcessOptions
-from pymodule.yhio.SNP import SNPData
+from pymodule.io.SNP import SNPData
 from MatrixFile import MatrixFile
 
 class BeagleGenotypeFile(MatrixFile):

@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.expanduser('~/src'))
 
 import copy, re
 from pymodule import ProcessOptions, PassingData, utils, NextGenSeq
-from pymodule.yhio.AlignmentDepthIntervalFile import AlignmentDepthIntervalFile
+from pymodule.io.AlignmentDepthIntervalFile import AlignmentDepthIntervalFile
 from AddAlignmentDepthIntervalMethod2DB import AddAlignmentDepthIntervalMethod2DB
 from Sunset.mapper.AbstractAccuMapper import AbstractAccuMapper as ParentClass
 

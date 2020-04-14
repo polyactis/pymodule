@@ -9,9 +9,9 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 import numpy
 import networkx as nx
 from pymodule.utils import PassingData
-from pymodule.yhio.HDF5MatrixFile import HDF5MatrixFile, addAttributeDictToYHTableInHDF5Group
-from pymodule.yhio.YHPyTables import YHTable, YHFile, castPyTablesRowIntoPassingData
-from pymodule.yhio.SNP import getGenomeWideResultFromHDF5MatrixFile
+from pymodule.io.HDF5MatrixFile import HDF5MatrixFile, addAttributeDictToYHTableInHDF5Group
+from pymodule.io.YHPyTables import YHTable, YHFile, castPyTablesRowIntoPassingData
+from pymodule.io.SNP import getGenomeWideResultFromHDF5MatrixFile
 
 import tables
 from tables import UInt64Col, Float64Col, StringCol, Int64Col
@@ -285,7 +285,7 @@ def constructAssociationPeakRBDictFromHDF5File(inputFname=None, peakPadding=1000
 		similar to Stock_250kDB.constructRBDictFromResultPeak(), but from HDF5MatrixFile-like file
 	"""
 	from pymodule.algorithm.RBTree import RBDict
-	from pymodule.yhio.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey, get_overlap_ratio
+	from pymodule.io.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey, get_overlap_ratio
 	
 	sys.stderr.write("Constructing association-peak RBDict from HDF5 file %s, (peakPadding=%s) ..."%(inputFname, peakPadding))
 	reader = HDF5MatrixFile(inputFname, openMode='r')
@@ -365,7 +365,7 @@ def constructAssociationLocusRBDictFromHDF5File(inputFname=None, locusPadding=0,
 		similar to constructAssociationPeakRBDictFromHDF5File
 	"""
 	from pymodule.algorithm.RBTree import RBDict
-	from pymodule.yhio.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey, get_overlap_ratio
+	from pymodule.io.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey, get_overlap_ratio
 	
 	sys.stderr.write("Constructing association-locus RBDict from HDF5 file %s, (locusPadding=%s) ..."%(inputFname, locusPadding))
 	reader = HDF5MatrixFile(inputFname, openMode='r')

@@ -11,9 +11,9 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 import copy
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job
 from pymodule import Genome, getListOutOfStr, PassingData, utils
-from pymodule.yhio.MatrixFile import MatrixFile
-from pymodule.yhio.VCFFile import VCFFile
-from pymodule.yhio import NextGenSeq
+from pymodule.io.MatrixFile import MatrixFile
+from pymodule.io.VCFFile import VCFFile
+from pymodule.io import NextGenSeq
 from pegaflow import Workflow
 from . AbstractNGSWorkflow import AbstractNGSWorkflow
 from . MapReduceGenomeFileWorkflow import MapReduceGenomeFileWorkflow as ParentClass

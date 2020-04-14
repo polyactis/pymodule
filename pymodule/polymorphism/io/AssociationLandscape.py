@@ -15,7 +15,7 @@ import networkx as nx
 from tables import UInt64Col, Float64Col
 from pymodule.utils import PassingData, PassingDataList
 from pymodule.ProcessOptions import  ProcessOptions
-from pymodule.yhio.YHPyTables import YHTable, YHFile
+from pymodule.io.YHPyTables import YHTable, YHFile
 from Association import AssociationTable, AssociationTableFile
 
 class AssociationLandscapeTable(tables.IsDescription):

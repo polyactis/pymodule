@@ -62,8 +62,8 @@ import tables
 import numpy
 from pymodule.utils import PassingData, PassingDataList
 from pymodule.ProcessOptions import  ProcessOptions
-from pymodule.yhio.MatrixFile import MatrixFile
-from pymodule.yhio.HDF5MatrixFile import HDF5MatrixFile, YHTableInHDF5Group, addAttributeDictToYHTableInHDF5Group 
+from pymodule.io.MatrixFile import MatrixFile
+from pymodule.io.HDF5MatrixFile import HDF5MatrixFile, YHTableInHDF5Group, addAttributeDictToYHTableInHDF5Group 
 from tables.file import _checkfilters
 
 class YHTable(tables.Table, YHTableInHDF5Group):

@@ -25,7 +25,7 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 from pymodule import ProcessOptions, MatrixFile, PassingData
-from pymodule.yhio.AbstractMatrixFileWalker import AbstractMatrixFileWalker
+from pymodule.io.AbstractMatrixFileWalker import AbstractMatrixFileWalker
 import numpy
 from scipy.stats import norm
 

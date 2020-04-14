@@ -28,7 +28,7 @@ import csv, random, numpy
 from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils, getColName2IndexFromHeader, figureOutDelimiter,\
 	yh_matplotlib
 from pymodule.pegasus.mapper.AbstractMapper import AbstractMapper
-from pymodule.yhio.AbstractMatrixFileWalker import AbstractMatrixFileWalker
+from pymodule.io.AbstractMatrixFileWalker import AbstractMatrixFileWalker
 
 class AbstractPlot(AbstractMatrixFileWalker):
 	__doc__ = __doc__

@@ -49,12 +49,12 @@ import random
 import networkx as nx
 from pymodule import ProcessOptions
 from pymodule.utils import PassingData
-from pymodule.yhio.AbstractMatrixFileWalker import AbstractMatrixFileWalker
-from pymodule.yhio.BeagleGenotypeFile import BeagleGenotypeFile
-from pymodule.yhio import SNP
-from pymodule.yhio.MatrixFile import MatrixFile
-from pymodule.yhio.PlinkPedigreeFile import PlinkPedigreeFile
-from pymodule.yhio.VCFFile import VCFFile
+from pymodule.io.AbstractMatrixFileWalker import AbstractMatrixFileWalker
+from pymodule.io.BeagleGenotypeFile import BeagleGenotypeFile
+from pymodule.io import SNP
+from pymodule.io.MatrixFile import MatrixFile
+from pymodule.io.PlinkPedigreeFile import PlinkPedigreeFile
+from pymodule.io.VCFFile import VCFFile
 from pymodule.statistics import NumberContainer, DiscreteProbabilityMassContainer
 
 class SelectDistantMembersFromGenotypeFile(AbstractMatrixFileWalker):

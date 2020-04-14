@@ -22,9 +22,9 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import csv, random, numpy
 from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
-from pymodule.yhio.AbstractGenomeFileWalker import AbstractGenomeFileWalker
+from pymodule.io.AbstractGenomeFileWalker import AbstractGenomeFileWalker
 from pymodule.algorithm.RBTree import RBDict
-from pymodule.yhio.CNV import CNVSegmentBinarySearchTreeKey
+from pymodule.io.CNV import CNVSegmentBinarySearchTreeKey
 
 ParentClass = AbstractGenomeFileWalker
 class GenomeMovingAverageStatistics(ParentClass):

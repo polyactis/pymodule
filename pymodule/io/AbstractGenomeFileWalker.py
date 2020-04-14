@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 import csv, random, numpy
 from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
 from pymodule.db import GenomeDB
-from pymodule.yhio.AbstractMatrixFileWalker import AbstractMatrixFileWalker
+from pymodule.io.AbstractMatrixFileWalker import AbstractMatrixFileWalker
 
 ParentClass = AbstractMatrixFileWalker
 

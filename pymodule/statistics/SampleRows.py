@@ -17,12 +17,6 @@ Description:
 
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-#bit_number = math.log(sys.maxint)/math.log(2)
-#if bit_number>40:	   #64bit
-#	sys.path.insert(0, os.path.expanduser('~/lib64/python'))
-#	sys.path.insert(0, os.path.join(os.path.expanduser('~/script64')))
-#else:   #32bit
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
@@ -30,7 +24,7 @@ import csv
 import random
 from pymodule import ProcessOptions, getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter
 from pymodule import yh_matplotlib, SNP
-from pymodule.yhio.AbstractMatrixFileWalker import AbstractMatrixFileWalker
+from pymodule.io.AbstractMatrixFileWalker import AbstractMatrixFileWalker
 
 class SampleRows(AbstractMatrixFileWalker):
 	__doc__ = __doc__

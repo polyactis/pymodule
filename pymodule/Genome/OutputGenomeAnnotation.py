@@ -24,7 +24,7 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 from pymodule import ProcessOptions, utils
-from pymodule.yhio.AbstractGenomeFileWalker import AbstractGenomeFileWalker
+from pymodule.io.AbstractGenomeFileWalker import AbstractGenomeFileWalker
 
 ParentClass = AbstractGenomeFileWalker
 class OutputGenomeAnnotation(ParentClass):

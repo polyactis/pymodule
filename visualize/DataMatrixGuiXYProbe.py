@@ -30,7 +30,7 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_gtkagg import NavigationToolbar2GTKAgg as NavigationToolbar
 
 import yh_gnome, csv, traceback
-from pymodule.yhio.SNP import SNPData, read_data
+from pymodule.io.SNP import SNPData, read_data
 from pymodule.utils import figureOutDelimiter
 from pymodule import MatrixFile
 from pymodule.plot import yh_matplotlib

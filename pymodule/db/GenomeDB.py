@@ -31,7 +31,7 @@ from sqlalchemy import UniqueConstraint, create_engine
 from sqlalchemy import and_, or_, not_
 from sqlalchemy import desc
 from pymodule.utils import PassingData	#2012.3.26 "from utils import PassingData" won't work because no module named "utils" exists outside pymodule (!=pymodule.utils). 
-from pymodule.yhio.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey
+from pymodule.io.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey
 from pymodule.algorithm.RBTree import RBDict
 from pymodule.Genome import GeneModel	#2010-9-21 although "from Genome import GeneModel" works,
 			#it causes problem in cPickle.load() because Genome is not directly visible outside.

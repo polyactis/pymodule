@@ -14,11 +14,11 @@ from pymodule import Genome, utils
 from pymodule import ProcessOptions
 from pymodule.Genome import IntervalData
 from pymodule.utils import PassingData
-from pymodule.yhio import NextGenSeq
-from pymodule.yhio.VCFFile import VCFFile
-from pymodule.yhio.MatrixFile import MatrixFile
-from pymodule.yhio.AlignmentDepthIntervalFile import AlignmentDepthIntervalFile
-from pymodule.yhio.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey
+from pymodule.io import NextGenSeq
+from pymodule.io.VCFFile import VCFFile
+from pymodule.io.MatrixFile import MatrixFile
+from pymodule.io.AlignmentDepthIntervalFile import AlignmentDepthIntervalFile
+from pymodule.io.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey
 from pymodule.algorithm.RBTree import RBDict
 from pymodule.pegasus.AbstractBioinfoWorkflow import AbstractBioinfoWorkflow
 from pymodule.db import SunsetDB

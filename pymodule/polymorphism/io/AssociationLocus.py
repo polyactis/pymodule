@@ -14,9 +14,9 @@ from tables import UInt64Col, StringCol, Float64Col
 import numpy
 from pymodule.utils import PassingData, PassingDataList
 from pymodule.ProcessOptions import  ProcessOptions
-from pymodule.yhio.YHPyTables import YHTable, YHFile, castPyTablesRowIntoPassingData
+from pymodule.io.YHPyTables import YHTable, YHFile, castPyTablesRowIntoPassingData
 from pymodule.algorithm.RBTree import RBDict
-from pymodule.yhio.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey, get_overlap_ratio
+from pymodule.io.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey, get_overlap_ratio
 from AssociationPeak import AssociationPeakTable
 
 class AssociationLocusTable(tables.IsDescription):

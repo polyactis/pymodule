@@ -26,7 +26,7 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 from pymodule import ProcessOptions, PassingData, utils
 from pymodule import VCFFile, MatrixFile
-from pymodule.yhio.SNP import nt2number
+from pymodule.io.SNP import nt2number
 from AbstractVCFMapper import AbstractVCFMapper
 
 class CheckTwoVCFOverlap(AbstractVCFMapper):

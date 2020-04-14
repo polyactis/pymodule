@@ -6,7 +6,7 @@ CTARGETS	=
 ExtraTargets	= ReduceSameChromosomeAlignmentDepthFiles
 
 
-SharedLibTargets	= ~/script/pymodule/yhio/AbstractMatrixFileWalkerCC.so
+SharedLibTargets	= ~/script/pymodule/io/AbstractMatrixFileWalkerCC.so
 
 SRCS	= ReduceSameChromosomeAlignmentDepthFiles.cc
 

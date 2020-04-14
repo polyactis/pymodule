@@ -51,7 +51,7 @@ from pymodule import ProcessOptions, PassingData
 from pymodule.pegasus.AbstractVCFWorkflow import AbstractVCFWorkflow
 from pymodule.pegasus.BlastWorkflow import BlastWorkflow
 from pymodule.pegasus.ShortRead2AlignmentWorkflow import ShortRead2AlignmentWorkflow
-from pymodule.yhio.FastaFile import FastaFile
+from pymodule.io.FastaFile import FastaFile
 
 ParentClass = AbstractVCFWorkflow
 

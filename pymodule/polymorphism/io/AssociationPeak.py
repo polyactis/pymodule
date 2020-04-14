@@ -14,7 +14,7 @@ from tables import UInt64Col, Float64Col, StringCol
 import numpy
 from pymodule.utils import PassingData, PassingDataList
 from pymodule.ProcessOptions import ProcessOptions
-from pymodule.yhio.YHPyTables import YHTable, YHFile, castPyTablesRowIntoPassingData
+from pymodule.io.YHPyTables import YHTable, YHFile, castPyTablesRowIntoPassingData
 
 class AssociationPeakTable(tables.IsDescription):
 	id = UInt64Col(pos=0)
@@ -63,7 +63,7 @@ class AssociationPeakTableFile(YHFile):
 		YHFile._readInData(self, tableName=tableName, tableObject=tableObject)
 		
 		from pymodule.algorithm.RBTree import RBDict
-		from pymodule.yhio.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey, get_overlap_ratio
+		from pymodule.io.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey, get_overlap_ratio
 		if tableObject is None:
 			tableObject = self.getTableObject(tableName=tableName)
 		sys.stderr.write("Constructing association-peak RBDict from HDF5 file %s, (peakPadding=%s) ..."%(self.inputFname, self.peakPadding))

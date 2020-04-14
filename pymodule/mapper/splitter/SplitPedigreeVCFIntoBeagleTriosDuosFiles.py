@@ -32,10 +32,10 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 import copy, numpy
 import networkx as nx
 from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
-from pymodule.yhio.VCFFile import VCFFile
-from pymodule.yhio.MatrixFile import MatrixFile
-from pymodule.yhio.BeagleLikelihoodFile import BeagleLikelihoodFile
-from pymodule.yhio.PlinkPedigreeFile import PlinkPedigreeFile
+from pymodule.io.VCFFile import VCFFile
+from pymodule.io.MatrixFile import MatrixFile
+from pymodule.io.BeagleLikelihoodFile import BeagleLikelihoodFile
+from pymodule.io.PlinkPedigreeFile import PlinkPedigreeFile
 from pymodule.mapper.AbstractVCFMapper import AbstractVCFMapper
 
 class SplitPedigreeVCFIntoBeagleTriosDuosFiles(AbstractVCFMapper):

@@ -33,7 +33,7 @@ from pegaflow import Workflow
 from pymodule import ProcessOptions, getListOutOfStr, PassingData, NextGenSeq, \
 	figureOutDelimiter, getColName2IndexFromHeader, utils
 #from pymodule.pegasus.AbstractVCFWorkflow import AbstractVCFWorkflow
-from pymodule.yhio.VCFFile import VCFFile
+from pymodule.io.VCFFile import VCFFile
 from vervet.src import AbstractVervetAlignmentWorkflow
 
 ParentClass = AbstractVervetAlignmentWorkflow

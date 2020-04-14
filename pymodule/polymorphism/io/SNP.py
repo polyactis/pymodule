@@ -351,7 +351,7 @@ def SNPData2RawSnpsData_ls(snpData, use_number2nt=1, need_transposeSNPData=0, re
 	"""
 	if report:
 		sys.stderr.write("Converting SNPData to RawSnpsData_ls ...")
-	from variation.src.yhio.snpsdata import RawSnpsData
+	from variation.src.io.snpsdata import RawSnpsData
 	
 	if need_transposeSNPData:
 		newSnpData = transposeSNPData(snpData, report=report)
@@ -1073,7 +1073,7 @@ class SNPData(object):
 		if outputFname:
 			#import csv
 			#writer = csv.writer(open(outputFname, 'w'), delimiter='\t')
-			from pymodule.yhio import MatrixFile
+			from pymodule.io import MatrixFile
 			writer = MatrixFile(outputFname, openMode='w', delimiter='\t')
 
 
@@ -2728,11 +2728,11 @@ class GenomeWideResult(object):
 		sys.stderr.write("Dumping association result into %s (HDF5 format) ..."%(filename))
 		#each number below is counting bytes, not bits
 		if outputFileType==1:
-			from pymodule.yhio.Association import AssociationTable, AssociationTableFile
+			from pymodule.io.Association import AssociationTable, AssociationTableFile
 			rowDefinition  = AssociationTable
 			OutputFileClass = AssociationTableFile
 		else:
-			from pymodule.yhio.HDF5MatrixFile import HDF5MatrixFile
+			from pymodule.io.HDF5MatrixFile import HDF5MatrixFile
 			rowDefinition = [('locus_id','i8'),('chromosome', HDF5MatrixFile.varLenStrType), ('start','i8'), ('stop', 'i8'), \
 					('score', 'f8'), ('MAC', 'i8'), ('MAF', 'f8'), ('genotype_var_perc', 'f8')]
 			OutputFileClass = HDF5MatrixFile
@@ -2746,7 +2746,7 @@ class GenomeWideResult(object):
 				sys.stderr.write("Error: no writer(%s) or filename(%s) to dump.\n"%(writer, filename))
 				sys.exit(3)
 		if attributeDict:
-			from pymodule.yhio.HDF5MatrixFile import addAttributeDictToYHTableInHDF5Group
+			from pymodule.io.HDF5MatrixFile import addAttributeDictToYHTableInHDF5Group
 			addAttributeDictToYHTableInHDF5Group(tableObject=tableObject, attributeDict=attributeDict)
 		if self.results_method_id:
 			tableObject.addAttribute(name='result_id', value=self.results_method_id)
@@ -3300,10 +3300,10 @@ def getGenomeWideResultFromHDF5MatrixFile(inputFname=None, reader=None, \
 	else:
 		if reader is None:
 			if inputFileType==1:
-				from pymodule.yhio.Association import AssociationTableFile
+				from pymodule.io.Association import AssociationTableFile
 				reader = AssociationTableFile(inputFname, openMode='r', autoRead=False)
 			else:
-				from pymodule.yhio.HDF5MatrixFile import HDF5MatrixFile
+				from pymodule.io.HDF5MatrixFile import HDF5MatrixFile
 				reader = HDF5MatrixFile(inputFname, openMode='r')
 		associationTableObject = reader.getTableObject(tableName=tableName)
 	

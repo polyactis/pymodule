@@ -46,7 +46,7 @@ from pymodule import ProcessOptions, PassingData
 from pymodule import utils
 from pymodule.db import GenomeDB
 from AbstractPlot import AbstractPlot
-from pymodule.yhio.AbstractGenomeFileWalker import AbstractGenomeFileWalker
+from pymodule.io.AbstractGenomeFileWalker import AbstractGenomeFileWalker
 
 ParentClass = AbstractPlot
 class PlotGenomeWideData(ParentClass, AbstractGenomeFileWalker):

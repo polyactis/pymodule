@@ -27,8 +27,8 @@ from pymodule import ProcessOptions
 
 #used in getattr(individual_site_id_set, '__len__', returnZeroFunc)()
 from pymodule.utils import returnZeroFunc
-from pymodule.yhio.VCFFile import VCFFile
-from pymodule.yhio.FastaFile import FastaFile
+from pymodule.io.VCFFile import VCFFile
+from pymodule.io.FastaFile import FastaFile
 from pymodule.mapper.AbstractVCFMapper import AbstractVCFMapper
 
 

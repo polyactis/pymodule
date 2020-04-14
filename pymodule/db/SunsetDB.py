@@ -32,7 +32,7 @@ from . import Database, TableClass, AbstractTableWithFilename
 from pymodule import ProcessOptions, utils, PassingData
 from pymodule.utils import runLocalCommand
 from pymodule.utils import returnZeroFunc
-from pymodule.yhio import NextGenSeq
+from pymodule.io import NextGenSeq
 from pymodule.VCFFile import VCFFile
 from pymodule.mapper.computer.CountFastqReadBaseCount import CountFastqReadBaseCount
 

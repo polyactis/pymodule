@@ -22,28 +22,28 @@ from . algorithm.RBTree import RBTree, RBDict, RBTreeIter, RBList, RBNode
 from . algorithm.BinarySearchTree import binary_tree
 
 #2012.11.14
-#from . yhio import SNP
-#from . yhio import NextGenSeq, getAssociationLandscapeDataFromHDF5File
-#from . yhio.MatrixFile import MatrixFile
-#from . yhio.BeagleLikelihoodFile import BeagleLikelihoodFile
-#from . yhio.PlinkPedigreeFile import PlinkPedigreeFile
+#from . io import SNP
+#from . io import NextGenSeq, getAssociationLandscapeDataFromHDF5File
+#from . io.MatrixFile import MatrixFile
+#from . io.BeagleLikelihoodFile import BeagleLikelihoodFile
+#from . io.PlinkPedigreeFile import PlinkPedigreeFile
 #
-#from . yhio.SNP import write_data_matrix, read_data, SNPData, GenomeWideResults, GenomeWideResult, DataObject, \
+#from . io.SNP import write_data_matrix, read_data, SNPData, GenomeWideResults, GenomeWideResult, DataObject, \
 #	getGenomeWideResultFromFile,\
 #	nt2number, number2nt, number2complement, SNPInfo, number2single_char_nt, getGenomeWideResultFromHDF5MatrixFile,\
 #	SNPData2RawSnpsData_ls
-#from . yhio.TwoSNPData import TwoSNPData, QualityControl
-#from . yhio.HDF5MatrixFile import HDF5MatrixFile, addAttributeDictToYHTableInHDF5Group
-#from . yhio.YHPyTables import YHTable, YHFile, YHSingleTableFile, castPyTablesRowIntoPassingData
-#from . yhio.Association import AssociationTable, AssociationTableFile, LocusMapTable, LocusMapTableFile
-#from . yhio.AssociationLandscape import AssociationLandscapeTable, AssociationLandscapeTableFile
-#from . yhio.AssociationPeak import AssociationPeakTable, AssociationPeakTableFile
-#from . yhio.AssociationLocus import AssociationLocusTable, AssociationLocus2PeakTable, AssociationLocusTableFile
+#from . io.TwoSNPData import TwoSNPData, QualityControl
+#from . io.HDF5MatrixFile import HDF5MatrixFile, addAttributeDictToYHTableInHDF5Group
+#from . io.YHPyTables import YHTable, YHFile, YHSingleTableFile, castPyTablesRowIntoPassingData
+#from . io.Association import AssociationTable, AssociationTableFile, LocusMapTable, LocusMapTableFile
+#from . io.AssociationLandscape import AssociationLandscapeTable, AssociationLandscapeTableFile
+#from . io.AssociationPeak import AssociationPeakTable, AssociationPeakTableFile
+#from . io.AssociationLocus import AssociationLocusTable, AssociationLocus2PeakTable, AssociationLocusTableFile
 #
-#from yhio.BamFile import BamFile
-#from . yhio.VCFFile import VCFFile, VCFRecord
-#from . yhio import CNV
-#from . yhio.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey, get_overlap_ratio, findCorrespondenceBetweenTwoCNVRBDict
-#from . yhio.AbstractMatrixFileWalker import AbstractMatrixFileWalker
-#from . yhio.latex import outputMatrixInLatexTable, outputFigureInLatex
-#from . yhio.FastaFile import FastaFile
+#from io.BamFile import BamFile
+#from . io.VCFFile import VCFFile, VCFRecord
+#from . io import CNV
+#from . io.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey, get_overlap_ratio, findCorrespondenceBetweenTwoCNVRBDict
+#from . io.AbstractMatrixFileWalker import AbstractMatrixFileWalker
+#from . io.latex import outputMatrixInLatexTable, outputFigureInLatex
+#from . io.FastaFile import FastaFile
