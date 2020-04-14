@@ -14,7 +14,7 @@ It contains code related to bioinformatics projects focusing on next-generation 
 [ngs/](ngs/) contains programs analyzing next-generation sequencing data.
 
 # Prerequisites
-
+The `palos` module is universally used by many programs and must be installed before running the standalone programs.
 
 ## Install palos
 
@@ -23,6 +23,7 @@ pip3 install --upgrade palos
 ```
 
 # Usage
+
 
 ```sh
 ./ngs/DownsampleWorkflow.py  -h
