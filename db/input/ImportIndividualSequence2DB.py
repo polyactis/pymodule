@@ -1,5 +1,30 @@
 #!/usr/bin/env python3
 """
+Description:
+	input:
+		input: (if directory, recursively go and find all bam files; if file, each line is path to bam).
+		tsv file: (map bam filename to individual ID).
+	
+	this program will
+		1. query db if individual record for that monkey is already in db, or not. create a new entry in db if not
+		2. query db if individual_sequence record for that monkey is already in db. create one new entry if not.
+			update individual_sequence.path if it's none
+		3. if commit, the db action would be committed
+		4. output the whole unpack workflow to an xml output file.
+	
+	This program has to be run on the pegasus submission host.
+	Option "--commit" commits the db transaction.
+	
+	The bamFname2MonkeyIDMapFname contains a map from individual ID to the bam filename.
+		(only base filename is used, relative directory is not used).
+	Example ("Library" and "Bam Path" are required):
+		FlowCell	Lane	Index Sequence	Library	Common Name	Bam Path	MD5
+		64J6AAAXX	1	TGACCA	VCAC-2007002-1-lib1	African Green Monkey	gerald_64J6AAAXX_1.bam	gerald_64J6AAAXX_1.bam.md5
+	
+	1. Watch the db commandline arguments as they'll be passed to db-registration jobs.
+		Make sure all computing nodes have access to the db.
+	2. The workflow has to be run on nodes where they can access both the db and the db-affiliated filesystem.
+
 Examples:
 	# run the program on crocea and output a local condor workflow
 	%s -i ~/NetworkData/vervet/VRC/ -t /u/home/eeskintmp/polyacti/NetworkData/vervet/db/ 
@@ -7,45 +32,46 @@ Examples:
 		-u yh --commit -z dl324b-1.cmb.usc.edu -o /tmp/condorpool.xml
 
 	#2011-8-26	generate a list of all bam file physical paths through find. (doing this because they are not located on crocea)
-	find /u/home/eeskintmp/polyacti/NetworkData/vervet/raw_sequence/ -name *.bam  > /u/home/eeskintmp/polyacti/NetworkData/vervet/raw_sequence/bamFileList.txt
+	find /u/home/eeskintmp/polyacti/NetworkData/vervet/raw_sequence/ -name *.bam  > vervet/raw_sequence/bamFileList.txt
 	# run the program on the crocea and output a hoffman2 workflow. (with db commit)
 	%s -i ~/mnt/hoffman2/u/home/eeskintmp/polyacti/NetworkData/vervet/raw_sequence/bamFileList.txt
 		-e /u/home/eeskin/polyacti/
 		-t /u/home/eeskin/polyacti/NetworkData/vervet/db/ -u yh
-		--bamFname2MonkeyIDMapFname ~/mnt/hoffman2/u/home/eeskintmp/polyacti/NetworkData/vervet/raw_sequence/xfer.genome.wustl.edu/gxfer3/46019922623327/Vervet_12_4X_README.tsv
+		--bamFname2MonkeyIDMapFname xfer.genome.wustl.edu/gxfer3/46019922623327/Vervet_12_4X_README.tsv
 		-z dl324b-1.cmb.usc.edu -l hoffman2
 		-o unpackAndAdd12_2007Monkeys2DB_hoffman2.xml
 		--commit 
 	
-	# 2011-8-28 output a workflow to run on local condorpool, no db commit (because records are already in db)
+	# 20110828 output a workflow to run on local condorpool, no db commit (because records are already in db)
 	%s -i /Network/Data/vervet/raw_sequence/xfer.genome.wustl.edu/gxfer3/
-		--bamFname2MonkeyIDMapFname ~/mnt/hoffman2/u/home/eeskintmp/polyacti/NetworkData/vervet/raw_sequence/xfer.genome.wustl.edu/gxfer3/46019922623327/Vervet_12_4X_README.tsv
+		--bamFname2MonkeyIDMapFname xfer.genome.wustl.edu/gxfer3/46019922623327/Vervet_12_4X_README.tsv
 		 --minNoOfReads 4000000 -u yh --commit
-		-z dl324b-1.cmb.usc.edu -j condorpool -l condorpool -o dags/AddReads2DB/DownloadUnpackReads/unpackAndAdd12_2007Monkeys2DB_condor.xml
+		-z dl324b-1.cmb.usc.edu -j condorpool -l condorpool -o dags/unpackAndAdd12_2007Monkeys2DB_condor.xml
 	
-	# 2012.4.30 run on hcondor, to import McGill 1X data (-y2), (-e) is not necessary because it's running on hoffman2 and can recognize home folder.
+	# 20120430 run on hcondor, to import McGill 1X data (-y2), (-e) is not necessary
+	#   because it's running on hoffman2 and can recognize home folder.
 	#. --needSSHDBTunnel means it needs sshTunnel for db-interacting jobs.
 	%s -i ~/NetworkData/vervet/raw_sequence/McGill96_1X/ -z localhost -u yh -j hcondor -l hcondor --commit
 		-o dags/AddReads2DB/unpackMcGill96_1X.xml -y2 --needSSHDBTunnel 
-		-D /u/home/eeskin/polyacti/NetworkData/vervet/db/ -t /u/home/eeskin/polyacti/NetworkData/vervet/db/
+		-D NetworkData/vervet/db/ -t NetworkData/vervet/db/
 		-e /u/home/eeskin/polyacti
 	
-	# 2012.6.2 add 18 south-african monkeys RNA read data (-y3), sequenced by Joe DeYoung's core (from Nam's folder),
+	# 20120602 add 18 south-african monkeys RNA read data (-y3), sequenced by Joe DeYoung's core (from Nam's folder),
 	# later manually changed its tissue id to distinguish them from DNA data (below) 
 	%s -i ~namtran/panasas/Data/HiSeqRaw/Ania/SIVpilot/by.Charles.Demultiplexed/ -z localhost -u yh -j hcondor -l hcondor
 		--commit -o dags/AddReads2DB/unpack20SouthAfricaSIVmonkeys.xml -y3 --needSSHDBTunnel
 		-D /u/home/eeskin/polyacti/NetworkData/vervet/db/
 		-t /u/home/eeskin/polyacti/NetworkData/vervet/db/ -e /u/home/eeskin/polyacti 
-		--bamFname2MonkeyIDMapFname ~namtran/panasas/Data/HiSeqRaw/Ania/SIVpilot/by.Charles.Demultiplexed/sampleIds.txt
+		--bamFname2MonkeyIDMapFname by.Charles.Demultiplexed/sampleIds.txt
 		--minNoOfReads 4000000
 	
-	# 2012.6.3 add 24 south-african monkeys DNA read data (-y4), sequenced by Joe DeYoung's core (from Nam's folder)
-	# --minNoOfReads 4000000
+	# 20120603 add 24 south-african monkeys DNA read data (-y4), sequenced by Joe DeYoung's core (from Nam's folder)
+	#   --minNoOfReads 4000000
 	%s -i ~namtran/panasas/Data/HiSeqRaw/Ania/SIVpilot/LowpassWGS/Demultiplexed/
 		-z localhost -u yh -j hcondor -l hcondor --commit -o dags/AddReads2DB/unpack20SouthAfricaSIVmonkeysDNA.xml
 		-y4 --needSSHDBTunnel
-		-D /u/home/eeskin/polyacti/NetworkData/vervet/db/ -t /u/home/eeskin/polyacti/NetworkData/vervet/db/
-		-e /u/home/eeskin/polyacti/
+		-D ～/NetworkData/vervet/db/ -t ～/NetworkData/vervet/db/
+		-e ～
 		--minNoOfReads 4000000
 		
 	# 2017.04.28 added TCGA sequences (.bam) into db
@@ -54,30 +80,6 @@ Examples:
 		--tissueSourceSiteFname /y/Sunset/tcga/tcga_code_tables/tissueSourceSite.tsv 
 		--minNoOfReads 8000000 --dbname pmdb -k xiandao --ref_ind_seq_id 1 --commit
 	
-Description:
-	2011-8-2
-		input:
-			input (if directory, recursively go and find all bam files; if file, each line is path to bam),
-			tsv file (map bam filename to monkey ID),
-		
-		this program
-			1. queries db if individual record for that monkey is already in db, or not. create a new entry in db if not
-			2. queries db if individual_sequence record for that monkey is already in db. create one new entry if not.
-				update individual_sequence.path if it's none
-			3. if commit, the db action would be committed
-			4. outputs the whole unpack workflow to an xml output file.
-		
-		This program has to be run on the pegasus submission host.
-		option "--commit" commits the db transaction.
-	
-	The bamFname2MonkeyIDMapFname contains a map from monkey ID to the bam filename (only base filename is used, relative directory is not used).
-	Example ("Library" and "Bam Path" are required):
-		FlowCell	Lane	Index Sequence	Library	Common Name	Bam Path	MD5
-		64J6AAAXX	1	TGACCA	VCAC-2007002-1-lib1	African Green Monkey	gerald_64J6AAAXX_1.bam	gerald_64J6AAAXX_1.bam.md5
-	
-	1. Be careful with the db connection setting as it'll be passed to the db-registration job.
-		Make sure all computing nodes have access to the db.
-	2. The workflow has to be run on nodes where they have direct db and db-affiliated file-storage access.
 """
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0])
@@ -88,8 +90,8 @@ sys.path.insert(0, os.path.expanduser('~/src'))
 
 import copy, re, csv
 from pegaflow.DAX3 import File
+from pegaflow import workflow
 from pymodule import ProcessOptions, PassingData, MatrixFile, utils
-from pymodule.pegasus import yh_pegasus
 from pymodule.ngs.AbstractNGSWorkflow import AbstractNGSWorkflow
 
 ParentClass=AbstractNGSWorkflow
@@ -108,7 +110,6 @@ class ImportIndividualSequence2DB(ParentClass):
 						("tissueSourceSiteFname", 0, ): ["", '', 1, 'TCGA tissue source site file'],\
 						('inputType', 1, int): [1, 'y', 1, 'input type. 1: bam from TCGA 2: import HCC1187', ],\
 						})
-	#('jobFileDir', 0, ): ['', 'j', 1, 'folder to contain qsub scripts', ],\
 	
 	def __init__(self,  **keywords):
 		"""
@@ -120,9 +121,8 @@ class ImportIndividualSequence2DB(ParentClass):
 	
 	def getBamBaseFname2MonkeyID_WUSTLDNAData(self, inputFname, ):
 		"""
-		2011-8-3
-			from WUSTL
-			the input looks like this:
+		20110803 from WUSTL
+		the input looks like this:
 			#	FlowCell	Lane	Index Sequence	Library	Common Name	Bam Path	MD5
 			1	64J6AAAXX	1	VCAC-2007002-1-lib1	African	Green	Monkey	/gscmnt/sata755/production/csf_111215677/gerald_64J6AAAXX_1.bam	/gscmnt/sata755/production/csf_111215677/gerald_64J6AAAXX_1.bam.md5
 			2	64J6AAAXX	2	VCAC-2007006-1-lib1	African	Green	Monkey	/gscmnt/sata751/production/csf_111215675/gerald_64J6AAAXX_2.bam	/gscmnt/sata751/production/csf_111215675/gerald_64J6AAAXX_2.bam.md5
@@ -419,44 +419,46 @@ class ImportIndividualSequence2DB(ParentClass):
 		sys.stderr.write(" %s monkeys and %s files in the dictionary.\n"%(len(monkeyID2FastqObjectLs), real_counter))
 		return monkeyID2FastqObjectLs
 
-	def addJobsToProcessSouthAfricanDNAData(self, workflow=None, db_main=None, bamFname2MonkeyIDMapFname=None, input=None, data_dir=None, \
+	def addJobsToProcessSouthAfricanDNAData(self, workflow=None, db_main=None, 
+			bamFname2MonkeyIDMapFname=None, input=None, data_dir=None, \
 			minNoOfReads=None, commit=None,\
 			sequencer_name=None, sequence_type_name=None, sequence_format=None):
 		"""
 		2012.6.2
 			input fastq files could be gzipped or not. doesn't matter.
-			data generated by Joe DeYoung's core, demultiplexed by ICNN
+			data generated by Joe DeYoung's core, demultiplexed by ICNN.
 		"""
 		fastqFnameLs = self.getInputFnameLsFromInput(input, suffixSet=set(['.fastq']), fakeSuffix='.gz')	#doesn't matter if fastq is not gzipped
 		monkeyID2FastqObjectLs = self.getMonkeyID2FastqObjectLsForSouthAfricanDNAData(fastqFnameLs=fastqFnameLs)
-		self.addJobsToSplitAndRegisterSequenceFiles(workflow=workflow, db_main=db_main, monkeyID2FastqObjectLs=monkeyID2FastqObjectLs, data_dir=data_dir, \
-									minNoOfReads=minNoOfReads, commit=commit,\
-									sequencer_name=sequencer_name, sequence_type_name=sequence_type_name, sequence_format=sequence_format)		
+		self.addJobsToSplitAndRegisterSequenceFiles(workflow=workflow, db_main=db_main, 
+				monkeyID2FastqObjectLs=monkeyID2FastqObjectLs, data_dir=data_dir, \
+				minNoOfReads=minNoOfReads, commit=commit,\
+				sequencer_name=sequencer_name, sequence_type_name=sequence_type_name, 
+				sequence_format=sequence_format)		
 	
 	def addJobsToProcessUNGCVervetData(self, workflow=None, db_main=None, bamFname2MonkeyIDMapFname=None, input=None, data_dir=None, \
 			minNoOfReads=None, commit=None,\
 			sequencer_name=None, sequence_type_name=None, sequence_format=None):
 		"""
 		2013.04.04
-			UNGC = UCLA Neuroscience Genomics Core
-			
-			input fastq files could be gzipped or not. doesn't matter.
-			data generated by Joe DeYoung's core, demultiplexed by ICNN
+		UNGC = UCLA Neuroscience Genomics Core
+		input fastq files could be gzipped or not. doesn't matter.
+			data generated by Joe DeYoung's core, demultiplexed by ICNN.
 		"""
 		sampleID2IndividualData = self.getSampleID2IndividualData_UNGC(bamFname2MonkeyIDMapFname)
-
-		fastqFnameLs = self.getInputFnameLsFromInput(input, suffixSet=set(['.fastq']), fakeSuffix='.gz')	#doesn't matter if fastq is not gzipped
+		fastqFnameLs = self.getInputFnameLsFromInput(input, suffixSet=set(['.fastq']), fakeSuffix='.gz')
 		monkeyID2FastqObjectLs = self.getMonkeyID2FastqObjectLsFromUNGCData(fastqFnameLs=fastqFnameLs, \
-																	sampleID2IndividualData=sampleID2IndividualData)
-		self.addJobsToSplitAndRegisterSequenceFiles(workflow=workflow, db_main=db_main, monkeyID2FastqObjectLs=monkeyID2FastqObjectLs, \
-									data_dir=data_dir, \
-									minNoOfReads=minNoOfReads, commit=commit,\
-									sequencer_name=sequencer_name, sequence_type_name=sequence_type_name, sequence_format=sequence_format)
+								sampleID2IndividualData=sampleID2IndividualData)
+		self.addJobsToSplitAndRegisterSequenceFiles(workflow=workflow, db_main=db_main, \
+				monkeyID2FastqObjectLs=monkeyID2FastqObjectLs, \
+				data_dir=data_dir, minNoOfReads=minNoOfReads, commit=commit,\
+				sequencer_name=sequencer_name, sequence_type_name=sequence_type_name, 
+				sequence_format=sequence_format)
 	
 	def getSampleID2IndividualData_UNGC(self, inputFname=None):
 		"""
 		2013.04.04
-			Format is like this from UNGC  = UCLA Neuroscience Genomics Core:
+		Format is like this from UNGC  = UCLA Neuroscience Genomics Core:
 			FCID	Lane	sample ID	sample code	sample name	Index	Description	SampleProject
 			D1HYNACXX	1	Ilmn Human control pool ( 4plex)	IP1			INDEX IS UNKNOWN prepared by Illumina (4 plex pool)	2013-029A
 			D1HYNACXX	2	UNGC Human Sample 1	S1	AS001A	ATTACTCG	TruSeq DNA PCR Free beta kit	2013-029A
@@ -489,10 +491,10 @@ class ImportIndividualSequence2DB(ParentClass):
 		"""
 		2013.04.05 bugfix. this ensures two ends from same library have same library.
 		2013.04.04
-			UNGC  = UCLA Neuroscience Genomics Core
-			In pairs like this:
-				UNGC_Vervet_Sample_11_1.fastq.gz
-				UNGC_Vervet_Sample_11_2.fastq.gz
+		UNGC  = UCLA Neuroscience Genomics Core
+		In pairs like this:
+			UNGC_Vervet_Sample_11_1.fastq.gz
+			UNGC_Vervet_Sample_11_2.fastq.gz
 		"""
 		sys.stderr.write("Passing monkeyID2FastqObjectLs from %s files ..."%(len(fastqFnameLs)))
 		monkeyID2FastqObjectLs = {}
@@ -538,7 +540,6 @@ class ImportIndividualSequence2DB(ParentClass):
 	def getFilenameSignature2MonkeyID_SouthAfricanRNAData(self, inputFname=None):
 		"""
 		2012.6.2 inputFname is tab-delimited, looks like this
-		
 			VSAC1012_R      ATCACG  sample2
 			VSAF1009_R      ATCACG  sample1
 			VSAB2009_RN     TAGCTT  sample2
@@ -692,7 +693,7 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
 			sequencer_name=None, sequence_type_name=None, sequence_format=None):
 		"""
 		2012.6.2
-			split out of addJobsToProcessMcGillData(), used also in addJobsToProcessDeYoungCoreData().
+		split out of addJobsToProcessMcGillData(), used also in addJobsToProcessDeYoungCoreData().
 			
 		"""
 		if workflow is None:
@@ -749,26 +750,30 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
 			
 		sys.stderr.write("%s jobs.\n"%(self.no_of_jobs))
 	
-	def addJobsToProcessMcGillData(self, workflow=None, db_main=None, bamFname2MonkeyIDMapFname=None, input=None, data_dir=None, \
+	def addJobsToProcessMcGillData(self, workflow=None, db_main=None, 
+			bamFname2MonkeyIDMapFname=None, input=None, data_dir=None, \
 			minNoOfReads=None, commit=None,\
 			sequencer_name=None, sequence_type_name=None, sequence_format=None):
 		"""
-		2012.4.30
+		20120430
+		Input are .fastq files.
 		"""
 		fastqFnameLs = self.getInputFnameLsFromInput(input, suffixSet=set(['.fastq']), fakeSuffix='.gz')
 		monkeyID2FastqObjectLs = self.getMonkeyID2FastqObjectLsForMcGillData(fastqFnameLs)
 		
 		self.addJobsToSplitAndRegisterSequenceFiles(workflow=workflow, db_main=db_main, \
-									monkeyID2FastqObjectLs=monkeyID2FastqObjectLs, data_dir=data_dir, \
-									minNoOfReads=minNoOfReads, commit=commit,\
-									sequencer_name=sequencer_name, sequence_type_name=sequence_type_name, sequence_format=sequence_format)
-		
+				monkeyID2FastqObjectLs=monkeyID2FastqObjectLs, data_dir=data_dir, \
+				minNoOfReads=minNoOfReads, commit=commit,\
+				sequencer_name=sequencer_name, sequence_type_name=sequence_type_name, \
+				sequence_format=sequence_format)
+
 	
 	def addJobsToProcessWUSTLData(self, workflow, db_main=None, bamFname2MonkeyIDMapFname=None, input=None, data_dir=None, \
 			minNoOfReads=None, commit=None,\
 			sequencer_name=None, sequence_type_name=None, sequence_format=None):
 		"""
-		2012.4.30
+		20120430
+		Input are bam files.
 		"""
 		bamBaseFname2MonkeyID = self.getBamBaseFname2MonkeyID_WUSTLDNAData(bamFname2MonkeyIDMapFname)
 		bamFnameLs = self.getInputFnameLsFromInput(input, suffixSet=set(['.bam', '.sam']), fakeSuffix='.gz')
@@ -785,8 +790,8 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
 				continue
 			code = bamBaseFname2MonkeyID.get(bamBaseFname)
 			individual_sequence = self.addIndividualSequence(db_main=db_main, code=code, \
-								sequencer_name=sequencer_name, sequence_type_name=sequence_type_name, \
-								sequence_format=sequence_format, data_dir=data_dir)
+						sequencer_name=sequencer_name, sequence_type_name=sequence_type_name, \
+						sequence_format=sequence_format, data_dir=data_dir)
 			#2012.2.10 stop passing path_to_original_sequence=bamFname to self.addMonkeySequence()
 			
 			"""
@@ -802,7 +807,7 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
 			sequenceOutputDir = os.path.join(data_dir, individual_sequence.path)
 			sequenceOutputDirJob = self.addMkDirJob(outputDir=sequenceOutputDir)
 			
-			bamInputF = yh_pegasus.registerFile(workflow, bamFname)
+			bamInputF = Workflow.registerFile(workflow, bamFname)
 			
 			bamBaseFname = os.path.split(bamFname)[1]
 			bamBaseFnamePrefix = os.path.splitext(bamBaseFname)[0]
@@ -858,7 +863,6 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
 							transferOutput=True, sshDBTunnel=self.needSSHDBTunnel)
 			
 			"""
-			
 			jobFname = os.path.join(self.jobFileDir, 'job%s.bam2fastq.sh'%(code))
 			self.writeQsubJob(jobFname, bamFname, os.path.join(self.data_dir, individual_sequence.path), self.vervet_path)
 			commandline = 'qsub %s'%(jobFname)
@@ -982,12 +986,11 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
 					minNoOfReads=None, commit=None,\
 					sequencer_name=None, sequence_type_name=None, sequence_format=None, **keywords):
 		"""
-		2017.4.7
-			sequence_type_name is not used in this function. it's determined from tcga barcode.
-			input:
-				folder of bams
-				tissueSourceSite.tsv file
-				
+		20170407
+		sequence_type_name is not used in this function. it's determined from tcga barcode.
+		input:
+			folder of bams
+			tissueSourceSite.tsv file
 		"""
 		#parse the tissueSourceSite.tsv file to get all tissue source sites info, save them into table site, and study_id from db
 		tssCode2dbEntry = self.parseTCGATissueSourceSite(db_main=db_main, inputFname=tissueSourceSiteFname)
@@ -1006,9 +1009,9 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
 		sam2fastqOutputDirJob = self.addMkDirJob(outputDir=sam2fastqOutputDir)
 		
 		for tcga_sample_obj in tcga_sample_obj_ls:
-			bamInputF = yh_pegasus.registerFile(workflow, tcga_sample_obj.bamPath)
+			bamInputF = Workflow.registerFile(workflow, tcga_sample_obj.bamPath)
 			bamFileSize = utils.getFileOrFolderSize(tcga_sample_obj.bamPath)
-			baiInputF = yh_pegasus.registerFile(workflow, tcga_sample_obj.baiPath)
+			baiInputF = Workflow.registerFile(workflow, tcga_sample_obj.baiPath)
 			bamBaseFname = os.path.split(tcga_sample_obj.bamPath)[1]
 			bamBaseFnamePrefix = os.path.splitext(bamBaseFname)[0]
 			library = tcga_sample_obj.tcga_barcode
@@ -1212,10 +1215,8 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
 					sequencer_name=None, sequence_type_name=None, sequence_format=None, **keywords):
 		"""
 		20170607
-			input:
-				folder of bams
-				
-		"""
+		input:
+			folder of bams
 		
 		#find all bam in a folder,
 		#parse barcode to get participant code, tss_id (site.short_name), sample_id (tissue_id), center_id (sequencer.id),
@@ -1223,17 +1224,17 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
 		#uuid is for sequence only, add as isq.comment
 		#parse analysis.xml to get md5sum 
 		#add all individual, tissue, site, study, sequencer, seq_center into db
+		"""
 		tcga_sample_obj_ls = self.getHCC1187SamplesFromInputDir(db_main=db_main, inputDir=input, tax_id=tax_id)
 		sys.stderr.write("%s total TCGA samples.\n"%(len(tcga_sample_obj_ls)))
-		
 		
 		sam2fastqOutputDir = 'sam2fastq'
 		sam2fastqOutputDirJob = self.addMkDirJob(outputDir=sam2fastqOutputDir)
 		
 		for tcga_sample_obj in tcga_sample_obj_ls:
-			bamInputF = yh_pegasus.registerFile(workflow, tcga_sample_obj.bamPath)
+			bamInputF = Workflow.registerFile(workflow, tcga_sample_obj.bamPath)
 			bamFileSize = utils.getFileOrFolderSize(tcga_sample_obj.bamPath)
-			baiInputF = yh_pegasus.registerFile(workflow, tcga_sample_obj.baiPath)
+			baiInputF = Workflow.registerFile(workflow, tcga_sample_obj.baiPath)
 			bamBaseFname = os.path.split(tcga_sample_obj.bamPath)[1]
 			bamBaseFnamePrefix = os.path.splitext(bamBaseFname)[0]
 			library = tcga_sample_obj.db_entry.code

@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 """
+Description:
+	20120509 Parent of other VCF workflows.
+
 Examples:
 	#2012.5.11 convert alignment read group (sample id) into UCLAID
 	%s -I FilterVCF_VRC_SK_Nevis_FilteredSeq_top1000Contigs.2012.5.6_trioCaller.2012.5.8T21.42/trioCaller_vcftoolsFilter/ 
@@ -45,8 +48,6 @@ Examples:
 		-s 16HCSAMtoolsMinDP1_2FoldDepth_minMAC8_maxSNPMissing0
 		-D /u/home/eeskin/polyacti/NetworkData/vervet/db/ -t /u/home/eeskin/polyacti/NetworkData/vervet/db/
 	
-Description:
-	#2012.5.9
 """
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0])

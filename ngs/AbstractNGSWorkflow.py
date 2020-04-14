@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-2011-11-22
+20111122
     a common class for pegasus workflows that work on NGS (next-gen sequencing) data
 """
 import sys, os, math
