@@ -640,7 +640,7 @@ Default is to combine them.'],\
 		2008-09-10
 			in case chop the whole figure into blocks, swap col_block_index and row_block_index to make row first, column 2nd
 		"""
-		from palos.io.SNP import read_data
+		from palos.polymorphism.SNP import read_data
 		from palos.utils import figureOutDelimiter, PassingData
 		delimiter = figureOutDelimiter(self.input_fname)
 		print(delimiter)

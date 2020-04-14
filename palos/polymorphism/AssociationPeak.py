@@ -63,7 +63,7 @@ class AssociationPeakTableFile(YHFile):
 		YHFile._readInData(self, tableName=tableName, tableObject=tableObject)
 		
 		from palos.algorithm.RBTree import RBDict
-		from palos.io.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey, get_overlap_ratio
+		from palos.polymorphism.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey, get_overlap_ratio
 		if tableObject is None:
 			tableObject = self.getTableObject(tableName=tableName)
 		sys.stderr.write("Constructing association-peak RBDict from HDF5 file %s, (peakPadding=%s) ..."%(self.inputFname, self.peakPadding))

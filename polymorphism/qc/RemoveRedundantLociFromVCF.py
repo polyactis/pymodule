@@ -22,7 +22,7 @@ from palos import ProcessOptions, MatrixFile, PassingData
 from palos.io.VCFFile import VCFFile
 from palos.pegasus.mapper.AbstractVCFMapper import AbstractVCFMapper
 from palos import SNP
-from palos.io.SNP import nt2number
+from palos.polymorphism.SNP import nt2number
 from CalculateSameSiteConcordanceInVCF import CalculateSameSiteConcordanceInVCF
 
 ParentClass = CalculateSameSiteConcordanceInVCF

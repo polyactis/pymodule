@@ -15,10 +15,10 @@ from palos import ProcessOptions
 from palos.Genome import IntervalData
 from palos.utils import PassingData
 from palos.io import NextGenSeq
-from palos.io.VCFFile import VCFFile
 from palos.io.MatrixFile import MatrixFile
-from palos.io.AlignmentDepthIntervalFile import AlignmentDepthIntervalFile
-from palos.io.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey
+from palos.ngs.io.VCFFile import VCFFile
+from palos.ngs.io.AlignmentDepthIntervalFile import AlignmentDepthIntervalFile
+from palos.polymorphism.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey
 from palos.algorithm.RBTree import RBDict
 from palos.pegasus.AbstractBioinfoWorkflow import AbstractBioinfoWorkflow
 from palos.db import SunsetDB
@@ -172,7 +172,6 @@ class AbstractNGSWorkflow(ParentClass):
             self.local_data_dir = self.db_main.data_dir
 
         #self.refFastaFList = self.getReferenceSequence(workflow=self)	#2013.1.25 done in run()
-
 
     def getReferenceSequence(self, **keywords):
         """

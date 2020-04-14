@@ -62,7 +62,7 @@ import csv, numpy
 bit_number = math.log(sys.maxint)/math.log(2)
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script/')))
-from palos.io.SNP import transposeSNPData, number2nt
+from palos.polymorphism.SNP import transposeSNPData, number2nt
 from variation.src.association.Association import Association
 
 class ConvertYuSNPFormat2TPED_TFAM(object):

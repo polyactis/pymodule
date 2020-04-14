@@ -52,7 +52,7 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 import copy, numpy
 from palos import utils, PassingData
 from palos.ProcessOptions import ProcessOptions
-from palos.io.SNP import SNPData
+from palos.polymorphism.SNP import SNPData
 from MatrixFile import MatrixFile
 
 class BeagleGenotypeFile(MatrixFile):

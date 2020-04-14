@@ -16,7 +16,7 @@ from palos.utils import PassingData, PassingDataList
 from palos.ProcessOptions import  ProcessOptions
 from palos.io.YHPyTables import YHTable, YHFile, castPyTablesRowIntoPassingData
 from palos.algorithm.RBTree import RBDict
-from palos.io.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey, get_overlap_ratio
+from palos.polymorphism.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey, get_overlap_ratio
 from AssociationPeak import AssociationPeakTable
 
 class AssociationLocusTable(tables.IsDescription):

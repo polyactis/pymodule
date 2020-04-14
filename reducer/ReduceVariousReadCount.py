@@ -1,30 +1,20 @@
 #!/usr/bin/env python
 """
+Description:
+	2011-11-4
+	input should be the output file of GATK's VariousReadCountWalker (custom written).
+	The input name contains the chromosome ID. like xxx_chr2.tsv
+
 Examples:
 	%s 
 	
-	%s 
-	
-
-Description:
-	2011-11-4
-		input should be the output file of GATK's VariousReadCountWalker (custom written).
-		The input name contains the chromosome ID. like xxx_chr2.tsv
 """
 
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-
-#bit_number = math.log(sys.maxint)/math.log(2)
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.expanduser('~/script'))
-
-import matplotlib; matplotlib.use("Agg")	#to disable pop-up requirement
+__doc__ = __doc__%(sys.argv[0])
 
 import csv
-from palos import ProcessOptions, getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter
-
+from palos import ProcessOptions, getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter, utils
 
 class ReduceVariousReadCount(object):
 	__doc__ = __doc__

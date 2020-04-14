@@ -14,16 +14,8 @@ Description:
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 
-
-#bit_number = math.log(sys.maxint)/math.log(2)
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.expanduser('~/script'))
-
-import matplotlib; matplotlib.use("Agg")	#to disable pop-up requirement
-
 import csv, copy
-from palos import ProcessOptions, getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter
-
+from palos import ProcessOptions, getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter, utils
 
 class ReduceDepthOfCoverage(object):
 	__doc__ = __doc__

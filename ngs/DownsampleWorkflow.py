@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 run Accurity in the  workflow
     ./downsample.py --outputFname dags/runDownsample_median.xml --data_dir /y/Sunset/db/ \
@@ -6,22 +6,17 @@ run Accurity in the  workflow
     --db_passwd yfishLab2113 --schema xiandao --ref_ind_seq_id 1 -l ycondor -j ycondor
 """
 import sys, os, math
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/src')))
 import copy
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
-from palos.reducer.AbstractReducer import AbstractReducer
-from pegaflow.DAX3 import Executable, PFN, File
-from sqlalchemy.sql import text
-from . AbstractAccuWorkflow import AbstractAccuWorkflow
 from palos.db import SunsetDB
+from palos.ngs.AbstractNGSWorkflow import AbstractNGSWorkflow
+from pegaflow.DAX3 import Executable, File
 
-parentClass = AbstractAccuWorkflow
-class DownsampleWorkflow(parentClass):
+ParentClass = AbstractNGSWorkflow
+class DownsampleWorkflow(ParentClass):
     __doc__ = __doc__
-    option_default_dict = copy.deepcopy(parentClass.option_default_dict)
-    option_default_dict.update(parentClass.db_option_dict.copy())
+    option_default_dict = copy.deepcopy(ParentClass.option_default_dict)
+    option_default_dict.update(ParentClass.db_option_dict.copy())
     option_default_dict.update({
         ("thisModulePath", 1,): ["%s/src/Sunset", '', 1, 'path of the module that owns this program. \
     					used to add executables from this module.'], \
@@ -31,7 +26,7 @@ class DownsampleWorkflow(parentClass):
 
     def __init__(self,  **keywords):
         self.pathToInsertHomePathList.extend(["thisModulePath", "AccurityPath"])
-        parentClass.__init__(self, **keywords)
+        ParentClass.__init__(self, **keywords)
 
 
     def addDownsamplejob(self, workflow=None, data_dir=None, idDict=None, DownSamplePrefix=None, \

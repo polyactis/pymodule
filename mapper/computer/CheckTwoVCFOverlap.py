@@ -26,8 +26,8 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 from palos import ProcessOptions, PassingData, utils
 from palos import VCFFile, MatrixFile
-from palos.io.SNP import nt2number
-from AbstractVCFMapper import AbstractVCFMapper
+from palos.polymorphism.SNP import nt2number
+from palos.mapper.AbstractVCFMapper import AbstractVCFMapper
 
 class CheckTwoVCFOverlap(AbstractVCFMapper):
 	__doc__ = __doc__

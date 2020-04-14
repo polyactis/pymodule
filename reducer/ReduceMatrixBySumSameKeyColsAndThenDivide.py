@@ -1,25 +1,20 @@
 #!/usr/bin/env python
 """
-Examples:
-	#testing merge three identical genotype files
-	%s -k 0 -v 4,5 -o /tmp/test.tsv trio_inconsistency_summary_hist_homo_het.tsv
-	
-	%s
-	
 Description:
 	2012.1.9
 		This program first sums values of chosen columns (all input files) with same keys from the keyColumnLs.
 		In the end, it divides values from first two chosen columns and appends it to the output as an extra column.
+
+Examples:
+	#testing merge three identical genotype files
+	%s -k 0 -v 4,5 -o /tmp/test.tsv trio_inconsistency_summary_hist_homo_het.tsv
+	
 """
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
+__doc__ = __doc__%(sys.argv[0])
 
 from palos import ProcessOptions, figureOutDelimiter, utils, PassingData
-from ReduceMatrixByChosenColumn import ReduceMatrixByChosenColumn
+from . ReduceMatrixByChosenColumn import ReduceMatrixByChosenColumn
 
 class ReduceMatrixBySumSameKeyColsAndThenDivide(ReduceMatrixByChosenColumn):
 	__doc__ = __doc__

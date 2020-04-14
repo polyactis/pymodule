@@ -304,7 +304,7 @@ class DiscreteProbabilityMassContainer(object):
 				
 			argument probabilityNormalized: whether the sum of all values in dc adds up to 1.
 		"""
-		from palos.io.CNV import CNVSegmentBinarySearchTreeKey
+		from palos.polymorphism.CNV import CNVSegmentBinarySearchTreeKey
 		startProbMass = 0.0
 		for discreteVariable, probabilityMass in dc.items():
 			segmentKey = CNVSegmentBinarySearchTreeKey(chromosome="1", span_ls=[startProbMass, startProbMass+probabilityMass], \
@@ -318,7 +318,7 @@ class DiscreteProbabilityMassContainer(object):
 	def sampleObject(self):
 		"""
 		"""
-		from palos.io.CNV import CNVSegmentBinarySearchTreeKey
+		from palos.polymorphism.CNV import CNVSegmentBinarySearchTreeKey
 		u = random.random()*self.totalProbabilityMass
 		key = CNVSegmentBinarySearchTreeKey(chromosome="1", span_ls=[u], \
 												min_reciprocal_overlap=0.0000001)

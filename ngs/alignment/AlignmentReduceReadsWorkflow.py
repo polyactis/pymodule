@@ -25,9 +25,6 @@ Examples:
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job
 from pegaflow import Workflow
 from palos import ProcessOptions, getListOutOfStr, PassingData, NextGenSeq, \

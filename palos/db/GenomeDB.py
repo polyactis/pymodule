@@ -31,7 +31,7 @@ from sqlalchemy import UniqueConstraint, create_engine
 from sqlalchemy import and_, or_, not_
 from sqlalchemy import desc
 from palos.utils import PassingData	#2012.3.26 "from utils import PassingData" won't work because no module named "utils" exists outside pymodule (!=pymodule.utils). 
-from palos.io.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey
+from palos.polymorphism.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey
 from palos.algorithm.RBTree import RBDict
 from palos.Genome import GeneModel	#2010-9-21 although "from Genome import GeneModel" works,
 			#it causes problem in cPickle.load() because Genome is not directly visible outside.

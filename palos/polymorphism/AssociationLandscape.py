@@ -6,8 +6,6 @@
 import sys, os, math
 __doc__ = __doc__%()
 
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 import csv
 import tables
 import numpy
@@ -16,7 +14,7 @@ from tables import UInt64Col, Float64Col
 from palos.utils import PassingData, PassingDataList
 from palos.ProcessOptions import  ProcessOptions
 from palos.io.YHPyTables import YHTable, YHFile
-from Association import AssociationTable, AssociationTableFile
+from . Association import AssociationTable, AssociationTableFile
 
 class AssociationLandscapeTable(tables.IsDescription):
 	id = UInt64Col(pos=0)

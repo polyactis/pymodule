@@ -13,14 +13,9 @@ Description:
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 
-
-#bit_number = math.log(sys.maxint)/math.log(2)
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
 from palos import ProcessOptions, figureOutDelimiter, utils, PassingData
 from palos.io.MatrixFile import MatrixFile
-from ReduceMatrixByMergeColumnsWithSameKey import ReduceMatrixByMergeColumnsWithSameKey
+from . ReduceMatrixByMergeColumnsWithSameKey import ReduceMatrixByMergeColumnsWithSameKey
 
 class ReduceMatrixByChosenColumn(ReduceMatrixByMergeColumnsWithSameKey):
 	__doc__ = __doc__

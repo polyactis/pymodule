@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Examples:
 	#testing merge three identical genotype files
@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.expanduser('~/script'))
 
 import copy
 from palos import ProcessOptions, utils
-from AbstractReducer import AbstractReducer
+from palos.reducer.AbstractReducer import AbstractReducer
 
 class MergeGenotypeMatrix(AbstractReducer):
 	__doc__ = __doc__
@@ -66,7 +66,7 @@ class MergeGenotypeMatrix(AbstractReducer):
 						sys.stderr.write('Except type: %s\n'%repr(sys.exc_info()))
 						import traceback
 						traceback.print_exc()
-						print sys.exc_info()
+						print(sys.exc_info())
 				else:
 					#skip the header for other input files
 					try:
@@ -75,7 +75,7 @@ class MergeGenotypeMatrix(AbstractReducer):
 						sys.stderr.write('Except type: %s\n'%repr(sys.exc_info()))
 						import traceback
 						traceback.print_exc()
-						print sys.exc_info()
+						print(sys.exc_info())
 			for line in inf:
 				isEmpty = self.isInputLineEmpty(line.strip(), inputFile=inf, inputEmptyType=self.inputEmptyType)
 				if not isEmpty:	#only write when it's not empty

@@ -28,7 +28,7 @@ from . algorithm.BinarySearchTree import binary_tree
 #from . io.BeagleLikelihoodFile import BeagleLikelihoodFile
 #from . io.PlinkPedigreeFile import PlinkPedigreeFile
 #
-#from . io.SNP import write_data_matrix, read_data, SNPData, GenomeWideResults, GenomeWideResult, DataObject, \
+#from . polymorphism.SNP import write_data_matrix, read_data, SNPData, GenomeWideResults, GenomeWideResult, DataObject, \
 #	getGenomeWideResultFromFile,\
 #	nt2number, number2nt, number2complement, SNPInfo, number2single_char_nt, getGenomeWideResultFromHDF5MatrixFile,\
 #	SNPData2RawSnpsData_ls
@@ -43,7 +43,6 @@ from . algorithm.BinarySearchTree import binary_tree
 #from io.BamFile import BamFile
 #from . io.VCFFile import VCFFile, VCFRecord
 #from . io import CNV
-#from . io.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey, get_overlap_ratio, findCorrespondenceBetweenTwoCNVRBDict
 #from . io.AbstractMatrixFileWalker import AbstractMatrixFileWalker
 #from . io.latex import outputMatrixInLatexTable, outputFigureInLatex
 #from . io.FastaFile import FastaFile

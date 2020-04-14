@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 import fileinput
 import numpy
 from palos.ProcessOptions import ProcessOptions
-from palos.io.SNP import GenomeWideResult, DataObject
+from palos.polymorphism.SNP import GenomeWideResult, DataObject
 from palos.utils import getColName2IndexFromHeader, dict_map, importNumericArray, figureOutDelimiter, PassingData
 
 def get_overlap_ratio(span1_ls=None, span2_ls=None, isDataDiscrete=True):

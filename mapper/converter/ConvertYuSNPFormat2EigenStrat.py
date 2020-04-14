@@ -64,7 +64,7 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script/')))
 
 from palos import process_function_arguments, write_data_matrix, figureOutDelimiter, read_data
-from palos.io.SNP import transposeSNPData, SNPData, SNPData2RawSnpsData_ls
+from palos.polymorphism.SNP import transposeSNPData, SNPData, SNPData2RawSnpsData_ls
 from variation.src.io import snpsdata
 import csv, numpy
 from variation.src.association.Kruskal_Wallis import Kruskal_Wallis

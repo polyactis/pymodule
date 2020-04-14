@@ -24,7 +24,7 @@ import csv, random, numpy
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
 from palos.io.AbstractGenomeFileWalker import AbstractGenomeFileWalker
 from palos.algorithm.RBTree import RBDict
-from palos.io.CNV import CNVSegmentBinarySearchTreeKey
+from palos.polymorphism.CNV import CNVSegmentBinarySearchTreeKey
 
 ParentClass = AbstractGenomeFileWalker
 class GenomeMovingAverageStatistics(ParentClass):

@@ -3,15 +3,13 @@
 2012.11.20 data structures for IO
 """
 import os, sys
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import numpy
 import networkx as nx
 from palos.utils import PassingData
 from palos.io.HDF5MatrixFile import HDF5MatrixFile, addAttributeDictToYHTableInHDF5Group
 from palos.io.YHPyTables import YHTable, YHFile, castPyTablesRowIntoPassingData
-from palos.io.SNP import getGenomeWideResultFromHDF5MatrixFile
+from palos.polymorphism.SNP import getGenomeWideResultFromHDF5MatrixFile
 
 import tables
 from tables import UInt64Col, Float64Col, StringCol, Int64Col
@@ -261,7 +259,7 @@ def outputAssociationLandscapeInHDF5(bridge_ls=None, outputFname=None, writer=No
 		writer = HDF5MatrixFile(outputFname, openMode='w', rowDefinition=rowDefinition, tableName=tableName)
 		tableObject = writer.getTableObject(tableName=tableName)
 	else:
-		sys.stderr.write("Error: no writer(%s) or filename(%s) to dump.\n"%(writer, filename))
+		sys.stderr.write("Error: no writer(%s) or filename(%s) to dump.\n"%(writer, outputFname))
 		sys.exit(3)
 	addAttributeDictToYHTableInHDF5Group(tableObject=tableObject, attributeDict=attributeDict)
 	
@@ -285,7 +283,7 @@ def constructAssociationPeakRBDictFromHDF5File(inputFname=None, peakPadding=1000
 		similar to Stock_250kDB.constructRBDictFromResultPeak(), but from HDF5MatrixFile-like file
 	"""
 	from palos.algorithm.RBTree import RBDict
-	from palos.io.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey, get_overlap_ratio
+	from palos.polymorphism.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey, get_overlap_ratio
 	
 	sys.stderr.write("Constructing association-peak RBDict from HDF5 file %s, (peakPadding=%s) ..."%(inputFname, peakPadding))
 	reader = HDF5MatrixFile(inputFname, openMode='r')
@@ -365,7 +363,7 @@ def constructAssociationLocusRBDictFromHDF5File(inputFname=None, locusPadding=0,
 		similar to constructAssociationPeakRBDictFromHDF5File
 	"""
 	from palos.algorithm.RBTree import RBDict
-	from palos.io.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey, get_overlap_ratio
+	from palos.polymorphism.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey, get_overlap_ratio
 	
 	sys.stderr.write("Constructing association-locus RBDict from HDF5 file %s, (locusPadding=%s) ..."%(inputFname, locusPadding))
 	reader = HDF5MatrixFile(inputFname, openMode='r')

@@ -125,10 +125,9 @@ import copy
 from pegaflow.DAX3 import Executable, File, PFN, Profile, Namespace
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
 from palos.db import SunsetDB
-from palos.pegasus.ShortRead2AlignmentWorkflow import ShortRead2AlignmentWorkflow
-from palos.ngs.AbstractNGSWorkflow import AbstractNGSWorkflow
+from palos.ngs.AbstractNGSWorkflow import AbstractNGSWorkflow as ParentClass
 from . AlignmentReadBaseQualityRecalibrationWorkflow import AlignmentReadBaseQualityRecalibrationWorkflow
-from AbstractAccuWorkflow import AbstractAccuWorkflow as ParentClass
+from . ShortRead2AlignmentWorkflow import ShortRead2AlignmentWorkflow
 
 class ShortRead2AlignmentPipeline(ParentClass, ShortRead2AlignmentWorkflow):
 	__doc__ = __doc__

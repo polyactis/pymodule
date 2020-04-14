@@ -16,7 +16,7 @@ from tables import UInt64Col, Float64Col, StringCol, UInt16Col, Int64Col
 from palos.utils import PassingData, PassingDataList
 from palos.ProcessOptions import  ProcessOptions
 from palos.io.YHPyTables import YHTable, YHFile, castPyTablesEntryIntoPassingData
-from palos.io.SNP import SNPData
+from palos.polymorphism.SNP import SNPData
 
 class SpeciesTable(tables.IsDescription):
 	"""
