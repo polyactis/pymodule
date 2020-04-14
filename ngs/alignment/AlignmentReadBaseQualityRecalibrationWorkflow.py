@@ -1,5 +1,14 @@
 #!/usr/bin/env python3
 """
+Description:
+	#2013.04.09  recalibration needs ~500K reads to get accurate estimate. So adjust the --intervalSize according to coverage.  
+	Input: a VCF folder, list of alignment IDs (or use site_id, ref_ind_seq_id to filter )
+	It could run local_realignment with or without indel VCF and BQSR with or without SNPVCF. 
+	Without a SNPVCF from particular chromosome, it uses a random chromosome. 
+	If the interval-span is too short , it use BQSR result from long-intervals.
+	
+	add alignment file into db (input: parent alignment ID, alignment file path)
+
 Examples:
 	# 2012.9.21 run base quality recalibration on VRC alignments (-S 447), individual_sequence_id from 639-642 (--ind_seq_id_ls ...)
 	# filtered sequences (-Q 1), alignment method 2 (-G 2)
@@ -12,7 +21,7 @@ Examples:
 		--intervalSize 10000000 --intervalOverlapSize 30000
 		--indelVCFFolder ...
 		-e /u/home/eeskin/polyacti
-		--local_data_dir /u/home/eeskin/polyacti/NetworkData/vervet/db/ --data_dir /u/home/eeskin/polyacti/NetworkData/vervet/db/
+		--local_data_dir NetworkData/vervet/db/ --data_dir /u/home/eeskin/polyacti/NetworkData/vervet/db/
 		--needSSHDBTunnel -J ~/bin/jdk/bin/java --new_mask_genotype_method_id 17
 		 --commit --skipDoneAlignment
 
@@ -23,42 +32,33 @@ Examples:
 		-j hcondor -z localhost -u yh --intervalSize 10000000 --intervalOverlapSize 30000
 		-e /u/home/eeskin/polyacti
 		--indelVCFFolder ...
-		--local_data_dir /u/home/eeskin/polyacti/NetworkData/vervet/db/ --data_dir /u/home/eeskin/polyacti/NetworkData/vervet/db/
+		--local_data_dir NetworkData/vervet/db/ --data_dir NetworkData/vervet/db/
 		--cluster_size 5 --needSSHDBTunnel -J ~/bin/jdk/bin/java --new_mask_genotype_method_id 41
 		 --commit --skipDoneAlignment
 	
 	# 2013.3.19 use sequence coverage to filter alignments
 	%s  --inputDir ~/NetworkData/vervet/db/genotype_file/method_41
 		--sequence_min_coverage 0 --sequence_max_coverage 2  --ind_seq_id_ls 632-3230
-		--ref_ind_seq_id 3280 -o dags/BaseQualityRecalibration/BaseQualityRecalibration_ISQ632_3230_coverage0_2_vsMethod41.xml
+		--ref_ind_seq_id 3280 -o dags/BaseQualityRecalibration_ISQ632_3230_coverage0_2_vsMethod41.xml
 		-l hcondor -j hcondor -z localhost -u yh --intervalSize 10000000 --intervalOverlapSize 30000
 		-e /u/home/eeskin/polyacti --contigMaxRankBySize 250
-		--local_data_dir /u/home/eeskin/polyacti/NetworkData/vervet/db/ --data_dir /u/home/eeskin/polyacti/NetworkData/vervet/db/
+		--local_data_dir NetworkData/vervet/db/ --data_dir NetworkData/vervet/db/
 		--cluster_size 5 --needSSHDBTunnel -J ~/bin/jdk/bin/java --new_mask_genotype_method_id 41
 		--indelVCFFolder ~/NetworkData/vervet/db/genotype_file/method_88 --commit --skipDoneAlignment
 		# --ref_genome_version 2 #(optional, as by default, it gets the outdated_index=0 reference chromosomes from GenomeDB)
 		# --ref_genome_outdated_index 1 #to get old reference. incompatible here as alignment is based on 3280, new ref.
 		# --needFastaDictJob --needFastaIndexJob
 	
-Description:
-	#2013.04.09  recalibration needs ~500K reads to get accurate estimate. So adjust the --intervalSize according to coverage.  
-	Input: a VCF folder, list of alignment IDs (or use site_id, ref_ind_seq_id to filter )
-	It could run local_realignment with or without indel VCF and BQSR with or without SNPVCF. Without a SNPVCF from particular chromosome, it uses a random chromosome. If the interval-span is too short , it use BQSR result from long-intervals.
-	
-	add alignment file into db (input: parent alignment ID, alignment file path)
 """
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job
 from pegaflow import Workflow
 from palos import ProcessOptions, getListOutOfStr, PassingData, NextGenSeq, \
 	figureOutDelimiter, getColName2IndexFromHeader, utils
 from palos import VCFFile
-from palos.pegasus.AbstractAlignmentAndVCFWorkflow import AbstractAlignmentAndVCFWorkflow
+from palos.ngs.AbstractAlignmentAndVCFWorkflow import AbstractAlignmentAndVCFWorkflow
 
 ParentClass = AbstractAlignmentAndVCFWorkflow
 class AlignmentReadBaseQualityRecalibrationWorkflow(ParentClass):
@@ -459,8 +459,6 @@ class AlignmentReadBaseQualityRecalibrationWorkflow(ParentClass):
 			returnData.jobDataLs.append(PassingData(jobLs=[alignment2DBJob], file=alignment2DBJob.logFile, \
 											fileLs=[alignment2DBJob.logFile]))
 		return returnData
-
-	
 	
 	def addGATKBaseRecalibratorJob(self, workflow=None, executable=None, GenomeAnalysisTKJar=None, inputFile=None, \
 								VCFFile=None, interval=None, outputFile=None, \
