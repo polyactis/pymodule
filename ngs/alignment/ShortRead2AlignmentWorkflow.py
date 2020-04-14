@@ -16,9 +16,9 @@ import copy
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
 from pegaflow import Workflow
-from . AbstractNGSWorkflow import AbstractNGSWorkflow
-from . AbstractAlignmentAndVCFWorkflow import AbstractAlignmentAndVCFWorkflow
-from alignment.AlignmentReadBaseQualityRecalibrationWorkflow import AlignmentReadBaseQualityRecalibrationWorkflow
+from palos.ngs.AbstractNGSWorkflow import AbstractNGSWorkflow
+from palos.ngs.AbstractAlignmentAndVCFWorkflow import AbstractAlignmentAndVCFWorkflow
+from . AlignmentReadBaseQualityRecalibrationWorkflow import AlignmentReadBaseQualityRecalibrationWorkflow
 
 class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityRecalibrationWorkflow):
 	__doc__ = __doc__
