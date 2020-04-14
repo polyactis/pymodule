@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Examples:
 	DrawMatrix.py -i /tmp/149CrossMatch_m3.tsv -o /tmp/149CrossMatch_m3.png -s 5
@@ -483,6 +483,7 @@ class Value2Color(object):
 						-2:'red',\
 						-3:'black'}
 	#usually -1 is NA_value, -2 is super_value.
+	@classmethod
 	def value2GrayScale(cls, value, min_value=0., max_value=255.):
 		"""
 		2008-08-21
@@ -499,11 +500,10 @@ class Value2Color(object):
 			#R_value = int(Y/math.pow(2,8))
 			#G_value = int(Y- R_value*math.pow(2,8))
 			return (R_value, R_value, R_value)
-	
-	value2GrayScale = classmethod(value2GrayScale)
-	
+		
 	max_hue_value = 255	#In Inkscape, the maximum possible hue value, 255, looks almost same as hue=0. cut off before reaching 255.
 	#but it's not the case in PIL.
+	@classmethod
 	def value2HSLcolor(cls, value, min_value=0., max_value=255., treat_above_max_as_NA=True, returnType=1):
 		"""
 		2012.2.22
@@ -538,9 +538,7 @@ class Value2Color(object):
 			return (hue_value/float(cls.max_hue_value), 1.0, 0.5)
 		else:
 			return "hsl(%s"%(hue_value)+",100%,50%)"
-	
-	value2HSLcolor = classmethod(value2HSLcolor)
-	
+		
 	def valueByMatplotlibColorMap(self, value, colormap='jet'):
 		"""
 		2012.2.22
