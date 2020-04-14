@@ -24,8 +24,8 @@ __doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0])
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
-from pymodule import ProcessOptions, MatrixFile, PassingData
-from pymodule.io.AbstractMatrixFileWalker import AbstractMatrixFileWalker
+from palos import ProcessOptions, MatrixFile, PassingData
+from palos.io.AbstractMatrixFileWalker import AbstractMatrixFileWalker
 import numpy
 from scipy.stats import norm
 

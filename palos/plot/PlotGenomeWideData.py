@@ -42,11 +42,11 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import copy
 import pylab
-from pymodule import ProcessOptions, PassingData
-from pymodule import utils
-from pymodule.db import GenomeDB
+from palos import ProcessOptions, PassingData
+from palos import utils
+from palos.db import GenomeDB
 from AbstractPlot import AbstractPlot
-from pymodule.io.AbstractGenomeFileWalker import AbstractGenomeFileWalker
+from palos.io.AbstractGenomeFileWalker import AbstractGenomeFileWalker
 
 ParentClass = AbstractPlot
 class PlotGenomeWideData(ParentClass, AbstractGenomeFileWalker):

@@ -26,9 +26,9 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import csv
-from pymodule import ProcessOptions, figureOutDelimiter
-from pymodule.utils import sortCMPBySecondTupleValue
-from pymodule.io.VCFFile import VCFFile
+from palos import ProcessOptions, figureOutDelimiter
+from palos.utils import sortCMPBySecondTupleValue
+from palos.io.VCFFile import VCFFile
 
 class ConvertVCF2BjarniFormat(object):
 	__doc__ = __doc__

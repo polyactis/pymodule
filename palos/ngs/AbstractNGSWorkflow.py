@@ -10,18 +10,18 @@ sys.path.insert(0, os.path.expanduser('~/script'))
 
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job
 from pegaflow import Workflow
-from pymodule import Genome, utils
-from pymodule import ProcessOptions
-from pymodule.Genome import IntervalData
-from pymodule.utils import PassingData
-from pymodule.io import NextGenSeq
-from pymodule.io.VCFFile import VCFFile
-from pymodule.io.MatrixFile import MatrixFile
-from pymodule.io.AlignmentDepthIntervalFile import AlignmentDepthIntervalFile
-from pymodule.io.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey
-from pymodule.algorithm.RBTree import RBDict
-from pymodule.pegasus.AbstractBioinfoWorkflow import AbstractBioinfoWorkflow
-from pymodule.db import SunsetDB
+from palos import Genome, utils
+from palos import ProcessOptions
+from palos.Genome import IntervalData
+from palos.utils import PassingData
+from palos.io import NextGenSeq
+from palos.io.VCFFile import VCFFile
+from palos.io.MatrixFile import MatrixFile
+from palos.io.AlignmentDepthIntervalFile import AlignmentDepthIntervalFile
+from palos.io.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey
+from palos.algorithm.RBTree import RBDict
+from palos.pegasus.AbstractBioinfoWorkflow import AbstractBioinfoWorkflow
+from palos.db import SunsetDB
 
 ParentClass = AbstractBioinfoWorkflow
 class AbstractNGSWorkflow(ParentClass):
@@ -115,7 +115,7 @@ class AbstractNGSWorkflow(ParentClass):
                                     ])
         #inserted before ParentClass.__init__()
         ParentClass.__init__(self, **keywords)
-        #from pymodule import ProcessOptions
+        #from palos import ProcessOptions
         #self.ad = ProcessOptions.process_function_arguments(keywords, self.option_default_dict, error_doc=self.__doc__, \
         #												class_to_have_attr=self)
 
@@ -2358,7 +2358,7 @@ Contig966       3160    50
         sys.stderr.write("Getting %s contigs with rank (by size) between %s and %s  ..."%\
                         (no_of_contigs_to_fetch, contigMinRankBySize, contigMaxRankBySize))
 
-        from pymodule.db import GenomeDB
+        from palos.db import GenomeDB
         db_genome = GenomeDB.GenomeDatabase(drivername=self.drivername, username=self.db_user,
                         password=self.db_passwd, hostname=self.hostname, database=self.dbname, schema="genome")
         db_genome.setup(create_tables=False)
@@ -2417,11 +2417,11 @@ Contig966       3160    50
 
         """
         sys.stderr.write("Splitting %s into blocks, each block with %s lines ... "%(intervalFname, noOfLinesPerUnit))
-        #from pymodule import utils
+        #from palos import utils
         #noOfLines = utils.getNoOfLinesInOneFileByWC(intervalFname)
         chr2StartStopDataLs = {}
         import csv
-        from pymodule import figureOutDelimiter
+        from palos import figureOutDelimiter
         inf = open(intervalFname)
         reader = csv.reader(inf, delimiter=figureOutDelimiter(intervalFname))
         lineNumber = 0

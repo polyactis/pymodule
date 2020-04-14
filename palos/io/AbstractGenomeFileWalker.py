@@ -18,9 +18,9 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import csv, random, numpy
-from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
-from pymodule.db import GenomeDB
-from pymodule.io.AbstractMatrixFileWalker import AbstractMatrixFileWalker
+from palos import ProcessOptions, getListOutOfStr, PassingData, utils
+from palos.db import GenomeDB
+from palos.io.AbstractMatrixFileWalker import AbstractMatrixFileWalker
 
 ParentClass = AbstractMatrixFileWalker
 

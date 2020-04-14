@@ -21,10 +21,10 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import csv, random, numpy
-from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
-from pymodule.io.AbstractGenomeFileWalker import AbstractGenomeFileWalker
-from pymodule.algorithm.RBTree import RBDict
-from pymodule.io.CNV import CNVSegmentBinarySearchTreeKey
+from palos import ProcessOptions, getListOutOfStr, PassingData, utils
+from palos.io.AbstractGenomeFileWalker import AbstractGenomeFileWalker
+from palos.algorithm.RBTree import RBDict
+from palos.io.CNV import CNVSegmentBinarySearchTreeKey
 
 ParentClass = AbstractGenomeFileWalker
 class GenomeMovingAverageStatistics(ParentClass):

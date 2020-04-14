@@ -26,8 +26,8 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 
-from pymodule import ProcessOptions
-from pymodule.io.AbstractMatrixFileWalker import AbstractMatrixFileWalker
+from palos import ProcessOptions
+from palos.io.AbstractMatrixFileWalker import AbstractMatrixFileWalker
 
 
 class SelectRowsFromMatrix(AbstractMatrixFileWalker):

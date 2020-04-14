@@ -32,9 +32,9 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import subprocess, cStringIO, re, csv
-from pymodule import ProcessOptions, figureOutDelimiter
-from pymodule.utils import sortCMPBySecondTupleValue
-from pymodule.VCFFile import VCFFile
+from palos import ProcessOptions, figureOutDelimiter
+from palos.utils import sortCMPBySecondTupleValue
+from palos.VCFFile import VCFFile
 
 class GenotypeCallByCoverage(object):
 	__doc__ = __doc__
@@ -391,7 +391,7 @@ class GenotypeCallByCoverage(object):
 			inputFname is VCF output by "vcfutils.pl varFilter" of samtools
 		"""
 		import csv
-		from pymodule.utils import runLocalCommand, getColName2IndexFromHeader
+		from palos.utils import runLocalCommand, getColName2IndexFromHeader
 		sys.stderr.write("Looking for heterozygous SNPs in %s (%s<=MAC<=%s).\n"%(os.path.basename(inputFname), \
 																		minMinorAlleleCoverage, maxMinorAlleleCoverage))
 		reader =csv.reader(open(inputFname), delimiter='\t')

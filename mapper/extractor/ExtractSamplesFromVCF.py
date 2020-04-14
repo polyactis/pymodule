@@ -22,9 +22,9 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import matplotlib; matplotlib.use("Agg")	#to disable pop-up requirement
 import csv
-from pymodule import ProcessOptions
-from pymodule import VCFFile
-from pymodule.utils import returnZeroFunc
+from palos import ProcessOptions
+from palos import VCFFile
+from palos.utils import returnZeroFunc
 #used in getattr(individual_site_id_set, '__len__', returnZeroFunc)()
 from vervet.src import VervetDB
 from vervet.src.mapper.AbstractVervetMapper import AbstractVervetMapper

@@ -24,9 +24,9 @@ __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
-from pymodule import ProcessOptions, PassingData, utils
-from pymodule import VCFFile, MatrixFile
-from pymodule.io.SNP import nt2number
+from palos import ProcessOptions, PassingData, utils
+from palos import VCFFile, MatrixFile
+from palos.io.SNP import nt2number
 from AbstractVCFMapper import AbstractVCFMapper
 
 class CheckTwoVCFOverlap(AbstractVCFMapper):

@@ -91,8 +91,8 @@ sys.path.insert(0, os.path.expanduser('~/src'))
 import copy, re, csv
 from pegaflow.DAX3 import File
 from pegaflow import workflow
-from pymodule import ProcessOptions, PassingData, MatrixFile, utils
-from pymodule.ngs.AbstractNGSWorkflow import AbstractNGSWorkflow
+from palos import ProcessOptions, PassingData, MatrixFile, utils
+from palos.ngs.AbstractNGSWorkflow import AbstractNGSWorkflow
 
 ParentClass=AbstractNGSWorkflow
 

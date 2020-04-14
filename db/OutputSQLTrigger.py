@@ -82,7 +82,7 @@ class OutputSQLTrigger(object):
 		"""
 		2008-07-27
 		"""
-		from pymodule import ProcessOptions
+		from palos import ProcessOptions
 		self.ad = ProcessOptions.process_function_arguments(keywords, self.option_default_dict, error_doc=self.__doc__, class_to_have_attr=self)
 		
 		self.table_names = self.table_names.split(',')
@@ -109,7 +109,7 @@ class OutputSQLTrigger(object):
 			self.printTriggerDict[self.type](table_name)
 
 if __name__ == '__main__':
-	from pymodule import ProcessOptions
+	from palos import ProcessOptions
 	main_class = OutputSQLTrigger
 	po = ProcessOptions(sys.argv, main_class.option_default_dict, error_doc=main_class.__doc__)
 	

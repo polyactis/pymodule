@@ -23,11 +23,11 @@ sys.path.insert(0, os.path.expanduser('~/src'))
 
 import subprocess, copy
 from pegaflow.DAX3 import File, Link, PFN, Job
-from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
-from pymodule.pegasus import yh_pegasus
-from pymodule.pegasus.AbstractNGSWorkflow import AbstractNGSWorkflow
+from palos import ProcessOptions, getListOutOfStr, PassingData, utils
+from palos.pegasus import yh_pegasus
+from palos.pegasus.AbstractNGSWorkflow import AbstractNGSWorkflow
 
-from pymodule.db import SunsetDB as DBClass
+from palos.db import SunsetDB as DBClass
 from Sunset.pegasus.AbstractAccuWorkflow import AbstractAccuWorkflow as ParentClass
 
 

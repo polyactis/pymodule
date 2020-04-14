@@ -12,8 +12,8 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import copy
-from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
-from pymodule.mapper.AbstractMapper import AbstractMapper
+from palos import ProcessOptions, getListOutOfStr, PassingData, utils
+from palos.mapper.AbstractMapper import AbstractMapper
 
 class AbstractReducer(AbstractMapper):
 	__doc__ = __doc__

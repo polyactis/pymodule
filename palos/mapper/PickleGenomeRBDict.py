@@ -17,9 +17,9 @@ __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
-from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
-from pymodule.mapper.AbstractMapper import AbstractMapper
-from pymodule import GenomeDB
+from palos import ProcessOptions, getListOutOfStr, PassingData, utils
+from palos.mapper.AbstractMapper import AbstractMapper
+from palos import GenomeDB
 
 class PickleGenomeRBDict(AbstractMapper):
 	__doc__ = __doc__

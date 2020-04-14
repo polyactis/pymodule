@@ -62,7 +62,7 @@ import csv, numpy
 bit_number = math.log(sys.maxint)/math.log(2)
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script/')))
-from pymodule.io.SNP import transposeSNPData, number2nt
+from palos.io.SNP import transposeSNPData, number2nt
 from variation.src.association.Association import Association
 
 class ConvertYuSNPFormat2TPED_TFAM(object):
@@ -81,7 +81,7 @@ class ConvertYuSNPFormat2TPED_TFAM(object):
 		2008-12-02
 			modelled after ConvertYuSNPFormat2Bjarni.py
 		"""
-		from pymodule import ProcessOptions
+		from palos import ProcessOptions
 		self.ad=ProcessOptions.process_function_arguments(keywords, self.option_default_dict, error_doc=self.__doc__, class_to_have_attr=self)
 	
 	def run(self):
@@ -153,7 +153,7 @@ class ConvertYuSNPFormat2TPED_TFAM(object):
 		del genotype_w
 
 if __name__ == '__main__':
-	from pymodule import ProcessOptions
+	from palos import ProcessOptions
 	main_class = ConvertYuSNPFormat2TPED_TFAM
 	po = ProcessOptions(sys.argv, main_class.option_default_dict, error_doc=main_class.__doc__)
 	

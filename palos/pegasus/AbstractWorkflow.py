@@ -8,7 +8,7 @@ import sys, os, math
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.expanduser('~/script'))
 
-from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
+from palos import ProcessOptions, getListOutOfStr, PassingData, utils
 from pegaflow.Workflow import Workflow
 from pegaflow.DAX3 import Executable, File, PFN, Profile, Namespace, Link, Use, Job, Dependency
 

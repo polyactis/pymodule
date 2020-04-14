@@ -60,9 +60,9 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 import csv
 import h5py
 import numpy
-from pymodule.utils import PassingData, PassingDataList,getListOutOfStr 
-from pymodule.ProcessOptions import  ProcessOptions
-from pymodule.io.MatrixFile import MatrixFile
+from palos.utils import PassingData, PassingDataList,getListOutOfStr 
+from palos.ProcessOptions import  ProcessOptions
+from palos.io.MatrixFile import MatrixFile
 varLenStrType = h5py.new_vlen(str)
 
 class YHTableInHDF5Group(object):

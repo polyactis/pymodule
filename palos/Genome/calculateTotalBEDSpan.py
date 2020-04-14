@@ -10,8 +10,8 @@ inputFname = os.path.expanduser("~/RefGenomes/dustPlus10_M1-22XY.overlap.genomic
 inputFname=sys.argv[1]
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-from pymodule import utils
-from pymodule import MatrixFile
+from palos import utils
+from palos import MatrixFile
 reader = MatrixFile(inputFname=inputFname, openMode='r', delimiter='\t')
 span=0
 

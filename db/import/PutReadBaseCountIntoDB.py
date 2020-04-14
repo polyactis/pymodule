@@ -19,9 +19,9 @@ sys.path.insert(0, os.path.expanduser('~/script'))
 sys.path.insert(0, os.path.expanduser('~/src'))
 
 import csv, copy
-from pymodule import ProcessOptions, PassingData, utils, figureOutDelimiter
+from palos import ProcessOptions, PassingData, utils, figureOutDelimiter
 from Sunset.mapper.AbstractAccuMapper import AbstractAccuMapper as ParentClass
-from pymodule.db import SunsetDB as DBClass
+from palos.db import SunsetDB as DBClass
 
 class PutReadBaseCountIntoDB(ParentClass):
 	__doc__ = __doc__

@@ -20,7 +20,7 @@ __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script/')))
 import unittest, os, sys, getopt, csv
-from pymodule.TaxonomyDB import TaxonomyDB
+from palos.TaxonomyDB import TaxonomyDB
 
 class TestTaxonomyDB(unittest.TestCase, TaxonomyDB):
 	__doc__ = __doc__
@@ -74,7 +74,7 @@ if __name__ == '__main__':
 	TestCaseDict = {1:TestTaxonomyDB,}
 	type = 1
 	
-	from pymodule import ProcessOptions
+	from palos import ProcessOptions
 	main_class = TestCaseDict[type]
 	po = ProcessOptions(sys.argv, main_class.option_default_dict, error_doc=main_class.__doc__)
 	

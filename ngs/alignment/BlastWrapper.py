@@ -26,8 +26,8 @@ import csv
 from Bio.Blast import NCBIXML, NCBIStandalone
 from Bio.Blast.Applications import NcbiblastnCommandline
 import cStringIO
-from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
-from pymodule.mapper.AbstractMapper import AbstractMapper
+from palos import ProcessOptions, getListOutOfStr, PassingData, utils
+from palos.mapper.AbstractMapper import AbstractMapper
 
 class BlastWrapper(AbstractMapper):
 	__doc__ = __doc__

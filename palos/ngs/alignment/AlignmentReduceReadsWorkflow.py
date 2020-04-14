@@ -30,10 +30,10 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job
 from pegaflow import Workflow
-from pymodule import ProcessOptions, getListOutOfStr, PassingData, NextGenSeq, \
+from palos import ProcessOptions, getListOutOfStr, PassingData, NextGenSeq, \
 	figureOutDelimiter, getColName2IndexFromHeader, utils
-#from pymodule.pegasus.AbstractVCFWorkflow import AbstractVCFWorkflow
-from pymodule.io.VCFFile import VCFFile
+#from palos.pegasus.AbstractVCFWorkflow import AbstractVCFWorkflow
+from palos.io.VCFFile import VCFFile
 from vervet.src import AbstractVervetAlignmentWorkflow
 
 ParentClass = AbstractVervetAlignmentWorkflow

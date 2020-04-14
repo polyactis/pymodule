@@ -12,10 +12,10 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import copy
-from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
-from pymodule.io.VCFFile import VCFFile
-from pymodule.io import SNP
-from pymodule.mapper.AbstractMapper import AbstractMapper
+from palos import ProcessOptions, getListOutOfStr, PassingData, utils
+from palos.io.VCFFile import VCFFile
+from palos.io import SNP
+from palos.mapper.AbstractMapper import AbstractMapper
 
 class AbstractVCFMapper(AbstractMapper):
 	__doc__ = __doc__

@@ -56,13 +56,13 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import csv, copy
-from pymodule import ProcessOptions, getListOutOfStr, PassingData, \
+from palos import ProcessOptions, getListOutOfStr, PassingData, \
 	figureOutDelimiter, getColName2IndexFromHeader, utils
-from pymodule.ngs.io import VCFFile
+from palos.ngs.io import VCFFile
 from pegaflow.DAX3 import File, Executable
 from pegaflow import Workflow
-#from pymodule.pegasus.AbstractVCFWorkflow import AbstractVCFWorkflow
-from pymodule.db import SunsetDB
+#from palos.pegasus.AbstractVCFWorkflow import AbstractVCFWorkflow
+from palos.db import SunsetDB
 from . AbstractNGSWorkflow import AbstractNGSWorkflow
 
 ParentClass = AbstractNGSWorkflow

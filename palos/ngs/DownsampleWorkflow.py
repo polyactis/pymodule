@@ -10,12 +10,12 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/src')))
 import copy
-from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
-from pymodule.reducer.AbstractReducer import AbstractReducer
+from palos import ProcessOptions, getListOutOfStr, PassingData, utils
+from palos.reducer.AbstractReducer import AbstractReducer
 from pegaflow.DAX3 import Executable, PFN, File
 from sqlalchemy.sql import text
 from . AbstractAccuWorkflow import AbstractAccuWorkflow
-from pymodule.db import SunsetDB
+from palos.db import SunsetDB
 
 parentClass = AbstractAccuWorkflow
 class DownsampleWorkflow(parentClass):

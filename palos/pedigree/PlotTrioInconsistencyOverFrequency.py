@@ -25,10 +25,10 @@ else:   #32bit
 import matplotlib; matplotlib.use("Agg")	#to disable pop-up requirement
 
 import csv
-from pymodule import ProcessOptions, getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter
-from pymodule import yh_matplotlib
+from palos import ProcessOptions, getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter
+from palos import yh_matplotlib
 import pylab, random
-from pymodule.plot.AbstractPlot import AbstractPlot
+from palos.plot.AbstractPlot import AbstractPlot
 
 
 class PlotTrioInconsistencyOverFrequency(AbstractPlot):
@@ -54,7 +54,7 @@ class PlotTrioInconsistencyOverFrequency(AbstractPlot):
 		"""
 		2011-7-11
 		"""
-		from pymodule import ProcessOptions
+		from palos import ProcessOptions
 		self.ad = ProcessOptions.process_function_arguments(keywords, self.option_default_dict, error_doc=self.__doc__, \
 														class_to_have_attr=self)
 		self.inputFnameLs = inputFnameLs

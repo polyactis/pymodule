@@ -20,12 +20,12 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import csv, random
-from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
-from pymodule.mapper.AbstractMapper import AbstractMapper
-from pymodule.io.MatrixFile import MatrixFile
-from pymodule.io.HDF5MatrixFile import HDF5MatrixFile
-from pymodule.io.YHPyTables import YHFile
-from pymodule.io.VCFFile import VCFFile
+from palos import ProcessOptions, getListOutOfStr, PassingData, utils
+from palos.mapper.AbstractMapper import AbstractMapper
+from palos.io.MatrixFile import MatrixFile
+from palos.io.HDF5MatrixFile import HDF5MatrixFile
+from palos.io.YHPyTables import YHFile
+from palos.io.VCFFile import VCFFile
 
 class AbstractMatrixFileWalker(AbstractMapper):
 	__doc__ = __doc__

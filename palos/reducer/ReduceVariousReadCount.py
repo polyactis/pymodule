@@ -23,7 +23,7 @@ sys.path.insert(0, os.path.expanduser('~/script'))
 import matplotlib; matplotlib.use("Agg")	#to disable pop-up requirement
 
 import csv
-from pymodule import ProcessOptions, getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter
+from palos import ProcessOptions, getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter
 
 
 class ReduceVariousReadCount(object):
@@ -37,7 +37,7 @@ class ReduceVariousReadCount(object):
 		"""
 		2011-11-4
 		"""
-		from pymodule import ProcessOptions
+		from palos import ProcessOptions
 		self.ad = ProcessOptions.process_function_arguments(keywords, self.option_default_dict, error_doc=self.__doc__, \
 														class_to_have_attr=self)
 		self.inputFnameLs = inputFnameLs

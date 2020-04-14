@@ -16,11 +16,11 @@ __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
-from pymodule import ProcessOptions
-from pymodule import SNPData, VCFFile
-from pymodule import utils
-from pymodule.io.SNP import number2di_nt
-from pymodule.mapper.AbstractMapper import AbstractMapper
+from palos import ProcessOptions
+from palos import SNPData, VCFFile
+from palos import utils
+from palos.io.SNP import number2di_nt
+from palos.mapper.AbstractMapper import AbstractMapper
 
 class ConvertYuSNPFormat2VCF(AbstractMapper):
 	__doc__ = __doc__

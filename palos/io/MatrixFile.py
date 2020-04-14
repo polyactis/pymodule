@@ -35,8 +35,8 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import csv, re
-from pymodule.ProcessOptions import  ProcessOptions
-from pymodule import utils, figureOutDelimiter
+from palos.ProcessOptions import  ProcessOptions
+from palos import utils, figureOutDelimiter
 
 class MatrixFile(object):
 	__doc__ = __doc__

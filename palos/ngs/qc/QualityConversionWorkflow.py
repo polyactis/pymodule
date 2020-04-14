@@ -16,13 +16,13 @@ parser.add_argument('-s','--schema', default='sunset', help='the password used i
 parser.add_argument('-u','--db_user', default='cl', help='database username')
 args = parser.parse_args()
 
-from pymodule.db import SunsetDB
+from palos.db import SunsetDB
 db_main = SunsetDB.SunsetDB(drivername='postgresql', db_user=args.db_user,db_passwd=args.password, 
                         hostname=args.hostname, dbname=args.dbname, schema=args.schema)
 db_main.setup(create_tables=False)
 session = db_main.session
 
-from pymodule.db.SunsetDB import IndividualSequence, IndividualAlignment, IndividualSequenceFile
+from palos.db.SunsetDB import IndividualSequence, IndividualAlignment, IndividualSequenceFile
 
 workflow_AC = ADAG("pegasus_test")
 site_handle = "ycondor"

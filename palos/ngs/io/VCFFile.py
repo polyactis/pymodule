@@ -19,9 +19,9 @@ import os, sys
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 import re, copy, csv
-from pymodule.ProcessOptions import  ProcessOptions
-from pymodule import utils
-from pymodule.utils import PassingData, getColName2IndexFromHeader
+from palos.ProcessOptions import  ProcessOptions
+from palos import utils
+from palos.utils import PassingData, getColName2IndexFromHeader
 
 diploidGenotypePattern = re.compile(r'([\d.])[|/]([\d.])')
 	#".|.", "0|1" for phased

@@ -32,7 +32,7 @@ from sqlalchemy.types import LargeBinary
 
 from datetime import datetime
 
-from pymodule import ProcessOptions, PassingData
+from palos import ProcessOptions, PassingData
 from . import Database, TableClass
 
 

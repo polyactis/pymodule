@@ -21,9 +21,9 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.Alphabet import IUPAC
-from pymodule import ProcessOptions, utils
-from pymodule import AbstractMapper
-from pymodule.io.PolymorphismTableFile import PolymorphismTableFile, OneIndividualPolymorphismData
+from palos import ProcessOptions, utils
+from palos import AbstractMapper
+from palos.io.PolymorphismTableFile import PolymorphismTableFile, OneIndividualPolymorphismData
 
 
 class SFS_CODE_Output2PolymorphismTableFile(AbstractMapper):

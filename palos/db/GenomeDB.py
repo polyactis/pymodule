@@ -30,12 +30,12 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy import UniqueConstraint, create_engine
 from sqlalchemy import and_, or_, not_
 from sqlalchemy import desc
-from pymodule.utils import PassingData	#2012.3.26 "from utils import PassingData" won't work because no module named "utils" exists outside pymodule (!=pymodule.utils). 
-from pymodule.io.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey
-from pymodule.algorithm.RBTree import RBDict
-from pymodule.Genome import GeneModel	#2010-9-21 although "from Genome import GeneModel" works,
+from palos.utils import PassingData	#2012.3.26 "from utils import PassingData" won't work because no module named "utils" exists outside pymodule (!=pymodule.utils). 
+from palos.io.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey
+from palos.algorithm.RBTree import RBDict
+from palos.Genome import GeneModel	#2010-9-21 although "from Genome import GeneModel" works,
 			#it causes problem in cPickle.load() because Genome is not directly visible outside.
-from pymodule.db import ElixirDB, get_sequence_segment
+from palos.db import ElixirDB, get_sequence_segment
 
 __session_factory__ = sessionmaker(autoflush=False, autocommit=True)
 __session__ = scoped_session(__session_factory__)
@@ -1904,7 +1904,7 @@ if __name__ == '__main__':
 		sys.path.insert(0, os.path.expanduser('~/lib/python'))
 		sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
-	from pymodule import ProcessOptions
+	from palos import ProcessOptions
 	main_class = GenomeDatabase
 	po = ProcessOptions(sys.argv, main_class.option_default_dict, error_doc=main_class.__doc__)
 	

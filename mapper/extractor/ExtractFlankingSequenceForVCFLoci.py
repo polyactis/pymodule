@@ -23,13 +23,13 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import csv, re
-from pymodule import ProcessOptions
+from palos import ProcessOptions
 
 #used in getattr(individual_site_id_set, '__len__', returnZeroFunc)()
-from pymodule.utils import returnZeroFunc
-from pymodule.io.VCFFile import VCFFile
-from pymodule.io.FastaFile import FastaFile
-from pymodule.mapper.AbstractVCFMapper import AbstractVCFMapper
+from palos.utils import returnZeroFunc
+from palos.io.VCFFile import VCFFile
+from palos.io.FastaFile import FastaFile
+from palos.mapper.AbstractVCFMapper import AbstractVCFMapper
 
 
 class ExtractFlankingSequenceForVCFLoci(AbstractVCFMapper):

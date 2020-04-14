@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.expanduser('~/script'))
 sys.path.insert(0, os.path.expanduser('~/src'))
 
 import copy
-from pymodule import ProcessOptions, utils
+from palos import ProcessOptions, utils
 from Sunset.mapper.AbstractAccuMapper import AbstractAccuMapper as ParentClass
 
 class AddAlignmentDepthIntervalMethod2DB(ParentClass):

@@ -8,10 +8,10 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 import copy, csv, math
 import re
-from pymodule.ProcessOptions import  ProcessOptions
-from pymodule.utils import dict_map, importNumericArray, figureOutDelimiter, PassingData, getColName2IndexFromHeader,\
+from palos.ProcessOptions import  ProcessOptions
+from palos.utils import dict_map, importNumericArray, figureOutDelimiter, PassingData, getColName2IndexFromHeader,\
 	openGzipFile
-from pymodule.db import TableClass
+from palos.db import TableClass
 
 pa_has_characters = re.compile(r'[a-zA-Z_]')
 
@@ -307,7 +307,7 @@ def transposeSNPData(snpData, report=0):
 	"""
 	if report:
 		sys.stderr.write("Transposing SNPData ...")
-	from pymodule import importNumericArray, SNPData
+	from palos import importNumericArray, SNPData
 	num = importNumericArray()
 	#copy except data_matrix
 	import copy
@@ -668,7 +668,7 @@ def readAdjacencyListDataIntoMatrix(inputFname=None, rowIDHeader=None, colIDHead
 		return a SNPData
 		
 		i.e.
-			from pymodule import SNP
+			from palos import SNP
 			import numpy
 			snpData = SNP.readAdjacencyListDataIntoMatrix(inputFname=inputFname, rowIDHeader='Sample', colIDHeader='SNP', \
 									rowIDIndex=None, colIDIndex=None, \
@@ -690,7 +690,7 @@ def readAdjacencyListDataIntoMatrix(inputFname=None, rowIDHeader=None, colIDHead
 		
 	"""
 	sys.stderr.write("Reading a matrix out of an adjacency-list based file %s ..."%(inputFname))
-	from pymodule import MatrixFile
+	from palos import MatrixFile
 	import numpy
 	if defaultValue is None:
 		defaultValue = numpy.nan
@@ -767,7 +767,7 @@ def getKey2ValueFromMatrixLikeFile(inputFname=None, keyHeaderLs=None, valueHeade
 		return a dictionary. key is a tuple of keyHeaderLs. value is conent of valueHeaderLs
 	"""
 	sys.stderr.write("Getting a dictionary out of  %s ..."%(inputFname))
-	from pymodule import MatrixFile
+	from palos import MatrixFile
 	
 	reader = MatrixFile(inputFname=inputFname)
 	if hasHeader:
@@ -1067,13 +1067,13 @@ class SNPData(object):
 		2012.8.24
 		"""
 		sys.stderr.write("Carrying out PCA on data_matrix ...")
-		from pymodule.algorithm.PCA import PCA
+		from palos.algorithm.PCA import PCA
 		#T, P, explained_var = pca_module.PCA_svd(phenData_trans.data_matrix, standardize=True)
 		T, P, explained_var = PCA.eig(self.data_matrix, toNormalize=toNormalize)	#normalize=True causes missing value in the covariance matrix
 		if outputFname:
 			#import csv
 			#writer = csv.writer(open(outputFname, 'w'), delimiter='\t')
-			from pymodule.io import MatrixFile
+			from palos.io import MatrixFile
 			writer = MatrixFile(outputFname, openMode='w', delimiter='\t')
 
 
@@ -1237,7 +1237,7 @@ class SNPData(object):
 			#.
 		"""
 		sys.stderr.write("Removing row/column(s) so that no missing cells exist in the data matrix ...  ")
-		from pymodule import PassingData
+		from palos import PassingData
 		row_id2missing_data = {}
 		no_of_missing_cells = 0
 		no_of_rows = len(self.row_id_ls)
@@ -1805,7 +1805,7 @@ class SNPData(object):
 		2010-9-30
 			like calLD() but doesn't require the alleles are encoded in integer according to nt2number.
 		"""
-		from pymodule.algorithm import LD
+		from palos.algorithm import LD
 		snp1_index = self.col_id2col_index[col1_id]
 		snp2_index = self.col_id2col_index[col2_id]
 		return LD.calLD(self.data_matrix[:, snp1_index], self.data_matrix[:, snp2_index])
@@ -2728,11 +2728,11 @@ class GenomeWideResult(object):
 		sys.stderr.write("Dumping association result into %s (HDF5 format) ..."%(filename))
 		#each number below is counting bytes, not bits
 		if outputFileType==1:
-			from pymodule.io.Association import AssociationTable, AssociationTableFile
+			from palos.io.Association import AssociationTable, AssociationTableFile
 			rowDefinition  = AssociationTable
 			OutputFileClass = AssociationTableFile
 		else:
-			from pymodule.io.HDF5MatrixFile import HDF5MatrixFile
+			from palos.io.HDF5MatrixFile import HDF5MatrixFile
 			rowDefinition = [('locus_id','i8'),('chromosome', HDF5MatrixFile.varLenStrType), ('start','i8'), ('stop', 'i8'), \
 					('score', 'f8'), ('MAC', 'i8'), ('MAF', 'f8'), ('genotype_var_perc', 'f8')]
 			OutputFileClass = HDF5MatrixFile
@@ -2746,7 +2746,7 @@ class GenomeWideResult(object):
 				sys.stderr.write("Error: no writer(%s) or filename(%s) to dump.\n"%(writer, filename))
 				sys.exit(3)
 		if attributeDict:
-			from pymodule.io.HDF5MatrixFile import addAttributeDictToYHTableInHDF5Group
+			from palos.io.HDF5MatrixFile import addAttributeDictToYHTableInHDF5Group
 			addAttributeDictToYHTableInHDF5Group(tableObject=tableObject, attributeDict=attributeDict)
 		if self.results_method_id:
 			tableObject.addAttribute(name='result_id', value=self.results_method_id)
@@ -3300,10 +3300,10 @@ def getGenomeWideResultFromHDF5MatrixFile(inputFname=None, reader=None, \
 	else:
 		if reader is None:
 			if inputFileType==1:
-				from pymodule.io.Association import AssociationTableFile
+				from palos.io.Association import AssociationTableFile
 				reader = AssociationTableFile(inputFname, openMode='r', autoRead=False)
 			else:
-				from pymodule.io.HDF5MatrixFile import HDF5MatrixFile
+				from palos.io.HDF5MatrixFile import HDF5MatrixFile
 				reader = HDF5MatrixFile(inputFname, openMode='r')
 		associationTableObject = reader.getTableObject(tableName=tableName)
 	

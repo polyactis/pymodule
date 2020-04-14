@@ -135,13 +135,13 @@ def testVerticalSurface():
 	
 	from enthought.mayavi import mlab
 	mlab.clf()
-	#from pymodule.yh_mayavi import customBarchart
+	#from palos.yh_mayavi import customBarchart
 	bar = customBarchart(x, y , enrichment_matrix, x_scale=0.9, y_scale=4.5, opacity=1, mode='cube', color=(0,1,0), scale_factor=1.0)
 	"""
 	#mlab.ylabel("KW")
 	#mlab.xlabel("Emma")
 	#mlab.zlabel("Enrichment Ratio")
-	from pymodule.DrawMatrix import get_font 
+	from palos.DrawMatrix import get_font 
 	font = get_font()
 	
 	for i in range(len(xlabel_ls)):

@@ -18,9 +18,9 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import csv
-from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
-from pymodule.mapper import AbstractMapper
-from pymodule.AbstractDBInteractingClass import AbstractDBInteractingClass
+from palos import ProcessOptions, getListOutOfStr, PassingData, utils
+from palos.mapper import AbstractMapper
+from palos.AbstractDBInteractingClass import AbstractDBInteractingClass
 
 class AbstractDBInteractingJob(AbstractDBInteractingClass):
 	__doc__ = __doc__

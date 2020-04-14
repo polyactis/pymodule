@@ -26,8 +26,8 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import matplotlib; matplotlib.use("Agg")	#to disable pop-up requirement
 import csv
-from pymodule import ProcessOptions, getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter
-from pymodule import yh_matplotlib, GenomeDB
+from palos import ProcessOptions, getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter
+from palos import yh_matplotlib, GenomeDB
 import numpy, random, pylab
 from AbstractPlot import AbstractPlot
 

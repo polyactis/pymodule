@@ -7,8 +7,8 @@
 import os, sys
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-from pymodule.ProcessOptions import  ProcessOptions
-from pymodule.utils import PassingData
+from palos.ProcessOptions import  ProcessOptions
+from palos.utils import PassingData
 import copy
 import numpy
 
@@ -281,7 +281,7 @@ def testSmoothFullData():
 class LD(object):
 	"""
 	2010-9-30
-		moved from pymodule/SNP.py to calculate LD
+		moved from palos/SNP.py to calculate LD
 	"""
 	def __init__(self):
 		pass
@@ -302,7 +302,7 @@ class LD(object):
 	def calLD(cls, locus1_allele_ls, locus2_allele_ls, locus1_id=None, locus2_id = None):
 		"""
 		2010-9-30
-			copied from pymodule/SNP.py.
+			copied from palos/SNP.py.
 			locus1_allele_ls, locus2_allele_ls should be bi-allelic.
 			If locus1_allele_ls and locus2_allele_ls are of different size, the extra elements are discarded.
 		2008-09-05

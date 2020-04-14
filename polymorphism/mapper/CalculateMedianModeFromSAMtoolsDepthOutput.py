@@ -20,8 +20,8 @@ sys.path.insert(0, os.path.expanduser('~/script'))
 
 import csv, copy
 import random, numpy, scipy.stats
-from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils, figureOutDelimiter, getColName2IndexFromHeader 
-from pymodule.pegasus.mapper.AbstractMapper import AbstractMapper as ParentClass
+from palos import ProcessOptions, getListOutOfStr, PassingData, utils, figureOutDelimiter, getColName2IndexFromHeader 
+from palos.pegasus.mapper.AbstractMapper import AbstractMapper as ParentClass
 
 
 class CalculateMedianModeFromSAMtoolsDepthOutput(ParentClass):

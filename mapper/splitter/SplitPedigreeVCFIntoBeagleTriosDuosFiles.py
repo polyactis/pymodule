@@ -31,12 +31,12 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import copy, numpy
 import networkx as nx
-from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
-from pymodule.io.VCFFile import VCFFile
-from pymodule.io.MatrixFile import MatrixFile
-from pymodule.io.BeagleLikelihoodFile import BeagleLikelihoodFile
-from pymodule.io.PlinkPedigreeFile import PlinkPedigreeFile
-from pymodule.mapper.AbstractVCFMapper import AbstractVCFMapper
+from palos import ProcessOptions, getListOutOfStr, PassingData, utils
+from palos.io.VCFFile import VCFFile
+from palos.io.MatrixFile import MatrixFile
+from palos.io.BeagleLikelihoodFile import BeagleLikelihoodFile
+from palos.io.PlinkPedigreeFile import PlinkPedigreeFile
+from palos.mapper.AbstractVCFMapper import AbstractVCFMapper
 
 class SplitPedigreeVCFIntoBeagleTriosDuosFiles(AbstractVCFMapper):
 	__doc__ = __doc__

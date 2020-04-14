@@ -60,10 +60,10 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 #sys.path += [os.path.join(os.path.expanduser('~/script'))]
-from pymodule.db.GenomeDB import *
-from pymodule import PassingData, utils, AbstractDBInteractingClass
-from pymodule.utils import FigureOutTaxID
-#from pymodule.db import db_connect
+from palos.db.GenomeDB import *
+from palos import PassingData, utils, AbstractDBInteractingClass
+from palos.utils import FigureOutTaxID
+#from palos.db import db_connect
 
 class annot_assembly_attr:
 	"""
@@ -428,7 +428,7 @@ class chromosome_fasta2db(AbstractDBInteractingClass):
 			session.rollback()
 
 if __name__ == '__main__':
-	from pymodule import ProcessOptions
+	from palos import ProcessOptions
 	main_class = chromosome_fasta2db
 	po = ProcessOptions(sys.argv, main_class.option_default_dict, error_doc=main_class.__doc__)
 	

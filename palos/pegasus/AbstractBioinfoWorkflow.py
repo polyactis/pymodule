@@ -9,7 +9,7 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.expanduser('~/script'))
 
 
-from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
+from palos import ProcessOptions, getListOutOfStr, PassingData, utils
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job
 from . AbstractWorkflow import AbstractWorkflow
 
@@ -369,7 +369,7 @@ class AbstractBioinfoWorkflow(ParentClass):
             path=os.path.join(self.pymodulePath, "mapper/extractor/tabixRetrieve.sh"),
             name='tabixRetrieve', clusterSizeMultiplier=1)
 
-        #2013.11.22 moved from pymodule/polymorphism/FindNewRefCoordinatesGivenVCFFolderWorkflow.py
+        #2013.11.22 moved from palos/polymorphism/FindNewRefCoordinatesGivenVCFFolderWorkflow.py
         self.addExecutableFromPath(path=os.path.join(self.pymodulePath, \
             "polymorphism/mapper/LiftOverVCFBasedOnCoordinateMap.py"), \
             name='LiftOverVCFBasedOnCoordinateMap', clusterSizeMultiplier=1)

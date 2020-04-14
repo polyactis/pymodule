@@ -47,15 +47,15 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import random
 import networkx as nx
-from pymodule import ProcessOptions
-from pymodule.utils import PassingData
-from pymodule.io.AbstractMatrixFileWalker import AbstractMatrixFileWalker
-from pymodule.io.BeagleGenotypeFile import BeagleGenotypeFile
-from pymodule.io import SNP
-from pymodule.io.MatrixFile import MatrixFile
-from pymodule.io.PlinkPedigreeFile import PlinkPedigreeFile
-from pymodule.io.VCFFile import VCFFile
-from pymodule.statistics import NumberContainer, DiscreteProbabilityMassContainer
+from palos import ProcessOptions
+from palos.utils import PassingData
+from palos.io.AbstractMatrixFileWalker import AbstractMatrixFileWalker
+from palos.io.BeagleGenotypeFile import BeagleGenotypeFile
+from palos.io import SNP
+from palos.io.MatrixFile import MatrixFile
+from palos.io.PlinkPedigreeFile import PlinkPedigreeFile
+from palos.io.VCFFile import VCFFile
+from palos.statistics import NumberContainer, DiscreteProbabilityMassContainer
 
 class SelectDistantMembersFromGenotypeFile(AbstractMatrixFileWalker):
 	__doc__ = __doc__

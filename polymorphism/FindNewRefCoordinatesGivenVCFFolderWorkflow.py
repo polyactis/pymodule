@@ -47,11 +47,11 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 from pegaflow.DAX3 import Executable, File, PFN
 from pegaflow import Workflow
-from pymodule import ProcessOptions, PassingData
-from pymodule.pegasus.AbstractVCFWorkflow import AbstractVCFWorkflow
-from pymodule.pegasus.BlastWorkflow import BlastWorkflow
-from pymodule.pegasus.ShortRead2AlignmentWorkflow import ShortRead2AlignmentWorkflow
-from pymodule.io.FastaFile import FastaFile
+from palos import ProcessOptions, PassingData
+from palos.pegasus.AbstractVCFWorkflow import AbstractVCFWorkflow
+from palos.pegasus.BlastWorkflow import BlastWorkflow
+from palos.pegasus.ShortRead2AlignmentWorkflow import ShortRead2AlignmentWorkflow
+from palos.io.FastaFile import FastaFile
 
 ParentClass = AbstractVCFWorkflow
 

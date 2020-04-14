@@ -20,8 +20,8 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.expanduser('~/script'))
 
 import csv, copy, re
-from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
-from pymodule.mapper.AbstractMapper import AbstractMapper as ParentClass
+from palos import ProcessOptions, getListOutOfStr, PassingData, utils
+from palos.mapper.AbstractMapper import AbstractMapper as ParentClass
 
 class ReformatFlagstatOutput(ParentClass):
 	__doc__ = __doc__

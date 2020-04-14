@@ -22,9 +22,9 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import csv
-from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
-from pymodule.io.VCFFile import VCFFile
-from pymodule.mapper.AbstractVCFMapper import AbstractVCFMapper
+from palos import ProcessOptions, getListOutOfStr, PassingData, utils
+from palos.io.VCFFile import VCFFile
+from palos.mapper.AbstractVCFMapper import AbstractVCFMapper
 
 class OutputVCFSiteGap(AbstractVCFMapper):
 	__doc__ = __doc__

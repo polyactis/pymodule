@@ -19,9 +19,9 @@ sys.path.insert(0, os.path.expanduser('~/script'))
 sys.path.insert(0, os.path.expanduser('~/src'))
 
 import csv, copy
-from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils, figureOutDelimiter
+from palos import ProcessOptions, getListOutOfStr, PassingData, utils, figureOutDelimiter
 from Sunset.mapper.AbstractAccuMapper import AbstractAccuMapper as ParentClass
-from pymodule.db import SunsetDB as DBClass
+from palos.db import SunsetDB as DBClass
 
 
 class PutDOCOutput2DB(ParentClass):

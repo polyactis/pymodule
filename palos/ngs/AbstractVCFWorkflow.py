@@ -10,10 +10,10 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import copy
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job
-from pymodule import Genome, getListOutOfStr, PassingData, utils
-from pymodule.io.MatrixFile import MatrixFile
-from pymodule.io.VCFFile import VCFFile
-from pymodule.io import NextGenSeq
+from palos import Genome, getListOutOfStr, PassingData, utils
+from palos.io.MatrixFile import MatrixFile
+from palos.io.VCFFile import VCFFile
+from palos.io import NextGenSeq
 from pegaflow import Workflow
 from . AbstractNGSWorkflow import AbstractNGSWorkflow
 from . MapReduceGenomeFileWorkflow import MapReduceGenomeFileWorkflow as ParentClass
@@ -330,7 +330,7 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 				 
 		"""
 		sys.stderr.write("Splitting %s into blocks of %s lines ... "%(vcfFname, noOfSitesPerUnit))
-		#from pymodule import utils
+		#from palos import utils
 		#noOfLines = utils.getNoOfLinesInOneFileByWC(vcfFname)
 		chr2StartStopDataLs = {}
 		reader = MatrixFile(vcfFname)

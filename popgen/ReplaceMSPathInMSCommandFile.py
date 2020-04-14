@@ -21,8 +21,8 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import re
-from pymodule import ProcessOptions, utils
-from pymodule import AbstractMapper
+from palos import ProcessOptions, utils
+from palos import AbstractMapper
 
 class ReplaceMSPathInMSCommandFile(AbstractMapper):
 	__doc__ = __doc__

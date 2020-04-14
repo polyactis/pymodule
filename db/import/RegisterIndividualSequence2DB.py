@@ -4,9 +4,9 @@ import csv, re, copy
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/src')))
-from pymodule import ProcessOptions, PassingData, utils
+from palos import ProcessOptions, PassingData, utils
 from Sunset.mapper.AbstractAccuMapper import AbstractAccuMapper as ParentClass
-from pymodule.db import SunsetDB as DBClass
+from palos.db import SunsetDB as DBClass
 
 class RegisterIndividualSequence2DB(ParentClass):
 	"""

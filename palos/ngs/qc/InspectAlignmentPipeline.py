@@ -67,10 +67,10 @@ sys.path.insert(0, os.path.expanduser('~/src'))
 
 import copy
 from pegaflow.DAX3 import File, Link, Job
-from pymodule import ProcessOptions, utils, PassingData
-from pymodule.pegasus import yh_pegasus
-from pymodule.pegasus.AbstractAlignmentWorkflow import AbstractAlignmentWorkflow
-from pymodule.db import SunsetDB as DBClass
+from palos import ProcessOptions, utils, PassingData
+from palos.pegasus import yh_pegasus
+from palos.pegasus.AbstractAlignmentWorkflow import AbstractAlignmentWorkflow
+from palos.db import SunsetDB as DBClass
 from Sunset.pegasus.AbstractAccuWorkflow import AbstractAccuWorkflow
 ParentClass = AbstractAlignmentWorkflow
 

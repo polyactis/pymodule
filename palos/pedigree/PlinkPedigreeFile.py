@@ -38,9 +38,9 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import copy
 import networkx as nx
-from pymodule.ProcessOptions import  ProcessOptions
-from pymodule import utils, PassingData
-from pymodule.algorithm import graph
+from palos.ProcessOptions import  ProcessOptions
+from palos import utils, PassingData
+from palos.algorithm import graph
 from MatrixFile import MatrixFile
 
 class PlinkPedigreeFile(MatrixFile):

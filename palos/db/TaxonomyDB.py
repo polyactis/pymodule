@@ -464,7 +464,7 @@ class TaxonomyDB(ElixirDB):
 	def scientific_name2tax_id(self):
 		"""
 		2012.8.28
-			copied from pymodule/utils.py
+			copied from palos/utils.py
 		2012.6.6
 			update it to get table names from TaxonomyDB
 		"""
@@ -475,14 +475,14 @@ class TaxonomyDB(ElixirDB):
 	def returnTaxIDGivenScientificName(self, scientific_name=None):
 		"""
 		2012.8.28
-			copied from pymodule/utils.py
+			copied from palos/utils.py
 		"""
 		return self.scientific_name2tax_id.get(scientific_name)
 	
 	def returnTaxIDGivenSentence(self, sentence=None):
 		"""
 		2012.8.28
-			copied from pymodule/utils.py
+			copied from palos/utils.py
 		2008-07-29
 		"""
 		tax_id_to_return = None
@@ -571,7 +571,7 @@ if __name__ == '__main__':
 		sys.path.insert(0, os.path.expanduser('~/lib/python'))
 		sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
-	from pymodule import ProcessOptions
+	from palos import ProcessOptions
 	main_class = TaxonomyDB
 	po = ProcessOptions(sys.argv, main_class.option_default_dict, error_doc=main_class.__doc__)
 	

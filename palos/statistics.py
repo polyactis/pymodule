@@ -28,8 +28,8 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import numpy, random
-from pymodule import getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter
-from pymodule.plot import yh_matplotlib
+from palos import getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter
+from palos.plot import yh_matplotlib
 
 def calculateChiSqStatOfDeltaVector(dataVector=None, mean=None, std=None):
 	"""
@@ -290,7 +290,7 @@ class DiscreteProbabilityMassContainer(object):
 		"""
 		2013.05.26
 		"""
-		from pymodule.algorithm.RBTree import RBDict
+		from palos.algorithm.RBTree import RBDict
 		self.rbDict = RBDict()
 		self.totalProbabilityMass = 1	#default
 		if object2proabilityMassDict is not None:
@@ -304,7 +304,7 @@ class DiscreteProbabilityMassContainer(object):
 				
 			argument probabilityNormalized: whether the sum of all values in dc adds up to 1.
 		"""
-		from pymodule.io.CNV import CNVSegmentBinarySearchTreeKey
+		from palos.io.CNV import CNVSegmentBinarySearchTreeKey
 		startProbMass = 0.0
 		for discreteVariable, probabilityMass in dc.items():
 			segmentKey = CNVSegmentBinarySearchTreeKey(chromosome="1", span_ls=[startProbMass, startProbMass+probabilityMass], \
@@ -318,7 +318,7 @@ class DiscreteProbabilityMassContainer(object):
 	def sampleObject(self):
 		"""
 		"""
-		from pymodule.io.CNV import CNVSegmentBinarySearchTreeKey
+		from palos.io.CNV import CNVSegmentBinarySearchTreeKey
 		u = random.random()*self.totalProbabilityMass
 		key = CNVSegmentBinarySearchTreeKey(chromosome="1", span_ls=[u], \
 												min_reciprocal_overlap=0.0000001)

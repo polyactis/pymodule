@@ -17,7 +17,7 @@ class PCA(object):
 		"""
 		2008-11-18
 		"""
-		from pymodule import ProcessOptions
+		from palos import ProcessOptions
 		self.ad = ProcessOptions.process_function_arguments(keywords, self.option_default_dict, error_doc=self.__doc__, class_to_have_attr=self)
 	
 	def normalize(cls, data_matrix, divide_variance=True):
@@ -78,7 +78,7 @@ class PCA(object):
 	eig = classmethod(eig)
 
 if __name__ == '__main__':
-	from pymodule import ProcessOptions
+	from palos import ProcessOptions
 	main_class = PCA
 	#po = ProcessOptions(sys.argv, main_class.option_default_dict, error_doc=main_class.__doc__)
 	

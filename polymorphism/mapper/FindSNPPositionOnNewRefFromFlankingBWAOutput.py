@@ -29,10 +29,10 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 import csv
 import pysam
 import numpy, re
-from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils, SNP
-from pymodule.pegasus.mapper.extractor.ExtractFlankingSequenceForVCFLoci import ExtractFlankingSequenceForVCFLoci
-from pymodule import figureOutDelimiter, getColName2IndexFromHeader
-from pymodule.io.BamFile import YHAlignedRead
+from palos import ProcessOptions, getListOutOfStr, PassingData, utils, SNP
+from palos.pegasus.mapper.extractor.ExtractFlankingSequenceForVCFLoci import ExtractFlankingSequenceForVCFLoci
+from palos import figureOutDelimiter, getColName2IndexFromHeader
+from palos.io.BamFile import YHAlignedRead
 from FindSNPPositionOnNewRefFromFlankingBlastOutput import FindSNPPositionOnNewRefFromFlankingBlastOutput
 
 class FindSNPPositionOnNewRefFromFlankingBWAOutput(FindSNPPositionOnNewRefFromFlankingBlastOutput):

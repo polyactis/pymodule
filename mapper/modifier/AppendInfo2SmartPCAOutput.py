@@ -32,18 +32,18 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import matplotlib; matplotlib.use("Agg")	#to disable pop-up requirement
 import csv
-from pymodule import ProcessOptions, getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter, SNPData
-from pymodule.utils import getColName2IndexFromHeader, getListOutOfStr, figureOutDelimiter
-from pymodule import yh_matplotlib, GenomeDB, utils
-from pymodule import MatrixFile
-from pymodule import SNP
+from palos import ProcessOptions, getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter, SNPData
+from palos.utils import getColName2IndexFromHeader, getListOutOfStr, figureOutDelimiter
+from palos import yh_matplotlib, GenomeDB, utils
+from palos import MatrixFile
+from palos import SNP
 import numpy, random, pylab
 import numpy as np
 from vervet.src import VervetDB
 from vervet.src.mapper.AbstractVervetMapper import AbstractVervetMapper
 import networkx as nx
 import matplotlib as mpl
-from pymodule import TaxonomyDB
+from palos import TaxonomyDB
 
 
 class AppendInfo2SmartPCAOutput(AbstractVervetMapper):

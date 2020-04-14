@@ -9,8 +9,8 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import copy
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job
-from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
-from pymodule.io import NextGenSeq
+from palos import ProcessOptions, getListOutOfStr, PassingData, utils
+from palos.io import NextGenSeq
 from . AbstractAlignmentWorkflow import AbstractAlignmentWorkflow
 from . AbstractVCFWorkflow import AbstractVCFWorkflow
 

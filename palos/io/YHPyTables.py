@@ -60,10 +60,10 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 import csv
 import tables
 import numpy
-from pymodule.utils import PassingData, PassingDataList
-from pymodule.ProcessOptions import  ProcessOptions
-from pymodule.io.MatrixFile import MatrixFile
-from pymodule.io.HDF5MatrixFile import HDF5MatrixFile, YHTableInHDF5Group, addAttributeDictToYHTableInHDF5Group 
+from palos.utils import PassingData, PassingDataList
+from palos.ProcessOptions import  ProcessOptions
+from palos.io.MatrixFile import MatrixFile
+from palos.io.HDF5MatrixFile import HDF5MatrixFile, YHTableInHDF5Group, addAttributeDictToYHTableInHDF5Group 
 from tables.file import _checkfilters
 
 class YHTable(tables.Table, YHTableInHDF5Group):

@@ -14,8 +14,8 @@ __doc__ = __doc__%(sys.argv[0])
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
-from pymodule import ProcessOptions, PassingData, utils
-from pymodule.mapper.AbstractMapper import AbstractMapper
+from palos import ProcessOptions, PassingData, utils
+from palos.mapper.AbstractMapper import AbstractMapper
 
 class VerifyFileMD5Sum(AbstractMapper):
     __doc__ = __doc__

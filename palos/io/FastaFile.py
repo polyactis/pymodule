@@ -7,8 +7,8 @@ import os,sys
 from Bio import SeqIO
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-from pymodule import ProcessOptions
-from pymodule.utils import dict_map, importNumericArray, figureOutDelimiter, PassingData, getColName2IndexFromHeader
+from palos import ProcessOptions
+from palos.utils import dict_map, importNumericArray, figureOutDelimiter, PassingData, getColName2IndexFromHeader
 
 class FastaFile(object):
 	__doc__ = __doc__

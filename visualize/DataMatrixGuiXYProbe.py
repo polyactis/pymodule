@@ -30,10 +30,10 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_gtkagg import NavigationToolbar2GTKAgg as NavigationToolbar
 
 import yh_gnome, csv, traceback
-from pymodule.io.SNP import SNPData, read_data
-from pymodule.utils import figureOutDelimiter
-from pymodule import MatrixFile
-from pymodule.plot import yh_matplotlib
+from palos.io.SNP import SNPData, read_data
+from palos.utils import figureOutDelimiter
+from palos import MatrixFile
+from palos.plot import yh_matplotlib
 from variation.src.qc.FilterStrainSNPMatrix import FilterStrainSNPMatrix
 
 class ValuePreProcessor(object):

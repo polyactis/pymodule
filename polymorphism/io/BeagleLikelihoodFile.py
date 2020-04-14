@@ -44,8 +44,8 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import copy
-from pymodule.ProcessOptions import  ProcessOptions
-from pymodule.utils import PassingData
+from palos.ProcessOptions import  ProcessOptions
+from palos.utils import PassingData
 from BeagleGenotypeFile import BeagleGenotypeFile
 
 ParentClass = BeagleGenotypeFile

@@ -17,9 +17,9 @@ __doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0])
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
-from pymodule import ProcessOptions, MatrixFile, PassingData
-from pymodule.io.VCFFile import VCFFile
-from pymodule.pegasus.mapper.AbstractVCFMapper import AbstractVCFMapper
+from palos import ProcessOptions, MatrixFile, PassingData
+from palos.io.VCFFile import VCFFile
+from palos.pegasus.mapper.AbstractVCFMapper import AbstractVCFMapper
 
 ParentClass = AbstractVCFMapper
 class ClearVCFBasedOnSwitchDensity(ParentClass):

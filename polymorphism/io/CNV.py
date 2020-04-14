@@ -10,9 +10,9 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 import fileinput
 import numpy
-from pymodule.ProcessOptions import ProcessOptions
-from pymodule.io.SNP import GenomeWideResult, DataObject
-from pymodule.utils import getColName2IndexFromHeader, dict_map, importNumericArray, figureOutDelimiter, PassingData
+from palos.ProcessOptions import ProcessOptions
+from palos.io.SNP import GenomeWideResult, DataObject
+from palos.utils import getColName2IndexFromHeader, dict_map, importNumericArray, figureOutDelimiter, PassingData
 
 def get_overlap_ratio(span1_ls=None, span2_ls=None, isDataDiscrete=True):
 	"""
@@ -1128,7 +1128,7 @@ class ArrayXProbeFileWrapper(object):
 		"""
 		self.input_fname = input_fname
 		import csv
-		from pymodule import figureOutDelimiter
+		from palos import figureOutDelimiter
 		self.reader = csv.reader(open(self.input_fname), delimiter=figureOutDelimiter(self.input_fname))
 		self.probe_id_ls, self.chr_pos_ls = self.getHeader(self.reader)
 	
@@ -1277,7 +1277,7 @@ if __name__ == "__main__":
 	
 	#from BinarySearchTree import binary_tree
 	#tree = binary_tree()
-	from pymodule.algorithm.RBTree import RBDict	#2010-1-26 binary_tree and RBDict are swappable. but RBDict is more efficient (balanced).
+	from palos.algorithm.RBTree import RBDict	#2010-1-26 binary_tree and RBDict are swappable. but RBDict is more efficient (balanced).
 	tree = RBDict(cmpfn=leftWithinRightAlsoEqualCmp)	# 2010-1-28 use the custom cmpfn if you want the case that left within right is regarded as equal as well.  
 	tree = RBDict(cmpfn=rightWithinLeftAlsoEqualCmp)
 	

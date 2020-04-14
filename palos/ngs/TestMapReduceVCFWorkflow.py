@@ -18,8 +18,8 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 from pegaflow.DAX3 import Executable, File, PFN
 from pegaflow import Workflow
-from pymodule import ProcessOptions, PassingData
-from pymodule.io.FastaFile import FastaFile
+from palos import ProcessOptions, PassingData
+from palos.io.FastaFile import FastaFile
 from . AbstractVCFWorkflow import AbstractVCFWorkflow
 
 ParentClass = AbstractVCFWorkflow

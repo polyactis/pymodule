@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.expanduser('~/script'))
 
 import copy
-from pymodule import ProcessOptions, utils
+from palos import ProcessOptions, utils
 from AbstractReducer import AbstractReducer
 
 class MergeGenotypeMatrix(AbstractReducer):

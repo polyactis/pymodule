@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import csv
-from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
+from palos import ProcessOptions, getListOutOfStr, PassingData, utils
 import re
 
 class AbstractMapper(object):

@@ -22,9 +22,9 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import csv
 import random
-from pymodule import ProcessOptions, getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter
-from pymodule import yh_matplotlib, SNP
-from pymodule.io.AbstractMatrixFileWalker import AbstractMatrixFileWalker
+from palos import ProcessOptions, getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter
+from palos import yh_matplotlib, SNP
+from palos.io.AbstractMatrixFileWalker import AbstractMatrixFileWalker
 
 class SampleRows(AbstractMatrixFileWalker):
 	__doc__ = __doc__

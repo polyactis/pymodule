@@ -26,8 +26,8 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 import matplotlib; matplotlib.use("Agg")	#to disable pop-up requirement
 import csv
 import numpy, random, pylab
-from pymodule import ProcessOptions, getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter
-from pymodule import yh_matplotlib
+from palos import ProcessOptions, getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter
+from palos import yh_matplotlib
 from AbstractPlot import AbstractPlot
 
 class PlotBoxPlot(AbstractPlot):

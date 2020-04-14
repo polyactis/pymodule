@@ -20,7 +20,7 @@ __doc__ = __doc__%(sys.argv[0])
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
-from pymodule import ProcessOptions
+from palos import ProcessOptions
 
 class SelectAndSplitFastaRecords(object):
 	__doc__ = __doc__

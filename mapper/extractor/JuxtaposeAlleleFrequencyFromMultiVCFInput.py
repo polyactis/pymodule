@@ -21,10 +21,10 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import csv
-from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
-from pymodule import SNP
-from pymodule.io.VCFFile import VCFFile
-from pymodule.mapper.AbstractMapper import AbstractMapper
+from palos import ProcessOptions, getListOutOfStr, PassingData, utils
+from palos import SNP
+from palos.io.VCFFile import VCFFile
+from palos.mapper.AbstractMapper import AbstractMapper
 
 class JuxtaposeAlleleFrequencyFromMultiVCFInput(AbstractVCFMapper):
 	__doc__ = __doc__

@@ -41,10 +41,10 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import csv
-from pymodule import ProcessOptions, PassingData, utils, SNP, MatrixFile
-from pymodule import figureOutDelimiter, getColName2IndexFromHeader
-from pymodule.pegasus.mapper.AbstractMapper import AbstractMapper
-from pymodule.pegasus.mapper.extractor.ExtractFlankingSequenceForVCFLoci import ExtractFlankingSequenceForVCFLoci
+from palos import ProcessOptions, PassingData, utils, SNP, MatrixFile
+from palos import figureOutDelimiter, getColName2IndexFromHeader
+from palos.pegasus.mapper.AbstractMapper import AbstractMapper
+from palos.pegasus.mapper.extractor.ExtractFlankingSequenceForVCFLoci import ExtractFlankingSequenceForVCFLoci
 import numpy, re
 
 

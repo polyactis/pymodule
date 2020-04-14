@@ -41,7 +41,7 @@ else:   #32bit
 	sys.path.insert(0, os.path.expanduser('~/lib/python'))
 	sys.path.insert(0, os.path.join(os.path.expanduser('~/script/')))
 import numpy
-from pymodule import process_function_arguments, write_data_matrix, figureOutDelimiter, read_data, SNPData,\
+from palos import process_function_arguments, write_data_matrix, figureOutDelimiter, read_data, SNPData,\
 	SNPData2RawSnpsData_ls
 from variation.src import Stock_250kDB
 from variation.src import AbstractVariationMapper
@@ -110,7 +110,7 @@ class ConvertYuSNPFormat2Bjarni(AbstractVariationMapper):
 		snpsdata.writeRawSnpsDatasToFile(self.outputFname, rawSnpsData_ls, chromosomes=chromosomes, deliminator=',', withArrayIds=self.array_id_2nd_column)
 		
 if __name__ == '__main__':
-	from pymodule import ProcessOptions
+	from palos import ProcessOptions
 	main_class = ConvertYuSNPFormat2Bjarni
 	po = ProcessOptions(sys.argv, main_class.option_default_dict, error_doc=main_class.__doc__)
 	

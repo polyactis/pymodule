@@ -29,12 +29,12 @@ from sqlalchemy.types import LargeBinary
 
 from datetime import datetime
 from . import Database, TableClass, AbstractTableWithFilename
-from pymodule import ProcessOptions, utils, PassingData
-from pymodule.utils import runLocalCommand
-from pymodule.utils import returnZeroFunc
-from pymodule.io import NextGenSeq
-from pymodule.VCFFile import VCFFile
-from pymodule.mapper.computer.CountFastqReadBaseCount import CountFastqReadBaseCount
+from palos import ProcessOptions, utils, PassingData
+from palos.utils import runLocalCommand
+from palos.utils import returnZeroFunc
+from palos.io import NextGenSeq
+from palos.VCFFile import VCFFile
+from palos.mapper.computer.CountFastqReadBaseCount import CountFastqReadBaseCount
 
 Base = declarative_base()
 #20190111 have to set it staticaly because SunsetDB is undefined at this point and it has to be defined after this.
@@ -3978,7 +3978,7 @@ class SunsetDB(Database):
 		"""
 		sys.stderr.write("Construct pedigree out of %s alignments, useAlignmentIDAsNodeID=%s... "%\
 						(len(alignmentLs), useAlignmentIDAsNodeID))
-		from pymodule.algorithm import graph
+		from palos.algorithm import graph
 		DG=graph.DiGraphWrapper()
 		
 		individual_id2alignmentLs = {}
@@ -4025,7 +4025,7 @@ class SunsetDB(Database):
 		2012.1.23
 		"""
 		sys.stderr.write("Constructing pedigree from db directionType=%s..."%(directionType))
-		from pymodule.algorithm import graph
+		from palos.algorithm import graph
 		if directionType==3:
 			DG = graph.GraphWrapper()
 		else:

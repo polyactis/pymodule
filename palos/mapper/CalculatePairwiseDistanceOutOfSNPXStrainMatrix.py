@@ -39,7 +39,7 @@ class CalculatePairwiseDistanceOutOfSNPXStrainMatrix(object):
 		2008-12-05
 		This class is the entry to all others.
 		"""
-		from pymodule import ProcessOptions
+		from palos import ProcessOptions
 		self.ad = ProcessOptions.process_function_arguments(keywords, self.option_default_dict, error_doc=self.__doc__, class_to_have_attr=self)
 	
 	@classmethod
@@ -58,7 +58,7 @@ class CalculatePairwiseDistanceOutOfSNPXStrainMatrix(object):
 				first and 2nd column are the same locus id.
 			genotypes are in alphabets.
 		"""
-		from pymodule.SNP import SNPData, transposeSNPData
+		from palos.SNP import SNPData, transposeSNPData
 		if snpFnameToDoFiltering:
 			oldSNPData = SNPData(input_fname=snpFnameToDoFiltering, turn_into_array=1, ignore_2nd_column=1,\
 								input_alphabet=1, turn_into_integer=1)
@@ -181,7 +181,7 @@ class CalculatePairwiseDistanceOutOfSNPXStrainMatrix(object):
 		
 	
 if __name__ == '__main__':
-	from pymodule import ProcessOptions
+	from palos import ProcessOptions
 	main_class = CalculatePairwiseDistanceOutOfSNPXStrainMatrix
 	po = ProcessOptions(sys.argv, main_class.option_default_dict, error_doc=main_class.__doc__)
 	

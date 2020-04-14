@@ -24,9 +24,9 @@ sys.path.insert(0, os.path.expanduser('~/src'))
 
 import random
 import matplotlib; matplotlib.use("Agg")	#to disable pop-up requirement
-from pymodule import PassingData, ProcessOptions, utils, yh_matplotlib
+from palos import PassingData, ProcessOptions, utils, yh_matplotlib
 from AbstractAccuMapper import AbstractAccuMapper as ParentClass
-from pymodule.db import SunsetDB as DBClass
+from palos.db import SunsetDB as DBClass
 
 class InspectBaseQuality(ParentClass):
 	__doc__ = __doc__

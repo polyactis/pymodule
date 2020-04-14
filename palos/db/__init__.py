@@ -13,7 +13,7 @@ from sqlalchemy.engine.url import URL
 from sqlalchemy import Table, create_engine
 from sqlalchemy.orm import mapper, relation
 from sqlalchemy.orm import scoped_session, sessionmaker
-from pymodule import utils
+from palos import utils
 import copy
 
 def supplantFilePathWithNewDataDir(filePath="", oldDataDir=None, newDataDir=None):
@@ -206,7 +206,7 @@ class DBAncestor(object):
 		"""
 		20170419 common ancestor of Database and ElixirDB
 		"""
-		from pymodule import ProcessOptions
+		from palos import ProcessOptions
 		ProcessOptions.process_function_arguments(keywords, self.option_default_dict, error_doc=self.__doc__, class_to_have_attr=self)
 		if self.echo_pool:	#2010-9-19 passing echo_pool to create_engine() causes error. all pool log disappeared.
 			#2010-9-19 Set up a specific logger with our desired output level
@@ -951,7 +951,7 @@ class ElixirDB(DBAncestor):
 
 
 if __name__ == '__main__':
-	from pymodule import process_options, generate_program_doc
+	from palos import process_options, generate_program_doc
 	main_class = Database
 	opts_dict = process_options(sys.argv, main_class.option_default_dict, error_doc=generate_program_doc(sys.argv[0], main_class.option_default_dict)+main_class.__doc__)
 	

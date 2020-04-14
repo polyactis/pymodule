@@ -25,10 +25,10 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 import matplotlib; matplotlib.use("Agg")	#to disable pop-up requirement
 import pylab
 import csv, random, numpy
-from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils, getColName2IndexFromHeader, figureOutDelimiter,\
+from palos import ProcessOptions, getListOutOfStr, PassingData, utils, getColName2IndexFromHeader, figureOutDelimiter,\
 	yh_matplotlib
-from pymodule.pegasus.mapper.AbstractMapper import AbstractMapper
-from pymodule.io.AbstractMatrixFileWalker import AbstractMatrixFileWalker
+from palos.pegasus.mapper.AbstractMapper import AbstractMapper
+from palos.io.AbstractMatrixFileWalker import AbstractMatrixFileWalker
 
 class AbstractPlot(AbstractMatrixFileWalker):
 	__doc__ = __doc__

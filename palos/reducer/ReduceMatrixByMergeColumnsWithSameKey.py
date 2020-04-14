@@ -21,8 +21,8 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import copy
-from pymodule import ProcessOptions, figureOutDelimiter, utils, PassingData
-from pymodule.io.MatrixFile import MatrixFile
+from palos import ProcessOptions, figureOutDelimiter, utils, PassingData
+from palos.io.MatrixFile import MatrixFile
 from AbstractReducer import AbstractReducer
 
 class ReduceMatrixByMergeColumnsWithSameKey(AbstractReducer):

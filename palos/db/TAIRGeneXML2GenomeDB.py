@@ -26,7 +26,7 @@ sys.path += [os.path.join(os.path.expanduser('~/script/annot/bin'))]
 import xml.etree.cElementTree as ElementTree
 from GenomeDB import GenomeDatabase, Gene, SequenceType, EntrezgeneType, \
 	GeneSegment, GeneCommentaryType, GeneCommentary, AnnotAssembly, Gene2go
-from pymodule import PassingData
+from palos import PassingData
 import datetime
 #import argparse	#in python 2.7
 from optparse import OptionParser
@@ -100,7 +100,7 @@ class TAIRGeneXML2GenomeDB:
 		if len(self.inputfiles) <1:
 			self.parser.error("Please supply input files.\n")
 		
-		#from pymodule import ProcessOptions
+		#from palos import ProcessOptions
 		#self.ad = ProcessOptions.process_function_arguments(keywords, self.option_default_dict, error_doc=self.__doc__, class_to_have_attr=self)
 		
 		#if type(self.inputfiles)==str:
@@ -482,7 +482,7 @@ class TAIRGeneXML2GenomeDB:
 if __name__ == '__main__':
 	#import pdb
 	#pdb.set_trace()
-	#from pymodule import ProcessOptions
+	#from palos import ProcessOptions
 	main_class = TAIRGeneXML2GenomeDB
 	instance = TAIRGeneXML2GenomeDB(sys.argv)
 	#po = ProcessOptions(sys.argv, main_class.option_default_dict, error_doc=main_class.__doc__)

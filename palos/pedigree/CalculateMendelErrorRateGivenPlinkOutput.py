@@ -33,11 +33,11 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import random
 import networkx as nx
-from pymodule import ProcessOptions
-from pymodule.utils import PassingData
-from pymodule.io.MatrixFile import MatrixFile
-from pymodule.io.PlinkPedigreeFile import PlinkPedigreeFile
-from pymodule.pegasus.mapper.AbstractMapper import AbstractMapper
+from palos import ProcessOptions
+from palos.utils import PassingData
+from palos.io.MatrixFile import MatrixFile
+from palos.io.PlinkPedigreeFile import PlinkPedigreeFile
+from palos.pegasus.mapper.AbstractMapper import AbstractMapper
 
 ParentClass = AbstractMapper
 class CalculateMendelErrorRateGivenPlinkOutput(ParentClass):

@@ -38,11 +38,11 @@ sys.path.insert(0, os.path.expanduser('~/src'))
 
 import csv, copy
 from pegaflow.DAX3 import Executable, File, PFN, Profile, Namespace
-from pymodule import ProcessOptions, getListOutOfStr, PassingData, NextGenSeq, figureOutDelimiter, getColName2IndexFromHeader
-from pymodule.ngs.io import VCFFile
-from pymodule.pegasus import yh_pegasus
-from pymodule.db import SunsetDB, AbstractVervetWorkflow
-from pymodule.ngs.GenericVCFWorkflow import GenericVCFWorkflow
+from palos import ProcessOptions, getListOutOfStr, PassingData, NextGenSeq, figureOutDelimiter, getColName2IndexFromHeader
+from palos.ngs.io import VCFFile
+from palos.pegasus import yh_pegasus
+from palos.db import SunsetDB, AbstractVervetWorkflow
+from palos.ngs.GenericVCFWorkflow import GenericVCFWorkflow
 
 class AddVCFFolder2DBWorkflow(GenericVCFWorkflow):
 	__doc__ = __doc__

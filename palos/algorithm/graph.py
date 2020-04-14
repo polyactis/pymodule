@@ -7,7 +7,7 @@
 import os, sys
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-from pymodule.utils import PassingData
+from palos.utils import PassingData
 import copy
 import numpy
 from networkx import Graph, DiGraph

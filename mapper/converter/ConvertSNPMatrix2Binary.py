@@ -22,7 +22,7 @@ if bit_number>40:       #64bit
 else:   #32bit
 	sys.path.insert(0, os.path.expanduser('~/lib/python'))
 	sys.path.insert(0, os.path.join(os.path.expanduser('~/script/')))
-from pymodule import process_function_arguments, write_data_matrix, figureOutDelimiter, read_data, SNPData
+from palos import process_function_arguments, write_data_matrix, figureOutDelimiter, read_data, SNPData
 import csv
 
 class ConvertSNPMatrix2Binary(object):
@@ -36,7 +36,7 @@ class ConvertSNPMatrix2Binary(object):
 		"""
 		2008-09-7
 		"""
-		from pymodule import ProcessOptions
+		from palos import ProcessOptions
 		self.ad=ProcessOptions.process_function_arguments(keywords, self.option_default_dict, error_doc=self.__doc__, class_to_have_attr=self)
 	
 	def output_allele2index_ls(self, snpData, allele_index2allele_ls, mapping_fname):
@@ -80,7 +80,7 @@ class ConvertSNPMatrix2Binary(object):
 
 		
 if __name__ == '__main__':
-	from pymodule import ProcessOptions
+	from palos import ProcessOptions
 	main_class = ConvertSNPMatrix2Binary
 	po = ProcessOptions(sys.argv, main_class.option_default_dict, error_doc=main_class.__doc__)
 	

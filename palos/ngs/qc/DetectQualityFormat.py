@@ -154,13 +154,13 @@ if __name__ == "__main__":
     # Session = sessionmaker(bind = engine)
     # session = Session()
 
-    from pymodule.Sunset.db import SunsetDB
+    from palos.Sunset.db import SunsetDB
     db_main = SunsetDB.SunsetDB(drivername='postgresql', db_user=args.db_user,db_passwd=args.password, 
                             hostname=args.hostname, dbname=args.dbname, schema=args.schema)
     db_main.setup(create_tables=False)
     session = db_main.session
 
-    from pymodule.db.SunsetDB import IndividualSequence, IndividualAlignment, IndividualSequenceFile
+    from palos.db.SunsetDB import IndividualSequence, IndividualAlignment, IndividualSequenceFile
     f_out = open(args.outputfilename, 'w') 
     id_list = session.query(IndividualAlignment.ind_seq_id).all()
     for the_id in id_list:

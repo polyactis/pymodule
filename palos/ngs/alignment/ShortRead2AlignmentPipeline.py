@@ -123,12 +123,12 @@ sys.path.insert(0, os.path.expanduser('~/src'))
 
 import copy
 from pegaflow.DAX3 import Executable, File, PFN, Profile, Namespace
-from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
-from pymodule.pegasus import yh_pegasus
-from pymodule.pegasus.ShortRead2AlignmentWorkflow import ShortRead2AlignmentWorkflow
-from pymodule.pegasus.AbstractNGSWorkflow import AbstractNGSWorkflow
-from pymodule.pegasus.alignment.AlignmentReadBaseQualityRecalibrationWorkflow import AlignmentReadBaseQualityRecalibrationWorkflow
-from pymodule.db import SunsetDB
+from palos import ProcessOptions, getListOutOfStr, PassingData, utils
+from palos.pegasus import yh_pegasus
+from palos.pegasus.ShortRead2AlignmentWorkflow import ShortRead2AlignmentWorkflow
+from palos.pegasus.AbstractNGSWorkflow import AbstractNGSWorkflow
+from palos.pegasus.alignment.AlignmentReadBaseQualityRecalibrationWorkflow import AlignmentReadBaseQualityRecalibrationWorkflow
+from palos.db import SunsetDB
 from AbstractAccuWorkflow import AbstractAccuWorkflow as ParentClass
 
 class ShortRead2AlignmentPipeline(ParentClass, ShortRead2AlignmentWorkflow):

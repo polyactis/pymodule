@@ -21,9 +21,9 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import csv
 import h5py
-from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
-from pymodule import SNP
-from pymodule.mapper.AbstractMapper import AbstractMapper
+from palos import ProcessOptions, getListOutOfStr, PassingData, utils
+from palos import SNP
+from palos.mapper.AbstractMapper import AbstractMapper
 
 
 class ConvertMSOutput2FASTQ(AbstractMapper):

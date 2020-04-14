@@ -29,9 +29,9 @@ sys.path.insert(0, os.path.expanduser('~/script'))
 sys.path.insert(0, os.path.expanduser('~/src'))
 
 import copy
-from pymodule import ProcessOptions, getListOutOfStr, PassingData, utils
+from palos import ProcessOptions, getListOutOfStr, PassingData, utils
 from Sunset.mapper.AbstractAccuMapper import AbstractAccuMapper as ParentClass
-from pymodule.db import SunsetDB as DBClass
+from palos.db import SunsetDB as DBClass
 
 class AddAlignmentFile2DB(ParentClass):
 	__doc__ = __doc__

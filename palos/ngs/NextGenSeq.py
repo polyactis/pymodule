@@ -7,7 +7,7 @@ import os, sys
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 import re
-from pymodule import utils
+from palos import utils
 
 
 def getPEInputFiles(input_dir, isPE=True):

@@ -116,7 +116,7 @@ sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 __version__ = "1.6"
 
 import string, math
-from pymodule.utils import PassingData
+from palos.utils import PassingData
 
 BLACK = 0
 RED = 1

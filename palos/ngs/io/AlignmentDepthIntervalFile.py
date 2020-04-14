@@ -20,8 +20,8 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.expanduser('~/script'))
 
 import copy, numpy
-from pymodule.ProcessOptions import  ProcessOptions
-from pymodule import PassingData
+from palos.ProcessOptions import  ProcessOptions
+from palos import PassingData
 from . MatrixFile import MatrixFile
 
 class AlignmentDepthIntervalFile(MatrixFile):
