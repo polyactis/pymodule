@@ -66,7 +66,7 @@ if __name__ == '__main__':
 	#test GADA
 	ins = GADA.GADA(1)
 	segment_ls = ins.run([1,1,1,1,0.99,0.99,1,1,0.1,0.1,0.1,0.15], 0.2, 4, 2)
-	print segment_ls
+	print(segment_ls)
 	del ins
 
 	from palos import ProcessOptions
