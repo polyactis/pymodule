@@ -17,7 +17,7 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.Alphabet import IUPAC
 from palos import ProcessOptions, utils
-from palos import AbstractMapper
+from palos.mapper.AbstractMapper import AbstractMapper
 from palos.polymorphism.PolymorphismTableFile import PolymorphismTableFile, OneIndividualPolymorphismData
 
 

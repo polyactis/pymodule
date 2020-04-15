@@ -15,8 +15,7 @@ import sys, os, math
 __doc__ = __doc__%(sys.argv[0])
 
 import csv
-from palos import ProcessOptions, getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter
-from palos import yh_matplotlib
+from palos import ProcessOptions, PassingData, figureOutDelimiter
 import numpy, random
 from palos.io.AbstractMatrixFileWalker import AbstractMatrixFileWalker
 from palos.plot.AbstractPlot import AbstractPlot

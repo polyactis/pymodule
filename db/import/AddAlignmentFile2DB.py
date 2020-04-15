@@ -27,7 +27,7 @@ __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 import copy
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
 from AbstractAccuMapper import AbstractAccuMapper as ParentClass
-from palos.db import SunsetDB as DBClass
+from palos.db import SunsetDB
 
 class AddAlignmentFile2DB(ParentClass):
 	__doc__ = __doc__
@@ -74,14 +74,14 @@ class AddAlignmentFile2DB(ParentClass):
 
 		if os.path.isfile(inputFileRealPath):
 			if self.individual_alignment_id:
-				individual_alignment = self.db_main.queryTable(DBClass.IndividualAlignment).get(self.individual_alignment_id)
+				individual_alignment = self.db_main.queryTable(SunsetDB.IndividualAlignment).get(self.individual_alignment_id)
 			elif self.parent_individual_alignment_id:
 				individual_alignment = self.db_main.copyParentIndividualAlignment(parent_individual_alignment_id=self.parent_individual_alignment_id,\
 																	mask_genotype_method_id=self.mask_genotype_method_id,\
 																	data_dir=self.data_dir, local_realigned=self.local_realigned)
 			else:
 				#alignment for this library of the individual_sequence
-				individual_sequence = self.db_main.queryTable(DBClass.IndividualSequence).get(self.individual_sequence_id)
+				individual_sequence = self.db_main.queryTable(SunsetDB.IndividualSequence).get(self.individual_sequence_id)
 				individual_alignment = self.db_main.getAlignment(individual_sequence_id=self.individual_sequence_id,\
 										path_to_original_alignment=None, sequencer=individual_sequence.sequencer,\
 										sequence_type=individual_sequence.sequence_type, sequence_format=individual_sequence.format, \
@@ -119,7 +119,7 @@ class AddAlignmentFile2DB(ParentClass):
 				traceback.print_exc()
 				self.cleanUpAndExitOnFailure(exitCode=4)
 
-			db_entry = self.db_main.queryTable(DBClass.IndividualAlignment).filter_by(md5sum=md5sum).first()
+			db_entry = self.db_main.queryTable(SunsetDB.IndividualAlignment).filter_by(md5sum=md5sum).first()
 			if db_entry and db_entry.id!=individual_alignment.id and db_entry.path and os.path.isfile(os.path.join(data_dir, db_entry.path)):
 				sys.stderr.write("Warning: another file %s with the identical md5sum %s as this file %s, is already in db.\n"%\
 								(db_entry.path, md5sum, inputFileRealPath))

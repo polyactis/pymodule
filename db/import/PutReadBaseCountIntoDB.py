@@ -13,8 +13,8 @@ import sys, os, math
 __doc__ = __doc__%(sys.argv[0])
 import csv, copy
 from palos import ProcessOptions, PassingData, utils, figureOutDelimiter
-from palos.mapper.AbstractAccuMapper import AbstractAccuMapper as ParentClass
-from palos.db import SunsetDB as DBClass
+from AbstractAccuMapper import AbstractAccuMapper as ParentClass
+from palos.db import SunsetDB
 
 class PutReadBaseCountIntoDB(ParentClass):
 	__doc__ = __doc__
@@ -36,7 +36,7 @@ class PutReadBaseCountIntoDB(ParentClass):
 		"""
 		if self.debug or self.report:
 			sys.stderr.write("Updating IndividualSequenceFile read & base count for isqf_id %s ...\n"%(isqf_id))
-		isqf = db_main.queryTable(DBClass.IndividualSequenceFile).get(isqf_id)
+		isqf = db_main.queryTable(SunsetDB.IndividualSequenceFile).get(isqf_id)
 		if isqf:
 			if isqf.read_count !=read_count or isqf.base_count!=base_count:
 				isqf.read_count = read_count
@@ -54,7 +54,7 @@ class PutReadBaseCountIntoDB(ParentClass):
 		"""
 		if self.debug or self.report:
 			sys.stderr.write("Updating IndividualSequence read & base count for isq_id %s ...\n"%(isq_id))
-		isq = db_main.queryTable(DBClass.IndividualSequence).get(isq_id)
+		isq = db_main.queryTable(SunsetDB.IndividualSequence).get(isq_id)
 		if isq:
 			if isq.read_count !=read_count or isq.base_count!=base_count:
 				isq.read_count = read_count

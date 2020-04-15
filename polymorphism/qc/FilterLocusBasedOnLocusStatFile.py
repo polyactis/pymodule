@@ -10,7 +10,8 @@ Examples:
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0])
 
-from palos import ProcessOptions, MatrixFile, PassingData
+from palos import ProcessOptions, PassingData
+from palos.io.MatrixFile import MatrixFile
 from palos.ngs.io.VCFFile import VCFFile
 from palos.mapper.AbstractVCFMapper import AbstractVCFMapper
 

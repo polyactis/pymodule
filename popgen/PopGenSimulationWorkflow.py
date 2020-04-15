@@ -18,7 +18,8 @@ __doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0])
 
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job
 from pegaflow import Workflow
-from palos import ProcessOptions, PassingData, AbstractWorkflow, utils
+from palos import ProcessOptions, PassingData, utils
+from palos.pegasus.AbstractWorkflow import AbstractWorkflow
 
 ParentClass = AbstractWorkflow
 class PopGenSimulationWorkflow(ParentClass):

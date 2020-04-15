@@ -32,11 +32,11 @@ class DownsampleWorkflow(ParentClass):
     def addDownsamplejob(self, workflow=None, data_dir=None, idDict=None, DownSamplePrefix=None, \
                          downSampleJava=None, downSampleJar=None, transferOutput=False):
         AccurityFolder = "AccurityResult"
-        AccurityFolderJob = self.addMkDirJob(executable=workflow.mkdirWrap, outputDir=AccurityFolder)
+        AccurityFolderJob = self.addMkDirJob(outputDir=AccurityFolder)
 
         sys.stderr.write("Adding downsample jobs for %s individual sequences ..." % (len(idDict)))
         SampleFolder = "%swithSeed1.0" % (DownSamplePrefix)
-        SampleFolderJob = self.addMkDirJob(executable=workflow.mkdirWrap, outputDir=SampleFolder)
+        SampleFolderJob = self.addMkDirJob(outputDir=SampleFolder)
 
         alignNormal = self.db_main.queryTable(SunsetDB.IndividualAlignment).get(idDict['normalFile'])
         alignNormalFilePath = os.path.join(data_dir, alignNormal.path)
@@ -63,21 +63,21 @@ class DownsampleWorkflow(ParentClass):
             outputTumorFile = File(os.path.join(SampleFolder, str(probTumor) + "_tumor_downsample.bam"))
             mergeJobAndOutputLs = []
             normal_down_sample_job = self.addGenericJavaJob(executable=downSampleJava, jarFile=downSampleJar, \
-                                                       inputFile=inputNormalBamFile, inputArgumentOption="INPUT=", \
-                                                       inputFileList=None,
-                                                       argumentForEachFileInInputFileList=None, \
-                                                       outputFile=outputNormalFile, outputArgumentOption="OUTPUT=", \
-                                                       parentJobLs=[SampleFolderJob], transferOutput=False,
-                                                       job_max_memory=job_max_memory, \
-                                                       frontArgumentList=['DownsampleSam'], extraArguments=None,
-                                                       extraArgumentList=['PROBABILITY=' + str(probNormal), \
-                                                                          'RANDOM_SEED=','1' ,\
-                                                                          'STRATEGY=','ConstantMemory', \
-                                                                          'VALIDATION_STRINGENCY=','LENIENT'
-                                                                          ],
-                                                       extraOutputLs=None, \
-                                                       extraDependentInputLs=None, no_of_cpus=None, walltime=walltime,
-                                                       sshDBTunnel=None)
+                                            inputFile=inputNormalBamFile, inputArgumentOption="INPUT=", \
+                                            inputFileList=None,
+                                            argumentForEachFileInInputFileList=None, \
+                                            outputFile=outputNormalFile, outputArgumentOption="OUTPUT=", \
+                                            parentJobLs=[SampleFolderJob], transferOutput=False,
+                                            job_max_memory=job_max_memory, \
+                                            frontArgumentList=['DownsampleSam'], extraArguments=None,
+                                            extraArgumentList=['PROBABILITY=' + str(probNormal), \
+                                                                'RANDOM_SEED=','1' ,\
+                                                                'STRATEGY=','ConstantMemory', \
+                                                                'VALIDATION_STRINGENCY=','LENIENT'
+                                                                ],
+                                            extraOutputLs=None, \
+                                            extraDependentInputLs=None, no_of_cpus=None, walltime=walltime,
+                                            sshDBTunnel=None)
             mergeJobAndOutputLs.append(PassingData(jobLs=[normal_down_sample_job], file=outputNormalFile))
 
             tumor_down_sample_job = self.addGenericJavaJob(executable=downSampleJava, jarFile=downSampleJar, \
@@ -101,10 +101,10 @@ class DownsampleWorkflow(ParentClass):
             mergeJobAndOutputLs.append(PassingData(jobLs=[tumor_down_sample_job], file=outputTumorFile))
 
             puritySampleFolder = "puritySample"
-            SampleFolderJob = self.addMkDirJob(executable=workflow.mkdirWrap, outputDir=puritySampleFolder)
+            SampleFolderJob = self.addMkDirJob(outputDir=puritySampleFolder)
             purity = str((10-i) * 0.1)
             purityDir = "purity" + str(purity)
-            purityFolderJob = self.addMkDirJob(executable=workflow.mkdirWrap, outputDir=os.path.join(puritySampleFolder,purityDir))
+            purityFolderJob = self.addMkDirJob(outputDir=os.path.join(puritySampleFolder,purityDir))
             mergedBamFile = File(os.path.join(puritySampleFolder,purityDir, "purity_"+ purity + ".bam"))
             baseCoverage = 4 * 3000000000  # baseline
             minMergeAlignmentWalltime = 240  # in minutes, 4 hours, when coverage is defaultCoverage
@@ -171,7 +171,8 @@ class DownsampleWorkflow(ParentClass):
             sample_id = os.path.basename(tumor_bam.name).strip(".bam")
             sample_folder = AccurityFolder + "/" + sample_id
 
-            sample_folder_Job = self.addMkDirJob(executable=workflow.mkdirWrap,outputDir=sample_folder, parentJobLs=parentJobLs.append( AccurityFolderJob))
+            sample_folder_Job = self.addMkDirJob(outputDir=sample_folder, 
+                parentJobLs=parentJobLs.append(AccurityFolderJob))
             outputList.append(File(sample_folder + "/infer.out.tsv"))
             outputList.append(File(sample_folder + "/infer.out.details.tsv"))
             outputList.append(File(sample_folder + "/auto.tsv"))

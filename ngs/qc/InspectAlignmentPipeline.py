@@ -64,12 +64,10 @@ __doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[
 import copy
 from pegaflow.DAX3 import File, Link, Job
 from palos import ProcessOptions, utils, PassingData
-from palos.pegasus import yh_pegasus
 from palos.ngs.AbstractAlignmentWorkflow import AbstractAlignmentWorkflow
-from palos.db import SunsetDB as DBClass
-from Sunset.pegasus.AbstractAccuWorkflow import AbstractAccuWorkflow
-ParentClass = AbstractAlignmentWorkflow
+from AbstractAccuWorkflow import AbstractAccuWorkflow
 
+ParentClass = AbstractAlignmentWorkflow
 
 class InspectAlignmentPipeline(ParentClass, AbstractAccuWorkflow):
 	__doc__ = __doc__
@@ -79,16 +77,16 @@ class InspectAlignmentPipeline(ParentClass, AbstractAccuWorkflow):
 
 	option_default_dict = copy.deepcopy(commonOptionDict)
 	option_default_dict.update({
-						('min_segment_length', 0, int): [100, '', 1, 'a parameter of segmentation algorithm used in segmenting the depth file', ],\
-						("needPerContigJob", 0, int): [0, 'P', 0, 'toggle to add DepthOfCoverage and VariousReadCount jobs for each contig.'],\
-						("skipAlignmentWithStats", 0, int): [0, 's', 0, 'If an alignment has depth stats filled, not DOC job will be run. similar for flagstat job.'],\
-						("alignmentDepthIntervalMethodShortName", 0, ): [None, '', 1, 'AlignmentDepthIntervalMethod.short_name, \n\
-		used to store segmented depth intervals from all alignments into db. \n\
-		This portion of workflow will not run if this is not given.'],\
-						})
+		('min_segment_length', 0, int): [100, '', 1, 'a parameter of segmentation algorithm used in segmenting the depth file', ],\
+		("needPerContigJob", 0, int): [0, 'P', 0, 'toggle to add DepthOfCoverage and VariousReadCount jobs for each contig.'],\
+		("skipAlignmentWithStats", 0, int): [0, 's', 0, 'If an alignment has depth stats filled, not DOC job will be run. similar for flagstat job.'],\
+		("alignmentDepthIntervalMethodShortName", 0, ): [None, '', 1, 'AlignmentDepthIntervalMethod.short_name, '
+			'used to store segmented depth intervals from all alignments into db. '
+			'This portion of workflow will not run if this is not given.'],\
+		})
 	#	("fractionToSample", 0, float): [0.001, '', 1, 'fraction of loci to walk through for DepthOfCoverage walker.'],\
 	option_default_dict[('completedAlignment', 0, int)][0]=1	#2013.05.03
-	option_default_dict[("thisModulePath", 1, )][0] = '%s/src/Sunset'
+	option_default_dict[("thisModulePath", 1, )][0] = '%s/script/pymodule/'
 
 	getReferenceSequence = AbstractAccuWorkflow.getReferenceSequence
 	connectDB = AbstractAccuWorkflow.connectDB

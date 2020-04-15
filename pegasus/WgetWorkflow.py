@@ -207,7 +207,7 @@ class WgetWorkflow(AbstractWorkflow):
         no_of_jobs= 0
         
         topOutputDir = outputDir
-        topOutputDirJob = self.addMkDirJob(mkdir=self.mkdirWrap, outputDir=topOutputDir)
+        topOutputDirJob = self.addMkDirJob(outputDir=topOutputDir)
         no_of_jobs += 1
         returnData = PassingData()
         returnData.jobDataLs = []

@@ -1,5 +1,16 @@
 #!/usr/bin/python
 """
+Parse the chromosome sequence files (fasta format) downloaded from
+	ftp://ftp.ncbi.nih.gov/genomes/ORGANISM/Assembled_chromosomes/
+	ftp://ftp.ncbi.nih.gov/refseq/release/
+INPUT_FILEs are *.fa.gz (fasta format). The program detects whether it's gzipped or not
+	based on the filename (like *gz or not). It could contain multiple fasta blocks.
+	Taxonomy ID of the organism is detected thru the fasta header by FigureOutTaxID
+		based on data stored in tables of schema taxonomy in the same postgres db, on the same host.
+
+Results are stored in 2 tables in the database, annot_assembly and raw_sequence.
+	The chromosome sequence is snipped into 10kb chunks and dumped into raw_sequence_table.
+	If annot_assembly has the same entry based on the unique constraint, this entry would be ignored. 
 
 Examples:
 	%s --commit *.fa.gz
@@ -36,27 +47,15 @@ Examples:
 		-i ~/mnt/hoffman2/u/home/eeskin2/polyacti/NetworkData/vervet/raw_sequence/Chlorocebus_sabaeus_1.0/Chlorocebus_sabaeus_1.0.fasta
 		--version 1
 
-Description:
-	Parse the chromosome sequence files (fasta format) downloaded from
-		ftp://ftp.ncbi.nih.gov/genomes/ORGANISM/Assembled_chromosomes/
-		ftp://ftp.ncbi.nih.gov/refseq/release/
-	INPUT_FILEs are *.fa.gz (fasta format). The program detects whether it's gzipped or not
-		based on the filename (like *gz or not). It could contain multiple fasta blocks.
-		Taxonomy ID of the organism is detected thru the fasta header by FigureOutTaxID
-			based on data stored in tables of schema taxonomy in the same postgres db, on the same host.
-	
-	Results are stored in 2 tables in the database, annot_assembly and raw_sequence.
-		The chromosome sequence is snipped into 10kb chunks and dumped into raw_sequence_table.
-		If annot_assembly has the same entry based on the unique constraint, this entry would be ignored. 
-	
 """
 
 import sys, getopt, os, re, gzip
 from apt_pkg import Description
 __doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0])
 
-from palos.db.GenomeDB import *
-from palos import PassingData, utils, AbstractDBInteractingClass
+from palos.db.GenomeDB import RawSequence, GenomeDatabase
+from palos import PassingData, utils
+from palos.mapper.AbstractDBJob import AbstractDBJob
 from palos.utils import FigureOutTaxID
 #from palos.db import db_connect
 
@@ -80,9 +79,9 @@ class annot_assembly_attr:
 		self.seq_type = None
 		self.comment = None
 
-class chromosome_fasta2db(AbstractDBInteractingClass):
+class chromosome_fasta2db(AbstractDBJob):
 	__doc__ = __doc__
-	option_default_dict = AbstractDBInteractingClass.option_default_dict.copy()
+	option_default_dict = AbstractDBJob.option_default_dict.copy()
 	option_default_dict.update({
 							('organism', 0, ): [None, 'g', 1, '2-letter abbreviation for organism. Optional, if specified, only sequence from this organism would be extracted.'],\
 							('sequence_type_id', 0, int):[9, '', 1, 'column SequenceType.id in database GenomeDB'],\
@@ -105,7 +104,7 @@ class chromosome_fasta2db(AbstractDBInteractingClass):
 		2008-07-06
 			use the firstline (header) of the fasta file to extract which chromosome. using filename is unreliable.
 		"""
-		AbstractDBInteractingClass.__init__(self, inputFnameLs=inputFnameLs, **keywords)
+		AbstractDBJob.__init__(self, inputFnameLs=inputFnameLs, **keywords)
 		#self.connectDB() called within its __init__()
 		
 		

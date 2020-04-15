@@ -18,7 +18,7 @@ __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 import csv, copy
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils, figureOutDelimiter
 from AbstractAccuMapper import AbstractAccuMapper as ParentClass
-from palos.db import SunsetDB as DBClass
+from palos.db import SunsetDB
 
 class PutFlagstatOutput2DB(ParentClass):
 	__doc__ = __doc__
@@ -69,7 +69,7 @@ class PutFlagstatOutput2DB(ParentClass):
 			perc_mapq5_mapped_to_diff_chrs_index = colName2Index.get("perc_mapq5_mapped_to_diff_chrs")
 			for row in reader:
 				alignmentID = int(row[alignment_id_index])
-				alignment = self.db_main.queryTable(DBClass.IndividualAlignment).get(alignmentID)
+				alignment = self.db_main.queryTable(SunsetDB.IndividualAlignment).get(alignmentID)
 				
 				alignment.perc_reads_mapped = float(row[perc_reads_mapped_index])
 				alignment.perc_secondary = float(row[perc_secondary_index])

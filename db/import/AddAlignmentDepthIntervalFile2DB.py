@@ -1,19 +1,17 @@
 #!/usr/bin/env python
 """
+2013.08.29 add a new AlignmentDepthIntervalFile into db
+
 Examples:
-	%s 
-	
 	%s --db_user yh --schema public -i  folderReduce/63_alignments_CAE5_depth_GADAOut_minSegLength1000.tsv.gz
 		--methodShortName PopSabaeusCoverageOn3488 --alignmentIDList 6115-6177 --chromosome CAE5 --format tsv
 		--data_dir /u/home/p/polyacti/NetworkData/vervet/db/ --commit
 		--logFilename  folderLog/AddAlignmentDepthIntervalFile2DB_chr_CAE5.log
 
-Description:
-	2013.08.29 add a new AlignmentDepthIntervalFile into db
 """
 
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
+__doc__ = __doc__%(sys.argv[0])
 
 import copy, re
 from palos import ProcessOptions, PassingData, utils, ngs

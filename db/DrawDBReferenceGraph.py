@@ -12,10 +12,10 @@ Examples:
 
 """
 
-import sys, os, math
+import sys, os
 __doc__ = __doc__%(sys.argv[0])
 
-from palos import ProcessOptions, getListOutOfStr, PassingData, utils
+from palos import ProcessOptions
 from palos.mapper.AbstractMapper import AbstractMapper
 import networkx as nx
 

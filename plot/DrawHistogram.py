@@ -17,13 +17,11 @@ import matplotlib; matplotlib.use("Agg")	#to disable pop-up requirement
 import csv
 from palos import ProcessOptions, getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter
 from palos.plot import yh_matplotlib
-from palos.db import GenomeDB
 import numpy, random, pylab
 from palos.plot.AbstractPlot import AbstractPlot
 
 class DrawHistogram(AbstractPlot):
 	__doc__ = __doc__
-#						
 	option_default_dict = AbstractPlot.option_default_dict
 	option_default_dict.pop(('xColumnHeader', 1, ))
 	option_default_dict.pop(('xColumnPlotLabel', 0, ))

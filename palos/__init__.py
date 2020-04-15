@@ -13,30 +13,3 @@ from . algorithm import pca_module
 from . algorithm.PCA import PCA
 from . algorithm.RBTree import RBTree, RBDict, RBTreeIter, RBList, RBNode
 from . algorithm.BinarySearchTree import binary_tree
-
-#from . plot import yh_matplotlib, yh_matplotlib_artists
-#from . plot.yh_matplotlib import assignMatPlotlibHueColorToLs, drawName2FCLegend
-#from db import GenomeDB, TaxonomyDB
-
-#2012.11.14
-#from . io.MatrixFile import MatrixFile
-#from . io.BeagleLikelihoodFile import BeagleLikelihoodFile
-#from . io.PlinkPedigreeFile import PlinkPedigreeFile
-#
-#from . polymorphism.SNP import write_data_matrix, read_data, SNPData, GenomeWideResults, GenomeWideResult, DataObject, \
-#	getGenomeWideResultFromFile,\
-#	nt2number, number2nt, number2complement, SNPInfo, number2single_char_nt, getGenomeWideResultFromHDF5MatrixFile,\
-#	SNPData2RawSnpsData_ls
-#from . io.TwoSNPData import TwoSNPData, QualityControl
-#from . io.HDF5MatrixFile import HDF5MatrixFile, addAttributeDictToYHTableInHDF5Group
-#from . io.YHPyTables import YHTable, YHFile, YHSingleTableFile, castPyTablesRowIntoPassingData
-#from . io.Association import AssociationTable, AssociationTableFile, LocusMapTable, LocusMapTableFile
-#from . io.AssociationLandscape import AssociationLandscapeTable, AssociationLandscapeTableFile
-#from . io.AssociationPeak import AssociationPeakTable, AssociationPeakTableFile
-#from . io.AssociationLocus import AssociationLocusTable, AssociationLocus2PeakTable, AssociationLocusTableFile
-#
-#from . io.VCFFile import VCFFile, VCFRecord
-#from . io import CNV
-#from . io.AbstractMatrixFileWalker import AbstractMatrixFileWalker
-#from . io.latex import outputMatrixInLatexTable, outputFigureInLatex
-#from . io.FastaFile import FastaFile

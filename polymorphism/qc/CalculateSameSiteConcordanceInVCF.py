@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2013.07.12 program that calculates genotype concordance of same-position SNPs (chromosome, position) inside a VCF.
 
@@ -6,13 +6,14 @@ Examples:
 	%s -i folderReduceLiftOverVCF/CAEY.sorted.vcf.gz -o CAEY.sameSite.concordance.tsv
 
 """
-import sys, os, math
+import sys, os
 __doc__ = __doc__%(sys.argv[0])
 
-from palos import ProcessOptions, MatrixFile, PassingData
+from palos import ProcessOptions, PassingData
 from palos.ngs.io.VCFFile import VCFFile
+from palos.io.MatrixFile import MatrixFile
 from palos.mapper.AbstractVCFMapper import AbstractVCFMapper
-from palos.polymorphism.SNP import SNP
+from palos.polymorphism import SNP
 
 ParentClass = AbstractVCFMapper
 class CalculateSameSiteConcordanceInVCF(ParentClass):
@@ -66,20 +67,15 @@ class CalculateSameSiteConcordanceInVCF(ParentClass):
 			import pdb
 			pdb.set_trace()
 		
-		
-		
 		outputDir = os.path.split(self.outputFname)[0]
 		if outputDir and not os.path.isdir(outputDir):
 			os.makedirs(outputDir)
 		
 		snp_pos2genotypeVectorLs =self.readInSNPID2GenotypeVectorLs(self.inputFname).snp_pos2returnData
 		
-		
-		
 		writer = MatrixFile(self.outputFname, openMode='w', delimiter='\t')
 		header = ['chromosome', 'position', 'noOfMatches', 'noOfTotal', 'concordance']
 		writer.writeHeader(header)
-		
 		
 		counter = 0
 		real_counter = 0

@@ -20,9 +20,8 @@ __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 import subprocess, copy
 from pegaflow.DAX3 import File, Link, PFN, Job
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
-from palos.pegasus import yh_pegasus
 from palos.ngs.AbstractNGSWorkflow import AbstractNGSWorkflow
-from palos.db import SunsetDB as DBClass
+from palos.db import SunsetDB
 from AbstractAccuWorkflow import AbstractAccuWorkflow as ParentClass
 
 
@@ -68,7 +67,7 @@ class ReadFileBaseCountWorkflow(ParentClass):
 		sys.stderr.write("Finding all ISQ-affiliated files of %s ind seq entries ..."%(len(ind_seq_id_ls)))
 		returnData = PassingData(jobDataLs=[])
 		counter = 0
-		Table = DBClass.IndividualSequence
+		Table = SunsetDB.IndividualSequence
 		query = db_main.queryTable(Table).filter(Table.id.in_(ind_seq_id_ls))
 		individual_sequence_id_set = set()
 		missed_individual_sequence_id_set = set()

@@ -3,7 +3,7 @@ import sys, os, math
 import csv, re, copy
 from palos import ProcessOptions, PassingData, utils
 from AbstractAccuMapper import AbstractAccuMapper as ParentClass
-from palos.db import SunsetDB as DBClass
+from palos.db import SunsetDB
 
 class RegisterIndividualSequence2DB(ParentClass):
 	"""

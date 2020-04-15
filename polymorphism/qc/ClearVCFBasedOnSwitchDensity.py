@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2013.07.12 program that clears the whole liftover VCF if its switch point density above the maximum.
 
@@ -6,10 +6,11 @@ Examples:
 	%s -i folderReduceLiftOverVCF/CAEY.sorted.vcf.gz -o CAEY.sameSite.concordance.tsv
 	
 """
-import sys, os, math
+import sys, os
 __doc__ = __doc__%(sys.argv[0])
 
-from palos import ProcessOptions, MatrixFile, PassingData
+from palos import ProcessOptions, PassingData
+from palos.io.MatrixFile import MatrixFile
 from palos.ngs.io.VCFFile import VCFFile
 from palos.mapper.AbstractVCFMapper import AbstractVCFMapper
 

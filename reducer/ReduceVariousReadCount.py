@@ -6,9 +6,9 @@
 
 """
 
-import sys, os, math
+import sys
 import csv
-from palos import ProcessOptions, getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter, utils
+from palos import ProcessOptions, getColName2IndexFromHeader, figureOutDelimiter, utils
 
 class ReduceVariousReadCount(object):
 	__doc__ = __doc__

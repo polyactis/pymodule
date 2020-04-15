@@ -1,12 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
-Examples:
-	%s  -s 0.01 -o ./LDPlot.png -W "R^2" --fitCurve /tmp/5988_VCF_Contig966.geno.ld
-	
+2012.8.18 this programs draw LD plot out of a matrix like output, i.e. vcftools's LD output. 
 
-Description:
-	2012.8.18
-		this programs draw LD plot out of a matrix like output, i.e. vcftools's LD output. 
+Examples:
+	%s  -s 0.01 -o ./LDPlot.png -W "R^2" --fitCurve /tmp/5988_VCF_Contig966.geno.ld	
 """
 
 import sys, os, math
@@ -16,7 +13,7 @@ import matplotlib; matplotlib.use("Agg")	#to disable pop-up requirement
 import csv
 import numpy, random, pylab
 from palos import ProcessOptions, getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter
-from palos import yh_matplotlib, GenomeDB, statistics
+from palos import statistics
 from palos.io.AbstractMatrixFileWalker import AbstractMatrixFileWalker
 from palos.plot.AbstractPlot import AbstractPlot
 
@@ -24,28 +21,16 @@ class PlotLD(AbstractPlot):
 	__doc__ = __doc__
 	option_default_dict = AbstractPlot.option_default_dict.copy()
 	option_default_dict.update({
-			('chrLengthColumnHeader', 1, ): ['chrLength', 'c', 1, 'label of the chromosome length column', ],\
-			('chrColumnHeader', 1, ): ['CHR', 'C', 1, 'label of the chromosome column', ],\
-			('minChrLength', 1, int): [1000000, 'L', 1, 'minimum chromosome length for one chromosome to be included', ],\
-			('pos2ColumnHeader', 1, ): ['POS2', 'u', 1, 'label of the 2nd position column, xColumnHeader is the 1st position column', ],\
-			('maxDist', 0, int): [None, '', 1, 'if given, pairs beyond this distance are tossed.', ],\
-			('minDist', 0, int): [None, '', 1, 'if given, pairs below this distance are tossed.', ],\
-			('movingAverageType', 0, int): [2, '', 1, '1: median r2 within each step, 2: mean, 3: fraction that is >0.8.', ],\
-#			('fitCurve', 0, ): [0, '', 0, 'toggle to fit an exponential decay function to the data', ],\
-			})
+		('chrLengthColumnHeader', 1, ): ['chrLength', 'c', 1, 'label of the chromosome length column', ],\
+		('chrColumnHeader', 1, ): ['CHR', 'C', 1, 'label of the chromosome column', ],\
+		('minChrLength', 1, int): [1000000, 'L', 1, 'minimum chromosome length for one chromosome to be included', ],\
+		('pos2ColumnHeader', 1, ): ['POS2', 'u', 1, 'label of the 2nd position column, xColumnHeader is the 1st position column', ],\
+		('maxDist', 0, int): [None, '', 1, 'if given, pairs beyond this distance are tossed.', ],\
+		('minDist', 0, int): [None, '', 1, 'if given, pairs below this distance are tossed.', ],\
+		('movingAverageType', 0, int): [2, '', 1, '1: median r2 within each step, 2: mean, 3: fraction that is >0.8.', ],\
+		#('fitCurve', 0, ): [0, '', 0, 'toggle to fit an exponential decay function to the data', ],\
+		})
 	option_default_dict[('missingDataNotation', 0, )][0] = '-nan'
-	
-	#option_default_dict.pop(('outputFname', 1, ))
-	
-	"""
-	option_for_DB_dict = {('drivername', 1,):['postgresql', 'v', 1, 'which type of database? mysql or postgresql', ],\
-						('hostname', 1, ): ['localhost', 'z', 1, 'hostname of the db server', ],\
-						('dbname', 1, ): ['vervetdb', 'd', 1, 'database name', ],\
-						('schema', 0, ): ['public', 'k', 1, 'database schema name', ],\
-						('db_user', 1, ): [None, 'u', 1, 'database username', ],\
-						('db_passwd', 1, ): [None, 'p', 1, 'database password', ]}
-	option_default_dict.update(option_for_DB_dict)
-	"""
 	def __init__(self, inputFnameLs, **keywords):
 		"""
 		"""
@@ -112,7 +97,6 @@ class PlotLD(AbstractPlot):
 		y_ar = map(functor, x_ar)
 		pylab.plot(x_ar, y_ar, 'r-')
 		"""
-	
 	
 	def processRow(self, row=None, pdata=None):
 		"""

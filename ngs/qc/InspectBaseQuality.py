@@ -20,7 +20,7 @@ import random
 import matplotlib; matplotlib.use("Agg")	#to disable pop-up requirement
 from palos import PassingData, ProcessOptions, utils, yh_matplotlib
 from AbstractAccuMapper import AbstractAccuMapper as ParentClass
-from palos.db import SunsetDB as DBClass
+from palos.db import SunsetDB
 
 class InspectBaseQuality(ParentClass):
 	__doc__ = __doc__

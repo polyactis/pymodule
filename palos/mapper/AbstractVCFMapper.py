@@ -1,13 +1,11 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
-
 Description:
 	2012.1.17 an abstract class for vcf mapper
 """
-
-import sys, os, math
+import sys, os
 import copy
-from palos import ProcessOptions, getListOutOfStr, PassingData, utils
+from palos import ProcessOptions
 from . AbstractMapper import AbstractMapper
 
 class AbstractVCFMapper(AbstractMapper):

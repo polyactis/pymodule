@@ -17,7 +17,7 @@ __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 import csv, copy
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils, figureOutDelimiter
 from AbstractAccuMapper import AbstractAccuMapper as ParentClass
-from palos.db import SunsetDB as DBClass
+from palos.db import SunsetDB
 
 
 class PutDOCOutput2DB(ParentClass):
@@ -79,7 +79,7 @@ Total   2136011136      7.23    N/A     N/A     N/A
 				mean_depth = float(row[mean_depth_index])
 				median_depth = float(row[median_depth_index])
 				mode_depth = float(row[mode_depth_index])
-				individual_alignment = self.db_main.queryTable(DBClass.IndividualAlignment).get(alignment_id)
+				individual_alignment = self.db_main.queryTable(SunsetDB.IndividualAlignment).get(alignment_id)
 				individual_alignment.pass_qc_read_base_count = total_base_count	#2012.9.17 no longer trustworthy because CalculateMedianMeanOfInputColumn skips data.
 				individual_alignment.mean_depth = mean_depth
 				individual_alignment.median_depth = median_depth

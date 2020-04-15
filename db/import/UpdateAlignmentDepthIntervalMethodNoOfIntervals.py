@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2013.08
 	Update the number of intervals in one AlignmentDepthIntervalMethod by summing 
@@ -16,7 +16,7 @@ __doc__ = __doc__%(sys.argv[0])
 import copy
 from palos import ProcessOptions
 from AbstractAccuMapper import AbstractAccuMapper as ParentClass
-from palos.db import SunsetDB as DBClass
+from palos.db import SunsetDB
 
 class UpdateAlignmentDepthIntervalMethodNoOfIntervals(ParentClass):
 	__doc__ = __doc__
@@ -49,9 +49,9 @@ class UpdateAlignmentDepthIntervalMethodNoOfIntervals(ParentClass):
 			self.data_dir = self.db_main.data_dir
 		
 		if self.methodID:
-			method_db_entry = self.db_main.queryTable(DBClass.AlignmentDepthIntervalMethod).get(self.methodID)
+			method_db_entry = self.db_main.queryTable(SunsetDB.AlignmentDepthIntervalMethod).get(self.methodID)
 		elif self.methodShortName:
-			method_db_entry = self.db_main.queryTable(DBClass.AlignmentDepthIntervalMethod).filter_by(short_name=self.methodShortName).first()
+			method_db_entry = self.db_main.queryTable(SunsetDB.AlignmentDepthIntervalMethod).filter_by(short_name=self.methodShortName).first()
 		else:
 			sys.stderr.write("ERROR: Both methodID (%s) and methodShortName (%s) are null.\n"%\
 							(self.methodID, self.methodShortName))

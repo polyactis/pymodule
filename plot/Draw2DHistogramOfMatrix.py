@@ -16,7 +16,7 @@ __doc__ = __doc__%(sys.argv[0])
 
 import matplotlib; matplotlib.use("Agg")	#to disable pop-up requirement
 import csv
-from palos import ProcessOptions, getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter
+from palos import ProcessOptions, PassingData
 from palos.plot import yh_matplotlib
 import numpy, random
 from palos.plot.AbstractPlot import AbstractPlot

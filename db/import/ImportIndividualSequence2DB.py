@@ -81,13 +81,14 @@ Examples:
 		--minNoOfReads 8000000 --dbname pmdb -k xiandao --ref_ind_seq_id 1 --commit
 	
 """
-import sys, os, math
+import sys, os
 __doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0])
 
 import copy, re, csv
 from pegaflow.DAX3 import File
 from pegaflow import Workflow
-from palos import ProcessOptions, PassingData, MatrixFile, utils
+from palos import ProcessOptions, PassingData, utils
+from palos.io.MatrixFile import MatrixFile
 from palos.ngs.AbstractNGSWorkflow import AbstractNGSWorkflow
 
 ParentClass=AbstractNGSWorkflow
@@ -154,8 +155,8 @@ class ImportIndividualSequence2DB(ParentClass):
 			bamBaseFname2MonkeyID[bamBaseFname] = code
 		sys.stderr.write("%s entries.\n"%(len(bamBaseFname2MonkeyID)))
 		return bamBaseFname2MonkeyID
-	
-	def getAllBamFiles(self, inputDir, bamFnameLs=[]):
+
+	def getAllBamFiles(self, inputDir, bamFnameLs=None):
 		"""
 		2011-8-3
 			recursively going through the directory to get all bam files
@@ -173,9 +174,9 @@ class ImportIndividualSequence2DB(ParentClass):
 				self.getAllBamFiles(inputFname, bamFnameLs)
 		
 	def addIndividualSequence(self, db_main=None, code=None, name=None, isq_comment=None, tax_id=9606,
-						tissue_id=None, site_id=None, study_id=None, sequence_batch_id=None,
-						sequencer_name='HiSeq', sequence_type_name='PairedEnd', sequence_format='fastq',
-						path_to_original_sequence=None, data_dir=None):
+				tissue_id=None, site_id=None, study_id=None, sequence_batch_id=None,
+				sequencer_name='HiSeq', sequence_type_name='PairedEnd', sequence_format='fastq',
+				path_to_original_sequence=None, data_dir=None):
 		"""
 		add individual and then add individual_sequence
 		"""
@@ -291,7 +292,7 @@ class ImportIndividualSequence2DB(ParentClass):
 					walltime=walltime, **keywords)
 		return job
 	
-	def addRegisterIndividualSequence2DBJob(self, workflow=None, executable=None, \
+	def addRegisterIndividualSequence2DBJob(self, executable=None, \
 						inputFile=None, individual_id=None, \
 						outputFile=None, \
 						parentJobLs=None, job_max_memory=100, walltime = 60, commit=0, \
@@ -321,7 +322,7 @@ class ImportIndividualSequence2DB(ParentClass):
 					key2ObjectForJob=None, objectWithDBArguments=self)
 		return job
 	
-	def addRegisterAndMoveSplitFileJob(self, workflow=None, inputFile=None, \
+	def addRegisterAndMoveSplitFileJob(self, inputFile=None, \
 							inputDir=None, logFile=None,\
 							library=None, mate_id=None, \
 							parentJobLs=None, job_max_memory=100, walltime = 60, \
@@ -494,7 +495,7 @@ class ImportIndividualSequence2DB(ParentClass):
 		"""
 		sys.stderr.write("Passing monkeyID2FastqObjectLs from %s files ..."%(len(fastqFnameLs)))
 		monkeyID2FastqObjectLs = {}
-		import re, random
+		import random
 		filenameSignaturePattern = re.compile(r'(?P<sampleID>[\w\d]+)_(?P<mateID>\d).fastq')
 		counter = 0
 		real_counter = 0
@@ -580,7 +581,7 @@ class ImportIndividualSequence2DB(ParentClass):
 		"""
 		sys.stderr.write("Passing monkeyID2FastqObjectLs from %s files ..."%(len(fastqFnameLs)))
 		monkeyID2FastqObjectLs = {}
-		import re, random
+		import random
 		filenameSignaturePattern = re.compile(r'/(?P<folderName>[ACGT]{6})/(?P<library>[\w]+)_(?P<subSampleName>sample[12])_end(?P<mateID>\d).fastq')
 		counter = 0
 		real_counter = 0
@@ -799,7 +800,6 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
 				session.add(individual_sequence)
 				session.flush()
 			"""
-			
 			sequenceOutputDir = os.path.join(data_dir, individual_sequence.path)
 			sequenceOutputDirJob = self.addMkDirJob(outputDir=sequenceOutputDir)
 			

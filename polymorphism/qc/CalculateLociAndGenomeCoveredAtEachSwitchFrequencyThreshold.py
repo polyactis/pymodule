@@ -1,12 +1,13 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2013.07.15 program that computes how many genomes/loci are left at particular switch frequency threshold if  
 	chromosomes/contigs with higher switch frequency were all thrown away.
 	Input is the switchPointFname output of FindSNPPositionOnNewRefFromFlankingBlastOutput.py
 
 """
-import sys, os, math
-from palos import ProcessOptions, MatrixFile, PassingData
+import sys, os
+from palos import ProcessOptions, PassingData
+from palos.io.MatrixFile import MatrixFile
 from palos.mapper.AbstractMapper import AbstractMapper
 
 ParentClass = AbstractMapper

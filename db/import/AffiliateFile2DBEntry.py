@@ -24,7 +24,7 @@ __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 import copy
 from palos import ProcessOptions
 from AbstractAccuMapper import AbstractAccuMapper as ParentClass
-from palos.db import SunsetDB as DBClass
+from palos.db import SunsetDB
 
 class AffiliateFile2DBEntry(ParentClass):
 	__doc__ = __doc__
@@ -64,7 +64,7 @@ class AffiliateFile2DBEntry(ParentClass):
 																		self.db_entry_id)
 		
 		if os.path.isfile(self.inputFname):
-			TableClass = getattr(DBClass, self.tableClassName, None)
+			TableClass = getattr(SunsetDB, self.tableClassName, None)
 			db_entry = self.db_main.queryTable(TableClass).get(self.db_entry_id)
 			
 			existing_db_entry_file_path = getattr(db_entry, self.filePathColumnName, None)

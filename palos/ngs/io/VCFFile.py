@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """
-Example:
+2011-9-27
+	A module to handle vcf file http://www.1000genomes.org/node/101
+	Need to add row-based iterator.
 
+Example:
 	vcfFile = VCFFile(inputFname=self.inputFname)
 	trio_col_index_data = self.findTrioIndex(vcfFile.sample_id2index, self.trio_isq_id_ls)
 	for vcfRecord in vcfFile.parseIter():
@@ -10,15 +13,11 @@ Example:
 		pos = vcfRecord.pos
 		pos = int(pos)
 	
-2011-9-27
-	a module to handle vcf file http://www.1000genomes.org/node/101
-	
-	need to add row-based iterator
 """
 import os, sys
 import re, copy, csv
-from palos.ProcessOptions import  ProcessOptions
 from palos import utils
+from palos.ProcessOptions import  ProcessOptions
 from palos.utils import PassingData, getColName2IndexFromHeader
 
 diploidGenotypePattern = re.compile(r'([\d.])[|/]([\d.])')

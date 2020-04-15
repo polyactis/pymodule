@@ -11,10 +11,8 @@ __doc__ = __doc__%(sys.argv[0])
 
 
 from Bio.Seq import Seq
-from palos import ProcessOptions, MatrixFile, PassingData
+from palos import ProcessOptions, PassingData
 from palos.ngs.io.VCFFile import VCFFile
-from palos.mapper.AbstractVCFMapper import AbstractVCFMapper
-from palos.polymorphism.SNP import nt2number, SNP
 from . CalculateSameSiteConcordanceInVCF import CalculateSameSiteConcordanceInVCF
 
 ParentClass = CalculateSameSiteConcordanceInVCF

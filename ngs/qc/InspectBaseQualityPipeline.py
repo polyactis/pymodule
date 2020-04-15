@@ -15,8 +15,8 @@ Examples:
 import sys, os, copy
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 
-from palos import ProcessOptions, getListOutOfStr, PassingData, utils, yh_pegasus
-from palos.db import SunsetDB as DBClass
+from palos import ProcessOptions, getListOutOfStr, PassingData, utils
+from palos.db import SunsetDB
 from Sunset.pegasus.AbstractAccuWorkflow import AbstractAccuWorkflow as ParentClass
 
 class InspectBaseQualityPipeline(ParentClass):
@@ -76,7 +76,7 @@ class InspectBaseQualityPipeline(ParentClass):
 		individualSequenceID2FilePairLs = db_main.getIndividualSequenceID2FilePairLs(self.ind_seq_id_ls, data_dir=self.data_dir)
 		
 		for ind_seq_id, FilePairLs in individualSequenceID2FilePairLs.iteritems():
-			individual_sequence = db_main.queryTable(DBClass.IndividualSequence).get(ind_seq_id)
+			individual_sequence = db_main.queryTable(SunsetDB.IndividualSequence).get(ind_seq_id)
 			if individual_sequence is not None and individual_sequence.format=='fastq':
 				#start to collect all files affiliated with this individual_sequence record 
 				inputFilepathLs = []
