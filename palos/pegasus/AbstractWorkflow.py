@@ -315,7 +315,7 @@ class AbstractWorkflow(Workflow):
                                     job_max_memory=200, **keywords)
                         """
                         # 2012.8.2 wrong, because -i and -o will be added in front.
-                        abstractMapperJob = self.addAbstractMapperLikeJob(workflow, executable=workflow.gzip, \
+                        abstractMapperJob = self.addAbstractMapperLikeJob(executable=self.gzip, \
                                 inputF=None, outputF=outputF, \
                                 parentJobLs=[topOutputDirJob]+jobData.jobLs, transferOutput=transferOutput, job_max_memory=200,\
                                 extraArguments=None, extraDependentInputLs=[inputF], )
@@ -456,7 +456,7 @@ class AbstractWorkflow(Workflow):
         """
         Examples
             outputFnamePrefix = os.path.join(plotOutputDir, 'noOfMendelErrors_along_chromosome')
-            self.addPlotVCFtoolsStatJob(executable=workflow.PlotVCFtoolsStat, \
+            self.addPlotVCFtoolsStatJob(executable=self.PlotVCFtoolsStat, \
                                 inputFileList=[splitPlinkLMendelFileSNPIDIntoChrPositionJob.output], \
                                 outputFnamePrefix=outputFnamePrefix, \
                                 whichColumn=None, whichColumnHeader="N", whichColumnPlotLabel="noOfMendelErrors", need_svg=False, \

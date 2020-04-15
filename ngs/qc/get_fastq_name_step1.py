@@ -1,5 +1,4 @@
 #!/usr/bin/python3
-from pegaflow.DAX3 import *
 import os,sys 
 sys.path.insert(0, os.path.expanduser('~/script'))
 

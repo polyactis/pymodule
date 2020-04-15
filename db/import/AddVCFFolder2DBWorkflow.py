@@ -38,11 +38,11 @@ from pegaflow.DAX3 import Executable, File, PFN, Profile, Namespace
 from palos import ProcessOptions, getListOutOfStr, PassingData, ngs, figureOutDelimiter, getColName2IndexFromHeader
 from palos.db import SunsetDB
 from palos.ngs.GenericVCFWorkflow import GenericVCFWorkflow
-import AbstractVervetWorkflow
+from palos.ngs.AbstractNGSWorkflow import AbstractNGSWorkflow
 
 class AddVCFFolder2DBWorkflow(GenericVCFWorkflow):
 	__doc__ = __doc__
-	option_default_dict = copy.deepcopy(AbstractVervetWorkflow.option_default_dict)
+	option_default_dict = copy.deepcopy(AbstractNGSWorkflow.option_default_dict)
 	option_default_dict.update({
 						('inputDir', 0, ): ['', 'I', 1, 'input folder that contains vcf or vcf.gz files', ],\
 						('maxContigID', 0, int): [None, 'x', 1, 'if contig ID is beyond this number, it will not be included. If None or 0, no restriction.', ],\
@@ -56,34 +56,31 @@ class AddVCFFolder2DBWorkflow(GenericVCFWorkflow):
 	def __init__(self,  **keywords):
 		"""
 		"""
-		AbstractVervetWorkflow.__init__(self, **keywords)
+		AbstractNGSWorkflow.__init__(self, **keywords)
 		self.inputDir = os.path.abspath(self.inputDir)
 	
-	def registerCustomJars(self, workflow, ):
+	def registerCustomJars(self, ):
 		"""
 		2012.2.10
 		"""
 		site_handler = self.site_handler
 	
-	def registerCustomExecutables(self, workflow=None):
+	def registerCustomExecutables(self):
 		"""
 		2011-11-28
 		"""
-		if workflow is None:
-			workflow = self
-		namespace = workflow.namespace
-		version = workflow.version
-		operatingSystem = workflow.operatingSystem
-		architecture = workflow.architecture
-		clusters_size = workflow.clusters_size
-		site_handler = workflow.site_handler
+		namespace = self.namespace
+		version = self.version
+		operatingSystem = self.operatingSystem
+		architecture = self.architecture
+		site_handler = self.site_handler
 		vervetSrcPath = self.vervetSrcPath
 		
 		executableList = []
 		
 		AddGenotypeMethod2DB = Executable(namespace=namespace, name="AddGenotypeMethod2DB", \
-											version=version, \
-											os=operatingSystem, arch=architecture, installed=True)
+								version=version, \
+								os=operatingSystem, arch=architecture, installed=True)
 		AddGenotypeMethod2DB.addPFN(PFN("file://" + os.path.join(vervetSrcPath, "db/input/AddGenotypeMethod2DB.py"), site_handler))
 		executableList.append(AddGenotypeMethod2DB)
 		
@@ -95,8 +92,8 @@ class AddVCFFolder2DBWorkflow(GenericVCFWorkflow):
 		
 		for executable in executableList:
 			executable.addProfile(Profile(Namespace.PEGASUS, key="clusters.size", value="%s"%self.clusters_size))
-			workflow.addExecutable(executable)
-			setattr(workflow, executable.name, executable)
+			self.addExecutable(executable)
+			setattr(executable.name, executable)
 	
 	
 	def addAddGenotypeMethod2DBJob(self, executable=None, inputFile=None, genotypeMethodShortName=None,\
@@ -220,7 +217,7 @@ class AddVCFFolder2DBWorkflow(GenericVCFWorkflow):
 		self.registerExecutables(workflow)
 		self.registerCustomExecutables(workflow)
 		
-		inputData = self.registerAllInputFiles(workflow, inputDir=self.inputDir, input_site_handler=self.input_site_handler, \
+		inputData = self.registerAllInputFiles(inputDir=self.inputDir, input_site_handler=self.input_site_handler, \
 										checkEmptyVCFByReading=self.checkEmptyVCFByReading,\
 										pegasusFolderName=self.pegasusFolderName)
 		if len(inputData.jobDataLs)<=0:
@@ -228,7 +225,7 @@ class AddVCFFolder2DBWorkflow(GenericVCFWorkflow):
 			sys.exit(0)
 		
 		if self.run_type==1:
-			self.addJobs(workflow=workflow, inputData=inputData, db_vervet=db_vervet, genotypeMethodShortName=self.genotypeMethodShortName, \
+			self.addJobs(inputData=inputData, db_vervet=db_vervet, genotypeMethodShortName=self.genotypeMethodShortName, \
 						commit=True,\
 						data_dir=self.data_dir, checkEmptyVCFByReading=self.checkEmptyVCFByReading, transferOutput=True,\
 						maxContigID=self.maxContigID, outputDirPrefix="", needSSHDBTunnel=self.needSSHDBTunnel)
@@ -237,7 +234,7 @@ class AddVCFFolder2DBWorkflow(GenericVCFWorkflow):
 			sys.exit(0)
 		# Write the DAX to stdout
 		outf = open(self.outputFname, 'w')
-		workflow.writeXML(outf)
+		self.writeXML(outf)
 
 
 if __name__ == '__main__':

@@ -38,7 +38,7 @@ class InspectBaseQualityPipeline(ParentClass):
 		if self.ind_seq_id_ls:
 			self.ind_seq_id_ls = getListOutOfStr(self.ind_seq_id_ls, data_type=int)
 
-	def registerCustomExecutables(self, workflow=None):
+	def registerCustomExecutables(self):
 		"""
 		"""
 		self.addOneExecutableFromPathAndAssignProperClusterSize(

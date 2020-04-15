@@ -41,11 +41,11 @@ class TestMapReduceVCFWorkflow(ParentClass):
 		ParentClass.__init__(self, **keywords)
 		self.needSplitChrIntervalData = False
 		
-	def preReduce(self, workflow=None, outputDirPrefix="", passingData=None, transferOutput=True, **keywords):
+	def preReduce(self, outputDirPrefix="", passingData=None, transferOutput=True, **keywords):
 		"""
 		2012.9.17
 		"""
-		returnData = ParentClass.preReduce(self, workflow=workflow, outputDirPrefix=outputDirPrefix,\
+		returnData = ParentClass.preReduce(self, outputDirPrefix=outputDirPrefix,\
 								passingData=passingData, transferOutput=transferOutput, **keywords)
 		
 		self.statDirJob = self.addMkDirJob(outputDir="%sStat"%(outputDirPrefix))
@@ -53,7 +53,7 @@ class TestMapReduceVCFWorkflow(ParentClass):
 		self.reduceEachVCFDirJob = self.addMkDirJob(outputDir="%sReduceEachVCF"%(outputDirPrefix))
 		return returnData
 	
-	def mapEachInterval(self, workflow=None, \
+	def mapEachInterval(self, \
 					VCFJobData=None, passingData=None, transferOutput=False, **keywords):
 		"""
 		2013.04.08 use VCFJobData
@@ -68,8 +68,6 @@ class TestMapReduceVCFWorkflow(ParentClass):
 				(replace contig ID , position with the new one's, remove the header part regarding chromosomes or replace it)
 
 		"""
-		if workflow is None:
-			workflow = self
 		
 		returnData = PassingData(no_of_jobs = 0)
 		returnData.jobDataLs = []
@@ -110,7 +108,7 @@ class TestMapReduceVCFWorkflow(ParentClass):
 		
 		return returnData
 	
-	def reduceEachVCF(self, workflow=None, chromosome=None, passingData=None, mapEachIntervalDataLs=None,\
+	def reduceEachVCF(self, chromosome=None, passingData=None, mapEachIntervalDataLs=None,\
 					transferOutput=True, **keywords):
 		"""
 		2013.07.10
@@ -133,7 +131,7 @@ class TestMapReduceVCFWorkflow(ParentClass):
 							minJobPropertyValue=5000, maxJobPropertyValue=10000).value
 		return returnData
 	
-	def reduce(self, workflow=None, passingData=None, reduceEachChromosomeDataLs=None, transferOutput=True, **keywords):
+	def reduce(self, passingData=None, reduceEachChromosomeDataLs=None, transferOutput=True, **keywords):
 		"""
 		2012.10.3
 			#. merge all output of input jobs (passingData.mapEachIntervalDataLsLs) into one big one

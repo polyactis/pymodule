@@ -102,7 +102,7 @@ class InspectAlignmentPipeline(ParentClass, AbstractAccuWorkflow):
 		self.alignmentDepthJobDataList=[]	#2013.08.16 use to store
 		self.needSplitChrIntervalData = False	#2013.09.01 no need for this.
 	
-	def addDepthOfCoverageJob(self, workflow=None, DOCWalkerJava=None, GenomeAnalysisTKJar=None,\
+	def addDepthOfCoverageJob(self, DOCWalkerJava=None, GenomeAnalysisTKJar=None,\
 							refFastaFList=None, bamF=None, baiF=None, DOCOutputFnamePrefix=None,\
 							fractionToSample=None, minMappingQuality=20, minBaseQuality=20, \
 							parentJobLs=None, extraArguments="", \
@@ -143,7 +143,7 @@ class InspectAlignmentPipeline(ParentClass, AbstractAccuWorkflow):
 		#if fractionToSample and fractionToSample>0 and fractionToSample<=1:
 		#	extraArgumentList.append("--fractionToSample %s"%(fractionToSample))
 		extraDependentInputLs = [baiF]
-		job = self.addGATKJob(workflow=workflow, executable=DOCWalkerJava, GenomeAnalysisTKJar=GenomeAnalysisTKJar, \
+		job = self.addGATKJob(executable=DOCWalkerJava, GenomeAnalysisTKJar=GenomeAnalysisTKJar, \
 							GATKAnalysisType="DepthOfCoverage",\
 					inputFile=bamF, inputArgumentOption="-I", refFastaFList=refFastaFList, inputFileList=None,\
 					interval=None, outputFile=None, \
@@ -155,7 +155,7 @@ class InspectAlignmentPipeline(ParentClass, AbstractAccuWorkflow):
 		job.sample_statistics_file = sample_statistics_file
 		return job
 
-	def addSAMtoolsDepthJob(self, workflow=None, samtoolsDepth=None, samtools_path=None,\
+	def addSAMtoolsDepthJob(self, samtoolsDepth=None, samtools_path=None,\
 						bamF=None, outputFile=None, baiF=None, \
 						parentJobLs=None, extraOutputLs=None, job_max_memory = 500, extraArguments=None, \
 						transferOutput=False, minMappingQuality=None, minBaseQuality=None, walltime=120, **keywords):
@@ -183,7 +183,7 @@ class InspectAlignmentPipeline(ParentClass, AbstractAccuWorkflow):
 		return job
 
 
-	def addReformatFlagstatOutputJob(self, workflow=None, executable=None, inputF=None, \
+	def addReformatFlagstatOutputJob(self, executable=None, inputF=None, \
 									alignmentID=None, outputF=None, \
 					parentJobLs=None, extraDependentInputLs=None, transferOutput=False, \
 					extraArguments=None, job_max_memory=2000, walltime=20, **keywords):
@@ -203,35 +203,33 @@ class InspectAlignmentPipeline(ParentClass, AbstractAccuWorkflow):
 				sshDBTunnel=None, walltime=walltime, **keywords)
 		return job
 
-	def preReduce(self, workflow=None, passingData=None, transferOutput=True, **keywords):
+	def preReduce(self, passingData=None, transferOutput=True, **keywords):
 		"""
 		2012.9.17
 			setup additional mkdir folder jobs, before mapEachAlignment, mapEachChromosome, mapReduceOneAlignment
 		"""
-		if workflow is None:
-			workflow = self
-		returnData = ParentClass.preReduce(self, workflow=workflow, passingData=passingData, \
+		returnData = ParentClass.preReduce(self, passingData=passingData, \
 							transferOutput=transferOutput)
 		reduceOutputDirJob = passingData.reduceOutputDirJob
 
 		self.logOutputDirJob = self.addMkDirJob(outputDir="%sLog"%(passingData.outputDirPrefix))
 
 		depthOfCoverageOutputF = File(os.path.join(reduceOutputDirJob.output, 'DepthOfCoverage.tsv'))
-		passingData.depthOfCoverageOutputMergeJob = self.addStatMergeJob(workflow, statMergeProgram=workflow.mergeSameHeaderTablesIntoOne, \
+		passingData.depthOfCoverageOutputMergeJob = self.addStatMergeJob(statMergeProgram=self.mergeSameHeaderTablesIntoOne, \
 							outputF=depthOfCoverageOutputF, parentJobLs=[reduceOutputDirJob], transferOutput=True)
 
 		if self.needPerContigJob:	#need for per-contig job
 			depthOfCoveragePerChrOutputF = File(os.path.join(reduceOutputDirJob.output, 'DepthOfCoveragePerChr.tsv'))
-			passingData.depthOfCoveragePerChrOutputMergeJob = self.addStatMergeJob(workflow, statMergeProgram=workflow.mergeSameHeaderTablesIntoOne, \
+			passingData.depthOfCoveragePerChrOutputMergeJob = self.addStatMergeJob(statMergeProgram=self.mergeSameHeaderTablesIntoOne, \
 							outputF=depthOfCoveragePerChrOutputF,parentJobLs=[reduceOutputDirJob], transferOutput=True)
 		else:
 			passingData.depthOfCoveragePerChrOutputMergeJob = None
 
 		flagStatOutputF = File(os.path.join(reduceOutputDirJob.output, 'FlagStat.tsv'))
-		passingData.flagStatOutputMergeJob = self.addStatMergeJob(workflow, statMergeProgram=workflow.mergeSameHeaderTablesIntoOne, \
+		passingData.flagStatOutputMergeJob = self.addStatMergeJob(statMergeProgram=self.mergeSameHeaderTablesIntoOne, \
 							outputF=flagStatOutputF, parentJobLs=[reduceOutputDirJob], transferOutput=True)
 
-		passingData.alignmentDataLs = self.addAddRG2BamJobsAsNeeded(workflow=workflow, alignmentDataLs=passingData.alignmentDataLs, site_handler=self.site_handler, \
+		passingData.alignmentDataLs = self.addAddRG2BamJobsAsNeeded(alignmentDataLs=passingData.alignmentDataLs, site_handler=self.site_handler, \
 					input_site_handler=self.input_site_handler, \
 					AddOrReplaceReadGroupsJar=self.AddOrReplaceReadGroupsJar, \
 					BuildBamIndexFilesJava=self.BuildBamIndexFilesJava, BuildBamIndexJar=self.BuildBamIndexJar, \
@@ -241,7 +239,7 @@ class InspectAlignmentPipeline(ParentClass, AbstractAccuWorkflow):
 
 		return returnData
 
-	def mapEachAlignment(self, workflow=None, alignmentData=None,  passingData=None, transferOutput=True, **keywords):
+	def mapEachAlignment(self, alignmentData=None,  passingData=None, transferOutput=True, **keywords):
 		"""
 		2012.9.22
 			similar to reduceBeforeEachAlignmentData() but for mapping programs that run on one alignment each.
@@ -283,7 +281,7 @@ class InspectAlignmentPipeline(ParentClass, AbstractAccuWorkflow):
 		else:
 			"""
 			depthOutputFile = File(os.path.join(topOutputDirJob.output, '%s_DOC.tsv.gz'%(alignment.id)))
-			samtoolsDepthJob = self.addSAMtoolsDepthJob(workflow, samtoolsDepth=self.samtoolsDepth, \
+			samtoolsDepthJob = self.addSAMtoolsDepthJob(samtoolsDepth=self.samtoolsDepth, \
 						samtools_path=self.samtools_path,\
 						bamF=bamF, outputFile=depthOutputFile, baiF=baiF, \
 						parentJobLs=[topOutputDirJob] + alignmentData.jobLs, job_max_memory = 500, extraArguments="", \
@@ -293,7 +291,7 @@ class InspectAlignmentPipeline(ParentClass, AbstractAccuWorkflow):
 						fastaIndexJob = passingData.fastaIndexJob, refFastaIndexF=passingData.refFastaIndexF)
 			meanMedianModeDepthFile = File(os.path.join(topOutputDirJob.output, "%s_meanMedianModeDepth.tsv"%(alignment.id)))
 			meanMedianModeDepthJob = self.addCalculateDepthMeanMedianModeJob(\
-						executable=workflow.CalculateMedianMeanOfInputColumn, \
+						executable=self.CalculateMedianMeanOfInputColumn, \
 						inputFile=depthOutputFile, outputFile=meanMedianModeDepthFile, alignmentID=alignment.id, fractionToSample=self.fractionToSample, \
 						noOfLinesInHeader=0, whichColumn=2, maxNumberOfSamplings=1E6,\
 						parentJobLs=[topOutputDirJob, samtoolsDepthJob], job_max_memory = 500, extraArguments=None, \
@@ -312,12 +310,12 @@ class InspectAlignmentPipeline(ParentClass, AbstractAccuWorkflow):
 			depthOutputFile = DOCJob.sample_statistics_file
 			meanMedianModeDepthFile = File(os.path.join(topOutputDirJob.output, "%s_meanMedianModeDepth.tsv"%(alignment.id)))
 			meanMedianModeDepthJob = self.addCalculateDepthMeanMedianModeJob(\
-						executable=workflow.CalculateMedianMeanOfInputColumn, \
+						executable=self.CalculateMedianMeanOfInputColumn, \
 						inputFile=depthOutputFile, outputFile=meanMedianModeDepthFile, alignmentID=alignment.id, \
 						parentJobLs=[topOutputDirJob, DOCJob], job_max_memory = 500, extraArguments="--inputFileFormat=2", \
 						transferOutput=False)
 
-			self.addInputToStatMergeJob(workflow, statMergeJob=passingData.depthOfCoverageOutputMergeJob, inputF=meanMedianModeDepthFile,\
+			self.addInputToStatMergeJob(statMergeJob=passingData.depthOfCoverageOutputMergeJob, inputF=meanMedianModeDepthFile,\
 						parentJobLs=[meanMedianModeDepthJob])
 			self.no_of_alns_with_depth_jobs += 1
 
@@ -410,7 +408,7 @@ class InspectAlignmentPipeline(ParentClass, AbstractAccuWorkflow):
 
 		return returnData
 
-	def mapEachChromosome(self, workflow=None, alignmentData=None, chromosome=None,\
+	def mapEachChromosome(self, alignmentData=None, chromosome=None,\
 				VCFJobData=None, passingData=None, reduceBeforeEachAlignmentData=None, transferOutput=True, **keywords):
 		"""
 		2012.9.17
@@ -431,7 +429,7 @@ class InspectAlignmentPipeline(ParentClass, AbstractAccuWorkflow):
 		statOutputDirJob = passingData.statOutputDirJob
 
 		depthOutputFile = File(os.path.join(statOutputDirJob.output, '%s_%s_DOC.tsv.gz'%(alignment.id, chromosome)))
-		samtoolsDepthJob = self.addSAMtoolsDepthJob(workflow, samtoolsDepth=self.samtoolsDepth, \
+		samtoolsDepthJob = self.addSAMtoolsDepthJob(samtoolsDepth=self.samtoolsDepth, \
 												samtools_path=self.samtools_path,\
 					bamF=bamF, outputFile=depthOutputFile, baiF=baiF, \
 					parentJobLs=[statOutputDirJob]+alignmentData.jobLs, job_max_memory = 500, extraArguments=None, \
@@ -440,18 +438,18 @@ class InspectAlignmentPipeline(ParentClass, AbstractAccuWorkflow):
 					fastaDictJob=passingData.fastaDictJob, refFastaDictF=passingData.refFastaDictF,\
 					fastaIndexJob = passingData.fastaIndexJob, refFastaIndexF=passingData.refFastaIndexF)
 		meanMedianModeDepthFile = File(os.path.join(statOutputDirJob.output, "%s_%s_meanMedianModeDepth.tsv"%(alignment.id, chromosome)))
-		meanMedianModeDepthJob = self.addCalculateDepthMeanMedianModeJob(workflow, \
-					executable=workflow.CalculateMedianMeanOfInputColumn, \
+		meanMedianModeDepthJob = self.addCalculateDepthMeanMedianModeJob(\
+					executable=self.CalculateMedianMeanOfInputColumn, \
 					inputFile=depthOutputFile, outputFile=meanMedianModeDepthFile, alignmentID="%s-%s"%(alignment.id, chromosome), \
 					parentJobLs=[samtoolsDepthJob], job_max_memory = 500, extraArguments="-r %s"%(chromosome), \
 					transferOutput=False)
 
-		self.addInputToStatMergeJob(workflow, statMergeJob=passingData.depthOfCoveragePerChrOutputMergeJob, \
+		self.addInputToStatMergeJob(statMergeJob=passingData.depthOfCoveragePerChrOutputMergeJob, \
 					inputF=meanMedianModeDepthFile,\
 					parentJobLs=[meanMedianModeDepthJob])
 		"""
 		DOCOutputFnamePrefix = os.path.join(statOutputDir, '%s_%s_DOC'%(alignment.id, chromosome))
-		DOCJob = self.addDepthOfCoverageJob(workflow, DOCWalkerJava=ContigDOCWalkerJava, \
+		DOCJob = self.addDepthOfCoverageJob(DOCWalkerJava=ContigDOCWalkerJava, \
 				GenomeAnalysisTKJar=GenomeAnalysisTKJar,\
 				refFastaFList=refFastaFList, bamF=bamF, baiF=baiF, \
 				DOCOutputFnamePrefix=DOCOutputFnamePrefix,\
@@ -461,12 +459,12 @@ class InspectAlignmentPipeline(ParentClass, AbstractAccuWorkflow):
 
 		reduceDepthOfCoverageJob.addArguments(DOCJob.sample_statistics_file)
 		reduceDepthOfCoverageJob.uses(DOCJob.sample_statistics_file, transfer=True, register=True, link=Link.INPUT)
-		workflow.depends(parent=DOCJob, child=reduceDepthOfCoverageJob)
+		self.depends(parent=DOCJob, child=reduceDepthOfCoverageJob)
 		"""
 
 		return returnData
 
-	def reduceAfterEachAlignment(self, workflow=None, passingData=None, mapEachChromosomeDataLs=None,\
+	def reduceAfterEachAlignment(self, passingData=None, mapEachChromosomeDataLs=None,\
 								reduceAfterEachChromosomeDataLs=None,\
 								transferOutput=True, **keywords):
 		"""
@@ -477,7 +475,7 @@ class InspectAlignmentPipeline(ParentClass, AbstractAccuWorkflow):
 		returnData.reduceAfterEachChromosomeDataLs = reduceAfterEachChromosomeDataLs
 		return returnData
 
-	def reduce(self, workflow=None, passingData=None, reduceAfterEachAlignmentDataLs=None,
+	def reduce(self, passingData=None, reduceAfterEachAlignmentDataLs=None,
 			transferOutput=True, **keywords):
 		"""
 		2013.08.14 add 2DB jobs only when their input is not empty
@@ -491,7 +489,7 @@ class InspectAlignmentPipeline(ParentClass, AbstractAccuWorkflow):
 
 		if passingData.flagStatOutputMergeJob.inputLs:	#the merge job's input is not empty or None
 			flagStat2DBLogFile = File(os.path.join(reduceOutputDirJob.output, "flagStat2DB.log"))
-			flagStat2DBJob = self.addPutStuffIntoDBJob(workflow, executable=self.PutFlagstatOutput2DB, \
+			flagStat2DBJob = self.addPutStuffIntoDBJob(executable=self.PutFlagstatOutput2DB, \
 						inputFileList=[passingData.flagStatOutputMergeJob.output], \
 						logFile=flagStat2DBLogFile, commit=True, \
 						parentJobLs=[reduceOutputDirJob, passingData.flagStatOutputMergeJob], \
@@ -499,7 +497,7 @@ class InspectAlignmentPipeline(ParentClass, AbstractAccuWorkflow):
 						job_max_memory=10, sshDBTunnel=self.needSSHDBTunnel)
 		if passingData.depthOfCoverageOutputMergeJob.inputLs:
 			DOC2DBLogFile = File(os.path.join(reduceOutputDirJob.output, "DOC2DB.log"))
-			DOC2DBJob = self.addPutStuffIntoDBJob(workflow, executable=self.PutDOCOutput2DB, \
+			DOC2DBJob = self.addPutStuffIntoDBJob(executable=self.PutDOCOutput2DB, \
 					inputFileList=[passingData.depthOfCoverageOutputMergeJob.output], \
 					logFile=DOC2DBLogFile, commit=True, \
 					parentJobLs=[reduceOutputDirJob, passingData.depthOfCoverageOutputMergeJob], \
@@ -598,17 +596,17 @@ class InspectAlignmentPipeline(ParentClass, AbstractAccuWorkflow):
 									"--alignmentIDList %s"%(alignmentIDListInStr), '--chromosome %s'%(chromosome),\
 									"--format tsv"], \
 					job_max_memory=2000, walltime=30, sshDBTunnel=self.needSSHDBTunnel)
-				workflow.depends(parent=addFile2DBJob, child=updateMethodNoOfIntervalsJob)
+				self.depends(parent=addFile2DBJob, child=updateMethodNoOfIntervalsJob)
 		sys.stderr.write(" %s jobs, %s alignments with depth jobs, %s alignments with flagstat jobs.\n"%(self.no_of_jobs, \
 							self.no_of_alns_with_depth_jobs, self.no_of_alns_with_flagstat_jobs))
 		return returnData
 
-	def registerCustomExecutables(self, workflow=None):
+	def registerCustomExecutables(self):
 		"""
 		2011-11-25
 			split out of run()
 		"""
-		ParentClass.registerCustomExecutables(self, workflow=workflow)
+		ParentClass.registerCustomExecutables(self)
 
 		#2013.08.23
 		#self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'GADA/testGADA.py'), \

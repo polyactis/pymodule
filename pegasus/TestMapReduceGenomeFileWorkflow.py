@@ -67,24 +67,22 @@ class TestMapReduceGenomeFileWorkflow(ParentClass):
 		if not self.local_data_dir:
 			self.local_data_dir = db_vervet.data_dir
 	
-	def registerExecutables(self, workflow=None):
+	def registerExecutables(self):
 		"""
 		"""
 		if not workflow:
 			workflow = self
-		ParentClass.registerExecutables(self, workflow=workflow)
+		ParentClass.registerExecutables(self)
 		
 		self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "polymorphism/mapper/ComputeLiftOverLocusProbability.py"),\
 				name='ComputeLiftOverLocusProbability', \
 				clusterSizeMultiplier=1)
 	
-	def preReduce(self, workflow=None, outputDirPrefix="", passingData=None, transferOutput=True, **keywords):
+	def preReduce(self, outputDirPrefix="", passingData=None, transferOutput=True, **keywords):
 		"""
 		2012.9.17
 		"""
-		if workflow is None:
-			workflow = self
-		returnData = ParentClass.preReduce(self, workflow=workflow, outputDirPrefix=outputDirPrefix,\
+		returnData = ParentClass.preReduce(self, outputDirPrefix=outputDirPrefix,\
 								passingData=passingData, transferOutput=transferOutput, **keywords)
 		#add a stat merge job and a genome wide plot job
 		outputFile = File(os.path.join(self.reduceOutputDirJob.output, 'locusLiftOverProbability.tsv'))
@@ -130,7 +128,7 @@ class TestMapReduceGenomeFileWorkflow(ParentClass):
 		
 		outputFile = File( os.path.join(self.plotDirJob.output, 'locusLiftOverProbabilityHist.png'))
 		#no spaces or parenthesis or any other shell-vulnerable letters in the x or y axis labels (whichColumnPlotLabel, xColumnPlotLabel)
-		self.addDrawHistogramJob(executable=workflow.DrawHistogram, inputFileList=[self.reduceJob.output], \
+		self.addDrawHistogramJob(executable=self.DrawHistogram, inputFileList=[self.reduceJob.output], \
 							outputFile=outputFile, \
 					whichColumn=None, whichColumnHeader="mapPvalue", whichColumnPlotLabel="minusLogLiftOverPvalue", \
 					xScaleLog=0, yScaleLog=1, \
@@ -143,7 +141,7 @@ class TestMapReduceGenomeFileWorkflow(ParentClass):
 		
 		return returnData
 	
-	def mapEachInterval(self, workflow=None, inputJobData=None, selectIntervalJobData=None, \
+	def mapEachInterval(self, inputJobData=None, selectIntervalJobData=None, \
 					chromosome=None,intervalData=None,\
 					mapEachChromosomeData=None, \
 					passingData=None, transferOutput=False, **keywords):
@@ -193,7 +191,7 @@ class TestMapReduceGenomeFileWorkflow(ParentClass):
 		returnData.jobDataLs.append(self.constructJobDataFromJob(job))
 		return returnData
 
-	def reduceEachChromosome(self, workflow=None, chromosome=None, passingData=None, mapEachInputDataLs=None, 
+	def reduceEachChromosome(self, chromosome=None, passingData=None, mapEachInputDataLs=None, 
 						chromosome2mapEachIntervalDataLs=None,\
 						reduceEachInputDataLs=None,\
 						transferOutput=True, \

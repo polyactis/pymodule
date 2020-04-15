@@ -133,7 +133,7 @@ class PopGenSimulationWorkflow(ParentClass):
 		return job
 	
 	
-	def addAllJobs(self, workflow=None, \
+	def addAllJobs(self, \
 				data_dir=None, \
 				outputDirPrefix="", transferOutput=True, **keywords):
 		"""
@@ -147,9 +147,6 @@ class PopGenSimulationWorkflow(ParentClass):
 			AddPopGenSimulation2DB.py
 			
 		"""
-		if workflow is None:
-			workflow = self
-		
 		sys.stderr.write("Adding jobs for pop-gen simulation #jobs=%s... \n"%\
 							(self.no_of_jobs))
 		
@@ -167,7 +164,7 @@ class PopGenSimulationWorkflow(ParentClass):
 					resultID2defineLandscapeJobData = {},
 					)
 		
-		preReduceReturnData = self.preReduce(workflow=workflow, outputDirPrefix=outputDirPrefix, \
+		preReduceReturnData = self.preReduce(outputDirPrefix=outputDirPrefix, \
 									passingData=passingData, transferOutput=False,\
 									**keywords)
 		
@@ -228,11 +225,11 @@ class PopGenSimulationWorkflow(ParentClass):
 					extraArgumentList=extraArgumentList,\
 					job_max_memory=10, sshDBTunnel=self.needSSHDBTunnel)
 	
-	def registerCustomExecutables(self, workflow=None):
+	def registerCustomExecutables(self):
 		"""
 		2013.2.26
 		"""
-		ParentClass.registerCustomExecutables(self, workflow=workflow)
+		ParentClass.registerCustomExecutables(self)
 		
 		namespace = self.namespace
 		version = self.version

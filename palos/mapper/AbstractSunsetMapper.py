@@ -26,10 +26,9 @@ class AbstractSunsetMapper(AbstractDBJob):
 	def connectDB(self):
 		"""
 		"""
-		db_main = SunsetDB.SunsetDB(drivername=self.drivername, db_user=self.db_user, db_passwd=self.db_passwd, \
-									hostname=self.hostname, dbname=self.dbname, schema=self.schema, port=self.port)
-		db_main.setup(create_tables=False)
-		self.db_main = db_main
+		self.db_main = SunsetDB.SunsetDB(drivername=self.drivername, db_user=self.db_user, db_passwd=self.db_passwd, \
+							hostname=self.hostname, dbname=self.dbname, schema=self.schema, port=self.port)
+		self.db_main.setup(create_tables=False)
 	
 	def checkIfAlignmentListMatchMethodDBEntry(self, individualAlignmentLs=[], methodDBEntry=None, session=None):
 		"""

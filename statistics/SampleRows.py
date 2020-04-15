@@ -17,7 +17,7 @@ __doc__ = __doc__%(sys.argv[0])
 
 import csv
 import random
-from palos import ProcessOptions, PassingData, figureOutDelimiter
+from palos import ProcessOptions
 from palos.polymorphism import SNP
 from palos.io.AbstractMatrixFileWalker import AbstractMatrixFileWalker
 
@@ -45,9 +45,10 @@ The sampling will try to avoid sampling close pairs, PI_HAT(i,j)<=maxIBDSharing'
 		AbstractMatrixFileWalker.setup(self, **keywords)
 		#read in the IBD check result
 		if self.plinkIBDCheckOutputFname:
-			ibdData = SNP.readAdjacencyListDataIntoMatrix(inputFname=self.plinkIBDCheckOutputFname, rowIDHeader="IID1", colIDHeader="IID2", \
-								rowIDIndex=None, colIDIndex=None, \
-								dataHeader="PI_HAT", dataIndex=None, hasHeader=True)
+			ibdData = SNP.readAdjacencyListDataIntoMatrix(inputFname=self.plinkIBDCheckOutputFname, \
+				rowIDHeader="IID1", colIDHeader="IID2", \
+				rowIDIndex=None, colIDIndex=None, \
+				dataHeader="PI_HAT", dataIndex=None, hasHeader=True)
 		else:
 			ibdData = None
 		self.ibdData = ibdData

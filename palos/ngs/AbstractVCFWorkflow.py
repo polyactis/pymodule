@@ -82,12 +82,10 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 						extraArgumentList=extraArgumentList, job_max_memory=job_max_memory, **keywords)
 		return job
 	
-	def registerExecutables(self, workflow=None):
+	def registerExecutables(self):
 		"""
 		"""
-		if not workflow:
-			workflow = self
-		ParentClass.registerExecutables(self, workflow=workflow)
+		ParentClass.registerExecutables(self)
 		
 		#2012.8.30 moved from vervet/src/AddVCFFolder2DBWorkflow.py
 		#self.addExecutableFromPath(path=os.path.join(vervetSrcPath, \
@@ -120,12 +118,12 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 		self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "mapper/extractor/ExtractSamplesFromVCF.py"), \
 				name='ExtractSamplesFromVCF', clusterSizeMultiplier=1)
 	
-	def registerCommonExecutables(self, workflow=None):
+	def registerCommonExecutables(self):
 		"""
 		"""
-		ParentClass.registerCommonExecutables(self, workflow=workflow)
+		ParentClass.registerCommonExecutables(self)
 	
-	def registerFilesOfInputDir(self, workflow=None, inputDir=None, input_site_handler=None, \
+	def registerFilesOfInputDir(self, inputDir=None, input_site_handler=None, \
 					checkEmptyVCFByReading=False, pegasusFolderName='',\
 					maxContigID=None, minContigID=None, db_vervet=None, needToKnowNoOfLoci=False,
 					minNoOfLociInVCF=None, includeIndelVCF=True, notToUseDBToInferVCFNoOfLoci=None):
@@ -145,10 +143,8 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 		2011-9-29
 			vcf files only
 		"""
-		if workflow is None:
-			workflow = self
 		if input_site_handler is None:
-			input_site_handler = workflow.input_site_handler
+			input_site_handler = self.input_site_handler
 		if notToUseDBToInferVCFNoOfLoci:
 			notToUseDBToInferVCFNoOfLoci = self.notToUseDBToInferVCFNoOfLoci
 		
@@ -205,13 +201,13 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 					
 					if minNoOfLociInVCF is None or inputF.noOfLoci is None or \
 							(minNoOfLociInVCF is not None and inputF.noOfLoci is not None and  inputF.noOfLoci >=minNoOfLociInVCF):
-						workflow.addFile(inputF)
+						self.addFile(inputF)
 						tbi_F_absPath = "%s.tbi"%inputFname
 						if os.path.isfile(tbi_F_absPath):	#it exists
 							tbi_F = File(os.path.join(pegasusFolderName, "%s.tbi"%inputBaseFname))
 							tbi_F.addPFN(PFN("file://" + tbi_F_absPath, input_site_handler))
 							tbi_F.abspath = tbi_F_absPath
-							workflow.addFile(tbi_F)
+							self.addFile(tbi_F)
 						else:
 							tbi_F = None
 						inputF.tbi_F = tbi_F
@@ -225,7 +221,7 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 																				counter, real_counter))
 		return returnData
 	
-	def addSplitVCFFileJob(self, workflow=None, executable=None, inputFile=None, outputFnamePrefix=None, \
+	def addSplitVCFFileJob(self, executable=None, inputFile=None, outputFnamePrefix=None, \
 					noOfOverlappingSites=1000, noOfSitesPerUnit=5000, noOfTotalSites=10000, \
 					parentJobLs=None, \
 					extraDependentInputLs=None, \
@@ -405,7 +401,7 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 		return chr2IntervalDataLs
 	
 	
-	def mapEachInterval(self, workflow=None, VCFJobData=None, chromosome=None,intervalData=None,\
+	def mapEachInterval(self, VCFJobData=None, chromosome=None,intervalData=None,\
 					mapEachChromosomeData=None, passingData=None, transferOutput=False, \
 					**keywords):
 		"""
@@ -429,7 +425,7 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 		"""
 		return returnData
 	
-	def mapEachVCF(self, workflow=None, chromosome=None,VCFJobData=None, passingData=None, transferOutput=False, **keywords):
+	def mapEachVCF(self, chromosome=None,VCFJobData=None, passingData=None, transferOutput=False, **keywords):
 		"""
 		2013.06.20 new data structure available used to split/select VCF
 			intervalDataLs = passingData.intervalDataLs
@@ -702,7 +698,7 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 						(len(returnData.jobDataLs), self.no_of_jobs))
 		return returnData
 	
-	def reduceEachChromosome(self, workflow=None, chromosome=None, passingData=None, mapEachVCFDataLs=None, reduceEachVCFDataLs=None,\
+	def reduceEachChromosome(self, chromosome=None, passingData=None, mapEachVCFDataLs=None, reduceEachVCFDataLs=None,\
 						transferOutput=True, \
 						**keywords):
 		"""
@@ -713,15 +709,15 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 		returnData.reduceEachVCFDataLs = reduceEachVCFDataLs
 		return returnData
 		
-	def reduceEachVCF(self, workflow=None, chromosome=None, passingData=None, mapEachIntervalDataLs=None,\
+	def reduceEachVCF(self, chromosome=None, passingData=None, mapEachIntervalDataLs=None,\
 					transferOutput=True, **keywords):
 		"""
 		"""
-		return ParentClass.reduceEachInput(self, workflow=workflow, chromosome=chromosome, \
+		return ParentClass.reduceEachInput(self, chromosome=chromosome, \
 						passingData=passingData, mapEachIntervalDataLs=mapEachIntervalDataLs, transferOutput=transferOutput,\
 						**keywords)
 
-	def reduce(self, workflow=None, reduceEachChromosomeDataLs=None, \
+	def reduce(self, reduceEachChromosomeDataLs=None, \
 			mapEachChromosomeDataLs=None, passingData=None, transferOutput=True, \
 			**keywords):
 		"""
@@ -742,7 +738,7 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 		"""
 		return returnData
 	
-	def addSplitVCFSubWorkflow(self, workflow=None, inputVCFData=None, intervalSize=1000000, chr2size=None,
+	def addSplitVCFSubWorkflow(self, inputVCFData=None, intervalSize=1000000, chr2size=None,
 							registerReferenceData=None, outputDirJob=None):
 		"""
 		Examples:
@@ -750,8 +746,6 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 		2013.09.19
 			split each VCF into non-overlapping sub-VCFs
 		"""
-		if workflow is None:
-			workflow = self
 		if chr2size is None:
 			chr2size = self.chr2size
 		if registerReferenceData is None:
@@ -784,7 +778,7 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 		sys.stderr.write("jobCount=%s.\n"%(self.no_of_jobs))
 		return returnData
 	
-	def addAllJobs(self, workflow=None, inputVCFData=None, chr2IntervalDataLs=None, \
+	def addAllJobs(self, inputVCFData=None, chr2IntervalDataLs=None, \
 				GenomeAnalysisTKJar=None, samtools=None, \
 				CreateSequenceDictionaryJava=None, CreateSequenceDictionaryJar=None, \
 				BuildBamIndexFilesJava=None, BuildBamIndexJar=None,\
@@ -888,7 +882,7 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 		# mapEachVCFDataLsLs is list of mapEachVCFDataLs by each chromosome
 		# reduceEachVCFDataLsLs is list of reduceEachVCFDataLs by each chromosome
 		
-		preReduceReturnData = self.preReduce(workflow=workflow, outputDirPrefix=outputDirPrefix, \
+		preReduceReturnData = self.preReduce(outputDirPrefix=outputDirPrefix, \
 									passingData=passingData, transferOutput=True,\
 									**keywords)
 		passingData.preReduceReturnData = preReduceReturnData
@@ -901,7 +895,7 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 		no_of_vcf_files = 0
 		for chromosome, jobDataLs in chr2jobDataLs.items():
 			passingData.chromosome = chromosome
-			mapEachChromosomeData = self.mapEachChromosome(workflow=workflow, chromosome=chromosome, \
+			mapEachChromosomeData = self.mapEachChromosome(chromosome=chromosome, \
 										passingData=passingData, \
 										transferOutput=False, **keywords)
 			passingData.mapEachChromosomeData = mapEachChromosomeData
@@ -934,8 +928,7 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 				if no_of_vcf_files%10==0:
 					sys.stderr.write("%s\t%s VCFs."%('\x08'*40, no_of_vcf_files))
 				if self.mapReduceType==1:	#2013.06.27 type 1: split VCF with fixed number of sites
-					mapEachVCFData = self.mapEachVCF(workflow=workflow,\
-													VCFJobData=jobData, passingData=passingData, \
+					mapEachVCFData = self.mapEachVCF(VCFJobData=jobData, passingData=passingData, \
 													transferOutput=False, **keywords)
 					passingData.mapEachVCFData = mapEachVCFData
 					passingData.mapEachVCFDataLs.append(mapEachVCFData)
@@ -955,7 +948,7 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 							passingData.intervalFileBasenamePrefix = '%s_%s_splitVCF_u%s'%(chromosome, commonPrefix, unitNumber)
 							passingData.noOfIndividuals = getattr(jobData.file, 'noOfIndividuals', None)
 							passingData.span = self.intervalSize + self.intervalOverlapSize*2 	#2013.06.19 for memory/walltime gauging
-							mapEachIntervalData = self.mapEachInterval(workflow=workflow, \
+							mapEachIntervalData = self.mapEachInterval(\
 													VCFJobData=PassingData(file=splitVCFFile, vcfFile=splitVCFFile, fileLs=[splitVCFFile], \
 																		job=splitVCFJob, jobLs=[splitVCFJob], tbi_F=None), \
 													chromosome=chromosome,intervalData=None,\
@@ -965,7 +958,7 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 							passingData.mapEachIntervalData = mapEachIntervalData
 							passingData.mapEachIntervalDataLs.append(mapEachIntervalData)
 							
-							linkMapToReduceData = self.linkMapToReduce(workflow=workflow, mapEachIntervalData=mapEachIntervalData, \
+							linkMapToReduceData = self.linkMapToReduce(mapEachIntervalData=mapEachIntervalData, \
 												preReduceReturnData=preReduceReturnData, \
 												passingData=passingData, \
 												**keywords)
@@ -979,7 +972,7 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 										(chromosome, self.mapReduceType, jobData.file.name))
 						sys.exit(3)
 					for intervalData in chr2IntervalDataLs.get(chromosome):
-						mapEachIntervalData = self.mapEachInterval(workflow=workflow, \
+						mapEachIntervalData = self.mapEachInterval(\
 														VCFJobData=jobData, \
 														chromosome=chromosome,intervalData=intervalData,\
 														mapEachChromosomeData=mapEachChromosomeData, \
@@ -988,23 +981,23 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 						passingData.mapEachIntervalData = mapEachIntervalData
 						passingData.mapEachIntervalDataLs.append(mapEachIntervalData)
 						
-						linkMapToReduceData = self.linkMapToReduce(workflow=workflow, mapEachIntervalData=mapEachIntervalData, \
+						linkMapToReduceData = self.linkMapToReduce(mapEachIntervalData=mapEachIntervalData, \
 											preReduceReturnData=preReduceReturnData, \
 											passingData=passingData, \
 											**keywords)
-				reduceEachVCFData = self.reduceEachVCF(workflow=workflow, chromosome=chromosome, passingData=passingData, \
+				reduceEachVCFData = self.reduceEachVCF(chromosome=chromosome, passingData=passingData, \
 								mapEachIntervalDataLs=passingData.mapEachIntervalDataLs,\
 								transferOutput=False, data_dir=data_dir, \
 								**keywords)
 				passingData.reduceEachVCFData = reduceEachVCFData
 				passingData.reduceEachVCFDataLs.append(reduceEachVCFData)
 				
-				gzipReduceEachVCFData = self.addGzipSubWorkflow(workflow=workflow, \
+				gzipReduceEachVCFData = self.addGzipSubWorkflow(\
 					inputData=reduceEachVCFData, transferOutput=transferOutput,\
 					outputDirPrefix="%sReduceEachVCF"%(outputDirPrefix), topOutputDirJob=gzipReduceEachVCFFolderJob, \
 					report=False)
 				gzipReduceEachVCFFolderJob = gzipReduceEachVCFData.topOutputDirJob
-			reduceEachChromosomeData = self.reduceEachChromosome(workflow=workflow, chromosome=chromosome, passingData=passingData, \
+			reduceEachChromosomeData = self.reduceEachChromosome(chromosome=chromosome, passingData=passingData, \
 								mapEachVCFDataLs=passingData.mapEachVCFDataLs,\
 								reduceEachVCFDataLs=passingData.reduceEachVCFDataLs,\
 								transferOutput=False, data_dir=data_dir, \
@@ -1012,26 +1005,26 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 			passingData.reduceEachChromosomeData = reduceEachChromosomeData
 			passingData.reduceEachChromosomeDataLs.append(reduceEachChromosomeData)
 			
-			gzipReduceEachChromosomeData = self.addGzipSubWorkflow(workflow=workflow, \
+			gzipReduceEachChromosomeData = self.addGzipSubWorkflow(\
 					inputData=reduceEachChromosomeData, transferOutput=transferOutput,\
 					outputDirPrefix="%sReduceEachChromosome"%(outputDirPrefix), \
 					topOutputDirJob=gzipReduceEachChromosomeFolderJob, report=False)
 			gzipReduceEachChromosomeFolderJob = gzipReduceEachChromosomeData.topOutputDirJob
 			
-		reduceReturnData = self.reduce(workflow=workflow, passingData=passingData, transferOutput=False, \
+		reduceReturnData = self.reduce(passingData=passingData, transferOutput=False, \
 							mapEachChromosomeDataLs=passingData.mapEachVCFDataLs,\
 							reduceEachChromosomeDataLs=passingData.reduceEachChromosomeDataLs,\
 							**keywords)
 		passingData.reduceReturnData = reduceReturnData
 		
 		if self.needGzipPreReduceReturnData:
-			gzipPreReduceReturnData = self.addGzipSubWorkflow(workflow=workflow, inputData=preReduceReturnData, transferOutput=transferOutput,\
+			gzipPreReduceReturnData = self.addGzipSubWorkflow(inputData=preReduceReturnData, transferOutput=transferOutput,\
 						outputDirPrefix="%sPreReduce"%(outputDirPrefix), \
 						topOutputDirJob= gzipPreReduceFolderJob, report=False)
 			gzipPreReduceFolderJob = gzipPreReduceReturnData.topOutputDirJob
 		
 		if self.needGzipReduceReturnData:
-			gzipReduceReturnData = self.addGzipSubWorkflow(workflow=workflow, inputData=reduceReturnData, transferOutput=transferOutput,\
+			gzipReduceReturnData = self.addGzipSubWorkflow(inputData=reduceReturnData, transferOutput=transferOutput,\
 						outputDirPrefix="%sReduce"%(outputDirPrefix), \
 						topOutputDirJob=gzipReduceFolderJob, report=False)
 			gzipReduceFolderJob = gzipReduceReturnData.topOutputDirJob
@@ -1098,13 +1091,13 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 			sys.stderr.write("No VCF files in this folder , %s.\n"%self.inputDir)
 			sys.exit(0)
 				
-		self.addAllJobs(workflow=workflow, inputVCFData=inputData, inputData=inputData, \
-				chr2IntervalDataLs=self.chr2IntervalDataLs, samtools=workflow.samtools, \
-				GenomeAnalysisTKJar=workflow.GenomeAnalysisTKJar, \
-				CreateSequenceDictionaryJava=workflow.CreateSequenceDictionaryJava, \
-				CreateSequenceDictionaryJar=workflow.CreateSequenceDictionaryJar, \
-				BuildBamIndexFilesJava=workflow.BuildBamIndexFilesJava, BuildBamIndexJar=workflow.BuildBamIndexJar,\
-				mv=workflow.mv, \
+		self.addAllJobs(inputVCFData=inputData, inputData=inputData, \
+				chr2IntervalDataLs=self.chr2IntervalDataLs, samtools=self.samtools, \
+				GenomeAnalysisTKJar=self.GenomeAnalysisTKJar, \
+				CreateSequenceDictionaryJava=self.CreateSequenceDictionaryJava, \
+				CreateSequenceDictionaryJar=self.CreateSequenceDictionaryJar, \
+				BuildBamIndexFilesJava=self.BuildBamIndexFilesJava, BuildBamIndexJar=self.BuildBamIndexJar,\
+				mv=self.mv, \
 				registerReferenceData=pdata.registerReferenceData,\
 				needFastaIndexJob=getattr(self, 'needFastaIndexJob',False), \
 				needFastaDictJob=getattr(self, 'needFastaDictJob', False), \

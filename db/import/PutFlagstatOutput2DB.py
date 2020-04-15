@@ -12,11 +12,11 @@ Description:
 	
 """
 
-import sys, os, math
+import sys, os
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 
 import csv, copy
-from palos import ProcessOptions, getListOutOfStr, PassingData, utils, figureOutDelimiter
+from palos import ProcessOptions, PassingData, utils, figureOutDelimiter
 from palos.mapper.AbstractSunsetMapper import AbstractSunsetMapper as ParentClass
 from palos.db import SunsetDB
 

@@ -47,12 +47,12 @@ class AbstractAlignmentAndVCFWorkflow(ParentClass, AbstractVCFWorkflow):
 		pdata.chr2VCFJobData = chr2VCFJobData
 		return pdata
 
-	def registerCustomExecutables(self, workflow=None):
+	def registerCustomExecutables(self):
 
 		"""
 		"""
-		ParentClass.registerCustomExecutables(self, workflow=workflow)
-		AbstractVCFWorkflow.registerCustomExecutables(self, workflow=workflow)
+		ParentClass.registerCustomExecutables(self)
+		AbstractVCFWorkflow.registerCustomExecutables(self)
 
 	def run(self):
 		"""
@@ -68,13 +68,13 @@ class AbstractAlignmentAndVCFWorkflow(ParentClass, AbstractVCFWorkflow):
 			sys.stderr.write("Error: No VCF files in the input VCF folder %s.\n"%self.inputDir)
 			raise
 		#adding inputVCFData=... is the key difference from the parent class
-		self.addAllJobs(workflow=workflow, inputVCFData=inputData, alignmentDataLs=pdata.alignmentDataLs, \
-					chr2IntervalDataLs=pdata.chr2IntervalDataLs, samtools=workflow.samtools, \
-				GenomeAnalysisTKJar=workflow.GenomeAnalysisTKJar, \
-				MergeSamFilesJar=workflow.MergeSamFilesJar, \
-				CreateSequenceDictionaryJava=workflow.CreateSequenceDictionaryJava, CreateSequenceDictionaryJar=workflow.CreateSequenceDictionaryJar, \
-				BuildBamIndexFilesJava=workflow.BuildBamIndexFilesJava, BuildBamIndexJar=workflow.BuildBamIndexJar,\
-				mv=workflow.mv, skipDoneAlignment=self.skipDoneAlignment, \
+		self.addAllJobs(inputVCFData=inputData, alignmentDataLs=pdata.alignmentDataLs, \
+					chr2IntervalDataLs=pdata.chr2IntervalDataLs, samtools=self.samtools, \
+				GenomeAnalysisTKJar=self.GenomeAnalysisTKJar, \
+				MergeSamFilesJar=self.MergeSamFilesJar, \
+				CreateSequenceDictionaryJava=self.CreateSequenceDictionaryJava, CreateSequenceDictionaryJar=self.CreateSequenceDictionaryJar, \
+				BuildBamIndexFilesJava=self.BuildBamIndexFilesJava, BuildBamIndexJar=self.BuildBamIndexJar,\
+				mv=self.mv, skipDoneAlignment=self.skipDoneAlignment, \
 				registerReferenceData=pdata.registerReferenceData,\
 				needFastaIndexJob=self.needFastaIndexJob, needFastaDictJob=self.needFastaDictJob, \
 				data_dir=self.data_dir, no_of_gatk_threads = 1, transferOutput=True,\

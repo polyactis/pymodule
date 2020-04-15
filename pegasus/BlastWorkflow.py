@@ -169,12 +169,10 @@ class BlastWorkflow(ParentClass):
 	
 				
 		
-	def registerCustomExecutables(self, workflow=None, **keywords):
+	def registerCustomExecutables(self, **keywords):
 		"""
 		2012.5.23
 		"""
-		if workflow is None:
-			workflow = self
 		namespace = self.namespace
 		version = self.version
 		operatingSystem = self.operatingSystem

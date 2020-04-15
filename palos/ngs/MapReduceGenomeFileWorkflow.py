@@ -59,14 +59,12 @@ class MapReduceGenomeFileWorkflow(ParentClass):
 		self.registerReferenceData = None
 		self.refFastaFList= None
 	
-	def preReduce(self, workflow=None, outputDirPrefix="", passingData=None, transferOutput=True, **keywords):
+	def preReduce(self, outputDirPrefix="", passingData=None, transferOutput=True, **keywords):
 		"""
 		2013.06.14
 			move topOutputDirJob from addAllJobs to here. 
 		2012.9.17
 		"""
-		if workflow is None:
-			workflow = self
 		returnData = PassingData(no_of_jobs = 0)
 		returnData.jobDataLs = []
 		
@@ -110,7 +108,7 @@ class MapReduceGenomeFileWorkflow(ParentClass):
 		return self.constructJobDataFromJob(job=tabixRetrieveJob)
 		
 
-	def addAllJobs(self, workflow=None, inputData=None, chr2IntervalDataLs=None, \
+	def addAllJobs(self, inputData=None, chr2IntervalDataLs=None, \
 				data_dir=None, \
 				intervalSize=3000, intervalOverlapSize=0, \
 				outputDirPrefix="", passingData=None, \
@@ -176,7 +174,7 @@ class MapReduceGenomeFileWorkflow(ParentClass):
 		# mapEachInputDataLsLs is list of mapEachInputDataLs by each chromosome
 		# reduceEachInputDataLsLs is list of reduceEachInputDataLs by each chromosome
 		
-		preReduceReturnData = self.preReduce(workflow=workflow, outputDirPrefix=outputDirPrefix, \
+		preReduceReturnData = self.preReduce(outputDirPrefix=outputDirPrefix, \
 									passingData=passingData, transferOutput=True,\
 									**keywords)
 		passingData.preReduceReturnData = preReduceReturnData
@@ -192,7 +190,7 @@ class MapReduceGenomeFileWorkflow(ParentClass):
 		
 		for chromosome, intervalDataLs in chr2IntervalDataLs.items():
 			passingData.chromosome = chromosome
-			mapEachChromosomeData = self.mapEachChromosome(workflow=workflow, chromosome=chromosome, \
+			mapEachChromosomeData = self.mapEachChromosome(chromosome=chromosome, \
 										passingData=passingData, \
 										transferOutput=False, **keywords)
 			passingData.mapEachChromosomeData = mapEachChromosomeData
@@ -225,7 +223,7 @@ class MapReduceGenomeFileWorkflow(ParentClass):
 													intervalData=intervalData, mapEachChromosomeData=mapEachChromosomeData,\
 													passingData=passingData, transferOutput=firstInterval,\
 													**keywords)
-					mapEachIntervalData = self.mapEachInterval(workflow=workflow, inputJobData=jobData, \
+					mapEachIntervalData = self.mapEachInterval(inputJobData=jobData, \
 															selectIntervalJobData=selectIntervalJobData, \
 										chromosome=chromosome,intervalData=intervalData,\
 										mapEachChromosomeData=mapEachChromosomeData, \
@@ -235,25 +233,25 @@ class MapReduceGenomeFileWorkflow(ParentClass):
 					passingData.mapEachIntervalDataLs.append(mapEachIntervalData)
 					passingData.chromosome2mapEachIntervalDataLs[chromosome].append(mapEachIntervalData)
 					
-					linkMapToReduceData = self.linkMapToReduce(workflow=workflow, mapEachIntervalData=mapEachIntervalData, \
+					linkMapToReduceData = self.linkMapToReduce(mapEachIntervalData=mapEachIntervalData, \
 										preReduceReturnData=preReduceReturnData, \
 										passingData=passingData, \
 										**keywords)
 					if firstInterval==True:
 						firstInterval = False
-				reduceEachInputData = self.reduceEachInput(workflow=workflow, chromosome=chromosome, passingData=passingData, \
+				reduceEachInputData = self.reduceEachInput(chromosome=chromosome, passingData=passingData, \
 								mapEachIntervalDataLs=passingData.mapEachIntervalDataLs,\
 								transferOutput=False, data_dir=data_dir, \
 								**keywords)
 				passingData.reduceEachInputData = reduceEachInputData
 				passingData.reduceEachInputDataLs.append(reduceEachInputData)
 				
-				gzipReduceEachInputData = self.addGzipSubWorkflow(workflow=workflow, \
+				gzipReduceEachInputData = self.addGzipSubWorkflow(\
 					inputData=reduceEachInputData, transferOutput=transferOutput,\
 					outputDirPrefix="%sReduceEachInput"%(outputDirPrefix), topOutputDirJob=gzipReduceEachInputFolderJob, \
 					report=False)
 				gzipReduceEachInputFolderJob = gzipReduceEachInputData.topOutputDirJob
-			reduceEachChromosomeData = self.reduceEachChromosome(workflow=workflow, chromosome=chromosome, passingData=passingData, \
+			reduceEachChromosomeData = self.reduceEachChromosome(chromosome=chromosome, passingData=passingData, \
 								mapEachInputDataLs=passingData.mapEachInputDataLs, \
 								chromosome2mapEachIntervalDataLs=passingData.chromosome2mapEachIntervalDataLs,\
 								reduceEachInputDataLs=passingData.reduceEachInputDataLs,\
@@ -262,26 +260,26 @@ class MapReduceGenomeFileWorkflow(ParentClass):
 			passingData.reduceEachChromosomeData = reduceEachChromosomeData
 			passingData.reduceEachChromosomeDataLs.append(reduceEachChromosomeData)
 			
-			gzipReduceEachChromosomeData = self.addGzipSubWorkflow(workflow=workflow, \
+			gzipReduceEachChromosomeData = self.addGzipSubWorkflow(\
 					inputData=reduceEachChromosomeData, transferOutput=transferOutput,\
 					outputDirPrefix="%sReduceEachChromosome"%(outputDirPrefix), \
 					topOutputDirJob=gzipReduceEachChromosomeFolderJob, report=False)
 			gzipReduceEachChromosomeFolderJob = gzipReduceEachChromosomeData.topOutputDirJob
 			
-		reduceReturnData = self.reduce(workflow=workflow, passingData=passingData, transferOutput=False, \
+		reduceReturnData = self.reduce(passingData=passingData, transferOutput=False, \
 							mapEachChromosomeDataLs=passingData.mapEachInputDataLs,\
 							reduceEachChromosomeDataLs=passingData.reduceEachChromosomeDataLs,\
 							**keywords)
 		passingData.reduceReturnData = reduceReturnData
 		
 		if self.needGzipPreReduceReturnData:
-			gzipPreReduceReturnData = self.addGzipSubWorkflow(workflow=workflow, inputData=preReduceReturnData, transferOutput=transferOutput,\
+			gzipPreReduceReturnData = self.addGzipSubWorkflow(inputData=preReduceReturnData, transferOutput=transferOutput,\
 						outputDirPrefix="%sPreReduce"%(outputDirPrefix), \
 						topOutputDirJob= gzipPreReduceFolderJob, report=False)
 			gzipPreReduceFolderJob = gzipPreReduceReturnData.topOutputDirJob
 		
 		if self.needGzipReduceReturnData:
-			gzipReduceReturnData = self.addGzipSubWorkflow(workflow=workflow, inputData=reduceReturnData, transferOutput=transferOutput,\
+			gzipReduceReturnData = self.addGzipSubWorkflow(inputData=reduceReturnData, transferOutput=transferOutput,\
 						outputDirPrefix="%sReduce"%(outputDirPrefix), \
 						topOutputDirJob=gzipReduceFolderJob, report=False)
 			gzipReduceFolderJob = gzipReduceReturnData.topOutputDirJob
@@ -291,7 +289,7 @@ class MapReduceGenomeFileWorkflow(ParentClass):
 		return reduceReturnData
 
 	
-	def mapEachChromosome(self, workflow=None, chromosome=None,\
+	def mapEachChromosome(self, chromosome=None,\
 				VCFJobData=None, jobData=None, passingData=None, transferOutput=True, **keywords):
 		"""
 		2012.9.17
@@ -300,7 +298,7 @@ class MapReduceGenomeFileWorkflow(ParentClass):
 		returnData.jobDataLs = []
 		return returnData
 	
-	def mapEachInterval(self, workflow=None, inputJobData=None, selectIntervalJobData=None, \
+	def mapEachInterval(self, inputJobData=None, selectIntervalJobData=None, \
 					chromosome=None,intervalData=None,\
 					mapEachChromosomeData=None, \
 					passingData=None, transferOutput=False, **keywords):
@@ -332,14 +330,14 @@ class MapReduceGenomeFileWorkflow(ParentClass):
 		"""
 		return returnData
 
-	def linkMapToReduce(self, workflow=None, mapEachIntervalData=None, preReduceReturnData=None, passingData=None, transferOutput=True, **keywords):
+	def linkMapToReduce(self, mapEachIntervalData=None, preReduceReturnData=None, passingData=None, transferOutput=True, **keywords):
 		"""
 		"""
 		returnData = PassingData(no_of_jobs = 0)
 		returnData.jobDataLs = []
 		return returnData
 	
-	def reduceEachChromosome(self, workflow=None, chromosome=None, passingData=None, mapEachInputDataLs=None, \
+	def reduceEachChromosome(self, chromosome=None, passingData=None, mapEachInputDataLs=None, \
 						chromosome2mapEachIntervalDataLs=None,\
 						reduceEachInputDataLs=None,\
 						transferOutput=True, \
@@ -352,7 +350,7 @@ class MapReduceGenomeFileWorkflow(ParentClass):
 		returnData.reduceEachInputDataLs = reduceEachInputDataLs
 		return returnData
 	
-	def reduceEachInput(self, workflow=None, chromosome=None, passingData=None, mapEachIntervalDataLs=None,\
+	def reduceEachInput(self, chromosome=None, passingData=None, mapEachIntervalDataLs=None,\
 					transferOutput=True, **keywords):
 		"""
 		2013.07.10
@@ -376,7 +374,7 @@ class MapReduceGenomeFileWorkflow(ParentClass):
 		"""
 		return returnData
 	
-	def reduce(self, workflow=None, reduceEachChromosomeDataLs=None, \
+	def reduce(self, reduceEachChromosomeDataLs=None, \
 			mapEachChromosomeDataLs=None, passingData=None, transferOutput=True, \
 			**keywords):
 		"""

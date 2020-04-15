@@ -19,7 +19,7 @@ class AbstractBioinfoWorkflow(ParentClass):
         """
         ParentClass.__init__(self, **keywords)
 
-    def registerPlinkExecutables(self, workflow=None):
+    def registerPlinkExecutables(self):
         if not workflow:
             workflow = self
         
@@ -155,7 +155,7 @@ class AbstractBioinfoWorkflow(ParentClass):
             returnData.needBlastMakeDBJob = True
         return returnData
 
-    def addPlinkJob(self, workflow=None, executable=None, inputFileList=None, parentPlinkJob=None,\
+    def addPlinkJob(self, executable=None, inputFileList=None, parentPlinkJob=None,\
                 tpedFile=None, tfamFile=None,\
                 pedFile=None, famFile=None, mapFile=None, bedFile=None, bimFile=None,\
                 inputFnamePrefix=None, inputOption='--file', \
@@ -340,12 +340,12 @@ class AbstractBioinfoWorkflow(ParentClass):
                 extraArgumentList=extraArgumentList, key2ObjectForJob=key2ObjectForJob, job_max_memory=job_max_memory, **keywords)
         return job
 
-    def registerExecutables(self, workflow=None):
+    def registerExecutables(self):
         """
         """
         if not workflow:
             workflow = self
-        ParentClass.registerExecutables(self, workflow=workflow)
+        ParentClass.registerExecutables(self)
 
         namespace = self.namespace
         version = self.version
@@ -369,19 +369,19 @@ class AbstractBioinfoWorkflow(ParentClass):
             "polymorphism/mapper/LiftOverVCFBasedOnCoordinateMap.py"), \
             name='LiftOverVCFBasedOnCoordinateMap', clusterSizeMultiplier=1)
 
-        self.addExecutableFromPath(path=os.path.join(workflow.pymodulePath, \
+        self.addExecutableFromPath(path=os.path.join(self.pymodulePath, \
             "polymorphism/qc/CalculateLociAndGenomeCoveredAtEachSwitchFrequencyThreshold.py"), \
             name='CalculateLociAndGenomeCoveredAtEachSwitchFrequencyThreshold', clusterSizeMultiplier=0.01)
 
-        self.addExecutableFromPath(path=os.path.join(workflow.pymodulePath, \
+        self.addExecutableFromPath(path=os.path.join(self.pymodulePath, \
                 "mapper/extractor/ExtractFlankingSequenceForVCFLoci.py"), \
             name='ExtractFlankingSequenceForVCFLoci', clusterSizeMultiplier=2)
 
-        self.addExecutableFromPath(path=os.path.join(workflow.pymodulePath, \
+        self.addExecutableFromPath(path=os.path.join(self.pymodulePath, \
             "polymorphism/mapper/FindSNPPositionOnNewRefFromFlankingBlastOutput.py"), \
             name='FindSNPPositionOnNewRefFromFlankingBlastOutput', clusterSizeMultiplier=2)
 
-        self.addExecutableFromPath(path=os.path.join(workflow.pymodulePath, \
+        self.addExecutableFromPath(path=os.path.join(self.pymodulePath, \
             "polymorphism/mapper/FindSNPPositionOnNewRefFromFlankingBWAOutput.py"), \
             name='FindSNPPositionOnNewRefFromFlankingBWAOutput', clusterSizeMultiplier=1)
 

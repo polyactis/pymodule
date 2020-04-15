@@ -42,13 +42,11 @@ class ReadFileBaseCountWorkflow(ParentClass):
 		if self.ind_seq_id_ls:
 			self.ind_seq_id_ls = getListOutOfStr(self.ind_seq_id_ls, data_type=int)
 	
-	def registerCustomExecutables(self, workflow=None):
+	def registerCustomExecutables(self):
 		"""
 		2012.3.14
 		"""
-		if workflow is None:
-			workflow = self
-		ParentClass.registerCustomExecutables(self, workflow=workflow)
+		ParentClass.registerCustomExecutables(self)
 		
 		self.addOneExecutableFromPathAndAssignProperClusterSize(
 			path=os.path.join(self.pymodulePath, 'mapper/computer/CountFastqReadBaseCount.py'), \
@@ -59,7 +57,7 @@ class ReadFileBaseCountWorkflow(ParentClass):
 										name='PutReadBaseCountIntoDB', clusterSizeMultipler=0.2)
 		
 	
-	def registerISQFiles(self, workflow=None, db_main=None, ind_seq_id_ls=[], local_data_dir='', pegasusFolderName='', \
+	def registerISQFiles(self, db_main=None, ind_seq_id_ls=[], local_data_dir='', pegasusFolderName='', \
 						input_site_handler='local'):
 		"""
 		2012.3.14
@@ -79,7 +77,7 @@ class ReadFileBaseCountWorkflow(ParentClass):
 						inputF = File(os.path.join(pegasusFolderName, individual_sequence_file.path))
 						inputF.addPFN(PFN("file://" + absPath, input_site_handler))
 						inputF.absPath = absPath
-						workflow.addFile(inputF)
+						self.addFile(inputF)
 						returnData.jobDataLs.append(PassingData(output=inputF, jobLs=[], isq_id=individual_sequence.id,\
 															isqf_id=individual_sequence_file.id))
 						individual_sequence_id_set.add(individual_sequence.id)
@@ -93,7 +91,7 @@ class ReadFileBaseCountWorkflow(ParentClass):
 					inputF = File(os.path.join(pegasusFolderName, individual_sequence.path))
 					inputF.addPFN(PFN("file://" + absPath, input_site_handler))
 					inputF.absPath = absPath
-					workflow.addFile(inputF)
+					self.addFile(inputF)
 					returnData.jobDataLs.append(PassingData(output=inputF, jobLs=[], isq_id=individual_sequence.id,\
 														isqf_id=None))
 					individual_sequence_id_set.add(individual_sequence.id)
@@ -106,7 +104,7 @@ class ReadFileBaseCountWorkflow(ParentClass):
 						(len(returnData.jobDataLs), len(individual_sequence_id_set), len(missed_individual_sequence_id_set)))
 		return returnData
 	
-	def addPutReadBaseCountIntoDBJob(self, workflow=None, executable=None, inputFileLs=[], \
+	def addPutReadBaseCountIntoDBJob(self, executable=None, inputFileLs=[], \
 					logFile=None, commit=False, parentJobLs=[], extraDependentInputLs=[], \
 					transferOutput=True, extraArguments=None, \
 					job_max_memory=10, sshDBTunnel=1, **keywords):
@@ -128,7 +126,7 @@ class ReadFileBaseCountWorkflow(ParentClass):
 		return job
 	
 	
-	def addCountFastqReadBaseCountJob(self, workflow=None, executable=None, inputFile=None, \
+	def addCountFastqReadBaseCountJob(self, executable=None, inputFile=None, \
 								outputFile=None, isq_id=None, isqf_id=None, \
 					parentJobLs=None, extraDependentInputLs=None, transferOutput=True, extraArguments=None, \
 					job_max_memory=100, **keywords):
@@ -136,7 +134,7 @@ class ReadFileBaseCountWorkflow(ParentClass):
 		20170503 use addGenericJob()
 		2012.3.14
 		"""
-		job = Job(namespace=workflow.namespace, name=executable.name, version=workflow.version)
+		job = Job(namespace=self.namespace, name=executable.name, version=self.version)
 		job.addArguments("--inputFname", inputFile, "--outputFname", outputFile)
 		if not extraArguments:
 			extraArguments = ""
@@ -157,7 +155,7 @@ class ReadFileBaseCountWorkflow(ParentClass):
 					**keywords)
 		return job
 	
-	def addJobs(self, workflow=None, inputData=None, pegasusFolderName="", needSSHDBTunnel=0):
+	def addJobs(self, inputData=None, pegasusFolderName="", needSSHDBTunnel=0):
 		"""
 		2012.3.14
 		"""
@@ -176,11 +174,11 @@ class ReadFileBaseCountWorkflow(ParentClass):
 		
 		finalReduceFile = File(os.path.join(topOutputDir, 'read_base_count.tsv'))
 		
-		readBaseCountMergeJob = self.addStatMergeJob(workflow, statMergeProgram=workflow.mergeSameHeaderTablesIntoOne, \
+		readBaseCountMergeJob = self.addStatMergeJob(statMergeProgram=self.mergeSameHeaderTablesIntoOne, \
 						outputF=finalReduceFile, transferOutput=True, extraArguments=None, parentJobLs=[topOutputDirJob])
 		
 		logFile = File(os.path.join(topOutputDir, 'PutReadBaseCountIntoDB.log'))
-		putCountIntoDBJob = self.addPutReadBaseCountIntoDBJob(workflow, executable=workflow.PutReadBaseCountIntoDB, \
+		putCountIntoDBJob = self.addPutReadBaseCountIntoDBJob(executable=self.PutReadBaseCountIntoDB, \
 					inputFileLs=[finalReduceFile], \
 					logFile=logFile, commit=self.commit, parentJobLs=[readBaseCountMergeJob], \
 					extraDependentInputLs=[], transferOutput=True, \
@@ -190,7 +188,7 @@ class ReadFileBaseCountWorkflow(ParentClass):
 		for jobData in inputData.jobDataLs:
 			#add the read count job
 			outputFile = File(os.path.join(topOutputDir, 'read_count_isq_%s_isqf_%s.tsv'%(jobData.isq_id, jobData.isqf_id)))
-			readCountJob = self.addCountFastqReadBaseCountJob(workflow, executable=workflow.CountFastqReadBaseCount, \
+			readCountJob = self.addCountFastqReadBaseCountJob(executable=self.CountFastqReadBaseCount, \
 								inputFile=jobData.output, outputFile=outputFile, isq_id=jobData.isq_id, \
 								isqf_id=jobData.isqf_id, \
 								parentJobLs=jobData.jobLs + [topOutputDirJob], extraDependentInputLs=None, \
@@ -198,7 +196,7 @@ class ReadFileBaseCountWorkflow(ParentClass):
 								job_max_memory=10, no_of_cpus=4)
 			
 			no_of_jobs += 1
-			self.addInputToStatMergeJob(workflow, statMergeJob=readBaseCountMergeJob, \
+			self.addInputToStatMergeJob(statMergeJob=readBaseCountMergeJob, \
 								inputF=readCountJob.output, parentJobLs=[readCountJob])
 			
 		sys.stderr.write("%s jobs.\n"%(no_of_jobs))
@@ -231,14 +229,14 @@ class ReadFileBaseCountWorkflow(ParentClass):
 
 		"""
 		
-		inputData = self.registerISQFiles(workflow=workflow, db_main=db_main, ind_seq_id_ls=self.ind_seq_id_ls, \
+		inputData = self.registerISQFiles(db_main=db_main, ind_seq_id_ls=self.ind_seq_id_ls, \
 										local_data_dir=self.local_data_dir, pegasusFolderName=self.pegasusFolderName,\
 										input_site_handler=self.input_site_handler)
 		
 		registerReferenceData = self.getReferenceSequence()
 		
 		
-		return PassingData(workflow=workflow, inputData=inputData,\
+		return PassingData(inputData=inputData,\
 						registerReferenceData=registerReferenceData)
 	def run(self):
 		"""
@@ -249,7 +247,7 @@ class ReadFileBaseCountWorkflow(ParentClass):
 		
 		inputData=pdata.inputData
 		
-		self.addJobs(workflow, inputData=inputData, pegasusFolderName=self.pegasusFolderName,
+		self.addJobs(inputData=inputData, pegasusFolderName=self.pegasusFolderName,
 					needSSHDBTunnel=self.needSSHDBTunnel)
 		
 		self.end_run()

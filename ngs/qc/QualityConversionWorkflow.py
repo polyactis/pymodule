@@ -24,7 +24,7 @@ workflow_AC = ADAG("pegasus_test")
 site_handle = "ycondor"
 picard_path = "/y/home/cl/software/picard.jar"
 
-def registerExecutefile(workflow, executeFile):
+def registerExecutefile(executeFile):
     architecture = "x86_64"
     operatingSystem = "linux"
     namespace = "pegasus"
@@ -35,13 +35,13 @@ def registerExecutefile(workflow, executeFile):
     workflow.addExecutable(execute)
     return executeName
 
-def addfastqtosamToWorkflow(workflow, excute, argv):
+def addfastqtosamToWorkflow(excute, argv):
     step = Job(namespace="pegasus", name=excute)
     step.addArguments(*argv)
     workflow.addJob(step)
     return step
 
-def addsamtofastqToWorkflow(workflow, excute,filenamelst, argv):
+def addsamtofastqToWorkflow(excute,filenamelst, argv):
     step = Job(namespace="pegasus", name=excute)
     step.addArguments(*argv)
     for f in filenamelst:

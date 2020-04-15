@@ -29,7 +29,7 @@ class DownsampleWorkflow(ParentClass):
         ParentClass.__init__(self, **keywords)
 
 
-    def addDownsamplejob(self, workflow=None, data_dir=None, idDict=None, DownSamplePrefix=None, \
+    def addDownsamplejob(self, data_dir=None, idDict=None, DownSamplePrefix=None, \
                          downSampleJava=None, downSampleJar=None, transferOutput=False):
         AccurityFolder = "AccurityResult"
         AccurityFolderJob = self.addMkDirJob(outputDir=AccurityFolder)
@@ -121,16 +121,16 @@ class DownsampleWorkflow(ParentClass):
                 baseInputVolume=baseCoverage, baseJobPropertyValue=minMergeAlignmentMaxMemory, \
                 minJobPropertyValue=minMergeAlignmentMaxMemory, maxJobPropertyValue=maxMergeAlignmentMaxMemory).value
 
-            MergeJob, bamIndexJob = self.addAlignmentMergeJob(workflow=workflow, \
+            MergeJob, bamIndexJob = self.addAlignmentMergeJob(\
                                                 AlignmentJobAndOutputLs=mergeJobAndOutputLs, \
                                                 outputBamFile=mergedBamFile, \
-                                                samtools=workflow.samtools, java=workflow.java, \
-                                                MergeSamFilesJava=workflow.MergeSamFilesJava,
-                                                MergeSamFilesJar=workflow.MergeSamFilesJar, \
-                                                BuildBamIndexFilesJava=workflow.IndexMergedBamIndexJava, \
-                                                BuildBamIndexJar=workflow.BuildBamIndexJar, \
-                                                mv=workflow.mv, namespace=workflow.namespace, \
-                                                version=workflow.version, \
+                                                samtools=self.samtools, java=self.java, \
+                                                MergeSamFilesJava=self.MergeSamFilesJava,
+                                                MergeSamFilesJar=self.MergeSamFilesJar, \
+                                                BuildBamIndexFilesJava=self.IndexMergedBamIndexJava, \
+                                                BuildBamIndexJar=self.BuildBamIndexJar, \
+                                                mv=self.mv, namespace=self.namespace, \
+                                                version=self.version, \
                                                 transferOutput=transferOutput, \
                                                 job_max_memory=mergeAlignmentMaxMemory, \
                                                 walltime=mergeAlignmentWalltime, \
@@ -140,7 +140,7 @@ class DownsampleWorkflow(ParentClass):
             normal_bam_bai = self.registerOneInputFile(
                 inputFname="/y/Sunset/workflow/real_data/downsample/normal_0.2.bam.bai",folderName=os.path.join(puritySampleFolder,purityDir))
             pair_bam_file_list.append([mergedBamFile, normal_part_refer])
-            AccurityJob = self.doAllAccurityAlignmentJob(workflow=workflow, data_dir=None,  normal_bam_bai=normal_bam_bai,\
+            AccurityJob = self.doAllAccurityAlignmentJob(data_dir=None,  normal_bam_bai=normal_bam_bai,\
                                                          pair_bam_file_list=pair_bam_file_list,\
                                                          outputDirPrefix=None, parentJobLs=[MergeJob, bamIndexJob],\
                                                          AccurityFolder=AccurityFolder, AccurityFolderJob=AccurityFolderJob)
@@ -148,7 +148,7 @@ class DownsampleWorkflow(ParentClass):
         return jobLs
 
 
-    def doAllAccurityAlignmentJob(self, workflow=None, data_dir=None, normal_bam_bai=None, pair_bam_file_list = None,\
+    def doAllAccurityAlignmentJob(self, data_dir=None, normal_bam_bai=None, pair_bam_file_list = None,\
                                outputDirPrefix=None, parentJobLs=None, AccurityFolder=None, AccurityFolderJob=None):
         sys.stderr.write("Adding Accurity jobs for %s pair individual sequences ..." % (len(pair_bam_file_list)))
 
@@ -203,10 +203,10 @@ class DownsampleWorkflow(ParentClass):
             jobLs.append(job)
         return jobLs
 
-    def addPurityJobToWorkflow(self, workflow=None, executable=None, argumentList=None, inputFileList=None,\
+    def addPurityJobToWorkflow(self, executable=None, argumentList=None, inputFileList=None,\
                                outputFileList=None, parentJobLs=None, job_max_memory=10000, no_of_cpus=1, \
                                walltime=400, sshDBTunnel=0):
-        job = self.addGenericJob(workflow=workflow, executable=executable, inputFile=None, inputArgumentOption=None, \
+        job = self.addGenericJob(executable=executable, inputFile=None, inputArgumentOption=None, \
                           outputFile=None, outputArgumentOption=None, inputFileList=None,
                           argumentForEachFileInInputFileList=None, \
                           parentJob=None, parentJobLs=parentJobLs, extraDependentInputLs=inputFileList,\
@@ -231,10 +231,10 @@ class DownsampleWorkflow(ParentClass):
         self.downSampleJava = self.addOneExecutableFromPathAndAssignProperClusterSize( \
             path=self.javaPath, name='sampleDownexecutable', clusterSizeMultipler=0)
 
-        self.addDownsamplejob(workflow=workflow, data_dir=self.data_dir, idDict=IDsample, DownSamplePrefix=None, \
+        self.addDownsamplejob(data_dir=self.data_dir, idDict=IDsample, DownSamplePrefix=None, \
                          downSampleJava=self.downSampleJava, downSampleJar=self.PicardJar, \
                          transferOutput=False)
-        #AccurityJobs = self.doAllAccurityAlignmentJob(workflow=workflow, data_dir=self.data_dir, \
+        #AccurityJobs = self.doAllAccurityAlignmentJob(data_dir=self.data_dir, \
         #                              pair_bam_file_list=entry, outputDirPrefix="")
         #self.addReducerJobtoAccurity(lastJob=AccurityJobs, dir="resultReducer", outputFnameLastStep="resultList.txt")
         self.end_run()

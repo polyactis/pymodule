@@ -18,7 +18,8 @@ __doc__ = __doc__%(sys.argv[0])
 
 import random
 import matplotlib; matplotlib.use("Agg")	#to disable pop-up requirement
-from palos import PassingData, ProcessOptions, utils, yh_matplotlib
+from palos import PassingData, ProcessOptions, utils
+from palos.plot import yh_matplotlib
 from palos.mapper.AbstractSunsetMapper import AbstractSunsetMapper as ParentClass
 
 class InspectBaseQuality(ParentClass):

@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-import sys, os, math
-import csv, re, copy
-from palos import ProcessOptions, PassingData, utils
+import sys, os
+import copy
+from palos import ProcessOptions, utils
 from palos.mapper.AbstractSunsetMapper import AbstractSunsetMapper as ParentClass
-from palos.db import SunsetDB
 
 class RegisterIndividualSequence2DB(ParentClass):
 	"""

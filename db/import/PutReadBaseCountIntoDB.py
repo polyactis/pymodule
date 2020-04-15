@@ -109,7 +109,7 @@ class PutReadBaseCountIntoDB(ParentClass):
 		
 		counter = 0
 		real_counter = 0
-		for isq_id, data in isq_id2data.iteritems():
+		for isq_id, data in isq_id2data.items():
 			real_counter += self.updateIndividualSequenceReadBaseCount(self.db_main, isq_id=isq_id, \
 										read_count=data.read_count, base_count=data.base_count, genomeSize=self.genomeSize)
 			counter += 1

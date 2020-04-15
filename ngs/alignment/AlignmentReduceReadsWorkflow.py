@@ -55,16 +55,14 @@ class AlignmentReduceReadsWorkflow(ParentClass):
 		#AlignmentToCallPipeline.__init__(self, **keywords)
 		#self.inputDir = os.path.abspath(self.inputDir)
 	
-	def mapEachInterval(self, workflow=None, alignmentData=None, intervalData=None, chromosome=None, \
-							VCFJobData=None, passingData=None, reduceBeforeEachAlignmentData=None,\
-							mapEachChromosomeData=None, transferOutput=False, \
-							**keywords):
+	def mapEachInterval(self, alignmentData=None, intervalData=None, chromosome=None, \
+					VCFJobData=None, passingData=None, reduceBeforeEachAlignmentData=None,\
+					mapEachChromosomeData=None, transferOutput=False, \
+					**keywords):
 		"""
 		2013.03.31 use VCFJobData to decide whether to add BQSR jobs, called in ShortRead2AlignmentWorkflow.py
 		2012.9.17
 		"""
-		if workflow is None:
-			workflow = self
 		returnData = PassingData(no_of_jobs = 0)
 		returnData.jobDataLs = []
 		
@@ -139,13 +137,11 @@ class AlignmentReduceReadsWorkflow(ParentClass):
 															file=reduceReadsJob.output, fileLs=[reduceReadsJob.output]))
 		return returnData
 	
-	def reduceAfterEachAlignment(self, workflow=None, passingData=None, transferOutput=False, data_dir=None, **keywords):
+	def reduceAfterEachAlignment(self, passingData=None, transferOutput=False, data_dir=None, **keywords):
 		"""
 		"""
 		returnData = PassingData(no_of_jobs = 0)
 		returnData.jobDataLs = []
-		if workflow is None:
-			workflow = self
 		AlignmentJobAndOutputLs = getattr(passingData, 'AlignmentJobAndOutputLs', [])
 		bamFnamePrefix = passingData.bamFnamePrefix
 		topOutputDirJob = passingData.topOutputDirJob
@@ -165,7 +161,7 @@ class AlignmentReduceReadsWorkflow(ParentClass):
 				alignmentJob, indexAlignmentJob = AlignmentJobAndOutput.jobLs[:2]
 				fileBasenamePrefix = os.path.splitext(alignmentJob.output.name)[0]
 				outputRGBAM = File("%s.isq_RG.bam"%(fileBasenamePrefix))
-				addRGJob = self.addReadGroupInsertionJob(workflow=workflow, individual_alignment=new_individual_alignment, \
+				addRGJob = self.addReadGroupInsertionJob(individual_alignment=new_individual_alignment, \
 									inputBamFile=alignmentJob.output, \
 									outputBamFile=outputRGBAM,\
 									AddOrReplaceReadGroupsJava=self.AddOrReplaceReadGroupsJava, \
@@ -176,17 +172,17 @@ class AlignmentReduceReadsWorkflow(ParentClass):
 				NewAlignmentJobAndOutputLs.append(PassingData(jobLs=[addRGJob], file=addRGJob.output))
 			#
 			mergedBamFile = File(os.path.join(reduceOutputDirJob.output, '%s.merged.bam'%(bamFnamePrefix)))
-			alignmentMergeJob, bamIndexJob = self.addAlignmentMergeJob(workflow, AlignmentJobAndOutputLs=NewAlignmentJobAndOutputLs, \
+			alignmentMergeJob, bamIndexJob = self.addAlignmentMergeJob(AlignmentJobAndOutputLs=NewAlignmentJobAndOutputLs, \
 					outputBamFile=mergedBamFile, \
-					samtools=workflow.samtools, java=workflow.java, \
-					MergeSamFilesJava=workflow.MergeSamFilesJava, MergeSamFilesJar=workflow.MergeSamFilesJar, \
-					BuildBamIndexFilesJava=workflow.IndexMergedBamIndexJava, BuildBamIndexJar=workflow.BuildBamIndexJar, \
-					mv=workflow.mv, parentJobLs=[reduceOutputDirJob], \
+					samtools=self.samtools, java=self.java, \
+					MergeSamFilesJava=self.MergeSamFilesJava, MergeSamFilesJar=self.MergeSamFilesJar, \
+					BuildBamIndexFilesJava=self.IndexMergedBamIndexJava, BuildBamIndexJar=self.BuildBamIndexJar, \
+					mv=self.mv, parentJobLs=[reduceOutputDirJob], \
 					transferOutput=False)
 			#2012.9.19 add/copy the alignment file to db-affliated storage
 			#add the metric file to AddAlignmentFile2DB.py as well (to be moved into db-affiliated storage)
 			logFile = File(os.path.join(reduceOutputDirJob.output, '%s_2db.log'%(bamFnamePrefix)))
-			alignment2DBJob = self.addAddAlignmentFile2DBJob(workflow=workflow, executable=self.AddAlignmentFile2DB, \
+			alignment2DBJob = self.addAddAlignmentFile2DBJob(executable=self.AddAlignmentFile2DB, \
 								inputFile=alignmentMergeJob.output, otherInputFileList=[],\
 								individual_alignment_id=new_individual_alignment.id, \
 								logFile=logFile, data_dir=data_dir, \
