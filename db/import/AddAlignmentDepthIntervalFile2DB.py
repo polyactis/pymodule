@@ -18,7 +18,7 @@ __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 import copy, re
 from palos import ProcessOptions, PassingData, utils, ngs
 from palos.ngs.io.AlignmentDepthIntervalFile import AlignmentDepthIntervalFile
-from AddAlignmentDepthIntervalMethod2DB import AddAlignmentDepthIntervalMethod2DB
+from . AddAlignmentDepthIntervalMethod2DB import AddAlignmentDepthIntervalMethod2DB
 from AbstractAccuMapper import AbstractAccuMapper as ParentClass
 
 class AddAlignmentDepthIntervalFile2DB(ParentClass):
