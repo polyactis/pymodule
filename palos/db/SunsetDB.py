@@ -2103,11 +2103,11 @@ class SunsetDB(Database):
 					local_realigned=local_realigned, reduce_reads=reduce_reads)
 		if not db_entry:
 			db_entry = IndividualAlignment(ind_seq_id=individual_sequence.id, ref_ind_seq_id=ref_individual_sequence_id,\
-								alignment_method_id=alignment_method.id, format=alignment_format, read_group_added=read_group_added,\
-								outdated_index=outdated_index, mask_genotype_method_id=mask_genotype_method_id,\
-								parent_individual_alignment_id=parent_individual_alignment_id,\
-								individual_sequence_file_raw_id=individual_sequence_file_raw_id, md5sum=md5sum,\
-								local_realigned=local_realigned, read_group=read_group, reduce_reads=reduce_reads)
+							alignment_method_id=alignment_method.id, format=alignment_format, read_group_added=read_group_added,\
+							outdated_index=outdated_index, mask_genotype_method_id=mask_genotype_method_id,\
+							parent_individual_alignment_id=parent_individual_alignment_id,\
+							individual_sequence_file_raw_id=individual_sequence_file_raw_id, md5sum=md5sum,\
+							local_realigned=local_realigned, read_group=read_group, reduce_reads=reduce_reads)
 			self.session.add(db_entry)
 			self.session.flush()
 			
@@ -3706,7 +3706,7 @@ class SunsetDB(Database):
 					else:
 						isPE = False
 					pairedEndPrefix2FileLs = ngs.getPEInputFiles(abs_path, isPE=isPE)
-					for pairedEndPrefix, fileLs in pairedEndPrefix2FileLs.iteritems():
+					for pairedEndPrefix, fileLs in pairedEndPrefix2FileLs.items():
 						if isPE and len(fileLs)==2 and fileLs[0] and fileLs[1]:	#PE
 							filename = os.path.join(path, fileLs[0])	#take one file only
 							fileRecord = [filename, individual_sequence.format, individual_sequence.sequence_type, individual_sequence.sequencer]

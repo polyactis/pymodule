@@ -83,8 +83,9 @@ class AddAlignmentFile2DB(ParentClass):
 				#alignment for this library of the individual_sequence
 				individual_sequence = self.db_main.queryTable(SunsetDB.IndividualSequence).get(self.individual_sequence_id)
 				individual_alignment = self.db_main.getAlignment(individual_sequence_id=self.individual_sequence_id,\
-										path_to_original_alignment=None, sequencer=individual_sequence.sequencer,\
-										sequence_type=individual_sequence.sequence_type, sequence_format=individual_sequence.format, \
+										path_to_original_alignment=None, sequencer_name=individual_sequence.sequencer.short_name,\
+										sequence_type_name=individual_sequence.sequence_type.short_name, \
+										sequence_format=individual_sequence.format, \
 										ref_individual_sequence_id=self.ref_sequence_id, \
 										alignment_method_id=self.alignment_method_id, alignment_format=self.format,\
 										individual_sequence_filtered=individual_sequence.filtered, read_group_added=1,
