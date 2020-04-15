@@ -1379,7 +1379,7 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
 		
 		self.registerJars()
 		self.registerExecutables()
-		self.registerCustomExecutables(workflow=workflow)
+		self.registerCustomExecutables()
 		
 		self.addJobsDict[self.inputType](db_main=db_main, bamFname2MonkeyIDMapFname=self.bamFname2MonkeyIDMapFname, \
 					input=self.input, data_dir=self.data_dir, minNoOfReads=self.minNoOfReads, commit=self.commit,\

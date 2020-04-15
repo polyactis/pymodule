@@ -68,7 +68,7 @@ class InspectBaseQualityPipeline(ParentClass):
 		
 		self.registerJars()
 		self.registerExecutables()
-		self.registerCustomExecutables(workflow=workflow)
+		self.registerCustomExecutables()
 		
 		
 		#must use db_vervet.data_dir.

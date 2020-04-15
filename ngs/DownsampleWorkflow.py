@@ -195,7 +195,7 @@ class DownsampleWorkflow(ParentClass):
             argumentList = ["-c", configure_file, "-t", tumor_bam, "-n", normal_bam, "-o", sample_folder, "-d", "1", "-l", "4"]
             inputFileList = [tumor_bam, tumor_bam_bai, normal_bam, normal_bam_bai, configure_file]
 
-            job = self.addPurityJobToWorkflow(workflow=self.workflow, executable=self.AccurityExecutableFile,\
+            job = self.addPurityJobToWorkflow(executable=self.AccurityExecutableFile,\
                                               argumentList=argumentList, \
                                               inputFileList=inputFileList, outputFileList=outputList, \
                                               parentJobLs=[sample_folder_Job], \

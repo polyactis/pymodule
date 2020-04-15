@@ -168,7 +168,7 @@ class AbstractNGSWorkflow(ParentClass):
         if not self.local_data_dir:
             self.local_data_dir = self.db_main.data_dir
 
-        #self.refFastaFList = self.getReferenceSequence(workflow=self)	#2013.1.25 done in run()
+        #self.refFastaFList = self.getReferenceSequence()	#2013.1.25 done in run()
 
     def getReferenceSequence(self, **keywords):
         """

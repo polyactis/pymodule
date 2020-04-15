@@ -181,7 +181,7 @@ class ShortRead2AlignmentPipeline(ParentClass, ShortRead2AlignmentWorkflow):
 					isqLs=None,\
 					refSequence=None, registerReferenceData=None, \
 					chr2IntervalDataLs=None,\
-					workflow=None, bwa=None, additionalArguments=None, samtools=None, mkdirWrap=None, mv=None,\
+					bwa=None, additionalArguments=None, samtools=None, mkdirWrap=None, mv=None,\
 					java=None, MergeSamFilesJava=None, MergeSamFilesJar=None, \
 					MarkDuplicatesJava=None, MarkDuplicatesJar=None, tmpDir='/tmp',\
 					BuildBamIndexFilesJava=None, BuildBamIndexJar=None, \

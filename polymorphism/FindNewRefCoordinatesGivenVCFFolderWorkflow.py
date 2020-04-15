@@ -404,7 +404,7 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, Sh
 		"""
 		2012.10.18
 		"""
-		#super(FindNewRefCoordinatesGivenVCFFolderWorkflow, self).registerCustomJars(workflow=workflow)
+		#super(FindNewRefCoordinatesGivenVCFFolderWorkflow, self).registerCustomJars()
 		ParentClass.registerCustomJars(self)
 		ShortRead2AlignmentWorkflow.registerCustomJars(self)
 		BlastWorkflow.registerCustomJars(self)
