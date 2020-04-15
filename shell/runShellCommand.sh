@@ -1,1 +1,0 @@
-../mapper/runShellCommand.sh
