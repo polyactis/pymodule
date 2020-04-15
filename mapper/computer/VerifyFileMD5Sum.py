@@ -1,18 +1,15 @@
 #!/usr/bin/env python
 """
+2017.04.07
+    Verify if the input file's md5sum is equal to the given correct md5sum.
+
 Examples:
     %s -i ABC.bam --correct_md5sum 486fd350d10cd3d701fa5dee22fca18d
 
-Description:
-    2017.04.07
-        Verify if the input file's md5sum is equal to the given correct md5sum.
 """
 
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 from palos import ProcessOptions, PassingData, utils
 from palos.mapper.AbstractMapper import AbstractMapper

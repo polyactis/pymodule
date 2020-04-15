@@ -1,12 +1,7 @@
 #!/usr/bin/env python
 """
-Examples:
-	%s 
-	
-	%s
-
 Description:
-	2012.11.15 a csv file format, stored in HDF5.
+	2012.11.15 a matrix stored in HDF5.
 		This HDF5 file is composed of groups. At least one group, group0.
 	i.e.
 		reader = HDF5MatrixFile(inputFname=filename, openMode='r')
@@ -53,10 +48,6 @@ Description:
 """
 
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 import csv
 import h5py
 import numpy

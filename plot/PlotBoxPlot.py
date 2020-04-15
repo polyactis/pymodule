@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 """
 Examples:
-	%s 
-	
 	%s  -s 1 -o ../plot/AAC_tally_barChart.png -W NumberOfLoci -l AAC -x AAC -i 20 -D NumberOfLoci ./AAC_tally.tsv.gz
 	
 
@@ -12,23 +10,14 @@ Description:
 """
 
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-
-#bit_number = math.log(sys.maxint)/math.log(2)
-#if bit_number>40:	   #64bit
-#	sys.path.insert(0, os.path.expanduser('~/lib64/python'))
-#	sys.path.insert(0, os.path.join(os.path.expanduser('~/script64')))
-#else:   #32bit
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
+__doc__ = __doc__%(sys.argv[0])
 
 import matplotlib; matplotlib.use("Agg")	#to disable pop-up requirement
 import csv
 import numpy, random, pylab
 from palos import ProcessOptions, getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter
-from palos import yh_matplotlib
-from AbstractPlot import AbstractPlot
+from palos.plot import yh_matplotlib
+from palos.plot.AbstractPlot import AbstractPlot
 
 class PlotBoxPlot(AbstractPlot):
 	__doc__ = __doc__

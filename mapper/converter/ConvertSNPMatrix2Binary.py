@@ -14,14 +14,8 @@ Description:
 	Output format is same as input. Another output file holds the mapping between each allele and the index.
 	
 """
-import sys, os, math
-bit_number = math.log(sys.maxint)/math.log(2)
-if bit_number>40:       #64bit
-	sys.path.insert(0, os.path.expanduser('~/lib64/python'))
-	sys.path.insert(0, os.path.join(os.path.expanduser('~/script64/')))
-else:   #32bit
-	sys.path.insert(0, os.path.expanduser('~/lib/python'))
-	sys.path.insert(0, os.path.join(os.path.expanduser('~/script/')))
+import sys, os
+sys.path.insert(0, os.path.expanduser('~/script/'))
 from palos import process_function_arguments, write_data_matrix, figureOutDelimiter, read_data, SNPData
 import csv
 

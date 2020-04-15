@@ -1,20 +1,18 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
+2011-12-21
+	This program merge lines keyed by keyColumnLs. The non-key columns are appended next to each other.
+	If one input misses lines for some keys, those lines will have empty data over there.
+	
+	All input files must have the keys at the same column(s).
+
 Examples:
 	#testing merge three identical genotype files
 	%s -o /tmp/ccc.tsv --inputDelimiter tab /tmp/call_1.tsv /tmp/call_1.tsv /tmp/call_1.tsv
 	
-	%s 
-	
-Description:
-	2011-12-21
-		This program merge lines keyed by keyColumnLs. The non-key columns are appended next to each other.
-		If one input misses lines for some keys, those lines will have empty data over there.
-		
-		All input files must have the keys at the same column(s).
 """
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
+__doc__ = __doc__%(sys.argv[0])
 
 import copy
 from palos import ProcessOptions, figureOutDelimiter, utils, PassingData

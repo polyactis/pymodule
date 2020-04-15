@@ -53,13 +53,8 @@ Description:
 
 import sys, getopt, os, re, gzip
 from apt_pkg import Description
-#from __builtin__ import None
 __doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0])
 
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
-#sys.path += [os.path.join(os.path.expanduser('~/script'))]
 from palos.db.GenomeDB import *
 from palos import PassingData, utils, AbstractDBInteractingClass
 from palos.utils import FigureOutTaxID

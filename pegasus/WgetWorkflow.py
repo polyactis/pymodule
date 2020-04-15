@@ -1,26 +1,22 @@
 #!/usr/bin/env python3
 """
+2012.6.27
+    a pegasus workflow that starts multiple wget processes.
+
 Examples:
     #2012.6.27, no clustering (-C 1), all downloaded files will be in gxfer3_74079526293008 subfolder (-F ..)
     # cut off 2 layers of folders from the URL (-c2) as the URL has two folders after its top-level URL.
     %s -I https://xfer.genome.wustl.edu/gxfer3/74079526293008/ -u aufiewisiuch -p uazeiraiquae
         -o /tmp/workflow.xml -F gxfer3_74079526293008 -j hcondor -l hcondor -C 1 -c2
 
-2012.6.27
-    a pegasus workflow that starts multiple wget processes.
-
 """
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0])
 
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
 from pegaflow import Workflow
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job
-from . AbstractWorkflow import AbstractWorkflow
-
+from palos.pegasus.AbstractWorkflow import AbstractWorkflow
 class WgetWorkflow(AbstractWorkflow):
     __doc__ = __doc__
     option_default_dict = AbstractWorkflow.option_default_dict.copy()

@@ -1,5 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
+2012.5.23
+	A wrapper around blastall (blastn after 2012.8.19), parse and filter.
+	Accept multiple input files after all arguments.
+
 Examples:
 	#run on hoffman2's condor
 	%s -d ~/NetworkData/vervet/db/individual_sequence/524_superContigsMinSize2000.fasta
@@ -10,22 +14,15 @@ Examples:
 	%s -d /Network/Data/vervet/db/individual_sequence/524_superContigsMinSize2000.fasta -i /tmp/input.fasta
 		-a 2 -o /tmp/output.tsv
 
-Description:
-	2012.5.23
-		a wrapper around blastall (blastn after 2012.8.19), parse and filter.
-		accept multiple input files trailing all arguments.
 """
 
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
 import csv
 from Bio.Blast import NCBIXML, NCBIStandalone
 from Bio.Blast.Applications import NcbiblastnCommandline
-import cStringIO
+from io import StringIO
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
 from palos.mapper.AbstractMapper import AbstractMapper
 
@@ -97,7 +94,7 @@ class BlastWrapper(AbstractMapper):
 			blastContent = result_handle.read()
 			outf.write(blastContent)
 			outf.close()
-			result_handle = cStringIO.StringIO(blastContent)
+			result_handle = StringIO(blastContent)
 		blast_records = NCBIXML.parse(result_handle)
 		
 		if self.report:

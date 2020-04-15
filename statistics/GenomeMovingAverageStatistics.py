@@ -1,24 +1,18 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
+2013.07.31 a program that calculates moving averages in windows (overlap or not) along the genome.
+
 Examples:
-	%s 
-	
-	# 
 	%s  -i  mendelRuntype3_s2Reduce/merged_lmendel_chr_pos.tsv  -o  mendelRuntype3_s2Reduce/medianNoOfMendelErrors_along_chromosome.tsv
 		--genome_drivername=postgresql --genome_hostname=localhost --genome_dbname=vervetdb --genome_schema=genome
 		--genome_db_user=yh --genome_db_passwd ...
 		--chromosomeHeader Chromosome --tax_id 60711 --sequence_type_id 1 --chrOrder 1
 		--samplingRate 1 --positionHeader Start --whichColumnHeader N --valueForNonPositiveYValue -1 --inputFileFormat 1
 
-Description:
-	2013.07.31 a program that calculates moving averages in windows (overlap or not) along the genome.
 """
 
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
+__doc__ = __doc__%(sys.argv[0])
 
 import csv, random, numpy
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils

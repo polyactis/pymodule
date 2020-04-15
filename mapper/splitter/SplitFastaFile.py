@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 """
 Examples:
-	%s 
-	
 	%s -i /tmp/input.fasta.gz -a 2 -O /tmp/output -f .fasta 
 
 Description:
@@ -11,11 +9,7 @@ Description:
 """
 
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
+__doc__ = __doc__%(sys.argv[0])
 import csv
 from Bio import SeqIO
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils

@@ -252,17 +252,14 @@ def importNumericArray():
     2008-05-11
         import whatever available array module
     """
-    try:
-        import numpy as num
-    except:
-        numpy_type2other_ls = ['int', 'int8', 'int16', 'int32', 'int64']
-        try:
-            import numarray as num
-        except:
-            import Numeric as num
-        for numpy_type in numpy_type2other_ls:	#make sure it has same type names
-            numpy_type_in_other = numpy_type[0].upper() + numpy_type[1:]
-            setattr(num, numpy_type, getattr(num, numpy_type_in_other))
+    import numpy as num
+    """
+    #old numarray and Numeric
+    numpy_type2other_ls = ['int', 'int8', 'int16', 'int32', 'int64']
+    for numpy_type in numpy_type2other_ls:	#make sure it has same type names
+        numpy_type_in_other = numpy_type[0].upper() + numpy_type[1:]
+        setattr(num, numpy_type, getattr(num, numpy_type_in_other))
+    """
     return num
 
 def figureOutDelimiter(input_fname, report=0, delimiter_choice_ls = ['\t', ',', ' '], use_sniff=False):
@@ -298,14 +295,15 @@ def figureOutDelimiter(input_fname, report=0, delimiter_choice_ls = ['\t', ',', 
     cs = csv.Sniffer()
     inputIsFileObject = False
     import gzip
-    if (isinstance(input_fname, str) or isinstance(input_fname, unicode)) and os.path.isfile(input_fname):
+    if isinstance(input_fname, str) and os.path.isfile(input_fname):
         inf = openGzipFile(input_fname)
-    elif isinstance(input_fname, file) or isinstance(input_fname, gzip.GzipFile) :	#could be a file/gzip-file object
+    elif hasattr(input_fname, 'read') or isinstance(input_fname, gzip.GzipFile):
+        #a file/gzip-file object
         inf = input_fname
         inputIsFileObject = True
-    elif (isinstance(input_fname, str) or isinstance(input_fname, unicode)) and not os.path.isfile(input_fname):	#it's the input
-        import StringIO
-        inf = StringIO.StringIO(input_fname)
+    elif isinstance(input_fname, str) and not os.path.isfile(input_fname):	#it's the input
+        from io import StringIO
+        inf = StringIO(input_fname)
     else:
         import sys
         sys.stderr.write("Error: %s is neither a file name nor a file object. But try 'open' anyway.\n"%input_fname)
@@ -340,7 +338,6 @@ def get_gene_symbol2gene_id_set(curs, tax_id, table='genome.gene_symbol2id', upp
     """
     sys.stderr.write("Getting gene_symbol2gene_id_set...")
     gene_symbol2gene_id_set = {}
-    from sets import Set
     curs.execute("select gene_id, gene_symbol from %s where tax_id=%s"%(table, tax_id))
     rows = curs.fetchall()
     for row in rows:
@@ -348,7 +345,7 @@ def get_gene_symbol2gene_id_set(curs, tax_id, table='genome.gene_symbol2id', upp
         if upper_case_gene_symbol:
             gene_symbol = gene_symbol.upper()
         if gene_symbol not in gene_symbol2gene_id_set:
-            gene_symbol2gene_id_set[gene_symbol] = Set()
+            gene_symbol2gene_id_set[gene_symbol] = set()
         gene_symbol2gene_id_set[gene_symbol].add(gene_id)
     sys.stderr.write(" %s entries. Done.\n"%len(gene_symbol2gene_id_set))
     return gene_symbol2gene_id_set
@@ -360,7 +357,6 @@ def get_gene_id2gene_symbol(curs, tax_id, table='genome.gene', upper_case_gene_s
     """
     sys.stderr.write("Getting gene_id2gene_symbol ...")
     gene_id2gene_symbol = {}
-    from sets import Set
     curs.execute("select gene_id, gene_symbol from %s where tax_id=%s"%(table, tax_id))
     rows = curs.fetchall()
     for row in rows:
@@ -390,7 +386,7 @@ class FigureOutTaxID(object):
         """
         2008-07-29
         """
-        from ProcessOptions import ProcessOptions
+        from . ProcessOptions import ProcessOptions
         self.ad = ProcessOptions.process_function_arguments(keywords, self.option_default_dict, error_doc=self.__doc__, \
                                                         class_to_have_attr=self)		
     
@@ -561,7 +557,7 @@ def runLocalCommand(commandline, report_stderr=True, report_stdout=False):
         run a command local (not on the cluster)
     """
     import subprocess
-    import cStringIO
+    from io import StringIO
     command_handler = subprocess.Popen(commandline, shell=True, \
                                     stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     #command_handler.wait() #Warning: This will deadlock if the child process generates enough output to a stdout or stderr pipe
@@ -577,9 +573,9 @@ def runLocalCommand(commandline, report_stderr=True, report_stdout=False):
     output_stdout = None
     output_stderr = None
     if not report_stdout:	#if not reporting, assume the user wanna to have a file handler returned
-        output_stdout = cStringIO.StringIO(stdout_content)
+        output_stdout = StringIO(stdout_content)
     if not report_stderr:
-        output_stderr = cStringIO.StringIO(stderr_content)
+        output_stderr = StringIO(stderr_content)
     
     if report_stdout and stdout_content:
         sys.stderr.write('stdout of %s: %s \n'%(commandline, stdout_content))
@@ -1079,7 +1075,7 @@ def pauseForUserInput(message="", continueAnswerSet=set(['Y', 'y', '', 'yes', 'Y
             2: raise
             3: pass (ignore)
     """
-    userAnswer = raw_input("\n\t %s"%(message))
+    userAnswer = input("\n\t %s"%(message))
     if continueAnswerSet is not None and userAnswer in continueAnswerSet:
         pass
     elif continueAnswerSet is None:

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -21,9 +21,6 @@ import optparse
 import sys, os
 
 from collections import Counter
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.expanduser('~/script'))
-sys.path.insert(0, os.path.expanduser('~/src'))
 
 #  Note that the theoretical maximum for all encodings is 126.
 #  The upper limits below are for "typical" data only.
@@ -154,7 +151,7 @@ if __name__ == "__main__":
     # Session = sessionmaker(bind = engine)
     # session = Session()
 
-    from palos.Sunset.db import SunsetDB
+    from palos.db import SunsetDB
     db_main = SunsetDB.SunsetDB(drivername='postgresql', db_user=args.db_user,db_passwd=args.password, 
                             hostname=args.hostname, dbname=args.dbname, schema=args.schema)
     db_main.setup(create_tables=False)

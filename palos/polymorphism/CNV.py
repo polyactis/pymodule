@@ -5,9 +5,7 @@
 	module for CNV (copy-number-variation)-related functions & classes
 """
 
-import os, sys, math
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
+import os, sys
 import fileinput
 import numpy
 from palos.ProcessOptions import ProcessOptions

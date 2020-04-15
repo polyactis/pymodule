@@ -1,25 +1,19 @@
 #!/usr/bin/env python
 """
+2011-8-16
+	construct a pegasus workflow to run InspectBaseQuality.py over a list of individual sequences
+
 Examples:
-	
 	# 2011-8-16 on condorpool
 	%s -o inspectBaseQuality.xml -u yh -i 1-8,15-130
 	
 	# 2011-8-16 use hoffman2 site_handler
 	%s -o inspectBaseQuality.xml -u yh -i 1-8,15-130 
 		-l hoffman2 -e /u/home/eeskin/polyacti -t /u/home/eeskin/polyacti/NetworkData/vervet/db
-	
-	
-Description:
-	2011-8-16
-		construct a pegasus workflow to run InspectBaseQuality.py over a list of individual sequences
+
 """
 import sys, os, copy
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.expanduser('~/script'))
-sys.path.insert(0, os.path.expanduser('~/src'))
 
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils, yh_pegasus
 from palos.db import SunsetDB as DBClass

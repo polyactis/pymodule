@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 """
+2012.10.5 program that extracts samples from a VCF and form a new VCF.
+	need to re-calculate the AC/AF values of each variant.
+
 Examples:
 	%s -i input.vcf -o -o selectedStKitts.vcf --country_id_ls 144 --tax_id_ls 60711
 	
@@ -7,25 +10,14 @@ Examples:
 
 	%s -i input.vcf.gz -o selected.vcf --country_id_ls 135,136,144,148,151 --tax_id_ls 60711
 		
-
-Description:
-	2012.10.5 program that extracts samples from a VCF and form a new VCF.
-		need to re-calculate the AC/AF values of each variant.
 """
 
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0])
-
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
-import matplotlib; matplotlib.use("Agg")	#to disable pop-up requirement
 import csv
 from palos import ProcessOptions
-from palos import VCFFile
+from palos.ngs.io.VCFFile import VCFFile
 from palos.utils import returnZeroFunc
-#used in getattr(individual_site_id_set, '__len__', returnZeroFunc)()
 from vervet.src import VervetDB
 from vervet.src.mapper.AbstractVervetMapper import AbstractVervetMapper
 

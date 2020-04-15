@@ -1,23 +1,16 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
+2012.9.17 program that extracts certain key in the INFO column of VCF (could be multiple input files) and outputs them in tsv format.
+
 Examples:
 	%s -i ~/NetworkData/vervet/db/genotype_file/method_27/*Contig0.vcf.gz
 		-o /tmp/Contig0_HaplotypeScore.tsv.gz 
 		-k HaplotypeScore
 		~/NetworkData/vervet/db/genotype_file/method_27/*.vcf.gz
 	
-	%s 
-	
-	%s 
-	
-Description:
-	2012.9.17 program that extracts certain key in the INFO column of VCF (could be multiple input files) and outputs them in tsv format.
 """
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
+__doc__ = __doc__%(sys.argv[0])
 
 from palos import ProcessOptions
 from palos.io.AbstractMatrixFileWalker import AbstractMatrixFileWalker

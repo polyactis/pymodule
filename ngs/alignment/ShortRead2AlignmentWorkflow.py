@@ -1,16 +1,12 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
+2012.11.14 a read-alignment workflow, extracted from vervet/src/ShortRead2AlignmentPipeline.py.
+
 Examples:
 	%s
-
-Description:
-	2012.11.14 a read-alignment workflow, extracted from vervet/src/ShortRead2AlignmentPipeline.py.
 """
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import copy
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job

@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 """
+2013.2.15 program selects certain chromosome sequences out of fasta/fastq files.
+
 Examples:
 	%s  -i /Network/Data/vervet/db/individual_sequence/524_superContigsMinSize2000.fasta -o /tmp/anything.fastq.gz
 		--chromosomeList Contig0,Contig1 --inputFileFormat 1 --outputFileFormat 2
@@ -8,15 +10,10 @@ Examples:
 	%s -i /tmp/input.fasta.gz -o /tmp/output.fasta.gz --chromosomeList Contig0,Contig1 
 		--inputFileFormat 1 --outputFileFormat 2
 
-Description:
-	2013.2.15 program selects certain chromosome sequences out of fasta/fastq files.
 """
 
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 from Bio import SeqIO
 from palos import ProcessOptions, PassingData, utils

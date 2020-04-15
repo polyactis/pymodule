@@ -1,37 +1,25 @@
 #!/usr/bin/env python
 """
-Examples:
-	%s 
-	
+2011-11-2
+	The input is tab/coma-delimited, with a header and has at least 3 columns.
+	The three designated columns must be of float value.
+If "-i ..." is given, it is regarded as one of the input files (plus the ones in trailing arguments). 
+
+Examples:	
 	%s -i /tmp/Contig315_StKitts_vs_Nevis.tsv --xColumnHeader=StKitts --whichColumnHeader=Nevis
 		-s 1.0 -o /tmp/Contig315_StKitts_vs_Nevis.2D.png
 	
-
-Description:
-	2011-11-2
-		The input is tab/coma-delimited, with a header and has at least 3 columns.
-		The three designated columns must be of float value.
-	If "-i ..." is given, it is regarded as one of the input files (plus the ones in trailing arguments). 
 """
 
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-
-#bit_number = math.log(sys.maxint)/math.log(2)
-#if bit_number>40:	   #64bit
-#	sys.path.insert(0, os.path.expanduser('~/lib64/python'))
-#	sys.path.insert(0, os.path.join(os.path.expanduser('~/script64')))
-#else:   #32bit
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
+__doc__ = __doc__%(sys.argv[0])
 
 import matplotlib; matplotlib.use("Agg")	#to disable pop-up requirement
 import csv
 from palos import ProcessOptions, getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter
-from palos import yh_matplotlib
+from palos.plot import yh_matplotlib
 import numpy, random
-from AbstractPlot import AbstractPlot
+from palos.plot.AbstractPlot import AbstractPlot
 
 class Draw2DHistogramOfMatrix(AbstractPlot):
 	__doc__ = __doc__

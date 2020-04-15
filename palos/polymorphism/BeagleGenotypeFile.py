@@ -1,59 +1,48 @@
 #!/usr/bin/env python
 """
-Examples:
-	%s 
+2013.05.03 a child class of MatrixFile. used to describe Beagle likelihood file format, which looks like:
+	marker alleleA alleleB 1000_709_1996093_GA_vs_524 1000_709_1996093_GA_vs_524 1000_709_1996093_GA_vs_524 1001_710_1995025_GA_vs_524 1001_710_1995025_GA_vs_524 1001_710_1995025_GA_vs_524 1002_711_2001039_GA_vs_524
+	Contig791:1086 C A 1 0 0 0.9997 0.0003 0 0
+	Contig791:1649 G C 1 0 0 1 0 0 0
+	Contig791:4084 A C 1 0 0 1 0 0 0
+	Contig791:4118 A G 1 0 0 1 0 0 0
+	Contig791:4143 C A 1 0 0 1 0 0 0
+	Contig791:4168 G C 1 0 0 0.9999 0.0001 0 0
+	Contig791:4203 C G 1 0 0 1 0 0 0
+
+Example:
+	beagleFile = BeagleGenotypeFile(inputFname='/tmp/input.bgl.gz')
+	beagleFile.readInAllHaplotypes()
 	
-	%s
-
-Description:
-	2013.05.03 a child class of MatrixFile. used to describe Beagle likelihood file format, which looks like:
-		marker alleleA alleleB 1000_709_1996093_GA_vs_524 1000_709_1996093_GA_vs_524 1000_709_1996093_GA_vs_524 1001_710_1995025_GA_vs_524 1001_710_1995025_GA_vs_524 1001_710_1995025_GA_vs_524 1002_711_2001039_GA_vs_524
-		Contig791:1086 C A 1 0 0 0.9997 0.0003 0 0
-		Contig791:1649 G C 1 0 0 1 0 0 0
-		Contig791:4084 A C 1 0 0 1 0 0 0
-		Contig791:4118 A G 1 0 0 1 0 0 0
-		Contig791:4143 C A 1 0 0 1 0 0 0
-		Contig791:4168 G C 1 0 0 0.9999 0.0001 0 0
-		Contig791:4203 C G 1 0 0 1 0 0 0
-
-	Example:
-		beagleFile = BeagleGenotypeFile(inputFname='/tmp/input.bgl.gz')
-		beagleFile.readInAllHaplotypes()
-		
-		for individualID, firstHaplotypeIndex in beagleFile.snpData.col_id2col_index.items():
-			haplotypeList = []
-			for j in range(firstHaplotypeIndex, firstHaplotypeIndex+self.ploidy):
-				haplotypeList.append(beagleFile.snpData.data_matrix[:,j]) 
-			# another way
-			#haplotypeList = beagleFile.getHaplotypeListOfOneSample(individualID)
-		
-		reader = MatrixFile(inputFname='/tmp/input.txt', openMode='r')
-		reader = MatrixFile('/tmp/input.txt', openMode='r')
-		reader.constructColName2IndexFromHeader()
-		for row in reader:
-			row[reader.getColName2IndexFromHeader('KID')]
-		
-		inf = utils.openGzipFile(inputFname, openMode='r')
-		reader = MatrixFile(inputFile=inf)
-		
-		#2013.2.1 writing
-		writer = MatrixFile('/tmp/output.txt', openMode='w', delimiter='\t')
-		writer.writeHeader(...)
-		writer.writerow(row)
-		writer.close()
+	for individualID, firstHaplotypeIndex in beagleFile.snpData.col_id2col_index.items():
+		haplotypeList = []
+		for j in range(firstHaplotypeIndex, firstHaplotypeIndex+self.ploidy):
+			haplotypeList.append(beagleFile.snpData.data_matrix[:,j]) 
+		# another way
+		#haplotypeList = beagleFile.getHaplotypeListOfOneSample(individualID)
+	
+	reader = MatrixFile(inputFname='/tmp/input.txt', openMode='r')
+	reader = MatrixFile('/tmp/input.txt', openMode='r')
+	reader.constructColName2IndexFromHeader()
+	for row in reader:
+		row[reader.getColName2IndexFromHeader('KID')]
+	
+	inf = utils.openGzipFile(inputFname, openMode='r')
+	reader = MatrixFile(inputFile=inf)
+	
+	#2013.2.1 writing
+	writer = MatrixFile('/tmp/output.txt', openMode='w', delimiter='\t')
+	writer.writeHeader(...)
+	writer.writerow(row)
+	writer.close()
 
 """
-import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
+import sys, os
 import copy, numpy
 from palos import utils, PassingData
 from palos.ProcessOptions import ProcessOptions
 from palos.polymorphism.SNP import SNPData
-from MatrixFile import MatrixFile
+from palos.io.MatrixFile import MatrixFile
 
 class BeagleGenotypeFile(MatrixFile):
 	__doc__ = __doc__

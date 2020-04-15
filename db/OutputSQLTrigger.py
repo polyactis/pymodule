@@ -1,20 +1,18 @@
 #!/usr/bin/env python3
 """
+Output triggers for standard fields, created_by, updated_by, date_created and date_updated
+
 Examples:
 	#for postgres tables
-	OutputSQLTrigger.py  -i readme
+	%s -i readme
 	
-	for mysql tables
-	OutputSQLTrigger.py  -i gene,readme -y 2
-
-Description:
-	Output triggers for standard fields, created_by, updated_by, date_created and date_updated
+	#for mysql tables
+	%s -i gene,readme -y 2
 	
 """
 
-import sys, os, math
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
+import sys, os
+__doc__ = __doc__%(sys.argv[0], sys.argv[0])
 
 mysql_trigger = """
 DELIMITER |

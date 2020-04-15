@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 """
+2012.10.5 program that extracts samples from a VCF and form a new VCF.
+	need to re-calculate the AC/AF values of each variant.
+
 Examples:
 	%s -i input.vcf -o -o selectedStKitts.vcf --country_id_ls 144 --tax_id_ls 60711
 	
@@ -8,26 +11,18 @@ Examples:
 	%s  -a ~/NetworkData/vervet/db/individual_sequence/524_superContigsMinSize2000.fasta
 		-i foldermap/Contig1_54079_VCF_52496_VCF_49977_VCF_Contig1_splitVCF_u1_popNevis.vcf
 		-o /tmp/Contig1_54079_VCF_52496_VCF_49977_VCF_Contig1_splitVCF_u1_popNevis_flankSeq.tsv
-	
 
-Description:
-	2012.10.5 program that extracts samples from a VCF and form a new VCF.
-		need to re-calculate the AC/AF values of each variant.
 """
 
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0])
 
 
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
 import csv, re
 from palos import ProcessOptions
-
 #used in getattr(individual_site_id_set, '__len__', returnZeroFunc)()
 from palos.utils import returnZeroFunc
-from palos.io.VCFFile import VCFFile
+from palos.ngs.io.VCFFile import VCFFile
 from palos.io.FastaFile import FastaFile
 from palos.mapper.AbstractVCFMapper import AbstractVCFMapper
 

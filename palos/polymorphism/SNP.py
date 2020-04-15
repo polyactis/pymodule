@@ -1,11 +1,8 @@
-#!/usr/bin/env python
 """
 2008-05-12
 	store SNP data structure related stuff
 """
 import os, sys
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 import copy, csv, math
 import re
 from palos.ProcessOptions import  ProcessOptions

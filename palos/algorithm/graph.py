@@ -1,12 +1,11 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2012.1.3
 	module for graph algorithms/data structures
 """
 
 import os, sys
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
+sys.path.insert(0, os.path.expanduser('~/script'))
 from palos.utils import PassingData
 import copy
 import numpy

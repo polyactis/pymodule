@@ -1,5 +1,15 @@
 #!/usr/bin/env python
 """
+2013.12.04 
+	Two output
+		one is modified VCF file.
+		one is missing stat file.
+			header = ["locusID", 'chromosome', 'start', 'stop', 'occurrence', 'missingReason']
+	missingReason:
+		1: outside range of permitted depth range
+		2: low mapping quality (>10 percent  of low mapping quality reads)
+		3: both
+
 Examples:
 	%s -i ~/NetworkData/vervet/db/genotype_file/method_225/94276_VCF_CAE6.sorted.vcf.gz
 		--missingStatFname ./tmp/94276_VCF_CAE6.sorted_missing_stat.tsv
@@ -7,32 +17,14 @@ Examples:
 		--alignmentMedianDepth 34
 		-o ./tmp/94276_VCF_CAE6.sorted.marked.vcf
 	
-	%s 
-	
-	%s 
-	
-Description:
-	2013.12.04 
-		Two output
-			one is modified VCF file.
-			one is missing stat file.
-				header = ["locusID", 'chromosome', 'start', 'stop', 'occurrence', 'missingReason']
-		missingReason:
-			1: outside range of permitted depth range
-			2: low mapping quality (>10 percent  of low mapping quality reads)
-			3: both
-
 """
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
+__doc__ = __doc__%(sys.argv[0])
 
 from palos import ProcessOptions, MatrixFile, PassingData
-from palos.io.VCFFile import VCFFile
-from palos.pegasus.mapper.AbstractVCFMapper import AbstractVCFMapper
-from palos import SNP
+from palos.ngs.io.VCFFile import VCFFile
+from palos.mapper.AbstractVCFMapper import AbstractVCFMapper
+from palos.polymorphism.SNP import SNP
 import pysam
 import numpy
 

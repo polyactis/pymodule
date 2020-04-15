@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Examples:
 	#setup database in postgresql
@@ -562,15 +562,7 @@ class TaxonomyDB(ElixirDB):
 			return None
 	
 if __name__ == '__main__':
-	import sys, os, math
-	bit_number = math.log(sys.maxint)/math.log(2)
-	if bit_number>40:       #64bit
-		sys.path.insert(0, os.path.expanduser('~/lib64/python'))
-		sys.path.insert(0, os.path.join(os.path.expanduser('~/script64')))
-	else:   #32bit
-		sys.path.insert(0, os.path.expanduser('~/lib/python'))
-		sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
+	import sys, os
 	from palos import ProcessOptions
 	main_class = TaxonomyDB
 	po = ProcessOptions(sys.argv, main_class.option_default_dict, error_doc=main_class.__doc__)

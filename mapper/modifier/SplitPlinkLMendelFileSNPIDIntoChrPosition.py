@@ -1,21 +1,15 @@
 #!/usr/bin/env python
 """
+2013.08 program that splits SNP-ID in plink .lmendel output into chromosome position , two columns.
+	all input files could be gzipped or not.
+
 Examples:
-	%s 
-	
 	%s -i input.tped.gz -o /tmp/output.tped
 
-Description:
-	2013.08 program that splits SNP-ID in plink .lmendel output into chromosome position , two columns.
-		all input files could be gzipped or not.
 """
 
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
+__doc__ = __doc__%(sys.argv[0])
 import csv
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils, MatrixFile
 from palos.mapper.AbstractMapper import AbstractMapper

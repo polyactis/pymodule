@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 """
-Examples:
-	%s 
-	
+Examples:	
 	%s -i /Network/Data/250k/db/dataset/call_method_32.tsv -o /tmp/call_32.hdf5
 
 Description:
@@ -12,10 +10,9 @@ Description:
 """
 
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
+__doc__ = __doc__%(sys.argv[0])
 
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
+sys.path.insert(0, os.path.expanduser('~/script'))
 
 import csv
 import h5py

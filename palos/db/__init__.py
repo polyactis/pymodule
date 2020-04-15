@@ -5,9 +5,6 @@ A wrapper on top of sqlalchemy around a database. Mostly copied from collective.
 of trouble in understanding how to use adapter involved in TreadlocalDatabaseTransactions.
 """
 import sys, os, math
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
 import sqlalchemy, threading
 from sqlalchemy.engine.url import URL
 from sqlalchemy import Table, create_engine
@@ -674,15 +671,8 @@ def db_connect(hostname, dbname, schema=None, password=None, user=None):
 	if user:
 		connection_string += ' user=%s'%user
 	
-	try:
-		import psycopg
-	except ImportError:
-		try:
-			import psycopg2 as psycopg
-		except ImportError:
-			sys.stderr.write("Neither psycopg nor psycopg2 is installed.\n")
-			raise
-	conn = psycopg.connect(connection_string)
+	import psycopg2
+	conn = psycopg2.connect(connection_string)
 	curs = conn.cursor()
 	if schema:
 		curs.execute("set search_path to %s"%schema)

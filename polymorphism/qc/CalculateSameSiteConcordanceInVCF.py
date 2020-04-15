@@ -1,26 +1,18 @@
 #!/usr/bin/env python
 """
+2013.07.12 program that calculates genotype concordance of same-position SNPs (chromosome, position) inside a VCF.
+
 Examples:
 	%s -i folderReduceLiftOverVCF/CAEY.sorted.vcf.gz -o CAEY.sameSite.concordance.tsv
-	
-	%s 
-	
-	%s 
-	
-Description:
-	2013.07.12 program that calculates genotype concordance of same-position SNPs (chromosome, position) inside a VCF.
 
 """
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
+__doc__ = __doc__%(sys.argv[0])
 
 from palos import ProcessOptions, MatrixFile, PassingData
-from palos.io.VCFFile import VCFFile
-from palos.pegasus.mapper.AbstractVCFMapper import AbstractVCFMapper
-from palos import SNP
+from palos.ngs.io.VCFFile import VCFFile
+from palos.mapper.AbstractVCFMapper import AbstractVCFMapper
+from palos.polymorphism.SNP import SNP
 
 ParentClass = AbstractVCFMapper
 class CalculateSameSiteConcordanceInVCF(ParentClass):

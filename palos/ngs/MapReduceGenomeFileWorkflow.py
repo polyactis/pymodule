@@ -1,25 +1,18 @@
 #!/usr/bin/env python3
 """
-Examples:
-	#
-	%s  ...
+Description:
+	2013.11.24 a generic workflow that map-reduces inputs of one or multiple genomic files (i.e. multi-chromosome, tabix-indexed )
+		parent class is AbstractNGSWorkflow.
 	
+Examples:
 	#2013.11.24
 	%s --inputDir LiftPolymorphismCoordinates/FindNewRefCoordinates_Method109_vs_3488_BWA_F99.2013.Jul.11T191341/folderReduceLiftOverVCF/
 		-H -C 10 -j hcondor -l hcondor -D /u/home/p/polyacti/NetworkData/vervet/db/ -t /u/home/p/polyacti/NetworkData/vervet/db/
 		-o dags/SameSiteConcordance/Method109_vs_3488_BWA_F99.sameSiteConcordance.xml --notToUseDBToInferVCFNoOfLoci
 		--db_user yh -z localhost
-
-Description:
-	2013.11.24 a generic workflow that map-reduces inputs of one or multiple genomic files (i.e. multi-chromosome, tabix-indexed )
-		parent class is AbstractNGSWorkflow.
 """
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
+__doc__ = __doc__%(sys.argv[0])
 from pegaflow.DAX3 import Executable, File, PFN
 from palos import ProcessOptions, PassingData, utils
 from palos.io.FastaFile import FastaFile

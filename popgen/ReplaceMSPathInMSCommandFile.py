@@ -1,39 +1,32 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
+2013.2.10 This program replaces the ms command path in the inputFname (output of history2ms.pl) with correct msPath
+	so that the inputFname could be run as a shell script.   
+
 Examples:
-	%s 
-	
 	#2013.2.11 add --replaceTheHengLiOutputFlagAsWell to get rid of "-l" argument so that msHOT or ms could run as well
 	%s -i 1534_788_2009098_GA_vs_524.ms_command.sh -o 1534_788_2009098_GA_vs_524.msHOT-lite.output.traditional_output.sh
 		--msPath ~/script/lh3_foreign/msHOT-lite/msHOT-lite
 		#--replaceTheHengLiOutputFlagAsWell
 
-Description:
-	2013.2.10 This program replaces the ms command path in the inputFname (output of history2ms.pl) with correct msPath
-		so that the inputFname could be run as a shell script.   
-
 """
 
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
+__doc__ = __doc__%(sys.argv[0])
 import re
 from palos import ProcessOptions, utils
-from palos import AbstractMapper
+from palos.mapper.AbstractMapper import AbstractMapper
 
 class ReplaceMSPathInMSCommandFile(AbstractMapper):
 	__doc__ = __doc__
 	option_default_dict = AbstractMapper.option_default_dict.copy()
 	#option_default_dict.pop(('inputFname', 1, ))
 	option_default_dict.update({
-							('oldMSPath', 0, ): ['msHOT-lite', '', 1, 'path of the ms program in inputFname '],\
-							('msPath', 0, ): [None, '', 1, 'path to the ms or msHOT, msHOT-lite program, '],\
-							('replaceTheHengLiOutputFlagAsWell', 0, int): [0, '', 0, "Heng Li's msHOT-lite has a '-l' flag to output in a succinct format.\n\
-				Toggle this to get rid of '-l'. "],\
-							})
+		('oldMSPath', 0, ): ['msHOT-lite', '', 1, 'path of the ms program in inputFname '],\
+		('msPath', 0, ): [None, '', 1, 'path to the ms or msHOT, msHOT-lite program, '],\
+		('replaceTheHengLiOutputFlagAsWell', 0, int): [0, '', 0, "Heng Li's msHOT-lite has a '-l' flag to output in a succinct format."
+			" Toggle this to get rid of '-l'. "],\
+		})
 	def __init__(self, inputFnameLs=None, **keywords):
 		"""
 		"""

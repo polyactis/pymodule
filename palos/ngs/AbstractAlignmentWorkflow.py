@@ -3,14 +3,10 @@
 2013.1.25 an abstract class for pegasus workflows that work on alignment files (already aligned).
 """
 import sys, os, math
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
 import copy
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
-from palos.ngs import NextGenSeq
+from palos import ngs
 from pegaflow import Workflow
 from . AbstractNGSWorkflow import AbstractNGSWorkflow
 

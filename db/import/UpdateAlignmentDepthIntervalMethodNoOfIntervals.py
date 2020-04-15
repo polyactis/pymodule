@@ -1,26 +1,21 @@
 #!/usr/bin/env python
 """
+2013.08
+	Update the number of intervals in one AlignmentDepthIntervalMethod by summing 
+	the no_of_intervals of its associated AlignmentDepthIntervalFile entries.
+
 Examples:
-	%s 
-	
 	%s -u yh -c -z uclaOffice --methodShortName 56PygerythrusCoverageOn3488 --data_dir ~/NetworkData/vervet/db/
 		--commit --logFilename  folderLog/updateMethodNoOfIntervals.log
 
-Description:
-	2013.08
-		Update the number of intervals in one AlignmentDepthIntervalMethod by summing the no_of_intervals of its associated AlignmentDepthIntervalFile entries.
 """
 
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.expanduser('~/script'))
-sys.path.insert(0, os.path.expanduser('~/src'))
+__doc__ = __doc__%(sys.argv[0])
 
 import copy
 from palos import ProcessOptions
-from Sunset.mapper.AbstractAccuMapper import AbstractAccuMapper as ParentClass
+from AbstractAccuMapper import AbstractAccuMapper as ParentClass
 from palos.db import SunsetDB as DBClass
 
 class UpdateAlignmentDepthIntervalMethodNoOfIntervals(ParentClass):

@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 """
-Examples:
-	%s
-	
 Description:
 	2012.8.15
 		abstract class for programs that walk through a list of matrix-like files.
@@ -14,18 +11,13 @@ Description:
 """
 
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
 import csv, random
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
 from palos.mapper.AbstractMapper import AbstractMapper
 from palos.io.MatrixFile import MatrixFile
 from palos.io.HDF5MatrixFile import HDF5MatrixFile
 from palos.io.YHPyTables import YHFile
-from palos.io.VCFFile import VCFFile
+from palos.ngs.io.VCFFile import VCFFile
 
 class AbstractMatrixFileWalker(AbstractMapper):
 	__doc__ = __doc__

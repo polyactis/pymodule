@@ -1,38 +1,30 @@
 #!/usr/bin/env python
 """
+Calculate pairwise distance matrix of a SNP (row) X Strain (column) matrix.
+
 Examples:
 	#
 	%s -i data/1MbBAC_as_ref/454_illu_6_sub_vs_1MbBAC.GATK.call -o /tmp/454_illu_6_sub_vs_1MbBAC.GATK.matrix -m 0.2 -n 0.4 -c1
 	
-	
-	%s 
-Description:
-	Calculate pairwise distance matrix of a SNP (row) X Strain (column) matrix.
 """
 import os, sys, numpy
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 #2007-03-05 common codes to initiate database connection
 import sys, os, math
-#sys.path.insert(0, os.path.expanduser('~/lib/python'))
-#sys.path.insert(0, os.path.join(os.path.expanduser('~/script/annot/bin')))
-#sys.path.insert(0, os.path.join(os.path.expanduser('~/script/test/python')))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script/variation/src')))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 #import matplotlib; matplotlib.use("Agg")	#to avoid popup and collapse in X11-disabled environment
-
 
 class CalculatePairwiseDistanceOutOfSNPXStrainMatrix(object):
 	__doc__ = __doc__
 	option_default_dict = {
-						('inputFname', 1, ): ['', 'i', 1, 'common input file.', ],\
-							('outputFname', 1, ): ['', 'o', 1, 'common output file', ],\
-							('min_MAF', 1, float): [0.0, 'n', 1, 'minimum MAF for SNP filter', ],\
-							('max_NA_rate', 1, float): [0.4, 'm', 1, 'maximum NA rate for SNP filter', ],\
-							('convertHetero2NA', 1, int):[0, 'c', 1, 'toggle convertHetero2NA mode'],\
-							('hetHalfMatchDistance', 1, float): [0.5, 'H', 1, 'distance between two half-matched genotypes. AG vs A or AG vs AC', ],\
-							('debug', 0, int):[0, 'b', 0, 'toggle debug mode'],\
-							('report', 0, int):[0, 'r', 0, 'toggle report, more verbose stdout/stderr.']}
+		('inputFname', 1, ): ['', 'i', 1, 'common input file.', ],\
+		('outputFname', 1, ): ['', 'o', 1, 'common output file', ],\
+		('min_MAF', 1, float): [0.0, 'n', 1, 'minimum MAF for SNP filter', ],\
+		('max_NA_rate', 1, float): [0.4, 'm', 1, 'maximum NA rate for SNP filter', ],\
+		('convertHetero2NA', 1, int):[0, 'c', 1, 'toggle convertHetero2NA mode'],\
+		('hetHalfMatchDistance', 1, float): [0.5, 'H', 1, 'distance between two half-matched genotypes. AG vs A or AG vs AC', ],\
+		('debug', 0, int):[0, 'b', 0, 'toggle debug mode'],\
+		('report', 0, int):[0, 'r', 0, 'toggle report, more verbose stdout/stderr.']}
 	
 	def __init__(self, **keywords):
 		"""
@@ -58,7 +50,7 @@ class CalculatePairwiseDistanceOutOfSNPXStrainMatrix(object):
 				first and 2nd column are the same locus id.
 			genotypes are in alphabets.
 		"""
-		from palos.SNP import SNPData, transposeSNPData
+		from palos.polymorphism.SNP import SNPData, transposeSNPData
 		if snpFnameToDoFiltering:
 			oldSNPData = SNPData(input_fname=snpFnameToDoFiltering, turn_into_array=1, ignore_2nd_column=1,\
 								input_alphabet=1, turn_into_integer=1)

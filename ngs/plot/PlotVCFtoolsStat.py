@@ -1,24 +1,19 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
+2011-11-28
+	this program draws a manhattan plot (gwas plot) and a histogram for some vcftools outputted windowed statistics.
+
 Examples:
 	%s -o outputFname input1 input2 ...
 	
 	%s  --samplingRate 0.1 -O hweplot --whichColumnHeader "P" --xColumnHeader POS --logY 2
 		--chrColumnHeader CHR --whichColumnPlotLabel "hweMinusLogPvalue" --xColumnPlotLabel position 
 		-z dl324b-1.cmb.usc.edu -u yh /tmp/5988_VCF_Contig966.hwe
-	
 
-Description:
-	2011-11-28
-		this program draws a manhattan plot (gwas plot) and a histogram for some vcftools outputted windowed statistics.
 """
 
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import matplotlib; matplotlib.use("Agg")	#to disable pop-up requirement
 import csv

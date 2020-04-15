@@ -1,29 +1,21 @@
 #!/usr/bin/env python
 """
+2013.07.12 program that removes any redundant SNPs. By redundant, (chromosome, position) appears >1.
+
 Examples:
 	%s -i tmp/testVCF/CAEY.sorted.vcf.gz  -o /tmp/VCF_CAEY.unique.vcf
-	
-	%s 
-	
-	%s 
-	
-Description:
-	2013.07.12 program that removes any redundant SNPs. By redundant, (chromosome, position) appears >1.
 
 """
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0])
+__doc__ = __doc__%(sys.argv[0])
 
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 from Bio.Seq import Seq
 from palos import ProcessOptions, MatrixFile, PassingData
-from palos.io.VCFFile import VCFFile
-from palos.pegasus.mapper.AbstractVCFMapper import AbstractVCFMapper
-from palos import SNP
-from palos.polymorphism.SNP import nt2number
-from CalculateSameSiteConcordanceInVCF import CalculateSameSiteConcordanceInVCF
+from palos.ngs.io.VCFFile import VCFFile
+from palos.mapper.AbstractVCFMapper import AbstractVCFMapper
+from palos.polymorphism.SNP import nt2number, SNP
+from . CalculateSameSiteConcordanceInVCF import CalculateSameSiteConcordanceInVCF
 
 ParentClass = CalculateSameSiteConcordanceInVCF
 class RemoveRedundantLociFromVCF(ParentClass):

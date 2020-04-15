@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 Some simple functions to generate colours.
 """

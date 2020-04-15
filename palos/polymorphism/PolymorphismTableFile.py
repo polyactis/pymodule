@@ -1,13 +1,8 @@
-#!/usr/bin/env python
 """
 2013.3.6 data structure for polymorphism data in YHPyTables (custom of PyTables) format
 	testing examples could be found in ~/script/pymodule/popgen/examples
 """
 import sys, os, math
-__doc__ = __doc__%()
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 import csv
 import tables
 import numpy

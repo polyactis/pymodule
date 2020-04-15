@@ -1,24 +1,14 @@
 #!/usr/bin/env python
 """
-Examples:
-	%s 
-	
-	%s -i 
-
-Description:
-	2012.3.14
-		count the number of reads/bases of fastq or fasta input file.
+2012.3.14
+	count the number of reads/bases of fastq or fasta input file.
 """
 
-import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
+import sys, os
 import csv
 from palos import ProcessOptions, PassingData, utils
 from palos.mapper.AbstractMapper import AbstractMapper
+from palos import ngs
 
 class CountFastqReadBaseCount(AbstractMapper):
 	__doc__ = __doc__
@@ -31,30 +21,8 @@ class CountFastqReadBaseCount(AbstractMapper):
 		"""
 		"""
 		AbstractMapper.__init__(self, **keywords)
-		self.inputFnameLs = inputFnameLs	#2012.3.19 not used
-	
-	@classmethod
-	def getReadBaseCount(cls, inputFname, ignore_set = set(['>', '+', '@']), onlyForEmptyCheck=False):
-		"""
-		2012.3.19
-			inputFname could be fastq or fasta
-		"""
-		inf = utils.openGzipFile(inputFname, openMode='r')
-		read_count = 0
-		base_count = 0
-		
-		for line in inf:
-			if line[0] in ignore_set:
-				if line[0]=='+':	#skip the quality-score line right after this "+" line
-					inf.next()
-				continue
-			read_count += 1
-			base_count += len(line.strip())
-			if onlyForEmptyCheck:	#2012.3.19 one read is enough.
-				break
-		
-		del inf
-		return PassingData(read_count=read_count, base_count=base_count)
+		self.inputFnameLs = inputFnameLs
+		#2012.3.19 not used
 	
 	def run(self):
 		"""
@@ -64,7 +32,7 @@ class CountFastqReadBaseCount(AbstractMapper):
 			import pdb
 			pdb.set_trace()
 		
-		baseCountData = self.getReadBaseCount(self.inputFname)
+		baseCountData = ngs.getReadBaseCount(self.inputFname)
 		
 		writer = csv.writer(open(self.outputFname, 'w'), delimiter='\t')
 		header = ['isq_id', 'isqf_id', 'read_count', 'base_count']

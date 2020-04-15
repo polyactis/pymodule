@@ -23,7 +23,6 @@ Description:
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import csv
@@ -32,7 +31,7 @@ import numpy, re
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils, SNP
 from palos.pegasus.mapper.extractor.ExtractFlankingSequenceForVCFLoci import ExtractFlankingSequenceForVCFLoci
 from palos import figureOutDelimiter, getColName2IndexFromHeader
-from palos.io.BamFile import YHAlignedRead
+from palos.ngs.io.BamFile import YHAlignedRead
 from FindSNPPositionOnNewRefFromFlankingBlastOutput import FindSNPPositionOnNewRefFromFlankingBlastOutput
 
 class FindSNPPositionOnNewRefFromFlankingBWAOutput(FindSNPPositionOnNewRefFromFlankingBlastOutput):

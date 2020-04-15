@@ -1,20 +1,15 @@
 #!/usr/bin/env python
 """
+2013.3.8 this turns SFS_CODE (Hernandez 2008) output into PolymorphismTableFile format.
+Warning: this program is coded with the capability to handle indel/inversion mutations. but un-tested. 
+
 Examples:
-	%s 
-	
 	%s -i ./sfs_code.ex1.output -u sfs_code.ex1.fasta -o sfs_code.ex1.polymorphism.h5
 
-Description:
-	2013.3.8 this turns SFS_CODE (Hernandez 2008) output into PolymorphismTableFile format.
-	Warning: this program is coded with the capability to handle indel/inversion mutations. but un-tested. 
 """
 
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
+__doc__ = __doc__%(sys.argv[0])
 
 import re
 from Bio import SeqIO
@@ -23,7 +18,7 @@ from Bio.SeqRecord import SeqRecord
 from Bio.Alphabet import IUPAC
 from palos import ProcessOptions, utils
 from palos import AbstractMapper
-from palos.io.PolymorphismTableFile import PolymorphismTableFile, OneIndividualPolymorphismData
+from palos.polymorphism.PolymorphismTableFile import PolymorphismTableFile, OneIndividualPolymorphismData
 
 
 class SFS_CODE_Output2PolymorphismTableFile(AbstractMapper):

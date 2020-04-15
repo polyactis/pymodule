@@ -1,6 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
-
 Examples:
 	testGADA.py -i input.txt -o output_a0.5T4M5.tsv
 	
@@ -14,13 +13,9 @@ Description:
 		starting-probe-index, stop-probe-index, no-of-probes, amplitude
 """
 
-import sys, os, math
-#bit_number = math.log(sys.maxint)/math.log(2)
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
+import sys, os
 
-
-from palos import MatrixFile
+from palos.io.MatrixFile import MatrixFile
 import GADA
 
 class testGADA(object):

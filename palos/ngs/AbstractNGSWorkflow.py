@@ -5,16 +5,13 @@
 """
 import sys, os, math
 
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.expanduser('~/script'))
-
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job
 from pegaflow import Workflow
 from palos import Genome, utils
 from palos import ProcessOptions
 from palos.Genome import IntervalData
 from palos.utils import PassingData
-from palos.io import NextGenSeq
+from palos import ngs
 from palos.io.MatrixFile import MatrixFile
 from palos.ngs.io.VCFFile import VCFFile
 from palos.ngs.io.AlignmentDepthIntervalFile import AlignmentDepthIntervalFile
@@ -1701,7 +1698,7 @@ class AbstractNGSWorkflow(ParentClass):
         vcfFileID2object = {}
         for inputFname in os.listdir(inputDir):
             inputAbsPath = os.path.join(os.path.abspath(inputDir), inputFname)
-            if NextGenSeq.isFileNameVCF(inputFname, includeIndelVCF=False) and not NextGenSeq.isVCFFileEmpty(inputAbsPath):
+            if ngs.isFileNameVCF(inputFname, includeIndelVCF=False) and not ngs.isVCFFileEmpty(inputAbsPath):
                 vcfIndexFname = '%s.tbi'%(inputAbsPath)
                 fileID = Genome.getChrFromFname(inputFname)
                 if not os.path.isfile(vcfIndexFname):	#does not exist, pass on a None structure
@@ -1750,7 +1747,7 @@ class AbstractNGSWorkflow(ParentClass):
         outputF = MatrixFile(inputFname=outputFname, openMode='w', delimiter='\t')
         for inputFname in os.listdir(inputVCFFolder):
             inputAbsPath = os.path.join(os.path.abspath(inputVCFFolder), inputFname)
-            if NextGenSeq.isFileNameVCF(inputFname, includeIndelVCF=False):
+            if ngs.isFileNameVCF(inputFname, includeIndelVCF=False):
                 vcfFile= VCFFile(inputFname=inputAbsPath)
                 no_of_vcfFiles += 1
                 for vcfRecord in vcfFile:

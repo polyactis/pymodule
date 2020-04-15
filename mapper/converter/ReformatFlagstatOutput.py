@@ -1,23 +1,16 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
+2012.4.3
+	reformat output of samtools flagstat so that it could be inserted into db.
+	both input and output files could be either gzipped or not.
+
 Examples:
-	%s 
-	
 	%s -i /tmp/outputStat.txt.gz -a 1043 -o /tmp/outputStat.tsv.gz
 
-Description:
-	2012.4.3
-		reformat output of samtools flagstat so that it could be inserted into db.
-		both input and output files could be either gzipped or not.
-
-	
 """
 
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.expanduser('~/script'))
+__doc__ = __doc__%(sys.argv[0])
 
 import csv, copy, re
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils

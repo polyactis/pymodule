@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 
 Examples:
@@ -22,9 +22,8 @@ Description:
 """
 
 import sys, getopt, os
-sys.path += [os.path.join(os.path.expanduser('~/script/annot/bin'))]
 import xml.etree.cElementTree as ElementTree
-from GenomeDB import GenomeDatabase, Gene, SequenceType, EntrezgeneType, \
+from palos.db.GenomeDB import GenomeDatabase, Gene, SequenceType, EntrezgeneType, \
 	GeneSegment, GeneCommentaryType, GeneCommentary, AnnotAssembly, Gene2go
 from palos import PassingData
 import datetime
@@ -36,7 +35,7 @@ def usernameOptionCallBack(option, opt_str, value, parser):
 	# useless. called only when -u is supplied, which misses the whole point.
 	option_name = option.dest
 	if not value:
-		value = raw_input("%s: "%opt_str)
+		value = input("%s: "%opt_str)
 	setattr(parser.values, option_name, value)
 
 def passwordOptionCallBack(option, opt_str, value, parser):

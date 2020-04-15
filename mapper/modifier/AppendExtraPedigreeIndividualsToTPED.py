@@ -1,8 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
-Examples:
-	%s 
-	
+Examples:	
 	%s -i input.tped.gz -o /tmp/output.tped --tfamFname ...
 
 Description:
@@ -13,10 +11,7 @@ Description:
 """
 
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
+__doc__ = __doc__%(sys.argv[0])
 
 import csv
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils, MatrixFile

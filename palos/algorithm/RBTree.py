@@ -110,8 +110,6 @@ RBTree.py contains an internal Distutils-based installer; just run:
 
 """
 import sys, os, math
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 __version__ = "1.6"
 

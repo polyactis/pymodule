@@ -1,22 +1,11 @@
 #!/usr/bin/env python
 """
-Examples:
-	%s 
-	
-	#
-	%s 
-
 Description:
-	2013.07.31
-		abstract walker class for genome files
+	20130731
+	abstract walker class for genome files
 """
 
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
 import csv, random, numpy
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
 from palos.db import GenomeDB
@@ -31,14 +20,15 @@ class AbstractGenomeFileWalker(ParentClass):
 	#option_default_dict.update(ParentClass.db_option_dict.copy())
 	
 	genome_option_dict = {
-					('chromosomeHeader', 1, ): ['chromosome', '', 1, 'header of the column that designates chromosome info' ],\
-					('positionHeader', 1, ): ['position', '', 1, 'header of the column that designates position of each locus on chromosome' ],\
-					
-					('tax_id', 0, int): [3702, '', 1, 'taxonomy ID of the organism from which to retrieve the chromosome info', ],\
-					('sequence_type_id', 0, int): [1, '', 1, 'sequence_type_id (annot_assembly) of the chromosomes, to retrieve the chromosome info. 1: assembledChromosome, 9: Scaffolds', ],\
-					('chrOrder', 0, int): [1, '', 1, 'how to order chromosomes. 1: column genome_order in db; 2: by chromosome size, descending', ],\
-					
-						}
+		('chromosomeHeader', 1, ): ['chromosome', '', 1, 'header of the column that designates chromosome info' ],\
+		('positionHeader', 1, ): ['position', '', 1, 'header of the column that designates position of each locus on chromosome' ],\
+		('tax_id', 0, int): [3702, '', 1, 'taxonomy ID of the organism from which '
+			'to retrieve the chromosome info', ],\
+		('sequence_type_id', 0, int): [1, '', 1, "sequence_type_id (annot_assembly) of the chromosomes, "
+			"to retrieve the chromosome info. 1: assembledChromosome, 9: Scaffolds", ],\
+		('chrOrder', 0, int): [1, '', 1, 'how to order chromosomes. '
+			'1: column genome_order in db; 2: by chromosome size, descending', ],\
+		}
 	option_default_dict.update(genome_option_dict)
 	option_default_dict.update({
 					

@@ -84,13 +84,9 @@ Examples:
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0])
 
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.expanduser('~/script'))
-sys.path.insert(0, os.path.expanduser('~/src'))
-
 import copy, re, csv
 from pegaflow.DAX3 import File
-from pegaflow import workflow
+from pegaflow import Workflow
 from palos import ProcessOptions, PassingData, MatrixFile, utils
 from palos.ngs.AbstractNGSWorkflow import AbstractNGSWorkflow
 

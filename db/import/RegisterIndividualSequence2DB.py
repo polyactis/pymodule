@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
 import sys, os, math
 import csv, re, copy
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/src')))
 from palos import ProcessOptions, PassingData, utils
-from Sunset.mapper.AbstractAccuMapper import AbstractAccuMapper as ParentClass
+from AbstractAccuMapper import AbstractAccuMapper as ParentClass
 from palos.db import SunsetDB as DBClass
 
 class RegisterIndividualSequence2DB(ParentClass):

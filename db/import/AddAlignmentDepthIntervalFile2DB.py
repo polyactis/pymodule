@@ -15,15 +15,11 @@ Description:
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.expanduser('~/script'))
-sys.path.insert(0, os.path.expanduser('~/src'))
-
 import copy, re
-from palos import ProcessOptions, PassingData, utils, NextGenSeq
-from palos.io.AlignmentDepthIntervalFile import AlignmentDepthIntervalFile
+from palos import ProcessOptions, PassingData, utils, ngs
+from palos.ngs.io.AlignmentDepthIntervalFile import AlignmentDepthIntervalFile
 from AddAlignmentDepthIntervalMethod2DB import AddAlignmentDepthIntervalMethod2DB
-from Sunset.mapper.AbstractAccuMapper import AbstractAccuMapper as ParentClass
+from AbstractAccuMapper import AbstractAccuMapper as ParentClass
 
 class AddAlignmentDepthIntervalFile2DB(ParentClass):
 	__doc__ = __doc__

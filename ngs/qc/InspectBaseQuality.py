@@ -1,26 +1,20 @@
 #!/usr/bin/env python
 """
+2011-8-15 Five types of figures will be generated.
+	qualityHist.png
+	quality_per_position.png
+	no_of_bases_per_position.png
+	diNuc_count.png
+	diNuc_quality.png
+2011-8-17 the db saving part is not implemented, you can supply any random password.
+
 Examples:
 	%s -i /Network/Data/vervet/db/individual_sequence/3_Barbados_GA/gerald_62FGFAAXX_3_1.fastq.gz -u yh -read_sampling_rate 0.0001
-	
-	%s 
 
-Description:
-	2011-8-15 Five types of figures will be generated.
-		qualityHist.png
-		quality_per_position.png
-		no_of_bases_per_position.png
-		diNuc_count.png
-		diNuc_quality.png
-	2011-8-17 the db saving part is not implemented, you can supply any random password.
 """
 
 import sys, os, copy
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.expanduser('~/script'))
-sys.path.insert(0, os.path.expanduser('~/src'))
+__doc__ = __doc__%(sys.argv[0])
 
 import random
 import matplotlib; matplotlib.use("Agg")	#to disable pop-up requirement
@@ -81,7 +75,7 @@ class InspectBaseQuality(ParentClass):
 					read_length = len(base_string)
 					if len(quality_ls_per_position)<read_length:	# extend quality_ls_per_position to house more data
 						extraNoOfBases = read_length-len(quality_ls_per_position)
-						for j in xrange(extraNoOfBases):
+						for j in range(extraNoOfBases):
 							quality_ls_per_position.append([])
 							no_of_bases_per_position.append(0)
 						

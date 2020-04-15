@@ -12,19 +12,11 @@ Description:
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 
-#bit_number = math.log(sys.maxint)/math.log(2)
-#if bit_number>40:	   #64bit
-#	sys.path.insert(0, os.path.expanduser('~/lib64/python'))
-#	sys.path.insert(0, os.path.join(os.path.expanduser('~/script64')))
-#else:   #32bit
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
 import csv
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
 from palos import SNP
-from palos.io.VCFFile import VCFFile
-from palos.mapper.AbstractMapper import AbstractMapper
+from palos.ngs.io.VCFFile import VCFFile
+from palos.mapper.AbstractVCFMapper import AbstractVCFMapper
 
 class JuxtaposeAlleleFrequencyFromMultiVCFInput(AbstractVCFMapper):
 	__doc__ = __doc__

@@ -1,34 +1,22 @@
 #!/usr/bin/env python
 """
+2012.8.13 select certain rows from a matrix based on the whichColumn (chosen column)
+	it accepts both input from "-i oneFile.txt" or the trailing standalone arguments.
+
 Examples:
 	%s -s 1 -o /tmp/Contig685_largeSiteGap.tsv -V 5000  -W distanceToNextSite  /tmp/Contig685_siteGap.tsv
 	
 	# 2012.8.6 select rows based on the fraction of heterozygotes per individual [0.2, 0.8].
 	%s -s 1 -o /tmp/hetPerMonkey_hist.png
 		-W NoOfHet_by_NoOfTotal -V 0.2 -x 0.8 /tmp/homoHetCountPerSample.tsv
-	
 
-Description:
-	2012.8.13 select certain rows from a matrix based on the whichColumn (chosen column)
-		it accepts both input from "-i oneFile.txt" or the trailing standalone arguments.
 """
 
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 
-
-#bit_number = math.log(sys.maxint)/math.log(2)
-#if bit_number>40:	   #64bit
-#	sys.path.insert(0, os.path.expanduser('~/lib64/python'))
-#	sys.path.insert(0, os.path.join(os.path.expanduser('~/script64')))
-#else:   #32bit
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
-
 from palos import ProcessOptions
 from palos.io.AbstractMatrixFileWalker import AbstractMatrixFileWalker
-
 
 class SelectRowsFromMatrix(AbstractMatrixFileWalker):
 	__doc__ = __doc__

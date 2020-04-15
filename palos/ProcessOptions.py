@@ -67,7 +67,7 @@ def process_function_arguments(keywords, argument_default_dict, error_doc='', cl
 					import getpass
 					default_value = getpass.getpass("%s: "%argument)
 				else:
-					default_value = raw_input("%s: "%argument)
+					default_value = input("%s: "%argument)
 			else:
 				if error_doc:
 					sys.stderr.write(error_doc)
@@ -413,6 +413,7 @@ class ProcessOptions(object):
 		return self.args
 	arguments = property(arguments)
 	
+	@classmethod
 	def process_function_arguments(cls, keywords, argument_default_dict, error_doc='', class_to_have_attr=None, howto_deal_with_required_none=1):
 		"""
 		2009-10-07
@@ -455,7 +456,7 @@ class ProcessOptions(object):
 						import getpass
 						default_value = getpass.getpass("%s: "%argument)
 					else:
-						default_value = raw_input("%s: "%argument)
+						default_value = input("%s: "%argument)
 				else:
 					if error_doc:
 						sys.stderr.write(error_doc)
@@ -467,7 +468,6 @@ class ProcessOptions(object):
 				setattr(class_to_have_attr, argument, default_value)
 			ad[argument] = default_value
 		return ad
-	process_function_arguments = classmethod(process_function_arguments)
 	
 	@classmethod
 	def processListArguments(cls, listArgumentName_data_type_ls=None, emptyContent=[], class_to_have_attr=None):

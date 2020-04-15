@@ -1,33 +1,26 @@
 #!/usr/bin/env python
 """
+An abstract class for plot classes, can plot XY scatter/line (pending self.formatString) plot.
+	If you specify --outputFname, make sure its suffix is .png.
+	If "-i ..." is given, it is regarded as one of the input files (plus the ones in trailing arguments). 
+
 Examples:
-	%s 
-	
 	# 2012.8.2 draw data column NumberOfLoci (y-axis, -W) vs. AAC (x-axis -l ...).
 	# sample all data (-s 1), generate svg figure (-n)
 	# take positive (-p) log (-g) of the whichColumn value (y-axis)
 	%s -p -g -l AAC -W NumberOfLoci -D NoOfLoci -O ~/NoOfLoci_vs_AAC -n -s 1 -x AAC
 			VCFStat_Method8_L800000P4000000m1000000.2012.8.1T0331/11Contigs_AAC_tally.tsv
 
-Description:
-	2012.8.2
-		abstract class for plot classes, can plot XY scatter/line (pending self.formatString) plot.
-	If you specify --outputFname, make sure its suffix is .png.
-	If "-i ..." is given, it is regarded as one of the input files (plus the ones in trailing arguments). 
 """
-
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
+__doc__ = __doc__%(sys.argv[0])
 
 import matplotlib; matplotlib.use("Agg")	#to disable pop-up requirement
 import pylab
 import csv, random, numpy
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils, getColName2IndexFromHeader, figureOutDelimiter,\
 	yh_matplotlib
-from palos.pegasus.mapper.AbstractMapper import AbstractMapper
+from palos.mapper.AbstractMapper import AbstractMapper
 from palos.io.AbstractMatrixFileWalker import AbstractMatrixFileWalker
 
 class AbstractPlot(AbstractMatrixFileWalker):

@@ -1,32 +1,20 @@
 #!/usr/bin/env python
 """
-Examples:
-	%s 
+Program to estimate how many outliers off the y=x axis.
+	1. hard cutoff. abs(y-x)<=minDelta
+	2. model y-x as a normal distribution, estimate its mean/variance
+		then add them up as chi-squared statistic.
 	
+	If "-i ..." is given, it is regarded as one of the input files (plus the ones in trailing arguments).
+
+Examples:
 	%s -i /tmp/Contig315_StKitts_vs_Nevis.tsv --xColumnHeader=StKitts --whichColumnHeader=Nevis
 		-s 1.0 -o /tmp/Contig315_StKitts_vs_Nevis.2D.png
-	
 
-Description:
-	2012.10.12
-		program to estimate how many outliers off the y=x axis.
-		1. hard cutoff. abs(y-x)<=minDelta
-		2. model y-x as a normal distribution, estimate its mean/variance
-			then add them up as chi-squared statistic.
-	If "-i ..." is given, it is regarded as one of the input files (plus the ones in trailing arguments). 
 """
 
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-#bit_number = math.log(sys.maxint)/math.log(2)
-#if bit_number>40:	   #64bit
-#	sys.path.insert(0, os.path.expanduser('~/lib64/python'))
-#	sys.path.insert(0, os.path.join(os.path.expanduser('~/script64')))
-#else:   #32bit
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
+__doc__ = __doc__%(sys.argv[0])
 import numpy, random
 from palos import getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter
 from palos.plot import yh_matplotlib

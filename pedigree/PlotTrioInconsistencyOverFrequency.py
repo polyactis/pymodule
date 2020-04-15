@@ -1,29 +1,10 @@
 #!/usr/bin/env python
 """
-Examples:
-	%s 
-	
-	%s 
-	
-
-Description:
-	2011-9-29
+2011-9-29
 """
 
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-
-bit_number = math.log(sys.maxint)/math.log(2)
-if bit_number>40:	   #64bit
-	sys.path.insert(0, os.path.expanduser('~/lib64/python'))
-	sys.path.insert(0, os.path.join(os.path.expanduser('~/script64')))
-else:   #32bit
-	sys.path.insert(0, os.path.expanduser('~/lib/python'))
-	sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
 import matplotlib; matplotlib.use("Agg")	#to disable pop-up requirement
-
 import csv
 from palos import ProcessOptions, getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter
 from palos import yh_matplotlib

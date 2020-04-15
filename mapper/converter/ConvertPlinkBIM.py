@@ -1,21 +1,17 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Examples:
-	%s
-	
 	%s -i  LDPrunedMerged.bim -o LDPrunedMerged.tsv 
 
-Description:
-	2012.9.13
-		This script converts plink's bim file (where markers are stored) into a tab delimited output.
-		Input file could be gzipped or not.
-		Output has one line header, tab-delimited. could be used by vcftools to keep sites.
+2012.9.13
+	This script converts plink's bim file (where markers are stored) into a tab delimited output.
+	Input file could be gzipped or not.
+	Output has one line header, tab-delimited. could be used by vcftools to keep sites.
 """
 
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
+__doc__ = __doc__%(sys.argv[0])
 
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import csv

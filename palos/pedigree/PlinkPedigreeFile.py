@@ -1,47 +1,34 @@
 #!/usr/bin/env python
 """
-Examples:
-	%s 
+2013.05.03 a child class of MatrixFile. used to describe pedigree file in plink format (delimiter could be ' ' or tab), which looks like:
+	The header line does not exist. Six columns are: FamilyID IndividualID PaternalID MaternalID Sex(1=male; 2=female; other=unknown) Phenotype.
 	
-	%s
+	F0_1 990_699_1984014_GA_vs_524copy1 0 0 2 1
+	F0_1 1513_641_1986014_GA_vs_524copy1 0 0 1 1
+	F0_1 984_693_1996027_GA_vs_524copy1 1513_641_1986014_GA_vs_524copy1 990_699_1984014_GA_vs_524copy1 1 1
+	F1_1 1582_1672_1993040_GA_vs_524copy1 0 0 1 1
+	F1_1 1917_2966_1992045_GA_vs_524copy1 0 0 2 1
+	F1_1 1931_2980_2000040_GA_vs_524copy1 1582_1672_1993040_GA_vs_524copy1 1917_2966_1992045_GA_vs_524copy1 1 1
 
-Description:
-	2013.05.03 a child class of MatrixFile. used to describe pedigree file in plink format (delimiter could be ' ' or tab), which looks like:
-		The header line does not exist. Six columns are: FamilyID IndividualID PaternalID MaternalID Sex(1=male; 2=female; other=unknown) Phenotype.
-		
-		F0_1 990_699_1984014_GA_vs_524copy1 0 0 2 1
-		F0_1 1513_641_1986014_GA_vs_524copy1 0 0 1 1
-		F0_1 984_693_1996027_GA_vs_524copy1 1513_641_1986014_GA_vs_524copy1 990_699_1984014_GA_vs_524copy1 1 1
-		F1_1 1582_1672_1993040_GA_vs_524copy1 0 0 1 1
-		F1_1 1917_2966_1992045_GA_vs_524copy1 0 0 2 1
-		F1_1 1931_2980_2000040_GA_vs_524copy1 1582_1672_1993040_GA_vs_524copy1 1917_2966_1992045_GA_vs_524copy1 1 1
+Example:
+
+	plinkPedigreeFile = PlinkPedigreeFile(inputFname=self.pedigreeFname)
+	familyStructureData = plinkPedigreeFile.getFamilyStructurePlinkWay()
 	
-	Example:
-	
-		plinkPedigreeFile = PlinkPedigreeFile(inputFname=self.pedigreeFname)
-		familyStructureData = plinkPedigreeFile.getFamilyStructurePlinkWay()
-		
-		plinkPedigreeFile = PlinkPedigreeFile(inputFname=self.pedigreeFname)
-		for nodeID in plinkPedigreeFile.pedigreeGraph:
-			...
-		plinkPedigreeFile.close()
-	
-	
+	plinkPedigreeFile = PlinkPedigreeFile(inputFname=self.pedigreeFname)
+	for nodeID in plinkPedigreeFile.pedigreeGraph:
+		...
+	plinkPedigreeFile.close()
 
 """
 
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
 import copy
 import networkx as nx
 from palos.ProcessOptions import  ProcessOptions
 from palos import utils, PassingData
 from palos.algorithm import graph
-from MatrixFile import MatrixFile
+from palos.io.MatrixFile import MatrixFile
 
 class PlinkPedigreeFile(MatrixFile):
 	__doc__ = __doc__

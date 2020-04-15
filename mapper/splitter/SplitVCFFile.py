@@ -1,8 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
+2012.8.25
+	This program splits a VCF file into multiple small ones.
+
 Examples:
-	%s 
-	
 	%s -i ~namtran/panasas/Experiment/RNA-seq/Freimer/Developmental/ASE/Variant/MultipleSampleCalling/genome.algn.split.part17/samtools.var.filt.vcf.gz 
 		-o /tmp/ -m 2
 	
@@ -10,23 +11,14 @@ Examples:
 	for i in `ls -d ~namtran/panasas/Experiment/RNA-seq/Freimer/Developmental/ASE/Variant/MultipleSampleCalling/genome*`; 
 		do echo $i; 
 		%s -i  $i/samtools.var.filt.vcf.gz  -o VariantsOf36RNA-SeqMonkeysFromNam_minDepth5/ -m 5;
-	done
-	
-Description:
-	2012.8.25
-		This program splits a VCF file into multiple small ones.
-	
+	done	
 """
 
-import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
+import sys, os
+__doc__ = __doc__%(sys.argv[0], sys.argv[0])
 import copy
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
-from palos.io.VCFFile import VCFFile
+from palos.ngs.io.VCFFile import VCFFile
 from palos.mapper.AbstractVCFMapper import AbstractVCFMapper
 
 class SplitVCFFile(AbstractVCFMapper):

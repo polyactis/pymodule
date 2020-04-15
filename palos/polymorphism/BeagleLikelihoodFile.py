@@ -1,52 +1,39 @@
 #!/usr/bin/env python
 """
-Examples:
-	%s 
-	
-	%s
+2013.05.03 a child class of BeagleGenotypeFile. used to describe Beagle likelihood file format, which looks like:
+	marker alleleA alleleB 1000_709_1996093_GA_vs_524 1000_709_1996093_GA_vs_524 1000_709_1996093_GA_vs_524 1001_710_1995025_GA_vs_524 1001_710_1995025_GA_vs_524 1001_710_1995025_GA_vs_524 1002_711_2001039_GA_vs_524
+	Contig791:1086 C A 1 0 0 0.9997 0.0003 0 0
+	Contig791:1649 G C 1 0 0 1 0 0 0
+	Contig791:4084 A C 1 0 0 1 0 0 0
+	Contig791:4118 A G 1 0 0 1 0 0 0
+	Contig791:4143 C A 1 0 0 1 0 0 0
+	Contig791:4168 G C 1 0 0 0.9999 0.0001 0 0
+	Contig791:4203 C G 1 0 0 1 0 0 0
 
-Description:
-	2013.05.03 a child class of BeagleGenotypeFile. used to describe Beagle likelihood file format, which looks like:
-		marker alleleA alleleB 1000_709_1996093_GA_vs_524 1000_709_1996093_GA_vs_524 1000_709_1996093_GA_vs_524 1001_710_1995025_GA_vs_524 1001_710_1995025_GA_vs_524 1001_710_1995025_GA_vs_524 1002_711_2001039_GA_vs_524
-		Contig791:1086 C A 1 0 0 0.9997 0.0003 0 0
-		Contig791:1649 G C 1 0 0 1 0 0 0
-		Contig791:4084 A C 1 0 0 1 0 0 0
-		Contig791:4118 A G 1 0 0 1 0 0 0
-		Contig791:4143 C A 1 0 0 1 0 0 0
-		Contig791:4168 G C 1 0 0 0.9999 0.0001 0 0
-		Contig791:4203 C G 1 0 0 1 0 0 0
+Example:
 
-	Example:
+	reader = MatrixFile(inputFname='/tmp/input.txt', openMode='r')
+	reader = MatrixFile('/tmp/input.txt', openMode='r')
+	reader.constructColName2IndexFromHeader()
+	for row in reader:
+		row[reader.getColName2IndexFromHeader('KID')]
 	
-		reader = MatrixFile(inputFname='/tmp/input.txt', openMode='r')
-		reader = MatrixFile('/tmp/input.txt', openMode='r')
-		reader.constructColName2IndexFromHeader()
-		for row in reader:
-			row[reader.getColName2IndexFromHeader('KID')]
-		
-		inf = utils.openGzipFile(inputFname, openMode='r')
-		reader = MatrixFile(inputFile=inf)
-		
-		#2013.2.1 writing
-		writer = MatrixFile('/tmp/output.txt', openMode='w', delimiter='\t')
-		writer.writeHeader(...)
-		writer.writerow(row)
-		writer.close()
+	inf = utils.openGzipFile(inputFname, openMode='r')
+	reader = MatrixFile(inputFile=inf)
 	
-	
+	#2013.2.1 writing
+	writer = MatrixFile('/tmp/output.txt', openMode='w', delimiter='\t')
+	writer.writeHeader(...)
+	writer.writerow(row)
+	writer.close()	
 
 """
 
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
 import copy
 from palos.ProcessOptions import  ProcessOptions
 from palos.utils import PassingData
-from BeagleGenotypeFile import BeagleGenotypeFile
+from . BeagleGenotypeFile import BeagleGenotypeFile
 
 ParentClass = BeagleGenotypeFile
 class BeagleLikelihoodFile(ParentClass):

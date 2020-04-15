@@ -14,10 +14,6 @@ Description:
 import sys, os, math, copy
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.expanduser('~/script'))
-
-
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, DateTime, func, Float, Text
 from sqlalchemy import create_engine

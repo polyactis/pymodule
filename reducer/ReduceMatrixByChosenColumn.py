@@ -1,17 +1,15 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
+2011-11-12
+	This program sums individual columns from all input files based on keys from the keyColumn.
+
 Examples:
 	#testing merge three identical genotype files
 	%s -k 0 -v 4,5 -o /tmp/test.tsv trio_inconsistency_summary_hist_homo_het.tsv
-	
-	%s 
-	
-Description:
-	2011-11-12
-		This program sums individual columns from all input files based on keys from the keyColumn.
+		
 """
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
+__doc__ = __doc__%(sys.argv[0])
 
 from palos import ProcessOptions, figureOutDelimiter, utils, PassingData
 from palos.io.MatrixFile import MatrixFile

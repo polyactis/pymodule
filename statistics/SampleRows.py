@@ -1,24 +1,20 @@
 #!/usr/bin/env python
 """
-Examples:
-	%s 
+2012.10.15
+	sample rows from a matrix-like file
 	
+If "-i ..." is given, it is regarded as one of the input files (plus the ones in trailing arguments). 
+
+Examples:
 	%s -i /tmp/VRCSamples.tsv --whichColumnHeader=sampleID
 		-s 1.0  --sampleSize 5
 		--plinkIBDCheckOutputFname PlinkIBDCheck/PlinkIBDCheck_Method38_W50Z20R0.9.2012.9.13T102614/ibdCheckIBDCheck/LDPrunedMerged_ibdCheck.tsv
 		-o /tmp/VRCSamples_sampled.tsv
 
-Description:
-	2012.10.15
-		sample rows from a matrix-like file
-		
-	If "-i ..." is given, it is regarded as one of the input files (plus the ones in trailing arguments). 
 """
 
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
+__doc__ = __doc__%(sys.argv[0])
 
 import csv
 import random

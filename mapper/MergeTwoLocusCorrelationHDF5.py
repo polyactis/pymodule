@@ -13,13 +13,10 @@ Description:
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
 import csv
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
 from palos import SNPData
-from AbstractMapper import AbstractMapper
+from palos.mapper.AbstractMapper import AbstractMapper
 import h5py, numpy
 
 class MergeTwoLocusCorrelationHDF5(AbstractMapper):

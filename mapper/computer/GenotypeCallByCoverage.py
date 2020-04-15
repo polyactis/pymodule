@@ -28,13 +28,10 @@ Description:
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0])
 
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
-import subprocess, cStringIO, re, csv
+import subprocess, re, csv
 from palos import ProcessOptions, figureOutDelimiter
 from palos.utils import sortCMPBySecondTupleValue
-from palos.VCFFile import VCFFile
+from palos.ngs.io.VCFFile import VCFFile
 
 class GenotypeCallByCoverage(object):
 	__doc__ = __doc__

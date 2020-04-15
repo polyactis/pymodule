@@ -1,11 +1,8 @@
 """
-2008-10-01
-	module related to Genome
+2008-10-01 module related to Genome
 """
 
 import os,sys
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 from palos.utils import PassingData
 
 class GeneModel(object):

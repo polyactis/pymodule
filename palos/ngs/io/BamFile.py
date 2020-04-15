@@ -1,16 +1,11 @@
 #!/usr/bin/env python
 """
-2011-7-11
-	a class wrapper for SAM/BAM file. It is an extension of pysam.Samfile
-	
+A class wrapper for SAM/BAM file. It is an extension of pysam.Samfile.	
 	http://wwwfgu.anat.ox.ac.uk/~andreas/documentation/samtools/api.html#pysam.Samfile
 """
 import os, sys
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 from palos.utils import PassingData
 import pysam
-
 
 class BamFile(pysam.Samfile):
 	"""

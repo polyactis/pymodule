@@ -28,12 +28,8 @@ Description:
 10-31-05 basic functions to draw images
 """
 import sys,os
-__doc__ = __doc__%()
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
-from palos import ProcessOptions, getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter, SNPData
+from palos import ProcessOptions, getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter
+from palos.polymorphism.SNP import SNPData
 
 
 def get_char_dimension():
@@ -695,12 +691,7 @@ if __name__ == '__main__':
 	im = drawLegend(matrix_value2label, matrix_value2color, font)
 	im.save('/tmp/legend.png')
 	
-	import sys, os, math
-	bit_number = math.log(sys.maxint)/math.log(2)
-	if bit_number>40:       #64bit
-		sys.path.insert(0, os.path.expanduser('~/script64'))
-	else:
-		sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
+	import sys, os
 	from variation.src.FilterStrainSNPMatrix import FilterStrainSNPMatrix
 	FilterStrainSNPMatrix_instance = FilterStrainSNPMatrix()
 	input_fname = './script/variation/data/justin_data.csv'

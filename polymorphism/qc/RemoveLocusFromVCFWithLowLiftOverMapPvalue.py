@@ -1,26 +1,20 @@
 #!/usr/bin/env python
 """
+2014.01.04 program that removes loci with low mapPvalue (output of ComputeLiftOverLocusProbability.py) 
+	from a lifted-over VCF (LiftOverVCFBasedOnCoordinateMap.py).
+
 Examples:
 	%s -i folderRun/Scaffold301_splitVCF_unit1.vcf -o folderRun/Scaffold301_splitVCF_unit1.info.vcf
 		--liftOverLocusMapPvalueFname ...probability.tsv
-	%s 
-	
-	%s 
-	
-Description:
-	2014.01.04 program that removes loci with low mapPvalue (output of ComputeLiftOverLocusProbability.py) 
-		from a lifted-over VCF (LiftOverVCFBasedOnCoordinateMap.py).
+
 
 """
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
+__doc__ = __doc__%(sys.argv[0])
 
 from palos import ProcessOptions, MatrixFile, PassingData
-from palos.io.VCFFile import VCFFile
-from palos.pegasus.mapper.AbstractVCFMapper import AbstractVCFMapper
+from palos.ngs.io.VCFFile import VCFFile
+from palos.mapper.AbstractVCFMapper import AbstractVCFMapper
 
 ParentClass = AbstractVCFMapper
 class RemoveLocusFromVCFWithLowLiftOverMapPvalue(ParentClass):

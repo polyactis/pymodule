@@ -1,29 +1,18 @@
 #!/usr/bin/env python
 """
+2012.8.13
+	this program outputs chr, pos, gap (distance to the next SNP).
+
 Examples:
-	%s 
-	
 	%s -i gatk/Contig799.vcf.gz -l 1000000 -c Contig799 -o /tmp/Contig799_siteGap.tsv
 
-Description:
-	2012.8.13
-		this program outputs chr, pos, gap (distance to the next SNP).
 """
 
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-#bit_number = math.log(sys.maxint)/math.log(2)
-#if bit_number>40:	   #64bit
-#	sys.path.insert(0, os.path.expanduser('~/lib64/python'))
-#	sys.path.insert(0, os.path.join(os.path.expanduser('~/script64')))
-#else:   #32bit
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
+__doc__ = __doc__%(sys.argv[0])
 import csv
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
-from palos.io.VCFFile import VCFFile
+from palos.ngs.io.VCFFile import VCFFile
 from palos.mapper.AbstractVCFMapper import AbstractVCFMapper
 
 class OutputVCFSiteGap(AbstractVCFMapper):

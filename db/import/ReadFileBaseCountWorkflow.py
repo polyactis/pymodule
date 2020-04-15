@@ -17,18 +17,13 @@ Description:
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.expanduser('~/script'))
-sys.path.insert(0, os.path.expanduser('~/src'))
-
 import subprocess, copy
 from pegaflow.DAX3 import File, Link, PFN, Job
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
 from palos.pegasus import yh_pegasus
-from palos.pegasus.AbstractNGSWorkflow import AbstractNGSWorkflow
-
+from palos.ngs.AbstractNGSWorkflow import AbstractNGSWorkflow
 from palos.db import SunsetDB as DBClass
-from Sunset.pegasus.AbstractAccuWorkflow import AbstractAccuWorkflow as ParentClass
+from AbstractAccuWorkflow import AbstractAccuWorkflow as ParentClass
 
 
 class ReadFileBaseCountWorkflow(ParentClass):

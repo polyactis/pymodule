@@ -1,26 +1,15 @@
 #!/usr/bin/env python
 """"
+2012.8.28 test class for TaxonomyDB.py
 
 Examples:
-	%s
-	
 	%s -u yh -p secret -d vervetdb -k taxonomy
 
-Description:
-
-2012.8.28 test class for TaxonomyDB.py
 """
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
-#bit_number = math.log(sys.maxint)/math.log(2)
-#if bit_number>40:       #64bit
-#	sys.path.insert(0, os.path.expanduser('~/lib64/python'))
-#	sys.path.insert(0, os.path.join(os.path.expanduser('~/script64/annot/bin')))
-#else:   #32bit
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script/')))
+__doc__ = __doc__%(sys.argv[0])
 import unittest, os, sys, getopt, csv
-from palos.TaxonomyDB import TaxonomyDB
+from palos.db.TaxonomyDB import TaxonomyDB
 
 class TestTaxonomyDB(unittest.TestCase, TaxonomyDB):
 	__doc__ = __doc__

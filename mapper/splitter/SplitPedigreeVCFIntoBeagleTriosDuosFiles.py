@@ -1,41 +1,35 @@
 #!/usr/bin/env python
 """
+2013.05.03
+	This program splits a VCF file from pedigree members into trios/duos beagle input files.
+		Pedigree is provided by --plinkPedigreeFname and contains individuals from --gatkPrintBeagleFname.
+			If more (a pedigree that encompasses more individuals from --gatkPrintBeagleFname), the extra will be ignored.
+			If less (individuals in --gatkPrintBeagleFname but not in --plinkPedigreeFname), would be ignored.
+			Output is the intersection between the two. 
+		The --gatkPrintBeagleFname file (beagle likelihood file) is output of running GATK PrintBeagleInput on VCF.
+	Output includes
+		1 or 2 or 3 (depends on composition of pedigree) beagle files 'outputFnamePrefix_familySize??.bgl
+			If a pedigree is composed entirely of one type of family (trio/duo/singleton), then only one beagle file.
+			The Beagle file for singletons is in likelihood format.
+		One additional output file is outputFnamePrefix.markers, which contains the markers.
+			Contig791:1086 1086 C A
+
 Examples:
-	%s 
-	
 	%s  -i --gatkPrintBeagleFname method_36_Contig791_replicated.bgl 
 		--plinkPedigreeFname trioCaller_VRC.merlin -O method_36_Contig791_replicated_unphased
-	
-Description:
-	2013.05.03
-		This program splits a VCF file from pedigree members into trios/duos beagle input files.
-			Pedigree is provided by --plinkPedigreeFname and contains individuals from --gatkPrintBeagleFname.
-				If more (a pedigree that encompasses more individuals from --gatkPrintBeagleFname), the extra will be ignored.
-				If less (individuals in --gatkPrintBeagleFname but not in --plinkPedigreeFname), would be ignored.
-				Output is the intersection between the two. 
-			The --gatkPrintBeagleFname file (beagle likelihood file) is output of running GATK PrintBeagleInput on VCF.
-		Output includes
-			1 or 2 or 3 (depends on composition of pedigree) beagle files 'outputFnamePrefix_familySize??.bgl
-				If a pedigree is composed entirely of one type of family (trio/duo/singleton), then only one beagle file.
-				The Beagle file for singletons is in likelihood format.
-			One additional output file is outputFnamePrefix.markers, which contains the markers.
-				Contig791:1086 1086 C A
 	
 """
 
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
+__doc__ = __doc__%(sys.argv[0])
 
 import copy, numpy
 import networkx as nx
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
-from palos.io.VCFFile import VCFFile
+from palos.ngs.io.VCFFile import VCFFile
 from palos.io.MatrixFile import MatrixFile
-from palos.io.BeagleLikelihoodFile import BeagleLikelihoodFile
-from palos.io.PlinkPedigreeFile import PlinkPedigreeFile
+from palos.polymorphism.BeagleLikelihoodFile import BeagleLikelihoodFile
+from palos.pedigree.PlinkPedigreeFile import PlinkPedigreeFile
 from palos.mapper.AbstractVCFMapper import AbstractVCFMapper
 
 class SplitPedigreeVCFIntoBeagleTriosDuosFiles(AbstractVCFMapper):

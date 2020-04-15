@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 """
 Examples:
-	%s 
-	
 	%s --newSNPDataOutputFname ~/script/vervet/data/194SNPData/isq524CoordinateSNPData_max15Mismatch.tsv
 		--querySNPDataFname ~/script/vervet/data/194SNPData/AllSNPData.txt
 		--SNPFlankSequenceFname ~/script/vervet/data/194SNPData/AllSNPFlankWithSNPMark.txt
@@ -35,15 +33,14 @@ Description:
 """
 
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
+__doc__ = __doc__%(sys.argv[0])
 
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import csv
 from palos import ProcessOptions, PassingData, utils, SNP, MatrixFile
 from palos import figureOutDelimiter, getColName2IndexFromHeader
-from palos.pegasus.mapper.AbstractMapper import AbstractMapper
+from palos.mapper.AbstractMapper import AbstractMapper
 from palos.pegasus.mapper.extractor.ExtractFlankingSequenceForVCFLoci import ExtractFlankingSequenceForVCFLoci
 import numpy, re
 

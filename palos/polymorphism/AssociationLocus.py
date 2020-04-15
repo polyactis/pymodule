@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2012.12.15 data structure for AssociationLocus in PyTablesMatrixFile format
  

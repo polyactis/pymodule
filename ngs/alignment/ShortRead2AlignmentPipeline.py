@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Examples:
 	# 2011-8-30 workflow on condor, always commit (--commit)
@@ -7,21 +7,24 @@ Examples:
 
 	# 2011-8-30 a workflow with 454 long-read and short-read PE. need a ref index job (-n1).
 	%s --ind_seq_id_ls 165-167 -o ShortRead2Alignment_isq_id_165_167_vs_9.xml -u yh -a 9
-		-e /u/home/eeskin/polyacti -l hoffman2 --data_dir /u/home/eeskin/polyacti/NetworkData/vervet/db -n1
+		-e /u/home/eeskin/polyacti -l hoffman2 --data_dir NetworkData/vervet/db -n1
 		-z dl324b-1.cmb.usc.edu --commit
 		--tmpDir /work/ --needSSHDBTunnel
 
-	# 2011-8-30 output a workflow to run alignments on hoffman2's condor pool (--local_data_dir changes local_data_dir. --data_dir changes data_dir.)
+	# 2011-8-30 output a workflow to run alignments on hoffman2's condor pool
+	#  (--local_data_dir changes local_data_dir. --data_dir changes data_dir.)
 	# 2012.3.20 use /work/ or /u/scratch/p/polyacti/tmp as TMP_DIR for MarkDuplicates.jar (/tmp is too small for 30X genome)
-	# 2012.5.4 cluster 4 alignment jobs (before merging) as a unit (--alignmentJobClustersSizeFraction 0.2), skip done alignment (--skipDoneAlignment)
+	# 2012.5.4 cluster 4 alignment jobs (before merging) as a unit
+	#   (--alignmentJobClustersSizeFraction 0.2), skip done alignment (--skipDoneAlignment)
 	# 2012.9.21 add "--needSSHDBTunnel" because AddAlignmentFile2DB need db conneciton
 	# 2012.9.21 add "--alignmentPerLibrary" to also get alignment for each library within one individual_sequence
 	# 2013.3.15 add "--coreAlignmentJobWallTimeMultiplier 0.5" to reduce wall time for core-alignment (bwa/stampy) jobs by half
-	ref=3280; %s --ind_seq_id_ls 632-3230 --sequence_min_coverage 15 --sequence_max_coverage 80 --site_id_ls 447 --sequence_filtered 1
-		--excludeContaminant -a $ref -o dags/ShortRead2Alignment/ShortRead2AlignmentPipeline_VRCPart1_vs_$ref\_AlnMethod2.xml
+	ref=3280; %s --ind_seq_id_ls 632-3230 --sequence_min_coverage 15 --sequence_max_coverage 80
+		 --site_id_ls 447 --sequence_filtered 1
+		--excludeContaminant -a $ref -o dags/ShortRead2AlignmentPipeline_VRCPart1_vs_$ref\_AlnMethod2.xml
 		-u yh -l hcondor -j hcondor -z localhost -u yh --commit --tmpDir /work/
 		--home_path /u/home/eeskin/polyacti --no_of_aln_threads 1 --skipDoneAlignment
-		-D /u/home/eeskin/polyacti/NetworkData/vervet/db/ -t /u/home/eeskin/polyacti/NetworkData/vervet/db/
+		-D /u/home/eeskin/polyacti/NetworkData/vervet/db/ -t NetworkData/vervet/db/
 		--clusters_size 20 --alignment_method_name bwaShortRead
 		--coreAlignmentJobWallTimeMultiplier 0.5
 		--alignmentJobClustersSizeFraction 0.2
@@ -110,16 +113,13 @@ Description:
 		It will also stage out every output file.
 		Be careful about -R, only toggle it if you know every input individual_sequence_file is not empty.
 			Empty read files would fail alignment jobs and thus no final alignment for a few indivdiuals.
-		Use "--alignmentJobClustersSizeFraction ..." to cluster the alignment jobs if the input read file is small enough (~1Million reads for bwa, ~300K for stampy).
+		Use "--alignmentJobClustersSizeFraction ..." to cluster the alignment jobs
+			 if the input read file is small enough (~1Million reads for bwa, ~300K for stampy).
 		The arguments related to how many chromosomes/contigs do not matter unless local_realigned=1.
 """
 import sys, os
 __doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], \
 				sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.expanduser('~/script'))
-sys.path.insert(0, os.path.expanduser('~/src'))
 
 import copy
 from pegaflow.DAX3 import Executable, File, PFN, Profile, Namespace

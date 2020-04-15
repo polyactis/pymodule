@@ -1,14 +1,14 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
+Convert all heterozygous calls and untouched in the file into NA.
 
 Examples:
 	ConvertHeteroCall2NA.py  -i bin/structure_test/149_popid2ecotypeid_50.csv -o bin/structure_test/149_popid2ecotypeid_50_hets2NA.csv
 	
-Description:
-	Convert all heterozygous calls and untouched in the file into NA.
-	
 """
-from __init__ import *
+import os, sys
+from palos import ProcessOptions, getListOutOfStr, PassingData, utils
+from palos.polymorphism.SNP import SNPData
 
 class ConvertHeteroCall2NA(object):
 	__doc__ = __doc__

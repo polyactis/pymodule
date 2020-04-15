@@ -1,18 +1,12 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
-Description:
-	2011-11-4
+2011-11-4
 	input should be the output file of GATK's VariousReadCountWalker (custom written).
 	The input name contains the chromosome ID. like xxx_chr2.tsv
 
-Examples:
-	%s 
-	
 """
 
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0])
-
 import csv
 from palos import ProcessOptions, getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter, utils
 

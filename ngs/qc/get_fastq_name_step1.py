@@ -1,9 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 from pegaflow.DAX3 import *
 import os,sys 
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.expanduser('~/script'))
-sys.path.insert(0, os.path.expanduser('~/src'))
 
 import argparse
 parser = argparse.ArgumentParser(description='Convert quality format of fastq files')

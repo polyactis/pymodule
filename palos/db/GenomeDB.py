@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Examples:
 	#setup database in postgresql
@@ -15,9 +15,6 @@ Description:
 	This is a wrapper for the genome database, build on top of elixir. supercedes the table definitions in genomedb.sql.
 """
 import sys, os
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
 from sqlalchemy.engine.url import URL
 from elixir import Unicode, DateTime, String, Integer, UnicodeText, Text
 from elixir import Entity, Field, using_options, using_table_options
@@ -1895,15 +1892,7 @@ def get_entrezgene_annotated_anchor(curs, tax_id, entrezgene_mapping_table='geno
 	return chromosome2anchor_gene_tuple_ls, gene_id2coord
 
 if __name__ == '__main__':
-	import sys, os, math
-	bit_number = math.log(sys.maxint)/math.log(2)
-	if bit_number>40:       #64bit
-		sys.path.insert(0, os.path.expanduser('~/lib64/python'))
-		sys.path.insert(0, os.path.join(os.path.expanduser('~/script64')))
-	else:   #32bit
-		sys.path.insert(0, os.path.expanduser('~/lib/python'))
-		sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
+	import sys, os
 	from palos import ProcessOptions
 	main_class = GenomeDatabase
 	po = ProcessOptions(sys.argv, main_class.option_default_dict, error_doc=main_class.__doc__)

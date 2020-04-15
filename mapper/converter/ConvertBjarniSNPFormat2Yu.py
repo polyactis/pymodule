@@ -10,15 +10,7 @@ Description:
 	Input format is snp X strain, bjarni's format. The extra first row for array id is optional. (change by withArrayIds).
 	Output format is strain X snp. tab-delimiter. header is 'chromosome_position'.
 """
-import sys, os, math
-bit_number = math.log(sys.maxint)/math.log(2)
-if bit_number>40:       #64bit
-	sys.path.insert(0, os.path.expanduser('~/lib64/python'))
-	sys.path.insert(0, os.path.join(os.path.expanduser('~/script64/')))
-else:   #32bit
-	sys.path.insert(0, os.path.expanduser('~/lib/python'))
-	sys.path.insert(0, os.path.join(os.path.expanduser('~/script/')))
-
+import sys, os
 from variation.src.io import dataParsers
 from variation.src.common import RawSnpsData_ls2SNPData, transposeSNPData
 

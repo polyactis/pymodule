@@ -1,23 +1,18 @@
 #!/usr/bin/env python3
 """
+2011-7-12
+	This program merges all files with the same header into one while retaining the header.
+2012.7.31 the input file could be gzipped as well.
+
 Examples:
 	#testing merge three identical genotype files
 	%s -o /tmp/ccc.tsv /tmp/call_1.tsv /tmp/call_1.tsv /tmp/call_1.tsv
 	
 	%s --exitNonZeroIfAnyInputFileInexistent  -o /tmp/ccc.tsv /tmp/call_1.tsv /tmp/call_1.tsv /tmp/call_1.tsv
 	
-Description:
-	2011-7-12
-		This program merges all files with the same header into one while retaining the header.
-	2012.7.31 the input file could be gzipped as well.
-
 """
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.expanduser('~/script'))
 
 import copy
 from palos import ProcessOptions, utils

@@ -1,18 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
-Examples:
-	%s 
-	
-	%s 
-	
-
-Description:
-	2011-11-4
-		input should be the *.sample_interval_summary output file of GATK's DepthOfCoverageWalker.
+2011-11-4
+	input should be the *.sample_interval_summary output file of GATK's DepthOfCoverageWalker.
 """
 
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
 
 import csv, copy
 from palos import ProcessOptions, getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter, utils

@@ -1,26 +1,20 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
+2012.7.9
+	This program constructs a database reference graph out of the source code (Elixir db declarative code),
+		each node representing one table, each directed edge representing foreign key from one table to another;
+		and plots the reference graph in a hierarchical manner (layout=graphviz's dot).
+	Each component of the directed graph has its own png output.
+	Comments will NOT be skipped in parsing. So watch out.
+
 Examples:
-	%s 
-	
 	%s -i ~/script/variation/src/Stock_250kDB.py -O /tmp/Stock_250kDB
 
-Description:
-	2012.7.9
-		This program constructs a database reference graph out of the source code (Elixir db declarative code),
-			each node representing one table, each directed edge representing foreign key from one table to another;
-			and plots the reference graph in a hierarchical manner (layout=graphviz's dot).
-		Each component of the directed graph has its own png output.
-		Comments will NOT be skipped in parsing. So watch out.
 """
 
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
+__doc__ = __doc__%(sys.argv[0])
 
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
-import csv
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
 from palos.mapper.AbstractMapper import AbstractMapper
 import networkx as nx

@@ -1,6 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
-
 Examples:
 	./src/ConvertYuSNPFormat2Bjarni.py -i data/2010/data_2010_ecotype_id_y0002_n1c1d110_mergedup.tsv
 		-o data/2010/data_2010_ecotype_id_y0002_n1c1d110_mergedup_bjarni.csv -r
@@ -32,14 +31,8 @@ Description:
 		on the array_id_2nd_column option. If it's toggled, yes.
 	
 """
-import sys, os, math
-bit_number = math.log(sys.maxint)/math.log(2)
-if bit_number>40:       #64bit
-	sys.path.insert(0, os.path.expanduser('~/lib64/python'))
-	sys.path.insert(0, os.path.join(os.path.expanduser('~/script64/')))
-else:   #32bit
-	sys.path.insert(0, os.path.expanduser('~/lib/python'))
-	sys.path.insert(0, os.path.join(os.path.expanduser('~/script/')))
+import sys, os
+sys.path.insert(0, os.path.join(os.path.expanduser('~/script/')))
 import numpy
 from palos import process_function_arguments, write_data_matrix, figureOutDelimiter, read_data, SNPData,\
 	SNPData2RawSnpsData_ls
@@ -87,7 +80,7 @@ class ConvertYuSNPFormat2Bjarni(AbstractVariationMapper):
 			# but if col-id is already chr_pos, it's fine.
 			new_header = header[:2]
 			data_matrix_col_index_to_be_kept = []
-			for i in xrange(2, len(header)):
+			for i in range(2, len(header)):
 				snp_id = header[i]
 				chr_pos = db.get_chr_pos_given_db_id2chr_pos(snp_id,)
 				if chr_pos is not None:

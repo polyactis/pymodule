@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 """
+2013.11.24 a generic workflow that map-reduces inputs of one or multiple genomic files (i.e. multi-chromosome, tabix-indexed )
+	parent class is AbstractNGSWorkflow.
+
 Examples:
 	#2013.11.24
 	%s -I ./LiftPolymorphismCoordinates/FindNewRefCoordinates_Method109_vs_3488_BWA_F49.2013.Jul.19T141746/folderReduceGzip/
 		-H -C 30 -j hcondor -l hcondor -D ~/NetworkData/vervet/db/ -t ~/NetworkData/vervet/db/
 		-o dags/LiftPolymorphismCoordinates/Method109_To_225_LiftOverProbability.xml --inputSuffixList .tsv --db_user yh -z localhost
 		--ref_ind_seq_id 3280 --ref_genome_tax_id 60711 --ref_genome_sequence_type_id 9 --ref_genome_version 2
-
-Description:
-	2013.11.24 a generic workflow that map-reduces inputs of one or multiple genomic files (i.e. multi-chromosome, tabix-indexed )
-		parent class is AbstractNGSWorkflow.
 """
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0])

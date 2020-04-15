@@ -1,22 +1,22 @@
 #!/usr/bin/env python
 """
-Examples:
-	TwoSNPData.py -i /Network/Data/250k/db/reference_dataset/data_2010_ecotype_id_y0002_n1c1d110_mergedup.tsv -j /Network/Data/250k/db/reference_dataset/stock_149SNP_y0000110101_mergedup.csv -o /tmp/2010_149.csv -c 1 -w 1 -s
-	
-Description:
-	2009-2-5
-		add option row_matching_by_which_value to allow both the 1st and 2nd column from the first file to be retained while matching
-			rows from the 2nd file using designated column.
+A class to merge two SNPData.
+2009-2-5: add option row_matching_by_which_value to allow both the 1st 
+	and 2nd column from the first file to be retained while matching
+	rows from the 2nd file using designated column.
 			
-	Merge two SNPData.
+	
+Examples:
+	TwoSNPData.py -i /Network/Data/250k/db/reference_dataset/data_2010_ecotype_id_y0002_n1c1d110_mergedup.tsv 
+		-j /Network/Data/250k/db/reference_dataset/stock_149SNP_y0000110101_mergedup.csv -o /tmp/2010_149.csv -c 1 -w 1 -s
+	
 """
 import sys, os, csv, traceback
-
 import numpy
-from SNP import cmpStringSNPID
-from SNP import get_nt_number2diff_matrix_index, nt2number, number2nt, NA_set, SNPData
 from palos.utils import importNumericArray
 from palos.ProcessOptions import ProcessOptions
+from . SNP import cmpStringSNPID
+from . SNP import get_nt_number2diff_matrix_index, nt2number, number2nt, NA_set, SNPData
 
 num = importNumericArray()
 
@@ -543,7 +543,7 @@ class QualityControl(object):
 		if self.latex_output_fname:
 			outf = open(self.latex_output_fname, 'w')
 			outf.write('\\section{Summary} \\label{section_summary}\n')
-			from palos.latex import outputMatrixInLatexTable, escape_characters
+			from palos.io.latex import outputMatrixInLatexTable, escape_characters
 			wrapped_diff_matrix = self.wrap_diff_matrix_with_row_col_names(self.diff_matrix)
 			table_label = 'table_dm%s'%i
 			outf.write(outputMatrixInLatexTable(wrapped_diff_matrix, '%s vs %s'%\

@@ -1,9 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
-Description:
-	2012.1.9
-		This program first sums values of chosen columns (all input files) with same keys from the keyColumnLs.
-		In the end, it divides values from first two chosen columns and appends it to the output as an extra column.
+2012.1.9
+	This program first sums values of chosen columns (all input files) with same keys from the keyColumnLs.
+	In the end, it divides values from first two chosen columns and appends it to the output as an extra column.
 
 Examples:
 	#testing merge three identical genotype files

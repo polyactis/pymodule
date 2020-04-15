@@ -53,12 +53,11 @@ def mpi_schedule_jobs(communicator, job_list, node_function, node_parameter_list
 		
 		
 	"""
-	from sets import Set
 	node_returned_value_list = []
 	node_rank = communicator.rank
 	if node_rank == 0:
 		sys.stderr.write("\tTotally, %d jobs to be scheduled.\n"%len(job_list))
-		seed_utilized = Set()
+		seed_utilized = set()
 		for node in range(1, communicator.size):
 			if len(job_list)==0:	#if #nodes > #jobs, tell those nodes to break their listening loop.
 				stop_signal = "-1"

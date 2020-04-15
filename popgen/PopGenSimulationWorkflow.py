@@ -1,5 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
+2013.2.26
+
 Examples:
 	# scaffold (120) is used as reference in alignment. get genome sequence id from 1 to 8.
 	%s -o workflow.xml -a 120 --ind_seq_id_ls 1-8 -y2 -s2
@@ -10,17 +12,9 @@ Examples:
 	# 8 genomes versus top 156 contigs
 	%s -o workflow_8GenomeVsTop156Contigs.xml -u yh  -a 128 --ind_seq_id_ls 1-8 -N 156 -y2 -s2
 	
-	
-Description:
-	2013.2.26
 """
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0])
-
-
-#bit_number = math.log(sys.maxint)/math.log(2)
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job
 from pegaflow import Workflow

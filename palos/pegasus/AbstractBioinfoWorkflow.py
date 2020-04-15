@@ -4,11 +4,6 @@
     an abstract class for pegasus workflows that work on bioinformatic data
 """
 import sys, os, math
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.expanduser('~/script'))
-
-
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job
 from . AbstractWorkflow import AbstractWorkflow

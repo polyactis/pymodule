@@ -1,13 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import sys
 import os
 import copy
 import re
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.expanduser('~/script'))
-sys.path.insert(0, os.path.expanduser('~/src'))
 from palos import ProcessOptions, utils
-from Sunset.mapper.AbstractAccuMapper import AbstractAccuMapper as ParentClass
+from AbstractAccuMapper import AbstractAccuMapper as ParentClass
 
 class RegisterAndMoveSplitSequenceFiles(ParentClass):
 	"""

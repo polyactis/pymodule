@@ -1,5 +1,22 @@
 #!/usr/bin/env python
 """
+2013.06.05 select haplotypes of distant pedigree members. IBD distance of all pairs must be < --maxPairwiseKinship. 
+	Input VCF files could be passed through "-i" and/or appended to the end of commandline.
+		Unlimited number of them.
+	--pedigreeFname provides the pedigree linking all samples.
+		Pedigree file could include more samples (identical ID system) than those in input Beagle files.
+			The extra will be removed from the graph before proceeding.
+		The pedigree is better not to be split into trios/duos because an individual's number of offspring affects
+			its probability of being sampled.
+	Sample IDs in input Beagle and --pedigreeFname files could be in replicate form, containing --replicateIndividualTag, or not.
+		first number is sample ID is alignment ID, matching samples in --individualAlignmentCoverageFname.
+	Sample IDs in --pedigreeKinshipFilePath are individual.code.
+	Sample IDs in outputFname would be in the same format as those of input.
+	
+	Two factors (linearly) affect a sample's probability of being chosen.
+		1. sequence coverage
+		2. number of offspring
+
 Examples:
 	#2013.06.25
 	m=0.2;
@@ -13,48 +30,21 @@ Examples:
 	
 	%s -o ... input1.vcf input2.vcf input3.vcf
 	
-
-Description:
-	2013.06.05 select haplotypes of distant pedigree members. IBD distance of all pairs must be < --maxPairwiseKinship. 
-		Input VCF files could be passed through "-i" and/or appended to the end of commandline.
-			Unlimited number of them.
-		--pedigreeFname provides the pedigree linking all samples.
-			Pedigree file could include more samples (identical ID system) than those in input Beagle files.
-				The extra will be removed from the graph before proceeding.
-			The pedigree is better not to be split into trios/duos because an individual's number of offspring affects
-				its probability of being sampled.
-		Sample IDs in input Beagle and --pedigreeFname files could be in replicate form, containing --replicateIndividualTag, or not.
-			first number is sample ID is alignment ID, matching samples in --individualAlignmentCoverageFname.
-		Sample IDs in --pedigreeKinshipFilePath are individual.code.
-		Sample IDs in outputFname would be in the same format as those of input.
-		
-		Two factors (linearly) affect a sample's probability of being chosen.
-			1. sequence coverage
-			2. number of offspring
 """
 
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-
-#bit_number = math.log(sys.maxint)/math.log(2)
-#if bit_number>40:	   #64bit
-#	sys.path.insert(0, os.path.expanduser('~/lib64/python'))
-#	sys.path.insert(0, os.path.join(os.path.expanduser('~/script64')))
-#else:   #32bit
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import random
 import networkx as nx
 from palos import ProcessOptions
 from palos.utils import PassingData
 from palos.io.AbstractMatrixFileWalker import AbstractMatrixFileWalker
-from palos.io.BeagleGenotypeFile import BeagleGenotypeFile
+from palos.polymorphism.BeagleGenotypeFile import BeagleGenotypeFile
 from palos.io import SNP
 from palos.io.MatrixFile import MatrixFile
-from palos.io.PlinkPedigreeFile import PlinkPedigreeFile
-from palos.io.VCFFile import VCFFile
+from palos.pedigree.PlinkPedigreeFile import PlinkPedigreeFile
+from palos.ngs.io.VCFFile import VCFFile
 from palos.statistics import NumberContainer, DiscreteProbabilityMassContainer
 
 class SelectDistantMembersFromGenotypeFile(AbstractMatrixFileWalker):

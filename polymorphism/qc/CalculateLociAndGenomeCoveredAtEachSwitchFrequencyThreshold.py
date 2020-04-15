@@ -1,26 +1,13 @@
 #!/usr/bin/env python
 """
-Examples:
-	%s -i  -o 
-	
-	%s 
-	
-	%s 
-	
-Description:
-	2013.07.15 program that computes how many genomes/loci are left at particular switch frequency threshold if  
-		chromosomes/contigs with higher switch frequency were all thrown away.
-		Input is the switchPointFname output of FindSNPPositionOnNewRefFromFlankingBlastOutput.py
+2013.07.15 program that computes how many genomes/loci are left at particular switch frequency threshold if  
+	chromosomes/contigs with higher switch frequency were all thrown away.
+	Input is the switchPointFname output of FindSNPPositionOnNewRefFromFlankingBlastOutput.py
 
 """
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
 from palos import ProcessOptions, MatrixFile, PassingData
-from palos.pegasus.mapper.AbstractMapper import AbstractMapper
+from palos.mapper.AbstractMapper import AbstractMapper
 
 ParentClass = AbstractMapper
 class CalculateLociAndGenomeCoveredAtEachSwitchFrequencyThreshold(ParentClass):

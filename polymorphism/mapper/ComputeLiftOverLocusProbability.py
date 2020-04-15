@@ -1,27 +1,16 @@
 #!/usr/bin/env python
 """
-Examples:
-	%s -i -o 
+2013.11.24 Input is a coordinate map file for loci (before and after LiftOver).
+	This program computes probability that each locus is correctly mapped to the target coordinate system.
 	
-	%s 
-	
-	%s 
-	
-Description:
-	2013.11.24 Input is a coordinate map file for loci (before and after LiftOver).
-		This program computes probability that each locus is correctly mapped to the target coordinate system.
-		
-		Output:
-		1. main output, probability for each SNP being correctly mapped.
-			oldChromosome, oldStart, oldStop, newChromosome, newStart, newStop, mapPvalue
-		2. side output, delta of old and new intervals.
-			oldChromosome, oldStart, oldStop, newChromosome, newStart, newStop, intervalDelta.
+	Output:
+	1. main output, probability for each SNP being correctly mapped.
+		oldChromosome, oldStart, oldStop, newChromosome, newStart, newStop, mapPvalue
+	2. side output, delta of old and new intervals.
+		oldChromosome, oldStart, oldStop, newChromosome, newStart, newStop, intervalDelta.
 
 """
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 from palos import ProcessOptions, MatrixFile, PassingData

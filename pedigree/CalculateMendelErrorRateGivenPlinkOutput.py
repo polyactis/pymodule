@@ -3,10 +3,7 @@
 Examples:
 	%s  -i mendelRuntype3_s1Gzip/meanMedianModePerLocusMendelError.tsv.gz
 		--pedigreeFname vcf2plinkRuntype3_s1VCF2PlinkMerged/pedigree.tfam
-		-o mendelRuntype3_s1Gzip/meanMendelErrorPerLocusPerFamily.tsv
-		
-	%s
-	
+		-o mendelRuntype3_s1Gzip/meanMendelErrorPerLocusPerFamily.tsv	
 
 Description:
 	2013.07.19 a program that calculates the number of nuclear families (plink definition) and divide above meanMendelError with that
@@ -20,24 +17,15 @@ output: tsv file with the divided rate (meanMendelError/#nuclear families)
 """
 
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-
-#bit_number = math.log(sys.maxint)/math.log(2)
-#if bit_number>40:	   #64bit
-#	sys.path.insert(0, os.path.expanduser('~/lib64/python'))
-#	sys.path.insert(0, os.path.join(os.path.expanduser('~/script64')))
-#else:   #32bit
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
+__doc__ = __doc__%(sys.argv[0])
 
 import random
 import networkx as nx
 from palos import ProcessOptions
 from palos.utils import PassingData
 from palos.io.MatrixFile import MatrixFile
-from palos.io.PlinkPedigreeFile import PlinkPedigreeFile
-from palos.pegasus.mapper.AbstractMapper import AbstractMapper
+from palos.pedigree.PlinkPedigreeFile import PlinkPedigreeFile
+from palos.mapper.AbstractMapper import AbstractMapper
 
 ParentClass = AbstractMapper
 class CalculateMendelErrorRateGivenPlinkOutput(ParentClass):

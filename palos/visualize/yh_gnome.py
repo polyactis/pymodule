@@ -3,8 +3,6 @@
 	module for some custom gnome functions
 """
 import os, sys
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 from variation.src.common import get_chr_pos_from_x_axis_pos
 import traceback
 

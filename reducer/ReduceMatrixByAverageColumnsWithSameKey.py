@@ -1,17 +1,15 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
+2012.1.9
+	This program takes mean/median/stdev of values of chosen columns (all input files) with same keys from the keyColumnLs.
+
 Examples:
 	#testing merge three identical genotype files
 	%s -k 0 -v 3 -o test.tsv trio_inconsistency.tsv trio_inconsistency1.tsv trio_inconsistency2.tsv
-	
-	%s 
-	
-Description:
-	2012.1.9
-		This program takes mean/median/stdev of values of chosen columns (all input files) with same keys from the keyColumnLs.
+
 """
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
+__doc__ = __doc__%(sys.argv[0])
 
 from palos import ProcessOptions, figureOutDelimiter, utils, PassingData
 import csv, numpy

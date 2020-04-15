@@ -32,13 +32,9 @@ Description:
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0])
 
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.expanduser('~/script'))
-sys.path.insert(0, os.path.expanduser('~/src'))
-
 import csv, copy
 from pegaflow.DAX3 import Executable, File, PFN, Profile, Namespace
-from palos import ProcessOptions, getListOutOfStr, PassingData, NextGenSeq, figureOutDelimiter, getColName2IndexFromHeader
+from palos import ProcessOptions, getListOutOfStr, PassingData, ngs, figureOutDelimiter, getColName2IndexFromHeader
 from palos.ngs.io import VCFFile
 from palos.pegasus import yh_pegasus
 from palos.db import SunsetDB, AbstractVervetWorkflow

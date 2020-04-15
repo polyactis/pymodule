@@ -1,16 +1,8 @@
-#!/usr/bin/env python
 """
-
-Description:
-	2013.2.12 an abstract class for reducer
+2013.2.12 an abstract class for reducer
 """
 
 import sys, os, math
-__doc__ = __doc__
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
 import copy
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
 from palos.mapper.AbstractMapper import AbstractMapper

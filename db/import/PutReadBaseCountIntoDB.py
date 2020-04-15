@@ -1,26 +1,19 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
+2012.3.13
+	program to put output of CountFastqReadBaseCount.py into database.
+	table IndividualSequence and IndividualSequenceFile
+
 Examples:
-	%s 
-	
 	%s -u yh /tmp/readCount.tsv
 
-Description:
-	2012.3.13
-		program to put output of CountFastqReadBaseCount.py into database.
-		table IndividualSequence and IndividualSequenceFile
 """
 
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.expanduser('~/script'))
-sys.path.insert(0, os.path.expanduser('~/src'))
-
+__doc__ = __doc__%(sys.argv[0])
 import csv, copy
 from palos import ProcessOptions, PassingData, utils, figureOutDelimiter
-from Sunset.mapper.AbstractAccuMapper import AbstractAccuMapper as ParentClass
+from palos.mapper.AbstractAccuMapper import AbstractAccuMapper as ParentClass
 from palos.db import SunsetDB as DBClass
 
 class PutReadBaseCountIntoDB(ParentClass):

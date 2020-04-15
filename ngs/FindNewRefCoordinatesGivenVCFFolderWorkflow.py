@@ -47,7 +47,7 @@ from pegaflow import Workflow
 from palos import ProcessOptions, PassingData
 from palos.ngs.AbstractVCFWorkflow import AbstractVCFWorkflow
 from palos.pegasus.BlastWorkflow import BlastWorkflow
-from alignment.ShortRead2AlignmentWorkflow import ShortRead2AlignmentWorkflow
+from palos.pegasus.ShortRead2AlignmentWorkflow import ShortRead2AlignmentWorkflow
 from palos.io.FastaFile import FastaFile
 
 ParentClass = AbstractVCFWorkflow

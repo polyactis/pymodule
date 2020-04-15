@@ -1,17 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
-Examples:
-
-Description:
-	2012.2.10
-		an abstract class that includes db-related arguments and etc
+2012.2.10 an abstract class that includes db-related arguments and etc
 """
 
 import sys, os, math
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
 from . ProcessOptions import ProcessOptions
 from . import utils
 from . utils import PassingData

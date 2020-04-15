@@ -1,13 +1,7 @@
-#!/usr/bin/env python
 """
-2012.12.15 data structure for AssociationPeak in PyTablesMatrixFile format
- 
+2012.12.15 data structure for AssociationPeak in PyTablesMatrixFile format 
 """
-import sys, os, math
-__doc__ = __doc__%()
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
+import sys, os
 import csv
 import tables
 from tables import UInt64Col, Float64Col, StringCol

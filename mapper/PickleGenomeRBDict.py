@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 """
 Examples:
-	%s 
-	
 	%s -o /Network/Data/250k/tmp-yh/genomeRBDict_tax3702_padding20kb.pickle
 
 Description:
@@ -12,14 +10,11 @@ Description:
 """
 
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
+__doc__ = __doc__%(sys.argv[0])
 
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
 from palos.mapper.AbstractMapper import AbstractMapper
-from palos import GenomeDB
+from palos.db import GenomeDB
 
 class PickleGenomeRBDict(AbstractMapper):
 	__doc__ = __doc__

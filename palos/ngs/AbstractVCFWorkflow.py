@@ -4,16 +4,12 @@
 	a common class for pegasus workflows that work on VCF variant files
 """
 import sys, os, math
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
 import copy
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job
 from palos import Genome, getListOutOfStr, PassingData, utils
 from palos.io.MatrixFile import MatrixFile
-from palos.io.VCFFile import VCFFile
-from palos.io import NextGenSeq
+from palos.ngs.io.VCFFile import VCFFile
+from palos import ngs
 from pegaflow import Workflow
 from . AbstractNGSWorkflow import AbstractNGSWorkflow
 from . MapReduceGenomeFileWorkflow import MapReduceGenomeFileWorkflow as ParentClass
@@ -179,8 +175,8 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 						import traceback
 						traceback.print_exc()
 						continue	#2013.08.12 ignore VCFs that contig/chromosome IDs could not be derived. 
-				if NextGenSeq.isFileNameVCF(fname, includeIndelVCF=includeIndelVCF) and \
-						not NextGenSeq.isVCFFileEmpty(inputFname, checkContent=checkEmptyVCFByReading):
+				if ngs.isFileNameVCF(fname, includeIndelVCF=includeIndelVCF) and \
+						not ngs.isVCFFileEmpty(inputFname, checkContent=checkEmptyVCFByReading):
 					inputBaseFname = os.path.basename(inputFname)
 					inputF = File(os.path.join(pegasusFolderName, inputBaseFname))
 					inputF.addPFN(PFN("file://" + inputFname, input_site_handler))

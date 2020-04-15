@@ -1,33 +1,25 @@
 #!/usr/bin/env python
 """
+2013.07.10 program that adds description of info fields/tags that appear in sites but not in VCF header, into VCF header.
+	At this moment, it just addes description of these fields into VCF header, and does NOT check missing info tags.
+LDAF
+ERATE
+AVGPOST
+AF_Orig
+AC_Orig
+AN_Orig
+
 Examples:
 	%s -i folderRun/Scaffold301_splitVCF_unit1.vcf -o folderRun/Scaffold301_splitVCF_unit1.info.vcf
 	
-	%s 
-	
-	%s 
-	
-Description:
-	2013.07.10 program that adds description of info fields/tags that appear in sites but not in VCF header, into VCF header.
-		At this moment, it just addes description of these fields into VCF header, and does NOT check missing info tags.
-	LDAF
-	ERATE
-	AVGPOST
-	AF_Orig
-	AC_Orig
-	AN_Orig
-
 """
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0])
+__doc__ = __doc__%(sys.argv[0])
 
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
-import cStringIO, re, csv
+import re, csv
 from palos import ProcessOptions, figureOutDelimiter
 from palos.utils import sortCMPBySecondTupleValue
-from palos.io.VCFFile import VCFFile
+from palos.ngs.io.VCFFile import VCFFile
 from palos.mapper.AbstractVCFMapper import AbstractVCFMapper
 
 ParentClass = AbstractVCFMapper

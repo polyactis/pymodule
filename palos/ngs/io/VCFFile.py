@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Example:
 
@@ -16,8 +16,6 @@ Example:
 	need to add row-based iterator
 """
 import os, sys
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 import re, copy, csv
 from palos.ProcessOptions import  ProcessOptions
 from palos import utils

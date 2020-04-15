@@ -1,28 +1,16 @@
 #!/usr/bin/env python
 """
-Examples:
-	%s 
-	
+2013.09.10 all three output files need to be explicitly specified on the commandline.
+
+Examples:	
 	%s -i gatk/Contig799.vcf.gz -j samtools/Contig799.vcf.gz -l 1000000 -c Contig799 -o /tmp/overlapSummary.tsv.gz
 		--overlappingSitesOutputFname /tmp/overlapSite.tsv.gz
 		--perSampleConcordanceOutputFname /tmp/Contig799_perSampleConcordance.tsv.gz
 
-Description:
-	2013.09.10 all three output files need to be explicitly specified on the commandline.
-	2012.7.29
-	2011-11-7
 """
 
-import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-#bit_number = math.log(sys.maxint)/math.log(2)
-#if bit_number>40:	   #64bit
-#	sys.path.insert(0, os.path.expanduser('~/lib64/python'))
-#	sys.path.insert(0, os.path.join(os.path.expanduser('~/script64')))
-#else:   #32bit
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
+import sys, os
+__doc__ = __doc__%(sys.argv[0])
 
 from palos import ProcessOptions, PassingData, utils
 from palos import VCFFile, MatrixFile

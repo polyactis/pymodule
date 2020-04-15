@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
 Examples:
-
 	%s --databaseFname /Network/Data/vervet/db/individual_sequence/524_superContigsMinSize2000.fasta 
 		--inputFname ~/script/vervet/data/OphoffMethylation/DMR330K_ProbeSeq.fasta --maxNoOfMismatches 2
 		-l condorpool -j condorpool --blockSize 500
@@ -14,19 +13,14 @@ Examples:
 		--blockSize 10 --formatdbPath ~/bin/blast/bin/formatdb
 		--blastallPath ~/bin/blast/bin/blastall
 
-2011-11-22
-	a common class for pegasus workflows that work on NGS (next-gen sequencing) data
 """
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
 from pegaflow import Workflow
-from AbstractBioinfoWorkflow import AbstractBioinfoWorkflow
+from palos.pegasus.AbstractBioinfoWorkflow import AbstractBioinfoWorkflow
 
 ParentClass = AbstractBioinfoWorkflow
 class BlastWorkflow(ParentClass):

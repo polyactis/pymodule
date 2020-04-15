@@ -1,20 +1,15 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
+2013.3.26 this turns msHOT-lite (Heng Li's custom ms software git@github.com:lh3/foreign.git)
+	output into PolymorphismTableFile format.
+
 Examples:
-	%s 
-	
 	%s -i ~/script/lh3_foreign/msHOT-lite/msHOT-lite.output -o /tmp/msHOT-lite.polymorphism.h5
 
-Description:
-	2013.3.26 this turns msHOT-lite (Heng Li's custom ms software git@github.com:lh3/foreign.git)
-		output into PolymorphismTableFile format.
 """
 
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
+__doc__ = __doc__%(sys.argv[0])
 
 import re
 from Bio import SeqIO
@@ -23,7 +18,7 @@ from Bio.SeqRecord import SeqRecord
 from Bio.Alphabet import IUPAC
 from palos import ProcessOptions, utils
 from palos import AbstractMapper
-from palos.io.PolymorphismTableFile import PolymorphismTableFile
+from palos.polymorphism.PolymorphismTableFile import PolymorphismTableFile
 
 class msOutput2PolymorphismTableFile(AbstractMapper):
 	__doc__ = __doc__

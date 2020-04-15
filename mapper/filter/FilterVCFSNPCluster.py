@@ -1,27 +1,20 @@
 #!/usr/bin/env python
 """
+2012.9.6
+	program that filters out SNPs that are too close to each other.
+	If two SNPs are within minNeighborDistance of each other, both will be removed.
+
 Examples:
 	%s -i ~/NetworkData/vervet/db/genotype_file/method_27/*Contig0.vcf.gz -o /tmp/Contig0.filter.vcf.gz -m 10
-	
-	%s 
-	
-	%s 
-	
-Description:
-	2012.9.6
-		program that filters out SNPs that are too close to each other.
-		If two SNPs are within minNeighborDistance of each other, both will be removed.
+
 """
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0])
+__doc__ = __doc__%(sys.argv[0])
 
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
-import cStringIO, re, csv
+import re, csv
 from palos import ProcessOptions, figureOutDelimiter
 from palos.utils import sortCMPBySecondTupleValue
-from palos.io.VCFFile import VCFFile
+from palos.ngs.io.VCFFile import VCFFile
 from palos.mapper.AbstractMapper import AbstractMapper
 
 class FilterVCFSNPCluster(AbstractMapper):

@@ -55,9 +55,9 @@ __doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0])
 
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job
 from pegaflow import Workflow
-from palos import ProcessOptions, getListOutOfStr, PassingData, NextGenSeq, \
+from palos import ProcessOptions, getListOutOfStr, PassingData, ngs, \
 	figureOutDelimiter, getColName2IndexFromHeader, utils
-from palos import VCFFile
+from palos.ngs.io.VCFFile import VCFFile
 from palos.ngs.AbstractAlignmentAndVCFWorkflow import AbstractAlignmentAndVCFWorkflow
 
 ParentClass = AbstractAlignmentAndVCFWorkflow

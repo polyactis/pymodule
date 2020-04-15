@@ -1,62 +1,51 @@
 #!/usr/bin/env python3
 """
-Examples:
-	%s 
+2012.12.15 table-data stored in pytables.
+i.e.
+	reader = PyTablesMatrixFile(inputFname=filename, openMode='r')
+	reader = PyTablesMatrixFile(filename, openMode='r')
+	for row in reader:
+		...
+	tableObject = reader.getTableObject(tableName=tableName)
+	for row in tableObject:
+		...
 	
-	%s
-
-Description:
-	2012.12.15 table-data stored in pytables.
-	i.e.
-		reader = PyTablesMatrixFile(inputFname=filename, openMode='r')
-		reader = PyTablesMatrixFile(filename, openMode='r')
-		for row in reader:
-			...
-		tableObject = reader.getTableObject(tableName=tableName)
-		for row in tableObject:
-			...
-		
-		dtypeList = [('locus_id','i8'),('chr', HDF5MatrixFile.varLenStrType), ('start','i8'), ('stop', 'i8'), \
-					('score', 'f8'), ('MAC', 'i8'), ('MAF', 'f8')]
-		headerList = [row[0] for row in dtypeList]
-		dtype = numpy.dtype(dtypeList)
-		
-		writer = PyTablesMatrixFile(inputFname=filename, openMode='w', dtype=dtype)
-		writer = PyTablesMatrixFile(filename, openMode='w', dtype=dtype)
-		
-		if writer:
-			tableObject = writer.createNewTable(tableName=tableName, dtype=dtype)
-			tableObject.setColIDList(headerList)
-		elif outputFname:
-			writer = PyTablesMatrixFile(outputFname, openMode='w', dtype=dtype, tableName=tableName)
-			writer.writeHeader(headerList)
-			tableObject = writer.getTableObject(tableName=tableName)
-		cellList = []
-		for data_obj in self.data_obj_ls:
-			dataTuple = self._extractOutputRowFromDataObject(data_obj=data_obj)
-			cellList.append(dataTuple)
-		tableObject.writeCellList(cellList)
-		if closeFile:
-			writer.close()
-			del writer
-		
-		
-		#each number below is counting bytes, not bits
-		dtypeList = [('locus_id','i8'),('chromosome', HDF5MatrixFile.varLenStrType), ('start','i8'), ('stop', 'i8'), \
-					('score', 'f8'), ('MAC', 'i8'), ('MAF', 'f8')]
-		if writer is None and filename:
-			writer = PyTablesMatrixFile(filename, openMode='w', dtypeList=dtypeList, tableName=tableName)
-			tableObject = writer.getTableObject(tableName=tableName)
-		elif writer:
-			tableObject = writer.createNewTable(tableName=tableName, dtypeList=dtypeList)
+	dtypeList = [('locus_id','i8'),('chr', HDF5MatrixFile.varLenStrType), ('start','i8'), ('stop', 'i8'), \
+				('score', 'f8'), ('MAC', 'i8'), ('MAF', 'f8')]
+	headerList = [row[0] for row in dtypeList]
+	dtype = numpy.dtype(dtypeList)
+	
+	writer = PyTablesMatrixFile(inputFname=filename, openMode='w', dtype=dtype)
+	writer = PyTablesMatrixFile(filename, openMode='w', dtype=dtype)
+	
+	if writer:
+		tableObject = writer.createNewTable(tableName=tableName, dtype=dtype)
+		tableObject.setColIDList(headerList)
+	elif outputFname:
+		writer = PyTablesMatrixFile(outputFname, openMode='w', dtype=dtype, tableName=tableName)
+		writer.writeHeader(headerList)
+		tableObject = writer.getTableObject(tableName=tableName)
+	cellList = []
+	for data_obj in self.data_obj_ls:
+		dataTuple = self._extractOutputRowFromDataObject(data_obj=data_obj)
+		cellList.append(dataTuple)
+	tableObject.writeCellList(cellList)
+	if closeFile:
+		writer.close()
+		del writer
+	
+	#each number below is counting bytes, not bits
+	dtypeList = [('locus_id','i8'),('chromosome', HDF5MatrixFile.varLenStrType), ('start','i8'), ('stop', 'i8'), \
+				('score', 'f8'), ('MAC', 'i8'), ('MAF', 'f8')]
+	if writer is None and filename:
+		writer = PyTablesMatrixFile(filename, openMode='w', dtypeList=dtypeList, tableName=tableName)
+		tableObject = writer.getTableObject(tableName=tableName)
+	elif writer:
+		tableObject = writer.createNewTable(tableName=tableName, dtypeList=dtypeList)
 
 """
 
-import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
+import sys, os
 import csv
 import tables
 import numpy

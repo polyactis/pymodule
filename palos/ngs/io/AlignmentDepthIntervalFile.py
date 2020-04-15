@@ -1,28 +1,13 @@
 #!/usr/bin/env python
 """
-Examples:
-	%s 
-	
-	%s
-
-Description:
-	2013.08.30 a child class of MatrixFile. used to describe AlignmentDepthIntervalFile in VervetDB
-	 
-	Example:
-	
-		
+2013.08.30 a child class of MatrixFile. used to describe AlignmentDepthIntervalFile in VervetDB
 """
 
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.expanduser('~/script'))
-
 import copy, numpy
 from palos.ProcessOptions import  ProcessOptions
 from palos import PassingData
-from . MatrixFile import MatrixFile
+from palos.io.MatrixFile import MatrixFile
 
 class AlignmentDepthIntervalFile(MatrixFile):
 	__doc__ = __doc__
@@ -81,9 +66,6 @@ class AlignmentDepthIntervalFile(MatrixFile):
 		2013.08.30
 			called by vervet/src/db/input/AddAlignmentDepthIntervalFile2DB.py
 		"""
-		
-	
-		
 		col_name2index= self.smartReadHeader()
 		if col_name2index is None:
 			pdata = self.parseRow(self._row)

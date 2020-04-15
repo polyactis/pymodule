@@ -4,8 +4,6 @@
  
 """
 import sys, os, math
-__doc__ = __doc__%()
-
 import csv
 import tables
 import numpy

@@ -4,8 +4,6 @@ Examples:
 	%s  -i /Network/Data/250k/db/dataset/call_method_32.tsv 
 		-j /Network/Data/250k/db/dataset/call_method_80.tsv -o /tmp/call_method_80_in_32_order.tsv  -m1
 	
-	%s
-	
 Description:
 	2012.3.2
 		Program to order the rows of the 2nd dataset (-j) in the order of the 1st datset (-i).
@@ -13,10 +11,7 @@ Description:
 """
 
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
+__doc__ = __doc__%(sys.argv[0])
 
 import csv
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils

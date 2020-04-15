@@ -1,32 +1,25 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
+2011-4-14
+	It finds all tables in a database (&schema) and check whether each has all
+		these columns: created_by, updated_by, date_created, date_updated.
+	
+	If a table does have all columns, its name will be outputted to stdout;
+		otherwise not.
+	This program is supposed to feed table names to OutputSQLTrigger.py
+
 Examples:
 	# for postgres tables
-	FindTablesWithLogColumns.py -d vervetdb -u yh -k public
+	%s -d vervetdb -u yh -k public
 	
 	# for mysql tables
 	# "2>/dev/null" is used to direct stderr to /dev/null so it won't mix with the table names outputed to stdout.
-	FindTablesWithLogColumns.py -v mysql -z banyan -d stock_250k -u yh 2>/dev/null
+	%s -v mysql -z banyan -d stock_250k -u yh 2>/dev/null
 
-Description:
-	2011-4-14
-		It finds all tables in a database (&schema) and check whether each has all
-			these columns: created_by, updated_by, date_created, date_updated.
-		
-		If a table does have all columns, its name will be outputted to stdout;
-			otherwise not.
-		This program is supposed to feed table names to OutputSQLTrigger.py
 """
 
-import sys, os, math
-bit_number = math.log(sys.maxint)/math.log(2)
-#if bit_number>40:       #64bit
-#	sys.path.insert(0, os.path.expanduser('~/lib64/python'))
-#	sys.path.insert(0, os.path.join(os.path.expanduser('~/script64')))
-#else:   #32bit
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
+import sys, os
+__doc__ = __doc__%(sys.argv[0], sys.argv[0])
 class FindTablesWithLogColumns(object):
 	__doc__ = __doc__
 	option_default_dict = {('drivername', 1,):['postgresql', 'v', 1, 'which type of database? mysql or postgresql', ],\
@@ -86,7 +79,7 @@ class FindTablesWithLogColumns(object):
 			try:
 				self.cursor.execute("select created_by, updated_by, date_created, date_updated from %s limit 1"%tablename)
 				#self.cursor.fetchall()
-				print tablename
+				print(tablename)
 			except:	#this table doesn't have these columns.
 				self.establishConnection()	# connection/transaction is gone due to exception 
 				if self.debug:

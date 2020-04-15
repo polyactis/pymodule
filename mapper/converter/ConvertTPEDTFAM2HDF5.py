@@ -1,19 +1,14 @@
 #!/usr/bin/env python
 """
-Examples:
-	%s 
-	
+Examples:	
 	%s -i /Network/Data/250k/db/dataset/call_method_32.tsv -o /tmp/call_32.hdf5
 
-Description:
-	2012.9.6 unfinished. still the copied skeleton from ConvertSNPData2HDF5.py
+2012.9.6 unfinished. still the copied skeleton from ConvertSNPData2HDF5.py
 
 """
 
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
+__doc__ = __doc__%(sys.argv[0])
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import csv

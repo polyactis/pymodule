@@ -4,31 +4,25 @@ Examples:
 	%s -i /tmp/vs_top150Contigs_by_aln_Contig0.vcf -o /tmp/vs_top150Contigs_by_aln_Contig0.tsv
 		-u ,
 	
-	%s 
+2011-9-1
+	Two functions:
+	1. A multi-sample genotype caller based entirely on coverage of reads.
+		sam/bam file has to be indexed beforehand.
+	2. A coverage-based GATK-generated VCF file filter.
 	
-	%s 
-	
-Description:
-	2011-9-1
-		Two functions:
-		1. A multi-sample genotype caller based entirely on coverage of reads.
-			sam/bam file has to be indexed beforehand.
-		2. A coverage-based GATK-generated VCF file filter.
-		
-		For multi-read-group input, seqCoverageFname will provide coverage for each individual sequence.
-			Each read group has the individual_sequence.id embedded as 2nd value if it's split by "_".
-			Read group formula: alnID_isqID_individual.code_sequencer_vs_alignment.ref_ind_seq_id
+	For multi-read-group input, seqCoverageFname will provide coverage for each individual sequence.
+		Each read group has the individual_sequence.id embedded as 2nd value if it's split by "_".
+		Read group formula: alnID_isqID_individual.code_sequencer_vs_alignment.ref_ind_seq_id
 """
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0])
+__doc__ = __doc__%(sys.argv[0])
 
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
+sys.path.insert(0, os.path.expanduser('~/script'))
 
 import csv
 from palos import ProcessOptions, figureOutDelimiter
 from palos.utils import sortCMPBySecondTupleValue
-from palos.io.VCFFile import VCFFile
+from palos.ngs.io.VCFFile import VCFFile
 
 class ConvertVCF2BjarniFormat(object):
 	__doc__ = __doc__

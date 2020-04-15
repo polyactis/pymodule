@@ -1,36 +1,23 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
-Examples:
-	%s -i
+2012.9.5
+	a program that adds country, site, latitute, longitude, ucla_id, species-name to smartpca .evec output.
+	Its output looks like this:
 	
-	%s -i smartpca.evec -o smartpca_withMetaInfo.tsv
-		
-
-Description:
-	2012.9.5
-		a program that adds country, site, latitute, longitude, ucla_id, species-name to smartpca .evec output.
-		Its output looks like this:
-		
 #eigvals:       36.853  19.837  6.413   3.946 
 1034_743_VWP00312_GA_vs_524     0.1642  0.0318  -0.0340 -0.0118 Case
 ...
 
 The extra column(s) (beyond what the header indicates) in the data matrix portion will be discarded.
+
+Examples:
+	%s -i smartpca.evec -o smartpca_withMetaInfo.tsv
+
 """
 
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
+__doc__ = __doc__%(sys.argv[0])
 
-
-#bit_number = math.log(sys.maxint)/math.log(2)
-#if bit_number>40:	   #64bit
-#	sys.path.insert(0, os.path.expanduser('~/lib64/python'))
-#	sys.path.insert(0, os.path.join(os.path.expanduser('~/script64')))
-#else:   #32bit
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
-import matplotlib; matplotlib.use("Agg")	#to disable pop-up requirement
 import csv
 from palos import ProcessOptions, getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter, SNPData
 from palos.utils import getColName2IndexFromHeader, getListOutOfStr, figureOutDelimiter
@@ -42,8 +29,7 @@ import numpy as np
 from vervet.src import VervetDB
 from vervet.src.mapper.AbstractVervetMapper import AbstractVervetMapper
 import networkx as nx
-import matplotlib as mpl
-from palos import TaxonomyDB
+from palos.db import TaxonomyDB
 
 
 class AppendInfo2SmartPCAOutput(AbstractVervetMapper):

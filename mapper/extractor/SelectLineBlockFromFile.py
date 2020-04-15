@@ -1,22 +1,17 @@
 #!/usr/bin/env python
 """
-Examples:
-	%s 
-	
+2012.7.30
+	This program selects lines specified on the commandline and output them.
+	The input file could be plain text or gzipped.
+	The line number starts from 1 (not 0).
+
+Examples:	
 	%s -i input.tped.gz -o /tmp/output.tped
 
-Description:
-	2012.7.30
-		This program selects lines specified on the commandline and output them.
-		The input file could be plain text or gzipped.
-		The line number starts from 1 (not 0).
 """
 
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
+__doc__ = __doc__%(sys.argv[0])
 
 import csv
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils

@@ -14,9 +14,6 @@ Description:
 import sys, os, copy
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.expanduser('~/script'))
-
 import hashlib
 from sqlalchemy import Unicode, DateTime, String, BigInteger, Integer, UnicodeText, Text, Boolean, Float, Binary, Enum, Table
 from sqlalchemy.ext.declarative import declarative_base
@@ -32,9 +29,8 @@ from . import Database, TableClass, AbstractTableWithFilename
 from palos import ProcessOptions, utils, PassingData
 from palos.utils import runLocalCommand
 from palos.utils import returnZeroFunc
-from palos.io import NextGenSeq
-from palos.VCFFile import VCFFile
-from palos.mapper.computer.CountFastqReadBaseCount import CountFastqReadBaseCount
+from palos import ngs
+from palos.ngs.io.VCFFile import VCFFile
 
 Base = declarative_base()
 #20190111 have to set it staticaly because SunsetDB is undefined at this point and it has to be defined after this.
@@ -3709,7 +3705,7 @@ class SunsetDB(Database):
 						isPE = True
 					else:
 						isPE = False
-					pairedEndPrefix2FileLs = NextGenSeq.getPEInputFiles(abs_path, isPE=isPE)
+					pairedEndPrefix2FileLs = ngs.getPEInputFiles(abs_path, isPE=isPE)
 					for pairedEndPrefix, fileLs in pairedEndPrefix2FileLs.iteritems():
 						if isPE and len(fileLs)==2 and fileLs[0] and fileLs[1]:	#PE
 							filename = os.path.join(path, fileLs[0])	#take one file only
@@ -3769,7 +3765,7 @@ class SunsetDB(Database):
 					continue
 				if ignoreEmptyReadFile:	#2012.3.19	ignore empty read files.
 					if individual_sequence_file.read_count is None:	#calculate it on the fly
-						baseCountData = CountFastqReadBaseCount.getReadBaseCount(path, onlyForEmptyCheck=True)
+						baseCountData = ngs.getReadBaseCount(path, onlyForEmptyCheck=True)
 						read_count = baseCountData.read_count
 					else:
 						read_count = individual_sequence_file.read_count
@@ -3916,7 +3912,7 @@ class SunsetDB(Database):
 					continue
 				if ignoreEmptyReadFile:	#2012.3.19	ignore empty read files.
 					if individual_sequence_file.read_count is None:	#calculate it on the fly
-						baseCountData = CountFastqReadBaseCount.getReadBaseCount(path, onlyForEmptyCheck=True)
+						baseCountData = ngs.getReadBaseCount(path, onlyForEmptyCheck=True)
 						read_count = baseCountData.read_count
 					else:
 						read_count = individual_sequence_file.read_count

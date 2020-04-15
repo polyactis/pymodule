@@ -53,22 +53,12 @@ Description:
 				phenotypes is one quantitative phenotype per line, using -100.0 for missing
 				quantitative phenotypes.
 """
-import sys, os, math
-#bit_number = math.log(sys.maxint)/math.log(2)
-#if bit_number>40:       #64bit
-#	sys.path.insert(0, os.path.expanduser('~/lib64/python'))
-#	sys.path.insert(0, os.path.join(os.path.expanduser('~/script64/')))
-#else:   #32bit
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script/')))
-
+import sys, os
 from palos import process_function_arguments, write_data_matrix, figureOutDelimiter, read_data
 from palos.polymorphism.SNP import transposeSNPData, SNPData, SNPData2RawSnpsData_ls
 from variation.src.io import snpsdata
 import csv, numpy
 from variation.src.association.Kruskal_Wallis import Kruskal_Wallis
-from sets import Set
 from variation.src.plot.PlotGroupOfSNPs import PlotGroupOfSNPs
 
 class ConvertYuSNPFormat2EigenStrat(object):
@@ -121,7 +111,7 @@ class ConvertYuSNPFormat2EigenStrat(object):
 			phenData = SNPData(header=header_phen, strain_acc_list=newSnpData.strain_acc_list, data_matrix=data_matrix_phen)	#row label is that of the SNP matrix, because the phenotype matrix is gonna be re-ordered in that way
 			phenData.data_matrix = Kruskal_Wallis.get_phenotype_matrix_in_data_matrix_order(newSnpData.row_id_ls, strain_acc_list_phen, phenData.data_matrix)	#tricky, using strain_acc_list_phen
 			
-			phenotype_col_index = PlotGroupOfSNPs.findOutWhichPhenotypeColumn(phenData, Set([self.phenotype_method_id]))[0]
+			phenotype_col_index = PlotGroupOfSNPs.findOutWhichPhenotypeColumn(phenData, set([self.phenotype_method_id]))[0]
 			phenotype_label = phenData.col_id_ls[phenotype_col_index]
 			phenotype_f = open('%s_%s.pheno'%(self.output_fname_prefix, phenotype_label.replace('/', '_')), 'w')
 			for phenotype_value in phenData.data_matrix[:,phenotype_col_index]:

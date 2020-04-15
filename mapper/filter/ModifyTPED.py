@@ -1,27 +1,22 @@
 #!/usr/bin/env python
 """
-Examples:
-	%s 
+2014.01.12, 2012.7.20
+	Its input .tped files are those that are converted from .vcf by "vcftools --plink-tped".
+	All input files could be gzipped or not.
 	
+	Sometime before 2013.11.21, "vcftools --plink-tped" changes it output from 
+		"CAE19	1002674	0	1002674	..." (chromosome, snp_id, genetic_distace, physical_distance)
+		to 
+		"0	CAE19:1002674	0	1002674	..." (chromosome, snp_id, genetic_distace, physical_distance).
+	So all processRow() functions now derive chromosome from "snp_id" column, rather than chromosome.
+
+Examples:	
 	%s -i input.tped.gz -o /tmp/output.tped
 
-Description:
-	2014.01.12, 2012.7.20
-		Its input .tped files are those that are converted from .vcf by "vcftools --plink-tped".
-		All input files could be gzipped or not.
-		
-		Sometime before 2013.11.21, "vcftools --plink-tped" changes it output from 
-			"CAE19	1002674	0	1002674	..." (chromosome, snp_id, genetic_distace, physical_distance)
-			to 
-			"0	CAE19:1002674	0	1002674	..." (chromosome, snp_id, genetic_distace, physical_distance).
-		So all processRow() functions now derive chromosome from "snp_id" column, rather than chromosome.
 """
 
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
+__doc__ = __doc__%(sys.argv[0])
 
 import csv
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils, MatrixFile

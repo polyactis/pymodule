@@ -1,16 +1,10 @@
 #!/usr/bin/env python3
 """
-
 Description:
 	2012.3.6 an abstract class for mapper
 """
 
 import sys, os, math
-__doc__ = __doc__
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
 import csv
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
 import re

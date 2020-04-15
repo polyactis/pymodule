@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Description:
 	20120509 Parent of other VCF workflows.
@@ -52,14 +52,11 @@ Examples:
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0])
 
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
 import csv, copy
 from palos import ProcessOptions, getListOutOfStr, PassingData, \
 	figureOutDelimiter, getColName2IndexFromHeader, utils
-from palos.ngs.io import VCFFile
-from pegaflow.DAX3 import File, Executable
+from palos.ngs.io.VCFFile import VCFFile
+from pegaflow.DAX3 import File, Executable, PFN
 from pegaflow import Workflow
 #from palos.pegasus.AbstractVCFWorkflow import AbstractVCFWorkflow
 from palos.db import SunsetDB
@@ -182,7 +179,7 @@ class GenericVCFWorkflow(ParentClass):
 		returnData.tfamJob = None	#2013.07.25 family file for tped file 
 		returnData.famJob = None	#2013.07.25 family file for bed file
 		
-		for i in xrange(len(inputData.jobDataLs)):
+		for i in range(len(inputData.jobDataLs)):
 			jobData = inputData.jobDataLs[i]
 			inputF = jobData.vcfFile
 			inputFBaseName = os.path.basename(inputF.name)
@@ -333,7 +330,7 @@ class GenericVCFWorkflow(ParentClass):
 		
 		returnData = PassingData()
 		returnData.jobDataLs = []
-		for i in xrange(len(inputData.jobDataLs)):
+		for i in range(len(inputData.jobDataLs)):
 			jobData = inputData.jobDataLs[i]
 			inputF = jobData.vcfFile
 			inputFBaseName = os.path.basename(inputF.name)
@@ -727,7 +724,7 @@ class GenericVCFWorkflow(ParentClass):
 		returnData.jobDataLs.append(PassingData(jobLs=[unionJob], file=unionJob.output, \
 											fileLs=unionJob.outputLs))
 		
-		for i in xrange(len(inputData.jobDataLs)):
+		for i in range(len(inputData.jobDataLs)):
 			jobData = inputData.jobDataLs[i]
 			inputF = jobData.vcfFile
 			inputFBaseName = os.path.basename(inputF.name)

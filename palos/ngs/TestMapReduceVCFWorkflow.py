@@ -1,20 +1,17 @@
 #!/usr/bin/env python3
 """
+Description:
+	2013.07.12 a test bed for AbstractVCFWorkflow
+
 Examples:
 	#2013.07.31 
 	%s -I LiftPolymorphismCoordinates/FindNewRefCoordinates_Method109_vs_3488_BWA_F99.2013.Jul.11T191341/folderReduceLiftOverVCF/
 		-H -C 1 -j hcondor -l hcondor -D /u/home/p/polyacti/NetworkData/vervet/db/ -t /u/home/p/polyacti/NetworkData/vervet/db/
 		-o dags/SameSiteConcordance/Method109_vs_3488_BWA_F99.sameSiteConcordance.xml --notToUseDBToInferVCFNoOfLoci
 		--db_user yh -z localhost
-
-Description:
-	2013.07.12 a test bed for AbstractVCFWorkflow
 """
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0])
-
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 from pegaflow.DAX3 import Executable, File, PFN
 from pegaflow import Workflow
