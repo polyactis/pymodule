@@ -1,38 +1,37 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2012.10.15
-	sample rows from a matrix-like file
-	
-If "-i ..." is given, it is regarded as one of the input files (plus the ones in trailing arguments). 
+	Sample rows from a matrix-like file.
+	If "-i ..." is given, it is regarded as one of the input files (plus the ones in trailing arguments). 
 
 Examples:
 	%s -i /tmp/VRCSamples.tsv --whichColumnHeader=sampleID
 		-s 1.0  --sampleSize 5
-		--plinkIBDCheckOutputFname PlinkIBDCheck/PlinkIBDCheck_Method38_W50Z20R0.9.2012.9.13T102614/ibdCheckIBDCheck/LDPrunedMerged_ibdCheck.tsv
+		--plinkIBDCheckOutputFname PlinkIBDCheck/ibdCheckIBDCheck/LDPrunedMerged_ibdCheck.tsv
 		-o /tmp/VRCSamples_sampled.tsv
 
 """
 
-import sys, os, math
+import sys
 __doc__ = __doc__%(sys.argv[0])
 
 import csv
 import random
-from palos import ProcessOptions, getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter
-from palos import yh_matplotlib, SNP
+from palos import ProcessOptions, PassingData, figureOutDelimiter
+from palos.polymorphism import SNP
 from palos.io.AbstractMatrixFileWalker import AbstractMatrixFileWalker
 
 class SampleRows(AbstractMatrixFileWalker):
 	__doc__ = __doc__
 	option_default_dict = AbstractMatrixFileWalker.option_default_dict.copy()
 	option_default_dict.update({
-						('sampleSize', 1, int): [None, '', 1, 'number of samples (rows) to be sampled from input, \n\
-	uniformly if plinkIBDCheckOutputFname is not given.'],\
-						('plinkIBDCheckOutputFname', 0, ): [None, '', 1, 'file that contains IBD check result, PI_HAT=relatedness.\n\
-	at least 3-columns with header: IID1, IID2, PI_HAT. IID1 and IID2 should match the whichColumn (whichColumnHeader) of inputFname.\n\
-	The sampling will try to avoid sampling close pairs, PI_HAT(i,j)<=maxIBDSharing'],\
-						('maxIBDSharing', 1, float): [0.1, '', 1, 'This argument caps the maximum IBD sharing among any pair within the sampled.'],\
-						})
+		('sampleSize', 1, int): [None, '', 1, 'number of samples (rows) to be sampled from input, \n\
+uniformly if plinkIBDCheckOutputFname is not given.'],\
+		('plinkIBDCheckOutputFname', 0, ): [None, '', 1, 'file that contains IBD check result, PI_HAT=relatedness.\n\
+at least 3-columns with header: IID1, IID2, PI_HAT. IID1 and IID2 should match the whichColumn (whichColumnHeader) of inputFname.\n\
+The sampling will try to avoid sampling close pairs, PI_HAT(i,j)<=maxIBDSharing'],\
+		('maxIBDSharing', 1, float): [0.1, '', 1, 'This argument caps the maximum IBD sharing among any pair within the sampled.'],\
+		})
 	def __init__(self, inputFnameLs=None, **keywords):
 		"""
 		"""

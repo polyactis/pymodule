@@ -10,14 +10,15 @@ Examples:
 
 """
 
+from . AddAlignmentDepthIntervalMethod2DB import AddAlignmentDepthIntervalMethod2DB
+
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0])
 
 import copy, re
 from palos import ProcessOptions, PassingData, utils, ngs
 from palos.ngs.io.AlignmentDepthIntervalFile import AlignmentDepthIntervalFile
-from . AddAlignmentDepthIntervalMethod2DB import AddAlignmentDepthIntervalMethod2DB
-from AbstractAccuMapper import AbstractAccuMapper as ParentClass
+from palos.mapper.AbstractSunsetMapper import AbstractSunsetMapper as ParentClass
 
 class AddAlignmentDepthIntervalFile2DB(ParentClass):
 	__doc__ = __doc__

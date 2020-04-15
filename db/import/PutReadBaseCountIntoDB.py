@@ -13,7 +13,7 @@ import sys, os, math
 __doc__ = __doc__%(sys.argv[0])
 import csv, copy
 from palos import ProcessOptions, PassingData, utils, figureOutDelimiter
-from AbstractAccuMapper import AbstractAccuMapper as ParentClass
+from palos.mapper.AbstractSunsetMapper import AbstractSunsetMapper as ParentClass
 from palos.db import SunsetDB
 
 class PutReadBaseCountIntoDB(ParentClass):

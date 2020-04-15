@@ -16,7 +16,7 @@ __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 
 import copy
 from palos import ProcessOptions, utils
-from AbstractAccuMapper import AbstractAccuMapper as ParentClass
+from palos.mapper.AbstractSunsetMapper import AbstractSunsetMapper as ParentClass
 
 class AddAlignmentDepthIntervalMethod2DB(ParentClass):
 	__doc__ = __doc__

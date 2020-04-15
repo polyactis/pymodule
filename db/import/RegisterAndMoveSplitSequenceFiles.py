@@ -4,7 +4,7 @@ import os
 import copy
 import re
 from palos import ProcessOptions, utils
-from AbstractAccuMapper import AbstractAccuMapper as ParentClass
+from palos.mapper.AbstractSunsetMapper import AbstractSunsetMapper as ParentClass
 
 class RegisterAndMoveSplitSequenceFiles(ParentClass):
 	"""
