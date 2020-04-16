@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 """
+This is the ORM architecture of SunsetDB, build on top of sqlalchemy.
+
 Examples:
 	#setup database in postgresql
 	%s -v postgresql -u yh -z pdc -d pmdb -k sunset
@@ -7,9 +9,6 @@ Examples:
 	#setup database in mysql
 	%s -u yh -z papaya.usc.edu
 	
-Description:
-	2017.03.17
-	This is the ORM architecture of SunsetDB, build on top of elixir.
 """
 import sys, os, copy
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
@@ -25,11 +24,11 @@ from sqlalchemy import and_, or_, not_
 from sqlalchemy.types import LargeBinary
 
 from datetime import datetime
-from . import Database, TableClass, AbstractTableWithFilename
 from palos import ProcessOptions, utils, PassingData
+from palos import ngs
+from palos.db import Database, TableClass, AbstractTableWithFilename
 from palos.utils import runLocalCommand
 from palos.utils import returnZeroFunc
-from palos import ngs
 from palos.ngs.io.VCFFile import VCFFile
 
 Base = declarative_base()
