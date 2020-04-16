@@ -2457,15 +2457,15 @@ class SunsetDB(Database):
 	excludeContaminant=%s, is_contaminated=%s, excludeTissueIDSet=%s, \n\
 	mask_genotype_method_id=%s, parent_individual_alignment_id=%s, completedAlignment=%s, \n\
 	alignment_method_id=%s, outdated_index=%s  ..."%\
-							(len(alignmentLs), min_coverage, max_coverage, individual_site_id, sequence_filtered, \
-							getattr(individual_site_id_set, '__len__', returnZeroFunc)(),\
-							getattr(country_id_set, '__len__', returnZeroFunc)(),\
-							getattr(tax_id_set, '__len__', returnZeroFunc)(),\
-							local_realigned, reduce_reads, excludeContaminant, is_contaminated, repr(excludeTissueIDSet),\
-							mask_genotype_method_id, parent_individual_alignment_id, completedAlignment,\
-							alignment_method_id, outdated_index,\
-							)
-						)
+				(len(alignmentLs), min_coverage, max_coverage, individual_site_id, sequence_filtered, \
+				getattr(individual_site_id_set, '__len__', returnZeroFunc)(),\
+				getattr(country_id_set, '__len__', returnZeroFunc)(),\
+				getattr(tax_id_set, '__len__', returnZeroFunc)(),\
+				local_realigned, reduce_reads, excludeContaminant, is_contaminated, repr(excludeTissueIDSet),\
+				mask_genotype_method_id, parent_individual_alignment_id, completedAlignment,\
+				alignment_method_id, outdated_index,\
+				)
+				)
 		newAlignmentLs = []
 		for alignment in alignmentLs:
 			if not alignment:
@@ -3805,9 +3805,10 @@ class SunsetDB(Database):
 		2013.3.15
 		"""
 		if report:
-			sys.stderr.write("Filter %s individual_sequence entries to select %s=<coverage <=%s & site-id=%s & sequence_filtered=%s & from %s sites, \n\
-	%s countries, %s taxonomies, %s individuals, %s sequence types, %s sequencers, %s sequence batches, %s parent isqs, \n\
-	%s versions; excludeContaminant=%s, outdated_index=%s, %s tissues to be excluded,..."%\
+			sys.stderr.write("Filter %s individual_sequence entries to select %s=<coverage <=%s "
+				"& site-id=%s & sequence_filtered=%s & from %s sites, "
+				"%s countries, %s taxonomies, %s individuals, %s sequence types, %s sequencers, %s sequence batches, %s parent isqs, "
+				"%s versions; excludeContaminant=%s, outdated_index=%s, %s tissues to be excluded,..."%\
 							(len(individual_sequence_list), min_coverage, max_coverage, individual_site_id, sequence_filtered, \
 							getattr(individual_site_id_set, '__len__', returnZeroFunc)(),\
 							getattr(country_id_set, '__len__', returnZeroFunc)(),\
