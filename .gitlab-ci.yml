@@ -30,6 +30,13 @@ test_SunsetDB:
     - pwd
     - ./palos/db/SunsetDB.py -h
 
+test_ImportSeq:
+  stage: test
+  script:
+    - echo "Testing if ImportIndividualSequence2DB.py can be run ... "
+    - pwd
+    - ./db/import/ImportIndividualSequence2DB.py -h
+
 uninstall:
   stage: uninstall
   script:
