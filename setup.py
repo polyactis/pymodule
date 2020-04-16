@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 
 src_dir = os.path.dirname(__file__)
 
-install_requires = []
+install_requires = ["sqlalchemy", "palos", "numpy", "pysam", 'matplotlib']
 
 with open(os.path.join(src_dir, 'README.md')) as readme_file:
     README = readme_file.read()
@@ -47,7 +47,7 @@ def find_package_data(dirname):
 
 setup_args = dict(
     name="Palos",
-    version="0.0.2",
+    version="0.0.3",
     author="Yu S. Huang",
     author_email="polyactis@gmail.com",
     description="Misc Python modules developed and used by the yfish group",
