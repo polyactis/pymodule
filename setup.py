@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 
 src_dir = os.path.dirname(__file__)
 
-install_requires = ["sqlalchemy", "palos", "numpy", 'cython', "pysam", 'matplotlib']
+install_requires = ["sqlalchemy", "palos", "numpy", 'matplotlib']
 
 with open(os.path.join(src_dir, 'README.md')) as readme_file:
     README = readme_file.read()
