@@ -30,8 +30,9 @@ from sqlalchemy import desc
 from palos.utils import PassingData	#2012.3.26 "from utils import PassingData" won't work because no module named "utils" exists outside pymodule (!=pymodule.utils). 
 from palos.polymorphism.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey
 from palos.algorithm.RBTree import RBDict
-from palos.Genome import GeneModel	#2010-9-21 although "from Genome import GeneModel" works,
-			#it causes problem in cPickle.load() because Genome is not directly visible outside.
+from palos.Genome import GeneModel
+#2010-9-21 although "from Genome import GeneModel" works,
+# it causes problem in pickle.load() because Genome is not directly visible outside.
 from palos.db import ElixirDB, get_sequence_segment
 
 __session_factory__ = sessionmaker(autoflush=False, autocommit=True)
@@ -1384,17 +1385,17 @@ class GenomeDatabase(ElixirDB):
 		2011-3-10
 		"""
 		sys.stderr.write("Dealing with genomeRBDict ...")
-		import cPickle
+		import pickle
 		if genomeRBDictPickleFname:
 			if os.path.isfile(genomeRBDictPickleFname):	#if this file is already there, suggest to un-pickle it.
 				picklef = open(genomeRBDictPickleFname)
-				genomeRBDict = cPickle.load(picklef)
+				genomeRBDict = pickle.load(picklef)
 				del picklef
 			else:	#if the file doesn't exist, but the filename is given, pickle snps_context_wrapper into it
 				genomeRBDict = self.createGenomeRBDict(tax_id=tax_id, max_distance=max_distance, debug=debug)
 				#2008-09-07 pickle the snps_context_wrapper object
 				picklef = open(genomeRBDictPickleFname, 'w')
-				cPickle.dump(genomeRBDict, picklef, -1)
+				pickle.dump(genomeRBDict, picklef, -1)
 				picklef.close()
 		else:
 			genomeRBDict = self.createGenomeRBDict(tax_id=tax_id, max_distance=max_distance, debug=debug)
@@ -1819,9 +1820,9 @@ class GenomeDatabase(ElixirDB):
 		if self.debug:
 			import pdb
 			pdb.set_trace()
-	
-		if self.geneAnnotationPickleFname and self.tax_id:	#only pick the file if the output file is not empty.
-			import cPickle
+		
+		if self.geneAnnotationPickleFname and self.tax_id:
+			import pickle
 			pickle_fname = os.path.expanduser(self.geneAnnotationPickleFname)	#2012.3.26 stopped using '~/at_gene_model_pickelf',
 			if os.path.isfile(pickle_fname):
 				#2011-1-20 check if the pickled file already exists or not
@@ -1835,13 +1836,11 @@ class GenomeDatabase(ElixirDB):
 				gene_annotation.chr_id2gene_id_ls = chr_id2gene_id_ls
 				gene_annotation.geneSpanRBDict = geneSpanRBDict
 				picklef = open(os.path.expanduser(pickle_fname), 'w')
-				cPickle.dump(gene_annotation, picklef, -1)
+				pickle.dump(gene_annotation, picklef, -1)
 				picklef.close()
-	
 
-	
 def get_entrezgene_annotated_anchor(curs, tax_id, entrezgene_mapping_table='genome.gene',\
-	annot_assembly_table='genome.annot_assembly'):
+		annot_assembly_table='genome.annot_assembly'):
 	"""
 	2011-1-25
 		moved from annot.bin.common
@@ -1905,7 +1904,7 @@ if __name__ == '__main__':
 		import pdb
 		pdb.set_trace()
 	
-	import cPickle
+	import pickle
 	#2011-1-20 check if the pickled file already exists or not
 	pickle_fname = po.arguments[0]	#2012.3.26 stopped using '~/at_gene_model_pickelf', instead use the 1st argument
 	if os.path.isfile(os.path.expanduser(pickle_fname)):
@@ -1918,7 +1917,7 @@ if __name__ == '__main__':
 		gene_annotation.chr_id2gene_id_ls = chr_id2gene_id_ls
 		gene_annotation.geneSpanRBDict = geneSpanRBDict
 		picklef = open(os.path.expanduser(pickle_fname), 'w')
-		cPickle.dump(gene_annotation, picklef, -1)
+		pickle.dump(gene_annotation, picklef, -1)
 		picklef.close()
 	"""
 	import sqlalchemy as sql

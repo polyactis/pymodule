@@ -6,8 +6,8 @@ import os, sys
 import copy, csv, math
 import re
 from palos.ProcessOptions import  ProcessOptions
-from palos.utils import dict_map, importNumericArray, figureOutDelimiter, PassingData, getColName2IndexFromHeader,\
-	openGzipFile
+from palos.utils import dict_map, importNumericArray, figureOutDelimiter, \
+	PassingData, getColName2IndexFromHeader, openGzipFile
 from palos.db import TableClass
 
 pa_has_characters = re.compile(r'[a-zA-Z_]')
@@ -2170,13 +2170,13 @@ class SNPData(object):
 	
 	@classmethod
 	def loadSNPDataObj(cls,row_id_key_set=None, row_id_hash_func=None, col_id_key_set=None, col_id_hash_func=None, **keywords):
-		import cPickle as cPickle
+		import pickle as pickle
 		import pickle as pickle
 		input_fname = keywords['input_fname']
 		if input_fname  != "":
 			if os.path.isfile(input_fname + ".pickle"):
 				input = open(input_fname + '.pickle','r')
-				data = cPickle.load(input)
+				data = pickle.load(input)
 				input.close()
 			else:
 				data = SNPData(**keywords)
@@ -2186,7 +2186,7 @@ class SNPData(object):
 				#new_data.tofile(input_fname+".tsv")
 				try:
 					output = open(input_fname + '.pickle', 'wb')
-					cPickle.dump(data, output, protocol=2)
+					pickle.dump(data, output, protocol=2)
 				except Exception as exp:
 					sys.stderr.write("Error in pickleing file: "+ str(exp))
 				finally:
@@ -2483,7 +2483,7 @@ class GenomeWideResult(object):
 			keep only objects (data_obj_ls, data_obj_id2index) that are within rbDict (CNV.xxx)
 		"""
 		sys.stderr.write("Keep GWR objects that are within rbDict  ...")
-		from CNV import CNVSegmentBinarySearchTreeKey
+		from palos.polymorphism.CNV import CNVSegmentBinarySearchTreeKey
 		new_data_obj_ls = []
 		new_data_obj_id2index = {}
 		no_of_objs = len(self.data_obj_ls)
@@ -2725,7 +2725,7 @@ class GenomeWideResult(object):
 		sys.stderr.write("Dumping association result into %s (HDF5 format) ..."%(filename))
 		#each number below is counting bytes, not bits
 		if outputFileType==1:
-			from palos.io.Association import AssociationTable, AssociationTableFile
+			from palos.polymorphism.Association import AssociationTable, AssociationTableFile
 			rowDefinition  = AssociationTable
 			OutputFileClass = AssociationTableFile
 		else:
@@ -3297,7 +3297,7 @@ def getGenomeWideResultFromHDF5MatrixFile(inputFname=None, reader=None, \
 	else:
 		if reader is None:
 			if inputFileType==1:
-				from palos.io.Association import AssociationTableFile
+				from palos.polymorphism.Association import AssociationTableFile
 				reader = AssociationTableFile(inputFname, openMode='r', autoRead=False)
 			else:
 				from palos.io.HDF5MatrixFile import HDF5MatrixFile

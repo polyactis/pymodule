@@ -1,11 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
-2007-10-23
-	module which wraps MPI
-	
-	functions originally copied from annot.bin.codense.common.
+2007-10-23 A MPI wrapper
 """
-import sys, os, cPickle
+import sys, os, pickle
 
 def mpi_synchronize(communicator):
 	"""
@@ -142,7 +139,7 @@ class MPIwrapper(object):
 		self.communicator.send("1", param_obj.output_node_rank, 1)	#WATCH: tag is 1, to the output_node.
 		free_computing_node, source, tag = self.communicator.receiveString(param_obj.output_node_rank, 2)
 		#WATCH: tag is 2, from the output_node
-		data_pickle = cPickle.dumps(data_to_send, -1)
+		data_pickle = pickle.dumps(data_to_send, -1)
 		self.communicator.send(data_pickle, int(free_computing_node),0)	#WATCH: int()
 		if param_obj.report:
 			sys.stderr.write("block %s sent to %s.\n"%(param_obj.counter, free_computing_node))
@@ -249,7 +246,7 @@ class MPIwrapper(object):
 			communicator.send("1", communicator.size-1, 1)	#WATCH: tag is 1, to the output_node.
 			free_computing_node, source, tag = communicator.receiveString(communicator.size-1, 2)
 				#WATCH: tag is 2, from the output_node
-			data_pickle = cPickle.dumps(data, -1)
+			data_pickle = pickle.dumps(data, -1)
 			communicator.send(data_pickle, int(free_computing_node), 0)	#WATCH: int()
 			if self.report:
 				sys.stderr.write("block %s sent to %s.\n"%(counter, free_computing_node))
@@ -299,7 +296,7 @@ class MPIwrapper(object):
 				communicator.send("1", param_obj.output_node_rank, 1)	#WATCH: tag is 1, to the output_node.
 				free_computing_node, source, tag = communicator.receiveString(param_obj.output_node_rank, 2)
 					#WATCH: tag is 2, from the output_node
-				data_pickle = cPickle.dumps(param_ls, -1)
+				data_pickle = pickle.dumps(param_ls, -1)
 				communicator.send(data_pickle, int(free_computing_node), 0)	#WATCH: int()
 				if self.report:
 					sys.stderr.write("block %s sent to %s.\n"%(counter, free_computing_node))
@@ -356,7 +353,7 @@ class MPIwrapper(object):
 				result = node_fire_handler(communicator, data, parameter_list)
 				if self.report:
 					sys.stderr.write("node %s is pickling result ...\n"%node_rank)
-				result_pickle = cPickle.dumps(result, -1)
+				result_pickle = pickle.dumps(result, -1)
 				del result
 				if self.report:
 					sys.stderr.write("node %s result-pickling done and sending it to node %s.\n"%(node_rank, output_node_rank))
@@ -426,7 +423,7 @@ class MPI4pywrapper(MPIwrapper):
 				if self.report:
 					sys.stderr.write('node %s is free \n'%free_computing_node)
 					#WATCH: tag is 2, from the output_node
-				#data_pickle = cPickle.dumps(param_ls, -1)
+				#data_pickle = pickle.dumps(param_ls, -1)
 				communicator.send(param_ls, int(free_computing_node), 0)	#WATCH: int()
 				if self.report:
 					sys.stderr.write("block %s sent to %s.\n"%(counter, free_computing_node))
@@ -465,7 +462,7 @@ class MPI4pywrapper(MPIwrapper):
 				result = node_fire_handler(communicator, data, parameter_list)
 				if self.report:
 					sys.stderr.write("node %s is pickling result ...\n"%node_rank)
-				#result_pickle = cPickle.dumps(result, -1)
+				#result_pickle = pickle.dumps(result, -1)
 				#del result
 				if self.report:
 					sys.stderr.write("node %s result-pickling done and sending it to node %s.\n"%(node_rank, output_node_rank))

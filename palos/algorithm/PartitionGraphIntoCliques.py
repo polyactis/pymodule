@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2007-10-01
 	module to partition a graph into cliques.
@@ -6,7 +6,7 @@
 	always search for the maximum first, then remove it from the graph and keep searching
 """
 
-from clique import clique
+from . clique import clique
 from networkx import cliques
 import numpy
 
@@ -67,7 +67,7 @@ if __name__ == '__main__':
 	#G.add_edge(3,6)
 	PartitionGraphIntoCliques_ins = PartitionGraphIntoCliques(debug=0)
 	PartitionGraphIntoCliques_ins.partition(G)
-	print "cliques:", PartitionGraphIntoCliques_ins.clique_ls
+	print("cliques:", PartitionGraphIntoCliques_ins.clique_ls)
 	
 	"""
 	2007-10-02 a testing case that the clique algorithm from clique.py lasts forever
@@ -75,9 +75,9 @@ if __name__ == '__main__':
 	sys.path.insert(0, os.path.join(os.path.expanduser('~/script/variation/src')))
 	from misc import construct_graph_out_of_identity_pair
 	input_fname = os.path.expanduser('~/script/variation/stock20070919/data_d110_c0_5.tsv')
-	import cPickle
+	import pickle
 	inf = open('%s_identity_pair_ls'%os.path.splitext(input_fname)[0], 'r')
-	identity_pair_ls = cPickle.load(inf)
+	identity_pair_ls = pickle.load(inf)
 	del inf
 	strain_iden_g = construct_graph_out_of_identity_pair(identity_pair_ls)
 	import networkx as nx

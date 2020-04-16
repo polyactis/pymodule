@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Program to estimate how many outliers off the y=x axis.
 	1. hard cutoff. abs(y-x)<=minDelta
@@ -12,7 +12,6 @@ Examples:
 		-s 1.0 -o /tmp/Contig315_StKitts_vs_Nevis.2D.png
 
 """
-
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0])
 import numpy, random
