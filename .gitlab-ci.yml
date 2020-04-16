@@ -16,6 +16,13 @@ install:
   script:
     - pip3 install --user ./
 
+
+test_version:
+  stage: test
+  script:
+    - echo "Checking the installed version"
+    - python3 -c "import palos; print(palos.version)"
+
 test_SunsetDB:
   stage: test
   script:
