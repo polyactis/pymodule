@@ -3,7 +3,7 @@
 run Accurity in the  workflow
     ./downsample.py --outputFname dags/runDownsample_median.xml --data_dir /y/Sunset/db/ \
     --drivername postgresql --hostname pdc --dbname pmdb --db_user luozhihui \
-    --db_passwd yfishLab2113 --schema xiandao --ref_ind_seq_id 1 -l ycondor -j ycondor
+    --db_passwd yfishLab2113 --schema sunset --ref_ind_seq_id 1 -l ycondor -j ycondor
 """
 import sys, os, math
 import copy

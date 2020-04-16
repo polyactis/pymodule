@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
 Description:
-	input:
-		input: (if directory, recursively go and find all bam files; if file, each line is path to bam).
-		tsv file: (map bam filename to individual ID).
+	input: 
+		if directory, recursively find all bam files,
+		if file, each line is path to bam.
+	tsv file: (map bam filename to individual ID).
 	
 	this program will
 		1. query db if individual record for that monkey is already in db, or not. create a new entry in db if not
@@ -45,7 +46,7 @@ Examples:
 	# 20110828 output a workflow to run on local condorpool, no db commit (because records are already in db)
 	%s -i /Network/Data/vervet/raw_sequence/xfer.genome.wustl.edu/gxfer3/
 		--bamFname2MonkeyIDMapFname xfer.genome.wustl.edu/gxfer3/46019922623327/Vervet_12_4X_README.tsv
-		 --minNoOfReads 4000000 -u yh --commit
+		--minNoOfReads 4000000 -u yh --commit
 		-z dl324b-1.cmb.usc.edu -j condorpool -l condorpool -o dags/unpackAndAdd12_2007Monkeys2DB_condor.xml
 	
 	# 20120430 run on hcondor, to import McGill 1X data (-y2), (-e) is not necessary
@@ -64,22 +65,20 @@ Examples:
 		-t /u/home/eeskin/polyacti/NetworkData/vervet/db/ -e /u/home/eeskin/polyacti 
 		--bamFname2MonkeyIDMapFname by.Charles.Demultiplexed/sampleIds.txt
 		--minNoOfReads 4000000
-	
+
 	# 20120603 add 24 south-african monkeys DNA read data (-y4), sequenced by Joe DeYoung's core (from Nam's folder)
 	#   --minNoOfReads 4000000
 	%s -i ~namtran/panasas/Data/HiSeqRaw/Ania/SIVpilot/LowpassWGS/Demultiplexed/
 		-z localhost -u yh -j hcondor -l hcondor --commit -o dags/AddReads2DB/unpack20SouthAfricaSIVmonkeysDNA.xml
-		-y4 --needSSHDBTunnel
-		-D ～/NetworkData/vervet/db/ -t ～/NetworkData/vervet/db/
-		-e ～
+		-y4 --needSSHDBTunnel -D ～/NetworkData/vervet/db/ -t ～/NetworkData/vervet/db/ -e ～
 		--minNoOfReads 4000000
 		
 	# 2017.04.28 added TCGA sequences (.bam) into db
-	%s -i /y/Sunset/tcga/HNSC_TCGA/ --hostname pdc -u huangyu -j ycondor -l ycondor 
+	%s -i /y/Sunset/tcga/HNSC_TCGA/ --hostname pdc -u huangyu -j condor -l condor 
 		-o dags/unpackTCGAHNSCSamples.xml -y6
 		--tissueSourceSiteFname /y/Sunset/tcga/tcga_code_tables/tissueSourceSite.tsv 
-		--minNoOfReads 8000000 --dbname pmdb -k xiandao --ref_ind_seq_id 1 --commit
-	
+		--minNoOfReads 8000000 --dbname pmdb -k sunset --ref_ind_seq_id 1 --commit
+
 """
 import sys, os
 __doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0])
@@ -97,16 +96,19 @@ class ImportIndividualSequence2DB(ParentClass):
 	__doc__ = __doc__
 	option_default_dict = copy.deepcopy(ParentClass.option_default_dict)
 	option_default_dict.update({
-						('input', 1, ): ['', 'i', 1, 'if it is a folder, take all .bam/.sam/.fastq files recursively. If it is a file, every line should be a path to the input file.', ],\
-						('bamFname2MonkeyIDMapFname', 0, ): ['', '', 1, 'a tsv version of WUSTL xls file detailing what monkey is in which bam file.', ],\
-						('minNoOfReads', 1, int): [8000000, '', 1, 'minimum number of reads in each split fastq file. This is the max NoOfReads.\
-								 The upper limit in each split file is 2*minNoOfReads.', ],\
-						("sequencer_name", 0, ): ["", '', 1, 'sequencing center of TCGA. parsed from TCGA bacode.'],\
-						("sequence_type_name", 1, ): ["PairedEnd", '', 1, 'isq.sequence_type_id table column: SequenceType.short_name.'],\
-						("sequence_format", 1, ): ["fastq", 'f', 1, 'fasta, fastq, etc.'],\
-						("tissueSourceSiteFname", 0, ): ["", '', 1, 'TCGA tissue source site file'],\
-						('inputType', 1, int): [1, 'y', 1, 'input type. 1: bam from TCGA 2: import HCC1187', ],\
-						})
+		('input', 1, ): ['', 'i', 1, 'if it is a folder, take all .bam/.sam/.fastq files recursively. '
+			'If it is a file, every line should be a path to the input file.', ],\
+		('bamFname2MonkeyIDMapFname', 0, ): ['', '', 1, 
+			'a tsv version of WUSTL xls file detailing what monkey is in which bam file.', ],\
+		('minNoOfReads', 1, int): [8000000, '', 1, 'minimum number of reads in each split fastq file. '
+			'This is the max NoOfReads. The upper limit in each split file is 2*minNoOfReads.', ],\
+		("sequencer_name", 0, ): ["", '', 1, 'sequencing center of TCGA. parsed from TCGA bacode.'],\
+		("sequence_type_name", 1, ): ["PairedEnd", '', 1, 
+			'isq.sequence_type_id table column: SequenceType.short_name.'],\
+		("sequence_format", 1, ): ["fastq", 'f', 1, 'fasta, fastq, etc.'],\
+		("tissueSourceSiteFname", 0, ): ["", '', 1, 'TCGA tissue source site file'],\
+		('inputType', 1, int): [1, 'y', 1, 'input type. 1: bam from TCGA 2: import HCC1187', ],\
+		})
 	
 	def __init__(self,  **keywords):
 		"""
@@ -257,15 +259,11 @@ class ImportIndividualSequence2DB(ParentClass):
 		2012.2.9
 			argument outputFnamePrefixTail is now useless.
 		2012.1.24
-			executable is shell/SplitReadFileWrapper.sh
-			
-			which calls "wc -l" to count the number of reads beforehand to derive a proper minNoOfReads (to avoid files with too few reads).
-			
-			run SplitReadFile and generate the output directly into the db-affiliated folders
-			
-			a log file is generated and registered for transfer (so that pegasus won't skip it)
-		
-			walltime is in minutes (max time allowed on hoffman2 is 24 hours).
+			Executable is shell/SplitReadFileWrapper.sh,
+				which calls "wc -l" to count the number of reads beforehand to derive a proper minNoOfReads (to avoid files with too few reads).
+			Run SplitReadFile and generate the output directly into the db-affiliated folders.
+			A log file is generated and registered for transfer (so that pegasus won't skip it).
+			Walltime is in minutes (max time allowed on hoffman2 is 24 hours).
 			
 		"""
 		if executable is None:
@@ -435,8 +433,8 @@ class ImportIndividualSequence2DB(ParentClass):
 		"""
 		2013.04.04
 		UNGC = UCLA Neuroscience Genomics Core
-		input fastq files could be gzipped or not. doesn't matter.
-			data generated by Joe DeYoung's core, demultiplexed by ICNN.
+		The input fastq files could be gzipped or not. doesn't matter.
+		Data generated by Joe DeYoung's core, demultiplexed by ICNN.
 		"""
 		sampleID2IndividualData = self.getSampleID2IndividualData_UNGC(bamFname2MonkeyIDMapFname)
 		fastqFnameLs = self.getInputFnameLsFromInput(input, suffixSet=set(['.fastq']), fakeSuffix='.gz')

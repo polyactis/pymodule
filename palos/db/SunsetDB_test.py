@@ -2,7 +2,7 @@
 """
 Examples:
     #setup database in postgresql
-    %s -v postgresql -u yh -z pdc -d pmdb -k xiandao
+    %s -v postgresql -u yh -z pdc -d pmdb -k sunset
     
     #setup database in mysql
     %s -u yh -z papaya.usc.edu
