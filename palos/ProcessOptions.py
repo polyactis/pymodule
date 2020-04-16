@@ -65,9 +65,9 @@ def process_function_arguments(keywords, argument_default_dict, error_doc='', cl
 			if howto_deal_with_required_none==1:
 				if argument=='passwd' or argument=='Passwd' or argument=='password':
 					import getpass
-					default_value = getpass.getpass("%s: "%argument)
+					default_value = getpass.getpass(f"{argument}: ")
 				else:
-					default_value = input("%s: "%argument)
+					default_value = input(f"{argument}: ")
 			else:
 				if error_doc:
 					sys.stderr.write(error_doc)
@@ -143,7 +143,7 @@ def process_options(argv_list, option_default_dict, error_doc=''):
 			long_option = short_option2long_option[short_option]
 		if long_option=='help':
 			print(error_doc)
-			sys.exit(2)
+			sys.exit(0)
 		if long_option2has_argument[long_option]:
 			opts_dict[long_option] = arg
 		else:	#toggle the bit for options which don't have arguments
@@ -389,7 +389,7 @@ class ProcessOptions(object):
 				long_option = self.short_option2long_option[short_option]
 			if long_option=='help':
 				print(error_doc)
-				sys.exit(2)
+				sys.exit(0)
 			if self.long_option2has_argument[long_option]:
 				opts_dict[long_option] = arg
 			else:	#toggle the bit for options which don't have arguments
