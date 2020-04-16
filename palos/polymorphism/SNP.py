@@ -1,6 +1,5 @@
 """
-2008-05-12
-	store SNP data structure related stuff
+A SNP data structure and related stuff.
 """
 import os, sys
 import copy, csv, math
