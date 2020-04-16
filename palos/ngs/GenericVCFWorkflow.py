@@ -57,7 +57,7 @@ from palos import ProcessOptions, getListOutOfStr, PassingData, \
 	figureOutDelimiter, getColName2IndexFromHeader, utils
 from palos.ngs.io.VCFFile import VCFFile
 from pegaflow.DAX3 import File, Executable, PFN
-from pegaflow import Workflow
+import pegaflow
 #from palos.pegasus.AbstractVCFWorkflow import AbstractVCFWorkflow
 from palos.db import SunsetDB
 from . AbstractNGSWorkflow import AbstractNGSWorkflow
@@ -609,7 +609,7 @@ class GenericVCFWorkflow(ParentClass):
 			debugHaplotypeDistanceFile = File(os.path.join(topOutputDir, '%s.haplotypeDistance.tsv'%(commonPrefix)))
 			debugMajoritySupportFile = File(os.path.join(topOutputDir, '%s.majoritySupport.tsv'%(commonPrefix)))
 			#2012.4.2
-			fileSize = utils.getFileOrFolderSize(Workflow.getAbsPathOutOfFile(inputF))
+			fileSize = utils.getFileOrFolderSize(pegaflow.getAbsPathOutOfFile(inputF))
 			memoryRequest = 45000
 			memoryRequest = min(42000, max(4000, int(38000*(fileSize/950452059.0))) )
 				#extrapolates (33,000Mb memory for a ungzipped VCF file with size=950,452,059)

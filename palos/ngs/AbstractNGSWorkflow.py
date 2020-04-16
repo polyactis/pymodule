@@ -6,7 +6,7 @@
 import sys, os, math
 
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job
-from pegaflow import Workflow
+import pegaflow
 from palos import Genome, utils
 from palos import ProcessOptions
 from palos.Genome import IntervalData
@@ -286,71 +286,71 @@ class AbstractNGSWorkflow(ParentClass):
         ParentClass.registerExecutables(self)
 
         #2014.01.08
-        self.addExecutableFromPath(path=os.path.join(self.pymodulePath, \
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
                 'polymorphism/qc/mapper/FilterLocusBasedOnLocusStatFile.py'), \
             name='FilterLocusBasedOnLocusStatFile', \
             clusterSizeMultiplier=0.5)
 
         #2013.10.2
-        self.addExecutableFromPath(path=self.javaPath, \
+        self.registerOneExecutable(path=self.javaPath, \
             name='CombineBeagleAndPreBeagleVariantsJava', \
             clusterSizeMultiplier=0.6)
         #2013.10.13
-        self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "reducer/ligateVcf.sh"), \
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, "reducer/ligateVcf.sh"), \
             name="ligateVcf", clusterSizeMultiplier=1)
         #2013.09.17 updated
-        #self.addExecutableFromPath(
+        #self.registerOneExecutable(
         #   path=os.path.join(self.pymodulePath, "polymorphism/qc/CheckTwoVCFOverlapCC"), \
         #   name='CheckTwoVCFOverlapCC', clusterSizeMultiplier=1)
 
-        self.addExecutableFromPath(path=os.path.join(self.pymodulePath, \
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
             "mapper/splitter/SelectAndSplitFastaRecords.py"),\
             name='SelectAndSplitFastaRecords', clusterSizeMultiplier=0)
 
-        self.addExecutableFromPath(path=self.javaPath,
+        self.registerOneExecutable(path=self.javaPath,
             name='BuildBamIndexFilesJava', clusterSizeMultiplier=0.5)
         #2012.9.21 same as BuildBamIndexFilesJava, but no clustering
-        self.addExecutableFromPath(path=self.javaPath,
+        self.registerOneExecutable(path=self.javaPath,
             name='IndexMergedBamIndexJava', clusterSizeMultiplier=0)
-        self.addExecutableFromPath(path=self.javaPath,
+        self.registerOneExecutable(path=self.javaPath,
             name='CreateSequenceDictionaryJava', clusterSizeMultiplier=0)
 
-        self.addExecutableFromPath(path=self.javaPath,
+        self.registerOneExecutable(path=self.javaPath,
             name='DOCWalkerJava', clusterSizeMultiplier=0.05)
         #no cluster_size for this because it could run on a whole bam for hours
-        self.addExecutableFromPath(path=self.javaPath,
+        self.registerOneExecutable(path=self.javaPath,
             name='VariousReadCountJava', clusterSizeMultiplier=0)
         #no cluster_size for this because it could run on a whole bam for hours
-        self.addExecutableFromPath(path=self.javaPath,
+        self.registerOneExecutable(path=self.javaPath,
             name='MarkDuplicatesJava', clusterSizeMultiplier=0)
 
-        self.addExecutableFromPath(path=os.path.join(self.pymodulePath, \
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
                 "mapper/filter/vcf_isec.sh"),\
             name='vcf_isec', clusterSizeMultiplier=1)
-        self.addExecutableFromPath(path=os.path.join(self.pymodulePath, \
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
             "mapper/extractor/vcfSubset.sh"),\
             name='vcfSubset', clusterSizeMultiplier=1)
         #vcfSubsetPath is first argument to vcfSubset
         self.vcfSubset.vcfSubsetPath = self.vcfSubsetPath
 
-        self.addExecutableFromPath(path=self.javaPath,
+        self.registerOneExecutable(path=self.javaPath,
             name='SelectVariantsJava', clusterSizeMultiplier=0.5)
 
         #2013.09.04
-        self.addExecutableFromPath(path=self.javaPath,
+        self.registerOneExecutable(path=self.javaPath,
             name='CombineVariantsJava', clusterSizeMultiplier=0.3)
-        self.addExecutableFromPath(path=self.javaPath,
+        self.registerOneExecutable(path=self.javaPath,
             name='CombineVariantsJavaInReduce', \
             clusterSizeMultiplier=0.001)
 
 
-        self.addExecutableFromPath(
+        self.registerOneExecutable(
             path=os.path.join(self.pymodulePath, \
                 "mapper/computer/CallVariantBySamtools.sh"),
             name='CallVariantBySamtools', \
             clusterSizeMultiplier=0)
 
-        self.addExecutableFromPath(
+        self.registerOneExecutable(
             path=os.path.join(self.pymodulePath, \
                 "mapper/computer/GenotypeCallByCoverage.py"),
             name='GenotypeCallByCoverage', \
@@ -358,105 +358,105 @@ class AbstractNGSWorkflow(ParentClass):
 
 
         #2013.06.28 use this function
-        self.addExecutableFromPath(
+        self.registerOneExecutable(
             path=os.path.join(self.pymodulePath, "shell/bgzip_tabix.sh"), \
             name='bgzip_tabix', clusterSizeMultiplier=4)
         #bgzip_tabix_in_reduce is used in reduce() functions, 
         # on whole-scaffold/chromosome VCFs, less clustering
-        self.addExecutableFromPath(
+        self.registerOneExecutable(
             path=os.path.join(self.pymodulePath, "shell/bgzip_tabix.sh"), \
             name='bgzip_tabix_in_reduce', clusterSizeMultiplier=1)
 
-        self.addExecutableFromPath(
+        self.registerOneExecutable(
             path=os.path.join(self.pymodulePath, "mapper/converter/vcf_convert.sh"), \
             name='vcf_convert', clusterSizeMultiplier=1)
         #vcf_convert_in_reduce is used in reduce() functions, on whole-scaffold/chromosome VCFs,
-        self.addExecutableFromPath(
+        self.registerOneExecutable(
             path=os.path.join(self.pymodulePath, "mapper/converter/vcf_convert.sh"), \
             name='vcf_convert_in_reduce', clusterSizeMultiplier=0.2)
 
-        self.addExecutableFromPath(
+        self.registerOneExecutable(
             path=os.path.join(self.pymodulePath, "reducer/vcf_concat.sh"),
             name='vcf_concat', clusterSizeMultiplier=1)
-        self.addExecutableFromPath(
+        self.registerOneExecutable(
             path=os.path.join(self.pymodulePath, "reducer/vcf_concat.sh"),
             name='concatGATK', clusterSizeMultiplier=1)
-        self.addExecutableFromPath(
+        self.registerOneExecutable(
             path=os.path.join(self.pymodulePath, "reducer/vcf_concat.sh"),
             name='concatSamtools', clusterSizeMultiplier=1)
 
 
         #2011.12.21 moved from FilterVCFPipeline.py
-        self.addExecutableFromPath(path=self.javaPath,
+        self.registerOneExecutable(path=self.javaPath,
                         name='FilterVCFByDepthJava', \
                         clusterSizeMultiplier=1)
 
         #2012.3.1
-        self.addExecutableFromPath(
+        self.registerOneExecutable(
             path=os.path.join(self.pymodulePath, "reducer/MergeFiles.sh"), \
             name='MergeFiles', clusterSizeMultiplier=0)
 
         #2013.09.17 updated
-        self.addExecutableFromPath(
+        self.registerOneExecutable(
             path=os.path.join(self.pymodulePath, \
                 "mapper/computer/CheckTwoVCFOverlap.py"), \
             name='CheckTwoVCFOverlap', clusterSizeMultiplier=1)
 
         #2012.9.6
-        self.addExecutableFromPath(
+        self.registerOneExecutable(
             path=os.path.join(self.pymodulePath, \
                 "mapper/modifier/AppendInfo2SmartPCAOutput.py"), \
             name='AppendInfo2SmartPCAOutput', clusterSizeMultiplier=0)
 
-        self.addExecutableFromPath(
+        self.registerOneExecutable(
             path=self.javaPath, name='MergeSamFilesJava', clusterSizeMultiplier=0)
 
         #2013.07.09 in order to run vcfsorter.pl from http://code.google.com/p/vcfsorter/
-        self.addExecutableFromPath(
+        self.registerOneExecutable(
             path=os.path.join(self.pymodulePath, 'shell/pipeCommandOutput2File.sh'),
             name='vcfsorterShellPipe', clusterSizeMultiplier=1)
 
-        self.addExecutableFromPath(
+        self.registerOneExecutable(
             path=self.javaPath, name='GATKJava', clusterSizeMultiplier=0.2)
-        self.addExecutableFromPath(
+        self.registerOneExecutable(
             path=self.samtools_path, name='samtools', clusterSizeMultiplier=0.2)
-        self.addExecutableFromPath(
+        self.registerOneExecutable(
             path=self.javaPath, name='genotyperJava', clusterSizeMultiplier=0.1)
 
         #clustering is controlled by a separate parameter
         #genotyperJava.addProfile(Profile(Namespace.PEGASUS, key="clusters.size", value="%s"%cluster_size))
 
         #2013.07.10
-        self.addExecutableFromPath(
+        self.registerOneExecutable(
             path=os.path.join(self.pymodulePath, \
                 "mapper/modifier/AddMissingInfoDescriptionToVCFHeader.py"), \
             name='AddMissingInfoDescriptionToVCFHeader', clusterSizeMultiplier=1)
 
         #2013.06.21
-        self.addExecutableFromPath(
+        self.registerOneExecutable(
             path=os.path.join(self.pymodulePath, "mapper/splitter/SplitVCFFile.py"), \
             name='SplitVCFFile', clusterSizeMultiplier=0.01)
         #2012.7.25
-        self.addExecutableFromPath(path=self.javaPath,
+        self.registerOneExecutable(path=self.javaPath,
                     name='MergeVCFReplicateHaplotypesJava', \
                     clusterSizeMultiplier=0.5)
 
         #2013.06.13
-        self.addExecutableFromPath(path=self.javaPath,
+        self.registerOneExecutable(path=self.javaPath,
                 name='BeagleJava', clusterSizeMultiplier=0.3)
         #2013.06.12 use this simple function to register vcftoolsWrapper
         #vcftoolsPath is first argument to vcftoolsWrapper
-        self.addExecutableFromPath(
+        self.registerOneExecutable(
             path=os.path.join(self.pymodulePath, "shell/vcftoolsWrapper.sh"), \
             name='vcftoolsWrapper', clusterSizeMultiplier=1)
 
-        self.addExecutableFromPath(path=self.javaPath, name='SortSamFilesJava', \
+        self.registerOneExecutable(path=self.javaPath, name='SortSamFilesJava', \
             clusterSizeMultiplier=1)
         #2013.06.06
-        self.addExecutableFromPath(path=self.javaPath, name='PrintReadsJava', \
+        self.registerOneExecutable(path=self.javaPath, name='PrintReadsJava', \
             clusterSizeMultiplier=1)
         #2013.04.09
-        self.addExecutableFromPath(path=self.javaPath, \
+        self.registerOneExecutable(path=self.javaPath, \
             name='AddOrReplaceReadGroupsJava', clusterSizeMultiplier=0.5)
 
 
@@ -1421,7 +1421,7 @@ class AbstractNGSWorkflow(ParentClass):
         job.uses(inputFile, transfer=True, register=True, link=Link.INPUT)
         job.uses(outputFile, transfer=transferOutput, register=True, link=Link.OUTPUT)
         job.output = outputFile
-        Workflow.setJobResourceRequirement(job, job_max_memory=job_max_memory)
+        pegaflow.setJobResourceRequirement(job, job_max_memory=job_max_memory)
         self.addJob(job)
         for parentJob in parentJobLs:
             if parentJob:
@@ -1837,7 +1837,7 @@ class AbstractNGSWorkflow(ParentClass):
         self.addJob(filterByDepthJob)
         for parentJob in parentJobLs:
             self.depends(parent=parentJob, child=filterByDepthJob)
-        Workflow.setJobResourceRequirement(filterByDepthJob, job_max_memory=job_max_memory)
+        pegaflow.setJobResourceRequirement(filterByDepthJob, job_max_memory=job_max_memory)
         self.no_of_jobs += 1
         return filterByDepthJob
 
@@ -2218,7 +2218,7 @@ Contig966       3160    50
         job.uses(vcf1, transfer=True, register=True, link=Link.INPUT)
         job.uses(vcf2, transfer=True, register=True, link=Link.INPUT)
         job.uses(snpMisMatchStatFile, transfer=transferOutput, register=True, link=Link.OUTPUT)
-        Workflow.setJobResourceRequirement(job, job_max_memory=job_max_memory)
+        pegaflow.setJobResourceRequirement(job, job_max_memory=job_max_memory)
         self.addJob(job)
         for input in extraDependentInputLs:
             job.uses(input, transfer=True, register=True, link=Link.INPUT)
@@ -2449,7 +2449,7 @@ Contig966       3160    50
                 lastStartStopData.stopLineStop = previousLine.stop
         sys.stderr.write("%s chromosomes out of %s lines.\n"%(len(chr2StartStopDataLs), lineNumber))
 
-        intervalFile = self.registerOneInputFile(inputFname=intervalFname, folderName=folderName)
+        intervalFile = self.registerOneInputFile(intervalFname, folderName=folderName)
         chr2IntervalDataLs = {}
         counter = 0
         for chr, startStopDataLs in chr2StartStopDataLs.items():

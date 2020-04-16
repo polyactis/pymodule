@@ -17,7 +17,7 @@ import sys, os, math
 __doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0])
 
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job
-from pegaflow import Workflow
+import pegaflow
 from palos import ProcessOptions, PassingData, utils
 from palos.pegasus.AbstractWorkflow import AbstractWorkflow
 
@@ -240,25 +240,25 @@ class PopGenSimulationWorkflow(ParentClass):
 		vervetSrcPath = self.vervetSrcPath
 		
 		#2013.3.8
-		self.addExecutableFromPath(path=os.path.expanduser(self.sfs_code_path), \
+		self.registerOneExecutable(path=os.path.expanduser(self.sfs_code_path), \
 												name="sfs_code", clusterSizeMultiplier=0.05)
-		self.addExecutableFromPath(path=os.path.expanduser(self.slim_path), \
+		self.registerOneExecutable(path=os.path.expanduser(self.slim_path), \
 												name="slim", clusterSizeMultiplier=0.3)
-		self.addExecutableFromPath(path=os.path.expanduser(self.msHOT_lite_path), \
+		self.registerOneExecutable(path=os.path.expanduser(self.msHOT_lite_path), \
 												name="msHOT_lite", clusterSizeMultiplier=0.5)
 		self.registerOneExecutableAsFile(pythonVariableName="msHOT_liteExecutableFile", path=self.msHOT_lite_path)
 		
-		self.addExecutableFromPath(path=os.path.join(self.pymodulePath, 'shell/pipeCommandOutput2File.sh'), \
+		self.registerOneExecutable(path=os.path.join(self.pymodulePath, 'shell/pipeCommandOutput2File.sh'), \
 										name='msShellPipe', clusterSizeMultiplier=1)
 		
-		self.addExecutableFromPath(\
+		self.registerOneExecutable(\
 										path=os.path.join(self.vervetSrcPath, 'db/input/AddPopGenSimulation2DB.py'), \
 										name="AddPopGenSimulation2DB", clusterSizeMultiplier=0.2)
 		
-		self.addExecutableFromPath(\
+		self.registerOneExecutable(\
 										path=os.path.join(self.pymodulePath, 'popgen/converter/SFS_CODE_Output2PolymorphismTableFile.py'), \
 										name="SFS_CODE_Output2PolymorphismTableFile", clusterSizeMultiplier=0.2)
-		self.addExecutableFromPath(\
+		self.registerOneExecutable(\
 										path=os.path.join(self.pymodulePath, 'popgen/converter/msOutput2PolymorphismTableFile.py'), \
 										name="msOutput2PolymorphismTableFile", clusterSizeMultiplier=0.2)
 		

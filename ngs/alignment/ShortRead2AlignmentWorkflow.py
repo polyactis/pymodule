@@ -11,7 +11,7 @@ __doc__ = __doc__%(sys.argv[0])
 import copy
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
-from pegaflow import Workflow
+import pegaflow
 from palos.ngs.AbstractNGSWorkflow import AbstractNGSWorkflow
 from palos.ngs.AbstractAlignmentAndVCFWorkflow import AbstractAlignmentAndVCFWorkflow
 from . AlignmentReadBaseQualityRecalibrationWorkflow import AlignmentReadBaseQualityRecalibrationWorkflow
@@ -87,31 +87,31 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 				clusterSizeMultiplier=self.alignmentJobClusterSizeFraction, \
 				defaultClusterSize=None)
 
-		self.addExecutableFromPath(path=self.bwa_path, \
+		self.registerOneExecutable(path=self.bwa_path, \
 			name="bwa", clusterSizeMultiplier=self.alignmentJobClusterSizeFraction)
-		self.addExecutableFromPath(
+		self.registerOneExecutable(
 			path=os.path.join(self.pymodulePath, 'mapper/alignment/ShortSEAlignmentByBWA.sh'), \
 			name="ShortSEAlignmentByBWA", clusterSizeMultiplier=self.alignmentJobClusterSizeFraction)
-		self.addExecutableFromPath(
+		self.registerOneExecutable(
 			path=os.path.join(self.pymodulePath, 'mapper/alignment/PEAlignmentByBWA.sh'), \
 			name="PEAlignmentByBWA", clusterSizeMultiplier=self.alignmentJobClusterSizeFraction)
-		self.addExecutableFromPath(
+		self.registerOneExecutable(
 			path=os.path.join(self.pymodulePath, 'mapper/alignment/LongSEAlignmentByBWA.sh'), \
 			name="LongSEAlignmentByBWA", clusterSizeMultiplier=self.alignmentJobClusterSizeFraction)
-		self.addExecutableFromPath(path=self.javaPath, \
+		self.registerOneExecutable(path=self.javaPath, \
 			name="SAM2BAMJava", clusterSizeMultiplier=self.alignmentJobClusterSizeFraction)
-		#self.addExecutableFromPath(
+		#self.registerOneExecutable(
 		#	path=os.path.join(self.pymodulePath, 'pegasus/mapper/alignment/BWA_Mem.sh'), \
 		#							name="BWA_Mem", clusterSizeMultiplier=self.alignmentJobClusterSizeFraction)
 		#2014.04.04 use generic pipeCommandOutput2File.sh instead
-		self.addExecutableFromPath(
+		self.registerOneExecutable(
 			path=os.path.join(self.pymodulePath, 'shell/pipeCommandOutput2File.sh'), \
 			name="BWA_Mem", clusterSizeMultiplier=self.alignmentJobClusterSizeFraction)
 		# 2014.04.04 pipeCommandOutput2File need this file dependency
 		self.registerOneExecutableAsFile(pythonVariableName="bwaExecutableFile", path=self.bwa_path)
 
-		#self.addExecutableFromPath(path=self.javaPath, name='RealignerTargetCreatorJava', clusterSizeMultiplier=0.7)
-		#self.addExecutableFromPath(path=self.javaPath, name='IndelRealignerJava', clusterSizeMultiplier=0.2)
+		#self.registerOneExecutable(path=self.javaPath, name='RealignerTargetCreatorJava', clusterSizeMultiplier=0.7)
+		#self.registerOneExecutable(path=self.javaPath, name='IndelRealignerJava', clusterSizeMultiplier=0.2)
 
 	def addBWAReferenceIndexJob(self, refFastaFList=None, refSequenceBaseCount=3000000000, bwa=None,\
 					bwaIndexFileSuffixLs = None,\
@@ -180,7 +180,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 			stampyGenomeIndexJob.uses(input, transfer=True, register=True, link=Link.INPUT)
 		for parentJob in parentJobLs:
 			self.depends(parent=parentJob, child=stampyGenomeIndexJob)
-		Workflow.setJobResourceRequirement(stampyGenomeIndexJob, job_max_memory=job_max_memory, walltime=walltime)
+		pegaflow.setJobResourceRequirement(stampyGenomeIndexJob, job_max_memory=job_max_memory, walltime=walltime)
 
 		stampyGenomeHashJob = Job(namespace=self.namespace, name=executable.name, version=self.version)
 		stampyGenomeHashJob.addArguments("-g", refFastaFile, "-H", refFastaFile)
@@ -194,7 +194,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 
 		self.addJob(stampyGenomeHashJob)
 		self.depends(parent=stampyGenomeIndexJob, child=stampyGenomeHashJob)
-		Workflow.setJobResourceRequirement(stampyGenomeHashJob, job_max_memory=job_max_memory, walltime=walltime)
+		pegaflow.setJobResourceRequirement(stampyGenomeHashJob, job_max_memory=job_max_memory, walltime=walltime)
 		"""
 
 		refFastaFile = refFastaFList[0]
@@ -305,7 +305,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 
 		alignmentJob = Job(namespace=self.namespace, name=stampy.name, version=self.version)
 		# make sure to use ', rather than ", to wrap the bwaoptions. double-quote(") would disappear during xml translation.
-		alignmentJob.addArguments(" --bwa=%s "%(Workflow.getAbsPathOutOfExecutable(bwa)), \
+		alignmentJob.addArguments(" --bwa=%s "%(pegaflow.getAbsPathOutOfExecutable(bwa)), \
 					"--bwaoptions='%s -t%s %s' "%(additionalArguments, no_of_aln_threads, refFastaFile.name),  \
 					"-g", refFastaFile, "-h", refFastaFile, "-o", outputSamFile, '--overwrite',\
 					'--baq', '--alignquals', '--gatkcigarworkaround')
@@ -318,7 +318,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 
 		for refFastaFile in refFastaFList:
 			alignmentJob.uses(refFastaFile, transfer=True, register=True, link=Link.INPUT)
-		Workflow.setJobResourceRequirement(alignmentJob, job_max_memory=aln_job_max_memory, \
+		pegaflow.setJobResourceRequirement(alignmentJob, job_max_memory=aln_job_max_memory, \
 										no_of_cpus=no_of_aln_threads, walltime=aln_job_walltime)
 		self.addJob(alignmentJob)
 		#add fastq files after "-M"
@@ -359,7 +359,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 		for refFastaFile in refFastaFList:
 			alignmentJob.uses(refFastaFile, transfer=True, register=True, link=Link.INPUT)
 		alignmentJob.uses(saiOutput, transfer=False, register=True, link=Link.OUTPUT)
-		Workflow.setJobResourceRequirement(alignmentJob, job_max_memory=aln_job_max_memory, \
+		pegaflow.setJobResourceRequirement(alignmentJob, job_max_memory=aln_job_max_memory, \
 										no_of_cpus=no_of_aln_threads, walltime=aln_job_walltime)
 
 		self.addJob(alignmentJob)
@@ -489,7 +489,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 					sai2samJob.uses(refFastaFile, transfer=True, register=True, link=Link.INPUT)
 				sai2samJob.uses(saiOutput, transfer=True, register=True, link=Link.INPUT)
 				sai2samJob.uses(fastqF, transfer=True, register=True, link=Link.INPUT)
-				Workflow.setJobResourceRequirement(sai2samJob, job_max_memory=samse_job_max_memory,\
+				pegaflow.setJobResourceRequirement(sai2samJob, job_max_memory=samse_job_max_memory,\
 											walltime=100)
 				self.addJob(sai2samJob)
 				self.addJobDependency(parentJob=alignmentJob, childJob=sai2samJob)
@@ -506,7 +506,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 				for refFastaFile in refFastaFList:
 					alignmentJob.uses(refFastaFile, transfer=True, register=True, link=Link.INPUT)
 				alignmentJob.uses(fastqF, transfer=True, register=True, link=Link.INPUT)
-				Workflow.setJobResourceRequirement(alignmentJob, job_max_memory=bwasw_job_max_memory, \
+				pegaflow.setJobResourceRequirement(alignmentJob, job_max_memory=bwasw_job_max_memory, \
 												no_of_cpus=no_of_aln_threads, walltime=aln_job_walltime)
 				self.addJob(alignmentJob)
 				#fake a sai2samJob
@@ -533,7 +533,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 			alignmentSamF = File('%s.sam.gz'%(os.path.join(outputDir, fileBasenamePrefix)))
 			sai2samJob = Job(namespace=namespace, name=PEAlignmentByBWA.name, version=version)
 			sai2samJob.addArguments(refFastaFList[0])
-			Workflow.setJobResourceRequirement(sai2samJob, job_max_memory=sampe_job_max_memory)
+			pegaflow.setJobResourceRequirement(sai2samJob, job_max_memory=sampe_job_max_memory)
 			for refFastaFile in refFastaFList:
 				sai2samJob.uses(refFastaFile, transfer=True, register=True, link=Link.INPUT)
 			self.addJob(sai2samJob)
@@ -860,7 +860,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 			merge_sam_job = Job(namespace=self.namespace, name=samtools.name, version=self.version)
 			merge_sam_job.addArguments('-f', outputBamFile)		#'overwrite the output BAM if exist'
 			merge_sam_job.uses(outputBamFile, transfer=transferOutput, register=True, link=Link.OUTPUT)
-			Workflow.setJobResourceRequirement(merge_sam_job, job_max_memory=job_max_memory)
+			pegaflow.setJobResourceRequirement(merge_sam_job, job_max_memory=job_max_memory)
 			self.addJob(merge_sam_job)
 			for AlignmentJobAndOutput in AlignmentJobAndOutputLs:
 				alignmentJob, alignmentOutput = AlignmentJobAndOutput[:2]
@@ -918,7 +918,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 		MarkDupJob.uses(MarkDupOutputMetricF, transfer=transferOutput, register=True, link=Link.OUTPUT)
 		#pass	#don't register the files so leave them there
 		self.addJob(MarkDupJob)
-		Workflow.setJobResourceRequirement(MarkDupJob, job_max_memory=job_max_memory, no_of_cpus=no_of_cpus,\
+		pegaflow.setJobResourceRequirement(MarkDupJob, job_max_memory=job_max_memory, no_of_cpus=no_of_cpus,\
 										walltime=walltime)
 		for parentJob in parentJobLs:
 			if parentJob:
@@ -945,7 +945,7 @@ class ShortRead2AlignmentWorkflow(AbstractNGSWorkflow, AlignmentReadBaseQualityR
 		"""
 		job = Job(namespace=namespace, name=BuildBamIndexFilesJava.name, version=version)
 		job.addArguments(inputBamF, refFastaFList[0], outputBamF)
-		Workflow.setJobResourceRequirement(job, job_max_memory=1000)
+		pegaflow.setJobResourceRequirement(job, job_max_memory=1000)
 		job.uses(inputBamF, transfer=True, register=True, link=Link.INPUT)
 		for refFastaFile in refFastaFList:
 			job.uses(refFastaFile, transfer=True, register=True, link=Link.INPUT)

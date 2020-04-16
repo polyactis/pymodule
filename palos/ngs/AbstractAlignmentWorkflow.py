@@ -7,7 +7,7 @@ import copy
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
 from palos import ngs
-from pegaflow import Workflow
+import pegaflow
 from . AbstractNGSWorkflow import AbstractNGSWorkflow
 
 class AbstractAlignmentWorkflow(AbstractNGSWorkflow):
@@ -172,7 +172,7 @@ class AbstractAlignmentWorkflow(AbstractNGSWorkflow):
 				addRGJob.uses(bamF, transfer=True, register=True, link=Link.INPUT)
 				addRGJob.uses(baiF, transfer=True, register=True, link=Link.INPUT)
 				addRGJob.uses(outputRGSAM, transfer=True, register=True, link=Link.OUTPUT)
-				Workflow.setJobResourceRequirement(addRGJob, job_max_memory=job_max_memory)
+				pegaflow.setJobResourceRequirement(addRGJob, job_max_memory=job_max_memory)
 				for parentJob in parentJobLs:
 					if parentJob:
 						self.depends(parent=parentJob, child=addRGJob)
@@ -206,7 +206,7 @@ class AbstractAlignmentWorkflow(AbstractNGSWorkflow):
 
 				index_sam_job
 
-				Workflow.setJobResourceRequirement(index_sam_job, job_max_memory=indexJobMaxMem)
+				pegaflow.setJobResourceRequirement(index_sam_job, job_max_memory=indexJobMaxMem)
 
 				self.addJob(index_sam_job)
 				self.depends(parent=mvJob, child=index_sam_job)
@@ -619,7 +619,7 @@ class AbstractAlignmentWorkflow(AbstractNGSWorkflow):
 		"""
 		"""
 		AbstractNGSWorkflow.registerCustomExecutables(self)
-		#self.addExecutableFromPath(path=self.javaPath, name="exampleJava", clusterSizeMultiplier=0.3)
+		#self.registerOneExecutable(path=self.javaPath, name="exampleJava", clusterSizeMultiplier=0.3)
 
 	def setup_run(self):
 		"""

@@ -14,7 +14,7 @@ import sys, os, math
 __doc__ = __doc__%(sys.argv[0])
 
 from pegaflow.DAX3 import Executable, File, PFN
-from pegaflow import Workflow
+import pegaflow
 from palos import ProcessOptions, PassingData
 from palos.io.FastaFile import FastaFile
 from . AbstractVCFWorkflow import AbstractVCFWorkflow

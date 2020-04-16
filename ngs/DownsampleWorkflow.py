@@ -40,14 +40,14 @@ class DownsampleWorkflow(ParentClass):
 
         alignNormal = self.db_main.queryTable(SunsetDB.IndividualAlignment).get(idDict['normalFile'])
         alignNormalFilePath = os.path.join(data_dir, alignNormal.path)
-        inputNormalBamFile = self.registerOneInputFile(inputFname=alignNormalFilePath)
+        inputNormalBamFile = self.registerOneInputFile(alignNormalFilePath)
         coverageNormal = int(alignNormal.mean_depth)
         #alignNormalIndiv = self.db_main.queryTable(SunsetDB.IndividualSequence).get(alignNormal.ind_seq_id)
         #coverageNormal = int(alignNormalIndiv.coverage)
 
         alignTumor = self.db_main.queryTable(SunsetDB.IndividualAlignment).get(idDict['tumorFile'])
         alignTumorFilePath = os.path.join(data_dir, alignTumor.path)
-        inputTumorBamFile = self.registerOneInputFile(inputFname=alignTumorFilePath)
+        inputTumorBamFile = self.registerOneInputFile(alignTumorFilePath)
         coverageTumor = int(alignTumor.mean_depth)
         #alignTumorIndiv = self.db_main.queryTable(SunsetDB.IndividualSequence).get(alignTumor.ind_seq_id)
         #coverageTumor = int(alignTumorIndiv.coverage)
@@ -136,9 +136,11 @@ class DownsampleWorkflow(ParentClass):
                                                 walltime=mergeAlignmentWalltime, \
                                                 parentJobLs=[SampleFolderJob, purityFolderJob])
             normal_part_refer = self.registerOneInputFile(
-                inputFname="/y/Sunset/workflow/real_data/downsample/normal_0.2.bam",folderName=os.path.join(puritySampleFolder,purityDir))
+                inputFname="/y/Sunset/workflow/real_data/downsample/normal_0.2.bam", 
+                folderName=os.path.join(puritySampleFolder,purityDir))
             normal_bam_bai = self.registerOneInputFile(
-                inputFname="/y/Sunset/workflow/real_data/downsample/normal_0.2.bam.bai",folderName=os.path.join(puritySampleFolder,purityDir))
+                inputFname="/y/Sunset/workflow/real_data/downsample/normal_0.2.bam.bai",
+                folderName=os.path.join(puritySampleFolder,purityDir))
             pair_bam_file_list.append([mergedBamFile, normal_part_refer])
             AccurityJob = self.doAllAccurityAlignmentJob(data_dir=None,  normal_bam_bai=normal_bam_bai,\
                                                          pair_bam_file_list=pair_bam_file_list,\
@@ -187,11 +189,11 @@ class DownsampleWorkflow(ParentClass):
             outputList.append(File(sample_folder + "/rc_ratios_of_peaks_based_on_period_from_autocor.tsv"))
             outputList.append(File(sample_folder + "/runTime.log.txt"))
 
-            #tumor_bam_file = self.registerOneInputFile(inputFname=tumor_bam_path)
-            #tumor_bai_file = self.registerOneInputFile(inputFname=tumor_bai_path)
-            #normal_bam_file = self.registerOneInputFile(inputFname=normal_bam_path)
-            #normal_bai_file = self.registerOneInputFile(inputFname=normal_bai_path)
-            configure_file = self.registerOneInputFile(inputFname=Accurity_configure_path)
+            #tumor_bam_file = self.registerOneInputFile(tumor_bam_path)
+            #tumor_bai_file = self.registerOneInputFile(tumor_bai_path)
+            #normal_bam_file = self.registerOneInputFile(normal_bam_path)
+            #normal_bai_file = self.registerOneInputFile(normal_bai_path)
+            configure_file = self.registerOneInputFile(Accurity_configure_path)
             argumentList = ["-c", configure_file, "-t", tumor_bam, "-n", normal_bam, "-o", sample_folder, "-d", "1", "-l", "4"]
             inputFileList = [tumor_bam, tumor_bam_bai, normal_bam, normal_bam_bai, configure_file]
 

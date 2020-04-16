@@ -43,7 +43,7 @@ import sys, os, math
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 
 from pegaflow.DAX3 import Executable, File, PFN
-from pegaflow import Workflow
+import pegaflow
 from palos import ProcessOptions, PassingData
 from palos.ngs.AbstractVCFWorkflow import AbstractVCFWorkflow
 from palos.pegasus.BlastWorkflow import BlastWorkflow
@@ -117,7 +117,7 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, Sh
 		
 		self.plotDirJob = self.addMkDirJob(outputDir="%sPlot"%(outputDirPrefix))
 		
-		passingData.oldRefFastaFile = self.registerOneInputFile(inputFname=self.oldRefFastaFname, \
+		passingData.oldRefFastaFile = self.registerOneInputFile(self.oldRefFastaFname, \
 															folderName=self.pegasusFolderName)
 		refIndexJob = None
 		if self.alignmentMethodType==1:	#blast
@@ -417,11 +417,11 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, Sh
 		ShortRead2AlignmentWorkflow.registerCustomExecutables(self)
 		BlastWorkflow.registerCustomExecutables(self)		
 
-		self.addExecutableFromPath(path=self.javaPath, name='LiftoverVariants', clusterSizeMultiplier=0.5)
-		self.addExecutableFromPath(path=self.javaPath, name='FilterLiftedVariants', clusterSizeMultiplier=0.5)
-		self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "polymorphism/qc/mapper/RemoveLocusFromVCFWithLowLiftOverMapPvalue.py"), \
+		self.registerOneExecutable(path=self.javaPath, name='LiftoverVariants', clusterSizeMultiplier=0.5)
+		self.registerOneExecutable(path=self.javaPath, name='FilterLiftedVariants', clusterSizeMultiplier=0.5)
+		self.registerOneExecutable(path=os.path.join(self.pymodulePath, "polymorphism/qc/mapper/RemoveLocusFromVCFWithLowLiftOverMapPvalue.py"), \
 												name='RemoveLocusFromVCFWithLowLiftOverMapPvalue', clusterSizeMultiplier=1)
-		self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "polymorphism/mapper/ComputeLiftOverLocusProbability.py"),\
+		self.registerOneExecutable(path=os.path.join(self.pymodulePath, "polymorphism/mapper/ComputeLiftOverLocusProbability.py"),\
 											name='ComputeLiftOverLocusProbability', \
 											clusterSizeMultiplier=1)
 	

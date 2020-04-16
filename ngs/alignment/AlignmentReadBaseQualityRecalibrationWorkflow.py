@@ -54,7 +54,7 @@ import sys, os, math
 __doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0])
 
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job
-from pegaflow import Workflow
+import pegaflow
 from palos import ProcessOptions, getListOutOfStr, PassingData, ngs, \
 	figureOutDelimiter, getColName2IndexFromHeader, utils
 from palos.ngs.io.VCFFile import VCFFile
@@ -609,13 +609,13 @@ class AlignmentReadBaseQualityRecalibrationWorkflow(ParentClass):
 		#samtools is only used for select alignment, which is very fast, increase the clustering 
 		self.setExecutableClusterSize(executable=self.samtools, clusterSizeMultiplier=1)
 		
-		self.addExecutableFromPath(path=self.javaPath, 
+		self.registerOneExecutable(path=self.javaPath, 
 				name='BaseRecalibratorJava', clusterSizeMultiplier=1)
-		self.addExecutableFromPath(path=self.javaPath, 
+		self.registerOneExecutable(path=self.javaPath, 
 				name='PrintRecalibratedReadsJava', clusterSizeMultiplier=1)
-		self.addExecutableFromPath(path=self.javaPath, 
+		self.registerOneExecutable(path=self.javaPath, 
 				name='RealignerTargetCreatorJava', clusterSizeMultiplier=1)
-		self.addExecutableFromPath(path=self.javaPath, 
+		self.registerOneExecutable(path=self.javaPath, 
 				name='IndelRealignerJava', clusterSizeMultiplier=1)
 
 

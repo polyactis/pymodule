@@ -16,7 +16,7 @@ __doc__ = __doc__%(sys.argv[0])
 from pegaflow.DAX3 import Executable, File, PFN
 from palos import ProcessOptions, PassingData, utils
 from palos.io.FastaFile import FastaFile
-from pegaflow import Workflow
+import pegaflow
 from palos.pegasus.MapReduceGenomeFileWorkflow import MapReduceGenomeFileWorkflow
 
 ParentClass = MapReduceGenomeFileWorkflow
@@ -70,11 +70,9 @@ class TestMapReduceGenomeFileWorkflow(ParentClass):
 	def registerExecutables(self):
 		"""
 		"""
-		if not workflow:
-			workflow = self
 		ParentClass.registerExecutables(self)
 		
-		self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "polymorphism/mapper/ComputeLiftOverLocusProbability.py"),\
+		self.registerOneExecutable(path=os.path.join(self.pymodulePath, "polymorphism/mapper/ComputeLiftOverLocusProbability.py"),\
 				name='ComputeLiftOverLocusProbability', \
 				clusterSizeMultiplier=1)
 	

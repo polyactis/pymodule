@@ -19,7 +19,7 @@ __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
-from pegaflow import Workflow
+import pegaflow
 from palos.pegasus.AbstractBioinfoWorkflow import AbstractBioinfoWorkflow
 
 ParentClass = AbstractBioinfoWorkflow
@@ -85,7 +85,7 @@ class BlastWorkflow(ParentClass):
 			job.outputList.append(splitFile)
 			job.uses(splitFile, transfer=transferOutput, register=True, link=Link.OUTPUT)
 			
-		Workflow.setJobResourceRequirement(job, job_max_memory=job_max_memory)
+		pegaflow.setJobResourceRequirement(job, job_max_memory=job_max_memory)
 		self.addJob(job)
 		for parentJob in parentJobLs:
 			if parentJob:
@@ -236,7 +236,7 @@ class BlastWorkflow(ParentClass):
 		self.setup_run()
 		
 		inputData = PassingData(jobDataLs = [])
-		inputFile = self.registerOneInputFile(inputFname=self.inputFname, folderName=self.pegasusFolderName)
+		inputFile = self.registerOneInputFile(self.inputFname, folderName=self.pegasusFolderName)
 		inputData.jobDataLs.append(PassingData(output=inputFile, jobLs=[]))
 		noOfTotalSequences= self.getNoOfSequencesFromFasta(inputFastaFname=self.inputFname)
 		

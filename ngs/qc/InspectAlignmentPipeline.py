@@ -393,7 +393,7 @@ class InspectAlignmentPipeline(ParentClass, AbstractAccuWorkflow):
 					job_max_memory=10, sshDBTunnel=self.needSSHDBTunnel)
 			pdata = self.constructJobDataFromJob(samtoolsDepthJob)
 		else:
-			alignmentDepthFile = self.registerOneInputFile(inputFname=os.path.join(self.data_dir, alignment.path_to_depth_file), \
+			alignmentDepthFile = self.registerOneInputFile(os.path.join(self.data_dir, alignment.path_to_depth_file), \
 							input_site_handler=None, folderName=self.pegasusFolderName, useAbsolutePathAsPegasusFileName=False,\
 							pegasusFileName=None, checkFileExistence=True)
 			pdata = PassingData(job=None, jobLs=[], file=alignmentDepthFile, fileLs=[alignmentDepthFile])

@@ -85,7 +85,7 @@ __doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[
 
 import copy, re, csv
 from pegaflow.DAX3 import File
-from pegaflow import Workflow
+import pegaflow
 from palos import ProcessOptions, PassingData, utils
 from palos.io.MatrixFile import MatrixFile
 from palos.ngs.AbstractNGSWorkflow import AbstractNGSWorkflow
@@ -795,7 +795,7 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
 			sequenceOutputDir = os.path.join(data_dir, individual_sequence.path)
 			sequenceOutputDirJob = self.addMkDirJob(outputDir=sequenceOutputDir)
 			
-			bamInputF = Workflow.registerFile(bamFname)
+			bamInputF = self.registerOneInputFile(bamFname)
 			
 			bamBaseFname = os.path.split(bamFname)[1]
 			bamBaseFnamePrefix = os.path.splitext(bamBaseFname)[0]
@@ -997,9 +997,9 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
 		sam2fastqOutputDirJob = self.addMkDirJob(outputDir=sam2fastqOutputDir)
 		
 		for tcga_sample_obj in tcga_sample_obj_ls:
-			bamInputF = Workflow.registerFile(tcga_sample_obj.bamPath)
+			bamInputF = self.registerOneInputFile(tcga_sample_obj.bamPath)
 			bamFileSize = utils.getFileOrFolderSize(tcga_sample_obj.bamPath)
-			baiInputF = Workflow.registerFile(tcga_sample_obj.baiPath)
+			baiInputF = self.registerOneInputFile(tcga_sample_obj.baiPath)
 			bamBaseFname = os.path.split(tcga_sample_obj.bamPath)[1]
 			bamBaseFnamePrefix = os.path.splitext(bamBaseFname)[0]
 			library = tcga_sample_obj.tcga_barcode
@@ -1220,9 +1220,9 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
 		sam2fastqOutputDirJob = self.addMkDirJob(outputDir=sam2fastqOutputDir)
 		
 		for tcga_sample_obj in tcga_sample_obj_ls:
-			bamInputF = Workflow.registerFile(tcga_sample_obj.bamPath)
+			bamInputF = self.registerOneInputFile(tcga_sample_obj.bamPath)
 			bamFileSize = utils.getFileOrFolderSize(tcga_sample_obj.bamPath)
-			baiInputF = Workflow.registerFile(tcga_sample_obj.baiPath)
+			baiInputF = self.registerOneInputFile(tcga_sample_obj.baiPath)
 			bamBaseFname = os.path.split(tcga_sample_obj.bamPath)[1]
 			bamBaseFnamePrefix = os.path.splitext(bamBaseFname)[0]
 			library = tcga_sample_obj.db_entry.code

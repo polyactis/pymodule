@@ -10,7 +10,7 @@ from palos import Genome, getListOutOfStr, PassingData, utils
 from palos.io.MatrixFile import MatrixFile
 from palos.ngs.io.VCFFile import VCFFile
 from palos import ngs
-from pegaflow import Workflow
+import pegaflow
 from . AbstractNGSWorkflow import AbstractNGSWorkflow
 from . MapReduceGenomeFileWorkflow import MapReduceGenomeFileWorkflow as ParentClass
 
@@ -88,34 +88,34 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 		ParentClass.registerExecutables(self)
 		
 		#2012.8.30 moved from vervet/src/AddVCFFolder2DBWorkflow.py
-		#self.addExecutableFromPath(path=os.path.join(vervetSrcPath, \
+		#self.registerOneExecutable(path=os.path.join(vervetSrcPath, \
 		#	"db/input/AddVCFFile2DB.py"),
 		#	name='AddVCFFile2DB', clusterSizeMultiplier=1)
 		
-		self.addExecutableFromPath(path=os.path.join(self.pymodulePath, \
+		self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
 				"pegasus/mapper/filter/FilterVCFSNPCluster.py"),
 				name='FilterVCFSNPCluster', \
 				clusterSizeMultiplier=1)
-		self.addExecutableFromPath(path=os.path.join(self.pymodulePath, \
+		self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
 				"pegasus/mapper/extractor/JuxtaposeAlleleFrequencyFromMultiVCFInput.py"),
 				name='JuxtaposeAlleleFrequencyFromMultiVCFInput', \
 				clusterSizeMultiplier=1)		
 		
 		#2013.07.12
-		self.addExecutableFromPath(path=self.javaPath, name='SelectVariantsJavaInReduce', \
+		self.registerOneExecutable(path=self.javaPath, name='SelectVariantsJavaInReduce', \
 				clusterSizeMultiplier=0.001)
-		self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "polymorphism/qc/RemoveRedundantLociFromVCF.py"), \
+		self.registerOneExecutable(path=os.path.join(self.pymodulePath, "polymorphism/qc/RemoveRedundantLociFromVCF.py"), \
 				name='RemoveRedundantLociFromVCF_InReduce', clusterSizeMultiplier=0)
-		self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "polymorphism/qc/RemoveRedundantLociFromVCF.py"), \
+		self.registerOneExecutable(path=os.path.join(self.pymodulePath, "polymorphism/qc/RemoveRedundantLociFromVCF.py"), \
 				name='RemoveRedundantLociFromVCF', clusterSizeMultiplier=1)
-		self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "polymorphism/qc/ClearVCFBasedOnSwitchDensity.py"), \
+		self.registerOneExecutable(path=os.path.join(self.pymodulePath, "polymorphism/qc/ClearVCFBasedOnSwitchDensity.py"), \
 				name='ClearVCFBasedOnSwitchDensity', clusterSizeMultiplier=1)
-		self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "polymorphism/qc/CalculateSameSiteConcordanceInVCF.py"), \
+		self.registerOneExecutable(path=os.path.join(self.pymodulePath, "polymorphism/qc/CalculateSameSiteConcordanceInVCF.py"), \
 				name='CalculateSameSiteConcordanceInVCF', clusterSizeMultiplier=1)
 		
-		self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "mapper/extractor/ExtractInfoFromVCF.py"), \
+		self.registerOneExecutable(path=os.path.join(self.pymodulePath, "mapper/extractor/ExtractInfoFromVCF.py"), \
 				name='ExtractInfoFromVCF', clusterSizeMultiplier=1)
-		self.addExecutableFromPath(path=os.path.join(self.pymodulePath, "mapper/extractor/ExtractSamplesFromVCF.py"), \
+		self.registerOneExecutable(path=os.path.join(self.pymodulePath, "mapper/extractor/ExtractSamplesFromVCF.py"), \
 				name='ExtractSamplesFromVCF', clusterSizeMultiplier=1)
 	
 	def registerCommonExecutables(self):
@@ -373,7 +373,7 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
 				lastStartStopData.stopLineStop = previousLine.stop
 		sys.stderr.write("%s chromosomes out of %s lines.\n"%(len(chr2StartStopDataLs), lineNumber))
 		
-		intervalFile = self.registerOneInputFile(inputFname=vcfFname, folderName=folderName)
+		intervalFile = self.registerOneInputFile(vcfFname, folderName=folderName)
 		chr2IntervalDataLs = {}
 		counter = 0
 		for chromosome, startStopDataLs in chr2StartStopDataLs.items():

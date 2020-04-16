@@ -14,7 +14,7 @@ import sys, os, math
 __doc__ = __doc__%(sys.argv[0])
 
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
-from pegaflow import Workflow
+import pegaflow
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job
 from palos.pegasus.AbstractWorkflow import AbstractWorkflow
 class WgetWorkflow(AbstractWorkflow):
@@ -233,7 +233,7 @@ class WgetWorkflow(AbstractWorkflow):
         """
         2012.6.27
         """
-        self.addExecutableFromPath(path=pathToWget, \
+        self.registerOneExecutable(path=pathToWget, \
                 name="wget", clusterSizeMultiplier=1)
     
     def run(self):
@@ -252,7 +252,7 @@ class WgetWorkflow(AbstractWorkflow):
         relativePathList = self.getFilenamesToBeDownloaded(url=self.inputURL, username=self.username, password=self.password)
         #one file needs to registered so that replica catalog is not empty
         #but this file doesn't need to be actually used by any job.
-        wgetFile = self.registerOneInputFile(inputFname=self.pathToWget)
+        wgetFile = self.registerOneInputFile(self.pathToWget)
         
         self.addJobs(inputURL=self.inputURL, relativePathList=relativePathList, outputDir=self.pegasusFolderName, username=self.username, \
                     password=self.password, \
