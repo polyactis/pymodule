@@ -354,19 +354,20 @@ class ImportIndividualSequence2DB(ParentClass):
 		2012.4.30
 			this function supercedes self.getAllBamFiles() and it's more flexible.
 		"""
-		inputFnameLs = []
+		input_path_list = []
 		if os.path.isdir(input):
-			self.getFilesWithSuffixFromFolderRecursive(inputFolder=input, suffixSet=suffixSet, fakeSuffix=fakeSuffix, \
-												inputFnameLs=inputFnameLs)
+			self.getFilesWithSuffixFromFolderRecursive(inputFolder=input, suffixSet=suffixSet, 
+                                fakeSuffix=fakeSuffix, \
+                                return_path_list=input_path_list)
 		elif os.path.isfile(input):
 			inf = open(input)
 			for line in inf:
-				inputFnameLs.append(line.strip())
+				input_path_list.append(line.strip())
 			del inf
 		else:
 			sys.stderr.write("%s is neither a folder nor a file.\n"%(input))
 			sys.exit(4)
-		return inputFnameLs
+		return input_path_list
 
 	def getMonkeyID2FastqObjectLsForSouthAfricanDNAData(self, fastqFnameLs=None):
 		"""
