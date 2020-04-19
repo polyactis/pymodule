@@ -2,7 +2,7 @@
  * 2013.09.10 a c++ version of CheckTwoVCFOverlap.py
  *
  */
-#include "pymodule/include/CheckTwoVCFOverlapCC.h"
+#include "include/CheckTwoVCFOverlapCC.h"
 
 CheckTwoVCFOverlapCC::CheckTwoVCFOverlapCC(int _argc, char* _argv[]): AbstractMatrixFileWalkerCC(_argc, _argv) {
 

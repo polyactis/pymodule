@@ -4,7 +4,7 @@
  * Output is single-column file with each value
  */
 
-#include "pymodule/include/ReduceSameChromosomeAlignmentDepthFiles.h"
+#include "include/ReduceSameChromosomeAlignmentDepthFiles.h"
 
 
 ReduceSameChromosomeAlignmentDepthFiles::ReduceSameChromosomeAlignmentDepthFiles(int _argc, char* _argv[]): AbstractMatrixFileWalkerCC(_argc, _argv) {

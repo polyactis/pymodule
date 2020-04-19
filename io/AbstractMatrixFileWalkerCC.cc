@@ -2,7 +2,7 @@
  * 2013.08.19 a c++ version of AbstractMatrixFileWalker.py
  *
  */
-#include "pymodule/include/AbstractMatrixFileWalkerCC.h"
+#include "include/AbstractMatrixFileWalkerCC.h"
 
 AbstractMatrixFileWalkerCC::AbstractMatrixFileWalkerCC(int _argc, char* _argv[]): argc(_argc), argv(_argv)
 {

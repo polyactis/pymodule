@@ -13,3 +13,5 @@ SelectRowsFromMatrixCC:	%:	%.o $(SharedLibTargets)
 
 
 include ../../Makefile.common
+#overwrite Makefile.common
+IncludeDirs	= -I`readlink -f ../..`

@@ -2,7 +2,7 @@
 .SUFFIXES:	.i .cc .c .so .o _wrap.o .py
 .PHONY:	swig clean_subdirs subdirs $(SUBDIRS)
 
-IncludeDirs = -I ~/script/ -I ~/script/vcflib/ -I /usr/include/hdf5/serial/ -I ~/script/vcflib/tabixpp/ -I ~/script/vcflib/tabixpp/htslib/
+IncludeDirs = -I`readlink -f .`  -I ~/script/vcflib/ -I /usr/include/hdf5/serial/ -I ~/script/vcflib/tabixpp/ -I ~/script/vcflib/tabixpp/htslib/
 BoostLib  = -lboost_program_options -lboost_iostreams
 HDF5Lib  = -lhdf5_cpp -lhdf5 
 
@@ -31,32 +31,32 @@ SharedLibFlags	= -shared -fPIC
 #ExtraTargets
 #SRCS
 
-all:	depend $(CXXStaticTargets) $(CXXTARGETS) $(CTARGETS) $(SharedLibTargets) $(StaticLibTargets) $(ExtraTargets) subdirs
+all:  depend subdirs $(CXXStaticTargets) $(CXXTARGETS) $(CTARGETS) $(SharedLibTargets) $(StaticLibTargets) $(ExtraTargets)
 
 
 $(StaticLibTargets):	%.a:	%.o
-	-ar crfvs $@ $<
+	ar crfvs $@ $<
 
 $(SharedLibTargets):	%.so:	%.o
-	-$(CXXCOMPILER) $< $(SharedLibFlags) -o $@ $(CXXLDFLAGS)
+	$(CXXCOMPILER) $< $(SharedLibFlags) -o $@ $(CXXLDFLAGS)
 
 #.o.so:
 #	-$(CXXCOMPILER) $< $(SharedLibFlags) -o $@ $(CXXLDFLAGS)
 
 $(CXXTARGETS):	%:	%.o
-	-$(CXXCOMPILER) $< $(CXXFLAGS) -o $@ $(CXXLDFLAGS)
+	$(CXXCOMPILER) $< $(CXXFLAGS) -o $@ $(CXXLDFLAGS)
 
 $(CXXStaticTargets):	%:	%.o
-	-$(CXXCOMPILER) $< $(CXXFLAGS) -o $@ $(StaticStartFlags) $(CXXLDFLAGS) $(StaticEndFlags)
+	$(CXXCOMPILER) $< $(CXXFLAGS) -o $@ $(StaticStartFlags) $(CXXLDFLAGS) $(StaticEndFlags)
 
 .cc.o:
-	-$(CXXCOMPILER) $< $(CXXFLAGS) $(IncludeDirs) -c -o $@
+	$(CXXCOMPILER) $< $(CXXFLAGS) $(IncludeDirs) -c -o $@
 
 $(CTARGETS):	%:	%.o
-	-$(CCOMPILER) $< $(CFLAGS) -o $@ $(CLDFLAGS)
+	$(CCOMPILER) $< $(CFLAGS) -o $@ $(CLDFLAGS)
 
 .c.o:
-	-$(CCOMPILER) $< $(CFLAGS) $(IncludeDirs) -c -o $@
+	$(CCOMPILER) $< $(CFLAGS) $(IncludeDirs) -c -o $@
 
 #.c:	$(wildcard ~/script/pymodule/include/*.h)
 #.cc:	$(wildcard ~/script/pymodule/include/*.h)

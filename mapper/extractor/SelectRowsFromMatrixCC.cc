@@ -1,7 +1,7 @@
 /*
  * 2013.08.20 c++ version of SelectRowsFromMatrix.py
  */
-#include "pymodule/include/SelectRowsFromMatrixCC.h"
+#include "include/SelectRowsFromMatrixCC.h"
 
 
 SelectRowsFromMatrixCC::SelectRowsFromMatrixCC(int _argc, char* _argv[]): AbstractMatrixFileWalkerCC(_argc, _argv) {

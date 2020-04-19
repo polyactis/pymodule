@@ -3,6 +3,7 @@ CXXStaticTargets	= CalculateColCorBetweenTwoHDF5 FindMaxLDBetweenPeakAndEachLocu
 CXXLDFLAGS 	= $(HDF5Lib)
 CTARGETS	= 
 
+IncludeDirs	= -I`readlink -f ..`
 ExtraTargets	= CalculateMedianMeanOfInputColumn
 
 CalculateMedianMeanOfInputColumn:	%:	%.o
@@ -13,3 +14,5 @@ SRCS	= CalculateColCorBetweenTwoHDF5.cc FindMaxLDBetweenPeakAndEachLocus.cc Calc
 
 include ../Makefile.common
 #all:	$(CXXTARGETS) $(CTARGETS) CalculateColCorBetweenTwoHDF5
+#overwrite Makefile.common
+IncludeDirs	= -I`readlink -f ..`
