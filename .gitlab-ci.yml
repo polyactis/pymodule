@@ -10,6 +10,8 @@ stages:
   - install
   - check_version
   - test_help
+  - compile_GADA
+  - test_GADA
   - uninstall
 
 install:
@@ -37,6 +39,21 @@ test_ImportSeq:
     - echo "Testing if ImportIndividualSequence2DB.py can be run ... "
     - pwd
     - ./db/import/ImportIndividualSequence2DB.py -h
+
+compile_GADA:
+  stage: compile_GADA
+  script:
+    - echo "Compiling GADA ... "
+    - pwd
+    - cd GADA && make
+
+test_GADA:
+  stage: test_GADA
+  script:
+    - echo "Compiling GADA and test-run its Python2 module... "
+    - pwd
+    - cd GADA && make
+    - ./testGADA.py -i input.txt -o output.tsv
 
 uninstall:
   stage: uninstall

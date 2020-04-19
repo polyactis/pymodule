@@ -5,8 +5,7 @@
 /*
  This File is part of GADA
 
- GADA v1.0 Genome Alteration Detection Algorithm
- Copyright (C) 2008  Childrens Hospital of Los Angeles
+ GADA v1.01 Genome Alteration Detection Algorithm
 
  GADA is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -22,6 +21,7 @@
  along with GADA.  If not, see <http://www.gnu.org/licenses/>.
 
  Author:
+ Yu S. Huang  polyactis@gmail.com
  Roger Pique-Regi    piquereg@usc.edu
 
  */
@@ -46,7 +46,7 @@
 #include <boost/functional/hash.hpp>	//2013.09.10 yh: for customize boost::hash
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
-#include "pymodule/algorithm/RedBlackTree.h"	//2013.09.19 red-black tree to store segment breakpoint, score, etc.
+#include "pymodule/palos/algorithm/RedBlackTree.h"	//2013.09.19 red-black tree to store segment breakpoint, score, etc.
 
 
 #ifndef GADABIN
