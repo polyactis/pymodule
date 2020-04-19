@@ -8,7 +8,8 @@ after_script:
 
 stages:
   - install
-  - test
+  - check_version
+  - test_help
   - uninstall
 
 install:
@@ -17,21 +18,21 @@ install:
     - pip3 install --user ./
 
 
-test_version:
-  stage: test
+check_version:
+  stage: check_version
   script:
-    - echo "Checking the installed version"
+    - echo "Checking the version of the installed package"
     - python3 -c "import palos; print(palos.version)"
 
 test_SunsetDB:
-  stage: test
+  stage: test_help
   script:
     - echo "Testing if SunsetDB.py can be run ... "
     - pwd
     - ./palos/db/SunsetDB.py -h
 
 test_ImportSeq:
-  stage: test
+  stage: test_help
   script:
     - echo "Testing if ImportIndividualSequence2DB.py can be run ... "
     - pwd
