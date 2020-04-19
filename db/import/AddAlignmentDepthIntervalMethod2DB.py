@@ -1,18 +1,15 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
+2013.08.29 Add a new AlignmentDepthIntervalMethod into db
+
 Examples:
-	%s 
-	
 	%s  --db_user yh --schema public --methodShortName PopSabaeusCoverageOn3488
 		--alignmentIDList 6115-6177 --data_dir /u/home/p/polyacti/NetworkData/vervet/db/
 		--commit --logFilename  folderLog/AddAlignmentDepthIntervalMethod2DB.log
 
-Description:
-	2013.08.29 Add a new AlignmentDepthIntervalMethod into db
 """
-
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
+__doc__ = __doc__%(sys.argv[0])
 
 import copy
 from palos import ProcessOptions, utils
@@ -25,11 +22,11 @@ class AddAlignmentDepthIntervalMethod2DB(ParentClass):
 	option_default_dict.pop(('outputFname', 0, ))
 	option_default_dict.pop(('outputFnamePrefix', 0, ))
 	option_default_dict.update({
-						('min_segment_length', 0, int): [None, '', 1, 'a parameter of segmentation algorithm used in segmenting the depth file', ],\
-						('alignmentIDList', 1, ): ['', '', 1, 'coma/dash-separated list of alignment IDs.', ],\
-						('methodShortName', 1, ):[None, 's', 1, 'column short_name of AlignmentDepthIntervalMethod table,\
-			will be created if not present in db.'],\
-						})
+		('min_segment_length', 0, int): [None, '', 1, 'a parameter of segmentation algorithm used in segmenting the depth file', ],\
+		('alignmentIDList', 1, ): ['', '', 1, 'coma/dash-separated list of alignment IDs.', ],\
+		('methodShortName', 1, ):[None, 's', 1, 'column short_name of AlignmentDepthIntervalMethod table, '
+			'will be created if not present in db.'],\
+		})
 	def __init__(self, inputFnameLs=None, **keywords):
 		"""
 		"""

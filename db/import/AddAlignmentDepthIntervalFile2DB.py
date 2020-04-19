@@ -11,7 +11,6 @@ Examples:
 """
 
 from . AddAlignmentDepthIntervalMethod2DB import AddAlignmentDepthIntervalMethod2DB
-
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0])
 
@@ -27,12 +26,13 @@ class AddAlignmentDepthIntervalFile2DB(ParentClass):
 	option_default_dict.pop(('outputFname', 0, ))
 	option_default_dict.pop(('outputFnamePrefix', 0, ))
 	option_default_dict.update({
-						('chromosome', 0, ): ['', '', 1, 'which chromosome is the data from', ],\
-						('alignmentIDList', 0, ): ['', '', 1, 'coma/dash-separated list of alignment IDs, used to verify/create AlignmentDepthIntervalMethod', ],\
-						('methodShortName', 1, ):[None, 's', 1, 'column short_name of AlignmentDepthIntervalMethod table, \
-		will be created if not present in db.'],\
-						('format', 1, ):['tsv', '', 1, 'format for AlignmentDepthIntervalFile entry'],\
-						})
+		('chromosome', 0, ): ['', '', 1, 'which chromosome is the data from', ],\
+		('alignmentIDList', 0, ): ['', '', 1, 'coma/dash-separated list of alignment IDs, '
+			'used to verify/create AlignmentDepthIntervalMethod', ],\
+		('methodShortName', 1, ):[None, 's', 1, 'column short_name of AlignmentDepthIntervalMethod table,'
+			'will be created if not present in db.'],\
+		('format', 1, ):['tsv', '', 1, 'format for AlignmentDepthIntervalFile entry'],\
+		})
 	def __init__(self, inputFnameLs=None, **keywords):
 		"""
 		"""
@@ -67,26 +67,33 @@ class AddAlignmentDepthIntervalFile2DB(ParentClass):
 			
 		alignmentList = self.db_main.getAlignmentsFromAlignmentIDList(self.alignmentIDList)
 		
-		method = self.db_main.getAlignmentDepthIntervalMethod(short_name=self.methodShortName, description=None, ref_ind_seq_id=None, \
-					individualAlignmentLs=alignmentList, parent_db_entry=None, parent_id=None, \
-					no_of_alignments=None, no_of_intervals=None, \
-					sum_median_depth=None, sum_mean_depth=None,\
-					data_dir=self.data_dir)
-		self.checkIfAlignmentListMatchMethodDBEntry(individualAlignmentLs=alignmentList, methodDBEntry=method, session=session)
+		method = self.db_main.getAlignmentDepthIntervalMethod(short_name=self.methodShortName, \
+			description=None, ref_ind_seq_id=None, \
+			individualAlignmentLs=alignmentList, parent_db_entry=None, parent_id=None, \
+			no_of_alignments=None, no_of_intervals=None, \
+			sum_median_depth=None, sum_mean_depth=None,\
+			data_dir=self.data_dir)
+		self.checkIfAlignmentListMatchMethodDBEntry(individualAlignmentLs=alignmentList, \
+			methodDBEntry=method, session=session)
 		
 		inputFileData = self.parseInputFile(inputFname=self.inputFname)
-		logMessage += "chromosome_size=%s, no_of_intervals=%s.\n"%(inputFileData.chromosome_size, inputFileData.no_of_intervals )
+		logMessage += "chromosome_size=%s, no_of_intervals=%s.\n"%(inputFileData.chromosome_size, \
+			inputFileData.no_of_intervals )
 		
-		db_entry = self.db_main.getAlignmentDepthIntervalFile(alignment_depth_interval_method=method, alignment_depth_interval_method_id=None,  \
-					path=None, file_size=None, \
-					chromosome=self.chromosome, chromosome_size=inputFileData.chromosome_size, \
-					no_of_chromosomes=1, no_of_intervals=inputFileData.no_of_intervals,\
-					format=self.format,\
-					mean_interval_value=inputFileData.mean_interval_value, median_interval_value=inputFileData.median_interval_value, \
-					min_interval_value=inputFileData.min_interval_value, max_interval_value=inputFileData.max_interval_value,\
-					min_interval_length=inputFileData.min_interval_length, max_interval_length=inputFileData.max_interval_length, \
-					median_interval_length=inputFileData.median_interval_length,\
-					md5sum=None, original_path=None, data_dir=self.data_dir)
+		db_entry = self.db_main.getAlignmentDepthIntervalFile(alignment_depth_interval_method=method, \
+			alignment_depth_interval_method_id=None,  \
+			path=None, file_size=None, \
+			chromosome=self.chromosome, chromosome_size=inputFileData.chromosome_size, \
+			no_of_chromosomes=1, no_of_intervals=inputFileData.no_of_intervals,\
+			format=self.format,\
+			mean_interval_value=inputFileData.mean_interval_value, \
+			median_interval_value=inputFileData.median_interval_value, \
+			min_interval_value=inputFileData.min_interval_value, \
+			max_interval_value=inputFileData.max_interval_value,\
+			min_interval_length=inputFileData.min_interval_length, \
+			max_interval_length=inputFileData.max_interval_length, \
+			median_interval_length=inputFileData.median_interval_length,\
+			md5sum=None, original_path=None, data_dir=self.data_dir)
 		if db_entry.id and db_entry.path:
 			isPathInDB = self.db_main.isPathInDBAffiliatedStorage(relativePath=db_entry.path, data_dir=self.data_dir)
 			if isPathInDB==-1:
@@ -116,10 +123,10 @@ class AddAlignmentDepthIntervalFile2DB(ParentClass):
 		inputFileBasename = os.path.basename(self.inputFname)
 		relativePath = db_entry.constructRelativePath(sourceFilename=inputFileBasename)
 		exitCode = self.db_main.moveFileIntoDBAffiliatedStorage(db_entry=db_entry, filename=inputFileBasename, \
-								inputDir=os.path.split(self.inputFname)[0], dstFilename=os.path.join(self.data_dir, relativePath), \
-								relativeOutputDir=None, shellCommand='cp -rL', \
-								srcFilenameLs=self.srcFilenameLs, dstFilenameLs=self.dstFilenameLs,\
-								constructRelativePathFunction=db_entry.constructRelativePath)
+					inputDir=os.path.split(self.inputFname)[0], dstFilename=os.path.join(self.data_dir, relativePath), \
+					relativeOutputDir=None, shellCommand='cp -rL', \
+					srcFilenameLs=self.srcFilenameLs, dstFilenameLs=self.dstFilenameLs,\
+					constructRelativePathFunction=db_entry.constructRelativePath)
 		
 		if exitCode!=0:
 			sys.stderr.write("Error: moveFileIntoDBAffiliatedStorage() exits with %s code.\n"%(exitCode))

@@ -1,8 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
+2013.08.08 this program would affiliate a file to an existing database table entry.
+	store its path in db,  calculate file size, etc.
+
 Examples:
-	%s 
-	
 	%s  -i  OneLibAlignment/6246_depth.tsv.gz
 		--logFilename  OneLibAlignment/6246_depth_2db.log
 		--db_entry_id 6246 --data_dir /u/home/eeskin/polyacti/NetworkData/vervet/db/
@@ -12,14 +13,10 @@ Examples:
 		--fileSizeColumnName depth_file_size
 		--outputFileRelativePath individual_alignment/6246_1517_VEB1010_GA_vs_3488_by_method6_realigned1_reduced0_p4475_m227_depth.tsv.gz
 
-Description:
-	2013.08.08 this program would affiliate a file to an existing database table entry.
-		store its path in db,  calculate file size, etc.
-		
 """
 
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
+__doc__ = __doc__%(sys.argv[0])
 
 import copy
 from palos import ProcessOptions
@@ -33,13 +30,13 @@ class AffiliateFile2DBEntry(ParentClass):
 	option_default_dict.pop(('outputFname', 0, ))
 	option_default_dict.pop(('outputFnamePrefix', 0, ))
 	option_default_dict.update({
-						#('inputDir', 1, ): ['', 'i', 1, 'input folder that contains split fastq files', ],\
-						('db_entry_id', 1, int):[None, '', 1, 'ID of the db entry with which the input file is to be affiliated with'],\
-						('tableClassName', 1, ):[None, '', 1, 'table class name'],\
-						('filePathColumnName', 1, ):[None, '', 1, 'column name to store file path'],\
-						('fileSizeColumnName', 0, ):[None, '', 1, 'column name to store file size'],\
-						('outputFileRelativePath', 1, ):[None, '', 1, 'the relative path of the output file, to be attached to self.data_dir'],\
-						})
+		#('inputDir', 1, ): ['', 'i', 1, 'input folder that contains split fastq files', ],\
+		('db_entry_id', 1, int):[None, '', 1, 'ID of the db entry with which the input file is to be affiliated with'],\
+		('tableClassName', 1, ):[None, '', 1, 'table class name'],\
+		('filePathColumnName', 1, ):[None, '', 1, 'column name to store file path'],\
+		('fileSizeColumnName', 0, ):[None, '', 1, 'column name to store file size'],\
+		('outputFileRelativePath', 1, ):[None, '', 1, 'the relative path of the output file, to be attached to self.data_dir'],\
+		})
 	def __init__(self, inputFnameLs=None, **keywords):
 		"""
 		"""

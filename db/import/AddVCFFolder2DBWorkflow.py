@@ -44,13 +44,14 @@ class AddVCFFolder2DBWorkflow(GenericVCFWorkflow):
 	__doc__ = __doc__
 	option_default_dict = copy.deepcopy(AbstractNGSWorkflow.option_default_dict)
 	option_default_dict.update({
-						('inputDir', 0, ): ['', 'I', 1, 'input folder that contains vcf or vcf.gz files', ],\
-						('maxContigID', 0, int): [None, 'x', 1, 'if contig ID is beyond this number, it will not be included. If None or 0, no restriction.', ],\
-						('genotypeMethodShortName', 1, ):[None, 's', 1, 'column short_name of GenotypeMethod table,\
-			will be created if not present in db.'],\
-						('run_type', 1, int): [1, 'y', 1, 'which run_type to run. '],\
-						})
-						#('bamListFname', 1, ): ['/tmp/bamFileList.txt', 'L', 1, 'The file contains path to each bam file, one file per line.'],\
+		('inputDir', 0, ): ['', 'I', 1, 'input folder that contains vcf or vcf.gz files', ],\
+		('maxContigID', 0, int): [None, 'x', 1, 'if contig ID is beyond this number, '
+			'it will not be included. If None or 0, no restriction.', ],\
+		('genotypeMethodShortName', 1, ):[None, 's', 1, 'column short_name of GenotypeMethod table, '
+			'will be created if not present in db.'],\
+		('run_type', 1, int): [1, 'y', 1, 'which run_type to run. '],\
+		})
+		#('bamListFname', 1, ): ['/tmp/bamFileList.txt', 'L', 1, 'The file contains path to each bam file, one file per line.'],\
 	option_default_dict[("thisModulePath", 1, )][0] = '%s/src/Sunset'
 
 	def __init__(self,  **keywords):
@@ -79,14 +80,14 @@ class AddVCFFolder2DBWorkflow(GenericVCFWorkflow):
 		executableList = []
 		
 		AddGenotypeMethod2DB = Executable(namespace=namespace, name="AddGenotypeMethod2DB", \
-								version=version, \
-								os=operatingSystem, arch=architecture, installed=True)
+						version=version, \
+						os=operatingSystem, arch=architecture, installed=True)
 		AddGenotypeMethod2DB.addPFN(PFN("file://" + os.path.join(vervetSrcPath, "db/input/AddGenotypeMethod2DB.py"), site_handler))
 		executableList.append(AddGenotypeMethod2DB)
 		
 		UpdateGenotypeMethodNoOfLoci = Executable(namespace=namespace, name="UpdateGenotypeMethodNoOfLoci", \
-											version=version, \
-											os=operatingSystem, arch=architecture, installed=True)
+				version=version, \
+				os=operatingSystem, arch=architecture, installed=True)
 		UpdateGenotypeMethodNoOfLoci.addPFN(PFN("file://" + os.path.join(vervetSrcPath, "db/UpdateGenotypeMethodNoOfLoci.py"), site_handler))
 		executableList.append(UpdateGenotypeMethodNoOfLoci)
 		
@@ -97,8 +98,9 @@ class AddVCFFolder2DBWorkflow(GenericVCFWorkflow):
 	
 	
 	def addAddGenotypeMethod2DBJob(self, executable=None, inputFile=None, genotypeMethodShortName=None,\
-								logFile=None, data_dir=None, commit=False, parentJobLs=[], extraDependentInputLs=[], transferOutput=False, \
-								extraArguments=None, job_max_memory=2000, **keywords):
+		logFile=None, data_dir=None, commit=False, parentJobLs=None, \
+		extraDependentInputLs=None, transferOutput=False, \
+		extraArguments=None, job_max_memory=2000, **keywords):
 		"""
 		2012.6.27
 		"""
@@ -121,8 +123,8 @@ class AddVCFFolder2DBWorkflow(GenericVCFWorkflow):
 		return job
 	
 	def addUpdateGenotypeMethodNoOfLociJob(self, executable=None, genotypeMethodShortName=None, genotypeMethodID=None,\
-								logFile=None, data_dir=None, commit=False, parentJobLs=[], extraDependentInputLs=[], transferOutput=False, \
-								extraArguments=None, job_max_memory=2000, **keywords):
+		logFile=None, data_dir=None, commit=False, parentJobLs=[], extraDependentInputLs=[], transferOutput=False, \
+		extraArguments=None, job_max_memory=2000, **keywords):
 		"""
 		2012.6.27
 		"""

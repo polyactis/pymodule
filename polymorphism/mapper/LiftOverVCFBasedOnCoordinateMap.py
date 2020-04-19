@@ -18,7 +18,8 @@ __doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0])
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 from Bio.Seq import Seq
-from palos import ProcessOptions, MatrixFile, PassingData
+from palos import ProcessOptions, PassingData
+from palos.io import MatrixFile
 from palos.ngs.io.VCFFile import VCFFile
 from palos.mapper.AbstractVCFMapper import AbstractVCFMapper
 

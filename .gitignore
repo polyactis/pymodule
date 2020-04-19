@@ -1,4 +1,6 @@
 **/*.pyc
+**/*.o
+**/*.so
 **/.*.swp
 **/__pycache__
 *egg-info
@@ -16,4 +18,5 @@
 build
 dist
 cmake-build-debug
+GADA/GADA
 MANIFEST.in

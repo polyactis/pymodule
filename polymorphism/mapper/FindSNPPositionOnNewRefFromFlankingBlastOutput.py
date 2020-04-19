@@ -1,5 +1,23 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
+Given a fasta file of flanking sequences of polymorphic loci (SNP or SVs),
+Find its new positions on the blast database (new reference).
+	
+inputFname is BlastWorkflow.py's output: blast SNPFlankSequenceFname (converting [A/C] to A) to a new reference.
+outputFname is the map between old and new coordinates (NOT a SNP dataset, which is --newSNPDataOutputFname).
+	format 1, a tsv file with this header:
+		querySNPID, queryStrand, queryChromosome, queryStart, queryStop,
+		queryRefBase, queryAltBase, queryAlignmentSpan, queryAlignmentStart, queryAlignmentStop,
+		newChr, newRefStart, newRefStop, \
+		newRefBase, targetAlignmentSpan, targetAlignmentStart, targetAlignmentStop
+	format 2, a chain file, http://genome.ucsc.edu/goldenPath/help/chain.html.
+		Header Lines
+			chain score tName tSize tStrand tStart tEnd qName qSize qStrand qStart qEnd id
+		Alignment Data Lines, three required attribute values:
+			size dt dq 
+		NOTE: The last line of the alignment section contains only one number: 
+			the ungapped alignment size of the last block.
+
 Examples:
 	%s --newSNPDataOutputFname ~/script/vervet/data/194SNPData/isq524CoordinateSNPData_max15Mismatch.tsv
 		--querySNPDataFname ~/script/vervet/data/194SNPData/AllSNPData.txt
@@ -10,26 +28,6 @@ Examples:
 		--minAlignmentSpan 10 --newSNPDataOutputFormat 2
 		
 
-Description:
-	2012.8.19
-		given a fasta file of flanking sequences of polymorphic loci (SNP or SVs).
-		find its new positions on the blast database (new reference).
-		
-		inputFname is BlastWorkflow.py's output: blast SNPFlankSequenceFname (converting [A/C] to A) to a new reference.
-		outputFname is the map between old and new coordinates (NOT a SNP dataset, which is --newSNPDataOutputFname).
-			format 1, a tsv file with this header:
-				querySNPID, queryStrand, queryChromosome, queryStart, queryStop,
-				queryRefBase, queryAltBase, queryAlignmentSpan, queryAlignmentStart, queryAlignmentStop,
-				newChr, newRefStart, newRefStop, \
-				newRefBase, targetAlignmentSpan, targetAlignmentStart, targetAlignmentStop
-			format 2, a chain file, http://genome.ucsc.edu/goldenPath/help/chain.html.
-				Header Lines
-					chain score tName tSize tStrand tStart tEnd qName qSize qStrand qStart qEnd id
-				Alignment Data Lines, three required attribute values:
-					size dt dq 
-				NOTE: The last line of the alignment section contains only one number: 
-					the ungapped alignment size of the last block.
-	
 """
 
 import sys, os, math
@@ -38,10 +36,12 @@ __doc__ = __doc__%(sys.argv[0])
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 import csv
-from palos import ProcessOptions, PassingData, utils, SNP, MatrixFile
+from palos import ProcessOptions, PassingData, utils
+from palos.polymorphism import SNP
+from palos.io import MatrixFile
 from palos import figureOutDelimiter, getColName2IndexFromHeader
 from palos.mapper.AbstractMapper import AbstractMapper
-from palos.pegasus.mapper.extractor.ExtractFlankingSequenceForVCFLoci import ExtractFlankingSequenceForVCFLoci
+from palos.mapper.extractor.ExtractFlankingSequenceForVCFLoci import ExtractFlankingSequenceForVCFLoci
 import numpy, re
 
 
@@ -50,19 +50,19 @@ class FindSNPPositionOnNewRefFromFlankingBlastOutput(AbstractMapper):
 	option_default_dict = AbstractMapper.option_default_dict.copy()
 	#option_default_dict.pop(('outputFnamePrefix', 0, ))
 	option_default_dict.update({
-							('SNPFlankSequenceFname', 0, ): ['', 'S', 1, 'in fasta format, with SNP embedded as [A/C] in sequence.\n\
-	if given, use this to fetch a map between querySNPID & positionInFlank.', ],\
-							('querySNPDataFname', 0, ): ['', 'l', 1, 'path to an input tsv/csv, 3-column: Sample SNP Geno.', ],\
-							('newSNPDataOutputFname', 0, ): [None, '', 1, 'if given, would be a Strain X Locus Yu format polymorphism file with new coordinates.', ],\
-							('newSNPDataOutputFormat', 0, int): [1, '', 1, 'format 1: SNP_ID =chr_start_stop; format 2: SNP_ID = chr_start', ],\
-							('minNoOfIdentities', 0, int): [None, 'm', 1, 'minimum number of identities between a query and target', ],\
-							('maxNoOfMismatches', 0, int): [None, 'a', 1, 'minimum number of mismatches between a query and target', ],\
-							('minIdentityFraction', 0, float): [None, 'n', 1, 'minimum fraction of identities between a query and target', ],\
-							('minAlignmentSpan', 1, int): [10, '', 1, 'minimum number of bases of the query and target that are involved in the blast alignment', ],\
-							('outputFileFormat', 1, int): [1, '', 1, 'output file format. 1: ', ],\
-							('chainFilename', 0, ): [None, '', 1, 'output file to store chains (UCSC chain file format)', ],\
-							('switchPointFname', 0, ): ['', '', 1, 'file to store switch points information', ],\
-							})
+		('SNPFlankSequenceFname', 0, ): ['', 'S', 1, 'in fasta format, with SNP embedded as [A/C] in sequence.\n\
+if given, use this to fetch a map between querySNPID & positionInFlank.', ],\
+		('querySNPDataFname', 0, ): ['', 'l', 1, 'path to an input tsv/csv, 3-column: Sample SNP Geno.', ],\
+		('newSNPDataOutputFname', 0, ): [None, '', 1, 'if given, would be a Strain X Locus Yu format polymorphism file with new coordinates.', ],\
+		('newSNPDataOutputFormat', 0, int): [1, '', 1, 'format 1: SNP_ID =chr_start_stop; format 2: SNP_ID = chr_start', ],\
+		('minNoOfIdentities', 0, int): [None, 'm', 1, 'minimum number of identities between a query and target', ],\
+		('maxNoOfMismatches', 0, int): [None, 'a', 1, 'minimum number of mismatches between a query and target', ],\
+		('minIdentityFraction', 0, float): [None, 'n', 1, 'minimum fraction of identities between a query and target', ],\
+		('minAlignmentSpan', 1, int): [10, '', 1, 'minimum number of bases of the query and target that are involved in the blast alignment', ],\
+		('outputFileFormat', 1, int): [1, '', 1, 'output file format. 1: ', ],\
+		('chainFilename', 0, ): [None, '', 1, 'output file to store chains (UCSC chain file format)', ],\
+		('switchPointFname', 0, ): ['', '', 1, 'file to store switch points information', ],\
+		})
 	def __init__(self, inputFnameLs, **keywords):
 		"""
 		2012.8.19
@@ -144,8 +144,8 @@ class FindSNPPositionOnNewRefFromFlankingBlastOutput(AbstractMapper):
 		
 	
 	def findSNPPositionOnNewRef(self, SNPFlankSequenceFname=None, blastHitResultFname=None, \
-							querySNPDataFname=None,\
-							querySNPID2NewRefCoordinateOutputFname=None, newSNPDataOutputFname=None, minAlignmentSpan=10):
+		querySNPDataFname=None,\
+		querySNPID2NewRefCoordinateOutputFname=None, newSNPDataOutputFname=None, minAlignmentSpan=10):
 		"""
 		2012.10.8
 			argument minAlignmentSpan: the number of bases involved in the blast query-target alignment

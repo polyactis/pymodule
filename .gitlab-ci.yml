@@ -10,9 +10,9 @@ stages:
   - install
   - check_version
   - test_help
-  - compile_GADA
   - test_GADA
   - uninstall
+  - compile
 
 install:
   stage: install
@@ -40,13 +40,6 @@ test_ImportSeq:
     - pwd
     - ./db/import/ImportIndividualSequence2DB.py -h
 
-compile_GADA:
-  stage: compile_GADA
-  script:
-    - echo "Compiling GADA ... "
-    - pwd
-    - cd GADA && make
-
 test_GADA:
   stage: test_GADA
   script:
@@ -59,3 +52,10 @@ uninstall:
   stage: uninstall
   script:
     - pip3 uninstall -y palos
+
+compile:
+  stage: compile
+  script:
+    - echo "Compiling all C++ programs and modules ... "
+    - pwd
+    - make

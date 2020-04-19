@@ -44,13 +44,6 @@ Examples:
 		-o unpackAndAdd12_2007Monkeys2DB_hoffman2.xml
 		--commit 
 	
-	# 20110828 output a workflow to run on local condor pool,
-	#  no db commit (because records are already in db)
-	%s -i /Network/Data/vervet/raw_sequence/xfer.genome.wustl.edu/gxfer3/
-		--fname2sampleID_file xfer.genome.wustl.edu/gxfer3/Vervet_12_4X_README.tsv
-		--minNoOfReads 4000000 -u yh --commit
-		-z dl324b-1.cmb.usc.edu -j condor -l condor -o dags/Import12_2007Monkeys2DB_condor.xml
-	
 	# 20120430 run on hcondor, to import McGill 1X data (-y2), (-e) is not necessary
 	#   because it's running on hoffman2 and can recognize home folder.
 	#. --needSSHDBTunnel means it needs sshTunnel for db-interacting jobs.
@@ -83,7 +76,7 @@ Examples:
 
 """
 import sys, os
-__doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0])
+__doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0])
 
 import copy, re, csv
 from pegaflow.DAX3 import File
@@ -97,16 +90,16 @@ class ImportIndividualSequence2DB(ParentClass):
 	__doc__ = __doc__
 	option_default_dict = copy.deepcopy(ParentClass.option_default_dict)
 	option_default_dict.update({
-		('input_path', 1, ): ['', 'i', 1, 'if it is a folder, take all .bam/.sam/.fastq files recursively. '
-			'If it is a file, every line should be a path to the input file.', ],\
+		('input_path', 1, ): ['', 'i', 1, 'If it is a folder, get all .bam/.sam/.fastq files recursively. '
+			'If it is a file, every line should be a path to an input file.', ],\
 		('fname2sampleID_file', 0, ): ['', '', 1, 
-			'a tsv-format file detailing the corresponding the sample ID of each input file.', ],\
-		('minNoOfReads', 1, int): [8000000, '', 1, 'minimum number of reads in each split fastq file. '
+			'a tsv-format file detailing the corresponding sample ID of each input file.', ],\
+		('minNoOfReads', 1, int): [8000000, '', 1, 'The minimum number of reads in each split fastq file. '
 			'This is the max NoOfReads. The upper limit in each split file is 2*minNoOfReads.', ],\
 		("sequencer_name", 0, ): ["", '', 1, 'sequencing center of TCGA. parsed from TCGA bacode.'],\
 		("sequence_type_name", 1, ): ["PairedEnd", '', 1,
 			'isq.sequence_type_id table column: SequenceType.short_name.'],\
-		("sequence_format", 1, ): ["fastq", 'f', 1, 'fasta, fastq, etc.'],\
+		("sequence_format", 1, ): ["fastq", 'f', 1, 'Fasta, fastq, etc.'],\
 		("tissueSourceSiteFname", 0, ): ["", '', 1, 'TCGA tissue source site file'],\
 		('inputType', 1, int): [1, 'y', 1, 'input type. 1: TCGA bam files; 2: HCC1187 bam files', ],\
 		})

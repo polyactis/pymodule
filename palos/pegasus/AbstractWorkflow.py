@@ -71,10 +71,12 @@ class AbstractWorkflow(Workflow):
         2012.5.23
         """
         Workflow.__init__(self, inputArgumentLs=None, **keywords)
-        self.ad = ProcessOptions.process_function_arguments(keywords, self.option_default_dict, error_doc=self.__doc__, \
-                                                        class_to_have_attr=self)
+        self.ad = ProcessOptions.process_function_arguments(keywords, \
+            self.option_default_dict, error_doc=self.__doc__, \
+            class_to_have_attr=self)
         #2013.11.24
-        self.inputSuffixList = utils.getListOutOfStr(list_in_str=self.inputSuffixList, data_type=str, separator1=',', separator2='-')
+        self.inputSuffixList = utils.getListOutOfStr(list_in_str=self.inputSuffixList, \
+            data_type=str, separator1=',', separator2='-')
         self.inputSuffixSet = set(self.inputSuffixList)
         #2013.06.27
         self.inputArgumentLs = inputArgumentLs

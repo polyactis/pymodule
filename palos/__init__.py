@@ -16,3 +16,4 @@ from . algorithm import pca_module
 from . algorithm.PCA import PCA
 from . algorithm.RBTree import RBTree, RBDict, RBTreeIter, RBList, RBNode
 from . algorithm.BinarySearchTree import binary_tree
+from . io.MatrixFile import MatrixFile

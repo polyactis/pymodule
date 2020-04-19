@@ -11,7 +11,8 @@ Examples:
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0])
 import csv
-from palos import ProcessOptions, getListOutOfStr, PassingData, utils, MatrixFile
+from palos import ProcessOptions, getListOutOfStr, PassingData, utils
+from palos.io import MatrixFile
 from palos.mapper.AbstractMapper import AbstractMapper
 
 class SplitPlinkLMendelFileSNPIDIntoChrPosition(AbstractMapper):
