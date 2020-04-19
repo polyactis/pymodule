@@ -43,7 +43,7 @@ test_ImportSeq:
 test_GADA:
   stage: test_GADA
   script:
-    - echo "Compiling GADA and test-run its Python2 module... "
+    - echo "Compiling GADA and test-run its Python2 module ... "
     - pwd
     - cd GADA && make
     - ./testGADA.py -i input.txt -o output.tsv
@@ -56,6 +56,9 @@ uninstall:
 compile:
   stage: compile
   script:
-    - echo "Compiling all C++ programs and modules ... "
+    - echo "Compileother C++ programs and modules ... "
     - pwd
-    - make
+    - pushd io && make && popd
+    - pushd mapper && make && popd
+    - pushd polymorphism && make && popd
+    - pushd reducer && make && popd
