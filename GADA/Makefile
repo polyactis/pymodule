@@ -4,7 +4,7 @@ BoostPythonLib  = -lboost_python
 # 2010-6-8 "-L ~/lib64/boost/lib" removed from BoostPythonLib. "-lboost_python-mt" changed to "-lboost_python"
 
 SharedLibFlags	= -shared -fPIC
-IncludeDirs	= `python-config --includes` -I ~/script/
+IncludeDirs	= `python-config --includes` -I`readlink -f ..`
 # 2010-6-8 "-I ~/lib64/boost/include/" removed from IncludeDirs
 
 BoostLib	= -lboost_program_options -lboost_iostreams

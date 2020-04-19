@@ -3,14 +3,14 @@ CXXTARGETS	=
 CXXLDFLAGS 	= $(BoostLib)
 CTARGETS	= 
 
-ExtraTargets	= CheckTwoVCFOverlapCC
-SharedLibTargets	= ~/script/pymodule/io/AbstractMatrixFileWalkerCC.so 
+#ExtraTargets	= CheckTwoVCFOverlapCC
+SharedLibTargets	= ../../io/AbstractMatrixFileWalkerCC.so 
 
-CheckTwoVCFOverlapCC:	%:	%.o $(SharedLibTargets)
-	-$(CXXCOMPILER) $< ~/script/vcflib/libvcf.a $(SharedLibTargets) $(CXXFLAGS) -o $@ $(CXXLDFLAGS)
+#CheckTwoVCFOverlapCC:	%:	%.o $(SharedLibTargets)
+#	-$(CXXCOMPILER) $< ~/script/vcflib/libvcf.a $(SharedLibTargets) $(CXXFLAGS) -o $@ $(CXXLDFLAGS)
 
 
-SRCS	= CheckTwoVCFOverlapCC.cc
+#SRCS	= CheckTwoVCFOverlapCC.cc
 
 include ../../Makefile.common
 #all:	$(CXXTARGETS) $(CTARGETS) CalculateColCorBetweenTwoHDF5

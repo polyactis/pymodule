@@ -46,7 +46,7 @@
 #include <boost/functional/hash.hpp>	//2013.09.10 yh: for customize boost::hash
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
-#include "pymodule/palos/algorithm/RedBlackTree.h"	//2013.09.19 red-black tree to store segment breakpoint, score, etc.
+#include "palos/algorithm/RedBlackTree.h"	//2013.09.19 red-black tree to store segment breakpoint, score, etc.
 
 
 #ifndef GADABIN

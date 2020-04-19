@@ -3,12 +3,12 @@ CXXTARGETS	=
 CXXLDFLAGS 	= $(BoostLib)
 CTARGETS	= 
 
-ExtraTargets	= ReduceSameChromosomeAlignmentDepthFiles
+ExtraTargets = ReduceSameChromosomeAlignmentDepthFiles
 
 
-SharedLibTargets	= ~/script/pymodule/io/AbstractMatrixFileWalkerCC.so
+SharedLibTargets = ../io/AbstractMatrixFileWalkerCC.so
 
-SRCS	= ReduceSameChromosomeAlignmentDepthFiles.cc
+SRCS = ReduceSameChromosomeAlignmentDepthFiles.cc
 
 ReduceSameChromosomeAlignmentDepthFiles:	%:	%.o $(SharedLibTargets)
 	-$(CXXCOMPILER) $< $(SharedLibTargets) $(CXXFLAGS) $(CXXLDFLAGS) -o $@
