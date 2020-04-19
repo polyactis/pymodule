@@ -422,6 +422,23 @@ class ImportIndividualSequence2DB(ParentClass):
 				sequencer_name=sequencer_name, sequence_type_name=sequence_type_name, 
 				sequence_format=sequence_format)		
 	
+	def addJobsToImportFastQ(self, db_main=None, \
+		fname2sampleID_file=None, input_path=None, data_dir=None, \
+		minNoOfReads=None, commit=None,\
+		sequencer_name=None, sequence_type_name=None, sequence_format=None):
+		"""
+		20200419 fname2sampleID_file
+		"""
+		sampleID2IndividualData = self.getSampleID2IndividualData(fname2sampleID_file)
+		fastqFnameLs = self.getInputFnameLsFromInput(input_path, suffixSet=set(['.fastq']), fakeSuffix='.gz')
+		sampleID2FastqObjectLs = self.getSampleID2FastqObjectLsFromUNGCData(fastqFnameLs=fastqFnameLs, \
+								sampleID2IndividualData=sampleID2IndividualData)
+		self.addJobsToSplitAndRegisterFastQ(db_main=db_main, \
+				sampleID2FastqObjectLs=sampleID2FastqObjectLs, \
+				data_dir=data_dir, minNoOfReads=minNoOfReads, commit=commit,\
+				sequencer_name=sequencer_name, sequence_type_name=sequence_type_name, 
+				sequence_format=sequence_format)
+	
 	def addJobsToImportUNGCVervetFastQ(self, db_main=None, \
 		fname2sampleID_file=None, input_path=None, data_dir=None, \
 		minNoOfReads=None, commit=None,\
