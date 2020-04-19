@@ -6,6 +6,7 @@
 .cproject
 .depend
 .idea
+.mypy_cache
 .project
 .pydevproject
 .settings
