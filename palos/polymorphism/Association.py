@@ -53,11 +53,11 @@ class AssociationTableFile(YHFile):
 		self.associationTable = None
 		self.do_log10_transformation = do_log10_transformation
 		
-		YHFile.__init__(self, inputFname=inputFname, openMode=openMode, \
-				tableName=tableName, groupNamePrefix=groupNamePrefix, tableNamePrefix=tableNamePrefix,\
-				rowDefinition=AssociationTable, filters=filters, expectedrows=expectedrows,\
-				autoRead=autoRead, autoWrite=autoWrite,\
-				debug=0, report=0, )
+		YHFile.__init__(self, path=inputFname, openMode=openMode, \
+			tableName=tableName, groupNamePrefix=groupNamePrefix, tableNamePrefix=tableNamePrefix,\
+			rowDefinition=AssociationTable, filters=filters, expectedrows=expectedrows,\
+			autoRead=autoRead, autoWrite=autoWrite,\
+			debug=0, report=0, )
 		
 
 		"""
@@ -118,7 +118,7 @@ class LocusMapTableFile(YHFile):
 				**keywords):
 		
 		self.locus_id2chr_pos = None
-		YHFile.__init__(self, inputFname=inputFname, openMode=openMode, \
+		YHFile.__init__(self, path=inputFname, openMode=openMode, \
 				tableName=tableName, groupNamePrefix=groupNamePrefix, tableNamePrefix=tableNamePrefix,\
 				rowDefinition=LocusMapTable, filters=filters, expectedrows=expectedrows,\
 				autoRead=autoRead, autoWrite=autoWrite,\

@@ -12,14 +12,14 @@
 
 Example:
 
-	reader = MatrixFile(inputFname='/tmp/input.txt', openMode='r')
+	reader = MatrixFile(path='/tmp/input.txt', openMode='r')
 	reader = MatrixFile('/tmp/input.txt', openMode='r')
 	reader.constructColName2IndexFromHeader()
 	for row in reader:
 		row[reader.getColName2IndexFromHeader('KID')]
 	
-	inf = utils.openGzipFile(inputFname, openMode='r')
-	reader = MatrixFile(inputFile=inf)
+	inf = utils.openGzipFile(path, openMode='r')
+	reader = MatrixFile(file_handle=inf)
 	
 	#2013.2.1 writing
 	writer = MatrixFile('/tmp/output.txt', openMode='w', delimiter='\t')
@@ -29,7 +29,8 @@ Example:
 
 """
 
-import sys, os, math
+import sys
+import os
 import copy
 from palos.ProcessOptions import  ProcessOptions
 from palos.utils import PassingData
@@ -42,8 +43,8 @@ class BeagleLikelihoodFile(ParentClass):
 	option_default_dict.update({
 						#('delimiter', 0, ): [' ', '', 1, 'delimiter for Beagle likelihood format is single-space'],\
 						})
-	def __init__(self, inputFname=None, **keywords):
-		ParentClass.__init__(self, inputFname=inputFname, **keywords)
+	def __init__(self, path=None, **keywords):
+		ParentClass.__init__(self, path=path, **keywords)
 	
 	def constructColName2IndexFromHeader(self):
 		"""

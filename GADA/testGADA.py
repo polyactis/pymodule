@@ -20,14 +20,15 @@ import GADA
 
 class testGADA(object):
 	__doc__ = __doc__
-	option_default_dict = {('input_fname', 1, ): ['', 'i', 1, 'CNV intensity matrix, probe X arrays. 1st column is probe id. 2nd last col is chr. last col is pos.', ],\
-						('output_fname', 1, ): ['', 'o', 1, 'self-explanatory', ],\
-						('aAlpha', 1, float): [0.5, 'A', 1, 'a in Gamma(a;b) the function that controls the prior for the number of breakpoints', ],\
-						('TBackElim', 1, int): [4, 'T', 1, '(amp1-amp2)/stddev in GADA', ],\
-						('MinSegLen', 1, int): [5, 'M', 1, 'minimum no of probes to comprise a segment in GADA', ],\
-						('debug', 0, int):[0, 'b', 0, 'toggle debug mode'],\
-						('report', 0, int):[0, 'r', 0, 'toggle report, more verbose stdout/stderr.'],\
-							}
+	option_default_dict = {('input_path', 1, ): ['', 'i', 1, 'input CNV intensity matrix, probe X arrays.'
+			' 1st column is probe id. 2nd last col is chr. last col is pos.', ],\
+		('output_path', 1, ): ['', 'o', 1, 'Path to the output file', ],\
+		('aAlpha', 1, float): [0.5, 'A', 1, 'a in Gamma(a;b) the function that controls the prior for the number of breakpoints', ],\
+		('TBackElim', 1, int): [4, 'T', 1, '(amp1-amp2)/stddev in GADA', ],\
+		('MinSegLen', 1, int): [5, 'M', 1, 'minimum no of probes to comprise a segment in GADA', ],\
+		('debug', 0, int):[0, 'b', 0, 'toggle debug mode'],\
+		('report', 0, int):[0, 'r', 0, 'toggle report, more verbose stdout/stderr.'],\
+			}
 	
 	
 	def __init__(self, **keywords):
@@ -41,10 +42,9 @@ class testGADA(object):
 		"""
 		2010-6-9
 		"""
-		
 		import sys, csv
-		#input_fname = "/tmp/GADA_ATL8C17938_ATL7C28313_1_5_ATL8C17938_ATL7C28313_1_input"
-		inf = MatrixFile(inputFname=self.input_fname)
+		#input_path = "/tmp/GADA_ATL8C17938_ATL7C28313_1_5_ATL8C17938_ATL7C28313_1_input"
+		inf = MatrixFile(path=self.input_path)
 		intensity_ls = []
 		for row in inf:
 			intensity_ls.append(float(row[0]))
@@ -54,7 +54,7 @@ class testGADA(object):
 		ins = GADA.GADA()
 		segment_ls = ins.run(intensity_ls, self.aAlpha, self.TBackElim, self.MinSegLen)
 		del ins
-		writer = MatrixFile(inputFname=self.output_fname, openMode='w', delimiter='\t')
+		writer = MatrixFile(path=self.output_path, openMode='w', delimiter='\t')
 		writer.writerow(["# Parameter setting: a=%s,T=%s,MinSegLen=%s"%(self.aAlpha, self.TBackElim, self.MinSegLen)])
 		header = ['Start', 'Stop', 'Length','Ampl']
 		writer.writeHeader(header)

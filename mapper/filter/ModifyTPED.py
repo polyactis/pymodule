@@ -106,7 +106,7 @@ class ModifyTPED(AbstractMapper):
 		sys.stderr.write("Getting individualID2Index from tfam file %s ..."%(tfamFname))
 		individualID2Index = {}
 		individualIDList = []
-		reader = MatrixFile(inputFname=tfamFname)
+		reader = MatrixFile(path=tfamFname)
 		counter = 0
 		for row in reader:
 			individualID = row[1]
@@ -125,7 +125,7 @@ class ModifyTPED(AbstractMapper):
 		sys.stderr.write("Getting data on loci involved in mendel-errors from %s ..."%(mendelErrorFname))
 		locus_id2individual_index_ls = {}
 		#inf = utils.openGzipFile(mendelErrorFname, 'r')
-		reader = MatrixFile(inputFname=mendelErrorFname)
+		reader = MatrixFile(path=mendelErrorFname)
 		#header = reader.next()
 		reader.constructColName2IndexFromHeader()
 		counter = 0
@@ -175,7 +175,7 @@ class ModifyTPED(AbstractMapper):
 		2013.07.24
 		"""
 		if outputFname and individual_index2no_of_genotype_marked_missing is not None:
-			writer = MatrixFile(inputFname=outputFname, openMode='w', delimiter='\t')
+			writer = MatrixFile(path=outputFname, openMode='w', delimiter='\t')
 			header = ["individualID", "noOfGenotypesMarkedMissing"]
 			writer.writeHeader(header)
 			for individual_index, no_of_genotype_marked_missing in individual_index2no_of_genotype_marked_missing.items():
@@ -194,7 +194,7 @@ class ModifyTPED(AbstractMapper):
 			pdb.set_trace()
 		
 		#inf = utils.openGzipFile(self.inputFname)
-		reader = MatrixFile(inputFname=self.inputFname)
+		reader = MatrixFile(path=self.inputFname)
 		writer = csv.writer(open(self.outputFname, 'w'), delimiter='\t')
 		counter = 0
 		if self.run_type==4:	#2013.2.1

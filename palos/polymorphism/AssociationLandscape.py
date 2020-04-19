@@ -34,9 +34,9 @@ class AssociationLandscapeTableFile(AssociationTableFile):
 		landscapeFile.appendAssociationLandscapeBridgeList(bridge_ls=landscapeData.bridge_ls)
 		
 		#for read-only,
-		landscapeTable = AssociationLandscapePyTable(self.inputFname, openMode='r')
+		landscapeTable = AssociationLandscapePyTable(self.path, openMode='r')
 	"""
-	def __init__(self, inputFname=None, openMode='r', \
+	def __init__(self, path=None, openMode='r', \
 				tableName='association_landscape', groupNamePrefix='group', tableNamePrefix='table',\
 				filters=None, autoRead=True, autoWrite=True, \
 				min_MAF=0.1, associationTableName='association', **keywords):
@@ -47,7 +47,7 @@ class AssociationLandscapeTableFile(AssociationTableFile):
 		self.bridge_ls = None
 		self.locusLandscapeNeighborGraph = None
 		
-		YHFile.__init__(self, inputFname=inputFname, openMode=openMode, \
+		YHFile.__init__(self, path=path, openMode=openMode, \
 				tableName=tableName, groupNamePrefix=groupNamePrefix, tableNamePrefix=tableNamePrefix,\
 				rowDefinition=None, filters=filters, \
 				debug=0, report=0, autoRead=False, autoWrite=False)
@@ -93,7 +93,7 @@ class AssociationLandscapeTableFile(AssociationTableFile):
 			start_locus_id = row['start_locus_id']	#fastest accessing
 			#start_locus_id = row[self.associationLandscapeTable.getColIndex('start_locus_id')]	#2nd fastest,
 			#start_locus_id = row[self.getColIndex('start_locus_id')]	#slowest
-			if start_locus_id==0:	#empty data. happens when inputFname contains no valid landscape, but one default null data point.
+			if start_locus_id==0:	#empty data. happens when path contains no valid landscape, but one default null data point.
 				continue
 			#fastest accessing
 			stop_locus_id = row['stop_locus_id']
@@ -135,7 +135,7 @@ class AssociationLandscapeTableFile(AssociationTableFile):
 		"""
 		2012.11.18
 		"""
-		sys.stderr.write("Outputting the %s bridges from the landscape to %s ..."%(len(bridge_ls), self.inputFname))
+		sys.stderr.write("Outputting the %s bridges from the landscape to %s ..."%(len(bridge_ls), self.path))
 		#output the data_object.id in bridge_ls to outputFname
 		#each number below is counting bytes, not bits
 		previous_locus_id = None

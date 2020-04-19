@@ -72,14 +72,14 @@ class CalculateMendelErrorRateGivenPlinkOutput(ParentClass):
 			import pdb
 			pdb.set_trace()
 		
-		reader = MatrixFile(inputFname=self.inputFname)
+		reader = MatrixFile(path=self.inputFname)
 		reader.constructColName2IndexFromHeader()
 		
 		meanMendelErrorIndex = reader.getColIndexGivenColHeader("meanMendelError")
 		noOfLociIndex = reader.getColIndexGivenColHeader("sampled_base_count")
 		sumOfMendelErrorIndex = reader.getColIndexGivenColHeader("sumOfMendelError")
 		
-		plinkPedigreeFile = PlinkPedigreeFile(inputFname=self.pedigreeFname)
+		plinkPedigreeFile = PlinkPedigreeFile(path=self.pedigreeFname)
 		familyStructureData = plinkPedigreeFile.getFamilyStructurePlinkWay()
 		
 		twoParentFamilyCountData = self.getNoOfFamiliesAndKidsGivenParentSetSize(noOfParents2FamilyData=familyStructureData.noOfParents2FamilyData, \

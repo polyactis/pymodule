@@ -119,24 +119,23 @@ class RecombinationTable(tables.IsDescription):
 class PolymorphismTableFile(YHFile):
 	"""
 	2013.3.6 usage examples:
-		
-		#for writing
-		landscapeFile = AssociationLandscapePyTable(self.outputFname, openMode='w', isPhased=1, ploidy=2)
-		landscapeFile.addAttributeDict(attributeDict)
-		
-		#for read-only,
-		landscapeTable = AssociationLandscapePyTable(self.inputFname, openMode='r')
+	#for writing
+	landscapeFile = AssociationLandscapePyTable(self.outputFname, openMode='w', isPhased=1, ploidy=2)
+	landscapeFile.addAttributeDict(attributeDict)
+	
+	#for read-only,
+	landscapeTable = AssociationLandscapePyTable(self.path, openMode='r')
 	"""
-	def __init__(self, inputFname=None, openMode='r', \
-				tableName='polymorphism', groupNamePrefix='group', tableNamePrefix='table',\
-				filters=None, autoRead=True, autoWrite=True, \
-				isPhased=None, ploidy=None, constructSNPData=True, **keywords):
+	def __init__(self, path=None, openMode='r', \
+		tableName='polymorphism', groupNamePrefix='group', tableNamePrefix='table',\
+		filters=None, autoRead=True, autoWrite=True, \
+		isPhased=None, ploidy=None, constructSNPData=True, **keywords):
 		
 		
 		self.bridge_ls = None
 		self.locusLandscapeNeighborGraph = None
 		
-		YHFile.__init__(self, inputFname=inputFname, openMode=openMode, \
+		YHFile.__init__(self, path=path, openMode=openMode, \
 				tableName=tableName, groupNamePrefix=groupNamePrefix, tableNamePrefix=tableNamePrefix,\
 				rowDefinition=None, filters=filters, \
 				debug=0, report=0, autoRead=False, autoWrite=False)

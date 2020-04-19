@@ -75,7 +75,7 @@ class ReduceMatrixByMergeColumnsWithSameKey(AbstractReducer):
 			open the outputFname regardless whether there is data or not.
 		2012.1.9
 		"""
-		writer = MatrixFile(inputFname=outputFname, delimiter=delimiter, openMode='w')
+		writer = MatrixFile(path=outputFname, delimiter=delimiter, openMode='w')
 		if header and delimiter:
 			writer.writerow(header)
 		if key2dataLs and delimiter:
@@ -131,7 +131,7 @@ class ReduceMatrixByMergeColumnsWithSameKey(AbstractReducer):
 				inputFile = utils.openGzipFile(inputFname)
 				if self.inputDelimiter is None or self.inputDelimiter=='':
 					self.inputDelimiter = figureOutDelimiter(inputFile)
-				reader = MatrixFile(inputFile=inputFile, delimiter=self.inputDelimiter)
+				reader = MatrixFile(file_handle=inputFile, delimiter=self.inputDelimiter)
 			except:
 				sys.stderr.write('Except type: %s\n'%repr(sys.exc_info()))
 				import traceback
@@ -143,7 +143,7 @@ class ReduceMatrixByMergeColumnsWithSameKey(AbstractReducer):
 				self.handleNewHeader(header, newHeader, self.keyColumnLs, valueColumnLs, keyColumnSet=self.keyColumnSet)
 				if self.noHeader:	#2012.8.10
 					inputFile.seek(0)
-					reader = MatrixFile(inputFile=inputFile, delimiter=self.inputDelimiter)
+					reader = MatrixFile(file_handle=inputFile, delimiter=self.inputDelimiter)
 			except:	#in case something wrong (i.e. file is empty)
 				sys.stderr.write('Except type: %s\n'%repr(sys.exc_info()))
 				import traceback

@@ -77,7 +77,7 @@ class ReduceMatrixByChosenColumn(ReduceMatrixByMergeColumnsWithSameKey):
 			try:
 				inputFile = utils.openGzipFile(inputFname)
 				delimiter = figureOutDelimiter(inputFile)
-				reader = MatrixFile(inputFile=inputFile, delimiter=delimiter)
+				reader = MatrixFile(file_handle=inputFile, delimiter=delimiter)
 			except:
 				sys.stderr.write('Except type: %s\n'%repr(sys.exc_info()))
 				import traceback
@@ -91,7 +91,7 @@ class ReduceMatrixByChosenColumn(ReduceMatrixByMergeColumnsWithSameKey):
 				self.handleNewHeader(header, newHeader, self.keyColumnLs, self.valueColumnLs, keyColumnSet=self.keyColumnSet)
 				if self.noHeader:	#2012.8.10
 					inputFile.seek(0)
-					reader = MatrixFile(inputFile=inputFile, delimiter=delimiter)
+					reader = MatrixFile(file_handle=inputFile, delimiter=delimiter)
 			except:	#in case something wrong (i.e. file is empty)
 				sys.stderr.write('Except type: %s\n'%repr(sys.exc_info()))
 				import traceback

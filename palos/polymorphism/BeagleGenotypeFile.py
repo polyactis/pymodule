@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2013.05.03 a child class of MatrixFile. used to describe Beagle likelihood file format, which looks like:
 	marker alleleA alleleB 1000_709_1996093_GA_vs_524 1000_709_1996093_GA_vs_524 1000_709_1996093_GA_vs_524 1001_710_1995025_GA_vs_524 1001_710_1995025_GA_vs_524 1001_710_1995025_GA_vs_524 1002_711_2001039_GA_vs_524
@@ -11,7 +11,7 @@
 	Contig791:4203 C G 1 0 0 1 0 0 0
 
 Example:
-	beagleFile = BeagleGenotypeFile(inputFname='/tmp/input.bgl.gz')
+	beagleFile = BeagleGenotypeFile(path='/tmp/input.bgl.gz')
 	beagleFile.readInAllHaplotypes()
 	
 	for individualID, firstHaplotypeIndex in beagleFile.snpData.col_id2col_index.items():
@@ -21,14 +21,14 @@ Example:
 		# another way
 		#haplotypeList = beagleFile.getHaplotypeListOfOneSample(individualID)
 	
-	reader = MatrixFile(inputFname='/tmp/input.txt', openMode='r')
+	reader = MatrixFile(path='/tmp/input.txt', openMode='r')
 	reader = MatrixFile('/tmp/input.txt', openMode='r')
 	reader.constructColName2IndexFromHeader()
 	for row in reader:
 		row[reader.getColName2IndexFromHeader('KID')]
 	
-	inf = utils.openGzipFile(inputFname, openMode='r')
-	reader = MatrixFile(inputFile=inf)
+	inf = utils.openGzipFile(path, openMode='r')
+	reader = MatrixFile(file_handle=inf)
 	
 	#2013.2.1 writing
 	writer = MatrixFile('/tmp/output.txt', openMode='w', delimiter='\t')
@@ -48,14 +48,12 @@ class BeagleGenotypeFile(MatrixFile):
 	__doc__ = __doc__
 	option_default_dict = copy.deepcopy(MatrixFile.option_default_dict)
 	option_default_dict.update({
-						('delimiter', 0, ): [' ', '', 1, 'delimiter for Beagle likelihood format is single-space'],\
-						('phased', 0, int): [0, '', 1, 'whether the genotypes are phased or not'],\
-						('ploidy', 0, int): [2, '', 1, 'ploidy of the organism. = #genotype-columns for one individual'],\
-						})
-	def __init__(self, inputFname=None, **keywords):
-		
-		MatrixFile.__init__(self, inputFname=inputFname, **keywords)
-		
+		('delimiter', 0, ): [' ', '', 1, 'delimiter for Beagle likelihood format is single-space'],\
+		('phased', 0, int): [0, '', 1, 'whether the genotypes are phased or not'],\
+		('ploidy', 0, int): [2, '', 1, 'ploidy of the organism. = #genotype-columns for one individual'],\
+		})
+	def __init__(self, path=None, **keywords):
+		MatrixFile.__init__(self, path=path, **keywords)
 		self.header = None
 		self.col_name2index = None	#key is sampleID, value is index of first haplotype
 		
@@ -182,7 +180,7 @@ class BeagleGenotypeFile(MatrixFile):
 				self.locusIDList
 				self.snpData
 		"""
-		sys.stderr.write("Reading in all haplotypes from %s ..."%(self.inputFname))
+		sys.stderr.write("Reading in all haplotypes from %s ..."%(self.path))
 		if self.inputFile:
 			if self.inputFile.tell()!=0:
 				self.inputFile.seek(0)
@@ -210,7 +208,7 @@ class BeagleGenotypeFile(MatrixFile):
 				self.locusIDList = locusIDList
 			elif self.locusIDList!=locusIDList:
 				sys.stderr.write("Error: this individual %s has a different list of locus ID than this file (%s) already has %s.\n"%\
-								(sampleID, self.inputFname, self.locusIDList))
+								(sampleID, self.path, self.locusIDList))
 				raise
 			
 	def _consolidateHaplotypeMatrixIntoSNPData(self, ):
@@ -232,7 +230,7 @@ class BeagleGenotypeFile(MatrixFile):
 		"""
 		2013.05.30
 		"""
-		sys.stderr.write("Writing data to file %s ..."%(self.inputFname))
+		sys.stderr.write("Writing data to file %s ..."%(self.path))
 		if self.snpData is None:
 			if self.sampleIDList and self.locusIDList and self.haplotypeMatrix:
 				self._consolidateHaplotypeMatrixIntoSNPData()

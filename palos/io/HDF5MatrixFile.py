@@ -58,41 +58,42 @@ varLenStrType = h5py.new_vlen(str)
 
 class YHTableInHDF5Group(object):
 	option_default_dict = {
-							('h5Group', 0, ): [None, '', 1, "the h5py group ojbect."],\
-							('newGroup', 1, int): [0, '', 1, "whether this is a new group or an existing group in a file"],\
-							('dataMatrixDtype', 0, ): ['f', '', 1, 'data type in the dataMatrix. candidates are i, f8, compound type, etc.'],\
-							('compression', 0, ): [None, '', 1, 'the compression engine for all underlying datasets'],\
-							('compression_opts', 0, ): [None, '', 1, 'option for the compression engine, gzip level, or tuple for szip'],\
-							
-							}
+		('h5Group', 0, ): [None, '', 1, "the h5py group ojbect."],\
+		('newGroup', 1, int): [0, '', 1, "whether this is a new group or an existing group in a file"],\
+		('dataMatrixDtype', 0, ): ['f', '', 1, 'data type in the dataMatrix. candidates are i, f8, compound type, etc.'],\
+		('compression', 0, ): [None, '', 1, 'the compression engine for all underlying datasets'],\
+		('compression_opts', 0, ): [None, '', 1, 'option for the compression engine, gzip level, or tuple for szip'],\
+		
+		}
 	def __init__(self, **keywords):
 		"""
 		dataMatrixDtype could be a compound type:
 			http://docs.scipy.org/doc/numpy/reference/arrays.dtypes.html
 			http://docs.scipy.org/doc/numpy/reference/generated/numpy.dtype.html
 				
-				#A record data type containing a 16-character string (in field name)
-					#and a sub-array of two 64-bit floating-point number (in field grades):
-				dt = numpy.dtype([('name', numpy.str_, 16), ('grades', numpy.float64, (2,))])
-				
-				my_dtype = numpy.dtype([('field1', 'i'), ('field2', 'f'), ('field3', varLenStrType)])
-				
-				#Using array-protocol type strings:
-				#each number below is counting bytes, not bits
-				>>> numpy.dtype([('a','f8'),('b','S10')])
-				dtype([('a', '<f8'), ('b', '|S10')])
-				
-				#Using tuples. int is a fixed type, 3 the field's shape. void is a flexible type, here of size 10:
-				numpy.dtype([('hello',(numpy.int,3)),('world',numpy.void,10)])
-				
-				#Using dictionaries. Two fields named 'gender' and 'age':
-				numpy.dtype({'names':['gender','age'], 'formats':['S1',numpy.uint8]})
-				
-				#Offsets in bytes, here 0 and 25:
-				numpy.dtype({'surname':('S25',0),'age':(numpy.uint8,25)})
+		#A record data type containing a 16-character string (in field name)
+			#and a sub-array of two 64-bit floating-point number (in field grades):
+		dt = numpy.dtype([('name', numpy.str_, 16), ('grades', numpy.float64, (2,))])
+		
+		my_dtype = numpy.dtype([('field1', 'i'), ('field2', 'f'), ('field3', varLenStrType)])
+		
+		#Using array-protocol type strings:
+		#each number below is counting bytes, not bits
+		>>> numpy.dtype([('a','f8'),('b','S10')])
+		dtype([('a', '<f8'), ('b', '|S10')])
+		
+		#Using tuples. int is a fixed type, 3 the field's shape. void is a flexible type, here of size 10:
+		numpy.dtype([('hello',(numpy.int,3)),('world',numpy.void,10)])
+		
+		#Using dictionaries. Two fields named 'gender' and 'age':
+		numpy.dtype({'names':['gender','age'], 'formats':['S1',numpy.uint8]})
+		
+		#Offsets in bytes, here 0 and 25:
+		numpy.dtype({'surname':('S25',0),'age':(numpy.uint8,25)})
 		"""
-		self.ad = ProcessOptions.process_function_arguments(keywords, self.option_default_dict, error_doc=self.__doc__, \
-														class_to_have_attr=self)
+		self.ad = ProcessOptions.process_function_arguments(keywords, \
+			self.option_default_dict, error_doc=self.__doc__, \
+			class_to_have_attr=self)
 		
 		self.dataMatrixDSName = "dataMatrix"
 		self.rowIDListDSName = "rowIDList"
@@ -116,7 +117,8 @@ class YHTableInHDF5Group(object):
 			dtype = self.dataMatrixDtype
 		self.dataMatrix = h5Group.create_dataset(self.dataMatrixDSName, shape=(1,), dtype=dtype, \
 										maxshape=(None, ), compression=self.compression, compression_opts=self.compression_opts)
-		self.dataMatrix.resize((0,))	#by default it contains one "null" data point.
+		#by default it contains one "null" data point.
+		self.dataMatrix.resize((0,))
 		self.rowIDList = h5Group.create_dataset(self.rowIDListDSName, shape=(1,), dtype=varLenStrType, maxshape=(None,),\
 											compression=self.compression, compression_opts=self.compression_opts)
 		self.rowIDList.resize((0,))
@@ -147,14 +149,13 @@ class YHTableInHDF5Group(object):
 		rowIDList = self.rowIDList
 		colIDList = self.colIDList
 		rowID2rowIndex = {}
-		if rowIDList:	#2008-12-03
+		if rowIDList:
 			for i in range(len(rowIDList)):
 				rowID = rowIDList[i]
 				rowID2rowIndex[rowID] = i
 		
-		
 		colID2colIndex = {}
-		if colIDList:	#2008-12-03
+		if colIDList:
 			for i in range(len(colIDList)):
 				colID = colIDList[i]
 				colID2colIndex[colID] = i

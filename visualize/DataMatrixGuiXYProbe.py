@@ -640,7 +640,7 @@ class DataMatrixGuiXYProbe(gtk.Window):
 		"""
 		if sampling_probability>1 or sampling_probability<0:
 			sampling_probability=1.0
-		reader = MatrixFile(inputFname=input_fname)
+		reader = MatrixFile(path=input_fname)
 		self.inputDataHeaders = reader.next()
 		self.parseDataHeader(self.inputDataHeaders)
 		

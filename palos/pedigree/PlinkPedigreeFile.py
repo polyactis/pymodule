@@ -12,10 +12,10 @@
 
 Example:
 
-	plinkPedigreeFile = PlinkPedigreeFile(inputFname=self.pedigreeFname)
+	plinkPedigreeFile = PlinkPedigreeFile(path=self.pedigreeFname)
 	familyStructureData = plinkPedigreeFile.getFamilyStructurePlinkWay()
 	
-	plinkPedigreeFile = PlinkPedigreeFile(inputFname=self.pedigreeFname)
+	plinkPedigreeFile = PlinkPedigreeFile(path=self.pedigreeFname)
 	for nodeID in plinkPedigreeFile.pedigreeGraph:
 		...
 	plinkPedigreeFile.close()
@@ -37,8 +37,8 @@ class PlinkPedigreeFile(MatrixFile):
 						('dummyIndividualNamePrefix', 0, ): ['dummy', '', 1, 'the prefix to name a dummy parent (TrioCaller format). The suffix is its order among all dummies.'],\
 							
 						})
-	def __init__(self, inputFname=None, **keywords):
-		MatrixFile.__init__(self, inputFname=inputFname, **keywords)
+	def __init__(self, path=None, **keywords):
+		MatrixFile.__init__(self, path=path, **keywords)
 		
 		self.familyID2MemberList= {}
 		self.familySize2SampleIDList = {}
@@ -69,7 +69,7 @@ class PlinkPedigreeFile(MatrixFile):
 		"""
 		2013.05.03
 		"""
-		sys.stderr.write("Getting pedigree graph from this file %s ..."%(self.inputFname))
+		sys.stderr.write("Getting pedigree graph from this file %s ..."%(self.path))
 		
 		self._resetInput()
 		#self.constructColName2IndexFromHeader()	#there is no header.

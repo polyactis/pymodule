@@ -691,7 +691,7 @@ def readAdjacencyListDataIntoMatrix(inputFname=None, rowIDHeader=None, colIDHead
 	if defaultValue is None:
 		defaultValue = numpy.nan
 	
-	reader = MatrixFile(inputFname=inputFname)
+	reader = MatrixFile(path=inputFname)
 	if hasHeader:
 		header = reader.next()
 		col_name2index = getColName2IndexFromHeader(header)
@@ -765,7 +765,7 @@ def getKey2ValueFromMatrixLikeFile(inputFname=None, keyHeaderLs=None, valueHeade
 	sys.stderr.write("Getting a dictionary out of  %s ..."%(inputFname))
 	from palos import MatrixFile
 	
-	reader = MatrixFile(inputFname=inputFname)
+	reader = MatrixFile(path=inputFname)
 	if hasHeader:
 		header = reader.next()
 		col_name2index = getColName2IndexFromHeader(header)

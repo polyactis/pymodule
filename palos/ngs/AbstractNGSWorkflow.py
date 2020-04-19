@@ -1723,7 +1723,7 @@ class AbstractNGSWorkflow(ParentClass):
         sys.stderr.write("Extracting sites from vcf folder %s into file %s ...\n"%(inputVCFFolder, outputFname))
         no_of_vcfFiles = 0
         no_of_loci = 0
-        outputF = MatrixFile(inputFname=outputFname, openMode='w', delimiter='\t')
+        outputF = MatrixFile(path=outputFname, openMode='w', delimiter='\t')
         for inputFname in os.listdir(inputVCFFolder):
             inputAbsPath = os.path.join(os.path.abspath(inputVCFFolder), inputFname)
             if ngs.isFileNameVCF(inputFname, includeIndelVCF=False):

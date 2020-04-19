@@ -34,7 +34,7 @@ class ClearVCFBasedOnSwitchDensity(ParentClass):
 		"""
 		sys.stderr.write("Reading in switch density from %s ..."%(inputFname))
 		
-		reader = MatrixFile(inputFname=inputFname)
+		reader = MatrixFile(path=inputFname)
 		reader.constructColName2IndexFromHeader()
 		
 		noOfSwitchesPerLocusIndex = reader.getColIndexGivenColHeader("noOfSwitchesPerLocus")

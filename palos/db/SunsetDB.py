@@ -681,7 +681,7 @@ class IndividualAlignment(Base, AbstractTableWithFilename):
 		2013.2.16 moved from PSMCOnAlignmentWorkflow.py
 		2013.2.12
 		"""
-		return '%s_%s%dMD'%(self.individual_sequence.individual.code, self.individual_sequence.individual.sex, self.median_depth)
+		return f'{self.individual_sequence.individual.code}_{self.individual_sequence.individual.sex}{self.median_depth:.0f}MD'
 	
 	
 class IndividualAlignmentConsensusSequence(Base, AbstractTableWithFilename):
@@ -2395,9 +2395,9 @@ class SunsetDB(Database):
 				2: individual.code
 		"""
 		query_string = "select * from view_alignment_with_country"
-		where_condition_ls = ["filtered=1 and outdated_index=0 and ref_ind_seq_id=%s and alignment_method_id=%s "%\
-							(ref_ind_seq_id, alignment_method_id)]
-		query_string = "%s where %s "%(query_string, " and ".join(where_condition_ls))
+		where_condition = f"filtered=1 and outdated_index=0 and ref_ind_seq_id=%s and alignment_method_id=%s"%\
+							(ref_ind_seq_id, alignment_method_id)
+		query_string = f"{query_string} where {where_condition}"
 		query = self.metadata.bind.execute(query_string)
 		monkeyID2ProperAlignment = {}
 		for row in query:
@@ -2408,8 +2408,10 @@ class SunsetDB(Database):
 			if monkeyID not in monkeyID2ProperAlignment:
 				monkeyID2ProperAlignment[monkeyID] = row
 			else:
-				sys.stderr.write("Warning: monkey %s has >1 proper alignment. Only used the 1st one. (ref_ind_seq_id=%s, alignment_method_id=%s)\n"%\
-								(ref_ind_seq_id, alignment_method_id))
+				print(f"Warning: monkey {monkeyID} has >1 proper alignments. "
+					f"Only used the 1st one from ref_ind_seq_id={ref_ind_seq_id} and "
+					f"alignment_method_id={alignment_method_id}"
+					, flush=True)
 		return monkeyID2ProperAlignment
 	
 	def filterAlignments(self, data_dir=None, alignmentLs=None, min_coverage=None, max_coverage=None, \

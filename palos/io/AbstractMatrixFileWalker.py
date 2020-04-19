@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Description:
 	2012.8.15
@@ -24,19 +24,21 @@ class AbstractMatrixFileWalker(AbstractMapper):
 	option_default_dict = AbstractMapper.option_default_dict.copy()
 	#option_default_dict.update(AbstractMapper.db_option_dict.copy())
 	option_default_dict.update({
-						('minNoOfTotal', 1, int): [10, 'M', 1, 'minimum no of data from one file for afterFileFunction() to run'],\
-						('h5TableName', 0, ): [None, '', 1, 'table name in the input file if inputFileFormat is 2'],\
-						('maxNoOfTotal', 0, int): [None, '', 1, 'maximum no of data to sample from one file. if not set, no limit.'],\
-						('samplingRate', 1, float): [1, 's', 1, 'how often you include the data, a probability between 0 and 1.'],\
-						('whichColumn', 0, int): [None, 'w', 1, 'data from this column (index starting from 0) is plotted as y-axis value'],\
-						('whichColumnHeader', 0, ): [None, 'W', 1, 'column header for the data to be plotted as y-axis value, substitute whichColumn'],\
-						('logY', 0, int): [0, '', 1, 'value 0: nothing; 1: log(); 2: -log(); 3: ln(X); 4: -ln(X). replacing self.logWhichColumn.'],\
-						('valueForNonPositiveYValue', 1, float): [-1, 'v', 1, 'default value when log-transformation fails (when value is negative)'],\
-						('missingDataNotation', 0, ): ['NA', '', 1, 'coma-separated list of notations for missing data.\n\
-	missing data will be skipped.'],\
-						('inputFileFormat', 0, int): [1, '', 1, '1: csv-like plain text file; 2: YHPyTables.YHFile; 3: HDF5MatrixFile; 4: VCFFile'],\
-						('outputFileFormat', 0, int): [1, '', 1, '1: csv-like plain text file; 2: YHPyTables.YHFile; 3: HDF5MatrixFile; 4: csv-like matrix, without header'],\
-						})
+		('minNoOfTotal', 1, int): [10, 'M', 1, 'minimum no of data from one file for afterFileFunction() to run'],\
+		('h5TableName', 0, ): [None, '', 1, 'table name in the input file if inputFileFormat is 2'],\
+		('maxNoOfTotal', 0, int): [None, '', 1, 'maximum no of data to sample from one file. if not set, no limit.'],\
+		('samplingRate', 1, float): [1, 's', 1, 'how often you include the data, a probability between 0 and 1.'],\
+		('whichColumn', 0, int): [None, 'w', 1, 'data from this column (index starting from 0) is plotted as y-axis value'],\
+		('whichColumnHeader', 0, ): [None, 'W', 1, 'column header for the data to be plotted as y-axis value, substitute whichColumn'],\
+		('logY', 0, int): [0, '', 1, 'value 0: nothing; 1: log(); 2: -log(); 3: ln(X); 4: -ln(X). replacing self.logWhichColumn.'],\
+		('valueForNonPositiveYValue', 1, float): [-1, 'v', 1, 'default value when log-transformation fails (when value is negative)'],\
+		('missingDataNotation', 0, ): ['NA', '', 1, 'coma-separated list of notations for missing data.'
+'missing data will be skipped.'],\
+		('inputFileFormat', 0, int): [1, '', 1, '1: csv-like plain text file; '
+			'2: YHPyTables.YHFile; 3: HDF5MatrixFile; 4: VCFFile'],\
+		('outputFileFormat', 0, int): [1, '', 1, '1: csv-like plain text file; '
+			'2: YHPyTables.YHFile; 3: HDF5MatrixFile; 4: csv-like matrix, without header'],\
+		})
 	
 	def __init__(self, inputFnameLs=None, **keywords):
 		"""

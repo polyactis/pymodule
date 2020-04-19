@@ -45,7 +45,7 @@ class AddAlignmentDepthIntervalFile2DB(ParentClass):
 		"""
 		2013.08.23
 		"""
-		reader = AlignmentDepthIntervalFile(inputFname=inputFname)
+		reader = AlignmentDepthIntervalFile(path=inputFname)
 		return reader.readThroughAndProvideSummary()
 	
 	def run(self):

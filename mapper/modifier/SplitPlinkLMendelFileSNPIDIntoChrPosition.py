@@ -50,9 +50,9 @@ class SplitPlinkLMendelFileSNPIDIntoChrPosition(AbstractMapper):
 			pdb.set_trace()
 		
 		#inf = utils.openGzipFile(self.inputFname)
-		reader = MatrixFile(inputFname=self.inputFname)
+		reader = MatrixFile(path=self.inputFname)
 		reader.constructColName2IndexFromHeader()
-		writer = MatrixFile(inputFname=self.outputFname, openMode='w', delimiter='\t')
+		writer = MatrixFile(path=self.outputFname, openMode='w', delimiter='\t')
 		header = ["SNPID", "oldChromosome", "Chromosome", "Start", "Stop", "N"]
 		writer.writeHeader(header)
 		

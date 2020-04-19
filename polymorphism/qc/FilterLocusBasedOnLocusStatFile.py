@@ -40,7 +40,7 @@ class FilterLocusBasedOnLocusStatFile(ParentClass):
 		sys.stderr.write("Reading in the missing statistics from %s ... "%(inputFname))
 		locusID2Stat = {}
 		
-		reader = MatrixFile(inputFname=inputFname)
+		reader = MatrixFile(path=inputFname)
 		reader.constructColName2IndexFromHeader()
 		locusIDIndex = reader.getColIndexGivenColHeader("locusID")
 		statIndex = reader.getColIndexGivenColHeader("occurrence_byFixedValue")

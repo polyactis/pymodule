@@ -41,7 +41,7 @@ class AssociationPeakTableFile(YHFile):
 		
 		self.peakPadding = peakPadding
 		self.associationPeakRBDict = None
-		YHFile.__init__(self, inputFname=inputFname, openMode=openMode, \
+		YHFile.__init__(self, path=inputFname, openMode=openMode, \
 				tableName=tableName, groupNamePrefix=groupNamePrefix, tableNamePrefix=tableNamePrefix,\
 				rowDefinition=AssociationPeakTable, filters=filters, expectedrows=expectedrows,\
 				autoRead=autoRead, autoWrite=autoWrite,\

@@ -45,7 +45,7 @@ class LiftOverVCFBasedOnCoordinateMap(ParentClass):
 		"""
 		sys.stderr.write("Reading in the coordinate map from %s ..."%(coordinateMapFname))
 		oldCoordinate2newCoordinateDataLs = {}
-		reader = MatrixFile(inputFname=coordinateMapFname)
+		reader = MatrixFile(path=coordinateMapFname)
 		reader.constructColName2IndexFromHeader()
 		oldChromosomeIndex = reader.getColIndexGivenColHeader("queryChromosome")
 		oldStartIndex = reader.getColIndexGivenColHeader("queryStart")

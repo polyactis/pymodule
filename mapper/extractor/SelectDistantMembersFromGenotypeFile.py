@@ -99,16 +99,16 @@ class SelectDistantMembersFromGenotypeFile(AbstractMatrixFileWalker):
 			run before anything is run
 		"""
 		AbstractMatrixFileWalker.setup(self, **keywords)
-		#self.writer = BeagleGenotypeFile(inputFname=self.outputFname, openMode='w')
+		#self.writer = BeagleGenotypeFile(path=self.outputFname, openMode='w')
 		
 		#read in the IBD check result
 		self.ibdData = SNP.readAdjacencyListDataIntoMatrix(inputFname=self.pedigreeKinshipFilePath, \
-								rowIDHeader=None, colIDHeader=None, \
-								rowIDIndex=0, colIDIndex=1, \
-								dataHeader=None, dataIndex=2, hasHeader=False)
+						rowIDHeader=None, colIDHeader=None, \
+						rowIDIndex=0, colIDIndex=1, \
+						dataHeader=None, dataIndex=2, hasHeader=False)
 		
 		#. read in the alignment coverage data
-		alignmentCoverageFile = MatrixFile(inputFname=self.individualAlignmentCoverageFname)
+		alignmentCoverageFile = MatrixFile(path=self.individualAlignmentCoverageFname)
 		alignmentCoverageFile.constructColName2IndexFromHeader()
 		alignmentReadGroup2coverageLs = alignmentCoverageFile.constructDictionary(keyColumnIndexList=[0], valueColumnIndexList=[1])
 		alignmentCoverageFile.close()
@@ -131,7 +131,7 @@ class SelectDistantMembersFromGenotypeFile(AbstractMatrixFileWalker):
 		#. read in the pedigree or deduce it from Beagle Trio/Duo genotype file (columns)
 		#. construct individualID2pedigreeContext, context: familySize=1/2/3, familyPosition=1/2 (parent/child)
 		sys.stderr.write("Constructing individualID2pedigreeContext ...")
-		plinkPedigreeFile = PlinkPedigreeFile(inputFname=self.pedigreeFname)
+		plinkPedigreeFile = PlinkPedigreeFile(path=self.pedigreeFname)
 		pGraph = plinkPedigreeFile.pedigreeGraph
 		#shrink the graph to only individuals with data
 		pGraph = nx.subgraph(pGraph, individualID2HaplotypeData.keys())

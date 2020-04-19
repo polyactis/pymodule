@@ -16,8 +16,8 @@ class AlignmentDepthIntervalFile(MatrixFile):
 						('minDepth', 0, float): [None, '', 1, ''],\
 							
 						})
-	def __init__(self, inputFname=None, **keywords):
-		MatrixFile.__init__(self, inputFname=inputFname, **keywords)
+	def __init__(self, path=None, **keywords):
+		MatrixFile.__init__(self, path=path, **keywords)
 		
 		#summary data
 		self.no_of_intervals = 0

@@ -3,14 +3,14 @@
 2012.3.1 a matrix file API like csv.reader, it can deal with any delimiter: coma, tab, space or multi-space.
 Example:
 
-	reader = MatrixFile(inputFname='/tmp/input.txt', openMode='r')
+	reader = MatrixFile(path='/tmp/input.txt', openMode='r')
 	reader = MatrixFile('/tmp/input.txt', openMode='r')
 	reader.constructColName2IndexFromHeader()
 	for row in reader:
 		row[reader.getColName2IndexFromHeader('KID')]
 	
-	inf = utils.openGzipFile(inputFname, openMode='r')
-	reader = MatrixFile(inputFile=inf)
+	inf = utils.openGzipFile(path, openMode='r')
+	reader = MatrixFile(file_handle=inf)
 	
 	#2013.2.1 writing
 	writer = MatrixFile('/tmp/output.txt', openMode='w', delimiter='\t')
@@ -19,52 +19,54 @@ Example:
 	writer.close()
 
 """
-
-import sys, os
-import csv, re
+import csv
+import os
+import re
+import sys
 from palos.ProcessOptions import  ProcessOptions
 from palos import utils, figureOutDelimiter
 
 class MatrixFile(object):
 	__doc__ = __doc__
 	option_default_dict = {
-		('inputFname', 0, ): [None, 'i', 1, 'filename.'],\
-		('inputFile', 0, ): [None, '', 1, 'opened file handler'],\
-		('openMode', 1, ): ['r', '', 1, 'mode to open the inputFname if inputFile is not presented.'],\
+		('path', 0, ): [None, 'i', 1, 'Path to the input file.'],\
+		('file_handle', 0, ): [None, '', 1, 'A opened input file handler'],\
+		('openMode', 1, ): ['r', '', 1, 'mode to open the path if file_handle is not presented.'],\
 		('delimiter', 0, ): [None, '', 1, ''],\
 		('header', 0, ): [None, '', 1, 'the header to be in output file, openMode=w'],\
 		('debug', 0, int):[0, 'b', 0, 'toggle debug mode'],\
 		('report', 0, int):[0, 'r', 0, 'toggle report, more verbose stdout/stderr.']
 		}
-	def __init__(self, inputFname=None, **keywords):
+	def __init__(self, path=None, **keywords):
 		self.ad = ProcessOptions.process_function_arguments(keywords, self.option_default_dict, error_doc=self.__doc__, \
 														class_to_have_attr=self)
-		if not self.inputFname:
-			self.inputFname = inputFname
-		if self.inputFname and self.inputFile is None:
-			self.inputFile = utils.openGzipFile(self.inputFname, openMode=self.openMode)
+		if not self.path:
+			self.path = path
 		
-		self.filename = self.inputFname	#2013.05.03 for easy access
+		if self.path and self.file_handle is None:
+			self.file_handle = utils.openGzipFile(self.path, openMode=self.openMode)
 		
+		#2013.05.03 for easy access
+		self.filename = self.path		
 		self.csvFile = None
 		self.isRealCSV = False
 		if self.openMode=='r':	#reading mode
 			if self.delimiter is None:
-				self.delimiter = figureOutDelimiter(self.inputFile)
+				self.delimiter = figureOutDelimiter(self.file_handle)
 			
 			if self.delimiter=='\t' or self.delimiter==',':
-				self.csvFile = csv.reader(self.inputFile, delimiter=self.delimiter)
+				self.csvFile = csv.reader(self.file_handle, delimiter=self.delimiter)
 				self.isRealCSV = True
 			else:
-				self.csvFile = self.inputFile
+				self.csvFile = self.file_handle
 				self.isRealCSV = False
 		else:	#writing mode
 			if not self.delimiter:
 				self.delimiter = '\t'
-			self.csvFile = csv.writer(self.inputFile, delimiter=self.delimiter)
+			self.csvFile = csv.writer(self.file_handle, delimiter=self.delimiter)
 			self.isRealCSV = True
 			#else:
-			#	self.csvFile = self.inputFile
+			#	self.csvFile = self.file_handle
 			#	self.isRealCSV = False
 		self.col_name2index = None
 		
@@ -78,7 +80,7 @@ class MatrixFile(object):
 		2013.07.19
 		"""
 		#reset the inf
-		self.inputFile.seek(0)
+		self.file_handle.seek(0)
 	
 	def writeHeader(self,header=None):
 		"""
@@ -156,7 +158,7 @@ class MatrixFile(object):
 	
 	def close(self):
 		del self.csvFile
-		self.inputFile.close()
+		self.file_handle.close()
 	
 	def writeRow(self, row=None):
 		"""
@@ -189,7 +191,7 @@ class MatrixFile(object):
 				
 			i.e.:
 			
-				alignmentCoverageFile = MatrixFile(inputFname=self.individualAlignmentCoverageFname)
+				alignmentCoverageFile = MatrixFile(path=self.individualAlignmentCoverageFname)
 				alignmentCoverageFile.constructColName2IndexFromHeader()
 				alignmentReadGroup2coverageLs = alignmentCoverageFile.constructDictionary(keyColumnIndexList=[0], valueColumnIndexList=[1])
 				alignmentCoverageFile.close()

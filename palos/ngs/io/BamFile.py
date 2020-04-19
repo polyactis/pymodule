@@ -6,21 +6,22 @@ A class wrapper for SAM/BAM file. It is an extension of pysam.Samfile.
 import os, sys
 from palos.utils import PassingData
 import pysam
+from pysam import AlignedRead
 
 class BamFile(pysam.Samfile):
 	"""
-	inputFname: a bam input file.
+	path: the path to a bam file.
 	openMode: 'rb: bam file. r: sam file.
 	2011-7-11 A class wrapper for SAM/BAM file. 
 		It is an extension of pysam.Samfile:
 		http://wwwfgu.anat.ox.ac.uk/~andreas/documentation/samtools/api.html#pysam.Samfile
 	"""
-	def __init__(self, inputFname, openMode, **keywords):
+	def __init__(self, path, openMode, **keywords):
 		"""
 		2011-7-11
 		"""
-		pysam.Samfile.__init__(self, inputFname, openMode, **keywords)
-		self.inputFname = inputFname
+		pysam.Samfile.__init__(self, path, openMode, **keywords)
+		self.path = path
 		self.openMode = openMode
 	
 	def traverseBamByRead(self, processor=None):
@@ -49,7 +50,6 @@ class BamFile(pysam.Samfile):
 		sys.stderr.write("\n %s unique reads among %s mapped reads, max redundant read count=%s. Done.\n"%\
 						(len(param_obj.qname2count), param_obj.real_counter, max_redundant_read_count))
 
-from pysam import AlignedRead
 class YHAlignedRead(object):
 	def __init__(self, alignedRead=None):
 		self.read = alignedRead

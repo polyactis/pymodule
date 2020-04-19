@@ -73,12 +73,12 @@ class SplitPedigreeVCFIntoBeagleTriosDuosFiles(AbstractVCFMapper):
 		sys.stderr.write("Constructing pedigree-family data from pedigree file %s, vcf file %s ...."%\
 						(plinkPedigreeFname, gatkPrintBeagleFname))
 		
-		beagleLikelihoodFile = BeagleLikelihoodFile(inputFname=gatkPrintBeagleFname)
+		beagleLikelihoodFile = BeagleLikelihoodFile(path=gatkPrintBeagleFname)
 		sampleID2ColIndexList = beagleLikelihoodFile.constructColName2IndexFromHeader()
 		#read in the pedigree, make sure samples exist in gatkPrintBeagleFname	
 		counter = 0
 		real_counter = 0
-		plinkPedigreeFile = PlinkPedigreeFile(inputFname=plinkPedigreeFname, dummyIndividualNamePrefix=dummyIndividualNamePrefix)
+		plinkPedigreeFile = PlinkPedigreeFile(path=plinkPedigreeFname, dummyIndividualNamePrefix=dummyIndividualNamePrefix)
 		pedigreeGraph = plinkPedigreeFile.getPedigreeGraph().DG
 		# shrink the pedigree to only individuals that exist in beagleLikelihoodFile
 		pedigreeGraph = nx.subgraph(pedigreeGraph, sampleID2ColIndexList.keys())
@@ -141,7 +141,7 @@ class SplitPedigreeVCFIntoBeagleTriosDuosFiles(AbstractVCFMapper):
 		for familySize, sampleIDList in familySize2SampleIDList.items():
 			if familySize not in familySize2BeagleFileHandler:
 				tmpOutputFnamePrefix = '%s_familySize%s'%(outputFnamePrefix, familySize)
-				writer = MatrixFile(inputFname='%s.bgl'%(tmpOutputFnamePrefix), openMode='w', delimiter=' ')
+				writer = MatrixFile(path='%s.bgl'%(tmpOutputFnamePrefix), openMode='w', delimiter=' ')
 				familySize2BeagleFileHandler[familySize] = writer
 				if familySize==1:
 					headerRow = ['marker', 'alleleA', 'alleleB']
@@ -154,7 +154,7 @@ class SplitPedigreeVCFIntoBeagleTriosDuosFiles(AbstractVCFMapper):
 						headerRow.extend([sampleID]*2)
 				writer.writeHeader(headerRow)
 				counter += 1
-		markersFile = MatrixFile(inputFname='%s.markers'%(outputFnamePrefix), openMode='w', delimiter=' ')
+		markersFile = MatrixFile(path='%s.markers'%(outputFnamePrefix), openMode='w', delimiter=' ')
 		
 		counter += 1
 		sys.stderr.write("%s files outputted.\n"%(counter))

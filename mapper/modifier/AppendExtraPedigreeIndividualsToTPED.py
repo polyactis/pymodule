@@ -42,7 +42,7 @@ class AppendExtraPedigreeIndividualsToTPED(ParentClass):
 			pdb.set_trace()
 		
 		#inf = utils.openGzipFile(self.inputFname)
-		reader = MatrixFile(inputFname=self.inputFname)	#a TPED file
+		reader = MatrixFile(path=self.inputFname)	#a TPED file
 		
 		writer = csv.writer(open(self.outputFname, 'w'), delimiter='\t')
 		counter = 0

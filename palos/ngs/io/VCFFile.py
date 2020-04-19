@@ -5,7 +5,7 @@
 	Need to add row-based iterator.
 
 Example:
-	vcfFile = VCFFile(inputFname=self.inputFname)
+	vcfFile = VCFFile(path=self.inputFname)
 	trio_col_index_data = self.findTrioIndex(vcfFile.sample_id2index, self.trio_isq_id_ls)
 	for vcfRecord in vcfFile.parseIter():
 		locus_id = vcfRecord.locus_id
@@ -235,7 +235,8 @@ class VCFRecord(object):
 		"""
 		frequencyLs = self.info_tag2value.get("AF", self.info_tag2value.get("AF1", None))
 		if frequencyLs is not None:
-			frequencyLs = frequencyLs.split(',')	#if more than one alt alleles, AF is a string separated by ",".
+			#if more than one alt alleles, AF is a string separated by ",".
+			frequencyLs = frequencyLs.split(',')
 			frequencyLs = map(float ,frequencyLs)
 			if useMax:
 				frequency = max(frequencyLs)
@@ -288,17 +289,18 @@ class VCFRecord(object):
 	def setGenotypeCallForOneSample(self, sampleID=None, genotype=None, convertGLToPL=True):
 		"""
 		2913.06.05
-			argument genotype should be in VCF format. 'A/G' for unphased;  'A|G' for phased; './.' or '.|.' for missing
-			argument convertGLToPL is so far only  for platypus.
-				##FORMAT=<ID=PL,Number=G,Type=Integer,Description="Normalized, Phred-scaled likelihoods for genotypes as defined in the VCF specification">
-				##FORMAT=<ID=GL,Number=.,Type=Float,Description="Genotype log10-likelihoods for AA,AB and BB genotypes, where A = ref and B = variant. Only applicable for bi-allelic sites">
-				
-				PL = -10*GL
-				
-				self.log10Likeli2PhredScaleFunction is lambda function for conversion
-				convertGLToPL=True by default because TrioCaller or most programs expect a PL, rather than GL.
+		argument genotype should be in VCF format. 'A/G' for unphased;  'A|G' for phased; './.' or '.|.' for missing
+		argument convertGLToPL is so far only  for platypus.
+			##FORMAT=<ID=PL,Number=G,Type=Integer,Description="Normalized, Phred-scaled likelihoods for genotypes as defined in the VCF specification">
+			##FORMAT=<ID=GL,Number=.,Type=Float,Description="Genotype log10-likelihoods for AA,AB and BB genotypes, where A = ref and B = variant. Only applicable for bi-allelic sites">
+			
+			PL = -10*GL
+			
+			self.log10Likeli2PhredScaleFunction is lambda function for conversion
+			convertGLToPL=True by default because TrioCaller or most programs expect a PL, rather than GL.
 		"""
-		col_index = self.sample_id2index.get(sampleID)	#col_index for "ref" is 0. col_index starts from 1 for actual samples.
+		#col_index for "ref" is 0. col_index starts from 1 for actual samples.
+		col_index = self.sample_id2index.get(sampleID)
 		if self.dataEntryType==2:
 			self.data_row[col_index]['GT'] = genotype
 		else:
@@ -354,49 +356,49 @@ class VCFRecord(object):
 	
 class VCFFile(object):
 	"""
-		self.reader = VCFFile(inputFname=self.originalVCFFname, openMode='r')
-		
-		
-		self.writer = VCFFile(outputFname=self.outputFname, openMode='w')
-		self.writer.metaInfoLs = self.reader.metaInfoLs
-		self.writer.header = self.reader.header
-		self.writer.writeMetaAndHeader()
-		
-		for vcfRecord in self.reader:
-			for sampleID, sample_index in vcfRecord.sample_id2index.items():
-				beagleFile = self.sampleID2BeagleFile.get(sampleID)
-				beagleGenotype = beagleFile.getGenotypeOfOneSampleOneLocus(sampleID=sampleID, locusID=None)
-				vcfRecord.setGenotypeCallForOneSample(sampleID=sampleID, genotype='%s|%s'%(beagleGenotype[0], beagleGenotype[1]))
-				counter += 1
-			self.writer.writeVCFRecord(vcfRecord)
-		
-		
-		self.writer = VCFFile(outputFname=self.outputFname, openMode='w')
-		self.writer.makeupHeaderFromSampleIDList(sampleIDList=snpData.row_id_ls)
-		self.writer.writeMetaAndHeader()
+	self.reader = VCFFile(inputFname=self.originalVCFFname, openMode='r')
+	
+	
+	self.writer = VCFFile(outputFname=self.outputFname, openMode='w')
+	self.writer.metaInfoLs = self.reader.metaInfoLs
+	self.writer.header = self.reader.header
+	self.writer.writeMetaAndHeader()
+	
+	for vcfRecord in self.reader:
+		for sampleID, sample_index in vcfRecord.sample_id2index.items():
+			beagleFile = self.sampleID2BeagleFile.get(sampleID)
+			beagleGenotype = beagleFile.getGenotypeOfOneSampleOneLocus(sampleID=sampleID, locusID=None)
+			vcfRecord.setGenotypeCallForOneSample(sampleID=sampleID, genotype='%s|%s'%(beagleGenotype[0], beagleGenotype[1]))
+			counter += 1
+		self.writer.writeVCFRecord(vcfRecord)
+	
+	
+	self.writer = VCFFile(outputFname=self.outputFname, openMode='w')
+	self.writer.makeupHeaderFromSampleIDList(sampleIDList=snpData.row_id_ls)
+	self.writer.writeMetaAndHeader()
 	"""
 	
 	__doc__ = __doc__
 	option_default_dict = {
-						('inputFname', 0, ): [None, 'i', 1, 'a VCF input file to read in the VCF content.'],\
-						('outputFname', 0, ): [None, 'o', 1, 'a VCF output file to hold the the VCF content.'],\
-						('openMode', 1, ): ['rb', '', 1, 'rb: bam file. r: sam file.'],\
-						('minorAlleleDepthLowerBoundCoeff', 1, float): [1/4., 'M', 1, 'minimum read depth multiplier for an allele to be called (heterozygous or homozygous)', ],\
-						('minorAlleleDepthUpperBoundCoeff', 1, float): [3/4., 'A', 1, 'maximum read depth multiplier for the minor allele of a heterozygous call', ],\
-						('majorAlleleDepthUpperBoundCoeff', 1, float): [7/8., 'a', 1, 'maximum read depth multiplier for the major allele of het call'],\
-						('maxNoOfReadsForGenotypingError', 1, float): [1, 'x', 1, 'if read depth for one allele is below or equal to this number, regarded as genotyping error ', ],\
-						('depthUpperBoundCoeff', 1, float): [2, 'm', 1, 'depthUpperBoundCoeff*coverage = maximum read depth for one base'],\
-						('depthLowerBoundCoeff', 1, float): [1/4., 'O', 1, 'depthLowerBoundCoeff*coverage = minimum read depth multiplier for one base'],\
-						('depthUpperBoundMultiSampleCoeff', 1, float): [3, 'N', 1, 'across n samples, ignore bases where read depth > coverageSum*depthUpperBoundCoeff*multiplier.'],\
-						('seqCoverageFname', 0, ): ['', 'q', 1, 'The sequence coverage file. tab/comma-delimited: individual_sequence.id coverage'],\
-						('minDepth', 0, float): [0, '', 1, 'minimum depth for a call to regarded as non-missing', ],\
-						('ploidy', 0, int): [2, '', 1, 'ploidy of the organism from which the genotype is from', ],\
-						('defaultCoverage', 1, float): [5, 'd', 1, 'default coverage when coverage is not available for a read group'],\
-						("site_type", 1, int): [1, 's', 1, '1: all sites, 2: variants only'],\
-						('debug', 0, int):[0, 'b', 0, 'toggle debug mode'],\
-						("sampleStartingColumn", 1, int): [9, '', 1, 'The column index (starting from 0) of the 1st sample genotype'],\
-						('report', 0, int):[0, 'r', 0, 'toggle report, more verbose stdout/stderr.']
-						}
+		('inputFname', 0, ): [None, 'i', 1, 'a VCF input file to read in the VCF content.'],\
+		('outputFname', 0, ): [None, 'o', 1, 'a VCF output file to hold the the VCF content.'],\
+		('openMode', 1, ): ['rb', '', 1, 'rb: bam file. r: sam file.'],\
+		('minorAlleleDepthLowerBoundCoeff', 1, float): [1/4., 'M', 1, 'minimum read depth multiplier for an allele to be called (heterozygous or homozygous)', ],\
+		('minorAlleleDepthUpperBoundCoeff', 1, float): [3/4., 'A', 1, 'maximum read depth multiplier for the minor allele of a heterozygous call', ],\
+		('majorAlleleDepthUpperBoundCoeff', 1, float): [7/8., 'a', 1, 'maximum read depth multiplier for the major allele of het call'],\
+		('maxNoOfReadsForGenotypingError', 1, float): [1, 'x', 1, 'if read depth for one allele is below or equal to this number, regarded as genotyping error ', ],\
+		('depthUpperBoundCoeff', 1, float): [2, 'm', 1, 'depthUpperBoundCoeff*coverage = maximum read depth for one base'],\
+		('depthLowerBoundCoeff', 1, float): [1/4., 'O', 1, 'depthLowerBoundCoeff*coverage = minimum read depth multiplier for one base'],\
+		('depthUpperBoundMultiSampleCoeff', 1, float): [3, 'N', 1, 'across n samples, ignore bases where read depth > coverageSum*depthUpperBoundCoeff*multiplier.'],\
+		('seqCoverageFname', 0, ): ['', 'q', 1, 'The sequence coverage file. tab/comma-delimited: individual_sequence.id coverage'],\
+		('minDepth', 0, float): [0, '', 1, 'minimum depth for a call to regarded as non-missing', ],\
+		('ploidy', 0, int): [2, '', 1, 'ploidy of the organism from which the genotype is from', ],\
+		('defaultCoverage', 1, float): [5, 'd', 1, 'default coverage when coverage is not available for a read group'],\
+		("site_type", 1, int): [1, 's', 1, '1: all sites, 2: variants only'],\
+		('debug', 0, int):[0, 'b', 0, 'toggle debug mode'],\
+		("sampleStartingColumn", 1, int): [9, '', 1, 'The column index (starting from 0) of the 1st sample genotype'],\
+		('report', 0, int):[0, 'r', 0, 'toggle report, more verbose stdout/stderr.']
+		}
 	
 	def __init__(self, **keywords):
 		"""
@@ -829,10 +831,11 @@ class VCFFile(object):
 		if outf is None:
 			sys.stderr.write("Warning: outf is None. nothing is written out.\n")
 		else:
-			self.locus_id_ls.append(vcfRecord.vcf_locus_id)#2012.9.6
-			data_row = [vcfRecord.chromosome, vcfRecord.pos, vcfRecord.vcf_locus_id, vcfRecord.refBase, vcfRecord.altBase, \
-					vcfRecord.quality, vcfRecord.filter,\
-					vcfRecord.info, vcfRecord.format] + vcfRecord.row[self.sampleStartingColumn:]
+			self.locus_id_ls.append(vcfRecord.vcf_locus_id)
+			data_row = [vcfRecord.chromosome, vcfRecord.pos, vcfRecord.vcf_locus_id, \
+				vcfRecord.refBase, vcfRecord.altBase, \
+				vcfRecord.quality, vcfRecord.filter,\
+				vcfRecord.info, vcfRecord.format] + vcfRecord.row[self.sampleStartingColumn:]
 			writer.writerow(data_row)
 	
 	def writerow(self, data_row):
@@ -853,17 +856,13 @@ class VCFFile(object):
 	def getLocus2AlternativeAlleleFrequency(self):
 		"""
 		2012.10.5
-			
 			adapted from VariantDiscovery.getContig2Locus2Frequency()
-		
 		"""
 		locus2frequency = {}
-		counter = 0
-		real_counter = 0
 		for vcfRecord in self:
 			current_locus = (vcfRecord.chromosome, vcfRecord.pos)
 			AAF = vcfRecord.getAAF()
 			locus2frequency[current_locus] = AAF
-		
+			counter += 1
 		self._resetInput()
 		return locus2frequency

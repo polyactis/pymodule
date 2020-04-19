@@ -2,7 +2,7 @@
 """
 2012.12.15 table-data stored in pytables.
 i.e.
-	reader = PyTablesMatrixFile(inputFname=filename, openMode='r')
+	reader = PyTablesMatrixFile(path=filename, openMode='r')
 	reader = PyTablesMatrixFile(filename, openMode='r')
 	for row in reader:
 		...
@@ -15,7 +15,7 @@ i.e.
 	headerList = [row[0] for row in dtypeList]
 	dtype = numpy.dtype(dtypeList)
 	
-	writer = PyTablesMatrixFile(inputFname=filename, openMode='w', dtype=dtype)
+	writer = PyTablesMatrixFile(path=filename, openMode='w', dtype=dtype)
 	writer = PyTablesMatrixFile(filename, openMode='w', dtype=dtype)
 	
 	if writer:
@@ -271,7 +271,7 @@ class YHSingleTableFile(YHTable):
 	2012.12.16 adapted from http://pytables.github.com/cookbook/simple_table.html
 	"""
 	#mimics the sqlalchemy	
-	def __init__(self, inputFname=None, openMode='r', \
+	def __init__(self, path=None, openMode='r', \
 				groupName=None, tableName=None,\
 				description=None,
 				title='', filters=None, rowDefinition=None,\
@@ -279,12 +279,12 @@ class YHSingleTableFile(YHTable):
 		"""
 		rowDefinition is backup of description, to make it compatible with HDF5MatrixFile
 		"""
-		self.inputFname = inputFname
+		self.path = path
 		self.openMode = openMode
 		self.groupName = groupName
 		self.tableName = tableName
 		
-		self.hdf5File = tables.openFile(inputFname, openMode)
+		self.hdf5File = tables.openFile(path, openMode)
 		self.uservars = None
 		
 		if groupName is None:
@@ -389,7 +389,7 @@ class YHFile(tables.File, HDF5MatrixFile):
 	...
 	
 	#read a file
-	reader = YHFile(inputFname, openMode='r')
+	reader = YHFile(path, openMode='r')
 	...
 	
 	#open a file without passing the table structure.
@@ -398,12 +398,12 @@ class YHFile(tables.File, HDF5MatrixFile):
 	writer.createNewTable(rowDefinition=CountAssociationLocusTable)
 	...
 	"""
-	def __init__(self, inputFname=None, openMode='r', \
+	def __init__(self, path=None, openMode='r', \
 				tableName=None, groupNamePrefix='group', tableNamePrefix='table',\
 				rowDefinition=None, filters=None, expectedrows=500000, \
 				autoRead=True, autoWrite=True, \
 				debug=0, report=0, **keywords):
-		self.inputFname = inputFname
+		self.path = path
 		self.header = None
 		self.openMode = openMode
 		self.tableName = tableName
@@ -424,12 +424,12 @@ class YHFile(tables.File, HDF5MatrixFile):
 		self.tableObjectList = []
 		self.tablePath2Index = {}
 		
-		#self.hdf5File = tables.openFile(self.inputFname, self.openMode)
+		#self.hdf5File = tables.openFile(self.path, self.openMode)
 		#self.root = self.hdf5File.root
 		if filters is None:
 			filters = tables.Filters(complib="blosc", complevel=5, shuffle=True)
 		
-		tables.File.__init__(self, self.inputFname, mode=self.openMode, title='', rootUEP='/', filters=filters,\
+		tables.File.__init__(self, self.path, mode=self.openMode, title='', rootUEP='/', filters=filters,\
 							**keywords)
 		
 		if self.openMode=='r' or self.openMode=='a':

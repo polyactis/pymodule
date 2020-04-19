@@ -37,20 +37,19 @@ class AssociationLocus2PeakTable(tables.IsDescription):
 class AssociationLocusTableFile(YHFile):
 
 	"""
-	usage examples:
-	
+	Examples:
 		associationLocusTableFile = AssociationLocusTableFile(self.outputFname, openMode='w')
 		associationLocusTableFile.addAttributeDict(attributeDict)
 		associationLocusTableFile.appendAssociationPeak(association_peak_ls=association_peak_ls)
 		
 		#for read-only
-		associationLocusTableFile = AssociationLocusTableFile(inputFname, openMode='r')
+		associationLocusTableFile = AssociationLocusTableFile(path, openMode='r')
 		rbDict = associationLocusTableFile.associationLocusRBDict
 		
-		associationLocusTableFile = AssociationLocusTableFile(inputFname, openMode='r', constructLocusRBDict=False)	#don't need it
+		associationLocusTableFile = AssociationLocusTableFile(path, openMode='r', constructLocusRBDict=False)	#don't need it
 		call_method_id_ls = associationLocusTableFile.getAttribute('call_method_id_ls')
 	"""
-	def __init__(self, inputFname=None, openMode='r', \
+	def __init__(self, path=None, openMode='r', \
 				tableName='association_locus', groupNamePrefix='group', tableNamePrefix='table',\
 				filters=None, autoRead=True, autoWrite=True, \
 				locus2PeakTableName='association_locus2peak', locusPadding=0, constructLocusRBDict=True,\
@@ -61,7 +60,7 @@ class AssociationLocusTableFile(YHFile):
 		self.locusPadding = locusPadding
 		self.associationLocusRBDict = None
 		
-		YHFile.__init__(self, inputFname=inputFname, openMode=openMode, \
+		YHFile.__init__(self, path=path, openMode=openMode, \
 				tableName=tableName, groupNamePrefix=groupNamePrefix, tableNamePrefix=tableNamePrefix,\
 				rowDefinition=None, filters=filters, debug=0, report=0,\
 				autoRead=False, autoWrite=False)
@@ -111,7 +110,7 @@ class AssociationLocusTableFile(YHFile):
 		real_counter = 0
 		for rowPointer in tableObject:
 			row = castPyTablesRowIntoPassingData(rowPointer)
-			if not row.chromosome:	#empty chromosome, which happens when inputFname contains no valid locus, but the default null locus (only one).
+			if not row.chromosome:	#empty chromosome, which happens when path contains no valid locus, but the default null locus (only one).
 				continue
 			counter += 1
 			phenotype_id_ls = row.phenotype_id_ls_in_str.split(',')
@@ -155,7 +154,7 @@ class AssociationLocusTableFile(YHFile):
 					* peak-score
 		2012.11.20
 		"""
-		sys.stderr.write("Saving %s association loci into file %s ..."%(len(associationLocusList), self.inputFname))
+		sys.stderr.write("Saving %s association loci into file %s ..."%(len(associationLocusList), self.path))
 		#add neighbor_distance, max_neighbor_distance, min_MAF, min_score, ground_score as attributes
 		#2012.11.28 sort it
 		associationLocusList.sort()

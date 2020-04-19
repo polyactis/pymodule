@@ -58,7 +58,7 @@ class CombinePhasedBeagleOutputsIntoVCF(AbstractMatrixFileWalker):
 		# read all the Beagle files
 		sampleID2BeagleFile = {}
 		for inputFname in self.inputFnameLs:
-			beagleFile = BeagleGenotypeFile(inputFname=inputFname)
+			beagleFile = BeagleGenotypeFile(path=inputFname)
 			beagleFile.readInAllHaplotypes()
 			for individualID in beagleFile.sampleIDList:
 				sampleID2BeagleFile[individualID] = beagleFile

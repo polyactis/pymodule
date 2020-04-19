@@ -38,7 +38,7 @@ class RemoveLocusFromVCFWithLowLiftOverMapPvalue(ParentClass):
 		"""
 		sys.stderr.write("Reading in the coordinate map from %s ..."%(liftOverLocusMapPvalueFname))
 		locusNewID2mapPvalue = {}
-		reader = MatrixFile(inputFname=liftOverLocusMapPvalueFname)
+		reader = MatrixFile(path=liftOverLocusMapPvalueFname)
 		reader.constructColName2IndexFromHeader()
 		strandIndex = reader.getColIndexGivenColHeader("oldStrand")
 		newChromosomeIndex = reader.getColIndexGivenColHeader("newChromosome")
