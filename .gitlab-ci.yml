@@ -56,7 +56,7 @@ uninstall:
 compile:
   stage: compile
   script:
-    - echo "Compileother C++ programs and modules ... "
+    - echo "Compile other C++ programs and modules ... "
     - pwd
     - pushd io && make && popd
     - pushd mapper && make && popd
