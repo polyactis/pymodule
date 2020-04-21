@@ -25,138 +25,142 @@ class AbstractNGSWorkflow(ParentClass):
     __doc__ = __doc__
     option_default_dict = ParentClass.option_default_dict.copy()
     option_default_dict.update(ParentClass.db_option_dict)
-
     option_default_dict.update({
-                        ('ref_ind_seq_id', 1, int): [None, 'a', 1, 'IndividualSequence.id. To pick alignments with this sequence as reference', ],\
-                        ("samtools_path", 1, ): ["%s/bin/samtools", '', 1, 'samtools binary'],\
-                        ("picard_path", 1, ): ["%s/script/picard/dist", '', 1, 'picard folder containing its jar binaries'],\
-                        ("gatk_path", 1, ): ["%s/bin/GenomeAnalysisTK1_6_9.jar", '', 1, 'my custom GATK 1.6.9 jar compiled from https://github.com/polyactis/gatk using jdk 1.6'],\
-                        ("gatk2_path", 1, ): ["%s/bin/GenomeAnalysisTK.jar", '', 1, 'jar of GATK version 2 or afterwards.'],\
-                        ('picardJarPath', 1, ): ["%s/script/picard.broad/build/libs/picard.jar", '', 1, 'path to the new picard jar', ],\
-                        ('tabixPath', 1, ): ["%s/bin/tabix", '', 1, 'path to the tabix binary', ],\
-                        ('bgzipPath', 1, ): ["%s/bin/bgzip", '', 1, 'path to the bgzip binary', ],\
-                        ('vcftoolsPath', 1, ): ["%s/bin/vcftools/vcftools", '', 1, 'path to the vcftools binary', ],\
-                        ('vcfSubsetPath', 1, ): ["%s/bin/vcftools/vcf-subset", '', 1, 'path to the vcf-subset program', ],\
-                        ("ligateVcfPerlPath", 1, ): ["%s/bin/ligateVcf.pl", '', 1, 'path to ligateVcf.pl'],\
-                        ("vcfsorterPath", 1, ): ["%s/bin/vcfsorter.pl", '', 1, 'path to vcfsorter.pl, http://code.google.com/p/vcfsorter/'],\
+        ('ref_ind_seq_id', 1, int): [None, 'a', 1, 'IndividualSequence.id. To pick alignments with this sequence as reference', ],\
+        ("samtools_path", 1, ): ["%s/bin/samtools", '', 1, 'samtools binary'],\
+        ("picard_path", 1, ): ["%s/script/picard/dist", '', 1, 'picard folder containing its jar binaries'],\
+        ("gatk_path", 1, ): ["%s/bin/GenomeAnalysisTK1_6_9.jar", '', 1, 
+            'my custom GATK 1.6.9 jar compiled from https://github.com/polyactis/gatk using jdk 1.6'],\
+        ("gatk2_path", 1, ): ["%s/bin/GenomeAnalysisTK.jar", '', 1, 'jar of GATK version 2 or afterwards.'],\
+        ('picardJarPath', 1, ): ["%s/script/picard.broad/build/libs/picard.jar", '', 1, 'path to the new picard jar', ],\
+        ('tabixPath', 1, ): ["%s/bin/tabix", '', 1, 'path to the tabix binary', ],\
+        ('bgzipPath', 1, ): ["%s/bin/bgzip", '', 1, 'path to the bgzip binary', ],\
+        ('vcftoolsPath', 1, ): ["%s/bin/vcftools/vcftools", '', 1, 'path to the vcftools binary', ],\
+        ('vcfSubsetPath', 1, ): ["%s/bin/vcftools/vcf-subset", '', 1, 'path to the vcf-subset program', ],\
+        ("ligateVcfPerlPath", 1, ): ["%s/bin/ligateVcf.pl", '', 1, 'path to ligateVcf.pl'],\
+        ("vcfsorterPath", 1, ): ["%s/bin/vcfsorter.pl", '', 1, 'path to vcfsorter.pl, http://code.google.com/p/vcfsorter/'],\
 
-                        #to filter chromosomes
-                        ('maxContigID', 0, int): [None, 'x', 1, 'if contig/chromosome(non-sex) ID > this number, it will not be included. If None or 0, no restriction.', ],\
-                        ('minContigID', 0, int): [None, 'V', 1, 'if contig/chromosome(non-sex) ID < this number, it will not be included. If None or 0, no restriction.', ],\
-                        ("contigMaxRankBySize", 1, int): [2500, 'N', 1, 'maximum rank (rank 1=biggest) of a contig/chr to be included in calling'],\
-                        ("contigMinRankBySize", 1, int): [1, 'M', 1, 'minimum rank (rank 1=biggest) of a contig/chr to be included in calling'],\
-                        ('chromosome_type_id', 0, int):[None, '', 1, 'what type of chromosomes to be included, same as table genome.chromosome_type.\n\
-    0 or None: all, 1: autosomes, 2: X, 3:Y, 4: mitochondrial '],\
-                        ('ref_genome_tax_id', 0, int):[9606, '', 1, 'used to fetch chromosome info from GenomeDB. column GenomeDB.AnnotAssembly.tax_id'],\
-                        ('ref_genome_sequence_type_id', 0, int):[1, '', 1, 'used to fetch chromosome info from GenomeDB. column GenomeDB.SequenceType.id 1: assembledChromosome, 9: Scaffold'],\
-                        ('ref_genome_version', 0, int):[15, '', 1, 'used to fetch chromosome info from GenomeDB. column GenomeDB.AnnotAssembly.version'],\
-                        ('ref_genome_outdated_index', 0, int):[0, '', 1, 'used to fetch chromosome info from GenomeDB. 0 means not outdated. column GenomeDB.AnnotAssembly.outdated_index'],\
+        #to filter chromosomes
+        ('maxContigID', 0, int): [None, 'x', 1, 
+            'if contig/chromosome(non-sex) ID > this number, it will not be included. If None or 0, no restriction.', ],\
+        ('minContigID', 0, int): [None, 'V', 1, 
+            'if contig/chromosome(non-sex) ID < this number, it will not be included. If None or 0, no restriction.', ],\
+        ("contigMaxRankBySize", 1, int): [2500, 'N', 1, 'maximum rank (rank 1=biggest) of a contig/chr to be included in calling'],\
+        ("contigMinRankBySize", 1, int): [1, 'M', 1, 'minimum rank (rank 1=biggest) of a contig/chr to be included in calling'],\
+        ('chromosome_type_id', 0, int):[None, '', 1, 
+            'what type of chromosomes to be included, same as table genome.chromosome_type. '
+            '0 or None: all, 1: autosomes, 2: X, 3:Y, 4: mitochondrial '],\
+        ('ref_genome_tax_id', 0, int):[9606, '', 1, 
+            'used to fetch chromosome info from GenomeDB. column GenomeDB.AnnotAssembly.tax_id'],\
+        ('ref_genome_sequence_type_id', 0, int):[1, '', 1, 
+            'used to fetch chromosome info from GenomeDB. column GenomeDB.SequenceType.id 1: assembledChromosome, 9: Scaffold'],\
+        ('ref_genome_version', 0, int):[15, '', 1, 
+            'used to fetch chromosome info from GenomeDB. column GenomeDB.AnnotAssembly.version'],\
+        ('ref_genome_outdated_index', 0, int):[0, '', 1, 
+            'used to fetch chromosome info from GenomeDB. 0 means not outdated. column GenomeDB.AnnotAssembly.outdated_index'],\
 
-                        ('completedAlignment', 0, int):[None, '', 1, 'a flag requiring whether user chooses alignment that has been completed or not.\n\
-    --completedAlignment 0 is same as --skipDoneAlignment. --completedAlignment 1 gets you only the alignments that has been completed. Default (None) has no effect.'],\
-                        ('mask_genotype_method_id', 0, int):[None, '', 1, 'to filter alignments with this field'],\
-                        ('skipDoneAlignment', 0, int):[0, '', 0, 'skip alignment whose db_entry is complete and affiliated file is valid\n\
-    (for ShortRead2AlignmentWorkflow or AlignmentReadBaseQualityRecalibrationWorkflow)'],\
-                        ('checkEmptyVCFByReading', 0, int):[0, 'E', 0, 'toggle to check if a vcf file is empty by reading its content'],\
+        ('completedAlignment', 0, int):[None, '', 1, 
+            'a flag requiring whether user chooses alignment that has been completed or not. '
+            '--completedAlignment 0 is same as --skipDoneAlignment. '
+            '--completedAlignment 1 gets you only the alignments that has been completed. Default (None) has no effect.'],\
+        ('mask_genotype_method_id', 0, int):[None, '', 1, 'to filter alignments with this field'],\
+        ('skipDoneAlignment', 0, int):[0, '', 0, 
+            'skip alignment whose db_entry is complete and affiliated file is valid'
+            '(for ShortRead2AlignmentWorkflow or AlignmentReadBaseQualityRecalibrationWorkflow)'],\
+        ('checkEmptyVCFByReading', 0, int):[0, 'E', 0, 'toggle to check if a vcf file is empty by reading its content'],\
 
-                        ("needFastaIndexJob", 0, int): [0, 'A', 0, 'need to add a reference index job by samtools?'],\
-                        ("needFastaDictJob", 0, int): [0, 'B', 0, 'need to add a reference dict job by picard CreateSequenceDictionary.jar?'],\
+        ("needFastaIndexJob", 0, int): [0, 'A', 0, 'need to add a reference index job by samtools?'],\
+        ("needFastaDictJob", 0, int): [0, 'B', 0, 'need to add a reference dict job by picard CreateSequenceDictionary.jar?'],\
 
-                        #to filter alignment or individual_sequence
-                        ("reduce_reads", 0, int): [None, '', 1, 'To filter which input alignments to fetch from db'],\
-                        ('excludeContaminant', 0, int):[0, '', 0, 'toggle this to exclude alignments or sequences that are from contaminated individuals, \n\
-        (IndividualSequence.is_contaminated=1)'],\
-                        ("sequence_filtered", 0, int): [None, 'Q', 1, 'to filter alignments/individual_sequences. None: whatever; 0: unfiltered sequences, 1: filtered sequences: 2: ...'],\
-                        ("site_id_ls", 0, ): ["", 'S', 1, 'comma/dash-separated list of site IDs. individuals must come from these sites.'],\
-                        ("country_id_ls", 0, ): ["", '', 1, 'comma/dash-separated list of country IDs. individuals must come from these countries.'],\
-                        ("tax_id_ls", 0, ): ["9606", '', 1, 'comma/dash-separated list of taxonomy IDs. individuals must come from these taxonomies.'],\
-                        ("sequence_type_id_ls", 0, ): ["", '', 1, 'comma/dash-separated list of IndividualSequence.sequence_type_id. Empty for no filtering'],\
-                        ("sequencer_id_ls", 0, ): ["", '', 1, 'comma/dash-separated list of IndividualSequence.sequencer_id. Empty for no filtering'],\
-                        ("sequence_batch_id_ls", 0, ): ["", '', 1, 'comma/dash-separated list of IndividualSequence.sequence_batch_id. Empty for no filtering'],\
-                        ("version_ls", 0, ): ["", '', 1, 'comma/dash-separated list of IndividualSequence.version. Empty for no filtering'],\
-                        ("sequence_max_coverage", 0, float): [None, '', 1, 'max IndividualSequence.coverage. Empty for no filtering'],\
-                        ("sequence_min_coverage", 0, float): [None, '', 1, 'min IndividualSequence.coverage. Empty for no filtering'],\
+        #to filter alignment or individual_sequence
+        ("reduce_reads", 0, int): [None, '', 1, 'To filter which input alignments to fetch from db'],\
+        ('excludeContaminant', 0, int):[0, '', 0, 
+            'toggle this to exclude alignments or sequences that are from contaminated individuals, '
+            '(IndividualSequence.is_contaminated=1)'],\
+        ("sequence_filtered", 0, int): [None, 'Q', 1, 'to filter alignments/individual_sequences. '
+            'None: whatever; 0: unfiltered sequences, 1: filtered sequences: 2: ...'],\
+        ("site_id_ls", 0, ): ["", 'S', 1, 'comma/dash-separated list of site IDs. '
+            'individuals must come from these sites.'],\
+        ("country_id_ls", 0, ): ["", '', 1, 'comma/dash-separated list of country IDs. '
+            'individuals must come from these countries.'],\
+        ("tax_id_ls", 0, ): ["9606", '', 1, 'comma/dash-separated list of taxonomy IDs. '
+            'individuals must come from these taxonomies.'],\
+        ("sequence_type_id_ls", 0, ): ["", '', 1, 'comma/dash-separated list of IndividualSequence.sequence_type_id. '
+            'Empty for no filtering'],\
+        ("sequencer_id_ls", 0, ): ["", '', 1, 
+            'comma/dash-separated list of IndividualSequence.sequencer_id. Empty for no filtering'],\
+        ("sequence_batch_id_ls", 0, ): ["", '', 1, 
+            'comma/dash-separated list of IndividualSequence.sequence_batch_id. Empty for no filtering'],\
+        ("version_ls", 0, ): ["", '', 1, 'comma/dash-separated list of IndividualSequence.version. Empty for no filtering'],\
+        ("sequence_max_coverage", 0, float): [None, '', 1, 'max IndividualSequence.coverage. Empty for no filtering'],\
+        ("sequence_min_coverage", 0, float): [None, '', 1, 'min IndividualSequence.coverage. Empty for no filtering'],\
 
-                        ('alignmentDepthIntervalMethodShortName', 0, ): [None, '', 1, 'fetch intervals from AlignmentDepthIntervalFile table', ],\
-                        ('minAlignmentDepthIntervalLength', 0, int): [1000, '', 1, 'minimum length for a alignment depth interval to be included', ],\
-                        ('alignmentDepthMaxFold', 0, float): [2, '', 1, 'depth of an alignment depth interval have to be within a range of [1/foldChange, foldChange]*medianDepth', ],\
-                        ('alignmentDepthMinFold', 0, float): [0.1, '', 1, 'depth of an alignment depth interval have to be within a range of [1/foldChange, foldChange]*medianDepth', ],\
+        ('alignmentDepthIntervalMethodShortName', 0, ): [None, '', 1, 
+            'fetch intervals from AlignmentDepthIntervalFile table', ],\
+        ('minAlignmentDepthIntervalLength', 0, int): [1000, '', 1, 
+            'minimum length for a alignment depth interval to be included', ],\
+        ('alignmentDepthMaxFold', 0, float): [2, '', 1, 
+            'depth of an alignment depth interval have to be within a range of [1/foldChange, foldChange]*medianDepth', ],\
+        ('alignmentDepthMinFold', 0, float): [0.1, '', 1, 
+            'depth of an alignment depth interval have to be within a range of [1/foldChange, foldChange]*medianDepth', ],\
 
-                        ('intervalOverlapSize', 1, int): [300000, 'U', 1, 'overlap #bps/#loci between adjacent intervals from one contig/chromosome,\
-                only used for TrioCaller, not for SAMtools/GATK', ],\
-                        ('intervalSize', 1, int): [5000000, 'Z', 1, '#bps/#loci for adjacent intervals from one contig/chromosome (alignment or VCF)', ],\
+        ('intervalOverlapSize', 1, int): [300000, 'U', 1, 
+            'overlap #bps/#loci between adjacent intervals from one contig/chromosome, '
+            'only used for TrioCaller, not for SAMtools/GATK', ],\
+        ('intervalSize', 1, int): [5000000, 'Z', 1, 
+            '#bps/#loci for adjacent intervals from one contig/chromosome (alignment or VCF)', ],\
 
-                        ('defaultGATKArguments', 1, ): [" --unsafe ALL --validation_strictness SILENT --read_filter BadCigar ", '', 1, 'arguments that will be added to every GATK-related job', ],\
-                        })
-                        #('bamListFname', 1, ): ['/tmp/bamFileList.txt', 'L', 1, 'The file contains path to each bam file, one file per line.'],\
+        ('defaultGATKArguments', 1, ): [" --unsafe ALL --validation_strictness SILENT --read_filter BadCigar ", '', 1, 
+            'arguments that will be added to every GATK-related job', ],\
+        })
+        #('bamListFname', 1, ): ['/tmp/bamFileList.txt', 'L', 1, 'The file contains path to each bam file, one file per line.'],\
 
     """
     2012.9.18
-        to silence this kind of error messages:
-
-        ##### ERROR
-        ##### ERROR MESSAGE:
-                SAM/BAM file SAMFileReader{/u/home/eeskin2/polyacti/NetworkData/scratch/HaplotypeScore/HaplotypeScore_ISQ633_638.2012.Sep.18T110829/individual_alignment/751_634_vs_524_by_2.bam}
-                is malformed: read ends with deletion. Cigar: 6M13I5M9D25M51I10D
+        The defaultGATKArguments is to silence this kind of error messages:
+    ##### ERROR
+    ##### ERROR MESSAGE:
+        SAM/BAM file SAMFileReader{/u/home/eeskin2/polyacti/NetworkData/scratch/HaplotypeScore/HaplotypeScore_ISQ633_638.2012.Sep.18T110829/individual_alignment/751_634_vs_524_by_2.bam}
+        is malformed: read ends with deletion. Cigar: 6M13I5M9D25M51I10D
 
     """
 
-
-    def __init__(self,  **keywords):
+    def __init__(self, **keywords):
         """
         2011-7-11
         """
-        self.pathToInsertHomePathList.extend(['samtools_path', 'picard_path', 'gatk_path', 'tabixPath', \
-                                    'bgzipPath', 'gatk2_path', 'ligateVcfPerlPath',\
-                                    'vcftoolsPath', 'vcfSubsetPath', 'vcfsorterPath', 'picardJarPath',\
-                                    ])
-        #inserted before ParentClass.__init__()
+        # Insert before ParentClass.__init__()
+        self.pathToInsertHomePathList.extend(['samtools_path', 'picard_path', \
+            'gatk_path', 'tabixPath', \
+            'bgzipPath', 'gatk2_path', 'ligateVcfPerlPath',\
+            'vcftoolsPath', 'vcfSubsetPath', 'vcfsorterPath', 'picardJarPath',\
+            ])
         ParentClass.__init__(self, **keywords)
-        #from palos import ProcessOptions
-        #self.ad = ProcessOptions.process_function_arguments(keywords, self.option_default_dict, error_doc=self.__doc__, \
-        #												class_to_have_attr=self)
-
         self.chr_pattern = Genome.chr_pattern
         self.contig_id_pattern = Genome.contig_id_pattern
+        #2013.06.21
+        self.needSplitChrIntervalData = True
 
-        self.needSplitChrIntervalData = True	#2013.06.21
-
-    def extra__init__(self):
-        """
-        2013.2.15
-        """
-        ParentClass.extra__init__(self)
+        listArgumentName_data_type_ls = [("site_id_ls", int), ('country_id_ls', int), ('tax_id_ls', int),\
+            ('sequence_type_id_ls', int), ('sequencer_id_ls', int), \
+            ('sequence_batch_id_ls', int),('version_ls', int)]
+        ProcessOptions.processListArguments(listArgumentName_data_type_ls, emptyContent=[])
 
         if hasattr(self, 'contigMaxRankBySize') and hasattr(self, 'contigMinRankBySize'):
-            #2013.2.6 non-public schema dbs should be connected before the main vervetdb or other db (schema=public) is connected.
-            self.chr2size = self.getTopNumberOfContigs(contigMaxRankBySize=self.contigMaxRankBySize, \
-                            contigMinRankBySize=self.contigMinRankBySize, tax_id=self.ref_genome_tax_id, \
-                            sequence_type_id=self.ref_genome_sequence_type_id, version=self.ref_genome_version, \
-                            chromosome_type_id=self.chromosome_type_id, outdated_index=self.ref_genome_outdated_index)
+            #2013.2.6 non-public schema dbs should be connected before the main public schema is connected.
+            self.chr2size = self.connectGenomeDBToGetTopChrs(contigMaxRankBySize=self.contigMaxRankBySize, \
+                contigMinRankBySize=self.contigMinRankBySize, tax_id=self.ref_genome_tax_id, \
+                sequence_type_id=self.ref_genome_sequence_type_id, version=self.ref_genome_version, \
+                chromosome_type_id=self.chromosome_type_id, outdated_index=self.ref_genome_outdated_index)
         else:
             self.chr2size = {}
 
-        listArgumentName_data_type_ls = [("site_id_ls", int), ('country_id_ls', int), ('tax_id_ls', int),\
-                                ('sequence_type_id_ls', int), ('sequencer_id_ls', int), \
-                                ('sequence_batch_id_ls', int),('version_ls', int)]
-        listArgumentName2hasContent = self.processListArguments(listArgumentName_data_type_ls, emptyContent=[])
-
-        self.samtoolsExecutableFile = self.registerOneExecutableAsFile(path=self.samtools_path,\
-                                                    site_handler=self.input_site_handler)
-        self.tabixExecutableFile = self.registerOneExecutableAsFile(path=self.tabixPath)
-        self.bgzipExecutableFile = self.registerOneExecutableAsFile(path=self.bgzipPath)
-        self.ligateVcfExecutableFile = self.registerOneExecutableAsFile(path=self.ligateVcfPerlPath)
-
-        self.vcftoolsExecutableFile = self.registerOneExecutableAsFile(path=self.vcftoolsPath)
-        self.vcfSubsetExecutableFile = self.registerOneExecutableAsFile(path=self.vcfSubsetPath)
-        self.vcfsorterExecutableFile = self.registerOneExecutableAsFile(path=self.vcfsorterPath)
-
     def connectDB(self):
         """
-        establish db_main connection for all derivative classes
+        Called in the end of Workflow.__init__().
+        Establish the db_main connection for all derivative classes.
         """
-        ParentClass.connectDB(self)	#2013.11.25
-
+        ParentClass.connectDB(self)
         self.db_main = SunsetDB.SunsetDB(drivername=self.drivername, db_user=self.db_user,
                     db_passwd=self.db_passwd, hostname=self.hostname, \
                     dbname=self.dbname, schema=self.schema)
@@ -164,11 +168,10 @@ class AbstractNGSWorkflow(ParentClass):
 
         if not self.data_dir:
             self.data_dir = self.db_main.data_dir
-
         if not self.local_data_dir:
             self.local_data_dir = self.db_main.data_dir
-
-        #self.refFastaFList = self.getReferenceSequence()	#2013.1.25 done in run()
+        # 2013.1.25 moved to run()
+        #self.refFastaFList = self.getReferenceSequence()
 
     def getReferenceSequence(self, **keywords):
         """
@@ -284,29 +287,20 @@ class AbstractNGSWorkflow(ParentClass):
         """
         """
         ParentClass.registerExecutables(self)
-
-        #2014.01.08
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
                 'polymorphism/qc/mapper/FilterLocusBasedOnLocusStatFile.py'), \
-            name='FilterLocusBasedOnLocusStatFile', \
-            clusterSizeMultiplier=0.5)
-
-        #2013.10.2
+            name='FilterLocusBasedOnLocusStatFile', clusterSizeMultiplier=0.5)
         self.registerOneExecutable(path=self.javaPath, \
-            name='CombineBeagleAndPreBeagleVariantsJava', \
-            clusterSizeMultiplier=0.6)
-        #2013.10.13
+            name='CombineBeagleAndPreBeagleVariantsJava', clusterSizeMultiplier=0.6)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, "reducer/ligateVcf.sh"), \
             name="ligateVcf", clusterSizeMultiplier=1)
         #2013.09.17 updated
         #self.registerOneExecutable(
         #   path=os.path.join(self.pymodulePath, "polymorphism/qc/CheckTwoVCFOverlapCC"), \
         #   name='CheckTwoVCFOverlapCC', clusterSizeMultiplier=1)
-
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
             "mapper/splitter/SelectAndSplitFastaRecords.py"),\
             name='SelectAndSplitFastaRecords', clusterSizeMultiplier=0)
-
         self.registerOneExecutable(path=self.javaPath,
             name='BuildBamIndexFilesJava', clusterSizeMultiplier=0.5)
         #2012.9.21 same as BuildBamIndexFilesJava, but no clustering
@@ -325,38 +319,26 @@ class AbstractNGSWorkflow(ParentClass):
             name='MarkDuplicatesJava', clusterSizeMultiplier=0)
 
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
-                "mapper/filter/vcf_isec.sh"),\
+            "mapper/filter/vcf_isec.sh"),\
             name='vcf_isec', clusterSizeMultiplier=1)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
             "mapper/extractor/vcfSubset.sh"),\
             name='vcfSubset', clusterSizeMultiplier=1)
         #vcfSubsetPath is first argument to vcfSubset
         self.vcfSubset.vcfSubsetPath = self.vcfSubsetPath
-
         self.registerOneExecutable(path=self.javaPath,
             name='SelectVariantsJava', clusterSizeMultiplier=0.5)
-
-        #2013.09.04
         self.registerOneExecutable(path=self.javaPath,
             name='CombineVariantsJava', clusterSizeMultiplier=0.3)
         self.registerOneExecutable(path=self.javaPath,
-            name='CombineVariantsJavaInReduce', \
-            clusterSizeMultiplier=0.001)
+            name='CombineVariantsJavaInReduce', clusterSizeMultiplier=0.001)
 
-
-        self.registerOneExecutable(
-            path=os.path.join(self.pymodulePath, \
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
                 "mapper/computer/CallVariantBySamtools.sh"),
-            name='CallVariantBySamtools', \
-            clusterSizeMultiplier=0)
-
-        self.registerOneExecutable(
-            path=os.path.join(self.pymodulePath, \
+            name='CallVariantBySamtools', clusterSizeMultiplier=0)
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
                 "mapper/computer/GenotypeCallByCoverage.py"),
-            name='GenotypeCallByCoverage', \
-            clusterSizeMultiplier=1)
-
-
+            name='GenotypeCallByCoverage', clusterSizeMultiplier=1)
         #2013.06.28 use this function
         self.registerOneExecutable(
             path=os.path.join(self.pymodulePath, "shell/bgzip_tabix.sh"), \
@@ -366,7 +348,6 @@ class AbstractNGSWorkflow(ParentClass):
         self.registerOneExecutable(
             path=os.path.join(self.pymodulePath, "shell/bgzip_tabix.sh"), \
             name='bgzip_tabix_in_reduce', clusterSizeMultiplier=1)
-
         self.registerOneExecutable(
             path=os.path.join(self.pymodulePath, "mapper/converter/vcf_convert.sh"), \
             name='vcf_convert', clusterSizeMultiplier=1)
@@ -384,64 +365,44 @@ class AbstractNGSWorkflow(ParentClass):
         self.registerOneExecutable(
             path=os.path.join(self.pymodulePath, "reducer/vcf_concat.sh"),
             name='concatSamtools', clusterSizeMultiplier=1)
-
-
         #2011.12.21 moved from FilterVCFPipeline.py
         self.registerOneExecutable(path=self.javaPath,
                         name='FilterVCFByDepthJava', \
                         clusterSizeMultiplier=1)
-
-        #2012.3.1
         self.registerOneExecutable(
             path=os.path.join(self.pymodulePath, "reducer/MergeFiles.sh"), \
             name='MergeFiles', clusterSizeMultiplier=0)
-
-        #2013.09.17 updated
         self.registerOneExecutable(
             path=os.path.join(self.pymodulePath, \
                 "mapper/computer/CheckTwoVCFOverlap.py"), \
             name='CheckTwoVCFOverlap', clusterSizeMultiplier=1)
-
-        #2012.9.6
-        self.registerOneExecutable(
-            path=os.path.join(self.pymodulePath, \
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
                 "mapper/modifier/AppendInfo2SmartPCAOutput.py"), \
             name='AppendInfo2SmartPCAOutput', clusterSizeMultiplier=0)
-
-        self.registerOneExecutable(
-            path=self.javaPath, name='MergeSamFilesJava', clusterSizeMultiplier=0)
-
+        self.registerOneExecutable(path=self.javaPath, \
+            name='MergeSamFilesJava', clusterSizeMultiplier=0)
         #2013.07.09 in order to run vcfsorter.pl from http://code.google.com/p/vcfsorter/
         self.registerOneExecutable(
-            path=os.path.join(self.pymodulePath, 'shell/pipeCommandOutput2File.sh'),
+            path=os.path.join(self.pymodulePath, 'shell/pipe2File.sh'),
             name='vcfsorterShellPipe', clusterSizeMultiplier=1)
-
         self.registerOneExecutable(
             path=self.javaPath, name='GATKJava', clusterSizeMultiplier=0.2)
         self.registerOneExecutable(
             path=self.samtools_path, name='samtools', clusterSizeMultiplier=0.2)
         self.registerOneExecutable(
             path=self.javaPath, name='genotyperJava', clusterSizeMultiplier=0.1)
-
-        #clustering is controlled by a separate parameter
-        #genotyperJava.addProfile(Profile(Namespace.PEGASUS, key="clusters.size", value="%s"%cluster_size))
-
         #2013.07.10
-        self.registerOneExecutable(
-            path=os.path.join(self.pymodulePath, \
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
                 "mapper/modifier/AddMissingInfoDescriptionToVCFHeader.py"), \
             name='AddMissingInfoDescriptionToVCFHeader', clusterSizeMultiplier=1)
 
-        #2013.06.21
-        self.registerOneExecutable(
-            path=os.path.join(self.pymodulePath, "mapper/splitter/SplitVCFFile.py"), \
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
+                "mapper/splitter/SplitVCFFile.py"), \
             name='SplitVCFFile', clusterSizeMultiplier=0.01)
-        #2012.7.25
         self.registerOneExecutable(path=self.javaPath,
                     name='MergeVCFReplicateHaplotypesJava', \
                     clusterSizeMultiplier=0.5)
 
-        #2013.06.13
         self.registerOneExecutable(path=self.javaPath,
                 name='BeagleJava', clusterSizeMultiplier=0.3)
         #2013.06.12 use this simple function to register vcftoolsWrapper
@@ -449,19 +410,28 @@ class AbstractNGSWorkflow(ParentClass):
         self.registerOneExecutable(
             path=os.path.join(self.pymodulePath, "shell/vcftoolsWrapper.sh"), \
             name='vcftoolsWrapper', clusterSizeMultiplier=1)
-
         self.registerOneExecutable(path=self.javaPath, name='SortSamFilesJava', \
             clusterSizeMultiplier=1)
-        #2013.06.06
         self.registerOneExecutable(path=self.javaPath, name='PrintReadsJava', \
             clusterSizeMultiplier=1)
-        #2013.04.09
         self.registerOneExecutable(path=self.javaPath, \
             name='AddOrReplaceReadGroupsJava', clusterSizeMultiplier=0.5)
+        #2013.11.22
+        self.bgzipExecutableFile = self.registerOneExecutableAsFile(path=self.bgzipPath)
+        # executable files to be used as input to Executable
+        self.samtoolsExecutableFile = self.registerOneExecutableAsFile(path=self.samtools_path,\
+                                        site_handler=self.input_site_handler)
+        self.tabixExecutableFile = self.registerOneExecutableAsFile(path=self.tabixPath)
+        self.bgzipExecutableFile = self.registerOneExecutableAsFile(path=self.bgzipPath)
+        self.ligateVcfExecutableFile = self.registerOneExecutableAsFile(path=self.ligateVcfPerlPath)
+
+        self.vcftoolsExecutableFile = self.registerOneExecutableAsFile(path=self.vcftoolsPath)
+        self.vcfSubsetExecutableFile = self.registerOneExecutableAsFile(path=self.vcfSubsetPath)
+        self.vcfsorterExecutableFile = self.registerOneExecutableAsFile(path=self.vcfsorterPath)
 
 
     bwaIndexFileSuffixLs = ['amb', 'ann', 'bwt', 'pac', 'sa']
-    #, 'nhr', 'nin', 'nsq' are formatdb (blast) output, 2012.10.18 i think
+    #, 'nhr', 'nin', 'nsq' are formatdb (blast) output. 2012.10.18 my guess.
 
     def registerBWAIndexFile(self, refFastaFname=None, input_site_handler=None, folderName=""):
         """
@@ -640,17 +610,16 @@ class AbstractNGSWorkflow(ParentClass):
         return job
 
     def addBeagle3Job(self, executable=None, BeagleJar=None, \
-                    phasedBeagleInputFile=None,\
-                    likelihoodBeagleInputFile=None, triosBeagleInputFile=None, pairsBeagleInputFile=None,\
-                    unphasedBeagleInputFile=None,\
-                    markersBeagleInputFile=None,
-                    outputFnamePrefix=None, noOfIterations=None, noOfSamplingHaplotypesPerSample=None, \
-                    parentJobLs=None, transferOutput=True, job_max_memory=2000,\
-                    frontArgumentList=None, extraArguments=None, extraArgumentList=None, extraOutputLs=None, \
-                    extraDependentInputLs=None, no_of_cpus=None, walltime=120, **keywords):
+        phasedBeagleInputFile=None,\
+        likelihoodBeagleInputFile=None, triosBeagleInputFile=None, pairsBeagleInputFile=None,\
+        unphasedBeagleInputFile=None,\
+        markersBeagleInputFile=None,
+        outputFnamePrefix=None, noOfIterations=None, noOfSamplingHaplotypesPerSample=None, \
+        parentJobLs=None, transferOutput=True, job_max_memory=2000,\
+        frontArgumentList=None, extraArguments=None, extraArgumentList=None, extraOutputLs=None, \
+        extraDependentInputLs=None, no_of_cpus=None, walltime=120, **keywords):
         """
         i.e.
-
         2013.06.13 a generic function to add Beagle version 3 jobs
 
         crocea@vervetNFS:~/bin/Beagle/example/imputation$
@@ -1717,8 +1686,6 @@ class AbstractNGSWorkflow(ParentClass):
             BED format is 0-based, tab-delimited, no header, stop position is not inclusive.
                 i.e. to describe a single SNP at Contig994 and position=3446.
                     Contig994	3445	3446
-
-
         """
         sys.stderr.write("Extracting sites from vcf folder %s into file %s ...\n"%(inputVCFFolder, outputFname))
         no_of_vcfFiles = 0
@@ -2228,9 +2195,9 @@ Contig966       3160    50
         return job
 
     def addTabixRetrieveJob(self, executable=None, tabixPath=None, \
-                            inputF=None, outputF=None, regionOfInterest=None, includeHeader=True,\
-                            parentJobLs=None, job_max_memory=100, extraDependentInputLs=None, \
-                            transferOutput=False, **keywords):
+        inputF=None, outputF=None, regionOfInterest=None, includeHeader=True,\
+        parentJobLs=None, job_max_memory=100, extraDependentInputLs=None, \
+        transferOutput=False, **keywords):
         """
         Examples:
             #tabix retrieve job
@@ -2309,8 +2276,9 @@ Contig966       3160    50
         """
         return Genome.getChrFromFname(filename)
 
-    def getTopNumberOfContigs(self, contigMaxRankBySize=100, contigMinRankBySize=1, tax_id=60711, sequence_type_id=9,\
-                            version=None, chromosome_type_id=0, outdated_index=0):
+    def connectGenomeDBToGetTopChrs(self, contigMaxRankBySize=100, 
+        contigMinRankBySize=1, tax_id=60711, sequence_type_id=9,\
+        version=None, chromosome_type_id=0, outdated_index=0):
         """
         2013.3.14 added argument version
         2013.2.15 added argument chromosome_type_id
@@ -2330,14 +2298,15 @@ Contig966       3160    50
         no_of_contigs_to_fetch = contigMaxRankBySize-contigMinRankBySize+1
         sys.stderr.write("Getting %s contigs with rank (by size) between %s and %s  ..."%\
                         (no_of_contigs_to_fetch, contigMinRankBySize, contigMaxRankBySize))
-
         from palos.db import GenomeDB
         db_genome = GenomeDB.GenomeDatabase(drivername=self.drivername, username=self.db_user,
-                        password=self.db_passwd, hostname=self.hostname, database=self.dbname, schema="genome")
+            password=self.db_passwd, hostname=self.hostname, database=self.dbname, schema="genome")
         db_genome.setup(create_tables=False)
-        chr2size = db_genome.getTopNumberOfChomosomes(contigMaxRankBySize=contigMaxRankBySize, contigMinRankBySize=contigMinRankBySize, \
-                            tax_id=tax_id, sequence_type_id=sequence_type_id, \
-                            version=version, chromosome_type_id=chromosome_type_id, outdated_index=outdated_index)
+        chr2size = db_genome.getTopNumberOfChomosomes(contigMaxRankBySize=contigMaxRankBySize, \
+            contigMinRankBySize=contigMinRankBySize, \
+            tax_id=tax_id, sequence_type_id=sequence_type_id, \
+            version=version, chromosome_type_id=chromosome_type_id, \
+            outdated_index=outdated_index)
         return chr2size
 
     def restrictContigDictionry(self, dc=None, maxContigID=None, minContigID=None):

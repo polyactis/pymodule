@@ -12,7 +12,12 @@ ParentClass = AbstractWorkflow
 class AbstractBioinfoWorkflow(ParentClass):
     __doc__ = __doc__
     option_default_dict = ParentClass.option_default_dict.copy()
-
+    option_default_dict.update(
+        {
+        ("plinkPath", 1, ): ["%s/bin/plink", '', 1, 
+            'path to the plink binary, http://pngu.mgh.harvard.edu/~purcell/plink/index.shtml'],
+        }
+    )
     def __init__(self,  **keywords):
         """
         20200129
@@ -20,9 +25,6 @@ class AbstractBioinfoWorkflow(ParentClass):
         ParentClass.__init__(self, **keywords)
 
     def registerPlinkExecutables(self):
-        if not workflow:
-            workflow = self
-        
         self.registerOneExecutable(path=self.plinkPath, \
             name='plink', clusterSizeMultiplier=1)
         self.registerOneExecutable(path=self.plinkPath, \
@@ -49,12 +51,6 @@ class AbstractBioinfoWorkflow(ParentClass):
             'pedigree/CalculateMendelErrorRateGivenPlinkOutput.py'), \
             name='CalculateMendelErrorRateGivenPlinkOutput', clusterSizeMultiplier=1)
 
-    def getTopNumberOfContigs(self, **keywords):
-        """
-        2013.2.6 placeholder
-        """
-        pass
-
     def registerBlastNucleotideDatabaseFile(self, ntDatabaseFname=None,  folderName=""):
         """
         2012.10.8
@@ -62,14 +58,14 @@ class AbstractBioinfoWorkflow(ParentClass):
         2012.5.23
         """
         return self.registerRefFastaFile(refFastaFname=ntDatabaseFname, registerAffiliateFiles=True, \
-                                    checkAffiliateFileExistence=True, addPicardDictFile=False, \
-                                    affiliateFilenameSuffixLs=['nin', 'nhr', 'nsq'],\
-                                    folderName=folderName)
+                    checkAffiliateFileExistence=True, addPicardDictFile=False, \
+                    affiliateFilenameSuffixLs=['nin', 'nhr', 'nsq'],\
+                    folderName=folderName)
 
     def registerRefFastaFile(self, refFastaFname=None, registerAffiliateFiles=True, \
-                        checkAffiliateFileExistence=True, addPicardDictFile=True,\
-                        affiliateFilenameSuffixLs=['fai', 'amb', 'ann', 'bwt', 'pac', 'sa', 'rbwt', 'rpac', 'rsa', \
-                        'stidx', 'sthash'], folderName="reference"):
+        checkAffiliateFileExistence=True, addPicardDictFile=True,\
+        affiliateFilenameSuffixLs=['fai', 'amb', 'ann', 'bwt', 'pac', 'sa', 'rbwt', 'rpac', 'rsa', \
+        'stidx', 'sthash'], folderName="reference"):
         """
         suffix here doesn't include ".".
         
@@ -156,19 +152,19 @@ class AbstractBioinfoWorkflow(ParentClass):
         return returnData
 
     def addPlinkJob(self, executable=None, inputFileList=None, parentPlinkJob=None,\
-                tpedFile=None, tfamFile=None,\
-                pedFile=None, famFile=None, mapFile=None, bedFile=None, bimFile=None,\
-                inputFnamePrefix=None, inputOption='--file', \
-                outputFnamePrefix=None, outputOption='--out',\
-                makeBED=False, calculateMendelError=False, checkSex=False, \
-                LDPruneWindowSize=100, LDPruneWindowShiftSize=5, LDPruneByPairwiseR2=False, LDPruneMinR2=0.1,\
-                LDPruneByRegression=False, LDPruneMinVarianceInflationFactor=2,\
-                estimatePairwiseGenomeWideIBD=False, estimatePairwiseGenomeWideIBDFreqFile=None, \
-                extractSNPFile=None, recodeOutput=False, recodeTransposeOutput=False, estimateAlleFrequency=False, \
-                mergeListFile=None,\
-                parentJobLs=None, extraDependentInputLs=None, transferOutput=False, \
-                extraArguments=None, extraArgumentList=None, extraOutputLs =None, \
-                job_max_memory=2000, **keywords):
+        tpedFile=None, tfamFile=None,\
+        pedFile=None, famFile=None, mapFile=None, bedFile=None, bimFile=None,\
+        inputFnamePrefix=None, inputOption='--file', \
+        outputFnamePrefix=None, outputOption='--out',\
+        makeBED=False, calculateMendelError=False, checkSex=False, \
+        LDPruneWindowSize=100, LDPruneWindowShiftSize=5, LDPruneByPairwiseR2=False, LDPruneMinR2=0.1,\
+        LDPruneByRegression=False, LDPruneMinVarianceInflationFactor=2,\
+        estimatePairwiseGenomeWideIBD=False, estimatePairwiseGenomeWideIBDFreqFile=None, \
+        extractSNPFile=None, recodeOutput=False, recodeTransposeOutput=False, estimateAlleFrequency=False, \
+        mergeListFile=None,\
+        parentJobLs=None, extraDependentInputLs=None, transferOutput=False, \
+        extraArguments=None, extraArgumentList=None, extraOutputLs =None, \
+        job_max_memory=2000, **keywords):
         """
         i.e.
 
@@ -216,9 +212,6 @@ class AbstractBioinfoWorkflow(ParentClass):
 
             if extractSNPFile or mergeListFile is given, either recodeOutput or makeBED have to be on. otherwise, no output.
             http://pngu.mgh.harvard.edu/~purcell/plink/index.shtml
-
-
-
         """
         if extraDependentInputLs is None:
             extraDependentInputLs = []
@@ -279,7 +272,6 @@ class AbstractBioinfoWorkflow(ParentClass):
         else:
             outputFnamePrefix = 'plink'
 
-
         suffixAndNameTupleList = []	# a list of tuples , in each tuple, 1st element is the suffix. 2nd element is the proper name of the suffix.
             #job.$nameFile will be the way to access the file.
             #if 2nd element (name) is missing, suffix[1:].replace('.', '_') is the name (dot replaced by _)
@@ -330,7 +322,8 @@ class AbstractBioinfoWorkflow(ParentClass):
             suffixAndNameTupleList=suffixAndNameTupleList, \
             extraOutputLs=extraOutputLs, key2ObjectForJob=key2ObjectForJob)
         #2013.07.24 add it in the end
-        logFile = File('%s.log'%(outputFnamePrefix))	#2012.8.10 left in the folder dying
+        #2012.8.10 left in the folder dying
+        logFile = File('%s.log'%(outputFnamePrefix))
         extraOutputLs.append(logFile)
 
         job= self.addGenericJob(executable=executable, inputFile=None, outputFile=None, \
@@ -343,22 +336,9 @@ class AbstractBioinfoWorkflow(ParentClass):
     def registerExecutables(self):
         """
         """
-        if not workflow:
-            workflow = self
         ParentClass.registerExecutables(self)
-
-        namespace = self.namespace
-        version = self.version
-        operatingSystem = self.operatingSystem
-        architecture = self.architecture
-        cluster_size = self.cluster_size
-        site_handler = self.site_handler
-
-
-        #2013.11.22	#2013.06.25 register tabix
         self.registerOneExecutable(
             path=self.tabixPath, name='tabix', clusterSizeMultiplier=5)
-
         #2013.11.22 2011.12.21	for OutputVCFSiteStat.py
         self.registerOneExecutable(
             path=os.path.join(self.pymodulePath, "mapper/extractor/tabixRetrieve.sh"),
@@ -384,101 +364,67 @@ class AbstractBioinfoWorkflow(ParentClass):
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
             "polymorphism/mapper/FindSNPPositionOnNewRefFromFlankingBWAOutput.py"), \
             name='FindSNPPositionOnNewRefFromFlankingBWAOutput', clusterSizeMultiplier=1)
-
-
-        #2013.08.28
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, 'Genome/OutputGenomeAnnotation.py'), \
             name='OutputGenomeAnnotation', clusterSizeMultiplier=0.01)
-        #2013.07.31
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, 'statistics/GenomeMovingAverageStatistics.py'), \
             name='GenomeMovingAverageStatistics', clusterSizeMultiplier=0.1)
-        #2013.08.23
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, 'reducer/ReduceSameChromosomeAlignmentDepthFiles'), \
             name='ReduceSameChromosomeAlignmentDepthFiles', clusterSizeMultiplier=0.5)
 
-        #executableList = []
-        executableClusterSizeMultiplierList = []	#2012.8.7 each cell is a tuple of (executable, clusterSizeMultiplier (0 if u do not need clustering)
-        #noClusteringExecutableSet = set()	#2012.8.2 you don't want to cluster for some jobs.
-
-        PlotLD = Executable(namespace=namespace, name="PlotLD", version=version, os=operatingSystem, arch=architecture, installed=True)
-        PlotLD.addPFN(PFN("file://" +  os.path.join(self.pymodulePath, "plot/PlotLD.py"), site_handler))
-        executableClusterSizeMultiplierList.append((PlotLD, 0))
-
-        #2012.8.13
-        OutputVCFSiteGap = Executable(namespace=namespace, name="OutputVCFSiteGap", \
-                            version=version, os=operatingSystem, arch=architecture, installed=True)
-        OutputVCFSiteGap.addPFN(PFN("file://" + os.path.join(self.pymodulePath, "mapper/computer/OutputVCFSiteGap.py"), site_handler))
-        executableClusterSizeMultiplierList.append((OutputVCFSiteGap, 1))
-
+        #2012.8.7 each cell is a tuple of (executable, clusterSizeMultiplier (0 if u do not need clustering)
+        executableClusterSizeMultiplierList = []
         
-        ConvertBjarniSNPFormat2Yu = Executable(namespace=namespace, name="ConvertBjarniSNPFormat2Yu", \
-                                            version=version, os=operatingSystem, arch=architecture, installed=True)
-        ConvertBjarniSNPFormat2Yu.addPFN(PFN("file://" +  os.path.join(self.variationSrcPath, "io/ConvertBjarniSNPFormat2Yu.py"), site_handler))
-        executableClusterSizeMultiplierList.append((ConvertBjarniSNPFormat2Yu, 1))
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, 'mapper/computer/OutputVCFSiteGap.py'), \
+            name='OutputVCFSiteGap', clusterSizeMultiplier=1)
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, 'plot/PlotLD.py'), \
+            name='PlotLD', clusterSizeMultiplier=0)
+        
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, 
+            'mapper/converter/ConvertBjarniSNPFormat2Yu.py'), \
+            name='ConvertBjarniSNPFormat2Yu', clusterSizeMultiplier=1)
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, 
+            'mapper/converter/ConvertVCF2BjarniFormat.py'), \
+            name='ConvertVCF2BjarniFormat', clusterSizeMultiplier=1)
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, 
+            'mapper/converter/ConvertYuSNPFormat2Bjarni.py'), \
+            name='ConvertYuSNPFormat2Bjarni', clusterSizeMultiplier=1)
 
-        ConvertVCF2BjarniFormat = Executable(namespace=namespace, name="ConvertVCF2BjarniFormat", \
-                                            version=version, os=operatingSystem, arch=architecture, installed=True)
-        ConvertVCF2BjarniFormat.addPFN(PFN("file://" +  os.path.join(self.pymodulePath, "mapper/converter/ConvertVCF2BjarniFormat.py"), site_handler))
-        executableClusterSizeMultiplierList.append((ConvertVCF2BjarniFormat, 1))
-
-
-        ConvertYuSNPFormat2Bjarni = Executable(namespace=namespace, name="ConvertYuSNPFormat2Bjarni", \
-                                            version=version, os=operatingSystem, arch=architecture, installed=True)
-        ConvertYuSNPFormat2Bjarni.addPFN(PFN("file://" +  os.path.join(self.variationSrcPath, "io/ConvertYuSNPFormat2Bjarni.py"), site_handler))
-        executableClusterSizeMultiplierList.append((ConvertYuSNPFormat2Bjarni, 1))
-
-        ConvertYuSNPFormat2EigenStrat = Executable(namespace=namespace, name="ConvertYuSNPFormat2EigenStrat", \
-                                            version=version, os=operatingSystem, arch=architecture, installed=True)
-        ConvertYuSNPFormat2EigenStrat.addPFN(PFN("file://" +  os.path.join(self.variationSrcPath, "io/ConvertYuSNPFormat2EigenStrat.py"), site_handler))
-        executableClusterSizeMultiplierList.append((ConvertYuSNPFormat2EigenStrat, 1))
-
-        ConvertYuSNPFormat2TPED_TFAM = Executable(namespace=namespace, name="ConvertYuSNPFormat2TPED_TFAM", \
-                                            version=version, os=operatingSystem, arch=architecture, installed=True)
-        ConvertYuSNPFormat2TPED_TFAM.addPFN(PFN("file://" +  os.path.join(self.variationSrcPath, "io/ConvertYuSNPFormat2TPED_TFAM.py"), site_handler))
-        executableClusterSizeMultiplierList.append((ConvertYuSNPFormat2TPED_TFAM, 1))
-
-        CalculatePairwiseDistanceOutOfSNPXStrainMatrix = Executable(namespace=namespace, name="CalculatePairwiseDistanceOutOfSNPXStrainMatrix", \
-                            version=version, os=operatingSystem, arch=architecture, installed=True)
-        CalculatePairwiseDistanceOutOfSNPXStrainMatrix.addPFN(PFN("file://" + \
-                        os.path.join(self.pymodulePath, "mapper/CalculatePairwiseDistanceOutOfSNPXStrainMatrix.py"), \
-                        site_handler))
-        executableClusterSizeMultiplierList.append((CalculatePairwiseDistanceOutOfSNPXStrainMatrix, 0.5))
-
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, 
+            'mapper/converter/ConvertYuSNPFormat2EigenStrat.py'), \
+            name='ConvertYuSNPFormat2EigenStrat', clusterSizeMultiplier=1)
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, 
+            'mapper/converter/ConvertYuSNPFormat2TPED_TFAM.py'), \
+            name='ConvertYuSNPFormat2TPED_TFAM', clusterSizeMultiplier=1)
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, 
+            'mapper/CalculatePairwiseDistanceOutOfSNPXStrainMatrix.py'), \
+            name='CalculatePairwiseDistanceOutOfSNPXStrainMatrix', clusterSizeMultiplier=0.5)
         #2013.2.3 use samtools to extract consensus from bam files
-        ExtractConsensusSequenceFromAlignment = Executable(namespace=namespace, name="ExtractConsensusSequenceFromAlignment", version=version, \
-                        os=operatingSystem, arch=architecture, installed=True)
-        ExtractConsensusSequenceFromAlignment.addPFN(PFN("file://" + \
-            os.path.join(self.pymodulePath, "mapper/alignment/ExtractConsensusSequenceFromAlignment.sh"), site_handler))
-        executableClusterSizeMultiplierList.append((ExtractConsensusSequenceFromAlignment, 1))
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, 
+            'mapper/alignment/ExtractConsensusSequenceFromAlignment.py'), \
+            name='ExtractConsensusSequenceFromAlignment', clusterSizeMultiplier=0.5)
 
         #2013.2.4, wrapper around psmc's splitfa, a program that splits fasta files
-        splitfa = Executable(namespace=namespace, name="splitfa", version=version, \
-                        os=operatingSystem, arch=architecture, installed=True)
-        splitfa.addPFN(PFN("file://" + os.path.join(self.pymodulePath, "mapper/splitter/splitfa.sh"), site_handler))
-        executableClusterSizeMultiplierList.append((splitfa, 1))
-
-        self.setExecutablesClusterSize(executableClusterSizeMultiplierList, defaultClusterSize=self.cluster_size)
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, "mapper/splitter/splitfa.sh"), \
+            name='splitfa', clusterSizeMultiplier=1)
 
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, "plot/PlotVCFtoolsStat.py"), \
-                                        name='PlotVCFtoolsStat', clusterSizeMultiplier=0)
+            name='PlotVCFtoolsStat', clusterSizeMultiplier=0)
         
         #2013.07.19
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, 'mapper/modifier/AppendExtraPedigreeIndividualsToTPED.py'), \
-                                        name='AppendExtraPedigreeIndividualsToTPED', clusterSizeMultiplier=1)
+            name='AppendExtraPedigreeIndividualsToTPED', clusterSizeMultiplier=1)
 
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, 'mapper/converter/ConvertMSOutput2FASTQ.py'), \
-                                        name='ConvertMSOutput2FASTQ', clusterSizeMultiplier=1)
+            name='ConvertMSOutput2FASTQ', clusterSizeMultiplier=1)
 
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, 'mapper/extractor/SelectChromosomeSequences.py'), \
-                                        name='SelectChromosomeSequences', clusterSizeMultiplier=0.5)
+            name='SelectChromosomeSequences', clusterSizeMultiplier=0.5)
 
         #2013.2.11 moved from vervet/src/reduce to pymodule/reducer
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, 'reducer/MergeGenotypeMatrix.py'), \
                                         name='MergeGenotypeMatrix', clusterSizeMultiplier=0.2)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, 'plot/PlotGenomeWideData.py'), \
                                         name='PlotGenomeWideData', clusterSizeMultiplier=1)
-
-        self.bgzipExecutableFile = self.registerOneExecutableAsFile(path=os.path.expanduser("~/bin/bgzip"))	#2013.11.22
 
 if __name__ == '__main__':
     main_class = AbstractBioinfoWorkflow

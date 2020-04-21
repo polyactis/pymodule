@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 """
 Parse the chromosome sequence files (fasta format) downloaded from
 	ftp://ftp.ncbi.nih.gov/genomes/ORGANISM/Assembled_chromosomes/
@@ -396,7 +396,6 @@ class chromosome_fasta2db(AbstractDBJob):
 	def run(self):
 		"""
 		2008-07-27
-			
 			--GenomeDatabase
 			--parse_chromosome_fasta_file()
 		"""

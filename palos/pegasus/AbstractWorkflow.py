@@ -21,33 +21,31 @@ class AbstractWorkflow(Workflow):
         ('commit', 0, ):[None, '', 0, 'commit database transaction if there is db transaction'],\
         ("data_dir", 0, ): ["", 't', 1, 'the base directory where all db-affiliated files are stored. '
                         'If not given, use the default stored in db.'],\
-        ("local_data_dir", 0, ): ["", 'D', 1, 'this one should contain same files as data_dir but accessible locally. '
+        ("local_data_dir", 0, ): ["", 'D', 1, 'This one should contain same files as data_dir but accessible locally. '
             'If not given, use the default stored in db (db.data_dir). This argument is used to find all input files available.\n '
-            'It should be different from data_dir only when you generate a workflow on one computer and execute it on another which has different data_dir.'],\
-
+            'It should be different from data_dir only when you generate a workflow '
+            ' on a computer has a different path to data_dir than your running site.'],\
         }
     option_default_dict = {
-        ("pymodulePath", 1, ): ["%s/script/pymodule", '', 1, 'path to the pymodule folder'],\
-        ("variationSrcPath", 1, ): ["%s/script/variation/src", '', 1, 'variation source code folder'],\
         ("home_path", 1, ): [os.path.expanduser("~"), 'e', 1, 'path to the home directory on the working nodes'],\
+        ("pymodulePath", 1, ): ["%s/src/pymodule", '', 1, 'path to the pymodule folder'],\
         ("javaPath", 1, ): ["%s/bin/jdk/bin/java", 'J', 1, 'the path to java binary'],\
-        ("plinkPath", 1, ): ["%s/bin/plink", '', 1, 'path to the plink binary, http://pngu.mgh.harvard.edu/~purcell/plink/index.shtml'],\
-        ("pegasusCleanupPath", 1, ): ["%s/bin/pegasus/bin/pegasus-cleanup", '', 1, \
-            'path to pegasus-cleanup executable, it will be registered and run on local universe of condor pool (rather than the vanilla universe)'],\
-        ("pegasusTransferPath", 1, ): ["%s/bin/pegasus/bin/pegasus-transfer", '', 1, \
-            'path to pegasus-transfer executable, it will be registered and run on local universe of condor pool (rather than the vanilla universe)'],\
-        ("site_handler", 1, ): ["condorpool", 'l', 1, 'which site to run the jobs: condorpool, hoffman2'],\
-        ("input_site_handler", 1, ): ["local", 'j', 1, 'which site has all the input files: local, condorpool, hoffman2. '
-            'If site_handler is condorpool, this must be condorpool and files will be symlinked. '
-            'If site_handler is hoffman2, input_site_handler=local induces file transfer and input_site_handler=hoffman2 induces symlink.'],\
-        ('cluster_size', 1, int):[30, 'C', 1, 'For short jobs that will be clustered, how many of them should be clustered int one'],\
+        ("site_handler", 1, ): ["condor", 'l', 1, 
+            'which computing site to run the jobs. check your Pegasus setup.'],\
+        ("input_site_handler", 0, ): ["None", 'j', 1, 'the site that stores all the input files: local, condor, hoffman2. '
+            'If site_handler is condor, this must be condor and files will be symlinked. '
+            'If site_handler is hoffman2, input_site_handler=local induces file transfer '
+            'and input_site_handler=hoffman2 induces symlink. '
+            'Default is the same as the site_handler.'],\
+        ('cluster_size', 1, int):[30, 'C', 1, 
+            'For short jobs that will be clustered, how many of them should be clustered int one'],\
         ('pegasusFolderName', 0, ): ['folder', 'F', 1, \
-            'the folder relative to pegasus workflow root to contain input & output. '
-                'It will be created during the pegasus staging process. It is useful to separate multiple workflows. '
-                'If empty, everything is in the pegasus root.', ],\
+            'The folder relative to pegasus scratch working dir to contain input & output. '
+            'It will be created during the pegasus staging process. It is useful to separate multiple workflows. '
+            'If empty, everything is in the pegasus root.', ],\
         ('inputSuffixList', 0, ): [None, '', 1, 'coma-separated list of input file suffices. If None, any suffix. '
             'Suffix include the dot, (i.e. .tsv). Typical zip suffices are excluded (.gz, .bz2, .zip, .bz).'],\
-        ('outputFname', 1, ): [None, 'o', 1, 'xml workflow output file'],\
+        ('output_path', 1, ): [None, 'o', 1, 'xml workflow output file'],\
         ("tmpDir", 1, ): ["/tmp/", '', 1, 'for MarkDuplicates.jar, etc., default is /tmp/ but sometimes it is too small'],\
         ('max_walltime', 1, int):[4320, '', 1, 'maximum wall time any job could have, in minutes. 20160=2 weeks.\n'
             'used in addGenericJob().'],\
@@ -60,10 +58,16 @@ class AbstractWorkflow(Workflow):
         ('needSSHDBTunnel', 0, int):[0, 'H', 0, 'DB-interacting jobs need a ssh tunnel (running on cluster behind firewall).'],\
         ('report', 0, int):[0, 'r', 0, 'toggle report, more verbose stdout/stderr.']
         }
-        #('bamListFname', 1, ): ['/tmp/bamFileList.txt', 'L', 1, 'The file contains path to each bam file, one file per line.'],\
+        #("pegasusCleanupPath", 1, ): ["%s/bin/pegasus/bin/pegasus-cleanup", '', 1, \
+        #    'path to pegasus-cleanup executable, it will be registered to run in local '
+        #    'universe of condor pool (rather than the vanilla universe)'],\
+        #("pegasusTransferPath", 1, ): ["%s/bin/pegasus/bin/pegasus-transfer", '', 1, \
+        #    'path to pegasus-transfer executable, it will be registered to run in local '
+        #     'universe of condor pool (rather than the vanilla universe)'],\
+        #('bamListFname', 1, ): ['/tmp/bamFileList.txt', 'L', 1, 
+        #     'The file contains path to each bam file, one file per line.'],\
 
-    pathToInsertHomePathList = ['javaPath', 'pymodulePath', 'plinkPath', 'variationSrcPath', 'pegasusCleanupPath',\
-                            'pegasusTransferPath', "thisModulePath"]
+    pathToInsertHomePathList = ['javaPath', 'pymodulePath', 'plinkPath', "thisModulePath"]
 
     def __init__(self, inputArgumentLs=None, **keywords):
         """
@@ -107,12 +111,15 @@ class AbstractWorkflow(Workflow):
         self.registerOneExecutable(path="/usr/bin/convert", name='convertImage', clusterSizeMultiplier=1)
 
         #2013.08.23 c++ version of SelectRowsFromMatrix.py
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, 'mapper/extractor/SelectRowsFromMatrixCC'), \
-                                        name='SelectRowsFromMatrixCC', clusterSizeMultiplier=1)
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, 
+            'mapper/extractor/SelectRowsFromMatrixCC'), \
+            name='SelectRowsFromMatrixCC', clusterSizeMultiplier=1)
         #2012.08.13 SelectRowsFromMatrix is a derivative of AbstractMatrixFileWalker, so use addAbstractMatrixFileWalkerJob()
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, 'mapper/extractor/SelectRowsFromMatrix.py'), \
-                                        name='SelectRowsFromMatrix', clusterSizeMultiplier=1)
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, "mapper/extractor/SelectLineBlockFromFile.py"), 
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, 
+            'mapper/extractor/SelectRowsFromMatrix.py'), \
+            name='SelectRowsFromMatrix', clusterSizeMultiplier=1)
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, 
+        "mapper/extractor/SelectLineBlockFromFile.py"), 
             name='SelectLineBlockFromFile', clusterSizeMultiplier=1)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, "plot/AbstractPlot.py"), 
             name='AbstractPlot', clusterSizeMultiplier=1)
@@ -145,46 +152,62 @@ class AbstractWorkflow(Workflow):
                 name='ReduceMatrixByMergeColumnsWithSameKey', clusterSizeMultiplier=0)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, 'reducer/ReduceMatrixBySumSameKeyColsAndThenDivide.py'), \
                 name='ReduceMatrixBySumSameKeyColsAndThenDivide', clusterSizeMultiplier=0)
+        """
+        # 2013.05.20 DISABLE this
+        if self.site_handler=='hcondor' and self.input_site_handler=='hcondor':
+            #2013.04.19 to make pegasus cleanup run on local universe of condor pool
+            # only enable this on hcondor because
+            #	1) its filesystem is very slow and these cleanup & transfer jobs take forever.
+            #	2) workers in vanilla universe expire after certain time.
+            #	3) it does not run on ycondor local universe somehow. pegasus keeps submitting but no condor jobs in the queue.
+            # this works because in most of my cases, vanilla universe and local universe share the same underlying filesystem.
+            cleanupExecutable = self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.pegasusCleanupPath, name='cleanup', \
+                                                                    clusterSizeMultipler=0, noVersion=True)
+            condorUniverseProfile = Profile(Namespace.CONDOR, key="universe", value="local")
+            if cleanupExecutable.hasProfile(condorUniverseProfile):
+                cleanupExecutable.removeProfile(condorUniverseProfile)
+            cleanupExecutable.addProfile(condorUniverseProfile)
+
+            transferExecutable = self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.pegasusTransferPath, name='transfer', \
+                                                                    clusterSizeMultipler=0, noVersion=True)
+            condorUniverseProfile = Profile(Namespace.CONDOR, key="universe", value="local")
+            if transferExecutable.hasProfile(condorUniverseProfile):
+                transferExecutable.removeProfile(condorUniverseProfile)
+            transferExecutable.addProfile(condorUniverseProfile)
+        """
 
     def addStatMergeJob(self, statMergeProgram=None, outputF=None, \
-                    parentJobLs=None, extraOutputLs=None,\
-                    extraDependentInputLs=None, transferOutput=True, \
-                    extraArguments=None, extraArgumentList=None,\
-                    key2ObjectForJob=None,\
-                    namespace=None, version=None, job_max_memory=1000, **keywords):
+        parentJobLs=None, extraOutputLs=None,\
+        extraDependentInputLs=None, transferOutput=True, \
+        extraArguments=None, extraArgumentList=None,\
+        key2ObjectForJob=None, job_max_memory=1000, **keywords):
         """
-        2012.8.10
-            use addGenericJob()
-        2012.4.3
-            make argument namespace, version optional
         2011-11-28
             moved from CalculateVCFStatPipeline.py
-        2011-11-17
-            add argument extraArguments
         """
         if extraDependentInputLs is None:
             extraDependentInputLs = []
-
         if extraArgumentList is None:
             extraArgumentList = []
         if key2ObjectForJob is None:
             key2ObjectForJob = {}
-
         if extraArguments:
             extraArgumentList.append(extraArguments)
-        job= self.addGenericJob(executable=statMergeProgram, inputFile=None, outputFile=outputF, \
-                parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
-                extraOutputLs=extraOutputLs,\
-                transferOutput=transferOutput, \
-                extraArgumentList=extraArgumentList, key2ObjectForJob=key2ObjectForJob, job_max_memory=job_max_memory, **keywords)
+        job= self.addGenericJob(executable=statMergeProgram, inputFile=None, inputArgumentOption='-i',
+            outputFile=outputF, outputArgumentOption='-o', 
+            parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, 
+            extraOutputLs=extraOutputLs,
+            transferOutput=transferOutput,
+            extraArgumentList=extraArgumentList, key2ObjectForJob=key2ObjectForJob,
+            job_max_memory=job_max_memory, **keywords)
         return job
 
     def addConvertImageJob(self, inputFile=None, inputArgumentOption=None, \
-                    outputFile=None, outputArgumentOption=None, density=None, \
-                    resizeDimension=None, \
-                    parentJobLs=None, extraDependentInputLs=None, extraOutputLs=None, transferOutput=False, \
-                    frontArgumentList=None, extraArguments=None, extraArgumentList=None, job_max_memory=200,\
-                    key2ObjectForJob=None, **keywords):
+        outputFile=None, outputArgumentOption=None, density=None, \
+        resizeDimension=None, \
+        parentJobLs=None, extraDependentInputLs=None, extraOutputLs=None, transferOutput=False, \
+        frontArgumentList=None, extraArguments=None, extraArgumentList=None, job_max_memory=200,\
+        key2ObjectForJob=None, **keywords):
         """
         2013.2.7 use imagemagick's convert to convert images. examples:
             plotOutputFile = File('%s.eps'%(plotOutputFnamePrefix))
@@ -219,20 +242,20 @@ class AbstractWorkflow(Workflow):
             frontArgumentList.append("-resize %s"%(resizeDimension))
         #do not pass the inputFileList to addGenericJob() because db arguments need to be added before them.
         job = self.addGenericJob(executable=self.convertImage, inputFile=inputFile, \
-                        inputArgumentOption=inputArgumentOption, outputFile=outputFile, \
-                        outputArgumentOption=outputArgumentOption, inputFileList=None, parentJobLs=parentJobLs, \
-                        extraDependentInputLs=extraDependentInputLs, extraOutputLs=extraOutputLs, \
-                        transferOutput=transferOutput, \
-                        frontArgumentList=frontArgumentList, extraArguments=extraArguments, extraArgumentList=extraArgumentList,\
-                        job_max_memory=job_max_memory, key2ObjectForJob=key2ObjectForJob,\
-                        **keywords)
+            inputArgumentOption=inputArgumentOption, outputFile=outputFile, \
+            outputArgumentOption=outputArgumentOption, inputFileList=None, parentJobLs=parentJobLs, \
+            extraDependentInputLs=extraDependentInputLs, extraOutputLs=extraOutputLs, \
+            transferOutput=transferOutput, \
+            frontArgumentList=frontArgumentList, extraArguments=extraArguments, extraArgumentList=extraArgumentList,\
+            job_max_memory=job_max_memory, key2ObjectForJob=key2ObjectForJob,\
+            **keywords)
         return job
     
     def addCalculateDepthMeanMedianModeJob(self, executable=None, \
-                            inputFile=None, outputFile=None, alignmentID=None, fractionToSample=0.001, \
-                            whichColumn=None, maxNumberOfSamplings=1E7, inputStatName=None,\
-                            parentJobLs=None, job_max_memory = 500, extraArguments=None, \
-                            transferOutput=False, **keywords):
+        inputFile=None, outputFile=None, alignmentID=None, fractionToSample=0.001, \
+        whichColumn=None, maxNumberOfSamplings=1E7, inputStatName=None,\
+        parentJobLs=None, job_max_memory = 500, extraArguments=None, \
+        transferOutput=False, **keywords):
         """
         2013.1.8 moved from vervet.src.alignment.InspectAlignmentPipeline and use addGenericJob()
         2012.6.15 turn maxNumberOfSamplings into integer when passing it to the job
@@ -284,13 +307,12 @@ class AbstractWorkflow(Workflow):
 
 
     def addGzipSubWorkflow(self, inputData=None, transferOutput=True,\
-                        outputDirPrefix="", topOutputDirJob=None, report=True, **keywords):
+                        outputDirPrefix="", topOutputDirJob=None, **keywords):
         """
         2012.8.2 bugfix.
         2012.7.19
         """
-        if report:
-            sys.stderr.write("Adding gzip jobs for %s input job data ... "%(len(inputData.jobDataLs)))
+        sys.stderr.write("Adding gzip jobs for %s input job data ... "%(len(inputData.jobDataLs)))
         returnData = PassingData(topOutputDirJob=None)
         returnData.jobDataLs = []
         if inputData:
@@ -324,15 +346,14 @@ class AbstractWorkflow(Workflow):
                         """
                         returnData.jobDataLs.append(PassingData(jobLs=[job], vcfFile=None, file=outputF,\
                                                 fileLs=[outputF]))
-        if report:
-            sys.stderr.write("no_of_jobs = %s.\n"%(self.no_of_jobs))
+        sys.stderr.write("no_of_jobs = %s.\n"%(self.no_of_jobs))
         return returnData
 
     def addAbstractMapperLikeJob(self, executable=None, \
-                    inputVCF=None, inputF=None, outputF=None, extraOutputLs=None,\
-                    parentJobLs=None, transferOutput=True, job_max_memory=200,\
-                    extraArguments=None, extraArgumentList=None, extraDependentInputLs=None, \
-                    sshDBTunnel=None, **keywords):
+        inputVCF=None, inputF=None, outputF=None, extraOutputLs=None,\
+        parentJobLs=None, transferOutput=True, job_max_memory=200,\
+        extraArguments=None, extraArgumentList=None, extraDependentInputLs=None, \
+        sshDBTunnel=None, **keywords):
         """
         2012.10.8 call addGenericJob() instead
         2012.7.19
@@ -352,9 +373,9 @@ class AbstractWorkflow(Workflow):
         return job
 
     def addSelectLineBlockFromFileJob(self, executable=None, inputFile=None, outputFile=None,\
-                    startLineNumber=None, stopLineNumber=None, parentJobLs=None, extraDependentInputLs=None, \
-                    transferOutput=False, \
-                    extraArguments=None, job_max_memory=200, **keywords):
+        startLineNumber=None, stopLineNumber=None, parentJobLs=None, extraDependentInputLs=None, \
+        transferOutput=False, \
+        extraArguments=None, job_max_memory=200, **keywords):
         """
         2012.7.30
         """
@@ -370,17 +391,17 @@ class AbstractWorkflow(Workflow):
         return job
 
     def addPlotLDJob(self, executable=None, inputFile=None, inputFileList=None, outputFile=None, \
-                    outputFnamePrefix=None,
-                    whichColumn=None, whichColumnHeader=None, whichColumnPlotLabel=None, title=None, \
-                    logY=None, valueForNonPositiveYValue=-1, \
-                    missingDataNotation='-nan',\
-                    xColumnPlotLabel=None, chrLengthColumnHeader=None, chrColumnHeader=None, \
-                    minChrLength=1000000, xColumnHeader=None, pos2ColumnHeader=None, minNoOfTotal=100, maxNoOfTotal=None,\
-                    figureDPI=300, formatString='.', ylim_type=2, samplingRate=0.0001,  need_svg=False, logCount=False, \
-                    minDist=None, maxDist=None, movingAverageType=2,\
-                    parentJobLs=None, \
-                    extraDependentInputLs=None, \
-                    extraArgumentList=None, extraArguments=None, transferOutput=True,  job_max_memory=200, **keywords):
+        outputFnamePrefix=None,
+        whichColumn=None, whichColumnHeader=None, whichColumnPlotLabel=None, title=None, \
+        logY=None, valueForNonPositiveYValue=-1, \
+        missingDataNotation='-nan',\
+        xColumnPlotLabel=None, chrLengthColumnHeader=None, chrColumnHeader=None, \
+        minChrLength=1000000, xColumnHeader=None, pos2ColumnHeader=None, minNoOfTotal=100, maxNoOfTotal=None,\
+        figureDPI=300, formatString='.', ylim_type=2, samplingRate=0.0001,  need_svg=False, logCount=False, \
+        minDist=None, maxDist=None, movingAverageType=2,\
+        parentJobLs=None, \
+        extraDependentInputLs=None, \
+        extraArgumentList=None, extraArguments=None, transferOutput=True,  job_max_memory=200, **keywords):
         """
         2012.10.25
             expose argument missingDataNotation, minDist, maxDist
@@ -388,7 +409,7 @@ class AbstractWorkflow(Workflow):
             use addAbstractPlotJob()
         2012.8.2 moved from vervet/src/CalculateVCFStatPipeline.py
         2012.8.1
-        ('outputFname', 1, ): [None, 'o', 1, 'output file for the figure.'],\
+            ('outputFname', 1, ): [None, 'o', 1, 'output file for the figure.'],\
             ('minNoOfTotal', 1, int): [100, 'i', 1, 'minimum no of total variants (denominator of inconsistent rate)'],\
             ('title', 1, ): [None, 't', 1, 'title for the figure.'],\
             ('figureDPI', 1, int): [200, 'f', 1, 'dpi for the output figures (png)'],\
@@ -433,28 +454,28 @@ class AbstractWorkflow(Workflow):
             extraArgumentList.append("--movingAverageType %s"%(movingAverageType))
 
         return self.addAbstractPlotJob(executable=executable, inputFileList=inputFileList, \
-                            inputFile=inputFile, outputFile=outputFile, outputFnamePrefix=outputFnamePrefix, whichColumn=whichColumn, \
-                            whichColumnHeader=whichColumnHeader, whichColumnPlotLabel=whichColumnPlotLabel, \
-                            logY=logY, valueForNonPositiveYValue=valueForNonPositiveYValue, \
-                            missingDataNotation=missingDataNotation,\
-                            xColumnHeader=xColumnHeader, xColumnPlotLabel=xColumnPlotLabel, title=title, \
-                            minNoOfTotal=minNoOfTotal, \
-                            figureDPI=figureDPI, formatString=formatString, ylim_type=ylim_type, samplingRate=samplingRate, need_svg=need_svg, \
-                            parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
-                            extraArgumentList=extraArgumentList, extraArguments=extraArguments, transferOutput=transferOutput, \
-                            job_max_memory=job_max_memory, \
-                            **keywords)
+            inputFile=inputFile, outputFile=outputFile, outputFnamePrefix=outputFnamePrefix, whichColumn=whichColumn, \
+            whichColumnHeader=whichColumnHeader, whichColumnPlotLabel=whichColumnPlotLabel, \
+            logY=logY, valueForNonPositiveYValue=valueForNonPositiveYValue, \
+            missingDataNotation=missingDataNotation,\
+            xColumnHeader=xColumnHeader, xColumnPlotLabel=xColumnPlotLabel, title=title, \
+            minNoOfTotal=minNoOfTotal, \
+            figureDPI=figureDPI, formatString=formatString, ylim_type=ylim_type, samplingRate=samplingRate, need_svg=need_svg, \
+            parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
+            extraArgumentList=extraArgumentList, extraArguments=extraArguments, transferOutput=transferOutput, \
+            job_max_memory=job_max_memory, \
+            **keywords)
 
     def addPlotVCFtoolsStatJob(self, executable=None, inputFileList=None, outputFnamePrefix=None, \
-                            whichColumn=None, whichColumnHeader=None, whichColumnPlotLabel=None, need_svg=False, \
-                            logY=0, valueForNonPositiveYValue=-1, \
-                            xColumnPlotLabel=None, xColumnHeader=None, chrLengthColumnHeader=None, chrColumnHeader=None, \
-                            minChrLength=1000000, minNoOfTotal=100,\
-                            figureDPI=300, ylim_type=2, samplingRate=0.0001, logCount=False,\
-                            tax_id=60711, sequence_type_id=1, chrOrder=None,\
-                            parentJobLs=None, \
-                            extraDependentInputLs=None, \
-                            extraArguments=None, transferOutput=True, job_max_memory=200, sshDBTunnel=False, **keywords):
+        whichColumn=None, whichColumnHeader=None, whichColumnPlotLabel=None, need_svg=False, \
+        logY=0, valueForNonPositiveYValue=-1, \
+        xColumnPlotLabel=None, xColumnHeader=None, chrLengthColumnHeader=None, chrColumnHeader=None, \
+        minChrLength=1000000, minNoOfTotal=100,\
+        figureDPI=300, ylim_type=2, samplingRate=0.0001, logCount=False,\
+        tax_id=60711, sequence_type_id=1, chrOrder=None,\
+        parentJobLs=None, \
+        extraDependentInputLs=None, \
+        extraArguments=None, transferOutput=True, job_max_memory=200, sshDBTunnel=False, **keywords):
         """
         Examples
             outputFnamePrefix = os.path.join(plotOutputDir, 'noOfMendelErrors_along_chromosome')
@@ -550,23 +571,23 @@ class AbstractWorkflow(Workflow):
         return job
 
     def addPlotGenomeWideDataJob(self, executable=None, inputFileList=None, inputFile=None,\
-                            outputFnamePrefix=None, outputFile=None,\
-                            whichColumn=None, whichColumnHeader=None, whichColumnPlotLabel=None, \
-                            logX=None, logY=None, valueForNonPositiveYValue=-1, \
-                            xScaleLog=None, yScaleLog=None,\
-                            missingDataNotation='NA',\
-                            xColumnPlotLabel=None, xColumnHeader=None, \
-                            xtickInterval=None,\
-                            drawCentromere=None, chrColumnHeader=None, \
-                            minChrLength=100000, minNoOfTotal=100, maxNoOfTotal=None, \
-                            figureDPI=300, formatString=".", ylim_type=2, samplingRate=1, logCount=False, need_svg=False,\
-                            tax_id=60711, sequence_type_id=1, chrOrder=None,\
-                            inputFileFormat=1, outputFileFormat=None,\
-                            parentJobLs=None, extraDependentInputLs=None, \
-                            extraArguments=None, extraArgumentList=None, \
-                            transferOutput=True, job_max_memory=200, \
-                            objectWithDBGenomeArguments=None, sshDBTunnel=False, \
-                            **keywords):
+        outputFnamePrefix=None, outputFile=None,\
+        whichColumn=None, whichColumnHeader=None, whichColumnPlotLabel=None, \
+        logX=None, logY=None, valueForNonPositiveYValue=-1, \
+        xScaleLog=None, yScaleLog=None,\
+        missingDataNotation='NA',\
+        xColumnPlotLabel=None, xColumnHeader=None, \
+        xtickInterval=None,\
+        drawCentromere=None, chrColumnHeader=None, \
+        minChrLength=100000, minNoOfTotal=100, maxNoOfTotal=None, \
+        figureDPI=300, formatString=".", ylim_type=2, samplingRate=1, logCount=False, need_svg=False,\
+        tax_id=60711, sequence_type_id=1, chrOrder=None,\
+        inputFileFormat=1, outputFileFormat=None,\
+        parentJobLs=None, extraDependentInputLs=None, \
+        extraArguments=None, extraArgumentList=None, \
+        transferOutput=True, job_max_memory=200, \
+        objectWithDBGenomeArguments=None, sshDBTunnel=False, \
+        **keywords):
 
         """
         Examples:
@@ -642,21 +663,21 @@ class AbstractWorkflow(Workflow):
         return job
 
     def addAbstractPlotJob(self, executable=None, inputFileList=None, inputFile=None, outputFile=None, \
-                    outputFnamePrefix=None, whichColumn=None, whichColumnHeader=None, whichColumnPlotLabel=None, \
-                    logX=None, logY=None, valueForNonPositiveYValue=-1, \
-                    xScaleLog=0, yScaleLog=0, \
-                    missingDataNotation='NA',\
-                    xColumnHeader=None, xColumnPlotLabel=None, title=None, \
-                    minNoOfTotal=100, maxNoOfTotal=None,\
-                    figureDPI=300, formatString='.', markerSize=None, \
-                    ylim_type=2, samplingRate=0.001, legendType=None,\
-                    need_svg=False, \
-                    inputFileFormat=None, outputFileFormat=None,\
-                    parentJob=None, parentJobLs=None, \
-                    extraDependentInputLs=None, extraOutputLs=None, \
-                    extraArgumentList=None, extraArguments=None, transferOutput=True,  job_max_memory=200, \
-                    sshDBTunnel=False, key2ObjectForJob=None, \
-                    objectWithDBArguments=None, **keywords):
+        outputFnamePrefix=None, whichColumn=None, whichColumnHeader=None, whichColumnPlotLabel=None, \
+        logX=None, logY=None, valueForNonPositiveYValue=-1, \
+        xScaleLog=0, yScaleLog=0, \
+        missingDataNotation='NA',\
+        xColumnHeader=None, xColumnPlotLabel=None, title=None, \
+        minNoOfTotal=100, maxNoOfTotal=None,\
+        figureDPI=300, formatString='.', markerSize=None, \
+        ylim_type=2, samplingRate=0.001, legendType=None,\
+        need_svg=False, \
+        inputFileFormat=None, outputFileFormat=None,\
+        parentJob=None, parentJobLs=None, \
+        extraDependentInputLs=None, extraOutputLs=None, \
+        extraArgumentList=None, extraArguments=None, transferOutput=True,  job_max_memory=200, \
+        sshDBTunnel=False, key2ObjectForJob=None, \
+        objectWithDBArguments=None, **keywords):
         """
         2013.08.28 added argument markerSize
         2013.07.16 added argument legendType
@@ -757,25 +778,28 @@ class AbstractWorkflow(Workflow):
         if extraArguments:
             extraArgumentList.append(extraArguments)
 
-        job = self.addGenericJob(executable=executable, inputFile=inputFile, outputFile=outputFile, \
-                inputFileList = inputFileList,\
-                parentJob=parentJob, parentJobLs=parentJobLs, \
-                extraDependentInputLs=extraDependentInputLs, \
-                extraOutputLs=extraOutputLs, transferOutput=transferOutput, \
-                extraArgumentList=extraArgumentList, key2ObjectForJob=key2ObjectForJob, job_max_memory=job_max_memory, \
-                sshDBTunnel=sshDBTunnel, objectWithDBArguments=objectWithDBArguments, **keywords)
+        job = self.addGenericJob(executable=executable, inputFile=inputFile, 
+            inputArgumentOption='-i',
+            outputFile=outputFile, outputArgumentOption='-o', \
+            inputFileList = inputFileList,\
+            parentJob=parentJob, parentJobLs=parentJobLs, \
+            extraDependentInputLs=extraDependentInputLs, \
+            extraOutputLs=extraOutputLs, transferOutput=transferOutput, \
+            extraArgumentList=extraArgumentList, key2ObjectForJob=key2ObjectForJob, job_max_memory=job_max_memory, \
+            sshDBTunnel=sshDBTunnel, objectWithDBArguments=objectWithDBArguments, **keywords)
         return job
 
-    def addAbstractMatrixFileWalkerJob(self, executable=None, inputFileList=None, inputFile=None, outputFile=None, \
-                    outputFnamePrefix=None, whichColumn=None, whichColumnHeader=None, \
-                    logY=None, valueForNonPositiveYValue=-1, \
-                    minNoOfTotal=10,\
-                    samplingRate=1, \
-                    inputFileFormat=None, outputFileFormat=None,\
-                    parentJob=None, parentJobLs=None, extraOutputLs=None, \
-                    extraDependentInputLs=None, extraArgumentList=None, \
-                    extraArguments=None, transferOutput=True,  job_max_memory=200, sshDBTunnel=False, \
-                    objectWithDBArguments=None, **keywords):
+    def addAbstractMatrixFileWalkerJob(self, executable=None, inputFileList=None, \
+        inputFile=None, outputFile=None, \
+        outputFnamePrefix=None, whichColumn=None, whichColumnHeader=None, \
+        logY=None, valueForNonPositiveYValue=-1, \
+        minNoOfTotal=10,\
+        samplingRate=1, \
+        inputFileFormat=None, outputFileFormat=None,\
+        parentJob=None, parentJobLs=None, extraOutputLs=None, \
+        extraDependentInputLs=None, extraArgumentList=None, \
+        extraArguments=None, transferOutput=True,  job_max_memory=200, sshDBTunnel=False, \
+        objectWithDBArguments=None, **keywords):
         """
         2012.11.25 more arguments, logY, inputFileFormat, outputFileFormat
         2012.10.16 added argument sshDBTunnel, objectWithDBArguments
@@ -795,33 +819,33 @@ class AbstractWorkflow(Workflow):
 
         """
         return self.addAbstractPlotJob(executable=executable, inputFileList=inputFileList, \
-                            inputFile=inputFile, outputFile=outputFile, outputFnamePrefix=outputFnamePrefix, whichColumn=whichColumn, \
-                            whichColumnHeader=whichColumnHeader, whichColumnPlotLabel=None, \
-                            logY=logY, \
-                            valueForNonPositiveYValue=valueForNonPositiveYValue, \
-                            missingDataNotation=None,\
-                            xColumnHeader=None, xColumnPlotLabel=None, \
-                            minNoOfTotal=minNoOfTotal, \
-                            figureDPI=None, formatString=None, ylim_type=None, samplingRate=samplingRate, need_svg=False, \
-                            parentJob=parentJob, parentJobLs=parentJobLs, \
-                            extraOutputLs=extraOutputLs, extraDependentInputLs=extraDependentInputLs, \
-                            extraArgumentList=extraArgumentList,\
-                            extraArguments=extraArguments, transferOutput=transferOutput, job_max_memory=job_max_memory, \
-                            sshDBTunnel=sshDBTunnel, objectWithDBArguments=objectWithDBArguments, **keywords)
+                inputFile=inputFile, outputFile=outputFile, outputFnamePrefix=outputFnamePrefix, whichColumn=whichColumn, \
+                whichColumnHeader=whichColumnHeader, whichColumnPlotLabel=None, \
+                logY=logY, \
+                valueForNonPositiveYValue=valueForNonPositiveYValue, \
+                missingDataNotation=None,\
+                xColumnHeader=None, xColumnPlotLabel=None, \
+                minNoOfTotal=minNoOfTotal, \
+                figureDPI=None, formatString=None, ylim_type=None, samplingRate=samplingRate, need_svg=False, \
+                parentJob=parentJob, parentJobLs=parentJobLs, \
+                extraOutputLs=extraOutputLs, extraDependentInputLs=extraDependentInputLs, \
+                extraArgumentList=extraArgumentList,\
+                extraArguments=extraArguments, transferOutput=transferOutput, job_max_memory=job_max_memory, \
+                sshDBTunnel=sshDBTunnel, objectWithDBArguments=objectWithDBArguments, **keywords)
 
     def addAbstractGenomeFileWalkerJob(self, executable=None, inputFileList=None, inputFile=None, outputFile=None, \
-                    outputFnamePrefix=None, whichColumn=None, whichColumnHeader=None, \
-                    logY=None, valueForNonPositiveYValue=-1, \
-                    minNoOfTotal=10,\
-                    samplingRate=1, \
-                    chrColumnHeader=None, \
-                    tax_id=60711, sequence_type_id=1, chrOrder=None,\
-                    positionHeader=None,\
-                    inputFileFormat=None, outputFileFormat=None,\
-                    parentJob=None, parentJobLs=None, \
-                    extraDependentInputLs=None, extraArgumentList=None, \
-                    extraArguments=None, transferOutput=True,  job_max_memory=200, sshDBTunnel=False, \
-                    objectWithDBGenomeArguments=None, **keywords):
+        outputFnamePrefix=None, whichColumn=None, whichColumnHeader=None, \
+        logY=None, valueForNonPositiveYValue=-1, \
+        minNoOfTotal=10,\
+        samplingRate=1, \
+        chrColumnHeader=None, \
+        tax_id=60711, sequence_type_id=1, chrOrder=None,\
+        positionHeader=None,\
+        inputFileFormat=None, outputFileFormat=None,\
+        parentJob=None, parentJobLs=None, \
+        extraDependentInputLs=None, extraArgumentList=None, \
+        extraArguments=None, transferOutput=True,  job_max_memory=200, sshDBTunnel=False, \
+        objectWithDBGenomeArguments=None, **keywords):
         """
         2013.07.31
 
@@ -842,31 +866,30 @@ class AbstractWorkflow(Workflow):
         if positionHeader is not None:
             extraArgumentList.append('--positionHeader %s'%(positionHeader))
         return self.addAbstractPlotJob(executable=executable, inputFileList=inputFileList, \
-                            inputFile=inputFile, outputFile=outputFile, outputFnamePrefix=outputFnamePrefix, whichColumn=whichColumn, \
-                            whichColumnHeader=whichColumnHeader, whichColumnPlotLabel=None, \
-                            logY=logY, \
-                            valueForNonPositiveYValue=valueForNonPositiveYValue, \
-                            missingDataNotation=None,\
-                            xColumnHeader=None, xColumnPlotLabel=None, \
-                            minNoOfTotal=minNoOfTotal, \
-                            figureDPI=None, formatString=None, ylim_type=None, samplingRate=samplingRate, need_svg=False, \
-                            parentJob=parentJob, parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
-                            extraArgumentList=extraArgumentList,\
-                            extraArguments=extraArguments, transferOutput=transferOutput, job_max_memory=job_max_memory, \
-                            sshDBTunnel=sshDBTunnel, objectWithDBGenomeArguments=objectWithDBGenomeArguments, \
-                            **keywords)
+                inputFile=inputFile, outputFile=outputFile, outputFnamePrefix=outputFnamePrefix, whichColumn=whichColumn, \
+                whichColumnHeader=whichColumnHeader, whichColumnPlotLabel=None, \
+                logY=logY, \
+                valueForNonPositiveYValue=valueForNonPositiveYValue, \
+                missingDataNotation=None,\
+                xColumnHeader=None, xColumnPlotLabel=None, \
+                minNoOfTotal=minNoOfTotal, \
+                figureDPI=None, formatString=None, ylim_type=None, samplingRate=samplingRate, need_svg=False, \
+                parentJob=parentJob, parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
+                extraArgumentList=extraArgumentList,\
+                extraArguments=extraArguments, transferOutput=transferOutput, job_max_memory=job_max_memory, \
+                sshDBTunnel=sshDBTunnel, objectWithDBGenomeArguments=objectWithDBGenomeArguments, \
+                **keywords)
 
 
     def addDrawHistogramJob(self, executable=None, inputFileList=None, inputFile=None, outputFile=None, \
-                    outputFnamePrefix=None, whichColumn=None, whichColumnHeader=None, whichColumnPlotLabel=None, \
-                    xScaleLog=0, yScaleLog=0, \
-                    logY=None, valueForNonPositiveYValue=-1, missingDataNotation='NA', title=None, \
-                    minNoOfTotal=10,\
-                    figureDPI=100, formatString='.', ylim_type=2, samplingRate=0.001, need_svg=False, legendType=None, \
-                    logCount=False, inputFileFormat=None, \
-                    parentJobLs=None, \
-                    extraDependentInputLs=None, \
-                    extraArguments=None, transferOutput=True,  job_max_memory=200, **keywords):
+        outputFnamePrefix=None, whichColumn=None, whichColumnHeader=None, whichColumnPlotLabel=None, \
+        xScaleLog=0, yScaleLog=0, \
+        logY=None, valueForNonPositiveYValue=-1, missingDataNotation='NA', title=None, \
+        minNoOfTotal=10, figureDPI=100, formatString='.', ylim_type=2, samplingRate=0.001, \
+        need_svg=False, legendType=None, \
+        logCount=False, inputFileFormat=None, \
+        parentJobLs=None, extraDependentInputLs=None, \
+        extraArguments=None, transferOutput=True,  job_max_memory=200, **keywords):
         """
         #no spaces or parenthesis or any other shell-vulnerable letters in the x or y axis labels (whichColumnPlotLabel, xColumnPlotLabel)
         2013.08.15 added argument xScaleLog, yScaleLog, legendType
@@ -894,32 +917,32 @@ class AbstractWorkflow(Workflow):
         if logCount:
             extraArguments += " --logCount "
         return self.addAbstractPlotJob(executable=executable, inputFileList=inputFileList, \
-                            inputFile=inputFile, outputFile=outputFile, outputFnamePrefix=outputFnamePrefix, whichColumn=whichColumn, \
-                            whichColumnHeader=whichColumnHeader, whichColumnPlotLabel=whichColumnPlotLabel, \
-                            xScaleLog=xScaleLog, yScaleLog=yScaleLog,\
-                            logY=logY, valueForNonPositiveYValue=valueForNonPositiveYValue, \
-                            missingDataNotation=missingDataNotation,\
-                            xColumnHeader=None, xColumnPlotLabel=None, title=title, \
-                            minNoOfTotal=minNoOfTotal, \
-                            figureDPI=figureDPI, formatString=formatString, ylim_type=ylim_type, \
-                            samplingRate=samplingRate, need_svg=need_svg, legendType=legendType, \
-                            inputFileFormat=inputFileFormat,\
-                            parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
-                            extraArguments=extraArguments, transferOutput=transferOutput, job_max_memory=job_max_memory, \
-                            **keywords)
+                inputFile=inputFile, outputFile=outputFile, outputFnamePrefix=outputFnamePrefix, whichColumn=whichColumn, \
+                whichColumnHeader=whichColumnHeader, whichColumnPlotLabel=whichColumnPlotLabel, \
+                xScaleLog=xScaleLog, yScaleLog=yScaleLog,\
+                logY=logY, valueForNonPositiveYValue=valueForNonPositiveYValue, \
+                missingDataNotation=missingDataNotation,\
+                xColumnHeader=None, xColumnPlotLabel=None, title=title, \
+                minNoOfTotal=minNoOfTotal, \
+                figureDPI=figureDPI, formatString=formatString, ylim_type=ylim_type, \
+                samplingRate=samplingRate, need_svg=need_svg, legendType=legendType, \
+                inputFileFormat=inputFileFormat,\
+                parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
+                extraArguments=extraArguments, transferOutput=transferOutput, job_max_memory=job_max_memory, \
+                **keywords)
 
     def addDraw2DHistogramOfMatrixJob(self, executable=None, inputFileList=None, inputFile=None, outputFile=None, \
-                outputFnamePrefix=None, whichColumn=None, whichColumnHeader=None, whichColumnPlotLabel=None, \
-                logX=False, logY=False, logZ=False, valueForNonPositiveYValue=-1, \
-                missingDataNotation='NA',\
-                xColumnHeader=None, xColumnPlotLabel=None, \
-                minNoOfTotal=100,\
-                figureDPI=300, formatString='.', samplingRate=0.001, need_svg=False, \
-                inputFileFormat=None, outputFileFormat=None,\
-                zColumnHeader=None, \
-                parentJobLs=None, \
-                extraDependentInputLs=None, \
-                extraArgumentList=None, extraArguments=None, transferOutput=True,  job_max_memory=200, **keywords):
+        outputFnamePrefix=None, whichColumn=None, whichColumnHeader=None, whichColumnPlotLabel=None, \
+        logX=False, logY=False, logZ=False, valueForNonPositiveYValue=-1, \
+        missingDataNotation='NA',\
+        xColumnHeader=None, xColumnPlotLabel=None, \
+        minNoOfTotal=100,\
+        figureDPI=300, formatString='.', samplingRate=0.001, need_svg=False, \
+        inputFileFormat=None, outputFileFormat=None,\
+        zColumnHeader=None, \
+        parentJobLs=None, \
+        extraDependentInputLs=None, \
+        extraArgumentList=None, extraArguments=None, transferOutput=True,  job_max_memory=200, **keywords):
         """
         2013.2.8 added argument inputFileFormat
         2013.2.7 executable could be None, default is self.Draw2DHistogramOfMatrix
@@ -936,18 +959,18 @@ class AbstractWorkflow(Workflow):
         if executable is None:
             executable = self.Draw2DHistogramOfMatrix
         return self.addAbstractPlotJob(executable=executable, inputFileList=inputFileList, \
-                            inputFile=inputFile, outputFile=outputFile, outputFnamePrefix=outputFnamePrefix, whichColumn=whichColumn, \
-                            whichColumnHeader=whichColumnHeader, whichColumnPlotLabel=whichColumnPlotLabel, \
-                            logX=logX, logY=logY, valueForNonPositiveYValue=valueForNonPositiveYValue, \
-                            missingDataNotation=missingDataNotation,\
-                            xColumnHeader=xColumnHeader, xColumnPlotLabel=xColumnPlotLabel, \
-                            minNoOfTotal=minNoOfTotal, \
-                            figureDPI=figureDPI, formatString=formatString, ylim_type=None, \
-                            samplingRate=samplingRate, need_svg=need_svg, \
-                            inputFileFormat=inputFileFormat, outputFileFormat=outputFileFormat,\
-                            parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
-                            extraArguments=extraArguments, transferOutput=transferOutput, job_max_memory=job_max_memory, \
-                            **keywords)
+            inputFile=inputFile, outputFile=outputFile, outputFnamePrefix=outputFnamePrefix, whichColumn=whichColumn, \
+            whichColumnHeader=whichColumnHeader, whichColumnPlotLabel=whichColumnPlotLabel, \
+            logX=logX, logY=logY, valueForNonPositiveYValue=valueForNonPositiveYValue, \
+            missingDataNotation=missingDataNotation,\
+            xColumnHeader=xColumnHeader, xColumnPlotLabel=xColumnPlotLabel, \
+            minNoOfTotal=minNoOfTotal, \
+            figureDPI=figureDPI, formatString=formatString, ylim_type=None, \
+            samplingRate=samplingRate, need_svg=need_svg, \
+            inputFileFormat=inputFileFormat, outputFileFormat=outputFileFormat,\
+            parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
+            extraArguments=extraArguments, transferOutput=transferOutput, job_max_memory=job_max_memory, \
+            **keywords)
 
     def setupMoreOutputAccordingToSuffixAndNameTupleList(self, outputFnamePrefix=None, \
             suffixAndNameTupleList=None, extraOutputLs=None, key2ObjectForJob=None):

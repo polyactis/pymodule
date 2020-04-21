@@ -14,31 +14,31 @@ def process_function_arguments(keywords, argument_default_dict, error_doc='', cl
 		add class_to_have_attr to assign the argument and values
 	2008-02-28
 		example of argument_default_dict:
-		
-			argument_default_dict = {('hostname',1, ):'papaya.usc.edu',\
-								('dbname',1, ):'stock_250k',\
-								('user',1, ):None,\
-								('passwd',1, ):None,\
-								('experimenter',0,):None,\
-								('mapping_file',1,):None,\
-								('input_dir',1, ):None,\
-								('output_dir',1, ):'/Network/Data/250k/db/raw_data/',\
-								('array_data_table',0, ):'array_data',\
-								('probes_table',0, ):'probes',\
-								('strain_info_table',0, ):'strain_info',\
-								('array_info_table',1, ):'array_info',\
-								('commit',0, int):0,\
-								('debug',0, int):0,\
-								('report',0, int):0}
+	
+		argument_default_dict = {('hostname',1, ):'papaya.usc.edu',\
+							('dbname',1, ):'stock_250k',\
+							('user',1, ):None,\
+							('passwd',1, ):None,\
+							('experimenter',0,):None,\
+							('mapping_file',1,):None,\
+							('input_dir',1, ):None,\
+							('output_dir',1, ):'/Network/Data/250k/db/raw_data/',\
+							('array_data_table',0, ):'array_data',\
+							('probes_table',0, ):'probes',\
+							('strain_info_table',0, ):'strain_info',\
+							('array_info_table',1, ):'array_info',\
+							('commit',0, int):0,\
+							('debug',0, int):0,\
+							('report',0, int):0}
 
-		process arguments from keywords based on argument_default_dict
-		
-		keywords is a dictionary of given arguments. 'argument_name':'argument_value'
-		
-		argument_default_dict is a dictionary of default arguments.
-			the key is a tuple, ('argument_name', is_argument_required, argument_type) and argument_type is optional.
-			the value is could just be the default_value or a list = [default_value, 'short_option', 'long_option', has_argument, description_for_option]
-				'short_option', has_argument, description_for_option are all optional.
+	process arguments from keywords based on argument_default_dict
+	
+	keywords is a dictionary of given arguments. 'argument_name':'argument_value'
+	
+	argument_default_dict is a dictionary of default arguments.
+		the key is a tuple, ('argument_name', is_argument_required, argument_type) and argument_type is optional.
+		the value is could just be the default_value or a list = [default_value, 'short_option', 'long_option', has_argument, description_for_option]
+			'short_option', has_argument, description_for_option are all optional.
 	"""
 	import sys
 	ad = {}
