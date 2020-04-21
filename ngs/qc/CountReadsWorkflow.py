@@ -1,18 +1,17 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Examples:
 	# 2012.5.3 run on hoffman2's condorpool, need sshDBTunnel (-H1)
-	%s  -i 963-1346 -o dags/ReadCount/read_count_isq_936_1346.xml -u yh --commit -z localhost
+	%s  -i 963-1346 -o dags/ReadCount/read_count_isq_936_1346.xml
+		-u yh --commit -z localhost
 		--pegasusFolderName readcount --needSSHDBTunnel
-		-l hcondor -j hcondor 
-		-t /u/home/eeskin/polyacti/NetworkData/vervet/db -D /u/home/eeskin/polyacti/NetworkData/vervet/db/
+		-l hcondor -j hcondor -D NetworkData/vervet/db/
 	
 	# 2012.3.14 
-	%s -i 1-864 -o dags/ReadCount/read_count_isq_1_864.xml -u yh -l condorpool -j condorpool -z uclaOffice
+	%s -i 1-864 -o dags/ReadCount/read_count_isq_1_864.xml
+		-u yh -l condor -j condor -z uclaOffice
 		--pegasusFolderName readCount --commit
 	
-Description:
-	2012.3.14
 """
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
@@ -20,18 +19,16 @@ __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 import subprocess, copy
 from pegaflow.DAX3 import File, Link, PFN, Job
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
-from palos.ngs.AbstractNGSWorkflow import AbstractNGSWorkflow
+from palos.ngs.AbstractNGSWorkflow import AbstractNGSWorkflow as ParentClass
 from palos.db import SunsetDB
-from AbstractAccuWorkflow import AbstractAccuWorkflow as ParentClass
 
-
-class ReadFileBaseCountWorkflow(ParentClass):
+class CountReadsWorkflow(ParentClass):
 	__doc__ = __doc__
 	option_default_dict = copy.deepcopy(ParentClass.option_default_dict)
 	option_default_dict.update({
-						('ind_seq_id_ls', 1, ): ['', 'i', 1, 'a comma/dash-separated list of IndividualSequence.id. \
-									non-fastq entries will be discarded.', ],\
-						})
+		('ind_seq_id_ls', 1, ): ['', 'i', 1, 'a comma/dash-separated list of IndividualSequence.id.'
+			'non-fastq entries will be discarded.', ],\
+		})
 
 	def __init__(self,  **keywords):
 		"""
@@ -50,11 +47,11 @@ class ReadFileBaseCountWorkflow(ParentClass):
 		
 		self.addOneExecutableFromPathAndAssignProperClusterSize(
 			path=os.path.join(self.pymodulePath, 'mapper/computer/CountFastqReadBaseCount.py'), \
-										name='CountFastqReadBaseCount', clusterSizeMultipler=1)
+			name='CountFastqReadBaseCount', clusterSizeMultipler=1)
 		
 		self.addOneExecutableFromPathAndAssignProperClusterSize(
 			path=os.path.join(self.thisModulePath, 'db/input/PutReadBaseCountIntoDB.py'), \
-										name='PutReadBaseCountIntoDB', clusterSizeMultipler=0.2)
+			name='PutReadBaseCountIntoDB', clusterSizeMultipler=0.2)
 		
 	
 	def registerISQFiles(self, db_main=None, ind_seq_id_ls=[], local_data_dir='', pegasusFolderName='', \
@@ -62,7 +59,8 @@ class ReadFileBaseCountWorkflow(ParentClass):
 		"""
 		2012.3.14
 		"""
-		sys.stderr.write("Finding all ISQ-affiliated files of %s ind seq entries ..."%(len(ind_seq_id_ls)))
+		print(f"Finding all ISQ-affiliated files of %s ind seq entries ..."%(len(ind_seq_id_ls)), 
+			flush=True)
 		returnData = PassingData(jobDataLs=[])
 		counter = 0
 		Table = SunsetDB.IndividualSequence
@@ -83,8 +81,9 @@ class ReadFileBaseCountWorkflow(ParentClass):
 						individual_sequence_id_set.add(individual_sequence.id)
 					else:
 						missed_individual_sequence_id_set.add(individual_sequence.id)
-						sys.stderr.write("Warning: IndividualSequenceFile.id=%s (isq-id=%s) doesn't have any affiliated IndividualSequenceFile entries while its path %s is not a file.\n"%\
-									(individual_sequence_file.id, individual_sequence.id, absPath))
+						sys.stderr.write("Warning: IndividualSequenceFile.id=%s (isq-id=%s) doesn't have "
+							"any affiliated IndividualSequenceFile entries while its path %s is not a file.\n"%\
+							(individual_sequence_file.id, individual_sequence.id, absPath))
 			elif individual_sequence.path:
 				absPath = os.path.join(local_data_dir, individual_sequence.path)
 				if os.path.isfile(absPath):
@@ -96,12 +95,13 @@ class ReadFileBaseCountWorkflow(ParentClass):
 														isqf_id=None))
 					individual_sequence_id_set.add(individual_sequence.id)
 				else:
-					sys.stderr.write("Warning: IndividualSequence.id=%s doesn't have any affiliated IndividualSequenceFile entries while its path %s is not a file.\n"%\
-									(individual_sequence.id, absPath))
+					sys.stderr.write("Warning: IndividualSequence.id=%s doesn't have any affiliated "
+						"IndividualSequenceFile entries while its path %s is not a file.\n"%\
+						(individual_sequence.id, absPath))
 					missed_individual_sequence_id_set.add(individual_sequence.id)
 		
-		sys.stderr.write(" %s files registered for %s individual_sequence entries. missed %s individual-sequence entries.\n"%\
-						(len(returnData.jobDataLs), len(individual_sequence_id_set), len(missed_individual_sequence_id_set)))
+		print(" %s files registered for %s individual_sequence entries. missed %s individual-sequence entries.\n"%\
+			(len(returnData.jobDataLs), len(individual_sequence_id_set), len(missed_individual_sequence_id_set)), flush=True)
 		return returnData
 	
 	def addPutReadBaseCountIntoDBJob(self, executable=None, inputFileLs=[], \
@@ -207,7 +207,7 @@ class ReadFileBaseCountWorkflow(ParentClass):
 		2013.04.07 wrap all standard pre-run() related functions into this function.
 			setting up for run(), called by run()
 		"""
-		pdata = AbstractNGSWorkflow.setup_run(self)
+		pdata = ParentClass.setup_run(self)
 		workflow = pdata.workflow
 		
 		db_main = self.db_main
@@ -215,45 +215,38 @@ class ReadFileBaseCountWorkflow(ParentClass):
 		session.begin(subtransactions=True)
 		"""
 		Traceback (most recent call last):
-		  File "/u/home/eeskin/polyacti/script/vervet/src/db/ReadFileBaseCountWorkflow.py", line 249, in <module>
+		  File "/u/home/eeskin/polyacti/script/vervet/src/db/CountReadsWorkflow.py", line 249, in <module>
 		    instance.run()
-		  File "/u/home/eeskin/polyacti/script/vervet/src/db/ReadFileBaseCountWorkflow.py", line 232, in run
+		  File "/u/home/eeskin/polyacti/script/vervet/src/db/CountReadsWorkflow.py", line 232, in run
 		    pdata = self.setup_run()
-		  File "/u/home/eeskin/polyacti/script/vervet/src/db/ReadFileBaseCountWorkflow.py", line 217, in setup_run
+		  File "/u/home/eeskin/polyacti/script/vervet/src/db/CountReadsWorkflow.py", line 217, in setup_run
 		    session.begin()
 		  File "/u/home/eeskin/polyacti/lib/python/sqlalchemy/orm/scoping.py", line 139, in do
 		    return getattr(self.registry(), name)(*args, **kwargs)
 		  File "/u/home/eeskin/polyacti/lib/python/sqlalchemy/orm/session.py", line 550, in begin
 		    "A transaction is already begun.  Use subtransactions=True "
 		sqlalchemy.exc.InvalidRequestError: A transaction is already begun.  Use subtransactions=True to allow subtransactions.
-
 		"""
-		
 		inputData = self.registerISQFiles(db_main=db_main, ind_seq_id_ls=self.ind_seq_id_ls, \
-										local_data_dir=self.local_data_dir, pegasusFolderName=self.pegasusFolderName,\
-										input_site_handler=self.input_site_handler)
+						local_data_dir=self.local_data_dir, pegasusFolderName=self.pegasusFolderName,\
+						input_site_handler=self.input_site_handler)
 		
 		registerReferenceData = self.getReferenceSequence()
-		
-		
 		return PassingData(inputData=inputData,\
-						registerReferenceData=registerReferenceData)
+			registerReferenceData=registerReferenceData)
+
 	def run(self):
 		"""
 		2011-7-11
 		"""
 		pdata = self.setup_run()
-		workflow = pdata.workflow
-		
-		inputData=pdata.inputData
-		
+		inputData = pdata.inputData
 		self.addJobs(inputData=inputData, pegasusFolderName=self.pegasusFolderName,
-					needSSHDBTunnel=self.needSSHDBTunnel)
-		
+			needSSHDBTunnel=self.needSSHDBTunnel)
 		self.end_run()
 
 if __name__ == '__main__':
-	main_class = ReadFileBaseCountWorkflow
+	main_class = CountReadsWorkflow
 	po = ProcessOptions(sys.argv, main_class.option_default_dict, error_doc=main_class.__doc__)
 	instance = main_class(**po.long_option2value)
 	instance.run()
