@@ -439,14 +439,14 @@ class ImportIndividualSequence2DB(ParentClass):
         20200419 a general importer
         """
         sampleID2IndividualData = self.getSampleID2IndividualData(sample_sheet)
-        fastqFnameLs = self.getInputPathLsFromInput(input_path, suffixSet=set(['.fastq']), fakeSuffix='.gz')
+        fastqFnameLs = self.getInputPathLsFromInput(input_path, suffixSet=set(['.fastq', '.fq']), fakeSuffix='.gz')
         sampleID2FastqObjectLs = self.getSampleID2FastqObjectLs(fastqFnameLs=fastqFnameLs, \
-                                sampleID2IndividualData=sampleID2IndividualData)
+            sampleID2IndividualData=sampleID2IndividualData)
         self.addJobsToSplitAndRegisterFastQ(db_main=db_main, \
-                sampleID2FastqObjectLs=sampleID2FastqObjectLs, \
-                data_dir=data_dir, minNoOfReads=minNoOfReads, commit=commit,\
-                sequencer_name=sequencer_name, sequence_type_name=sequence_type_name, 
-                sequence_format=sequence_format)
+            sampleID2FastqObjectLs=sampleID2FastqObjectLs, \
+            data_dir=data_dir, minNoOfReads=minNoOfReads, commit=commit,\
+            sequencer_name=sequencer_name, sequence_type_name=sequence_type_name, 
+            sequence_format=sequence_format)
     
     def addJobsToImportUNGCVervetFastQ(self, db_main=None, \
         sample_sheet=None, input_path=None, data_dir=None, \
