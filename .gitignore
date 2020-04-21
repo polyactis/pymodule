@@ -15,8 +15,11 @@
 .tags
 .tags1
 .vscode
-build
-dist
-cmake-build-debug
 GADA/GADA
 MANIFEST.in
+build
+cmake-build-debug
+dist
+io/AbstractMatrixFileWalkerCC
+mapper/extractor/SelectRowsFromMatrixCC
+reducer/ReduceSameChromosomeAlignmentDepthFiles
