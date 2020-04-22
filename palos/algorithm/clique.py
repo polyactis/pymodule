@@ -81,15 +81,15 @@ if __name__ == '__main__':
 	#G.add_edge(3,6)
 	clique_instance = clique(debug=1)
 	clique_instance.max_clique(G)
-	print 'max_clique_size:', clique_instance.max_clique_size
-	print 'max_clique_ls:', clique_instance.max_clique_ls
-	print 'nodes:', G.nodes()
-	print 'degree:', G.degree()
+	print(f'max_clique_size: {clique_instance.max_clique_size}')
+	print(f'max_clique_ls: {clique_instance.max_clique_ls}')
+	print(f'nodes: {G.nodes()}')
+	print(f'degree: {G.degree()}')
 	nx.draw(G)
 	import pylab
-	print 'the graph looks like this:'
+	print(f'the graph looks like this:')
 	pylab.show()
 	
 	from networkx import cliques
 	G_max_clique = cliques.find_cliques(G)
-	print 'cliques found  by networkx:', G_max_clique
+	print(f'cliques found  by networkx: {G_max_clique}')
