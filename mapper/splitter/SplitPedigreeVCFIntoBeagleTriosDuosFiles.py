@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2013.05.03
 	This program splits a VCF file from pedigree members into trios/duos beagle input files.

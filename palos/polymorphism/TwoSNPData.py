@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 A class to merge two SNPData.
 2009-2-5: add option row_matching_by_which_value to allow both the 1st 

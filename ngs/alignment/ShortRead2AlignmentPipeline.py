@@ -148,7 +148,6 @@ class ShortRead2AlignmentPipeline(ParentClass, ShortRead2AlignmentWorkflow):
 	2011-7-11
 	"""
 	def __init__(self,  **keywords):
-		self.pathToInsertHomePathList.extend(['thisModulePath'])
 		ShortRead2AlignmentWorkflow.__init__(self, **keywords)
 		#ParentClass.__init__(self, **keywords)
 		if self.ind_seq_id_ls:
@@ -171,9 +170,9 @@ class ShortRead2AlignmentPipeline(ParentClass, ShortRead2AlignmentWorkflow):
 		site_handler = self.site_handler
 
 
-		self.addOneExecutableFromPathAndAssignProperClusterSize(
-			path=os.path.join(self.thisModulePath, "db/input/AddAlignmentFile2DB.py"), \
-			name="AddAlignmentFile2DB", clusterSizeMultipler=self.alignmentJobClustersSizeFraction)
+		self.registerOneExecutable(
+			path=os.path.join(self.pymodulePath, "db/import/AddAlignmentFile2DB.py"), \
+			name="AddAlignmentFile2DB", clusterSizeMultiplier=self.alignmentJobClustersSizeFraction)
 
 
 	def addAllAlignmentJobs(self, db_main=None, individualSequenceID2FilePairLs=None, \
@@ -275,7 +274,7 @@ class ShortRead2AlignmentPipeline(ParentClass, ShortRead2AlignmentWorkflow):
 				tmpOutputDir = os.path.basename(individual_sequence.path)
 				# add a mkdir job
 				mkdirJob = None
-				for library, pdata in library2Data.iteritems():
+				for library, pdata in library2Data.items():
 					minIsqFileRawID = min(pdata.isqFileRawID2Index.keys())
 					splitOrder2Index = pdata.splitOrder2Index
 					fileObjectPairLs = pdata.fileObjectPairLs

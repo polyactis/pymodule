@@ -84,35 +84,39 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
         ParentClass.registerExecutables(self)
         
         #2012.8.30 moved from vervet/src/AddVCFFolder2DBWorkflow.py
-        #self.registerOneExecutable(path=os.path.join(vervetSrcPath, \
-        #	"db/input/AddVCFFile2DB.py"),
+        #self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
+        #	"db/import/AddVCFFile2DB.py"),
         #	name='AddVCFFile2DB', clusterSizeMultiplier=1)
         
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
-                "pegasus/mapper/filter/FilterVCFSNPCluster.py"),
-                name='FilterVCFSNPCluster', \
-                clusterSizeMultiplier=1)
+            "mapper/filter/FilterVCFSNPCluster.py"),
+            name='FilterVCFSNPCluster', clusterSizeMultiplier=1)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
-                "pegasus/mapper/extractor/JuxtaposeAlleleFrequencyFromMultiVCFInput.py"),
-                name='JuxtaposeAlleleFrequencyFromMultiVCFInput', \
-                clusterSizeMultiplier=1)		
+            "mapper/extractor/JuxtaposeAlleleFrequencyFromMultiVCFInput.py"),
+            name='JuxtaposeAlleleFrequencyFromMultiVCFInput', clusterSizeMultiplier=1)		
         
         #2013.07.12
         self.registerOneExecutable(path=self.javaPath, name='SelectVariantsJavaInReduce', \
-                clusterSizeMultiplier=0.001)
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, "polymorphism/qc/RemoveRedundantLociFromVCF.py"), \
-                name='RemoveRedundantLociFromVCF_InReduce', clusterSizeMultiplier=0)
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, "polymorphism/qc/RemoveRedundantLociFromVCF.py"), \
-                name='RemoveRedundantLociFromVCF', clusterSizeMultiplier=1)
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, "polymorphism/qc/ClearVCFBasedOnSwitchDensity.py"), \
-                name='ClearVCFBasedOnSwitchDensity', clusterSizeMultiplier=1)
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, "polymorphism/qc/CalculateSameSiteConcordanceInVCF.py"), \
-                name='CalculateSameSiteConcordanceInVCF', clusterSizeMultiplier=1)
+            clusterSizeMultiplier=0.001)
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, 
+            "polymorphism/qc/RemoveRedundantLociFromVCF.py"), \
+            name='RemoveRedundantLociFromVCF_InReduce', clusterSizeMultiplier=0)
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, 
+            "polymorphism/qc/RemoveRedundantLociFromVCF.py"), \
+            name='RemoveRedundantLociFromVCF', clusterSizeMultiplier=1)
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, 
+            "polymorphism/qc/ClearVCFBasedOnSwitchDensity.py"), \
+            name='ClearVCFBasedOnSwitchDensity', clusterSizeMultiplier=1)
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, 
+            "polymorphism/qc/CalculateSameSiteConcordanceInVCF.py"), \
+            name='CalculateSameSiteConcordanceInVCF', clusterSizeMultiplier=1)
         
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, "mapper/extractor/ExtractInfoFromVCF.py"), \
-                name='ExtractInfoFromVCF', clusterSizeMultiplier=1)
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, "mapper/extractor/ExtractSamplesFromVCF.py"), \
-                name='ExtractSamplesFromVCF', clusterSizeMultiplier=1)
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, 
+            "mapper/extractor/ExtractInfoFromVCF.py"), \
+            name='ExtractInfoFromVCF', clusterSizeMultiplier=1)
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, 
+            "mapper/extractor/ExtractSamplesFromVCF.py"), \
+            name='ExtractSamplesFromVCF', clusterSizeMultiplier=1)
     
     def registerCommonExecutables(self):
         """
@@ -120,12 +124,13 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
         ParentClass.registerCommonExecutables(self)
     
     def registerFilesOfInputDir(self, inputDir=None, input_site_handler=None, \
-                    checkEmptyVCFByReading=False, pegasusFolderName='',\
-                    maxContigID=None, minContigID=None, db_vervet=None, needToKnowNoOfLoci=False,
-                    minNoOfLociInVCF=None, includeIndelVCF=True, notToUseDBToInferVCFNoOfLoci=None):
+        checkEmptyVCFByReading=False, pegasusFolderName='',\
+        maxContigID=None, minContigID=None, db_vervet=None, needToKnowNoOfLoci=False,
+        minNoOfLociInVCF=None, includeIndelVCF=True, notToUseDBToInferVCFNoOfLoci=None):
         """
         2013.07.17 bugfix
-        2013.3.1 flip includeIndelVCF to true (now indel and SNP vcf files from AlignmentToCall workflows are in separate folders.
+        2013.3.1 flip includeIndelVCF to true.
+            now indel and SNP vcf files from AlignmentToCall workflows are in separate folders.
         2012.8.15 add argument db_vervet, needToKnowNoOfLoci, to get noOfLoci by parsing inputFname and find db-entry...
             argument minNoOfLociInVCF, only used when it's not None and needToKnowNoOfLoci is True
         2012.8.10 add maxContigID and minContigID to restrict input
@@ -144,8 +149,9 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
         if notToUseDBToInferVCFNoOfLoci:
             notToUseDBToInferVCFNoOfLoci = self.notToUseDBToInferVCFNoOfLoci
         
-        sys.stderr.write("Registering input files from %s, maxContigID=%s, minContigID=%s, needToKnowNoOfLoci=%s, minNoOfLociInVCF=%s, includeIndelVCF=%s, notToUseDBToInferVCFNoOfLoci=%s ..."%\
-                        (inputDir, maxContigID, minContigID, needToKnowNoOfLoci, minNoOfLociInVCF, includeIndelVCF, notToUseDBToInferVCFNoOfLoci))
+        sys.stderr.write("Registering input files from %s, maxContigID=%s, minContigID=%s, "
+            "needToKnowNoOfLoci=%s, minNoOfLociInVCF=%s, includeIndelVCF=%s, notToUseDBToInferVCFNoOfLoci=%s ..."%\
+            (inputDir, maxContigID, minContigID, needToKnowNoOfLoci, minNoOfLociInVCF, includeIndelVCF, notToUseDBToInferVCFNoOfLoci))
         returnData = PassingData(jobDataLs = [])
         counter = 0
         real_counter = 0

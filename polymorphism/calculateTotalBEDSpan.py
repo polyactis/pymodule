@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os, sys
 inputFname = os.path.expanduser("~/RefGenomes/dustPlus10_M1-22XY.bed.gz")

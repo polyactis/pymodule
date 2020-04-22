@@ -1,24 +1,19 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
+2012.7.17 
+Update the number of loci in one genotype method by summing the no_of_loci of its GenotypeFile entries.
+
 Examples:
-	%s 
-	
 	%s -u yh -c -z uclaOffice -s 323VRCSKNevisTrioCallerMAF0.1
 		-i Contig103.filter_by_vcftools.recode.vcf.gz
 
-Description:
-	2012.7.17 
-		Update the number of loci in one genotype method by summing the no_of_loci of its GenotypeFile entries.
 """
-
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0])
+__doc__ = __doc__%(sys.argv[0])
 
-sys.path.insert(0, os.path.expanduser('~/lib/python'))
-sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
-
+sys.path.insert(0, os.path.expanduser('~/src'))
 import csv
-from palos import ProcessOptions, getListOutOfStr, PassingData, utils, figureOutDelimiter, NextGenSeq, Genome
+from palos import ProcessOptions, PassingData, utils, NextGenSeq, Genome
 from palos import VCFFile
 from vervet.src.mapper.AbstractVervetMapper import AbstractVervetMapper
 from vervet.src import VervetDB
@@ -30,10 +25,10 @@ class UpdateGenotypeMethodNoOfLoci(AbstractVervetMapper):
 	option_default_dict.pop(('outputFname', 0, ))
 	option_default_dict.pop(('outputFnamePrefix', 0, ))
 	option_default_dict.update({
-						('genotypeMethodID', 0, int): [None, 'i', 1, 'GenotypeMethod.id, used to fetch db entry, non-zero exit if not present in db', ],\
-						('genotypeMethodShortName', 0, ):[None, 's', 1, 'column short_name of GenotypeMethod table,\
+		('genotypeMethodID', 0, int): [None, 'i', 1, 'GenotypeMethod.id, used to fetch db entry, non-zero exit if not present in db', ],\
+		('genotypeMethodShortName', 0, ):[None, 's', 1, 'column short_name of GenotypeMethod table,\
 			non-zero exit if not present in db.'],\
-						})
+		})
 	def __init__(self, inputFnameLs=None, **keywords):
 		"""
 		"""

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from numpy import abs, array, average, corrcoef, mat, shape, std, sum, transpose, zeros
 from numpy.linalg import svd
 

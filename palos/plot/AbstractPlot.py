@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 An abstract class for plot classes, can plot XY scatter/line (pending self.formatString) plot.
 	If you specify --outputFname, make sure its suffix is .png.

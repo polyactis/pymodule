@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
 input_path: 
-    if directory, recursively find all bam files,
-    if file, each line is path to bam.
-sample_sheet: (map bam filename to individual ID).
+    if directory, recursively find all fastq/bam files,
+    if file, each line is the path to bam.
+sample_sheet: (map fastq/bam files to individual information).
 
 this program will
     1. query table individual if the sample is already in db. Create a new entry in db if not.
@@ -16,12 +16,6 @@ this program will
 
 This program has to be run on the pegasus submission host.
 Option "--commit" commits the db transaction.
-
-The sample_sheet for bam files is a map from sample ID to the bam filename.
-    Only the base filename is required.
-Example ("Library" and "Bam Path" are required):
-    FlowCell	Lane	Index Sequence	Library	Common Name	Bam Path
-    64J6AAAXX	1	TGACCA	VCAC-2007002-1-lib1	African Green Monkey	gerald_64J6AAAXX_1.bam
 
 1. The db commandline arguments will be passed to db-interacting jobs.
     Make sure all computing nodes have access to the db.
@@ -37,7 +31,7 @@ Examples:
     #  (doing this because they are not located on crocea)
     find NetworkData/vervet/raw_sequence/ -name *.bam  > vervet/raw_sequence/bamFileList.txt
     # run the program on the crocea and output a hoffman2 workflow. (with db commit)
-    %s -i ~/mnt/hoffman2/u/home/eeskintmp/polyacti/NetworkData/vervet/raw_sequence/bamFileList.txt
+    %s -i ~/mnt/h2/u/home/eeskintmp/polyacti/NetworkData/vervet/raw_sequence/bamFileList.txt
         -e /u/home/eeskin/polyacti/
         -t /u/home/eeskin/polyacti/NetworkData/vervet/db/ -u yh
         --sample_sheet xfer.genome.wustl.edu/gxfer3/46019922623327/Vervet_12_4X_README.tsv
@@ -47,14 +41,15 @@ Examples:
     
     # 20120430 run on hcondor, to import McGill 1X data (-y2), (-e) is not necessary
     #   because it's running on hoffman2 and can recognize home folder.
-    #. --needSSHDBTunnel means it needs sshTunnel for db-interacting jobs.
+    #   --needSSHDBTunnel means it needs sshTunnel for db-interacting jobs.
     %s -i raw_sequence/McGill96_1X/ -z localhost -u yh -j hcondor -l hcondor --commit
         -o dags/AddReads2DB/unpackMcGill96_1X.xml -y2 --needSSHDBTunnel 
         -D NetworkData/vervet/db/ -t NetworkData/vervet/db/
         -e /u/home/eeskin/polyacti
     
-    # 20120602 add 18 south-african monkeys RNA read data (-y3), sequenced by Joe DeYoung's core (from Nam's folder),
-    # later manually changed its tissue id to distinguish them from DNA data (below) 
+    # 20120602 add 18 south-african monkeys RNA read data (-y3),
+    #  sequenced by Joe DeYoung's core (from Nam's folder),
+    #  later manually changed its tissue id to distinguish them from DNA data (below).
     %s -i SIVpilot/by.Charles.Demultiplexed/ -z localhost -u yh -j hcondor -l hcondor
         --commit -o dags/AddReads2DB/unpack20SouthAfricaSIVmonkeys.xml -y3 --needSSHDBTunnel
         -D /u/home/eeskin/polyacti/NetworkData/vervet/db/
@@ -62,12 +57,14 @@ Examples:
         --sample_sheet by.Charles.Demultiplexed/sampleIds.txt
         --minNoOfReads 4000000
 
-    # 20120603 add 24 south-african monkeys DNA read data (-y4), sequenced by Joe DeYoung's core (from Nam's folder)
+    # 20120603 add 24 south-african monkeys DNA read data (-y4),
+    #  sequenced by Joe DeYoung's core (from Nam's folder)
     #   --minNoOfReads 4000000
     %s -i ~namtran/panasas/Data/HiSeqRaw/Ania/SIVpilot/LowpassWGS/Demultiplexed/
-        -z localhost -u yh -j hcondor -l hcondor --commit -o dags/unpack20SouthAfricaSIVmonkeysDNA.xml
-        -y4 --needSSHDBTunnel -D ～/NetworkData/vervet/db/ -t ～/NetworkData/vervet/db/ -e ～
-        --minNoOfReads 4000000
+        -z localhost -u yh -j hcondor -l hcondor --commit
+        -o dags/unpack20SouthAfricaSIVmonkeysDNA.xml
+        -y4 --needSSHDBTunnel -D ～/NetworkData/vervet/db/
+        -t ～/NetworkData/vervet/db/ -e ～ --minNoOfReads 4000000
         
     # 2017.04.28 added TCGA sequences (.bam) into db
     %s -i /y/Sunset/tcga/HNSC_TCGA/ --hostname pdc -u huangyu -j condor -l condor 
@@ -96,6 +93,10 @@ class ImportIndividualSequence2DB(ParentClass):
     option_default_dict.update({
         ('input_path', 1, ): ['', 'i', 1, 'If it is a folder, get all .bam/.sam/.fastq files recursively. '
             'If it is a file, every line should be a path to an input file.', ],\
+        ('SplitReadFileJarPath', 1, ): ["%s/script/picard/dist/SplitReadFile.jar", '', 1, 
+            'path to the SplitReadFile jar', ],\
+        ('picard_path', 1, ): ["%s/script/picard.broad/build/libs/picard.jar", '', 1, 
+            'path to the new picard jar', ],\
         ('sample_sheet', 0, ): ['', '', 1, 
             'a tsv-format file detailing the corresponding sample ID of each input file.', ],\
         ('minNoOfReads', 1, int): [8000000, '', 1, 'The minimum number of reads in each split fastq file. '
@@ -114,9 +115,11 @@ class ImportIndividualSequence2DB(ParentClass):
         """
         2011-8-3
         """
+        # Insert before ParentClass.__init__()
+        self.pathToInsertHomePathList.extend(
+            ['SplitReadFileJarPath', 'picard_path',]
+            )
         ParentClass.__init__(self, **keywords)
-        self.addJobsDict = {1: self.addJobsToImportTCGABam,
-                        2: self.addJobsToImportHCC1187Bam}
     
     def connectDB(self):
         """
@@ -135,12 +138,16 @@ class ImportIndividualSequence2DB(ParentClass):
         if not self.local_data_dir:
             self.local_data_dir = self.db_main.data_dir
     
-    def getBamBaseFname2SampleID_WUSTLDNAData(self, sample_sheet):
+    def readSampleSheet_WUSTLBam(self, sample_sheet):
         """
-        20110803 from WUSTL, the input looks like this:
+        20110803 from WUSTL, the sample_sheet looks like this:
+    Only the base filename is required, you can provide more as long as the whole path is unique.
+Example ("Library" and "Bam Path" are required):
+
 #	FlowCell	Lane	Index Sequence	Library	Common Name	Bam Path	MD5
-1	64J6AAAXX	1	VCAC-2007002-1-lib1	African	Green	Monkey	/gscmnt/sata755/production/csf_111215677/gerald_64J6AAAXX_1.bam	/gscmnt/sata755/production/csf_111215677/gerald_64J6AAAXX_1.bam.md5
-2	64J6AAAXX	2	VCAC-2007006-1-lib1	African	Green	Monkey	/gscmnt/sata751/production/csf_111215675/gerald_64J6AAAXX_2.bam	/gscmnt/sata751/production/csf_111215675/gerald_64J6AAAXX_2.bam.md5
+1	64J6AAAXX	1	VCAC-2007002-1-lib1	African	Green	Monkey	gerald_64J6AAAXX_1.bam	gerald_64J6AAAXX_1.bam.md5
+2	64J6AAAXX	2	VCAC-2007006-1-lib1	African	Green	Monkey	gerald_64J6AAAXX_2.bam	gerald_64J6AAAXX_2.bam.md5
+
         """
         sys.stderr.write("Getting bamBaseFname2SampleID dictionary ...")
         bamBaseFname2SampleID = {}
@@ -161,7 +168,8 @@ class ImportIndividualSequence2DB(ParentClass):
         #sampleIDPattern = re.compile(r'\w+-(\w+)-\d+-\w+')
         # 2012.5.29 i.e. VCAC-VGA00006-AGM0075-lib1 ,
         sampleIDPattern = re.compile(r'\w+-(\w+)-\w+-\w+')
-        # VCAC-VZC1014-AGM0055-lib1, VCAC-1996031-VRV0265-lib2a, VCAC-VKD7-361-VKD7-361-lib1 (VKD7 is to be taken),
+        # VCAC-VZC1014-AGM0055-lib1, VCAC-1996031-VRV0265-lib2a,
+        #  VCAC-VKD7-361-VKD7-361-lib1 (VKD7 is to be taken),
         for row in reader:
             code = row[sampleIDIndex]
             pa_search = sampleIDPattern.search(code)
@@ -192,48 +200,60 @@ class ImportIndividualSequence2DB(ParentClass):
             elif os.path.isdir(input_path):
                 self.getAllBamFiles(input_path, bamFnameLs)
         
-    def addIndividualSequence(self, db_main=None, code=None, name=None, isq_comment=None, tax_id=9606,
+    def addIndividualSequence(self, db_main=None, code=None, name=None, 
+        isq_comment=None, tax_id=9606,
         tissue_id=None, site_id=None, study_id=None, sequence_batch_id=None,
         sequencer_name='HiSeq', sequence_type_name='PairedEnd', sequence_format='fastq',
         path_to_original_sequence=None, data_dir=None):
         """
         add individual and then add individual_sequence
         """
-        individual = db_main.getIndividual(code=code, name=name, tax_id=tax_id, site_id=site_id, study_id=study_id)
-        individual_sequence = db_main.getIndividualSequence(individual_id=individual.id, sequencer_name=sequencer_name, 
-                        sequence_type_name=sequence_type_name, sequence_format=sequence_format, 
-                        path_to_original_sequence=path_to_original_sequence, tissue_name=None, coverage=None,
-                        subFolder='individual_sequence', data_dir=data_dir, sequence_batch_id=sequence_batch_id, 
-                        tissue_id=tissue_id,
-                        filtered=0, version=None, is_contaminated=0, outdated_index=0, comment=isq_comment)
+        individual = db_main.getIndividual(code=code, name=name, tax_id=tax_id, 
+            site_id=site_id, study_id=study_id)
+        individual_sequence = db_main.getIndividualSequence(individual_id=individual.id, 
+            sequencer_name=sequencer_name, 
+            sequence_type_name=sequence_type_name, sequence_format=sequence_format, 
+            path_to_original_sequence=path_to_original_sequence, tissue_name=None, coverage=None,
+            subFolder='individual_sequence', data_dir=data_dir, sequence_batch_id=sequence_batch_id, 
+            tissue_id=tissue_id,
+            filtered=0, version=None, is_contaminated=0, outdated_index=0, comment=isq_comment)
         
         return individual_sequence
     
-    def registerCustomExecutables(self):
+    def registerJars(self):
+        ParentClass.registerJars(self)
+        
+        self.registerOneJar(name="SplitReadFileJar", path=self.SplitReadFileJarPath)
+        self.registerOneJar(name="PicardJar", path=self.picard_path)
+
+    def registerExecutables(self):
         """
         20170503 No pegasus job clustering for these executables 
-            because some of these jobs are certain to fail and will affect other good samples' downstream jobs. 
+            because some of these jobs are certain to fail and
+             will affect other good samples' downstream jobs. 
         2012.1.3
         """
-        self.addOneExecutableFromPathAndAssignProperClusterSize(
+        ParentClass.registerExecutables(self)
+
+        self.registerOneExecutable(
             path=os.path.join(self.pymodulePath, 'mapper/splitter/SplitReadFileWrapper.sh'), \
-            name='SplitReadFileWrapper', clusterSizeMultipler=0)
-        self.addOneExecutableFromPathAndAssignProperClusterSize(
+            name='SplitReadFileWrapper', clusterSizeMultiplier=0)
+        self.registerOneExecutable(
             path=os.path.join(self.pymodulePath, 'mapper/computer/VerifyFileMD5Sum.py'), \
-            name='VerifyFileMD5Sum', clusterSizeMultipler=0)
-        self.addOneExecutableFromPathAndAssignProperClusterSize(
-            path=os.path.join(self.thisModulePath, 'db/input/RegisterAndMoveSplitSequenceFiles.py'), \
-            name='RegisterAndMoveSplitSequenceFiles', clusterSizeMultipler=0)
-        self.addOneExecutableFromPathAndAssignProperClusterSize(
-            path=os.path.join(self.thisModulePath, 'db/input/RegisterIndividualSequence2DB.py'), \
-            name='RegisterIndividualSequence2DB', clusterSizeMultipler=0)
-        self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, \
-            name='SamToFastqJava', clusterSizeMultipler=0)
+            name='VerifyFileMD5Sum', clusterSizeMultiplier=0)
+        self.registerOneExecutable(
+            path=os.path.join(self.pymodulePath, 'db/import/RegisterAndMoveSplitSequenceFiles.py'), \
+            name='RegisterAndMoveSplitSequenceFiles', clusterSizeMultiplier=0)
+        self.registerOneExecutable(
+            path=os.path.join(self.pymodulePath, 'db/import/RegisterIndividualSequence2DB.py'), \
+            name='RegisterIndividualSequence2DB', clusterSizeMultiplier=0)
+        self.registerOneExecutable(path=self.javaPath, \
+            name='SamToFastqJava', clusterSizeMultiplier=0)
         
     def addConvertBamToFastqAndGzipJob(self, executable=None, \
-                            inputF=None, outputFnamePrefix=None, \
-                            parentJobLs=None, job_max_memory=8000, walltime = 800, extraDependentInputLs=None, \
-                            transferOutput=False, **keywords):
+        inputF=None, outputFnamePrefix=None, \
+        parentJobLs=None, job_max_memory=8000, walltime = 800, extraDependentInputLs=None, \
+        transferOutput=False, **keywords):
         """
         2013.04.03 use addGenericJavaJob()
         2012.1.3
@@ -250,7 +270,7 @@ class ImportIndividualSequence2DB(ParentClass):
         output_unpaired = File("%s_unpaired.fastq.gz"%(outputFnamePrefix))
         extraOutputLs= [output1, output2, output_unpaired]
         extraArgumentList = ["F=", output1, "F2=", output2, "UNPAIRED_FASTQ=", output_unpaired, \
-                            "VALIDATION_STRINGENCY=LENIENT", "INCLUDE_NON_PF_READS=true"]
+            "VALIDATION_STRINGENCY=LENIENT", "INCLUDE_NON_PF_READS=true"]
         
         job = self.addGenericJavaJob(executable=self.SamToFastqJava, jarFile=self.PicardJar, \
                     inputFile=inputF, inputArgumentOption="INPUT=", \
@@ -273,7 +293,8 @@ class ImportIndividualSequence2DB(ParentClass):
         extraDependentInputLs=None, transferOutput=False, **keywords):
         """
         Executable is shell/SplitReadFileWrapper.sh,
-            which calls "wc -l" to count the number of reads beforehand to derive a proper minNoOfReads (to avoid files with too few reads).
+            which calls "wc -l" to count the number of reads beforehand to 
+            derive a proper minNoOfReads, avoiding files with too few reads.
         Run SplitReadFile and generate the output directly into the db-affiliated folders.
         A log file is generated and registered for transfer (so that pegasus won't skip it).
         Walltime is in minutes (max time allowed on hoffman2 is 24 hours).
@@ -288,14 +309,15 @@ class ImportIndividualSequence2DB(ParentClass):
         if logFile:
             extraArgumentList.append(logFile)
         
-        job = self.addGenericJob(executable=executable, inputFile=inputF, inputArgumentOption="", \
-                    outputFile=None, outputArgumentOption="-o", \
-                    parentJob=None, parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
-                    extraOutputLs=[logFile], transferOutput=transferOutput, \
-                    frontArgumentList=frontArgumentList, \
-                    extraArgumentList=extraArgumentList, \
-                    job_max_memory=job_max_memory, \
-                    walltime=walltime, **keywords)
+        job = self.addGenericJob(executable=executable, inputFile=inputF, 
+            inputArgumentOption="", \
+            outputFile=None, outputArgumentOption="-o", \
+            parentJob=None, parentJobLs=parentJobLs, 
+            extraDependentInputLs=extraDependentInputLs, \
+            extraOutputLs=[logFile], transferOutput=transferOutput, \
+            frontArgumentList=frontArgumentList, \
+            extraArgumentList=extraArgumentList, \
+            job_max_memory=job_max_memory, walltime=walltime, **keywords)
         return job
     
     def addRegisterIndividualSequence2DBJob(self, executable=None, \
@@ -316,14 +338,14 @@ class ImportIndividualSequence2DB(ParentClass):
             if value is not None and value != "":
                 extraArgumentList.append("--%s %s"%(name, value))
         job = self.addGenericFile2DBJob(executable=executable, \
-                    inputFile=inputFile, inputArgumentOption="-i", \
-                    outputFile=outputFile, outputArgumentOption="-o", inputFileList=None, \
-                    data_dir=None, commit=commit,\
-                    parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
-                    extraOutputLs=None, transferOutput=transferOutput, \
-                    extraArguments=extraArguments, extraArgumentList=extraArgumentList, \
-                    job_max_memory=job_max_memory,  sshDBTunnel=sshDBTunnel, walltime=walltime,\
-                    key2ObjectForJob=None, objectWithDBArguments=self)
+            inputFile=inputFile, inputArgumentOption="-i", \
+            outputFile=outputFile, outputArgumentOption="-o", inputFileList=None, \
+            data_dir=None, commit=commit,\
+            parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
+            extraOutputLs=None, transferOutput=transferOutput, \
+            extraArguments=extraArguments, extraArgumentList=extraArgumentList, \
+            job_max_memory=job_max_memory,  sshDBTunnel=sshDBTunnel, walltime=walltime,\
+            key2ObjectForJob=None, objectWithDBArguments=self)
         return job
     
     def addRegisterAndMoveSplitFileJob(self, inputFile=None, \
@@ -343,14 +365,14 @@ class ImportIndividualSequence2DB(ParentClass):
             extraArgumentList.append('--mate_id %s'%(mate_id))
         
         job = self.addGenericFile2DBJob(executable=self.RegisterAndMoveSplitSequenceFiles, \
-                    inputFile=inputFile, inputArgumentOption="-i", \
-                    outputFile=None, outputArgumentOption="-o", inputFileList=None, \
-                    data_dir=None, logFile=logFile, commit=commit,\
-                    parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
-                    extraOutputLs=None, transferOutput=transferOutput, \
-                    extraArguments=extraArguments, extraArgumentList=extraArgumentList, \
-                    job_max_memory=job_max_memory,  sshDBTunnel=sshDBTunnel, walltime=walltime,\
-                    key2ObjectForJob=None, objectWithDBArguments=self)
+            inputFile=inputFile, inputArgumentOption="-i", \
+            outputFile=None, outputArgumentOption="-o", inputFileList=None, \
+            data_dir=None, logFile=logFile, commit=commit,\
+            parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
+            extraOutputLs=None, transferOutput=transferOutput, \
+            extraArguments=extraArguments, extraArgumentList=extraArgumentList, \
+            job_max_memory=job_max_memory,  sshDBTunnel=sshDBTunnel, walltime=walltime,\
+            key2ObjectForJob=None, objectWithDBArguments=self)
         return job
     
     def getInputPathLsFromInput(self, input_path=None, suffixSet=set(['.fastq']), fakeSuffix='.gz'):
@@ -373,7 +395,7 @@ class ImportIndividualSequence2DB(ParentClass):
             sys.exit(4)
         return input_path_list
 
-    def getSampleID2FastqObjectLsForSouthAfricanDNAData(self, fastqFnameLs=None):
+    def getSampleID2FastqObjectLsForSouthAfricanDNAFastQ(self, fastqPathLs=None):
         """
         similar to getSampleID2FastqObjectLsForMcGillData() (which is for McGill data)
         
@@ -381,14 +403,15 @@ class ImportIndividualSequence2DB(ParentClass):
             VSAA2015_1.fastq.gz
             VSAA2015_2.fastq.gz
         """
-        sys.stderr.write("Passing sampleID2FastqObjectLs from %s files ..."%(len(fastqFnameLs)))
+        sys.stderr.write("Parsing sampleID2FastqObjectLs from %s files ..."%(len(fastqPathLs)))
         sampleID2FastqObjectLs = {}
         import random
         filenameSignaturePattern = re.compile(r'(?P<sampleID>[a-zA-Z0-9]+)_(?P<mateID>\d).fastq')
         counter = 0
         real_counter = 0
-        libraryKey2UniqueLibrary = {}	#McGill's library ID , 7_Index-11, is not unique enough.
-        for fastqFname in fastqFnameLs:
+        #McGill's library ID , 7_Index-11, is not unique enough.
+        libraryKey2UniqueLibrary = {}
+        for fastqFname in fastqPathLs:
             counter += 1
             sampleIDSearchResult = filenameSignaturePattern.search(fastqFname)
             if sampleIDSearchResult:
@@ -398,20 +421,23 @@ class ImportIndividualSequence2DB(ParentClass):
                 filenameSignature = (sampleID)
                     
                 #concoct a unique library ID
-                libraryKey = (sampleID)	#this combination insures two ends from the same library are grouped together
+                #this combination insures two ends from the same library are grouped together
+                libraryKey = (sampleID)
                 if libraryKey not in libraryKey2UniqueLibrary:
                     uniqueLibrary = '%s_%s'%(sampleID, repr(random.random())[2:])
                     libraryKey2UniqueLibrary[libraryKey] = uniqueLibrary
                 
                 uniqueLibrary = libraryKey2UniqueLibrary[libraryKey]
-                fastqObject = PassingData(library=uniqueLibrary, sampleID=sampleID, mateID=mateID, absPath=fastqFname)
+                fastqObject = PassingData(library=uniqueLibrary, sampleID=sampleID, 
+                    mateID=mateID, absPath=fastqFname)
                 if sampleID not in sampleID2FastqObjectLs:
                     sampleID2FastqObjectLs[sampleID] = []
                 sampleID2FastqObjectLs[sampleID].append(fastqObject)
             else:
                 sys.stderr.write("Error: can't parse sampleID, library, mateID out of %s.\n"%fastqFname)
                 sys.exit(4)
-        sys.stderr.write(" %s samples and %s files in the dictionary.\n"%(len(sampleID2FastqObjectLs), real_counter))
+        sys.stderr.write(" %s samples and %s files in the dictionary.\n"%
+            (len(sampleID2FastqObjectLs), real_counter))
         return sampleID2FastqObjectLs
 
     def addJobsToImportSouthAfricanDNAFastQ(self, db_main=None, 
@@ -423,30 +449,119 @@ class ImportIndividualSequence2DB(ParentClass):
             input fastq files could be gzipped or not.
             data generated by Joe DeYoung's core, demultiplexed by ICNN.
         """
-        fastqFnameLs = self.getInputPathLsFromInput(input_path, suffixSet=set(['.fastq']), fakeSuffix='.gz')
-        sampleID2FastqObjectLs = self.getSampleID2FastqObjectLsForSouthAfricanDNAData(fastqFnameLs=fastqFnameLs)
+        fastqPathLs = self.getInputPathLsFromInput(input_path, suffixSet=set(['.fastq']), 
+        fakeSuffix='.gz')
+        sampleID2FastqObjectLs = self.getSampleID2FastqObjectLsForSouthAfricanDNAFastQ(
+            fastqPathLs=fastqPathLs)
         self.addJobsToSplitAndRegisterFastQ(db_main=db_main, 
-                sampleID2FastqObjectLs=sampleID2FastqObjectLs, data_dir=data_dir, \
-                minNoOfReads=minNoOfReads, commit=commit,\
-                sequencer_name=sequencer_name, sequence_type_name=sequence_type_name, 
-                sequence_format=sequence_format)		
-    
+            sampleID2FastqObjectLs=sampleID2FastqObjectLs, data_dir=data_dir, \
+            minNoOfReads=minNoOfReads, commit=commit,\
+            sequencer_name=sequencer_name, sequence_type_name=sequence_type_name, 
+            sequence_format=sequence_format)
+
+    def readSampleSheetFastQ(self, sample_sheet=None, fastqPathLs=None):
+        """
+        20200421
+        Only the first two columns are required. The rest is optional.
+        But should provide as much as you can.
+        sample_sheet Format:
+FilePath SampleID SequenceType Sequencer SequenceBatchID Libarary StudyID SiteID TissueName TissueID
+
+        """
+        print(f"Getting sampleID2IndividualData from {sample_sheet} ...", flush=True)
+        sampleID2IndividualData = {}
+        reader = pd.read_csv(sample_sheet, delimiter=',')
+        
+        for row in reader:
+            #no space in sampleID
+            sampleID = row.sampleID.replace(' ', '_')
+            libraryIndex = row[libraryIndexIndex]
+            if sampleID not in sampleID2IndividualData:
+                sampleID2IndividualData[sampleID] = PassingData(sampleName=sampleName, 
+                    libraryIndexList=[])
+            if sampleName!=sampleID2IndividualData[sampleID].sampleName:
+                sys.stderr.write("Error: sampleID %s is associated with two different sample names (%s, %s).\n"%\
+                    (sampleID, sampleName, sampleID2IndividualData[sampleID].sampleName))
+                raise
+            sampleID2IndividualData[sampleID].libraryIndexList.append(libraryIndex)
+        
+        print(f"{len(sampleID2IndividualData)} entries.", flush=True)
+        return sampleID2IndividualData
+
     def addJobsToImportFastQ(self, db_main=None, \
         sample_sheet=None, input_path=None, data_dir=None, \
-        minNoOfReads=None, commit=None,\
-        sequencer_name=None, sequence_type_name=None, sequence_format=None):
+        minNoOfReads=None, commit=None):
         """
         20200419 a general importer
         """
-        sampleID2IndividualData = self.getSampleID2IndividualData(sample_sheet)
-        fastqFnameLs = self.getInputPathLsFromInput(input_path, suffixSet=set(['.fastq', '.fq']), fakeSuffix='.gz')
-        sampleID2FastqObjectLs = self.getSampleID2FastqObjectLs(fastqFnameLs=fastqFnameLs, \
+        fastqPathLs = self.getInputPathLsFromInput(
+            input_path, suffixSet=set(['.fastq', '.fq']), fakeSuffix='.gz')
+        sampleID2IndividualData = self.readSampleSheetFastQ(sample_sheet, fastqPathLs)
+        
+        sampleID2FastqObjectLs = self.getSampleID2FastqObjectLs(
+            fastqPathLs=fastqPathLs, 
             sampleID2IndividualData=sampleID2IndividualData)
-        self.addJobsToSplitAndRegisterFastQ(db_main=db_main, \
-            sampleID2FastqObjectLs=sampleID2FastqObjectLs, \
-            data_dir=data_dir, minNoOfReads=minNoOfReads, commit=commit,\
-            sequencer_name=sequencer_name, sequence_type_name=sequence_type_name, 
-            sequence_format=sequence_format)
+        
+        print("Adding split-read & register jobs ...", flush=True)
+        filenameKey2PegasusFile = {}
+        for sampleID, indData in sampleID2IndividualData.items():
+            individual_sequence = self.addIndividualSequence(
+                db_main=db_main, code=indData.sampleID, \
+                site_id=indData.site_id, study_id=indData.study_id, \
+                sequencer_name=indData.sequencer, sequence_type_name=indData.sequence_type, \
+                sequence_format=sequence_format, data_dir=data_dir)
+            
+            sequenceOutputDir = os.path.join(data_dir, individual_sequence.path)
+            sequenceOutputDirJob = self.addMkDirJob(outputDir=sequenceOutputDir)
+            
+            splitOutputDir = f'{individual_sequence.id}'
+            #Same directory containing split files from both mates is fine 
+            # as RegisterAndMoveSplitSequenceFiles could pick up.
+            splitOutputDirJob = self.addMkDirJob(outputDir=splitOutputDir)
+            for fastqObject in indData.fastqObjectLs:
+                library = fastqObject.library
+                mateID = fastqObject.mateID
+                fastqPath = fastqObject.absPath
+                filenameKey = (library, os.path.basename(fastqPath))
+                if filenameKey in filenameKey2PegasusFile:
+                    fastqFile = filenameKey2PegasusFile.get(filenameKey)
+                    print(f"Error: File {fastqPath} has been registered with sample "
+                        f"{fastqFile.sampleID}. Can't happen.", flush=True)
+                    sys.exit(3)
+                    import pdb
+                    pdb.set_trace()
+                    continue
+                else:
+                    fastqFile = self.registerOneInputFile(fastqPath, folderName=library)
+                    fastqFile.sampleID = sampleID
+                    fastqFile.fastqObject= fastqObject
+                    filenameKey2PegasusFile[filenameKey] = fastqFile
+            
+                splitFastQFnamePrefix = os.path.join(
+                    splitOutputDir, f'{individual_sequence.id}_{library}_{mateID}')
+                logFile = File(f'{individual_sequence.id}_{library}_{mateID}.split.log')
+                splitReadFileJob1 = self.addSplitReadFileJob(
+                    inputF=fastqFile, outputFnamePrefix=splitFastQFnamePrefix, \
+                    outputFnamePrefixTail="", minNoOfReads=minNoOfReads, \
+                    logFile=logFile, parentJobLs=[splitOutputDirJob], \
+                    job_max_memory=4000, walltime = 800, \
+                    extraDependentInputLs=None, transferOutput=True)
+                
+                logFile = File(f'{individual_sequence.id}_{library}_{mateID}.register.log')
+                # 2012.4.30 add '--mate_id_associated_with_bam' to RegisterAndMoveSplitSequenceFiles
+                #  so that it will be used to distinguish IndividualSequenceFileRaw
+                registerJob1 = self.addRegisterAndMoveSplitFileJob(
+                    inputDir=splitOutputDir, outputDir=sequenceOutputDir, \
+                    relativeOutputDir=individual_sequence.path, logFile=logFile,\
+                    individual_sequence_id=individual_sequence.id, \
+                    bamFile=fastqFile, library=library, mate_id=mateID, \
+                    parentJobLs=[splitReadFileJob1, sequenceOutputDirJob], 
+                    job_max_memory=100, walltime = 60, \
+                    commit=commit, sequence_format=sequence_format, extraDependentInputLs=None, \
+                    extraArguments='--mate_id_associated_with_bam', \
+                    transferOutput=True, sshDBTunnel=self.needSSHDBTunnel)
+            
+        print("%s jobs.\n"%(self.no_of_jobs), flush=True)
     
     def addJobsToImportUNGCVervetFastQ(self, db_main=None, \
         sample_sheet=None, input_path=None, data_dir=None, \
@@ -458,54 +573,24 @@ class ImportIndividualSequence2DB(ParentClass):
         Data generated by Joe DeYoung's core, demultiplexed by ICNN.
         The input fastq files could be gzipped or not.
         """
-        sampleID2IndividualData = self.getSampleID2IndividualData_UNGC(sample_sheet)
-        fastqFnameLs = self.getInputPathLsFromInput(input_path, suffixSet=set(['.fastq']), fakeSuffix='.gz')
-        sampleID2FastqObjectLs = self.getSampleID2FastqObjectLsFromUNGCData(fastqFnameLs=fastqFnameLs, \
-                                sampleID2IndividualData=sampleID2IndividualData)
+        sampleID2IndividualData = self.readSampleSheetFastQ_UNGC(sample_sheet)
+        fastqPathLs = self.getInputPathLsFromInput(input_path, suffixSet=set(['.fastq']),
+            fakeSuffix='.gz')
+        sampleID2FastqObjectLs = self.getSampleID2FastqObjectLsForUNGCFastQ(fastqPathLs=fastqPathLs, \
+            sampleID2IndividualData=sampleID2IndividualData)
         self.addJobsToSplitAndRegisterFastQ(db_main=db_main, \
                 sampleID2FastqObjectLs=sampleID2FastqObjectLs, \
                 data_dir=data_dir, minNoOfReads=minNoOfReads, commit=commit,\
                 sequencer_name=sequencer_name, sequence_type_name=sequence_type_name, 
                 sequence_format=sequence_format)
 
-    def getSampleID2IndividualData(self, sample_sheet=None):
-        """
-        20200421
-        sample_sheet Format
-Library	File path	Sample ID	Site ID	Study ID	Sequencer
-D1HYNACXX	
-D1HYNACXX	TruSeq DNA PCR Free beta kit
-        """
-        print(f"Getting sampleID2IndividualData from {sample_sheet} ...", flush=True)
-        sampleID2IndividualData = {}
-        reader = pd.read_csv(sample_sheet, openMode='r', delimiter=',')
-        reader.constructColName2IndexFromHeader()
-        sampleIDIndex = reader.getColIndexGivenColHeader("sample ID")
-        sampleNameIndex = reader.getColIndexGivenColHeader("sample name")
-        libraryIndexIndex = reader.getColIndexGivenColHeader("Index")
-        
-        for row in reader:
-            sampleID = row[sampleIDIndex].replace(' ', '_')
-            sampleName = row[sampleNameIndex]
-            libraryIndex = row[libraryIndexIndex]
-            if sampleID not in sampleID2IndividualData:
-                sampleID2IndividualData[sampleID] = PassingData(sampleName=sampleName, libraryIndexList=[])
-            if sampleName!=sampleID2IndividualData[sampleID].sampleName:
-                sys.stderr.write("Error: sampleID %s is associated with two different sample names (%s, %s).\n"%\
-                    (sampleID, sampleName, sampleID2IndividualData[sampleID].sampleName))
-                raise
-            sampleID2IndividualData[sampleID].libraryIndexList.append(libraryIndex)
-        
-        print(f"{len(sampleID2IndividualData)} entries.", flush=True)
-        return sampleID2IndividualData
-
-    def getSampleID2IndividualData_UNGC(self, sample_sheet=None):
+    def readSampleSheetFastQ_UNGC(self, sample_sheet=None):
         """
         2013.04.04
         Format is like this from UNGC  = UCLA Neuroscience Genomics Core:
 
 FCID	Lane	sample ID	sample code	sample name	Index	Description	SampleProject
-D1HYNACXX	1	Ilmn Human control pool ( 4plex)	IP1			INDEX IS UNKNOWN prepared by Illumina (4 plex pool)	2013-029A
+D1HYNACXX	1	Ilmn Human control pool ( 4plex)	IP1		INDEX IS UNKNOWN	2013-029A
 D1HYNACXX	2	UNGC Human Sample 1	S1	AS001A	ATTACTCG	TruSeq DNA PCR Free beta kit	2013-029A
         """
         print(f"Getting sampleID2IndividualData from {sample_sheet} ...", flush=True)
@@ -522,17 +607,20 @@ D1HYNACXX	2	UNGC Human Sample 1	S1	AS001A	ATTACTCG	TruSeq DNA PCR Free beta kit	
             sampleName = row[sampleNameIndex]
             libraryIndex = row[libraryIndexIndex]
             if sampleID not in sampleID2IndividualData:
-                sampleID2IndividualData[sampleID] = PassingData(sampleName=sampleName, libraryIndexList=[])
+                sampleID2IndividualData[sampleID] = PassingData(sampleName=sampleName, 
+                    libraryIndexList=[])
             if sampleName!=sampleID2IndividualData[sampleID].sampleName:
-                sys.stderr.write("Error: sampleID %s is associated with two different sample names (%s, %s).\n"%\
-                    (sampleID, sampleName, sampleID2IndividualData[sampleID].sampleName))
+                print("Error: sampleID %s is associated with two different sample names (%s, %s)."%\
+                    (sampleID, sampleName, sampleID2IndividualData[sampleID].sampleName), 
+                    flush=True)
                 raise
             sampleID2IndividualData[sampleID].libraryIndexList.append(libraryIndex)
         
         print(f"{len(sampleID2IndividualData)} entries.", flush=True)
         return sampleID2IndividualData
     
-    def getSampleID2FastqObjectLsFromUNGCData(self, fastqFnameLs=None, sampleID2IndividualData=None):
+    def getSampleID2FastqObjectLsForUNGCFastQ(self, fastqPathLs=None, 
+        sampleID2IndividualData=None):
         """
         2013.04.05 bugfix. this ensures two ends from same library have same library.
         2013.04.04
@@ -541,7 +629,7 @@ D1HYNACXX	2	UNGC Human Sample 1	S1	AS001A	ATTACTCG	TruSeq DNA PCR Free beta kit	
             UNGC_Vervet_Sample_11_1.fastq.gz
             UNGC_Vervet_Sample_11_2.fastq.gz
         """
-        sys.stderr.write("Passing sampleID2FastqObjectLs from %s files ..."%(len(fastqFnameLs)))
+        sys.stderr.write("Parsing sampleID2FastqObjectLs from %s files ..."%(len(fastqPathLs)))
         sampleID2FastqObjectLs = {}
         import random
         filenameSignaturePattern = re.compile(r'(?P<sampleID>[\w\d]+)_(?P<mateID>\d).fastq')
@@ -549,7 +637,7 @@ D1HYNACXX	2	UNGC Human Sample 1	S1	AS001A	ATTACTCG	TruSeq DNA PCR Free beta kit	
         real_counter = 0
         libraryKey2UniqueLibrary = {}
         #McGill's library ID , 7_Index-11, is not unique enough.
-        for fastqFname in fastqFnameLs:
+        for fastqFname in fastqPathLs:
             counter += 1
             sampleIDSearchResult = filenameSignaturePattern.search(fastqFname)
             if sampleIDSearchResult:
@@ -557,22 +645,23 @@ D1HYNACXX	2	UNGC Human Sample 1	S1	AS001A	ATTACTCG	TruSeq DNA PCR Free beta kit	
                 sampleID = sampleIDSearchResult.group('sampleID')
                 mateID = sampleIDSearchResult.group('mateID')
                 if sampleID in sampleID2IndividualData:
-                    individualData = sampleID2IndividualData.get(sampleID)
-                    sampleID = individualData.sampleName
-                    library = '_'.join(individualData.libraryIndexList)
+                    indData = sampleID2IndividualData.get(sampleID)
+                    sampleID = indData.sampleName
+                    library = '_'.join(indData.libraryIndexList)
                     
                     libraryKey = (sampleID, library)
                     if libraryKey not in libraryKey2UniqueLibrary:
-                        #20130405 bugfix. this ensures two ends from the same library is marked as the same library.
+                        #this ensures two ends from the same library is marked as the same library.
                         uniqueLibrary = '%s_%s_%s'%(sampleID, library, repr(random.random())[2:])
                         libraryKey2UniqueLibrary[libraryKey] = uniqueLibrary
                     else:
                         print(f"libraryKey {libraryKey} of {fastqFname} is already in "
-                            f"libraryKey2UniqueLibrary with unique library = {libraryKey2UniqueLibrary[libraryKey]}.",
-                            flush=True)
+                        f"libraryKey2UniqueLibrary with unique library = {libraryKey2UniqueLibrary[libraryKey]}.",
+                        flush=True)
                     
                     uniqueLibrary = libraryKey2UniqueLibrary[libraryKey]
-                    fastqObject = PassingData(library=uniqueLibrary, sampleID=sampleID, mateID=mateID, absPath=fastqFname)
+                    fastqObject = PassingData(library=uniqueLibrary, sampleID=sampleID, 
+                        mateID=mateID, absPath=fastqFname)
                     if sampleID not in sampleID2FastqObjectLs:
                         sampleID2FastqObjectLs[sampleID] = []
                     sampleID2FastqObjectLs[sampleID].append(fastqObject)
@@ -586,7 +675,7 @@ D1HYNACXX	2	UNGC Human Sample 1	S1	AS001A	ATTACTCG	TruSeq DNA PCR Free beta kit	
         return sampleID2FastqObjectLs
     
     
-    def getFilenameSignature2SampleID_SouthAfricanRNAFastQ(self, sample_sheet=None):
+    def readSampleSheet_SouthAfricanRNAFastQ(self, sample_sheet=None):
         """
         2012.6.2 sample_sheet is tab-delimited, looks like this
             VSAC1012_R      ATCACG  sample2
@@ -616,13 +705,15 @@ D1HYNACXX	2	UNGC Human Sample 1	S1	AS001A	ATTACTCG	TruSeq DNA PCR Free beta kit	
             subSampleName = row[subSampleNameIndex]
             filenameSignature = (folderName, subSampleName)
             if filenameSignature in filenameSignature2SampleID:
-                sys.stderr.write("Error: filenameSignature %s already in filenameSignature2SampleID.\n"%(filenameSignature))
+                print("Error: filenameSignature %s already in filenameSignature2SampleID."
+                    %(filenameSignature), flush=True)
                 sys.exit(3)
             filenameSignature2SampleID[filenameSignature] = sampleID
         sys.stderr.write("%s entries.\n"%(len(filenameSignature2SampleID)))
         return filenameSignature2SampleID
     
-    def getSampleID2FastqObjectLsForSouthAfricanRNAData(self, fastqFnameLs=None, filenameSignature2SampleID=None):
+    def getSampleID2FastqObjectLsForSouthAfricanRNAFastQ(self, fastqPathLs=None, 
+        filenameSignature2SampleID=None):
         """
         2012.6.2
             similar to getSampleID2FastqObjectLsForMcGillData() (which is for McGill data)
@@ -631,19 +722,22 @@ D1HYNACXX	2	UNGC Human Sample 1	S1	AS001A	ATTACTCG	TruSeq DNA PCR Free beta kit	
             .../GCCAAT/tile_1101_sample1_end1.fastq
             .../GCCAAT/tile_1101_sample1_end2.fastq
         """
-        sys.stderr.write("Passing sampleID2FastqObjectLs from %s files ..."%(len(fastqFnameLs)))
+        sys.stderr.write("Parsing sampleID2FastqObjectLs from %s files ..."%(len(fastqPathLs)))
         sampleID2FastqObjectLs = {}
         import random
-        filenameSignaturePattern = re.compile(r'/(?P<folderName>[ACGT]{6})/(?P<library>[\w]+)_(?P<subSampleName>sample[12])_end(?P<mateID>\d).fastq')
+        filenameSignaturePattern = re.compile(r'/(?P<folderName>[ACGT]{6})/(?P<library>[\w]+)'
+            r'_(?P<subSampleName>sample[12])_end(?P<mateID>\d).fastq')
         counter = 0
         real_counter = 0
-        libraryKey2UniqueLibrary = {}	#McGill's library ID , 7_Index-11, is not unique enough.
-        for fastqFname in fastqFnameLs:
+        #McGill's library ID , 7_Index-11, is not unique enough.
+        libraryKey2UniqueLibrary = {}
+        for fastqFname in fastqPathLs:
             counter += 1
             sampleIDSearchResult = filenameSignaturePattern.search(fastqFname)
             if sampleIDSearchResult:
                 real_counter += 1
-                library = sampleIDSearchResult.group('library')	#tile_1101
+                #tile_1101
+                library = sampleIDSearchResult.group('library')
                 folderName = sampleIDSearchResult.group('folderName')
                 subSampleName = sampleIDSearchResult.group('subSampleName')
                 mateID = sampleIDSearchResult.group('mateID')
@@ -652,13 +746,15 @@ D1HYNACXX	2	UNGC Human Sample 1	S1	AS001A	ATTACTCG	TruSeq DNA PCR Free beta kit	
                     sampleID = filenameSignature2SampleID.get(filenameSignature)
                     
                     #concoct a unique library ID
-                    libraryKey = (folderName, library)	#this combination insures two ends from the same library are grouped together
+                    #this combination insures two ends from the same library are grouped together
+                    libraryKey = (folderName, library)
                     if libraryKey not in libraryKey2UniqueLibrary:
                         uniqueLibrary = '%s_%s_%s'%(folderName, library, repr(random.random())[2:])
                         libraryKey2UniqueLibrary[libraryKey] = uniqueLibrary
                     
                     uniqueLibrary = libraryKey2UniqueLibrary[libraryKey]
-                    fastqObject = PassingData(library=uniqueLibrary, sampleID=sampleID, mateID=mateID, absPath=fastqFname)
+                    fastqObject = PassingData(library=uniqueLibrary, sampleID=sampleID, 
+                        mateID=mateID, absPath=fastqFname)
                     if sampleID not in sampleID2FastqObjectLs:
                         sampleID2FastqObjectLs[sampleID] = []
                     sampleID2FastqObjectLs[sampleID].append(fastqObject)
@@ -667,7 +763,8 @@ D1HYNACXX	2	UNGC Human Sample 1	S1	AS001A	ATTACTCG	TruSeq DNA PCR Free beta kit	
             else:
                 sys.stderr.write("Error: can't parse sampleID, library, mateID out of %s.\n"%fastqFname)
                 sys.exit(4)
-        sys.stderr.write(" %s samples and %s files in the dictionary.\n"%(len(sampleID2FastqObjectLs), real_counter))
+        sys.stderr.write(" %s samples and %s files in the dictionary.\n"%(len(sampleID2FastqObjectLs),
+            real_counter))
         return sampleID2FastqObjectLs
     
     def addJobsToImportSouthAfricanRNAFastQ(self, db_main=None, \
@@ -676,52 +773,54 @@ D1HYNACXX	2	UNGC Human Sample 1	S1	AS001A	ATTACTCG	TruSeq DNA PCR Free beta kit	
         sequencer_name=None, sequence_type_name=None, sequence_format=None):
         """
         2012.6.1
-            input fastq files could be gzipped or not. doesn't matter.
-            data generated by Joe DeYoung's core, demultiplexed by ICNN (Charles in particular)
+        input fastq files could be gzipped or not.
+        data generated by Joe DeYoung's core, demultiplexed by ICNN (Charles in particular)
         """
-        filenameSignature2SampleID = self.getFilenameSignature2SampleID_SouthAfricanRNAFastQ(sample_sheet)
-        
-        fastqFnameLs = self.getInputPathLsFromInput(input_path, suffixSet=set(['.fastq']), fakeSuffix='.gz')
-        sampleID2FastqObjectLs = self.getSampleID2FastqObjectLsForNamSouthAfricanRNAData(fastqFnameLs=fastqFnameLs, \
-                        filenameSignature2SampleID=filenameSignature2SampleID)
+        filenameSignature2SampleID = self.readSampleSheet_SouthAfricanRNAFastQ(sample_sheet)
+        fastqPathLs = self.getInputPathLsFromInput(input_path, suffixSet=set(['.fastq']), fakeSuffix='.gz')
+        sampleID2FastqObjectLs = self.getSampleID2FastqObjectLsForSouthAfricanRNAFastQ(
+            fastqPathLs=fastqPathLs, \
+            filenameSignature2SampleID=filenameSignature2SampleID)
         self.addJobsToSplitAndRegisterFastQ(db_main=db_main, 
-                sampleID2FastqObjectLs=sampleID2FastqObjectLs, data_dir=data_dir, \
-                minNoOfReads=minNoOfReads, commit=commit,\
-                sequencer_name=sequencer_name, \
-                sequence_type_name=sequence_type_name, sequence_format=sequence_format)		
+            sampleID2FastqObjectLs=sampleID2FastqObjectLs, data_dir=data_dir, \
+            minNoOfReads=minNoOfReads, commit=commit,\
+            sequencer_name=sequencer_name, \
+            sequence_type_name=sequence_type_name, sequence_format=sequence_format)		
     
-    def getSampleID2FastqObjectLsForMcGillData(self, fastqFnameLs=None):
+    def getSampleID2FastqObjectLsForMcGillData(self, fastqPathLs=None):
         """
-        2013.1.30 add fixed monkey ID prefixes (VWP, VGA, etc.) into sampleIDPattern 
-            due to new not-all-number monkey IDs.
+        2013.1.30
+        add fixed monkey ID prefixes (VWP, VGA, etc.) into sampleIDPattern 
+        due to new not-all-number monkey IDs.
         
 HI.0628.001.D701.VGA00010_R1.fastq.gz  HI.0628.004.D703.VWP00384_R1.fastq.gz  HI.0628.007.D703.VWP10020_R1.fastq.gz
 HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI.0628.007.D703.VWP10020_R2.fastq.gz
         2012.4.30
-            each fastq file looks like 7_Index-11.2006013_R1.fastq.gz, 7_Index-11.2006013_R2.fastq.gz,
-                7_Index-10.2005045_replacement_R1.fastq.gz, 7_Index-10.2005045_replacement_R2.fastq.gz
-            
-            The data from McGill is dated 2012.4.27.
-            Each monkey is sequenced at 1X. There are 96 of them. Each library seems to contain 2 samples.
-                But each monkey has only 1 library.
-            
-            8_Index_23.2008126_R1.fastq.gz
-            8_Index_23.2008126_R2.fastq.gz
-            8_Index_23.2009017_R1.fastq.gz
-            8_Index_23.2009017_R2.fastq.gz
+        each fastq file looks like 7_Index-11.2006013_R1.fastq.gz, 7_Index-11.2006013_R2.fastq.gz,
+            7_Index-10.2005045_replacement_R1.fastq.gz, 7_Index-10.2005045_replacement_R2.fastq.gz
+        
+        The data from McGill is dated 2012.4.27.
+        Each monkey is sequenced at 1X. There are 96 of them. Each library seems to contain 2 samples.
+            But each monkey has only 1 library.
+        
+        8_Index_23.2008126_R1.fastq.gz
+        8_Index_23.2008126_R2.fastq.gz
+        8_Index_23.2009017_R1.fastq.gz
+        8_Index_23.2009017_R2.fastq.gz
 
         """
-        sys.stderr.write("Passing sampleID2FastqObjectLs from %s files ..."%(len(fastqFnameLs)))
+        sys.stderr.write("Parsing sampleID2FastqObjectLs from %s files ..."%(len(fastqPathLs)))
         sampleID2FastqObjectLs = {}
         import re, random
-        #sampleIDPattern = re.compile(r'(?P<library>[-\w]+)\.(?P<sampleID>\d+)((_replacement)|(_pool)|())_R(?P<mateID>\d).fastq.gz')
+        #sampleIDPattern = re.compile(r'(?P<library>[-\w]+)\.(?P<sampleID>\d+)
+        # ((_replacement)|(_pool)|())_R(?P<mateID>\d).fastq.gz')
         sampleIDPattern = re.compile(r'(?P<library>[-\w]+)\.'
             r'(?P<sampleID>((VWP)|(VGA)|(VSA)|())\d+)((_replacement)|(_pool)|())_R(?P<mateID>\d).fastq.gz')
         counter = 0
         real_counter = 0
         libraryKey2UniqueLibrary = {}
         #McGill's library ID , 7_Index-11, is not unique enough.
-        for fastqFname in fastqFnameLs:
+        for fastqFname in fastqPathLs:
             counter += 1
             sampleIDSearchResult = sampleIDPattern.search(fastqFname)
             if sampleIDSearchResult:
@@ -753,7 +852,7 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
         """
         print("Adding split-read & register jobs ...", flush=True)
         filenameKey2PegasusFile = {}
-        for sampleID, fastqObjectLs in sampleID2FastqObjectLs.iteritems():
+        for sampleID, fastqObjectLs in sampleID2FastqObjectLs.items():
             individual_sequence = self.addIndividualSequence(db_main=db_main, code=sampleID, \
                 site_id=self.site_id, study_id=self.study_id, \
                 sequencer_name=sequencer_name, sequence_type_name=sequence_type_name, \
@@ -785,26 +884,29 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
                     fastqFile.fastqObject= fastqObject
                     filenameKey2PegasusFile[filenameKey] = fastqFile
             
-                splitFastQFnamePrefix = os.path.join(splitOutputDir, '%s_%s_%s'%(individual_sequence.id, library, mateID))
+                splitFastQFnamePrefix = os.path.join(splitOutputDir, '%s_%s_%s'%(individual_sequence.id, 
+                    library, mateID))
                 logFile = File('%s_%s_%s.split.log'%(individual_sequence.id, library, mateID))
                 splitReadFileJob1 = self.addSplitReadFileJob(
                                 inputF=fastqFile, outputFnamePrefix=splitFastQFnamePrefix, \
                                 outputFnamePrefixTail="", minNoOfReads=minNoOfReads, \
                                 logFile=logFile, parentJobLs=[splitOutputDirJob], \
                                 job_max_memory=4000, walltime = 800, \
-                                extraDependentInputLs=[], transferOutput=True)
+                                extraDependentInputLs=None, transferOutput=True)
                 
                 logFile = File('%s_%s_%s.register.log'%(individual_sequence.id, library, mateID))
-                # 2012.4.30 add '--mate_id_associated_with_bam' to RegisterAndMoveSplitSequenceFiles so that it will be used to distinguish IndividualSequenceFileRaw
+                # 2012.4.30 add '--mate_id_associated_with_bam' to RegisterAndMoveSplitSequenceFiles
+                #  so that it will be used to distinguish IndividualSequenceFileRaw
                 registerJob1 = self.addRegisterAndMoveSplitFileJob(
-                        inputDir=splitOutputDir, outputDir=sequenceOutputDir, \
-                        relativeOutputDir=individual_sequence.path, logFile=logFile,\
-                        individual_sequence_id=individual_sequence.id, \
-                        bamFile=fastqFile, library=library, mate_id=mateID, \
-                        parentJobLs=[splitReadFileJob1, sequenceOutputDirJob], job_max_memory=100, walltime = 60, \
-                        commit=commit, sequence_format=sequence_format, extraDependentInputLs=None, \
-                        extraArguments='--mate_id_associated_with_bam', \
-                        transferOutput=True, sshDBTunnel=self.needSSHDBTunnel)
+                    inputDir=splitOutputDir, outputDir=sequenceOutputDir, \
+                    relativeOutputDir=individual_sequence.path, logFile=logFile,\
+                    individual_sequence_id=individual_sequence.id, \
+                    bamFile=fastqFile, library=library, mate_id=mateID, \
+                    parentJobLs=[splitReadFileJob1, sequenceOutputDirJob], 
+                    job_max_memory=100, walltime = 60, \
+                    commit=commit, sequence_format=sequence_format, extraDependentInputLs=None, \
+                    extraArguments='--mate_id_associated_with_bam', \
+                    transferOutput=True, sshDBTunnel=self.needSSHDBTunnel)
             
         print("%s jobs.\n"%(self.no_of_jobs), flush=True)
         
@@ -816,8 +918,9 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
         20120430
         Input are .fastq files.
         """
-        fastqFnameLs = self.getInputPathLsFromInput(input_path, suffixSet=set(['.fastq']), fakeSuffix='.gz')
-        sampleID2FastqObjectLs = self.getSampleID2FastqObjectLsForMcGillData(fastqFnameLs)
+        fastqPathLs = self.getInputPathLsFromInput(input_path, suffixSet=set(['.fastq']), 
+            fakeSuffix='.gz')
+        sampleID2FastqObjectLs = self.getSampleID2FastqObjectLsForMcGillData(fastqPathLs)
         
         self.addJobsToSplitAndRegisterFastQ(db_main=db_main, \
             sampleID2FastqObjectLs=sampleID2FastqObjectLs, data_dir=data_dir, \
@@ -826,15 +929,17 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
             sequence_format=sequence_format)
 
     
-    def addJobsToImportWUSTLBam(self, db_main=None, sample_sheet=None, input_path=None, data_dir=None, \
+    def addJobsToImportWUSTLBam(self, db_main=None, sample_sheet=None, 
+        input_path=None, data_dir=None, \
         minNoOfReads=None, commit=None,\
         sequencer_name=None, sequence_type_name=None, sequence_format=None):
         """
         20120430
         Input are bam files.
         """
-        bamBaseFname2SampleID = self.getBamBaseFname2SampleID_WUSTLDNAData(sample_sheet)
-        bamFnameLs = self.getInputPathLsFromInput(input_path, suffixSet=set(['.bam', '.sam']), fakeSuffix='.gz')
+        bamBaseFname2SampleID = self.readSampleSheet_WUSTLBam(sample_sheet)
+        bamFnameLs = self.getInputPathLsFromInput(input_path, 
+        suffixSet=set(['.bam', '.sam']), fakeSuffix='.gz')
         
         sys.stderr.write("%s total bam files.\n"%(len(bamFnameLs)))
         
@@ -871,58 +976,71 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
             bamBaseFnamePrefix = os.path.splitext(bamBaseFname)[0]
             library = bamBaseFnamePrefix
             
-            outputFnamePrefix = os.path.join(sam2fastqOutputDir, '%s_%s'%(individual_sequence.id, library))
+            outputFnamePrefix = os.path.join(sam2fastqOutputDir, 
+                '%s_%s'%(individual_sequence.id, library))
             
-            convertBamToFastqAndGzip_job = self.addConvertBamToFastqAndGzipJob(executable=self.SamToFastqJava, \
-                            inputF=bamInputF, outputFnamePrefix=outputFnamePrefix, \
-                            parentJobLs=[sam2fastqOutputDirJob], job_max_memory=6000, walltime = 800, \
-                            extraDependentInputLs=[], \
-                            transferOutput=False)
+            convertBamToFastqAndGzip_job = self.addConvertBamToFastqAndGzipJob(
+                executable=self.SamToFastqJava, \
+                inputF=bamInputF, outputFnamePrefix=outputFnamePrefix, \
+                parentJobLs=[sam2fastqOutputDirJob], job_max_memory=6000, walltime = 800, \
+                extraDependentInputLs=None, \
+                transferOutput=False)
             
             splitOutputDir = '%s_%s'%(individual_sequence.id, library)
-            #same directory containing split files from both mates is fine as RegisterAndMoveSplitSequenceFiles could pick up.
+            #same directory containing split files from both mates is fine
+            #  as RegisterAndMoveSplitSequenceFiles could pick up.
             splitOutputDirJob = self.addMkDirJob( outputDir=splitOutputDir)
             
-            
             mate_id = 1
-            splitFastQFnamePrefix = os.path.join(splitOutputDir, '%s_%s_%s'%(individual_sequence.id, library, mate_id))
+            splitFastQFnamePrefix = os.path.join(splitOutputDir, 
+                '%s_%s_%s'%(individual_sequence.id, library, mate_id))
             logFile = File('%s_%s_%s.split.log'%(individual_sequence.id, library, mate_id))
             splitReadFileJob1 = self.addSplitReadFileJob(executable=self.SplitReadFileWrapper, \
-                            inputF=convertBamToFastqAndGzip_job.output1, outputFnamePrefix=splitFastQFnamePrefix, \
-                            outputFnamePrefixTail="", minNoOfReads=minNoOfReads, \
-                            logFile=logFile, parentJobLs=[convertBamToFastqAndGzip_job, splitOutputDirJob], \
-                            job_max_memory=6000, walltime = 800, \
-                            extraDependentInputLs=[], transferOutput=True)
+                inputF=convertBamToFastqAndGzip_job.output1, outputFnamePrefix=splitFastQFnamePrefix, \
+                outputFnamePrefixTail="", minNoOfReads=minNoOfReads, \
+                logFile=logFile, parentJobLs=[convertBamToFastqAndGzip_job, splitOutputDirJob], \
+                job_max_memory=6000, walltime = 800, \
+                extraDependentInputLs=None, transferOutput=True)
             
             logFile = File('%s_%s_%s.register.log'%(individual_sequence.id, library, mate_id))
-            registerJob1 = self.addRegisterAndMoveSplitFileJob(executable=self.RegisterAndMoveSplitSequenceFiles, \
-                            inputDir=splitOutputDir, outputDir=sequenceOutputDir, relativeOutputDir=individual_sequence.path, logFile=logFile,\
-                            individual_sequence_id=individual_sequence.id, bamFile=bamInputF, library=library, mate_id=mate_id, \
-                            parentJobLs=[splitReadFileJob1, sequenceOutputDirJob], job_max_memory=100, walltime = 60, \
-                            commit=commit, sequence_format=sequence_format, extraDependentInputLs=[], \
-                            transferOutput=True, sshDBTunnel=self.needSSHDBTunnel)
+            registerJob1 = self.addRegisterAndMoveSplitFileJob(
+                executable=self.RegisterAndMoveSplitSequenceFiles, \
+                inputDir=splitOutputDir, outputDir=sequenceOutputDir, 
+                relativeOutputDir=individual_sequence.path, logFile=logFile,\
+                individual_sequence_id=individual_sequence.id, bamFile=bamInputF, 
+                library=library, mate_id=mate_id, \
+                parentJobLs=[splitReadFileJob1, sequenceOutputDirJob], 
+                job_max_memory=100, walltime = 60, \
+                commit=commit, sequence_format=sequence_format, extraDependentInputLs=None, \
+                transferOutput=True, sshDBTunnel=self.needSSHDBTunnel)
             #handle the 2nd end
             mate_id = 2
-            splitFastQFnamePrefix = os.path.join(splitOutputDir, '%s_%s_%s'%(individual_sequence.id, library, mate_id))
+            splitFastQFnamePrefix = os.path.join(splitOutputDir, 
+                '%s_%s_%s'%(individual_sequence.id, library, mate_id))
             logFile = File('%s_%s_%s.split.log'%(individual_sequence.id, library, mate_id))
             splitReadFileJob2 = self.addSplitReadFileJob(executable=self.SplitReadFileWrapper, \
-                            inputF=convertBamToFastqAndGzip_job.output2, outputFnamePrefix=splitFastQFnamePrefix, \
-                            outputFnamePrefixTail="", minNoOfReads=minNoOfReads, \
-                            logFile=logFile, parentJobLs=[convertBamToFastqAndGzip_job, splitOutputDirJob], \
-                            job_max_memory=6000, walltime = 800, \
-                            extraDependentInputLs=[], transferOutput=True)
+                inputF=convertBamToFastqAndGzip_job.output2, outputFnamePrefix=splitFastQFnamePrefix, \
+                outputFnamePrefixTail="", minNoOfReads=minNoOfReads, \
+                logFile=logFile, parentJobLs=[convertBamToFastqAndGzip_job, splitOutputDirJob], \
+                job_max_memory=6000, walltime = 800, \
+                extraDependentInputLs=None, transferOutput=True)
             
             logFile = File('%s_%s_%s.register.log'%(individual_sequence.id, library, mate_id))
-            registerJob1 = self.addRegisterAndMoveSplitFileJob(executable=self.RegisterAndMoveSplitSequenceFiles, \
-                            inputDir=splitOutputDir, outputDir=sequenceOutputDir, relativeOutputDir=individual_sequence.path, logFile=logFile,\
-                            individual_sequence_id=individual_sequence.id, bamFile=bamInputF, library=library, mate_id=mate_id, \
-                            parentJobLs=[splitReadFileJob2, sequenceOutputDirJob], job_max_memory=100, walltime = 60, \
-                            commit=commit, sequence_format=sequence_format, extraDependentInputLs=[], \
-                            transferOutput=True, sshDBTunnel=self.needSSHDBTunnel)
+            registerJob1 = self.addRegisterAndMoveSplitFileJob(
+                executable=self.RegisterAndMoveSplitSequenceFiles, \
+                inputDir=splitOutputDir, outputDir=sequenceOutputDir, 
+                relativeOutputDir=individual_sequence.path, logFile=logFile,\
+                individual_sequence_id=individual_sequence.id, bamFile=bamInputF, 
+                library=library, mate_id=mate_id, \
+                parentJobLs=[splitReadFileJob2, sequenceOutputDirJob], 
+                job_max_memory=100, walltime = 60, \
+                commit=commit, sequence_format=sequence_format, extraDependentInputLs=None, \
+                transferOutput=True, sshDBTunnel=self.needSSHDBTunnel)
             
             """
             jobFname = os.path.join(self.jobFileDir, 'job%s.bam2fastq.sh'%(code))
-            self.writeQsubJob(jobFname, bamFname, os.path.join(self.data_dir, individual_sequence.path), self.vervet_path)
+            self.writeQsubJob(jobFname, bamFname, os.path.join(self.data_dir, individual_sequence.path),
+                self.vervet_path)
             commandline = 'qsub %s'%(jobFname)
             if self.commit:	#qsub only when db transaction will be committed.
                 return_data = runLocalCommand(commandline, report_stderr=True, report_stdout=True)
@@ -949,15 +1067,15 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
         
         return tssCode2dbEntry
 
-    def getTCGASamplesFromInputDir(self, db_main=None, inputDir=None, tax_id=None):
+    def getSamplesFromInputDir_TCGA(self, db_main=None, inputDir=None, tax_id=None):
         """
-        20170412
+        20170412 Get most info about bams from the .xml file.
         COAD_TCGA/6795b83b-1ca7-4060-a078-6649fa9004bb
             35f008d5-1a15-463e-88e6-955583a33aa6_analysis.xml
             TCGA-AA-3553-10A-01D-1167-02_IlluminaHiSeq-DNASeq_whole.bam
             ...
         """
-        sys.stderr.write("Getting TCGA samples from %s... \n"%inputDir)
+        print("Getting TCGA samples from %s... "%inputDir, flush=True)
         counter = 0
         noOfSamplesIntoDB = 0
         noOfSamplesWithoutCenter = 0
@@ -989,13 +1107,14 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
                         tree = ET.parse(os.path.join(input_path, subfilename))
                         root = tree.getroot()
                         description = root.findall("ANALYSIS_SET/ANALYSIS/DESCRIPTION")[0].text
-                        #get participant code, tss_id (site.short_name), sample_id (tissue_id), center_id (sequencer.id)
+                        #get participant code, tss_id (site.short_name), sample_id (tissue_id),
+                        #  center_id (sequencer.id)
                         result = tcga_barcode_re.search(description)
                         if result is None:
-                            sys.stderr.write("\n  ERROR: not enough (!=7) fields in tcga_barcode of %s/%s: %s.\n"%
-                                            (input_path, subfilename, description))
+                            print("\n  ERROR: not enough (!=7) fields in tcga_barcode of %s/%s: %s."%
+                                (input_path, subfilename, description), flush=True)
                             sys.exit(-2)
-                        tcga_barcode = result.group()	##
+                        tcga_barcode = result.group()
                         split_row = tcga_barcode.split('-')
                         
                         tss_code = result.group('tss')
@@ -1009,8 +1128,9 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
                         else:
                             sequencer_id = None
                             noOfSamplesWithoutCenter += 1
-                        db_entry = db_main.getIndividual(code=participant_code, name=None, sex=None, age=None, \
-                                                        site=site, tax_id=tax_id, study=site.study)
+                        db_entry = db_main.getIndividual(code=participant_code, 
+                            name=None, sex=None, age=None, \
+                            site=site, tax_id=tax_id, study=site.study)
                         tcga_sample.db_entry = db_entry
                         tcga_sample.tissue_id = tissue_id
                         tcga_sample.sequencer_id = sequencer_id
@@ -1019,8 +1139,8 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
                         #get md5sum
                         fileElemLs = root.findall("ANALYSIS_SET/ANALYSIS/DATA_BLOCK/FILES/FILE")
                         if len(fileElemLs)!=1:
-                            sys.stderr.write("\n  ERROR: number of files with MD5SUM in %s/%s is not one. it is %s.\n"%
-                                            (input_path, subfilename, len(fileElemLs)))
+                            print(f"\n  ERROR: number of files with MD5SUM in %s/%s is not one. It is %s."%
+                                (input_path, subfilename, len(fileElemLs)), flush=True)
                             sys.exit(-2)
                         filename = fileElemLs[0].get('filename')
                         md5sum = fileElemLs[0].get('checksum')
@@ -1030,14 +1150,15 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
                         if filename[-4:]==".bam":
                             tcga_sample.md5sum = md5sum
                         else:
-                            sys.stderr.write("\n  ERROR: md5sum is for a non-bam file, %s.\n"%(filename))
+                            print("\n  ERROR: md5sum is for a non-bam file, %s."%(filename),
+                                flush=True)
                             sys.exit(-3)
                         noOfTargets+=1
                 if noOfTargets==2:
                     tcga_sample_ls.append(tcga_sample)
                     noOfSamplesIntoDB += 1
-        sys.stderr.write("%s samples in this folder %s. %s samples into DB. %s samples without center.\n"%(
-            counter, inputDir, len(tcga_sample_ls), noOfSamplesWithoutCenter ))
+        print("%s samples in this folder %s. %s samples into DB. %s samples without center."%(
+            counter, inputDir, len(tcga_sample_ls), noOfSamplesWithoutCenter), flush=True)
         return tcga_sample_ls
 
 
@@ -1054,78 +1175,81 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
         """
         #parse the tissueSourceSite.tsv file to get all tissue source sites info,
         #  save them into table site, and study_id from db
-        self.saveTCGATissueSourceSiteIntoDB(db_main=db_main, input_path=self.tissueSourceSiteFname)
+        self.saveTCGATissueSourceSiteIntoDB(db_main=db_main, 
+            input_path=self.tissueSourceSiteFname)
         
         #find all bam in a folder,
-        #parse barcode to get participant code, tss_id (site.short_name), sample_id (tissue_id), center_id (sequencer.id),
+        #parse barcode to get participant code, tss_id (site.short_name), 
+        # sample_id (tissue_id), center_id (sequencer.id),
         #folder name is uuid
         #uuid is for sequence only, add as isq.comment
         #parse analysis.xml to get md5sum 
         #add all individual, tissue, site, study, sequencer, seq_center into db
-        tcga_sample_obj_ls = self.getTCGASamplesFromInputDir(db_main=db_main, \
+        sample_obj_ls = self.getSamplesFromInputDir_TCGA(db_main=db_main, \
             inputDir=input_path, tax_id=tax_id)
-        sys.stderr.write("%s total TCGA samples.\n"%(len(tcga_sample_obj_ls)))
+        sys.stderr.write("%s total TCGA samples.\n"%(len(sample_obj_ls)))
         
         sam2fastqOutputDir = 'sam2fastq'
         sam2fastqOutputDirJob = self.addMkDirJob(outputDir=sam2fastqOutputDir)
         
-        for tcga_sample_obj in tcga_sample_obj_ls:
-            bamInputF = self.registerOneInputFile(tcga_sample_obj.bamPath)
-            bamFileSize = utils.getFileOrFolderSize(tcga_sample_obj.bamPath)
-            baiInputF = self.registerOneInputFile(tcga_sample_obj.baiPath)
-            bamBaseFname = os.path.split(tcga_sample_obj.bamPath)[1]
+        for sample_obj in sample_obj_ls:
+            bamInputF = self.registerOneInputFile(sample_obj.bamPath)
+            bamFileSize = utils.getFileOrFolderSize(sample_obj.bamPath)
+            baiInputF = self.registerOneInputFile(sample_obj.baiPath)
+            bamBaseFname = os.path.split(sample_obj.bamPath)[1]
             bamBaseFnamePrefix = os.path.splitext(bamBaseFname)[0]
-            library = tcga_sample_obj.tcga_barcode
+            library = sample_obj.tcga_barcode
             
             #add VerifyFileMD5Sum, cpu=8 to reduce its IO load
             verifyMD5SumJob = self.addGenericJob(executable=self.VerifyFileMD5Sum, \
-                    inputFile=bamInputF, \
-                    inputArgumentOption="-i", \
-                    outputFile=None, outputArgumentOption="-o", \
-                    inputFileList=None, argumentForEachFileInInputFileList=None, \
-                    parentJob=None, parentJobLs=None, extraDependentInputLs=None, \
-                    extraOutputLs=[bamInputF], transferOutput=False, \
-                    frontArgumentList=None, \
-                    extraArguments="--correct_md5sum %s"%tcga_sample_obj.md5sum, \
-                    extraArgumentList=None, \
-                    job_max_memory=None, sshDBTunnel=None, \
-                    key2ObjectForJob=None, objectWithDBArguments=None, no_of_cpus=8, walltime=30)
+                inputFile=bamInputF, \
+                inputArgumentOption="-i", \
+                outputFile=None, outputArgumentOption="-o", \
+                inputFileList=None, argumentForEachFileInInputFileList=None, \
+                parentJob=None, parentJobLs=None, extraDependentInputLs=None, \
+                extraOutputLs=[bamInputF], transferOutput=False, \
+                frontArgumentList=None, \
+                extraArguments="--correct_md5sum %s"%sample_obj.md5sum, \
+                extraArgumentList=None, \
+                job_max_memory=None, sshDBTunnel=None, \
+                key2ObjectForJob=None, objectWithDBArguments=None, no_of_cpus=8, walltime=30)
             
             #no_of_cpus=4 to reduce its IO
             #assume a 10GB file needing a 30GB memory with a cap of 150G
             memoryNeeded = min(max(60000, int(bamFileSize/10000000000.0*30000)), 150000)
             outputFnamePrefix = os.path.join(sam2fastqOutputDir, '%s'%(library))
-            convertBamToFastqAndGzip_job = self.addConvertBamToFastqAndGzipJob(executable=self.SamToFastqJava, \
-                    inputF=bamInputF, outputFnamePrefix=outputFnamePrefix, \
-                    parentJobLs=[sam2fastqOutputDirJob, verifyMD5SumJob], \
-                    job_max_memory=memoryNeeded, no_of_cpus=4, walltime = 800, \
-                    extraDependentInputLs=[baiInputF], \
-                    transferOutput=False)
+            convertBamToFastqAndGzip_job = self.addConvertBamToFastqAndGzipJob(
+                executable=self.SamToFastqJava, \
+                inputF=bamInputF, outputFnamePrefix=outputFnamePrefix, \
+                parentJobLs=[sam2fastqOutputDirJob, verifyMD5SumJob], \
+                job_max_memory=memoryNeeded, no_of_cpus=4, walltime = 800, \
+                extraDependentInputLs=[baiInputF], \
+                transferOutput=False)
             
-            #job to check if each file is empty or not. If empty, exit non-0. If not, add db isq entry, output isq-id, exit 0.
-            
+            #job to check if each file is empty or not. If empty, exit non-0.
+            #  If not, add db isq entry, output isq-id, exit 0.
             #uuid is for sequence only, add as isq.comment
             unpaired_seq_db_idFile = File("%s_unpaired_seq_db_id.txt"%outputFnamePrefix)
             registerUnpairedSequence2DBJob =self.addRegisterIndividualSequence2DBJob(
-                        inputFile=convertBamToFastqAndGzip_job.output_unpaired, \
-                        outputFile=unpaired_seq_db_idFile, \
-                        individual_id=tcga_sample_obj.db_entry.id, sequencer_id=tcga_sample_obj.sequencer_id,\
-                        sequence_type_name="SingleRead", sequence_format=sequence_format, \
-                        copy_original_file=0, tissue_name=None, tissue_id=tcga_sample_obj.tissue_id, \
-                        coverage=None, quality_score_format="Standard", filtered=0,\
-                        parent_individual_sequence_id=None,\
-                        read_count=None, no_of_chromosomes=None, \
-                        sequence_batch_id=None, version=None, \
-                        is_contaminated=0, outdated_index=0, comment=tcga_sample_obj.uuid,\
-                        data_dir=data_dir,\
-                        original_sequence_filepath=tcga_sample_obj.bamPath, \
-                        original_sequence_library=library, \
-                        original_sequence_mate_id=None, \
-                        original_sequence_md5sum=tcga_sample_obj.md5sum, \
-                        parentJobLs=[convertBamToFastqAndGzip_job], \
-                        job_max_memory=100, walltime = 60, commit=self.commit, \
-                        extraDependentInputLs=[bamInputF], extraArguments=None, \
-                        transferOutput=False, sshDBTunnel=self.needSSHDBTunnel)
+                inputFile=convertBamToFastqAndGzip_job.output_unpaired, \
+                outputFile=unpaired_seq_db_idFile, \
+                individual_id=sample_obj.db_entry.id, sequencer_id=sample_obj.sequencer_id,\
+                sequence_type_name="SingleRead", sequence_format=sequence_format, \
+                copy_original_file=0, tissue_name=None, tissue_id=sample_obj.tissue_id, \
+                coverage=None, quality_score_format="Standard", filtered=0,\
+                parent_individual_sequence_id=None,\
+                read_count=None, no_of_chromosomes=None, \
+                sequence_batch_id=None, version=None, \
+                is_contaminated=0, outdated_index=0, comment=sample_obj.uuid,\
+                data_dir=data_dir,\
+                original_sequence_filepath=sample_obj.bamPath, \
+                original_sequence_library=library, \
+                original_sequence_mate_id=None, \
+                original_sequence_md5sum=sample_obj.md5sum, \
+                parentJobLs=[convertBamToFastqAndGzip_job], \
+                job_max_memory=100, walltime = 60, commit=self.commit, \
+                extraDependentInputLs=[bamInputF], extraArguments=None, \
+                transferOutput=False, sshDBTunnel=self.needSSHDBTunnel)
             
             splitSROutputDir = 'split_%s_singleRead'%(library)
             splitSROutputDirJob = self.addMkDirJob(outputDir=splitSROutputDir)
@@ -1133,94 +1257,97 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
             splitFastQFnamePrefix = os.path.join(splitSROutputDir, '%s_singleRead'%(library))
             logFile = File('%s_split.log'%(splitFastQFnamePrefix))
             splitSRFileJob = self.addSplitReadFileJob(
-                            inputF=convertBamToFastqAndGzip_job.output_unpaired, \
-                            outputFnamePrefix=splitFastQFnamePrefix, \
-                            outputFnamePrefixTail="", minNoOfReads=minNoOfReads, \
-                            logFile=logFile, \
-                            parentJobLs=[registerUnpairedSequence2DBJob, splitSROutputDirJob], \
-                            job_max_memory=4000, walltime = 800, no_of_cpus=4, \
-                            extraDependentInputLs=[], transferOutput=True)
+                inputF=convertBamToFastqAndGzip_job.output_unpaired, \
+                outputFnamePrefix=splitFastQFnamePrefix, \
+                outputFnamePrefixTail="", minNoOfReads=minNoOfReads, \
+                logFile=logFile, \
+                parentJobLs=[registerUnpairedSequence2DBJob, splitSROutputDirJob], \
+                job_max_memory=4000, walltime = 800, no_of_cpus=4, \
+                extraDependentInputLs=None, transferOutput=True)
             
             #mate_id is set to null for singleRead sequences
             logFile = File('%s_register.log'%(splitFastQFnamePrefix))
             registerSRJob = self.addRegisterAndMoveSplitFileJob(
-                            inputFile=registerUnpairedSequence2DBJob.output,\
-                            inputDir=splitSROutputDir, logFile=logFile,\
-                            library=library, mate_id=None, \
-                            parentJobLs=[splitSRFileJob], job_max_memory=100, walltime = 60, \
-                            commit=commit, sequence_format=sequence_format, extraDependentInputLs=[], \
-                            transferOutput=True, sshDBTunnel=self.needSSHDBTunnel)
+                inputFile=registerUnpairedSequence2DBJob.output,\
+                inputDir=splitSROutputDir, logFile=logFile,\
+                library=library, mate_id=None, \
+                parentJobLs=[splitSRFileJob], job_max_memory=100, walltime = 60, \
+                commit=commit, sequence_format=sequence_format, 
+                extraDependentInputLs=None, \
+                transferOutput=True, sshDBTunnel=self.needSSHDBTunnel)
             
             #job to check if PE sequence file is empty or not. but only check one mate file.
             pairedEnd_seq_db_idFile = File("%s_pairedEnd_seq_db_id.txt"%(outputFnamePrefix))
             registerPairedEndSequence2DBJob =self.addRegisterIndividualSequence2DBJob(
-                        inputFile=convertBamToFastqAndGzip_job.output1, \
-                        outputFile=pairedEnd_seq_db_idFile, \
-                        individual_id=tcga_sample_obj.db_entry.id, sequencer_id=tcga_sample_obj.sequencer_id,\
-                        sequence_type_name="PairedEnd", sequence_format=sequence_format, \
-                        copy_original_file=0, tissue_name=None, tissue_id=tcga_sample_obj.tissue_id, \
-                        coverage=None, quality_score_format="Standard", filtered=0,\
-                        parent_individual_sequence_id=None,\
-                        read_count=None, no_of_chromosomes=None, \
-                        sequence_batch_id=None, version=None, \
-                        is_contaminated=0, outdated_index=0, comment=tcga_sample_obj.uuid,\
-                        data_dir=data_dir,\
-                        original_sequence_filepath=tcga_sample_obj.bamPath, \
-                        original_sequence_library=library, \
-                        original_sequence_mate_id=None, \
-                        original_sequence_md5sum=tcga_sample_obj.md5sum, \
-                        parentJobLs=[convertBamToFastqAndGzip_job], \
-                        job_max_memory=100, walltime = 60, commit=self.commit, \
-                        extraDependentInputLs=[bamInputF], extraArguments=None, \
-                        transferOutput=False, sshDBTunnel=self.needSSHDBTunnel)
+                inputFile=convertBamToFastqAndGzip_job.output1, \
+                outputFile=pairedEnd_seq_db_idFile, \
+                individual_id=sample_obj.db_entry.id, sequencer_id=sample_obj.sequencer_id,\
+                sequence_type_name="PairedEnd", sequence_format=sequence_format, \
+                copy_original_file=0, tissue_name=None, tissue_id=sample_obj.tissue_id, \
+                coverage=None, quality_score_format="Standard", filtered=0,\
+                parent_individual_sequence_id=None,\
+                read_count=None, no_of_chromosomes=None, \
+                sequence_batch_id=None, version=None, \
+                is_contaminated=0, outdated_index=0, comment=sample_obj.uuid,\
+                data_dir=data_dir,\
+                original_sequence_filepath=sample_obj.bamPath, \
+                original_sequence_library=library, \
+                original_sequence_mate_id=None, \
+                original_sequence_md5sum=sample_obj.md5sum, \
+                parentJobLs=[convertBamToFastqAndGzip_job], \
+                job_max_memory=100, walltime = 60, commit=self.commit, \
+                extraDependentInputLs=[bamInputF], extraArguments=None, \
+                transferOutput=False, sshDBTunnel=self.needSSHDBTunnel)
             
             splitOutputDir = 'split_%s_PE'%(library)
-            #same directory containing split files from both mates is fine as RegisterAndMoveSplitSequenceFiles could pick up.
+            #same directory containing split files from both mates is fine
+            #  as RegisterAndMoveSplitSequenceFiles could pick up.
             splitOutputDirJob = self.addMkDirJob(outputDir=splitOutputDir)
             
             mate_id = 1
             splitFastQFnamePrefix = os.path.join(splitOutputDir, '%s_%s'%(library, mate_id))
             logFile = File('%s_split.log'%(splitFastQFnamePrefix))
             splitReadFileJob1 = self.addSplitReadFileJob(
-                inputF=convertBamToFastqAndGzip_job.output1, outputFnamePrefix=splitFastQFnamePrefix, \
+                inputF=convertBamToFastqAndGzip_job.output1, 
+                outputFnamePrefix=splitFastQFnamePrefix, \
                 outputFnamePrefixTail="", minNoOfReads=minNoOfReads, \
                 logFile=logFile, \
                 parentJobLs=[registerPairedEndSequence2DBJob, splitOutputDirJob], \
                 job_max_memory=4000, walltime = 800, no_of_cpus=4, \
-                extraDependentInputLs=[], transferOutput=True)
+                extraDependentInputLs=None, transferOutput=True)
             
             logFile = File('%s_register.log'%(splitFastQFnamePrefix))
             registerJob1 = self.addRegisterAndMoveSplitFileJob(
-                    inputFile=registerPairedEndSequence2DBJob.output,\
-                    inputDir=splitOutputDir, logFile=logFile,\
-                    library=library, mate_id=mate_id, \
-                    parentJobLs=[splitReadFileJob1], job_max_memory=100, walltime = 60, \
-                    commit=commit, sequence_format=sequence_format, extraDependentInputLs=[], \
-                    transferOutput=True, sshDBTunnel=self.needSSHDBTunnel)
+                inputFile=registerPairedEndSequence2DBJob.output,\
+                inputDir=splitOutputDir, logFile=logFile,\
+                library=library, mate_id=mate_id, \
+                parentJobLs=[splitReadFileJob1], job_max_memory=100, walltime = 60, \
+                commit=commit, sequence_format=sequence_format, extraDependentInputLs=None, \
+                transferOutput=True, sshDBTunnel=self.needSSHDBTunnel)
             #handle the 2nd end
             mate_id = 2
             splitFastQFnamePrefix = os.path.join(splitOutputDir, '%s_%s'%(library, mate_id))
             logFile = File('%s_split.log'%(splitFastQFnamePrefix))
             splitReadFileJob2 = self.addSplitReadFileJob(
-                    inputF=convertBamToFastqAndGzip_job.output2, outputFnamePrefix=splitFastQFnamePrefix, \
-                    outputFnamePrefixTail="", minNoOfReads=minNoOfReads, \
-                    logFile=logFile, \
-                    parentJobLs=[registerPairedEndSequence2DBJob, splitOutputDirJob], \
-                    job_max_memory=4000, walltime = 800, no_of_cpus=4, \
-                    extraDependentInputLs=[], transferOutput=True)
+                inputF=convertBamToFastqAndGzip_job.output2, 
+                outputFnamePrefix=splitFastQFnamePrefix, \
+                outputFnamePrefixTail="", minNoOfReads=minNoOfReads, \
+                logFile=logFile, \
+                parentJobLs=[registerPairedEndSequence2DBJob, splitOutputDirJob], \
+                job_max_memory=4000, walltime = 800, no_of_cpus=4, \
+                extraDependentInputLs=None, transferOutput=True)
             
             logFile = File('%s_register.log'%(splitFastQFnamePrefix))
             registerJob2 = self.addRegisterAndMoveSplitFileJob(
-                    inputFile=registerPairedEndSequence2DBJob.output,\
-                    inputDir=splitOutputDir, logFile=logFile,\
-                    library=library, mate_id=mate_id, \
-                    parentJobLs=[splitReadFileJob2], job_max_memory=100, walltime = 60, \
-                    commit=commit, sequence_format=sequence_format, extraDependentInputLs=[], \
-                    transferOutput=True, sshDBTunnel=self.needSSHDBTunnel)
-            
+                inputFile=registerPairedEndSequence2DBJob.output,\
+                inputDir=splitOutputDir, logFile=logFile,\
+                library=library, mate_id=mate_id, \
+                parentJobLs=[splitReadFileJob2], job_max_memory=100, walltime = 60, \
+                commit=commit, sequence_format=sequence_format, extraDependentInputLs=None, \
+                transferOutput=True, sshDBTunnel=self.needSSHDBTunnel)
         sys.stderr.write("%s jobs.\n"%(self.no_of_jobs))
 
-    def getHCC1187SamplesFromInputDir(self, db_main=None, inputDir=None, tax_id=None):
+    def getSamplesFromInputDir_HCC1187(self, db_main=None, inputDir=None, tax_id=None):
         """
         20170607
         inputDir is /y/home/luozhihui/Downloads/
@@ -1276,61 +1403,64 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
         input: A folder of bam files.
         
         - Find all bam in the folder.
-        - parse barcode to get participant code, tss_id (site.short_name), sample_id (tissue_id), center_id (sequencer.id),
+        - parse barcode to get participant code, tss_id (site.short_name), 
+            sample_id (tissue_id), center_id (sequencer.id),
         - folder name is uuid.
         - uuid is for sequence only, add as isq.comment.
         - parse analysis.xml to get md5sum.
         - add all individual, tissue, site, study, sequencer, seq_center into db.
         """
-        tcga_sample_obj_ls = self.getHCC1187SamplesFromInputDir(db_main=db_main, inputDir=input_path, tax_id=tax_id)
-        print(f"{len(tcga_sample_obj_ls)} TCGA samples in total.", flush=True)
+        sample_obj_ls = self.getSamplesFromInputDir_HCC1187(db_main=db_main, 
+            inputDir=input_path, tax_id=tax_id)
+        print(f"{len(sample_obj_ls)} TCGA samples in total.", flush=True)
         
         sam2fastqOutputDir = 'sam2fastq'
         sam2fastqOutputDirJob = self.addMkDirJob(outputDir=sam2fastqOutputDir)
         
-        for tcga_sample_obj in tcga_sample_obj_ls:
-            bamInputF = self.registerOneInputFile(tcga_sample_obj.bamPath)
-            bamFileSize = utils.getFileOrFolderSize(tcga_sample_obj.bamPath)
-            baiInputF = self.registerOneInputFile(tcga_sample_obj.baiPath)
-            bamBaseFname = os.path.split(tcga_sample_obj.bamPath)[1]
+        for sample_obj in sample_obj_ls:
+            bamInputF = self.registerOneInputFile(sample_obj.bamPath)
+            bamFileSize = utils.getFileOrFolderSize(sample_obj.bamPath)
+            baiInputF = self.registerOneInputFile(sample_obj.baiPath)
+            bamBaseFname = os.path.split(sample_obj.bamPath)[1]
             bamBaseFnamePrefix = os.path.splitext(bamBaseFname)[0]
-            library = tcga_sample_obj.db_entry.code
+            library = sample_obj.db_entry.code
             
             #no_of_cpus=4 to reduce its IO
             #assume a 10GB file needing a 30GB memory with a cap of 150G
             memoryNeeded = min(max(60000, int(bamFileSize/10000000000.0*30000)), 150000)
             outputFnamePrefix = os.path.join(sam2fastqOutputDir, '%s'%(library))
-            convertBamToFastqAndGzip_job = self.addConvertBamToFastqAndGzipJob(executable=self.SamToFastqJava, \
-                    inputF=bamInputF, outputFnamePrefix=outputFnamePrefix, \
-                    parentJobLs=[sam2fastqOutputDirJob], \
-                    job_max_memory=memoryNeeded, no_of_cpus=4, walltime = 800, \
-                    extraDependentInputLs=[baiInputF], \
-                    transferOutput=False)
+            convertBamToFastqAndGzip_job = self.addConvertBamToFastqAndGzipJob(
+                executable=self.SamToFastqJava, \
+                inputF=bamInputF, outputFnamePrefix=outputFnamePrefix, \
+                parentJobLs=[sam2fastqOutputDirJob], \
+                job_max_memory=memoryNeeded, no_of_cpus=4, walltime = 800, \
+                extraDependentInputLs=[baiInputF], \
+                transferOutput=False)
             
-            #job to check if each file is empty or not. If empty, exit non-0. If not, add db isq entry, output isq-id, exit 0.
-            
+            #job to check if each file is empty or not. If empty, exit non-0.
+            #  If not, add db isq entry, output isq-id, exit 0.
             #uuid is for sequence only, add as isq.comment
             unpaired_seq_db_idFile = File("%s_unpaired_seq_db_id.txt"%outputFnamePrefix)
             registerUnpairedSequence2DBJob =self.addRegisterIndividualSequence2DBJob(
-                        inputFile=convertBamToFastqAndGzip_job.output_unpaired, \
-                        outputFile=unpaired_seq_db_idFile, \
-                        individual_id=tcga_sample_obj.db_entry.id, sequencer_id=tcga_sample_obj.sequencer_id,\
-                        sequence_type_name="SingleRead", sequence_format=sequence_format, \
-                        copy_original_file=0, tissue_name=None, tissue_id=tcga_sample_obj.tissue_id, \
-                        coverage=None, quality_score_format="Standard", filtered=0,\
-                        parent_individual_sequence_id=None,\
-                        read_count=None, no_of_chromosomes=None, \
-                        sequence_batch_id=None, version=None, \
-                        is_contaminated=0, outdated_index=0, comment=None,\
-                        data_dir=data_dir,\
-                        original_sequence_filepath=tcga_sample_obj.bamPath, \
-                        original_sequence_library=library, \
-                        original_sequence_mate_id=None, \
-                        original_sequence_md5sum=None, \
-                        parentJobLs=[convertBamToFastqAndGzip_job], \
-                        job_max_memory=100, walltime = 60, commit=self.commit, \
-                        extraDependentInputLs=[bamInputF], extraArguments=None, \
-                        transferOutput=False, sshDBTunnel=self.needSSHDBTunnel)
+                inputFile=convertBamToFastqAndGzip_job.output_unpaired, \
+                outputFile=unpaired_seq_db_idFile, \
+                individual_id=sample_obj.db_entry.id, sequencer_id=sample_obj.sequencer_id,\
+                sequence_type_name="SingleRead", sequence_format=sequence_format, \
+                copy_original_file=0, tissue_name=None, tissue_id=sample_obj.tissue_id, \
+                coverage=None, quality_score_format="Standard", filtered=0,\
+                parent_individual_sequence_id=None,\
+                read_count=None, no_of_chromosomes=None, \
+                sequence_batch_id=None, version=None, \
+                is_contaminated=0, outdated_index=0, comment=None,\
+                data_dir=data_dir,\
+                original_sequence_filepath=sample_obj.bamPath, \
+                original_sequence_library=library, \
+                original_sequence_mate_id=None, \
+                original_sequence_md5sum=None, \
+                parentJobLs=[convertBamToFastqAndGzip_job], \
+                job_max_memory=100, walltime = 60, commit=self.commit, \
+                extraDependentInputLs=[bamInputF], extraArguments=None, \
+                transferOutput=False, sshDBTunnel=self.needSSHDBTunnel)
             
             splitSROutputDir = 'split_%s_singleRead'%(library)
             splitSROutputDirJob = self.addMkDirJob(outputDir=splitSROutputDir)
@@ -1338,93 +1468,94 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
             splitFastQFnamePrefix = os.path.join(splitSROutputDir, '%s_singleRead'%(library))
             logFile = File('%s_split.log'%(splitFastQFnamePrefix))
             splitSRFileJob = self.addSplitReadFileJob(
-                            inputF=convertBamToFastqAndGzip_job.output_unpaired, \
-                            outputFnamePrefix=splitFastQFnamePrefix, \
-                            outputFnamePrefixTail="", minNoOfReads=minNoOfReads, \
-                            logFile=logFile, \
-                            parentJobLs=[registerUnpairedSequence2DBJob, splitSROutputDirJob], \
-                            job_max_memory=4000, walltime = 800, no_of_cpus=4, \
-                            extraDependentInputLs=[], transferOutput=True)
+                inputF=convertBamToFastqAndGzip_job.output_unpaired, \
+                outputFnamePrefix=splitFastQFnamePrefix, \
+                outputFnamePrefixTail="", minNoOfReads=minNoOfReads, \
+                logFile=logFile, \
+                parentJobLs=[registerUnpairedSequence2DBJob, splitSROutputDirJob], \
+                job_max_memory=4000, walltime = 800, no_of_cpus=4, \
+                extraDependentInputLs=None, transferOutput=True)
             
             #mate_id is set to null for singleRead sequences
             logFile = File('%s_register.log'%(splitFastQFnamePrefix))
             registerSRJob = self.addRegisterAndMoveSplitFileJob(
-                            inputFile=registerUnpairedSequence2DBJob.output,\
-                            inputDir=splitSROutputDir, logFile=logFile,\
-                            library=library, mate_id=None, \
-                            parentJobLs=[splitSRFileJob], job_max_memory=100, walltime = 60, \
-                            commit=commit, sequence_format=sequence_format, extraDependentInputLs=[], \
-                            transferOutput=True, sshDBTunnel=self.needSSHDBTunnel)
+                inputFile=registerUnpairedSequence2DBJob.output,\
+                inputDir=splitSROutputDir, logFile=logFile,\
+                library=library, mate_id=None, \
+                parentJobLs=[splitSRFileJob], job_max_memory=100, walltime = 60, \
+                commit=commit, sequence_format=sequence_format, extraDependentInputLs=None, \
+                transferOutput=True, sshDBTunnel=self.needSSHDBTunnel)
             
             #job to check if PE sequence file is empty or not. but only check one mate file.
             pairedEnd_seq_db_idFile = File("%s_pairedEnd_seq_db_id.txt"%(outputFnamePrefix))
             registerPairedEndSequence2DBJob =self.addRegisterIndividualSequence2DBJob(
-                        inputFile=convertBamToFastqAndGzip_job.output1, \
-                        outputFile=pairedEnd_seq_db_idFile, \
-                        individual_id=tcga_sample_obj.db_entry.id, sequencer_id=tcga_sample_obj.sequencer_id,\
-                        sequence_type_name="PairedEnd", sequence_format=sequence_format, \
-                        copy_original_file=0, tissue_name=None, tissue_id=tcga_sample_obj.tissue_id, \
-                        coverage=None, quality_score_format="Standard", filtered=0,\
-                        parent_individual_sequence_id=None,\
-                        read_count=None, no_of_chromosomes=None, \
-                        sequence_batch_id=None, version=None, \
-                        is_contaminated=0, outdated_index=0, comment=None,\
-                        data_dir=data_dir,\
-                        original_sequence_filepath=tcga_sample_obj.bamPath, \
-                        original_sequence_library=library, \
-                        original_sequence_mate_id=None, \
-                        original_sequence_md5sum=None, \
-                        parentJobLs=[convertBamToFastqAndGzip_job], \
-                        job_max_memory=100, walltime = 60, commit=self.commit, \
-                        extraDependentInputLs=[bamInputF], extraArguments=None, \
-                        transferOutput=False, sshDBTunnel=self.needSSHDBTunnel)
-            
+                inputFile=convertBamToFastqAndGzip_job.output1, \
+                outputFile=pairedEnd_seq_db_idFile, \
+                individual_id=sample_obj.db_entry.id, sequencer_id=sample_obj.sequencer_id,\
+                sequence_type_name="PairedEnd", sequence_format=sequence_format, \
+                copy_original_file=0, tissue_name=None, tissue_id=sample_obj.tissue_id, \
+                coverage=None, quality_score_format="Standard", filtered=0,\
+                parent_individual_sequence_id=None,\
+                read_count=None, no_of_chromosomes=None, \
+                sequence_batch_id=None, version=None, \
+                is_contaminated=0, outdated_index=0, comment=None,\
+                data_dir=data_dir,\
+                original_sequence_filepath=sample_obj.bamPath, \
+                original_sequence_library=library, \
+                original_sequence_mate_id=None, \
+                original_sequence_md5sum=None, \
+                parentJobLs=[convertBamToFastqAndGzip_job], \
+                job_max_memory=100, walltime = 60, commit=self.commit, \
+                extraDependentInputLs=[bamInputF], extraArguments=None, \
+                transferOutput=False, sshDBTunnel=self.needSSHDBTunnel)
+    
             splitOutputDir = 'split_%s_PE'%(library)
-            #same directory containing split files from both mates is fine as RegisterAndMoveSplitSequenceFiles could pick up.
+            #same directory containing split files from both mates is fine as
+            #  RegisterAndMoveSplitSequenceFiles could pick up.
             splitOutputDirJob = self.addMkDirJob(outputDir=splitOutputDir)
             
             mate_id = 1
             splitFastQFnamePrefix = os.path.join(splitOutputDir, '%s_%s'%(library, mate_id))
             logFile = File('%s_split.log'%(splitFastQFnamePrefix))
             splitReadFileJob1 = self.addSplitReadFileJob(
-                            inputF=convertBamToFastqAndGzip_job.output1, outputFnamePrefix=splitFastQFnamePrefix, \
-                            outputFnamePrefixTail="", minNoOfReads=minNoOfReads, \
-                            logFile=logFile, \
-                            parentJobLs=[registerPairedEndSequence2DBJob, splitOutputDirJob], \
-                            job_max_memory=4000, walltime = 800, no_of_cpus=4, \
-                            extraDependentInputLs=None, transferOutput=True)
+                inputF=convertBamToFastqAndGzip_job.output1, outputFnamePrefix=splitFastQFnamePrefix, \
+                outputFnamePrefixTail="", minNoOfReads=minNoOfReads, \
+                logFile=logFile, \
+                parentJobLs=[registerPairedEndSequence2DBJob, splitOutputDirJob], \
+                job_max_memory=4000, walltime = 800, no_of_cpus=4, \
+                extraDependentInputLs=None, transferOutput=True)
             
             logFile = File('%s_register.log'%(splitFastQFnamePrefix))
             registerJob1 = self.addRegisterAndMoveSplitFileJob(
-                            inputFile=registerPairedEndSequence2DBJob.output,\
-                            inputDir=splitOutputDir, logFile=logFile,\
-                            library=library, mate_id=mate_id, \
-                            parentJobLs=[splitReadFileJob1], job_max_memory=100, walltime = 60, \
-                            commit=commit, sequence_format=sequence_format, \
-                            extraDependentInputLs=None, \
-                            transferOutput=True, sshDBTunnel=self.needSSHDBTunnel)
+                inputFile=registerPairedEndSequence2DBJob.output,\
+                inputDir=splitOutputDir, logFile=logFile,\
+                library=library, mate_id=mate_id, \
+                parentJobLs=[splitReadFileJob1], job_max_memory=100, walltime = 60, \
+                commit=commit, sequence_format=sequence_format, \
+                extraDependentInputLs=None, \
+                transferOutput=True, sshDBTunnel=self.needSSHDBTunnel)
             #handle the 2nd end
             mate_id = 2
             splitFastQFnamePrefix = os.path.join(splitOutputDir, '%s_%s'%(library, mate_id))
             logFile = File('%s_split.log'%(splitFastQFnamePrefix))
             splitReadFileJob2 = self.addSplitReadFileJob(
-                    inputF=convertBamToFastqAndGzip_job.output2, \
-                    outputFnamePrefix=splitFastQFnamePrefix, \
-                    outputFnamePrefixTail="", minNoOfReads=minNoOfReads, \
-                    logFile=logFile, \
-                    parentJobLs=[registerPairedEndSequence2DBJob, splitOutputDirJob], \
-                    job_max_memory=4000, walltime = 800, no_of_cpus=4, \
-                    extraDependentInputLs=[], transferOutput=True)
+                inputF=convertBamToFastqAndGzip_job.output2, \
+                outputFnamePrefix=splitFastQFnamePrefix, \
+                outputFnamePrefixTail="", minNoOfReads=minNoOfReads, \
+                logFile=logFile, \
+                parentJobLs=[registerPairedEndSequence2DBJob, splitOutputDirJob], \
+                job_max_memory=4000, walltime = 800, no_of_cpus=4, \
+                extraDependentInputLs=None, transferOutput=True)
             
             logFile = File('%s_register.log'%(splitFastQFnamePrefix))
             registerJob2 = self.addRegisterAndMoveSplitFileJob(
-                        inputFile=registerPairedEndSequence2DBJob.output,\
-                        inputDir=splitOutputDir, logFile=logFile,\
-                        library=library, mate_id=mate_id, \
-                        parentJobLs=[splitReadFileJob2], job_max_memory=100, walltime = 60, \
-                        commit=commit, sequence_format=sequence_format, \
-                        extraDependentInputLs=None, \
-                        transferOutput=True, sshDBTunnel=self.needSSHDBTunnel)
+                inputFile=registerPairedEndSequence2DBJob.output,\
+                inputDir=splitOutputDir, logFile=logFile,\
+                library=library, mate_id=mate_id, \
+                parentJobLs=[splitReadFileJob2], job_max_memory=100, walltime = 60, \
+                commit=commit, sequence_format=sequence_format, \
+                extraDependentInputLs=None, \
+                transferOutput=True, sshDBTunnel=self.needSSHDBTunnel)
             
         print(f"{self.no_of_jobs} jobs.", flush=True)
 
@@ -1433,12 +1564,21 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
         2011-8-3
         """
         pdata = self.setup_run()
-        
-        self.addJobsDict[self.inputType](db_main=self.db_main, \
+        if self.inputType==1:
+            self.addJobsToImportTCGABam(db_main=self.db_main, \
             sample_sheet=self.sample_sheet, \
             input_path=self.input_path, data_dir=self.data_dir, \
             minNoOfReads=self.minNoOfReads, commit=self.commit,\
-            sequencer_name=self.sequencer_name, sequence_type_name=self.sequence_type_name, \
+            sequencer_name=self.sequencer_name, 
+            sequence_type_name=self.sequence_type_name, \
+            sequence_format=self.sequence_format)
+        elif self.inputType==2:
+            self.addJobsToImportHCC1187Bam(db_main=self.db_main, \
+            sample_sheet=self.sample_sheet, \
+            input_path=self.input_path, data_dir=self.data_dir, \
+            minNoOfReads=self.minNoOfReads, commit=self.commit,\
+            sequencer_name=self.sequencer_name, 
+            sequence_type_name=self.sequence_type_name, \
             sequence_format=self.sequence_format)
         # Write the DAX
         self.end_run()

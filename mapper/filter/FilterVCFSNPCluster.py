@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2012.9.6
 	program that filters out SNPs that are too close to each other.

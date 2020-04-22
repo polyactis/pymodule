@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Examples:
 	%s -i /tmp/depth.tsv.gz -a 100 -n 0 -o /tmp/depth.mode.tsv.gz -f 0.3

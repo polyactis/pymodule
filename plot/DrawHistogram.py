@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Examples:	
 	# 2012.8.6 draw histogram of fraction of heterozygotes per individual.

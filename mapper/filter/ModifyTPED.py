@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2014.01.12, 2012.7.20
 	Its input .tped files are those that are converted from .vcf by "vcftools --plink-tped".

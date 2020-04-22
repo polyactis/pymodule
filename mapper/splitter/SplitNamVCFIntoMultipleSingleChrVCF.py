@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Examples:
 	%s 
@@ -110,7 +110,7 @@ class SplitNamVCFIntoMultipleSingleChrVCF(AbstractVCFMapper):
 		
 		vcfFile.close()
 		#close all output files
-		for chr, outVCFFile in chr2outVCFFile.iteritems():
+		for chr, outVCFFile in chr2outVCFFile.items():
 			outVCFFile.close()
 		
 		sys.stderr.write("%s (out of %s) loci from %s chromosomes.\n"%(real_counter, counter, len(chr2outVCFFile)))

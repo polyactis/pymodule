@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2013.07.10 program that adds description of info fields/tags that appear in sites but not in VCF header, into VCF header.
 	At this moment, it just addes description of these fields into VCF header, and does NOT check missing info tags.

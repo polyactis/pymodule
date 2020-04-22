@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2008-02-02 extend the artists in matplotlib
 """

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2013.09.10 all three output files need to be explicitly specified on the commandline.
 

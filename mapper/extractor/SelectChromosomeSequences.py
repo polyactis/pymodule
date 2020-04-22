@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2013.2.15 program selects certain chromosome sequences out of fasta/fastq files.
 

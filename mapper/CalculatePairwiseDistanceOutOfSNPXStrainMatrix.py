@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Calculate pairwise distance matrix of a SNP (row) X Strain (column) matrix.
 

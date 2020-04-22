@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2012.8.13 select certain rows from a matrix based on the whichColumn (chosen column)
 	it accepts both input from "-i oneFile.txt" or the trailing standalone arguments.

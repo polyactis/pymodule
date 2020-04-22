@@ -12,12 +12,10 @@ ParentClass = AbstractWorkflow
 class AbstractBioinfoWorkflow(ParentClass):
     __doc__ = __doc__
     option_default_dict = ParentClass.option_default_dict.copy()
-    option_default_dict.update(
-        {
+    option_default_dict.update({
         ("plinkPath", 1, ): ["%s/bin/plink", '', 1, 
             'path to the plink binary, http://pngu.mgh.harvard.edu/~purcell/plink/index.shtml'],
-        }
-    )
+        })
     def __init__(self,  **keywords):
         """
         20200129

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2013.11.24 Input is a coordinate map file for loci (before and after LiftOver).
 	This program computes probability that each locus is correctly mapped to the target coordinate system.

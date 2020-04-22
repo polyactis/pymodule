@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2012.8.6
 	derivative of DrawHistogram.py, parse the OBS(HOM1/HET/HOM2) (i.e. 13/3/0 ) the column.

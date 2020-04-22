@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2013.06.05 select haplotypes of distant pedigree members. IBD distance of all pairs must be < --maxPairwiseKinship. 
 	Input VCF files could be passed through "-i" and/or appended to the end of commandline.

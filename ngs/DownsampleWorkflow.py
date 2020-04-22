@@ -227,11 +227,11 @@ class DownsampleWorkflow(ParentClass):
         pdata = self.setup_run()
         workflow = pdata.workflow
 
-        self.AccurityExecutableFile = self.addOneExecutableFromPathAndAssignProperClusterSize( \
-            path=self.AccurityPath, name='Accuritymainexecutable', clusterSizeMultipler=0)
+        self.AccurityExecutableFile = self.registerOneExecutable( \
+            path=self.AccurityPath, name='Accuritymainexecutable', clusterSizeMultiplier=0)
 
-        self.downSampleJava = self.addOneExecutableFromPathAndAssignProperClusterSize( \
-            path=self.javaPath, name='sampleDownexecutable', clusterSizeMultipler=0)
+        self.downSampleJava = self.registerOneExecutable( \
+            path=self.javaPath, name='sampleDownexecutable', clusterSizeMultiplier=0)
 
         self.addDownsamplejob(data_dir=self.data_dir, idDict=IDsample, DownSamplePrefix=None, \
                          downSampleJava=self.downSampleJava, downSampleJar=self.PicardJar, \

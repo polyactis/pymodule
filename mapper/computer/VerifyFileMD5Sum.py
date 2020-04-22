@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2017.04.07
     Verify if the input file's md5sum is equal to the given correct md5sum.

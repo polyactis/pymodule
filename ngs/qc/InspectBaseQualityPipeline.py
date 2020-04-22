@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2011-8-16
 	construct a pegasus workflow to run InspectBaseQuality.py over a list of individual sequences
@@ -41,9 +41,9 @@ class InspectBaseQualityPipeline(ParentClass):
 	def registerCustomExecutables(self):
 		"""
 		"""
-		self.addOneExecutableFromPathAndAssignProperClusterSize(
-			path=os.path.join(self.thisModulePath, 'mapper/InspectBaseQuality.py'), \
-			name='InspectBaseQuality', clusterSizeMultipler=1)
+		self.registerOneExecutable(
+			path=os.path.join(self.pymodulePath, 'mapper/InspectBaseQuality.py'), \
+			name='InspectBaseQuality', clusterSizeMultiplier=1)
 		
 			
 	def run(self):
@@ -75,7 +75,7 @@ class InspectBaseQualityPipeline(ParentClass):
 		# If self.data_dir differs from db_vervet.data_dir, this program (must be run on submission host) won't find files.
 		individualSequenceID2FilePairLs = db_main.getIndividualSequenceID2FilePairLs(self.ind_seq_id_ls, data_dir=self.data_dir)
 		
-		for ind_seq_id, FilePairLs in individualSequenceID2FilePairLs.iteritems():
+		for ind_seq_id, FilePairLs in individualSequenceID2FilePairLs.items():
 			individual_sequence = db_main.queryTable(SunsetDB.IndividualSequence).get(ind_seq_id)
 			if individual_sequence is not None and individual_sequence.format=='fastq':
 				#start to collect all files affiliated with this individual_sequence record 

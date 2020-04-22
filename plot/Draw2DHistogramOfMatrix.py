@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2011-11-2
 	The input is tab/coma-delimited, with a header and has at least 3 columns.

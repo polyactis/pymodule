@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2012.3.14
 	count the number of reads/bases of fastq or fasta input file.

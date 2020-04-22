@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Description:
 	2012.11.15 a matrix stored in HDF5.

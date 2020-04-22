@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2012.10.5 program that extracts samples from a VCF and form a new VCF.
 	need to re-calculate the AC/AF values of each variant.

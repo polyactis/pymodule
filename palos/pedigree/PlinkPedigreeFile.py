@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2013.05.03 a child class of MatrixFile. used to describe pedigree file in plink format (delimiter could be ' ' or tab), which looks like:
 	The header line does not exist. Six columns are: FamilyID IndividualID PaternalID MaternalID Sex(1=male; 2=female; other=unknown) Phenotype.

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Examples:	
 	%s -i /Network/Data/250k/db/dataset/call_method_32.tsv -o /tmp/call_32.hdf5

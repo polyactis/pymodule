@@ -47,13 +47,13 @@ class CountReadsWorkflow(ParentClass):
         """
         ParentClass.registerCustomExecutables(self)
         
-        self.addOneExecutableFromPathAndAssignProperClusterSize(
+        self.registerOneExecutable(
             path=os.path.join(self.pymodulePath, 'mapper/computer/CountFastqReadBaseCount.py'), \
-            name='CountFastqReadBaseCount', clusterSizeMultipler=1)
+            name='CountFastqReadBaseCount', clusterSizeMultiplier=1)
         
-        self.addOneExecutableFromPathAndAssignProperClusterSize(
-            path=os.path.join(self.thisModulePath, 'db/input/PutReadBaseCountIntoDB.py'), \
-            name='PutReadBaseCountIntoDB', clusterSizeMultipler=0.2)
+        self.registerOneExecutable(
+            path=os.path.join(self.pymodulePath, 'db/import/PutReadBaseCountIntoDB.py'), \
+            name='PutReadBaseCountIntoDB', clusterSizeMultiplier=0.2)
         
     
     def registerISQFiles(self, db_main=None, ind_seq_id_ls=[], local_data_dir='', pegasusFolderName='', \

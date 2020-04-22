@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2014.01.04 program that filters loci based on stats from statFname. 
 

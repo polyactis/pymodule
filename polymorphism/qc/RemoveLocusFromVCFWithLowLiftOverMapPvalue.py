@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2014.01.04 program that removes loci with low mapPvalue (output of ComputeLiftOverLocusProbability.py) 
 	from a lifted-over VCF (LiftOverVCFBasedOnCoordinateMap.py).

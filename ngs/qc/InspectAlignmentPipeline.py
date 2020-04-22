@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Examples:
 
@@ -86,7 +86,6 @@ class InspectAlignmentPipeline(ParentClass, AbstractAccuWorkflow):
 		})
 	#	("fractionToSample", 0, float): [0.001, '', 1, 'fraction of loci to walk through for DepthOfCoverage walker.'],\
 	option_default_dict[('completedAlignment', 0, int)][0]=1	#2013.05.03
-	option_default_dict[("thisModulePath", 1, )][0] = '%s/script/pymodule/'
 
 	getReferenceSequence = AbstractAccuWorkflow.getReferenceSequence
 	connectDB = AbstractAccuWorkflow.connectDB
@@ -532,7 +531,7 @@ class InspectAlignmentPipeline(ParentClass, AbstractAccuWorkflow):
 					extraArgumentList=["--methodShortName %s"%(self.alignmentDepthIntervalMethodShortName) ], \
 					job_max_memory=2000, walltime=30, sshDBTunnel=self.needSSHDBTunnel)
 
-			for chromosome, chromosomeSize in self.chr2size.iteritems():
+			for chromosome, chromosomeSize in self.chr2size.items():
 				#add a ReduceSameChromosomeAlignmentDepthFiles job
 				outputFile = File(os.path.join(reduceOutputDirJob.output, '%s_alignments_chr_%s_depth.tsv.gz'%(len(self.alignmentDepthJobDataList), chromosome)))
 				reduceSameChromosomeAlignmentDepthFilesJob = self.addGenericJob(executable=self.ReduceSameChromosomeAlignmentDepthFiles, \
@@ -609,48 +608,51 @@ class InspectAlignmentPipeline(ParentClass, AbstractAccuWorkflow):
 		ParentClass.registerCustomExecutables(self)
 
 		#2013.08.23
-		#self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'GADA/testGADA.py'), \
-		#								name='GADA', clusterSizeMultipler=0.1)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'GADA/GADA'), \
-										name='GADA', clusterSizeMultipler=0.1)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.thisModulePath, 'db/input/AddAlignmentDepthIntervalMethod2DB.py'), \
-										name='AddAlignmentDepthIntervalMethod2DB', clusterSizeMultipler=0)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.thisModulePath, 'db/input/AddAlignmentDepthIntervalFile2DB.py'), \
-										name='AddAlignmentDepthIntervalFile2DB', clusterSizeMultipler=0.3)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.thisModulePath, 'db/input/UpdateAlignmentDepthIntervalMethodNoOfIntervals.py'), \
-										name='UpdateAlignmentDepthIntervalMethodNoOfIntervals', clusterSizeMultipler=0)
-		#2013.08.08
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.thisModulePath, 'db/input/AffiliateFile2DBEntry.py'), \
-										name='AffiliateFile2DBEntry', clusterSizeMultipler=0.1)
+		#self.registerOneExecutable(path=os.path.join(self.pymodulePath, 'GADA/testGADA.py'), \
+		#	name='GADA', clusterSizeMultiplier=0.1)
+		self.registerOneExecutable(path=os.path.join(self.pymodulePath, 'GADA/GADA'), \
+			name='GADA', clusterSizeMultiplier=0.1)
+		self.registerOneExecutable(path=os.path.join(self.pymodulePath,
+			'db/import/AddAlignmentDepthIntervalMethod2DB.py'), \
+			name='AddAlignmentDepthIntervalMethod2DB', clusterSizeMultiplier=0)
+		self.registerOneExecutable(path=os.path.join(self.pymodulePath,
+			'db/import/AddAlignmentDepthIntervalFile2DB.py'), \
+			name='AddAlignmentDepthIntervalFile2DB', clusterSizeMultiplier=0.3)
+		self.registerOneExecutable(path=os.path.join(self.pymodulePath,
+			 'db/import/UpdateAlignmentDepthIntervalMethodNoOfIntervals.py'), \
+			name='UpdateAlignmentDepthIntervalMethodNoOfIntervals', clusterSizeMultiplier=0)
+		self.registerOneExecutable(path=os.path.join(self.pymodulePath,
+			 'db/import/AffiliateFile2DBEntry.py'), \
+			name='AffiliateFile2DBEntry', clusterSizeMultiplier=0.1)
 		"""
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'reducer/ReduceDepthOfCoverage.py'), \
-										name='ReduceDepthOfCoverage', clusterSizeMultipler=0)
+		self.registerOneExecutable(path=os.path.join(self.pymodulePath, 'reducer/ReduceDepthOfCoverage.py'), \
+			name='ReduceDepthOfCoverage', clusterSizeMultiplier=0)
 
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'reducer/ReduceVariousReadCount.py'), \
-										name='ReduceVariousReadCount', clusterSizeMultipler=0)
+		self.registerOneExecutable(path=os.path.join(self.pymodulePath, 'reducer/ReduceVariousReadCount.py'), \
+			name='ReduceVariousReadCount', clusterSizeMultiplier=0)
 		"""
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, \
-										name='ContigDOCWalkerJava', clusterSizeMultipler=1)
-
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.javaPath, \
-										name='ContigVariousReadCountJava', clusterSizeMultipler=1)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, "mapper/converter/ReformatFlagstatOutput.py"), \
-										name='ReformatFlagstatOutput', clusterSizeMultipler=1)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, "polymorphism/mapper/samtoolsDepth.sh"), \
-										name='samtoolsDepth', clusterSizeMultipler=0.1)
-
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, "polymorphism/mapper/CalculateMedianModeFromSAMtoolsDepthOutput.py"), \
-										name='CalculateMedianModeFromSAMtoolsDepthOutput', clusterSizeMultipler=1)
-
-		executableClusterSizeMultiplierList = []	#2012.8.7 each cell is a tuple of (executable, clusterSizeMultipler (0 if u do not need clustering)
-		self.addExecutableAndAssignProperClusterSize(executableClusterSizeMultiplierList, defaultClustersSize=self.clusters_size)
-
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.thisModulePath, 'db/input/PutFlagstatOutput2DB.py'), \
-										name='PutFlagstatOutput2DB', clusterSizeMultipler=0)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.thisModulePath, 'db/input/PutDOCOutput2DB.py'), \
-										name='PutDOCOutput2DB', clusterSizeMultipler=0)
-		self.addOneExecutableFromPathAndAssignProperClusterSize(path=os.path.join(self.pymodulePath, 'shell/pipeCommandOutput2File.sh'), \
-										name='samtoolsFlagStat', clusterSizeMultipler=1)
+		self.registerOneExecutable(path=self.javaPath, \
+			name='ContigDOCWalkerJava', clusterSizeMultiplier=1)
+		self.registerOneExecutable(path=self.javaPath, \
+			name='ContigVariousReadCountJava', clusterSizeMultiplier=1)
+		self.registerOneExecutable(path=os.path.join(self.pymodulePath, 
+			"mapper/converter/ReformatFlagstatOutput.py"), \
+			name='ReformatFlagstatOutput', clusterSizeMultiplier=1)
+		self.registerOneExecutable(path=os.path.join(self.pymodulePath, 
+			"polymorphism/mapper/samtoolsDepth.sh"), \
+			name='samtoolsDepth', clusterSizeMultiplier=0.1)
+		self.registerOneExecutable(path=os.path.join(self.pymodulePath, 
+			"polymorphism/mapper/CalculateMedianModeFromSAMtoolsDepthOutput.py"), \
+			name='CalculateMedianModeFromSAMtoolsDepthOutput', clusterSizeMultiplier=1)
+		self.registerOneExecutable(path=os.path.join(self.pymodulePath, 
+			'db/import/PutFlagstatOutput2DB.py'), \
+			name='PutFlagstatOutput2DB', clusterSizeMultiplier=0)
+		self.registerOneExecutable(path=os.path.join(self.pymodulePath, 
+			'db/import/PutDOCOutput2DB.py'), \
+			name='PutDOCOutput2DB', clusterSizeMultiplier=0)
+		self.registerOneExecutable(path=os.path.join(self.pymodulePath, 
+			'shell/pipe2File.sh'), \
+			name='samtoolsFlagStat', clusterSizeMultiplier=1)
 
 
 if __name__ == '__main__':

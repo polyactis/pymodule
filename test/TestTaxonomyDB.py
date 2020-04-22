@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """"
 2012.8.28 test class for TaxonomyDB.py
 

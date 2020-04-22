@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Examples:
 	%s  -i mendelRuntype3_s1Gzip/meanMedianModePerLocusMendelError.tsv.gz

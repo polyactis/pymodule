@@ -29,6 +29,8 @@ class AbstractWorkflow(Workflow):
     option_default_dict = {
         ("home_path", 1, ): [os.path.expanduser("~"), 'e', 1, 'path to the home directory on the working nodes'],\
         ("pymodulePath", 1, ): ["%s/src/pymodule", '', 1, 'path to the pymodule folder'],\
+        ("thisModulePath", 1, ): ["%s", '', 1, 'path of the module that owns this program. '
+            'used to add executables from this module.'],\
         ("javaPath", 1, ): ["%s/bin/jdk/bin/java", 'J', 1, 'the path to java binary'],\
         ("site_handler", 1, ): ["condor", 'l', 1, 
             'which computing site to run the jobs. check your Pegasus setup.'],\
@@ -52,8 +54,6 @@ class AbstractWorkflow(Workflow):
         ('jvmVirtualByPhysicalMemoryRatio', 1, float):[1.0, '', 1, 
             "if a job's virtual memory (usually 1.2X of JVM resident memory) exceeds request, "
             "it will be killed on hoffman2. Hence this argument"],\
-        ("thisModulePath", 1, ): ["%s", '', 1, 'path of the module that owns this program. '
-            'used to add executables from this module.'],\
         ('debug', 0, int):[0, 'b', 0, 'toggle debug mode'],\
         ('needSSHDBTunnel', 0, int):[0, 'H', 0, 'DB-interacting jobs need a ssh tunnel (running on cluster behind firewall).'],\
         ('report', 0, int):[0, 'r', 0, 'toggle report, more verbose stdout/stderr.']
@@ -161,15 +161,15 @@ class AbstractWorkflow(Workflow):
             #	2) workers in vanilla universe expire after certain time.
             #	3) it does not run on ycondor local universe somehow. pegasus keeps submitting but no condor jobs in the queue.
             # this works because in most of my cases, vanilla universe and local universe share the same underlying filesystem.
-            cleanupExecutable = self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.pegasusCleanupPath, name='cleanup', \
-                                                                    clusterSizeMultipler=0, noVersion=True)
+            cleanupExecutable = self.registerOneExecutable(path=self.pegasusCleanupPath, name='cleanup', \
+                                                                    clusterSizeMultiplier=0, noVersion=True)
             condorUniverseProfile = Profile(Namespace.CONDOR, key="universe", value="local")
             if cleanupExecutable.hasProfile(condorUniverseProfile):
                 cleanupExecutable.removeProfile(condorUniverseProfile)
             cleanupExecutable.addProfile(condorUniverseProfile)
 
-            transferExecutable = self.addOneExecutableFromPathAndAssignProperClusterSize(path=self.pegasusTransferPath, name='transfer', \
-                                                                    clusterSizeMultipler=0, noVersion=True)
+            transferExecutable = self.registerOneExecutable(path=self.pegasusTransferPath, name='transfer', \
+                                                                    clusterSizeMultiplier=0, noVersion=True)
             condorUniverseProfile = Profile(Namespace.CONDOR, key="universe", value="local")
             if transferExecutable.hasProfile(condorUniverseProfile):
                 transferExecutable.removeProfile(condorUniverseProfile)

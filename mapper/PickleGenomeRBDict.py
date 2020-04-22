@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Examples:
 	%s -o /Network/Data/250k/tmp-yh/genomeRBDict_tax3702_padding20kb.pickle

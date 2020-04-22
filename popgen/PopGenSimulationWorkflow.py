@@ -237,30 +237,27 @@ class PopGenSimulationWorkflow(ParentClass):
 		architecture = self.architecture
 		cluster_size = self.cluster_size
 		site_handler = self.site_handler
-		vervetSrcPath = self.vervetSrcPath
 		
-		#2013.3.8
 		self.registerOneExecutable(path=os.path.expanduser(self.sfs_code_path), \
-												name="sfs_code", clusterSizeMultiplier=0.05)
+			name="sfs_code", clusterSizeMultiplier=0.05)
 		self.registerOneExecutable(path=os.path.expanduser(self.slim_path), \
-												name="slim", clusterSizeMultiplier=0.3)
+			name="slim", clusterSizeMultiplier=0.3)
 		self.registerOneExecutable(path=os.path.expanduser(self.msHOT_lite_path), \
-												name="msHOT_lite", clusterSizeMultiplier=0.5)
-		self.registerOneExecutableAsFile(pythonVariableName="msHOT_liteExecutableFile", path=self.msHOT_lite_path)
-		
-		self.registerOneExecutable(path=os.path.join(self.pymodulePath, 'shell/pipeCommandOutput2File.sh'), \
-										name='msShellPipe', clusterSizeMultiplier=1)
+			name="msHOT_lite", clusterSizeMultiplier=0.5)
+		self.registerOneExecutableAsFile(pythonVariableName="msHOT_liteExecutableFile",
+			path=self.msHOT_lite_path)
+		self.registerOneExecutable(path=os.path.join(self.pymodulePath, 'shell/pipe2File.sh'), \
+			name='msShellPipe', clusterSizeMultiplier=1)
+		self.registerOneExecutable(
+			path=os.path.join(self.pymodulePath, 'db/import/AddPopGenSimulation2DB.py'), \
+			name="AddPopGenSimulation2DB", clusterSizeMultiplier=0.2)
 		
 		self.registerOneExecutable(\
-										path=os.path.join(self.vervetSrcPath, 'db/input/AddPopGenSimulation2DB.py'), \
-										name="AddPopGenSimulation2DB", clusterSizeMultiplier=0.2)
-		
+			path=os.path.join(self.pymodulePath, 'popgen/converter/SFS_CODE_Output2PolymorphismTableFile.py'), \
+			name="SFS_CODE_Output2PolymorphismTableFile", clusterSizeMultiplier=0.2)
 		self.registerOneExecutable(\
-										path=os.path.join(self.pymodulePath, 'popgen/converter/SFS_CODE_Output2PolymorphismTableFile.py'), \
-										name="SFS_CODE_Output2PolymorphismTableFile", clusterSizeMultiplier=0.2)
-		self.registerOneExecutable(\
-										path=os.path.join(self.pymodulePath, 'popgen/converter/msOutput2PolymorphismTableFile.py'), \
-										name="msOutput2PolymorphismTableFile", clusterSizeMultiplier=0.2)
+			path=os.path.join(self.pymodulePath, 'popgen/converter/msOutput2PolymorphismTableFile.py'), \
+			name="msOutput2PolymorphismTableFile", clusterSizeMultiplier=0.2)
 		
 	def run(self):
 		"""

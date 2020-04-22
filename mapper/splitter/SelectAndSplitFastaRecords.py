@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Examples:
 	%s -i /home/vervetData/subspecies/Barbados/vs_top150Contigs_by_aln.bam -o /tmp/ Contig0 Contig1

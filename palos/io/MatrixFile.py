@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2012.3.1 a matrix file API like csv.reader, it can deal with any delimiter: coma, tab, space or multi-space.
 Example:

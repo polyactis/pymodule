@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2011-8-15 Five types of figures will be generated.
 	qualityHist.png

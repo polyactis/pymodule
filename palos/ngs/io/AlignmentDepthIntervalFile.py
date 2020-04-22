@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2013.08.30 a child class of MatrixFile. used to describe AlignmentDepthIntervalFile in VervetDB
 """
@@ -64,7 +64,7 @@ class AlignmentDepthIntervalFile(MatrixFile):
 	def readThroughAndProvideSummary(self):
 		"""
 		2013.08.30
-			called by vervet/src/db/input/AddAlignmentDepthIntervalFile2DB.py
+			called by vervet/src/db/import/AddAlignmentDepthIntervalFile2DB.py
 		"""
 		col_name2index= self.smartReadHeader()
 		if col_name2index is None:

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 
 Examples:
@@ -45,7 +45,7 @@ class ConvertSNPMatrix2Binary(object):
 		writer.writerow(['snp_id', 'allele', 'index'])
 		for i in range(len(allele_index2allele_ls)):
 			snp_id = snpData.col_id_ls[i]
-			for allele_index, allele in allele_index2allele_ls[i].iteritems():
+			for allele_index, allele in allele_index2allele_ls[i].items():
 				row = [snp_id, allele, allele_index]
 				writer.writerow(row)
 		del writer

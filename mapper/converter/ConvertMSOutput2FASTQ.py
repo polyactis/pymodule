@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Examples:
 	# 2013.2.11 input is the msHOT-lite Heng-Li custom output

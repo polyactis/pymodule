@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Examples:
 	%s -i /tmp/vs_top150Contigs_by_aln_Contig0.vcf -o /tmp/vs_top150Contigs_by_aln_Contig0.tsv

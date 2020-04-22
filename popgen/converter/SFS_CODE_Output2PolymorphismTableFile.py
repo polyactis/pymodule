@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2013.3.8 this turns SFS_CODE (Hernandez 2008) output into PolymorphismTableFile format.
 Warning: this program is coded with the capability to handle indel/inversion mutations. but un-tested. 

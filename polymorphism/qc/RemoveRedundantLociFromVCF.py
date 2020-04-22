@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2013.07.12 program that removes any redundant SNPs. By redundant, (chromosome, position) appears >1.
 

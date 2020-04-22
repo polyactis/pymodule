@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Examples:
 	%s -i /tmp/input.fasta.gz -a 2 -O /tmp/output -f .fasta 

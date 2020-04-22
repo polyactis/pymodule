@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2013.1.25 an abstract class for pegasus workflows that work on alignment files (already aligned).
 """

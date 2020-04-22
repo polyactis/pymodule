@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2012.8.13
 	this program outputs chr, pos, gap (distance to the next SNP).

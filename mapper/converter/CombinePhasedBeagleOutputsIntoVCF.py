@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2013.06.06
 	This program converts Beagle genotype file (could be >1) into VCF.

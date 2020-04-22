@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from enthought.mayavi.tools.helper_functions import Pipeline, document_pipeline, bar_mode_dict
 from enthought.mayavi.tools import tools

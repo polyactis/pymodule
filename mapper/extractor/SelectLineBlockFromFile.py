@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2012.7.30
 	This program selects lines specified on the commandline and output them.

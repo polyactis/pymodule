@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2013.08 program that splits SNP-ID in plink .lmendel output into chromosome position , two columns.
 	all input files could be gzipped or not.

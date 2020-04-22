@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2013.08.29 add a new AlignmentDepthIntervalFile into db
 

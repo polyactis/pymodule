@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 2011-11-28
 	this program draws a manhattan plot (gwas plot) and a histogram for some vcftools outputted windowed statistics.
