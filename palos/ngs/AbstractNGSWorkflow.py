@@ -28,11 +28,11 @@ class AbstractNGSWorkflow(ParentClass):
     option_default_dict.update({
         ('ref_ind_seq_id', 1, int): [None, 'a', 1, 'IndividualSequence.id. To pick alignments with this sequence as reference', ],\
         ("samtools_path", 1, ): ["%s/bin/samtools", '', 1, 'samtools binary'],\
-        ("picard_path", 1, ): ["%s/script/picard/dist", '', 1, 'picard folder containing its jar binaries'],\
+        ("picard_dir", 1, ): ["%s/script/picard/dist", '', 1, 'picard folder containing its jar binaries'],\
         ("gatk_path", 1, ): ["%s/bin/GenomeAnalysisTK1_6_9.jar", '', 1, 
             'my custom GATK 1.6.9 jar compiled from https://github.com/polyactis/gatk using jdk 1.6'],\
         ("gatk2_path", 1, ): ["%s/bin/GenomeAnalysisTK.jar", '', 1, 'jar of GATK version 2 or afterwards.'],\
-        ('picardJarPath', 1, ): ["%s/script/picard.broad/build/libs/picard.jar", '', 1, 'path to the new picard jar', ],\
+        ('picard_path', 1, ): ["%s/script/picard.broad/build/libs/picard.jar", '', 1, 'path to the new picard jar', ],\
         ('tabixPath', 1, ): ["%s/bin/tabix", '', 1, 'path to the tabix binary', ],\
         ('bgzipPath', 1, ): ["%s/bin/bgzip", '', 1, 'path to the bgzip binary', ],\
         ('vcftoolsPath', 1, ): ["%s/bin/vcftools/vcftools", '', 1, 'path to the vcftools binary', ],\
@@ -130,10 +130,10 @@ class AbstractNGSWorkflow(ParentClass):
         2011-7-11
         """
         # Insert before ParentClass.__init__()
-        self.pathToInsertHomePathList.extend(['samtools_path', 'picard_path', \
+        self.pathToInsertHomePathList.extend(['samtools_path', 'picard_dir', \
             'gatk_path', 'tabixPath', \
             'bgzipPath', 'gatk2_path', 'ligateVcfPerlPath',\
-            'vcftoolsPath', 'vcfSubsetPath', 'vcfsorterPath', 'picardJarPath',\
+            'vcftoolsPath', 'vcfSubsetPath', 'vcfsorterPath', 'picard_path',\
             ])
         ParentClass.__init__(self, **keywords)
         self.chr_pattern = Genome.chr_pattern
@@ -257,29 +257,32 @@ class AbstractNGSWorkflow(ParentClass):
         #2013.06.13
         #self.registerOneJar(name="BeagleJar", path=os.path.expanduser('~/bin/Beagle/beagle.jar'))
 
-        #add the MergeSamFiles.jar file into workflow
-        self.registerOneJar(name="MergeSamFilesJar", path=os.path.join(self.picard_path, 'MergeSamFiles.jar'))
-        self.registerOneJar(name="BuildBamIndexJar", path=os.path.join(self.picard_path, 'BuildBamIndex.jar'))
-        self.registerOneJar(name="SamToFastqJar", path=os.path.join(self.picard_path, 'SamToFastq.jar'))	#2013.04.03
-
-        self.registerOneJar(name="CreateSequenceDictionaryJar", path=os.path.join(self.picard_path, 'CreateSequenceDictionary.jar'))
-        self.registerOneJar(name="AddOrReplaceReadGroupsAndCleanSQHeaderJar", path=os.path.join(self.picard_path, 'AddOrReplaceReadGroupsAndCleanSQHeader.jar'))
-        self.registerOneJar(name="AddOrReplaceReadGroupsJar", path=os.path.join(self.picard_path, 'AddOrReplaceReadGroups.jar'))
-        self.registerOneJar(name="MarkDuplicatesJar", path=os.path.join(self.picard_path, 'MarkDuplicates.jar'))
-        self.registerOneJar(name="SplitReadFileJar", path=os.path.join(self.picard_path, 'SplitReadFile.jar'))
-
+        self.registerOneJar(name="PicardJar", path=self.picard_path)
+        self.registerOneJar(name="MergeSamFilesJar", 
+            path=os.path.join(self.picard_dir, 'MergeSamFiles.jar'))
+        self.registerOneJar(name="BuildBamIndexJar", 
+            path=os.path.join(self.picard_dir, 'BuildBamIndex.jar'))
+        self.registerOneJar(name="SamToFastqJar", 
+            path=os.path.join(self.picard_dir, 'SamToFastq.jar'))
+        self.registerOneJar(name="CreateSequenceDictionaryJar", 
+            path=os.path.join(self.picard_dir, 'CreateSequenceDictionary.jar'))
+        self.registerOneJar(name="AddOrReplaceReadGroupsAndCleanSQHeaderJar", 
+            path=os.path.join(self.picard_dir, 'AddOrReplaceReadGroupsAndCleanSQHeader.jar'))
+        self.registerOneJar(name="AddOrReplaceReadGroupsJar", 
+            path=os.path.join(self.picard_dir, 'AddOrReplaceReadGroups.jar'))
+        self.registerOneJar(name="MarkDuplicatesJar", path=os.path.join(self.picard_dir, 'MarkDuplicates.jar'))
+        self.registerOneJar(name="SplitReadFileJar", path=os.path.join(self.picard_dir, 'SplitReadFile.jar'))
+        self.registerOneJar(name="SortSamJar", path=os.path.join(self.picard_dir, 'SortSam.jar'))
+        self.registerOneJar(name="SamFormatConverterJar", 
+            path=os.path.join(self.picard_dir, 'SamFormatConverter.jar'))
         self.registerOneJar(name="GenomeAnalysisTKJar", path=self.gatk_path)
-
-        #have to be a different folder, otherwise name clash with the old gatk jar file
+        # Put GenomeAnalysisTK2Jar in a a different folder than the new gatk jar,
+        #  otherwise name clash with the old gatk jar file.
         self.registerOneJar(name="GenomeAnalysisTK2Jar", path=self.gatk2_path, folderName='gatk2Jar')
-        self.registerOneJar(name="SortSamJar", path=os.path.join(self.picard_path, 'SortSam.jar'))
-        self.registerOneJar(name="SamFormatConverterJar", path=os.path.join(self.picard_path, 'SamFormatConverter.jar'))
-        #20170425
-        self.registerOneJar(name="PicardJar", path=os.path.join(self.picardJarPath))
+
 
     def registerCustomJars(self):
         """
-        2012.1.9
         """
         ParentClass.registerCustomJars(self)
 
@@ -367,8 +370,7 @@ class AbstractNGSWorkflow(ParentClass):
             name='concatSamtools', clusterSizeMultiplier=1)
         #2011.12.21 moved from FilterVCFPipeline.py
         self.registerOneExecutable(path=self.javaPath,
-                        name='FilterVCFByDepthJava', \
-                        clusterSizeMultiplier=1)
+            name='FilterVCFByDepthJava', clusterSizeMultiplier=1)
         self.registerOneExecutable(
             path=os.path.join(self.pymodulePath, "reducer/MergeFiles.sh"), \
             name='MergeFiles', clusterSizeMultiplier=0)
@@ -391,7 +393,6 @@ class AbstractNGSWorkflow(ParentClass):
             path=self.samtools_path, name='samtools', clusterSizeMultiplier=0.2)
         self.registerOneExecutable(
             path=self.javaPath, name='genotyperJava', clusterSizeMultiplier=0.1)
-        #2013.07.10
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
                 "mapper/modifier/AddMissingInfoDescriptionToVCFHeader.py"), \
             name='AddMissingInfoDescriptionToVCFHeader', clusterSizeMultiplier=1)
@@ -2605,7 +2606,7 @@ Contig966       3160    50
                     parentJobLs=None, extraDependentInputLs=None, transferOutput=False, \
                     extraArguments=None, job_max_memory=2000, walltime=120, **keywords):
         """
-        2013.03.25 use pipeCommandOutput2File to get output piped into outputF
+        2013.03.25 use pipe2File to get output piped into outputF
         2013.3.24 use addGenericJob()
         2012.4.3
             samtools (sam_stat.c) has been modified so that it could take one more optional argument to store the
