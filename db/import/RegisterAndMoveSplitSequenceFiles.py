@@ -19,9 +19,9 @@ Examples:
 		--logFilename  3185_gerald_D14CGACXX_7_GCCAAT_1.register.log
 
 Description:
-	program to register and move split output by picard's SplitReadFile.jar to db storage.
-	Argument outputDir, relativeOutputDir, individual_sequence_id, individual_sequence_file_raw_id can be parsed from inputFname,
-		if the latter is present.
+	Program to register and move split output by picard's SplitReadFile.jar to db storage.
+	If inputFname (one variable on each line.) is given, it will parse inputFname to get 
+		outputDir, relativeOutputDir, individual_sequence_id, individual_sequence_file_raw_id.
 	"""
 	__doc__ = __doc__%(sys.argv[0])
 	option_default_dict = copy.deepcopy(ParentClass.option_default_dict)
@@ -29,7 +29,7 @@ Description:
 	option_default_dict.pop(('outputFnamePrefix', 0, ))
 	option_default_dict.update({
 		('inputDir', 1, ): ['', '', 1, 'input folder that contains split fastq files', ],
-		('origin_file_path', 0, ): ['', '', 1, 
+		('original_file_path', 0, ): ['', '', 1, 
 			'The original file from which all input files originate '],
 		('outputDir', 0, ): ['', 'o', 1, 'output folder to which files from inputDir will be moved.', ],
 		('relativeOutputDir', 0, ): ['', '', 1, 'the output folder path relative to db.data_dir. '
@@ -117,9 +117,9 @@ Description:
 		db_main = self.db_main
 		session = db_main.session
 		session.begin()
-		if self.origin_file_path:
+		if self.original_file_path:
 			file_raw_db_entry = self.db_main.registerOriginalSequenceFileToDB(
-				self.origin_file_path, library=self.library,
+				self.original_file_path, library=self.library,
 				individual_sequence_id=self.individual_sequence_id, mate_id=self.mate_id, 
 				md5sum=None)
 			self.individual_sequence_file_raw_id = file_raw_db_entry.id

@@ -14,6 +14,7 @@ import sys, os, copy
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 
 import hashlib
+import logging
 from sqlalchemy import Unicode, DateTime, String, BigInteger, Integer
 from sqlalchemy import UnicodeText, Text, Boolean, Float, Binary, Enum, Table
 from sqlalchemy.ext.declarative import declarative_base
@@ -2805,12 +2806,14 @@ class SunsetDB(Database):
 			if sequence_type:
 				sequence_type_id=sequence_type.id
 		
-		query = self.queryTable(IndividualSequence).filter_by(individual_id=individual_id).filter_by(filtered=filtered)
+		query = self.queryTable(IndividualSequence).filter_by(individual_id=individual_id).\
+			filter_by(filtered=filtered)
 		query = query.filter_by(sequencer_id=sequencer_id)
 		query = query.filter_by(sequence_type_id=sequence_type_id)
 		if sequence_format:
 			query = query.filter_by(format=sequence_format)
-		query = query.filter_by(is_contaminated=is_contaminated).filter_by(outdated_index=outdated_index)
+		query = query.filter_by(is_contaminated=is_contaminated).\
+			filter_by(outdated_index=outdated_index)
 		
 		if tissue_name:
 			tissue = self.getTissue(short_name=tissue_name)
@@ -2882,13 +2885,15 @@ class SunsetDB(Database):
 			if individual is None:
 				individual = individual_sequence.individual
 		elif individual:
-			individual_sequence = self.getIndividualSequence(individual_id=individual.id, sequencer_name=sequencer_name, \
-								sequencer_id=sequencer_id, sequence_type_id=sequence_type_id,\
-								sequence_type_name=sequence_type_name,\
-								sequence_format=sequence_format, filtered=individual_sequence_filtered)
+			individual_sequence = self.getIndividualSequence(individual_id=individual.id, 
+			sequencer_name=sequencer_name, \
+			sequencer_id=sequencer_id, sequence_type_id=sequence_type_id,\
+			sequence_type_name=sequence_type_name,\
+			sequence_format=sequence_format, filtered=individual_sequence_filtered)
 		else:
-			sys.stderr.write("Error: not able to get individual_sequence cuz individual_sequence_id=%s; individual_code=%s; individual_id=%s .\n"%\
-							(individual_sequence_id, individual_code, individual_id))
+			logging.error(f"Not able to get individual_sequence because "
+				f"individual_sequence_id={individual_sequence_id}; "
+				f"individual_code={individual_code}; individual_id={individual_id}.")
 			return None
 		
 		if alignment_method_name:
@@ -2896,16 +2901,17 @@ class SunsetDB(Database):
 		elif alignment_method_id:
 			alignment_method = self.queryTable(AlignmentMethod).get(alignment_method_id)
 		elif alignment_method is None:
-			sys.stderr.write("Error: not able to get alignment_method cuz alignment_method_name=%s and alignment_method_id=%s.\n"%\
-							(alignment_method_name, alignment_method_id))
+			logging.error(f"Not able to get alignment_method because "
+				f"alignment_method_name={alignment_method_name} and "
+				f"alignment_method_id={alignment_method_id}.")
 			return None
 		
 		query = self.queryTable(IndividualAlignment).filter_by(ind_seq_id=individual_sequence.id).\
-				filter_by(ref_ind_seq_id=ref_individual_sequence_id).\
-				filter_by(alignment_method_id=alignment_method.id).filter_by(outdated_index=outdated_index).\
-				filter_by(mask_genotype_method_id=mask_genotype_method_id).\
-				filter_by(parent_individual_alignment_id=parent_individual_alignment_id).\
-				filter_by(individual_sequence_file_raw_id=individual_sequence_file_raw_id)
+			filter_by(ref_ind_seq_id=ref_individual_sequence_id).\
+			filter_by(alignment_method_id=alignment_method.id).filter_by(outdated_index=outdated_index).\
+			filter_by(mask_genotype_method_id=mask_genotype_method_id).\
+			filter_by(parent_individual_alignment_id=parent_individual_alignment_id).\
+			filter_by(individual_sequence_file_raw_id=individual_sequence_file_raw_id)
 		
 		if alignment_format:
 			query = query.filter_by(format=alignment_format)
@@ -2916,37 +2922,40 @@ class SunsetDB(Database):
 		
 		no_of_entries = query.count()
 		if no_of_entries>1:
-			sys.stderr.write("Error, >1 entries (%s) returned for IndividualAlignment \
-		(individual_id=%s, ref_individual_sequence_id=%s, \
-		sequencer_id=%s, sequence_type_id=%s, sequence_format=%s, filtered=%s, outdated_index=%s,\
-		alignment_method_id=%s,mask_genotype_method_id =%s, parent_individual_alignment_id=%s, individual_sequence_file_raw_id=%s,\
-		alignment_format=%s, local_realigned=%s, reduce_reads=%s).\n"%\
-							(no_of_entries, individual_id, ref_individual_sequence_id, sequencer_id, sequence_type_id,\
-							sequence_format, individual_sequence_filtered, outdated_index,\
-							alignment_method_id, mask_genotype_method_id, parent_individual_alignment_id, individual_sequence_file_raw_id,\
-							alignment_format, local_realigned, reduce_reads))
-			raise
+			logging.error(f">1 entries ({no_of_entries}) returned for IndividualAlignment "
+				f"(individual_id={individual_id}, "
+				f"ref_individual_sequence_id={ref_individual_sequence_id}, "
+				f"sequencer_id={sequencer_id}, sequence_type_id={sequence_type_id}, "
+				f"sequence_format={sequence_format}, "
+				f"filtered={individual_sequence_filtered}, "
+				f"outdated_index={outdated_index}, "
+				f"alignment_method_id={alignment_method_id}, "
+				f"mask_genotype_method_id ={mask_genotype_method_id}, "
+				f"parent_individual_alignment_id={parent_individual_alignment_id}, "
+				f"individual_sequence_file_raw_id={individual_sequence_file_raw_id},"
+				f"alignment_format={alignment_format}, "
+				f"local_realigned={local_realigned}, reduce_reads={reduce_reads}).")
+			sys.exit(4)
 		db_entry = query.first()
 		return db_entry
 	
 	def getIndividualSequence(self, individual_id:int=None, 
 		sequencer_id:int=None, sequencer_name:str=None, \
 		sequence_type_name:str=None, sequence_type_id:int=None, \
-		sequence_format:str=None, path_to_original_sequence=None, 
-		copy_original_file:bool=False,\
+		sequence_format:str=None, 
+		path_to_original_sequence=None, copy_original_file:bool=False,\
 		tissue_name:str=None, tissue_id:int=None, \
-		coverage:float=None,\
-		quality_score_format:str="Standard", filtered:int=0,\
+		coverage:float=None, quality_score_format:str="Standard", filtered:int=0,\
 		parent_individual_sequence_id:int=None,\
 		read_count:int=None, no_of_chromosomes:int=None, 
 		sequence_batch_id:int=None,
-		version:int=None,
-		is_contaminated=0, outdated_index=0, comment=None, 
+		version:int=None, is_contaminated=0, outdated_index=0, comment=None, 
 		subFolder=None, data_dir=None):
 		"""
 		Columns that are None will be part of the db query to see if entry is in db already
-		The path_to_original_sequence is only given when you want to copy the file to db storage.
-		The path field is now considered a folder (rather than a file).
+		The path field is usually considered a folder (rather than a file).
+			But if copy_original_file==True and path_to_original_sequence is given,
+				it will copy path_to_original_sequence to db storage.
 		subFolder is the name of the folder in data_dir that is used to hold the sequence files.
 		"""
 		if not data_dir:
@@ -3020,9 +3029,10 @@ class SunsetDB(Database):
 			self.dbID2monkeyDBEntry[db_id] = monkey
 			return monkey
 	
-	def copyParentIndividualSequence(self, parent_individual_sequence=None, parent_individual_sequence_id=None,\
-									subFolder='individual_sequence', quality_score_format='Standard', filtered=1,\
-									data_dir=None):
+	def copyParentIndividualSequence(self, parent_individual_sequence=None, \
+		parent_individual_sequence_id=None,\
+		subFolder='individual_sequence', quality_score_format='Standard', filtered=1,\
+		data_dir=None):
 		"""
 		2012.6.10
 			call getIndividualSequence to construct individual_sequence, rather than construct it from here.
@@ -3035,25 +3045,27 @@ class SunsetDB(Database):
 			make a copy of parent_individual_sequence_id individual_sequence entity
 		"""
 		if parent_individual_sequence is None:
-			parent_individual_sequence = self.queryTable(IndividualSequence).get(parent_individual_sequence_id)
+			parent_individual_sequence = self.queryTable(IndividualSequence).\
+				get(parent_individual_sequence_id)
 		
 		pis = parent_individual_sequence
 		
 		individual = self.queryTable(Individual).get(pis.individual_id)
 		
 		individual_sequence = self.getIndividualSequence(individual_id=parent_individual_sequence.individual_id, \
-						sequencer_id=parent_individual_sequence.sequencer.id, \
-						sequence_type_id=parent_individual_sequence.sequence_type.id,\
-						sequence_format=parent_individual_sequence.format, path_to_original_sequence=None, \
-						tissue_id=getattr(parent_individual_sequence.tissue, 'id', None), coverage=None,\
-						quality_score_format=quality_score_format, filtered=filtered,\
-						parent_individual_sequence_id=parent_individual_sequence.id, \
-						data_dir=data_dir, subFolder=subFolder)
+			sequencer_id=parent_individual_sequence.sequencer.id, \
+			sequence_type_id=parent_individual_sequence.sequence_type.id,\
+			sequence_format=parent_individual_sequence.format, path_to_original_sequence=None, \
+			tissue_id=getattr(parent_individual_sequence.tissue, 'id', None), coverage=None,\
+			quality_score_format=quality_score_format, filtered=filtered,\
+			parent_individual_sequence_id=parent_individual_sequence.id, \
+			data_dir=data_dir, subFolder=subFolder)
 		return individual_sequence
 	
-	def copyParentIndividualSequenceFile(self, parent_individual_sequence_file=None, parent_individual_sequence_file_id=None,\
-									individual_sequence_id=None,\
-									quality_score_format='Standard', filtered=1):
+	def copyParentIndividualSequenceFile(self, parent_individual_sequence_file=None, 
+		parent_individual_sequence_file_id=None,\
+		individual_sequence_id=None,\
+		quality_score_format='Standard', filtered=1):
 		"""
 		2012.2.14
 			call self.getIndividualSequenceFile() instead
@@ -3061,32 +3073,35 @@ class SunsetDB(Database):
 		"""
 		if parent_individual_sequence_file is None:
 			if parent_individual_sequence_file_id is not None:
-				parent_individual_sequence_file = self.queryTable(IndividualSequenceFile).get(parent_individual_sequence_file_id)
+				parent_individual_sequence_file = self.queryTable(IndividualSequenceFile).\
+					get(parent_individual_sequence_file_id)
 			else:
-				sys.stderr.write("Warning: parent individual_sequence_id is None. No IndividualSequenceFile instance to be created.\n")
+				sys.stderr.write("Warning: parent individual_sequence_id is None. "
+					"No IndividualSequenceFile instance to be created.\n")
 				return None
-		
 		
 		parent = parent_individual_sequence_file
 		
 		
-		db_entry = self.getIndividualSequenceFile(individual_sequence_id, library=parent.library, mate_id=parent.mate_id, \
-									split_order=parent.split_order, format=parent.format,\
-									filtered=filtered, parent_individual_sequence_file_id=parent.id, \
-									individual_sequence_file_raw_id=parent.individual_sequence_file_raw_id,\
-									quality_score_format=quality_score_format)
+		db_entry = self.getIndividualSequenceFile(individual_sequence_id, 
+			library=parent.library, mate_id=parent.mate_id, \
+			split_order=parent.split_order, format=parent.format,\
+			filtered=filtered, parent_individual_sequence_file_id=parent.id, \
+			individual_sequence_file_raw_id=parent.individual_sequence_file_raw_id,\
+			quality_score_format=quality_score_format)
 		return db_entry
 	
 	def copyParentIndividualAlignment(self, parent_individual_alignment=None, \
-									parent_individual_alignment_id=None, mask_genotype_method=None, \
-									mask_genotype_method_id=None, data_dir=None, local_realigned=0, read_group=None,\
-									reduce_reads=None):
+		parent_individual_alignment_id=None, mask_genotype_method=None, \
+		mask_genotype_method_id=None, data_dir=None, local_realigned=0, read_group=None,\
+		reduce_reads=None):
 		"""
 		Examples:
 			in AlignmentReduceReadsWorkflow.py
-			new_individual_alignment = self.db.copyParentIndividualAlignment(parent_individual_alignment_id=individual_alignment.id,\
-										data_dir=self.data_dir, local_realigned=individual_alignment.local_realigned,\
-										reduce_reads=1)
+			new_individual_alignment = self.db.copyParentIndividualAlignment(
+				parent_individual_alignment_id=individual_alignment.id,\
+				data_dir=self.data_dir, local_realigned=individual_alignment.local_realigned,\
+				reduce_reads=1)
 		
 		2013.04.11 added argument reduce_reads
 		2013.04.09 added argument read_group
@@ -3102,25 +3117,26 @@ class SunsetDB(Database):
 		ref_sequence = parent_individual_alignment.ref_sequence
 		alignment_method = parent_individual_alignment.alignment_method
 		individual_alignment = self.getAlignment(individual_code=individual_sequence.individual.code, \
-								individual_sequence_id=individual_sequence.id,\
-					path_to_original_alignment=None, sequencer_id=individual_sequence.sequencer_id, \
-					sequence_type_id=individual_sequence.sequence_type_id, sequence_format=individual_sequence.format, \
-					ref_individual_sequence_id=ref_sequence.id, \
-					alignment_method_name=alignment_method.short_name, alignment_format=parent_individual_alignment.format,\
-					individual_sequence_filtered=individual_sequence.filtered, read_group_added=1,
-					data_dir=data_dir, outdated_index=0, mask_genotype_method_id=getattr(mask_genotype_method, 'id', None),\
-					parent_individual_alignment_id=parent_individual_alignment.id,\
-					individual_sequence_file_raw_id=parent_individual_alignment.individual_sequence_file_raw_id,\
-					local_realigned=local_realigned, read_group=read_group, reduce_reads=reduce_reads)
-					#read-group addition is part of pipeline
+			individual_sequence_id=individual_sequence.id,\
+			path_to_original_alignment=None, sequencer_id=individual_sequence.sequencer_id, \
+			sequence_type_id=individual_sequence.sequence_type_id, sequence_format=individual_sequence.format, \
+			ref_individual_sequence_id=ref_sequence.id, \
+			alignment_method_name=alignment_method.short_name, alignment_format=parent_individual_alignment.format,\
+			individual_sequence_filtered=individual_sequence.filtered, read_group_added=1,
+			data_dir=data_dir, outdated_index=0, mask_genotype_method_id=getattr(mask_genotype_method, 'id', None),\
+			parent_individual_alignment_id=parent_individual_alignment.id,\
+			individual_sequence_file_raw_id=parent_individual_alignment.individual_sequence_file_raw_id,\
+			local_realigned=local_realigned, read_group=read_group, reduce_reads=reduce_reads)
+			#read-group addition is part of pipeline
 		#if not individual_alignment.path:
 		#	individual_alignment.path = individual_alignment.constructRelativePath()
 		#	session.add(individual_alignment)
 		#	session.flush()
 		return individual_alignment
 	
-	def getIndividualSequenceFileRaw(self, individual_sequence_id=None, library=None, md5sum=None, path=None, \
-									original_path=None, mate_id=None, file_size=None):
+	def getIndividualSequenceFileRaw(self, individual_sequence_id=None, 
+		library=None, md5sum=None, path=None, \
+		original_path=None, mate_id=None, file_size=None):
 		"""
 		2013.04.03 argument original_path
 		2012.7.12 add argument file_size
@@ -3129,7 +3145,8 @@ class SunsetDB(Database):
 		2012.2.14
 		"""
 		#query first
-		query = self.queryTable(IndividualSequenceFileRaw).filter_by(individual_sequence_id=individual_sequence_id)
+		query = self.queryTable(IndividualSequenceFileRaw).\
+			filter_by(individual_sequence_id=individual_sequence_id)
 		if library:
 			query = query.filter_by(library=library)
 		if md5sum:
@@ -3150,14 +3167,16 @@ class SunsetDB(Database):
 					file_size = utils.getFileOrFolderSize(path)
 				elif original_path and os.path.isfile(original_path):
 					file_size = utils.getFileOrFolderSize(path)
-			db_entry = IndividualSequenceFileRaw(individual_sequence_id=individual_sequence_id, library=library, md5sum=md5sum, \
-										path=path, mate_id=mate_id, file_size=file_size, original_path=original_path)
+			db_entry = IndividualSequenceFileRaw(individual_sequence_id=individual_sequence_id, 
+				library=library, md5sum=md5sum, \
+				path=path, mate_id=mate_id, file_size=file_size, original_path=original_path)
 			self.session.add(db_entry)
 			self.session.flush()
 		return db_entry
 	
-	def registerOriginalSequenceFileToDB(self, original_sequence_filepath=None, library=None, 
-										 individual_sequence_id=None, mate_id=None, md5sum=None):
+	def registerOriginalSequenceFileToDB(self, original_sequence_filepath=None, 
+		library=None, 
+		individual_sequence_id=None, mate_id=None, md5sum=None):
 		"""
 		20190206 moved from RegisterIndividualSequence2DB.py
 		20130403 original_sequence_filepath passed to original_path
@@ -3169,53 +3188,59 @@ class SunsetDB(Database):
 				if not, add it into db
 				if yes, exit the program. no more work.
 		"""
-		sys.stderr.write("Register the original sequence file %s into db ..."%(original_sequence_filepath))
+		logging.info("Register the original sequence file %s into db ..."%(original_sequence_filepath))
 		if not md5sum:
 			md5sum = utils.get_md5sum(original_sequence_filepath)
 		db_entry = self.queryTable(IndividualSequenceFileRaw).filter_by(md5sum=md5sum).first()
 		if db_entry:
-			sys.stderr.write("Warning: another file %s with the identical md5sum %s (library=%s) as this file %s is already in db.\n"%\
-								(db_entry.path, md5sum, library, original_sequence_filepath))
+			logging.warn("Another file %s with the identical md5sum %s (library=%s) as this file %s is already in db."%\
+				(db_entry.path, md5sum, library, original_sequence_filepath))
 		else:
 			file_size = utils.getFileOrFolderSize(original_sequence_filepath)
-			db_entry = self.getIndividualSequenceFileRaw(individual_sequence_id=individual_sequence_id, library=library, md5sum=md5sum,
-											original_path=original_sequence_filepath, mate_id=mate_id, file_size=file_size)
+			db_entry = self.getIndividualSequenceFileRaw(individual_sequence_id=individual_sequence_id,
+				library=library, md5sum=md5sum,
+				original_path=original_sequence_filepath, mate_id=mate_id, file_size=file_size)
 		mate_id2split_order_ls = {}
 		for individual_sequence_file in db_entry.individual_sequence_file_ls:
 			mate_id = individual_sequence_file.mate_id
-			if mate_id is None:	#sequence entries without mate_id are just from one mate.
+			if mate_id is None:
+				#sequence entries without mate_id are just from one mate.
 				mate_id = 1
 			if mate_id not in mate_id2split_order_ls:
 				mate_id2split_order_ls[mate_id] = []
 			mate_id2split_order_ls[mate_id].append(individual_sequence_file.split_order)
 		if len(mate_id2split_order_ls)>2:
-			sys.stderr.write("Error: db sequence files spawned from file %s (md5sum=%s) form %s(>2) mates.\
-				Unless this bam file contains reads from >2 mates, reads from this file should be stored in db already.\n"%\
-				(db_entry.path, md5sum, len(mate_id2split_order_ls)))
+			logging.error(f"Something WRONG. DB sequence files spawned from file {db_entry.path} "
+				f"(md5sum={md5sum}) are from {len(mate_id2split_order_ls)}(>2) mates. "
+				"Unless this bam/fastq file contains reads from >2 mates, "
+				"reads from this file should be stored in db already.")
 			sys.exit(4)
 		return db_entry
 	
-	def getIndividualSequenceFile(self, individual_sequence_id, library=None, mate_id=None, split_order=None, format=None,\
-							filtered=0, parent_individual_sequence_file_id=None, individual_sequence_file_raw_id=None,\
-							quality_score_format='Standard'):
+	def getIndividualSequenceFile(self, individual_sequence_id, library=None, 
+		mate_id=None, split_order=None, format=None,\
+		filtered=0, parent_individual_sequence_file_id=None, individual_sequence_file_raw_id=None,\
+		quality_score_format='Standard'):
 		"""
 		2012.5.2
 			add all filter_by() straight to self.queryTable(IndividualSequenceFile)
 		2012.2.14
 		"""
 		#query first
-		query = self.queryTable(IndividualSequenceFile).filter_by(individual_sequence_id=individual_sequence_id).filter_by(library=library).\
-					filter_by(mate_id=mate_id).filter_by(split_order=split_order).filter_by(format=format).filter_by(filtered=filtered).\
-					filter_by(parent_individual_sequence_file_id=parent_individual_sequence_file_id).\
-					filter_by(individual_sequence_file_raw_id=individual_sequence_file_raw_id)
+		query = self.queryTable(IndividualSequenceFile).\
+			filter_by(individual_sequence_id=individual_sequence_id).filter_by(library=library).\
+			filter_by(mate_id=mate_id).filter_by(split_order=split_order).\
+			filter_by(format=format).filter_by(filtered=filtered).\
+			filter_by(parent_individual_sequence_file_id=parent_individual_sequence_file_id).\
+			filter_by(individual_sequence_file_raw_id=individual_sequence_file_raw_id)
 		db_entry = query.first()
 		if not db_entry:
 			db_entry = IndividualSequenceFile(individual_sequence_id=individual_sequence_id,\
-							library=library, mate_id=mate_id, split_order=split_order,\
-							format=format, filtered=filtered, \
-							parent_individual_sequence_file_id=parent_individual_sequence_file_id,\
-							individual_sequence_file_raw_id=individual_sequence_file_raw_id,\
-							quality_score_format=quality_score_format)
+				library=library, mate_id=mate_id, split_order=split_order,\
+				format=format, filtered=filtered, \
+				parent_individual_sequence_file_id=parent_individual_sequence_file_id,\
+				individual_sequence_file_raw_id=individual_sequence_file_raw_id,\
+				quality_score_format=quality_score_format)
 			self.session.add(db_entry)
 			self.session.flush()
 		return db_entry
