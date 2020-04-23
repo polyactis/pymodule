@@ -2740,30 +2740,23 @@ class SunsetDB(Database):
 			self.session.flush()
 		return db_entry
 	
-	def getIndividual(self, code=None, name=None, sex=None, age=None, 
-		latitude=None, longitude=None, \
-		altitude=None, site=None, site_name=None, site_id=None,\
-		city=None, stateprovince=None, country_name=None, \
-		collection_date=None, collector=None, \
-		tax_id=None, birthdate=None, comment=None, study=None, study_id=None):
+	def getIndividual(self, code: str=None, name: str=None, sex=None, age=None, 
+		latitude: float=None, longitude: float=None, \
+		altitude: float=None, 
+		site: Site=None, site_name: str=None, site_id: int=None,\
+		city: str=None, stateprovince: str=None, country_name: str=None, \
+		collection_date=None, collector=None,
+		study: Study=None, study_name: str=None, study_id: int=None,\
+		tax_id: int=None, birthdate=None, comment:str=None):
 		"""
 		Examples:
 			individual = db_vervet.getIndividual(code=code)
 			individual = db_vervet.getIndividual(code=code, site=None,
 				site_name='YBK', country_name='Gambia')
 			
-		2012.12.6 in the case of creating a new individual, and site is None 
-			(to be created on the fly),
-			site_name and country_name must be not null.
-			latitude, longitude, altitude is no longer part of table Individual.
-		2011-9-8
-			add argument comment
-		2011-5-6
-			add birthdate
-		2011-5-5
-			take first letter of sex and upper case.
-		2011-2-11
-			code can't be None
+		2012.12.6 If site is None and is to be created,
+			site_name and country_name must be not None.
+		code can't be None.
 		"""
 		db_entry = None
 		if not db_entry and code is not None:
@@ -2780,26 +2773,28 @@ class SunsetDB(Database):
 				site = self.getSite(description=site_name, city=city, \
 					stateprovince=stateprovince, country_name=country_name,\
 					latitude=latitude, longitude=longitude, altitude=altitude)
+			if not study and study_name:
+				study = self.getStudy(short_name=study_name)
 			db_entry = Individual(code=code, name=name, sex=sex, age=age,
 				site=site, site_id=site_id,\
 				collection_date=collection_date, collector=collector,\
-				tax_id=tax_id, birthdate=birthdate,\
-				comment=comment, study=study, study_id=study_id)
+				tax_id=tax_id, birthdate=birthdate, 
+				study=study, study_id=study_id,\
+				comment=comment)
 			self.session.add(db_entry)
 			self.session.flush()
 		return db_entry
 	
-	def checkIndividualSequence(self, individual_id=None, sequencer_id=None,
-		sequencer_name=None, \
-		sequence_type_name=None, sequence_type_id=None, \
-		sequence_format=None, tissue_name=None, tissue_id=None, \
-		filtered=0,\
-		parent_individual_sequence_id=None,\
-		no_of_chromosomes=None, sequence_batch_id=None, version=None, \
-		is_contaminated=0, outdated_index=0, returnFirstEntry=True):
+	def checkIndividualSequence(self, individual_id: int=None, 
+		sequencer_id: int=None, sequencer_name: str=None, \
+		sequence_type_name: str=None, sequence_type_id: int=None, \
+		sequence_format: str=None, tissue_name: str=None, tissue_id: int=None, \
+		filtered: int=0,\
+		parent_individual_sequence_id: int=None,\
+		no_of_chromosomes: int=None, sequence_batch_id: int=None, version=None, \
+		is_contaminated: int=0, outdated_index: int=0, 
+		returnFirstEntry:bool=True):
 		"""
-		2013.04.03 bugfix
-		2013.3.15
 		"""
 		if sequencer_id is None and sequencer_name:
 			sequencer = self.getSequencer(short_name=sequencer_name)
@@ -2934,33 +2929,25 @@ class SunsetDB(Database):
 		db_entry = query.first()
 		return db_entry
 	
-	def getIndividualSequence(self, individual_id=None, sequencer_id=None, sequencer_name=None, \
-							sequence_type_name=None, sequence_type_id=None, \
-						sequence_format=None, path_to_original_sequence=None, copy_original_file=False,\
-						tissue_name=None, tissue_id=None, \
-						coverage=None,\
-						subFolder=None, quality_score_format="Standard", filtered=0,\
-						parent_individual_sequence_id=None,\
-						read_count=None, no_of_chromosomes=None, sequence_batch_id=None, version=None, data_dir=None,\
-						is_contaminated=0, outdated_index=0, comment=None):
+	def getIndividualSequence(self, individual_id:int=None, 
+		sequencer_id:int=None, sequencer_name:str=None, \
+		sequence_type_name:str=None, sequence_type_id:int=None, \
+		sequence_format:str=None, path_to_original_sequence=None, 
+		copy_original_file:bool=False,\
+		tissue_name:str=None, tissue_id:int=None, \
+		coverage:float=None,\
+		quality_score_format:str="Standard", filtered:int=0,\
+		parent_individual_sequence_id:int=None,\
+		read_count:int=None, no_of_chromosomes:int=None, 
+		sequence_batch_id:int=None,
+		version:int=None,
+		is_contaminated=0, outdated_index=0, comment=None, 
+		subFolder=None, data_dir=None):
 		"""
-		2013.3.15 added is_contaminated, outdated_index
-		2013.3.13 read_count, no_of_chromosomes, sequencer_id, sequence_type_id, sequence_batch_id, version
-		2012.6.3
-			columns that are None become part of the db query to see if entry is in db already
-		2012.2.24
-			add argument data_dir
-		2012.2.10
-			path_to_original_sequence is only given when you want to copy the file to db storage.
-			add argument parent_individual_sequence_id
-		2011-8-30
-			add argument filtered
-		2011-8-18
-			add argument quality_score_format, default to "Standard"
-		2011-8-3
-			the path field is now considered a folder (rather than a file).
-		2011-5-7
-			subFolder is the name of the folder in self.data_dir that is used to hold the sequence files.
+		Columns that are None will be part of the db query to see if entry is in db already
+		The path_to_original_sequence is only given when you want to copy the file to db storage.
+		The path field is now considered a folder (rather than a file).
+		subFolder is the name of the folder in data_dir that is used to hold the sequence files.
 		"""
 		if not data_dir:
 			data_dir = self.data_dir
@@ -2976,41 +2963,44 @@ class SunsetDB(Database):
 			if sequence_type:
 				sequence_type_id=sequence_type.id
 		
-		db_entry = self.checkIndividualSequence(individual_id=individual_id, sequencer_id=sequencer_id, \
-						sequencer_name=sequencer_name, sequence_type_name=sequence_type_name, \
-						sequence_type_id=sequence_type_id, sequence_format=sequence_format, tissue_name=tissue_name,\
-						tissue_id=tissue_id, filtered=filtered, \
-						parent_individual_sequence_id=parent_individual_sequence_id, \
-						no_of_chromosomes=no_of_chromosomes, sequence_batch_id=sequence_batch_id, \
-						version=version, is_contaminated=is_contaminated, outdated_index=outdated_index)
+		db_entry = self.checkIndividualSequence(individual_id=individual_id, 
+			sequencer_id=sequencer_id, \
+			sequencer_name=sequencer_name, sequence_type_name=sequence_type_name, \
+			sequence_type_id=sequence_type_id, sequence_format=sequence_format, 
+			tissue_name=tissue_name, tissue_id=tissue_id, filtered=filtered, \
+			parent_individual_sequence_id=parent_individual_sequence_id, \
+			no_of_chromosomes=no_of_chromosomes, sequence_batch_id=sequence_batch_id, \
+			version=version, is_contaminated=is_contaminated, outdated_index=outdated_index)
 		if not db_entry:
 			tissue = self.getTissue(db_entry_id=tissue_id, short_name=tissue_name)
 			db_entry = IndividualSequence(individual_id=individual_id, sequencer_id=sequencer_id, \
-										sequence_type_id=sequence_type_id,\
-									format=sequence_format, original_path=path_to_original_sequence,\
-									tissue=tissue, coverage=coverage, \
-									quality_score_format=quality_score_format, filtered=filtered,\
-									parent_individual_sequence_id=parent_individual_sequence_id, \
-									read_count=read_count, no_of_chromosomes=no_of_chromosomes,\
-									sequence_batch_id=sequence_batch_id, version=version, \
-									is_contaminated=is_contaminated, outdated_index=outdated_index,\
-									comment=comment)
+				sequence_type_id=sequence_type_id,\
+				format=sequence_format, original_path=path_to_original_sequence,\
+				tissue=tissue, coverage=coverage, \
+				quality_score_format=quality_score_format, filtered=filtered,\
+				parent_individual_sequence_id=parent_individual_sequence_id, \
+				read_count=read_count, no_of_chromosomes=no_of_chromosomes,\
+				sequence_batch_id=sequence_batch_id, version=version, \
+				is_contaminated=is_contaminated, outdated_index=outdated_index,\
+				comment=comment)
 			#to make db_entry.id valid
 			self.session.add(db_entry)
 			self.session.flush()
 			
 			dst_relative_path = db_entry.constructRelativePathForIndividualSequence(subFolder=subFolder)
-			
 			#update its path in db to the relative path
 			db_entry.path = dst_relative_path
 			
 			dst_abs_path = os.path.join(data_dir, dst_relative_path)
-			if copy_original_file and path_to_original_sequence and (os.path.isfile(path_to_original_sequence) or os.path.isdir(path_to_original_sequence)):
+			if copy_original_file and path_to_original_sequence and \
+				(os.path.isfile(path_to_original_sequence) or os.path.isdir(path_to_original_sequence)):
 				dst_dir = os.path.join(data_dir, subFolder)
-				if not os.path.isdir(dst_dir):	#the upper directory has to be created at this moment.
+				if not os.path.isdir(dst_dir):
+					#the upper directory has to be created at this moment.
 					commandline = 'mkdir -p %s'%(dst_dir)
 					return_data = runLocalCommand(commandline, report_stderr=True, report_stdout=True)
-				if not os.path.isdir(dst_abs_path):	#2011-8-3 create the directory to host all sequences.
+				if not os.path.isdir(dst_abs_path):
+					#2011-8-3 create the directory to host all sequences.
 					commandline = 'mkdir -p %s'%(dst_abs_path)
 					return_data = runLocalCommand(commandline, report_stderr=True, report_stdout=True)
 				commandline = 'cp -r %s %s'%(path_to_original_sequence, dst_abs_path)
@@ -3021,8 +3011,7 @@ class SunsetDB(Database):
 
 	def getIndividualDBEntryViaDBID(self, db_id=None):
 		"""
-		2012.9.6
-			has a cache inside
+		Has a cache inside
 		"""
 		if db_id in self.dbID2monkeyDBEntry:
 			return self.dbID2monkeyDBEntry.get(db_id)
@@ -3720,12 +3709,11 @@ class SunsetDB(Database):
 			self.session.flush()
 		return db_entry
 	
-	def getSite(self, short_name=None, description=None, city=None, stateprovince=None, region=None, country_name=None, \
-			latitude=None, longitude=None, altitude=None, study_id=None):
+	def getSite(self, short_name:str=None, description=None, city=None, 
+		stateprovince=None, region=None, country_name=None, \
+		latitude:float=None, longitude:float=None, altitude:float=None,
+		study_id:int=None):
 		"""
-		20170412 added study_id
-		20121206 added argument short_name
-		20110428
 		"""
 		if country_name:
 			country = self.getCountry(country_name=country_name)
@@ -3760,16 +3748,17 @@ class SunsetDB(Database):
 			query = query.filter_by(study_id=study_id)
 		db_entry = query.first()
 		if not db_entry:
-			db_entry = Site(short_name=short_name, description=description, city=city, stateprovince=stateprovince, \
-						region=region, country=country, \
-						latitude=latitude, longitude=longitude, altitude=altitude, study_id=study_id)
+			db_entry = Site(short_name=short_name, description=description,
+				city=city, stateprovince=stateprovince, \
+				region=region, country=country, \
+				latitude=latitude, longitude=longitude, altitude=altitude,
+				study_id=study_id)
 			self.session.add(db_entry)
 			self.session.flush()
 		return db_entry
 	
-	def getStudy(self, short_name=None, description=None):
+	def getStudy(self, short_name: str=None, description: str=None):
 		"""
-		20170412
 		"""
 		db_entry = self.queryTable(Study).filter_by(short_name=short_name).first()
 		if not db_entry:
@@ -3780,8 +3769,7 @@ class SunsetDB(Database):
 	
 	def getTissue(self, db_entry_id=None, short_name=None, description=None):
 		"""
-		2011-5-9
-			fetch a tissue entry (create one if none existent)
+		fetch a tissue entry (create one if none existent)
 		"""
 		db_entry=None
 		if db_entry_id:
