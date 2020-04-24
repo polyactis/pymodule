@@ -290,7 +290,7 @@ class Database(object):
 			repeated, a number closer to the default of 100 is likely more appropriate:
 		"""
 		if self._engine is None:
-			if self.drivername=='postgresql':
+			if self.schema:
 				#schema set at the engine level
 				self._engine = create_engine(self.url, pool_recycle=self.pool_recycle, 
 					echo=self.sql_echo, executemany_mode='values',
