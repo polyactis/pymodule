@@ -12,7 +12,7 @@ this program will
         Update individual_sequence.path if it's none
     3. If commit, the db actions would be committed
         and files will moved to db-affiliated file-system.
-    4. Output the whole unpack workflow to an xml output file.
+    4. Output the whole workflow to an xml output file.
 
 This program has to be run on the pegasus submission host.
 Option "--commit" commits the db transaction.
@@ -38,7 +38,7 @@ Examples:
         -t /u/home/eeskin/polyacti/NetworkData/vervet/db/ -u yh
         --sample_sheet xfer.genome.wustl.edu/gxfer3/46019922623327/Vervet_12_4X_README.tsv
         -z dl324b-1.cmb.usc.edu -l hoffman2
-        -o unpackAndAdd12_2007Monkeys2DB_hoffman2.xml
+        -o Import2007Monkeys2DB_hoffman2.xml
         --commit 
     
     # 20120430 run on hcondor, to import McGill 1X data (-y2), (-e) is not necessary
@@ -46,7 +46,7 @@ Examples:
     #   --needSSHDBTunnel means it needs sshTunnel for db-interacting jobs.
     %s
         -i raw_sequence/McGill96_1X/ -z localhost -u yh -j hcondor -l hcondor --commit
-        -o dags/AddReads2DB/unpackMcGill96_1X.xml -y2 --needSSHDBTunnel 
+        -o dags/AddReads2DB/ImportMcGill96_1X.xml -y2 --needSSHDBTunnel 
         -D NetworkData/vervet/db/ -t NetworkData/vervet/db/
         -e /u/home/eeskin/polyacti
     
@@ -55,7 +55,7 @@ Examples:
     #  later manually changed its tissue id to distinguish them from DNA data (below).
     %s -i SIVpilot/by.Charles.Demultiplexed/
         -z localhost -u yh -j hcondor -l hcondor
-        --commit -o dags/AddReads2DB/unpack20SouthAfricaSIVmonkeys.xml -y3 --needSSHDBTunnel
+        --commit -o dags/AddReads2DB/Import20SouthAfricaSIVmonkeys.xml -y3 --needSSHDBTunnel
         -D /u/home/eeskin/polyacti/NetworkData/vervet/db/
         -t /u/home/eeskin/polyacti/NetworkData/vervet/db/ -e /u/home/eeskin/polyacti 
         --sample_sheet by.Charles.Demultiplexed/sampleIds.txt
@@ -67,20 +67,21 @@ Examples:
     %s
         -i ~namtran/panasas/Data/HiSeqRaw/Ania/SIVpilot/LowpassWGS/Demultiplexed/
         -z localhost -u yh -j hcondor -l hcondor --commit
-        -o dags/unpack20SouthAfricaSIVmonkeysDNA.xml
+        -o dags/Import20SouthAfricaSIVmonkeysDNA.xml
         -y4 --needSSHDBTunnel -D ～/NetworkData/vervet/db/
         -t ～/NetworkData/vervet/db/ -e ～ --minNoOfReads 4000000
         
     # 2017.04.28 added TCGA sequences (.bam) into db
     %s -i /y/Sunset/tcga/HNSC_TCGA/
         --hostname pdc -u huangyu -j condor -l condor 
-        -o dags/unpackTCGAHNSCSamples.xml -y6
+        -o dags/ImportTCGAHNSCSamples.xml -y6
         --tissueSourceSiteFname /y/Sunset/tcga/tcga_code_tables/tissueSourceSite.tsv 
         --minNoOfReads 8000000 --dbname pmdb -k sunset --commit
 
 """
 import sys, os
-__doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0])
+__doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], \
+    sys.argv[0], sys.argv[0])
 
 import copy, re, csv
 import pandas as pd
@@ -114,8 +115,8 @@ class ImportIndividualSequence2DB(ParentClass):
         ("sequence_format", 1, ): ["fastq", 'f', 1, 'Fasta, fastq, etc.'],\
         ("tissueSourceSiteFname", 0, ): ["", '', 1, 'TCGA tissue source site file'],\
         ('inputType', 1, int): [1, 'y', 1, 'input type. 1: TCGA bam files; 2: HCC1187 bam files', ],\
-        ('study_id', 1, int): [None, '', 1, 'Field study.id from db, used to group individuals.', ],\
-        ('site_id', 1, int): [None, '', 1, 'Field site.id from db, used to group individuals.', ],\
+        ('study_id', 0, int): [None, '', 1, 'Field study.id from db, used to group individuals.', ],\
+        ('site_id', 0, int): [None, '', 1, 'Field site.id from db, used to group individuals.', ],\
         })
     
     def __init__(self,  **keywords):
@@ -135,9 +136,9 @@ class ImportIndividualSequence2DB(ParentClass):
         Establish the db_main connection for all derivative classes.
         """
         ParentClass.connectDB(self)
-        self.db_main = SunsetDB.SunsetDB(drivername=self.drivername, db_user=self.db_user,
-                    db_passwd=self.db_passwd, hostname=self.hostname, \
-                    dbname=self.dbname, schema=self.schema)
+        self.db_main = SunsetDB.SunsetDB(drivername=self.drivername, \
+            hostname=self.hostname, dbname=self.dbname, schema=self.schema,
+            db_user=self.db_user, db_passwd=self.db_passwd)
         self.db_main.setup(create_tables=False)
 
         if not self.data_dir:
