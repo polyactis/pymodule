@@ -23,7 +23,8 @@ Option "--commit" commits the db transaction.
 
 Examples:
     # run the program on crocea and output a local condor workflow
-    %s -i ~/NetworkData/vervet/VRC/ -t /u/home/eeskintmp/polyacti/NetworkData/vervet/db/ 
+    %s -i ~/NetworkData/vervet/VRC/ 
+        -t /u/home/eeskintmp/polyacti/NetworkData/vervet/db/ 
         --sample_sheet ~/script/vervet/data/VRC_sequencing_20110802.tsv
         -u yh --commit -z dl324b-1.cmb.usc.edu -o /tmp/condorpool.xml
 
@@ -31,7 +32,8 @@ Examples:
     #  (doing this because they are not located on crocea)
     find NetworkData/vervet/raw_sequence/ -name *.bam  > vervet/raw_sequence/bamFileList.txt
     # run the program on the crocea and output a hoffman2 workflow. (with db commit)
-    %s -i ~/mnt/h2/u/home/eeskintmp/polyacti/NetworkData/vervet/raw_sequence/bamFileList.txt
+    %s
+        -i ~/vervet/raw_sequence/bamFileList.txt
         -e /u/home/eeskin/polyacti/
         -t /u/home/eeskin/polyacti/NetworkData/vervet/db/ -u yh
         --sample_sheet xfer.genome.wustl.edu/gxfer3/46019922623327/Vervet_12_4X_README.tsv
@@ -42,7 +44,8 @@ Examples:
     # 20120430 run on hcondor, to import McGill 1X data (-y2), (-e) is not necessary
     #   because it's running on hoffman2 and can recognize home folder.
     #   --needSSHDBTunnel means it needs sshTunnel for db-interacting jobs.
-    %s -i raw_sequence/McGill96_1X/ -z localhost -u yh -j hcondor -l hcondor --commit
+    %s
+        -i raw_sequence/McGill96_1X/ -z localhost -u yh -j hcondor -l hcondor --commit
         -o dags/AddReads2DB/unpackMcGill96_1X.xml -y2 --needSSHDBTunnel 
         -D NetworkData/vervet/db/ -t NetworkData/vervet/db/
         -e /u/home/eeskin/polyacti
@@ -50,7 +53,8 @@ Examples:
     # 20120602 add 18 south-african monkeys RNA read data (-y3),
     #  sequenced by Joe DeYoung's core (from Nam's folder),
     #  later manually changed its tissue id to distinguish them from DNA data (below).
-    %s -i SIVpilot/by.Charles.Demultiplexed/ -z localhost -u yh -j hcondor -l hcondor
+    %s -i SIVpilot/by.Charles.Demultiplexed/
+        -z localhost -u yh -j hcondor -l hcondor
         --commit -o dags/AddReads2DB/unpack20SouthAfricaSIVmonkeys.xml -y3 --needSSHDBTunnel
         -D /u/home/eeskin/polyacti/NetworkData/vervet/db/
         -t /u/home/eeskin/polyacti/NetworkData/vervet/db/ -e /u/home/eeskin/polyacti 
@@ -60,14 +64,16 @@ Examples:
     # 20120603 add 24 south-african monkeys DNA read data (-y4),
     #  sequenced by Joe DeYoung's core (from Nam's folder)
     #   --minNoOfReads 4000000
-    %s -i ~namtran/panasas/Data/HiSeqRaw/Ania/SIVpilot/LowpassWGS/Demultiplexed/
+    %s
+        -i ~namtran/panasas/Data/HiSeqRaw/Ania/SIVpilot/LowpassWGS/Demultiplexed/
         -z localhost -u yh -j hcondor -l hcondor --commit
         -o dags/unpack20SouthAfricaSIVmonkeysDNA.xml
         -y4 --needSSHDBTunnel -D ～/NetworkData/vervet/db/
         -t ～/NetworkData/vervet/db/ -e ～ --minNoOfReads 4000000
         
     # 2017.04.28 added TCGA sequences (.bam) into db
-    %s -i /y/Sunset/tcga/HNSC_TCGA/ --hostname pdc -u huangyu -j condor -l condor 
+    %s -i /y/Sunset/tcga/HNSC_TCGA/
+        --hostname pdc -u huangyu -j condor -l condor 
         -o dags/unpackTCGAHNSCSamples.xml -y6
         --tissueSourceSiteFname /y/Sunset/tcga/tcga_code_tables/tissueSourceSite.tsv 
         --minNoOfReads 8000000 --dbname pmdb -k sunset --commit
@@ -518,18 +524,21 @@ Example ("Library" and "Bam Path" are required):
             #replace space in sample_id
             sample_id = row['sample_id'].replace(' ', '_')
             if sample_id not in sample_id2data:
-                sample_id2data[sample_id] = PassingData(sample_id=sample_id,
+                sample_id2data[sample_id] = PassingData(
+                    sample_id=sample_id,
                     study_name=row['study_name'], study_id=row['study_id'], 
-                    site_id=row['site_id'], row=row, fastq_obj_ls=[])
+                    site_id=row['site_id'], fastq_obj_ls=[])
             search_result = filename_pattern.search(row['file_path'])
             mate_id = search_result.group('mate_id')
 
             fastq_obj = PassingData(
-                abs_path = abs_path, sequence_type=row['sequence_type'],
+                abs_path = abs_path, 
                 library=None, mate_id = mate_id,
+                sequence_type=row['sequence_type'],
                 sequencer=row['sequencer'], 
                 sequence_batch_id=row['sequence_batch_id'],
                 tissue_name=row['tissue_name'], tissue_id=row['tissue_id'],
+                condition=row['condition'],
                 )
             sample_id2data[sample_id].fastq_obj_ls.append(fastq_obj)
             no_of_files +=1
@@ -553,15 +562,18 @@ Example ("Library" and "Bam Path" are required):
             individual = db_main.getIndividual(code=sample_id, tax_id=9606, 
                 study_name=sample_data.study_name, study_id=sample_data.study_id, 
                 site_id=sample_data.site_id)
+            fastq_obj_1 = sample_data.fastq_obj_ls[0]
             individual_sequence = db_main.getIndividualSequence(
                 individual_id=individual.id, 
-                sequencer_name=fastq_obj.sequencer,
-                sequence_type_name=fastq_obj.sequence_type, 
+                sequencer_name=fastq_obj_1.sequencer,
+                sequence_type_name=fastq_obj_1.sequence_type, 
                 sequence_format=self.sequence_format, 
-                path_to_original_sequence=fastq_obj.abs_path, 
+                path_to_original_sequence=fastq_obj_1.abs_path, 
                 coverage=None,
-                sequence_batch_id=fastq_obj.sequence_batch_id, 
-                tissue_name=fastq_obj.tissue_name, tissue_id=fastq_obj.tissue_id,
+                sequence_batch_id=fastq_obj_1.sequence_batch_id, 
+                tissue_name=fastq_obj_1.tissue_name, 
+                tissue_id=fastq_obj_1.tissue_id,
+                condition_name=fastq_obj_1.condition,
                 filtered=0, version=None, is_contaminated=0, outdated_index=0, 
                 data_dir=data_dir)
             
@@ -569,27 +581,15 @@ Example ("Library" and "Bam Path" are required):
             createSequenceAbsDirJob = self.addMkDirJob(outputDir=sequenceAbsDir)
             
             splitOutputDir = f'{individual_sequence.id}'
-            #Same directory containing split files from both mates is fine 
+            #One directory containing split files from both mates is fine,
             # as RegisterAndMoveSplitSequenceFiles could pick up.
             splitOutputDirJob = self.addMkDirJob(outputDir=splitOutputDir)
             for fastq_obj in sample_data.fastq_obj_ls:
                 library = fastq_obj.library
                 mate_id = fastq_obj.mate_id
                 fastq_path = fastq_obj.abs_path
-                filenameKey = (os.path.basename(fastq_path), mate_id)
-                if filenameKey in filenameKey2PegasusFile:
-                    fastqFile = filenameKey2PegasusFile.get(filenameKey)
-                    logging.error(f"Error: File {fastq_path} has been registered with sample "
-                        f"{fastqFile.sample_id}. Can't happen.")
-                    sys.exit(3)
-                    import pdb
-                    pdb.set_trace()
-                    continue
-                else:
-                    fastqFile = self.registerOneInputFile(fastq_path)
-                    fastqFile.sample_id = sample_id
-                    fastqFile.fastq_obj= fastq_obj
-                    filenameKey2PegasusFile[filenameKey] = fastqFile
+                fastqFile = self.registerOneInputFile(fastq_path)
+                fastqFile.sample_id = sample_id
             
                 splitFastQFnamePrefix = os.path.join(
                     splitOutputDir, f'{individual_sequence.id}_{mate_id}')
@@ -612,7 +612,7 @@ Example ("Library" and "Bam Path" are required):
                 if library:
                     extraArgumentList.extend(['--library', library])
                 if mate_id:
-                    extraArgumentList.append('--mate_id %s'%(mate_id))
+                    extraArgumentList.append(f'--mate_id {mate_id}')
                 
                 registerJob = self.addGenericFile2DBJob(
                     executable=self.RegisterAndMoveSplitSequenceFiles, \
@@ -640,13 +640,14 @@ Example ("Library" and "Bam Path" are required):
         sample_id2data = self.readSampleSheetFastQ_UNGC(sample_sheet)
         fastq_path_ls = self.getInputPathLsFromInput(input_path, suffixSet=set(['.fastq']),
             fakeSuffix='.gz')
-        sample_id2fastq_obj_ls = self.getSampleID2FastqObjectLsForUNGCFastQ(fastq_path_ls=fastq_path_ls, \
+        sample_id2fastq_obj_ls = self.getSampleID2FastqObjectLsForUNGCFastQ(
+            fastq_path_ls=fastq_path_ls, \
             sample_id2data=sample_id2data)
         self.addJobsToSplitAndRegisterFastQ(db_main=db_main, \
-                sample_id2fastq_obj_ls=sample_id2fastq_obj_ls, \
-                data_dir=data_dir, minNoOfReads=minNoOfReads, commit=commit,\
-                sequencer_name=sequencer_name, sequence_type_name=sequence_type_name, 
-                sequence_format=sequence_format)
+            sample_id2fastq_obj_ls=sample_id2fastq_obj_ls, \
+            data_dir=data_dir, minNoOfReads=minNoOfReads, commit=commit,\
+            sequencer_name=sequencer_name, sequence_type_name=sequence_type_name, 
+            sequence_format=sequence_format)
 
     def readSampleSheetFastQ_UNGC(self, sample_sheet=None):
         """
@@ -674,10 +675,9 @@ D1HYNACXX	2	UNGC Human Sample 1	S1	AS001A	ATTACTCG	TruSeq DNA PCR Free beta kit	
                 sample_id2data[sample_id] = PassingData(sampleName=sampleName, 
                     libraryIndexList=[])
             if sampleName!=sample_id2data[sample_id].sampleName:
-                print("Error: sample_id %s is associated with two different sample names (%s, %s)."%\
-                    (sample_id, sampleName, sample_id2data[sample_id].sampleName), 
-                    flush=True)
-                raise
+                logging.error("sample_id %s is associated with two different sample names (%s, %s)."\
+                    %(sample_id, sampleName, sample_id2data[sample_id].sampleName))
+                sys.exit(4)
             sample_id2data[sample_id].libraryIndexList.append(libraryIndex)
         
         print(f"{len(sample_id2data)} entries.", flush=True)
@@ -823,7 +823,7 @@ D1HYNACXX	2	UNGC Human Sample 1	S1	AS001A	ATTACTCG	TruSeq DNA PCR Free beta kit	
                 else:
                     sys.stderr.write("%s not in filenameSignature2SampleID.\n"%(filenameSignature))
             else:
-                sys.stderr.write("Error: can't parse sample_id, library, mate_id out of %s.\n"%fastq_path)
+                logging.error("Can't parse sample_id, library, mate_id out of %s."%fastq_path)
                 sys.exit(4)
         sys.stderr.write(" %s samples and %s files in the dictionary.\n"%(len(sample_id2fastq_obj_ls),
             real_counter))
@@ -839,7 +839,8 @@ D1HYNACXX	2	UNGC Human Sample 1	S1	AS001A	ATTACTCG	TruSeq DNA PCR Free beta kit	
         data generated by Joe DeYoung's core, demultiplexed by ICNN (Charles in particular)
         """
         filenameSignature2SampleID = self.readSampleSheet_SouthAfricanRNAFastQ(sample_sheet)
-        fastq_path_ls = self.getInputPathLsFromInput(input_path, suffixSet=set(['.fastq']), fakeSuffix='.gz')
+        fastq_path_ls = self.getInputPathLsFromInput(input_path, \
+            suffixSet=set(['.fastq']), fakeSuffix='.gz')
         sample_id2fastq_obj_ls = self.getSampleID2FastqObjectLsForSouthAfricanRNAFastQ(
             fastq_path_ls=fastq_path_ls, \
             filenameSignature2SampleID=filenameSignature2SampleID)
@@ -903,7 +904,8 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
                 print("Error: can't parse sample_id, library, mate_id out of %s."%
                     fastq_path, flush=True)
                 sys.exit(4)
-        sys.stderr.write(" %s samples and %s files in the dictionary.\n"%(len(sample_id2fastq_obj_ls), real_counter))
+        sys.stderr.write(" %s samples and %s files in the dictionary.\n"%(
+            len(sample_id2fastq_obj_ls), real_counter))
         return sample_id2fastq_obj_ls
     
     def addJobsToSplitAndRegisterFastQ(self, db_main=None, 
@@ -1056,8 +1058,10 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
             splitFastQFnamePrefix = os.path.join(splitOutputDir, 
                 '%s_%s_%s'%(individual_sequence.id, library, mate_id))
             logFile = File('%s_%s_%s.split.log'%(individual_sequence.id, library, mate_id))
-            splitReadFileJob1 = self.addSplitReadFileJob(executable=self.SplitReadFileWrapper, \
-                inputF=convertBamToFastqAndGzip_job.output1, outputFnamePrefix=splitFastQFnamePrefix, \
+            splitReadFileJob1 = self.addSplitReadFileJob(
+                executable=self.SplitReadFileWrapper, \
+                inputF=convertBamToFastqAndGzip_job.output1, 
+                outputFnamePrefix=splitFastQFnamePrefix, \
                 outputFnamePrefixTail="", minNoOfReads=minNoOfReads, \
                 logFile=logFile, parentJobLs=[convertBamToFastqAndGzip_job, splitOutputDirJob], \
                 job_max_memory=6000, walltime = 800, \

@@ -956,8 +956,10 @@ class IndividualSequence(Base, AbstractTableWithFilename):
             filename_part_ls.append("sequencer%s"%(self.sequencer_id))
         if self.sequence_type_id:
             filename_part_ls.append("seqType%s"%(self.sequence_type_id))
-        if self.tissue:
-            filename_part_ls.append("tissueID%s"%(self.tissue.id))
+        if self.tissue_id:
+            filename_part_ls.append("tissueID%s"%(self.tissue_id))
+        if self.condition_id:
+            filename_part_ls.append("conditionID%s"%(self.condition_id))
         if self.filtered is not None:
             filename_part_ls.append("filtered%s"%(self.filtered))
         if self.no_of_chromosomes is not None:
@@ -2885,10 +2887,12 @@ class SunsetDB(Database):
     def checkIndividualSequence(self, individual_id: int=None, 
         sequencer_id: int=None, sequencer_name: str=None, \
         sequence_type_name: str=None, sequence_type_id: int=None, \
-        sequence_format: str=None, tissue_name: str=None, tissue_id: int=None, \
-        filtered: int=0,\
+        sequence_format: str=None, \
+        tissue_name: str=None, tissue_id: int=None, 
+        condition_name: str=None, condition_id: int=None, 
         parent_individual_sequence_id: int=None,\
         no_of_chromosomes: int=None, sequence_batch_id: int=None, version=None, \
+        filtered: int=0,\
         is_contaminated: int=0, outdated_index: int=0, 
         returnFirstEntry:bool=True):
         """
@@ -2902,7 +2906,8 @@ class SunsetDB(Database):
             if sequence_type:
                 sequence_type_id=sequence_type.id
         
-        query = self.queryTable(IndividualSequence).filter_by(individual_id=individual_id).\
+        query = self.queryTable(IndividualSequence).\
+            filter_by(individual_id=individual_id).\
             filter_by(filtered=filtered)
         query = query.filter_by(sequencer_id=sequencer_id)
         query = query.filter_by(sequence_type_id=sequence_type_id)
@@ -2914,12 +2919,22 @@ class SunsetDB(Database):
         if tissue_name:
             tissue = self.getTissue(short_name=tissue_name)
             query = query.filter_by(tissue_id=tissue.id)
+            tissue_id = tissue.id
         elif tissue_id:
             query = query.filter_by(tissue_id=tissue_id)
         else:
             query = query.filter_by(tissue_id=None)
+        if condition_name:
+            condition = self.getCondition(short_name=condition_name)
+            query = query.filter_by(condition_id=condition.id)
+            condition_id = condition.id
+        elif condition_id:
+            query = query.filter_by(condition_id=condition_id)
+        else:
+            query = query.filter_by(condition_id=None)
         if parent_individual_sequence_id:
-            query = query.filter_by(parent_individual_sequence_id=parent_individual_sequence_id)
+            query = query.filter_by(
+                parent_individual_sequence_id=parent_individual_sequence_id)
         else:
             query = query.filter_by(parent_individual_sequence_id=None)
         
@@ -2928,7 +2943,8 @@ class SunsetDB(Database):
         else:
             query = query.filter_by(sequence_batch_id=None)
         
-        if version is not None:	#default is 1. so if argument is None, don't query it
+        if version is not None:
+            #default is 1. so if argument is None, don't query it
             query = query.filter_by(version=version)
         
         if no_of_chromosomes is not None:
@@ -2938,17 +2954,17 @@ class SunsetDB(Database):
         
         no_of_entries = query.count()
         if no_of_entries>1:
-            sys.stderr.write("Error, >1 entries (%s) returned for IndividualSequence: "
-                "(individual_id=%s, filtered=%s, "
-                "sequencer_id=%s, sequence_type_id=%s, sequence_format=%s, "
-                "is_contaminated=%s, outdated_index=%s,"
-                "tissue_id=%s, parent_individual_sequence_id=%s, "
-                "sequence_batch_id=%s, version=%s, no_of_chromosomes=%s).\n"%\
-                (no_of_entries, individual_id, filtered, sequencer_id, sequence_type_id,\
-                sequence_format, is_contaminated, outdated_index,\
-                tissue_id, parent_individual_sequence_id, sequence_batch_id, version,\
-                no_of_chromosomes))
-            raise
+            logging.error(
+                f">1 entries ({no_of_entries}) returned for IndividualSequence: "
+                f"(individual_id={individual_id}, filtered={filtered}, "
+                f"sequencer_id={sequencer_id}, sequence_type_id={sequence_type_id}, "
+                f"sequence_format={sequence_format}, "
+                f"is_contaminated={is_contaminated}, outdated_index={outdated_index},"
+                f"tissue_id={tissue_id}, condition_id={condition.id}"
+                f"parent_individual_sequence_id={parent_individual_sequence_id}, "
+                f"sequence_batch_id={sequence_batch_id}, version={version}, "
+                f"no_of_chromosomes={no_of_chromosomes}).")
+            sys.exit(5)
         if returnFirstEntry:
             db_entry = query.first()
             return db_entry
@@ -3041,11 +3057,13 @@ class SunsetDB(Database):
         sequence_format:str=None, 
         path_to_original_sequence=None, copy_original_file:bool=False,\
         tissue_name:str=None, tissue_id:int=None, \
-        coverage:float=None, quality_score_format:str="Standard", filtered:int=0,\
+        condition_name: str=None, condition_id: int=None, 
+        coverage:float=None, quality_score_format:str="Standard", 
         parent_individual_sequence_id:int=None,\
         read_count:int=None, no_of_chromosomes:int=None, 
         sequence_batch_id:int=None,
-        version:int=None, is_contaminated=0, outdated_index=0, comment=None, 
+        filtered:int=0, version:int=None, is_contaminated=0, 
+        outdated_index=0, comment=None, 
         subFolder=None, data_dir=None):
         """
         Columns that are None will be part of the db query to see if entry is in db already
@@ -3068,20 +3086,30 @@ class SunsetDB(Database):
             if sequence_type:
                 sequence_type_id=sequence_type.id
         
-        db_entry = self.checkIndividualSequence(individual_id=individual_id, 
-            sequencer_id=sequencer_id, \
-            sequencer_name=sequencer_name, sequence_type_name=sequence_type_name, \
-            sequence_type_id=sequence_type_id, sequence_format=sequence_format, 
-            tissue_name=tissue_name, tissue_id=tissue_id, filtered=filtered, \
+        db_entry = self.checkIndividualSequence(
+            individual_id=individual_id, sequencer_id=sequencer_id, \
+            sequencer_name=sequencer_name, 
+            sequence_type_name=sequence_type_name, \
+            sequence_type_id=sequence_type_id, 
+            sequence_format=sequence_format, 
+            tissue_name=tissue_name, tissue_id=tissue_id,
+            condition_name=condition_name, condition_id=condition_id,
+            filtered=filtered, \
             parent_individual_sequence_id=parent_individual_sequence_id, \
-            no_of_chromosomes=no_of_chromosomes, sequence_batch_id=sequence_batch_id, \
-            version=version, is_contaminated=is_contaminated, outdated_index=outdated_index)
+            no_of_chromosomes=no_of_chromosomes, 
+            sequence_batch_id=sequence_batch_id, \
+            version=version, is_contaminated=is_contaminated, \
+            outdated_index=outdated_index)
         if not db_entry:
             tissue = self.getTissue(db_entry_id=tissue_id, short_name=tissue_name)
-            db_entry = IndividualSequence(individual_id=individual_id, sequencer_id=sequencer_id, \
+            condition = self.getCondition(db_entry_id=condition_id, \
+                short_name=condition_name)
+            db_entry = IndividualSequence(
+                individual_id=individual_id, sequencer_id=sequencer_id, \
                 sequence_type_id=sequence_type_id,\
                 format=sequence_format, original_path=path_to_original_sequence,\
-                tissue=tissue, coverage=coverage, \
+                tissue=tissue, condition=condition,
+                coverage=coverage, \
                 quality_score_format=quality_score_format, filtered=filtered,\
                 parent_individual_sequence_id=parent_individual_sequence_id, \
                 read_count=read_count, no_of_chromosomes=no_of_chromosomes,\
@@ -3092,7 +3120,8 @@ class SunsetDB(Database):
             self.session.add(db_entry)
             self.session.flush()
             
-            dst_relative_path = db_entry.constructRelativePathForIndividualSequence(subFolder=subFolder)
+            dst_relative_path = db_entry.constructRelativePathForIndividualSequence(\
+                subFolder=subFolder)
             #update its path in db to the relative path
             db_entry.path = dst_relative_path
             
@@ -3133,10 +3162,11 @@ class SunsetDB(Database):
         subFolder='individual_sequence', quality_score_format='Standard', filtered=1,\
         data_dir=None):
         """
-        call getIndividualSequence to construct individual_sequence, rather than construct it from here.
+        call getIndividualSequence to construct individual_sequence,
+            rather than construct it from here.
         2012.2.10
-            constructRelativePathForIndividualSequence is now moved to Table IndividualSequence
-            add argument filtered
+            constructRelativePathForIndividualSequence is now moved to
+             Table IndividualSequence.
         2011-9-1
             add quality_score_format
         2011-8-11
@@ -3154,8 +3184,10 @@ class SunsetDB(Database):
             individual_id=parent_individual_sequence.individual_id, \
             sequencer_id=parent_individual_sequence.sequencer.id, \
             sequence_type_id=parent_individual_sequence.sequence_type.id,\
-            sequence_format=parent_individual_sequence.format, path_to_original_sequence=None, \
-            tissue_id=getattr(parent_individual_sequence.tissue, 'id', None), coverage=None,\
+            sequence_format=parent_individual_sequence.format, \
+            path_to_original_sequence=None, \
+            tissue_id=getattr(parent_individual_sequence.tissue, 'id', None), \
+            coverage=None,\
             quality_score_format=quality_score_format, filtered=filtered,\
             parent_individual_sequence_id=parent_individual_sequence.id, \
             data_dir=data_dir, subFolder=subFolder)
@@ -3326,7 +3358,8 @@ class SunsetDB(Database):
     
     def getIndividualSequenceFile(self, individual_sequence_id, library=None, 
         mate_id=None, split_order=None, format=None,\
-        filtered=0, parent_individual_sequence_file_id=None, individual_sequence_file_raw_id=None,\
+        filtered=0, parent_individual_sequence_file_id=None, 
+        individual_sequence_file_raw_id=None,\
         quality_score_format='Standard'):
         """
         2012.5.2
@@ -3927,7 +3960,25 @@ class SunsetDB(Database):
             self.session.add(db_entry)
             self.session.flush()
         return db_entry
-    
+
+    def getCondition(self, db_entry_id=None, short_name=None, description=None):
+        """
+        fetch a condition entry (create one if none existent)
+        """
+        db_entry=None
+        if db_entry_id:
+            db_entry = self.queryTable(Condition).get(db_entry_id)
+        
+        if not db_entry and short_name:
+            db_entry = self.queryTable(Condition).\
+                filter_by(short_name=short_name).first()
+        if not db_entry and (db_entry_id or short_name):
+            db_entry = Condition(id=db_entry_id, short_name=short_name, \
+                description=description)
+            self.session.add(db_entry)
+            self.session.flush()
+        return db_entry
+
     def getTissue(self, db_entry_id=None, short_name=None, description=None):
         """
         fetch a tissue entry (create one if none existent)
@@ -3937,9 +3988,11 @@ class SunsetDB(Database):
             db_entry = self.queryTable(Tissue).get(db_entry_id)
         
         if not db_entry and short_name:
-            db_entry = self.queryTable(Tissue).filter_by(short_name=short_name).first()
+            db_entry = self.queryTable(Tissue).\
+                filter_by(short_name=short_name).first()
         if not db_entry and (db_entry_id or short_name):
-            db_entry = Tissue(id=db_entry_id, short_name=short_name, description=description)
+            db_entry = Tissue(id=db_entry_id, short_name=short_name, \
+                description=description)
             self.session.add(db_entry)
             self.session.flush()
         return db_entry
