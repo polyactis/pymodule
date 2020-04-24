@@ -134,7 +134,7 @@ class SunsetDB(Database):
         Database.__init__(self, **keywords)
         ##self.setup_engine()    #2012.12.18 it needs __metadata__, __session__ from each db-definition file to be ready. can't be run here.
         self.READMEClass = README    #2012.12.18 required to figure out data_dir
-        self.dbID2monkeyDBEntry = {}
+        self.dbID2indEntry = {}
 
     def getCountry(self, country_name=None, capital=None, abbr=None, latitude=None, longitude=None):
         """

@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """
 2008-04-28
-A wrapper on top of sqlalchemy around a database. Mostly copied from collective.lead.Database. Can't directly use it because
-of trouble in understanding how to use adapter involved in TreadlocalDatabaseTransactions.
+A wrapper on top of sqlalchemy around a database. 
+Mostly copied from collective.lead.Database.
+Can't directly use it because of trouble in 
+  understanding how to use adapter involved in TreadlocalDatabaseTransactions.
 """
 import sys, os, math
 import sqlalchemy, threading
@@ -43,11 +45,13 @@ def supplantFilePathWithNewDataDir(filePath="", oldDataDir=None, newDataDir=None
 			if oldDataDir and newDataDir and oldDataDir!=newDataDir:
 				if filePath.find(oldDataDir)==0:
 					relativePath = filePath[len(oldDataDir):]
-					if relativePath[0]=='/':	#2012.12.28 have to remove the initial "/" otherwise os.path.join() won't work
+					if relativePath[0]=='/':
+						#2012.12.28 have to remove the initial "/" otherwise os.path.join() won't work
 						relativePath = relativePath[1:]
 					newFilePath = os.path.join(newDataDir, relativePath)
 				else:
-					sys.stderr.write("Warning: %s doesn't include old data dir %s. Return Nothing.\n"%(filePath, oldDataDir))
+					sys.stderr.write("Warning: %s doesn't include old data dir %s. Return Nothing.\n"%(
+						filePath, oldDataDir))
 					newFilePath = None
 		else:	#relative path
 			if newDataDir:
@@ -79,7 +83,8 @@ class TableClass(object):
 
 class AbstractTableWithFilename(TableClass):
 	"""
-	2012.11.13 ancestor of ResultsMethod and AssociationLandscape, and other tables that store paths to files on harddisk.
+	2012.11.13 ancestor of ResultsMethod and AssociationLandscape, 
+		and other tables that store paths to files on harddisk.
 	"""
 	id = None
 	short_name = None
@@ -108,10 +113,11 @@ class AbstractTableWithFilename(TableClass):
 	
 	def getFileAbsPath(self, oldDataDir=None, newDataDir=None):
 		"""
-		2013.1.10 renamed from getFilePath() (which is now another function that returns either self.filename or self.path)
-		2012.11.13
-			in case that the whole /Network/Data/250k/db is stored in a different place (=data_dir)
-				how to modify self.filename (stored in the database tables) to reflect its new path.
+2013.1.10 renamed from getFilePath() 
+	(which is now another function that returns either self.filename or self.path)
+2012.11.13
+	in case that the whole /Network/Data/250k/db is stored in a different place (=data_dir)
+		how to modify self.filename (stored in the database tables) to reflect its new path.
 		"""
 		if self.filename:
 			filePath = self.filename
@@ -123,8 +129,7 @@ class AbstractTableWithFilename(TableClass):
 	
 	def getFilePath(self):
 		"""
-		2013.1.10
-			returns either self.filename or self.path (old-version tables use self.filename, new version use self.path).
+	returns either self.filename or self.path (old-version tables use self.filename, new version use self.path).
 		"""
 		if self.filename:
 			filePath = self.filename
@@ -183,29 +188,52 @@ class AbstractTableWithFilename(TableClass):
 		"""
 		self.short_name = self.getShortName()
 
-class DBAncestor(object):
+class Database(object):
 	__doc__ = __doc__
-	option_default_dict = {('drivername', 1,):['postgresql', 'v', 1, 'which type of database? mysql or postgres', ],\
-							('hostname', 1, ):['localhost', 'z', 1, 'hostname of the db server', ],\
-							('dbname', 1, ):["", 'd', 1, 'database name',],\
-							('schema', 0, ): ["", 'k', 1, 'database schema name', ],\
-							('db_user', 1, ):["", 'u', 1, 'database username',],\
-							('db_passwd', 1, ):["", 'p', 1, 'database password', ],\
-							('port', 0, int):[5432, '', 1, 'database port number'],\
-							('pool_recycle', 0, int):[3600, '', 1, 'the length of time to keep connections open before recycling them.'],\
-							('echo_pool', 0, bool):[False, 'e', 0, 'if True, the connection pool will log all checkouts/checkins to the logging stream, which defaults to sys.stdout.'],\
-							('sql_echo', 0, bool):[False, '', 0, 'wanna echo the underlying sql of every sql query'],\
-							('is_elixir', 0, int):[0, '', 0, 'if the db class is elixir based, if yes. The query way is different.'],\
-							('commit',0, int): [0, 'c', 0, 'commit db transaction'],\
-							('debug', 0, int):[0, 'b', 0, 'toggle debug mode'],\
-							('report', 0, int):[0, 'r', 0, 'toggle report, more verbose stdout/stderr.']}
-	def __init__(self, **keywords):
+	option_default_dict = {
+		('drivername', 1,):['postgresql', 'v', 1, 
+			'which type of database? mysql or postgres', ],\
+		('hostname', 1, ):['localhost', 'z', 1, 'hostname of the db server', ],\
+		('dbname', 1, ):["", 'd', 1, 'database name',],\
+		('schema', 0, ): ["", 'k', 1, 'database schema name', ],\
+		('db_user', 1, ):["", 'u', 1, 'database username',],\
+		('db_passwd', 1, ):["", 'p', 1, 'database password', ],\
+		('port', 0, int):[5432, '', 1, 'database port number'],\
+		('pool_recycle', 0, int):[3600, '', 1, 
+			'the length of time to keep connections open before recycling them.'],\
+		('echo_pool', 0, bool):[False, 'e', 0, 
+			'if True, the connection pool will log all checkouts/checkins to the '
+			'logging stream, which defaults to sys.stdout.'],\
+		('sql_echo', 0, bool):[False, '', 0, 
+			'wanna echo the underlying sql of every sql query'],\
+		('commit',0, int): [0, 'c', 0, 'commit db transaction'],\
+		('debug', 0, int):[0, 'b', 0, 'toggle debug mode'],\
+		('report', 0, int):[0, 'r', 0, 'toggle report, more verbose stdout/stderr.']
+		}
+	def __init__(self, drivername:str='postgresql', hostname:str="localhost",\
+		dbname:str=None, schema:str=None, db_user:str=None, db_passswd:str=None,\
+		port:int=5432, pool_recycle:int=3600, echo_pool:bool=False,
+		sql_echo:bool=False, is_elixir:bool=False, commit:int=0, 
+		debug:int=0, report:int=0):
 		"""
-		20170419 common ancestor of Database and ElixirDB
 		"""
-		from palos import ProcessOptions
-		ProcessOptions.process_function_arguments(keywords, self.option_default_dict, error_doc=self.__doc__, class_to_have_attr=self)
-		if self.echo_pool:	#2010-9-19 passing echo_pool to create_engine() causes error. all pool log disappeared.
+		self.drivername = drivername
+		self.hostname = hostname
+		self.dbname=dbname
+		self.schema=schema
+		self.db_user=db_user
+		self.db_passswd=db_passwd
+		self.port=port
+		self.pool_recycle=pool_recycle
+		self.echo_pool=echo_pool
+		self.sql_echo=sql_echo
+		# if the db class is elixir based, if yes. The query way is different.
+		self.is_elixir=False
+		self.commit=commit 
+		self.debug=debug
+		self.report=report
+		if self.echo_pool:
+			#2010-9-19 passing echo_pool to create_engine() causes error. all pool log disappeared.
 			#2010-9-19 Set up a specific logger with our desired output level
 			import logging
 			#import logging.handlers
@@ -222,9 +250,12 @@ class DBAncestor(object):
 			#my_logger.addHandler(handler)
 			my_logger.setLevel(logging.DEBUG)
 		
-		##self.setup_engine()	#2012.12.18 it needs __metadata__, __session__ from each db-definition file to be ready. can't be run here.
-		self.READMEClass = None	#2012.12.18 required to figure out data_dir
-		self._data_dir = None	#2012.11.13
+		##self.setup_engine()
+		# #2012.12.18 it needs __metadata__, __session__ from each db-definition file to be ready.
+		#  can't be run here.
+		#2012.12.18 required to figure out data_dir
+		self.READMEClass = None	
+		self._data_dir = None
 		
 		self._engine = None
 		self._session = None
@@ -234,6 +265,49 @@ class DBAncestor(object):
 			import pdb
 			pdb.set_trace()
 
+	@property
+	def engine(self):
+		"""
+		20200105 executemanymode='values': 
+			https://docs.sqlalchemy.org/en/13/dialects/postgresql.html#psycopg2-fast-execution-helpers
+			
+			sqlalchemy 1.3.7 has support for the psycopg2 "execute_values()" feature
+			Batch insert is a lot faster than the default approach.
+
+		The executemany_batch_page_size and executemany_values_page_size arguments 
+			control how many parameter sets should be represented in each execution. 
+			Because "values" mode implies a fallback down to "batch" mode for
+			non-INSERT statements, there are two independent page size arguments. 
+			For each, the default value of None means to use psycopg2's defaults, 
+			which at the time of this writing are quite low at 100. For the 
+			execute_values method, a number as high as 10000 may prove to be performant,
+			whereas for execute_batch, as the number represents full statements 
+			repeated, a number closer to the default of 100 is likely more appropriate:
+		"""
+		if self._engine is None:
+			self._engine = create_engine(self.url, pool_recycle=self.pool_recycle, 
+				echo=self.sql_echo, executemany_mode='values',
+				executemany_values_page_size=10000, executemany_batch_page_size=500)
+		return self._engine
+
+	@property
+	def session(self):
+		if self._session is None:
+			SessionClass = scoped_session(sessionmaker(autoflush=False, 
+				autocommit=True, bind=self.engine))
+			self._session = SessionClass()
+			# set the search path
+			self._session.execute(f"SET search_path TO {self.schema}")
+		return self._session
+
+	def setup(self, create_tables=True, Base=None):
+		if create_tables:
+			#from sqlalchemy.ext.declarative import declarative_base
+			#Base = declarative_base()
+			Base.metadata.create_all(self.engine)
+
+	def SessionDown(self):
+		self.session.close()
 	
 	@property
 	def url(self):
@@ -255,7 +329,8 @@ class DBAncestor(object):
 				data_dir_entry = query.filter_by(title='data_dir').first()
 				if not data_dir_entry or not data_dir_entry.description:
 					# todo: need to test data_dir_entry.description is writable to the user
-					sys.stderr.write("data_dir not available in db or not accessible on the harddisk. Raise exception.\n")
+					sys.stderr.write("data_dir not available in db or not accessible on "+\
+						" the harddisk. Raise exception.\n")
 					self._data_dir = None
 					raise Exception("data_dir not available in db or not accessible on the harddisk.")
 				else:
@@ -264,10 +339,11 @@ class DBAncestor(object):
 	
 	def queryTable(self, TableClass=None):
 		"""
-		201704
-			usage: 
-				db_entry = db_main.queryTable(SunsetDB.IndividualSequenceFileRaw).filter_by(md5sum=md5sum).first()
-				db_entry = db_main.queryTable(SunsetDB.IndividualAlignment).get(self.individual_alignment_id)
+		usage: 
+			db_entry = db_main.queryTable(SunsetDB.IndividualSequenceFileRaw).\
+				filter_by(md5sum=md5sum).first()
+			db_entry = db_main.queryTable(SunsetDB.IndividualAlignment).\
+				get(self.individual_alignment_id)
 		"""
 		if self.is_elixir:
 			query = TableClass.query
@@ -285,7 +361,8 @@ class DBAncestor(object):
 		query = self.queryTable(TableClass)
 		if short_name or id:
 			if id is not None:
-				db_entry = query.get(id)	#20170419 not sure if it's right. For elixir, it should be TableClass.get(id)
+				db_entry = query.get(id)
+				#20170419 not sure if it's right. For elixir, it should be TableClass.get(id)
 				return db_entry
 			if short_name:
 				query = query.filter_by(short_name=short_name)
@@ -297,36 +374,39 @@ class DBAncestor(object):
 		db_entry = query.first()
 		if no_of_entries>1:
 			sys.stderr.write("Error, query table %s by short_name=%s, id=%s returns %s entries (>1).\n"%\
-							(TableClass, short_name, id, no_of_entries))
+				(TableClass, short_name, id, no_of_entries))
 			raise
 		if db_entry:
 			return db_entry
 		else:
 			return None
 	
-	def isPathInDBAffiliatedStorage(self, db_entry=None, relativePath=None, inputFileBasename=None, data_dir=None, \
-								constructRelativePathFunction=None):
+	def isPathInDBAffiliatedStorage(self, db_entry=None, relativePath=None, \
+		inputFileBasename=None, data_dir=None, \
+		constructRelativePathFunction=None):
 		"""
-		2012.8.29
-			check whether one relative path already exists in db-affliated storage.
-				return -1 if db_entry.path is different from relativePath and could not be updated in db.
-				return 1 if relativePath exists in db already
-				return 0 if not.
-			Example:
-				# simplest
-				db_vervet.isPathInDBAffiliatedStorage(relativePath=relativePath, data_dir=self.data_dir)
-				# this will check if db_entry.path == relativePath, if not, update it in db with relativePath.
-				db_vervet.isPathInDBAffiliatedStorage(db_entry=db_entry, relativePath=relativePath)
-				# 
-				db_vervet.isPathInDBAffiliatedStorage(db_entry=db_entry, inputFileBasename=inputFileBasename, data_dir=None, \
-								constructRelativePathFunction=genotypeFile.constructRelativePath)
+check whether one relative path already exists in db-affliated storage.
+	return -1 if db_entry.path is different from relativePath and could not be updated in db.
+	return 1 if relativePath exists in db already
+	return 0 if not.
+Example:
+	# simplest
+	db_vervet.isPathInDBAffiliatedStorage(relativePath=relativePath, data_dir=self.data_dir)
+	# this will check if db_entry.path == relativePath, if not, update it in db with relativePath.
+	db_vervet.isPathInDBAffiliatedStorage(db_entry=db_entry, relativePath=relativePath)
+	# 
+	db_vervet.isPathInDBAffiliatedStorage(db_entry=db_entry, \
+		inputFileBasename=inputFileBasename, data_dir=None, \
+		constructRelativePathFunction=genotypeFile.constructRelativePath)
 		"""
 		if data_dir is None:
 			data_dir = self.data_dir
 		
 		exitCode = 0
-		if db_entry and (relativePath is None) and constructRelativePathFunction and inputFileBasename:
-			relativePath = constructRelativePathFunction(db_entry=db_entry, sourceFilename=inputFileBasename)
+		if db_entry and (relativePath is None) and constructRelativePathFunction \
+			and inputFileBasename:
+			relativePath = constructRelativePathFunction(db_entry=db_entry, \
+				sourceFilename=inputFileBasename)
 		
 		if db_entry and relativePath:
 			if db_entry.path != relativePath:
@@ -365,9 +445,8 @@ class DBAncestor(object):
 	
 	def updateDBEntryMD5SUM(self, db_entry=None, data_dir=None, absPath=None):
 		"""
-		2012.12.15 moved from VervetDB
-		2012.7.13
-			if absPath is given, take that , rather than construct it from data_dir and db_entry.path
+		if absPath is given, take that , rather than construct it \
+			from data_dir and db_entry.path.
 		"""
 		if data_dir is None:
 			data_dir = self.data_dir
@@ -379,26 +458,31 @@ class DBAncestor(object):
 		else:
 			db_entry_path = None
 		if not absPath and db_entry_path:
-			absPath = supplantFilePathWithNewDataDir(filePath=db_entry_path, oldDataDir=self.data_dir,\
-													newDataDir=data_dir)
+			absPath = supplantFilePathWithNewDataDir(filePath=db_entry_path, \
+				oldDataDir=self.data_dir,\
+				newDataDir=data_dir)
 		
 		if absPath and not os.path.isfile(absPath):
-			sys.stderr.write("updateDBEntryMD5SUM() Warning: target file %s doesn't exist. Could not update its md5sum.\n"%(absPath))
+			sys.stderr.write("updateDBEntryMD5SUM() Warning: target file %s "
+				"doesn't exist. Could not update its md5sum.\n"%(absPath))
 			return
 		md5sum = utils.get_md5sum(absPath)
 		if db_entry.md5sum is  not None and db_entry.md5sum!=md5sum:
-			sys.stderr.write("WARNING: The new md5sum %s is not same as the existing md5sum %s.\n"%(md5sum, db_entry.md5sum))
+			sys.stderr.write("WARNING: The new md5sum %s is not same as "
+				"the existing md5sum %s.\n"%(md5sum, db_entry.md5sum))
 		db_entry.md5sum = md5sum
 		self.session.add(db_entry)
 		self.session.flush()
 
-	def updateDBEntryPathFileSize(self, db_entry=None, data_dir=None, absPath=None, \
-								file_path_column_name='path', file_size_column_name='file_size'):
+	def updateDBEntryPathFileSize(self, db_entry=None, data_dir=None, \
+		absPath=None, \
+		file_path_column_name='path', file_size_column_name='file_size'):
 		"""
 		2013.08.08 added argument file_path_column_name, file_size_column_name
 		2012.12.15 moved from VervetDB
 		2012.7.13
-			if absPath is given, take that , rather than construct it from data_dir and db_entry.path
+			if absPath is given, take that , rather than construct it 
+				from data_dir and db_entry.path.
 		"""
 		if data_dir is None:
 			data_dir = self.data_dir
@@ -411,8 +495,9 @@ class DBAncestor(object):
 		else:
 			db_entry_path = None
 		if not absPath and db_entry_path:
-			absPath = supplantFilePathWithNewDataDir(filePath=db_entry_path, oldDataDir=self.data_dir,\
-													newDataDir=data_dir)
+			absPath = supplantFilePathWithNewDataDir(
+				filePath=db_entry_path, oldDataDir=self.data_dir,\
+				newDataDir=data_dir)
 			#absPath = os.path.join(data_dir, db_entry.path)
 		if absPath and not os.path.isfile(absPath):
 			sys.stderr.write("Warning: file %s doesn't exist.\n"%(absPath))
@@ -420,14 +505,16 @@ class DBAncestor(object):
 		file_size = utils.getFileOrFolderSize(absPath)
 		db_entry_file_size = getattr(db_entry, file_size_column_name, None)
 		if db_entry_file_size is not None and file_size!=db_entry_file_size:
-			sys.stderr.write("Warning: the new file size %s doesn't match the old one %s.\n"%(file_size, db_entry_file_size))
+			sys.stderr.write("Warning: the new file size %s doesn't "
+				"match the old one %s.\n"%(file_size, db_entry_file_size))
 		setattr(db_entry, file_size_column_name, file_size)
 		self.session.add(db_entry)
 		self.session.flush()
 	
-	def copyFileWithAnotherFilePrefix(self, inputFname=None, filenameWithPrefix=None, \
-									outputDir=None, outputFileRelativePath=None, \
-									logMessage=None, srcFilenameLs=None, dstFilenameLs=None):
+	def copyFileWithAnotherFilePrefix(self, inputFname=None, \
+		filenameWithPrefix=None, \
+		outputDir=None, outputFileRelativePath=None, \
+		logMessage=None, srcFilenameLs=None, dstFilenameLs=None):
 		"""
 		2013.08.08 added argument outputFileRelativePath
 		2013.3.18 bugfix in filename. there was extra . between prefix and suffix.
@@ -443,8 +530,10 @@ class DBAncestor(object):
 		dstFilename = os.path.join(outputDir, outputFileRelativePath)
 		returnCode = utils.copyFile(srcFilename=srcFilename, dstFilename=dstFilename)
 		if returnCode!=0:
-			sys.stderr.write("ERROR during utils.copyFile. check stderr message just ahead of this.\n")
-			raise Exception("ERROR during utils.copyFile. check stderr message just ahead of this.")
+			sys.stderr.write("ERROR during utils.copyFile. "
+				"check stderr message just ahead of this.\n")
+			raise Exception("ERROR during utils.copyFile. "\
+				"check stderr message just ahead of this.")
 		if logMessage:
 			logMessage += "file %s has been copied to %s.\n"%(srcFilename, dstFilename)
 		if srcFilenameLs:
@@ -453,47 +542,57 @@ class DBAncestor(object):
 			dstFilenameLs.append(dstFilename)
 		return logMessage
 	
-	def moveFileIntoDBAffiliatedStorage(self, db_entry=None, filename=None, inputDir=None, outputDir=None, \
-									dstFilename=None,\
-								relativeOutputDir=None, shellCommand='cp -rL', srcFilenameLs=None, dstFilenameLs=None,\
-								constructRelativePathFunction=None, data_dir=None):
+	def moveFileIntoDBAffiliatedStorage(self, db_entry=None, \
+		filename=None, inputDir=None, outputDir=None, \
+		dstFilename=None,\
+		relativeOutputDir=None, shellCommand='cp -rL', \
+		srcFilenameLs=None, dstFilenameLs=None,\
+		constructRelativePathFunction=None, data_dir=None):
 		"""
-			filename (required): relative path of input file
-			inputDir (required): where 'filename' is from
-			outputDir (required): where the output file will be 
-			dstFilename: the absolute path of where the output file will be.
-				if set to None (usually), then it'll be constructed on the fly. First 
-					either through constructRelativePathFunction()
-					or use join(relativeOutputDir, '%s_%s'%(db_entry.id, filename))
-					or '%s_%s'%(db_entry.id, filename)
-			
-			relativeOutputDir: used for construct dstFilename if constructRelativePathFunction() is not there.
-			constructRelativePathFunction: similar function of relativeOutputDir.
-			 	used to construct relative path of output file.
-			if neither relativeOutputDir nor constructRelativePathFunction is available, relative path is ='%s_%s'%(db_entry.id, filename).
-				relative path is used to set db_entry.path when the latter is None.
-			
-			srcFilenameLs, dstFilenameLs: optional. two lists used to store the absolute path of input and output files.
-				used in case rollback is needed.
-			
-			data_dir: the top-level folder where all the db-affiliated file storage is. for constructRelativePathFunction 
+		filename (required): relative path of input file
+		inputDir (required): where 'filename' is from
+		outputDir (required): where the output file will be 
+		dstFilename: the absolute path of where the output file will be.
+			if set to None (usually), then it'll be constructed on the fly. First 
+				either through constructRelativePathFunction()
+				or use join(relativeOutputDir, '%s_%s'%(db_entry.id, filename))
+				or '%s_%s'%(db_entry.id, filename)
+		
+		relativeOutputDir: used for construct dstFilename 
+			if constructRelativePathFunction() is not there.
+		constructRelativePathFunction: similar function of relativeOutputDir.
+			used to construct relative path of output file.
+		if neither relativeOutputDir nor constructRelativePathFunction 
+			is available, relative path is ='%s_%s'%(db_entry.id, filename).
+			relative path is used to set db_entry.path when the latter is None.
+		
+		srcFilenameLs, dstFilenameLs: optional. 
+			two lists used to store the absolute path of input and output files.
+			used in case rollback is needed.
+		
+		data_dir: the top-level folder where all the db-affiliated file storage is. 
+			for constructRelativePathFunction 
 			 	
-		2013.1.31 bugfix: if relativeOutputDir is included in both outputDir and newPath, use newfilename to avoid double usage. 
+		2013.1.31 bugfix: if relativeOutputDir is included in both outputDir
+			and newPath, use newfilename to avoid double usage. 
 		2012.12.15 moved from VervetDB. i.e.:
 			inputFileBasename = os.path.basename(self.inputFname)
 			relativePath = genotypeFile.constructRelativePath(sourceFilename=inputFileBasename)
-			exitCode = self.db_vervet.moveFileIntoDBAffiliatedStorage(db_entry=genotypeFile, filename=inputFileBasename, \
-									inputDir=os.path.split(self.inputFname)[0], dstFilename=os.path.join(self.data_dir, relativePath), \
-									relativeOutputDir=None, shellCommand='cp -rL', \
-									srcFilenameLs=self.srcFilenameLs, dstFilenameLs=self.dstFilenameLs,\
-									constructRelativePathFunction=genotypeFile.constructRelativePath, data_dir=self.data_dir)
+			exitCode = self.db_vervet.moveFileIntoDBAffiliatedStorage(
+				db_entry=genotypeFile, filename=inputFileBasename, \
+				inputDir=os.path.split(self.inputFname)[0], 
+				dstFilename=os.path.join(self.data_dir, relativePath), \
+				relativeOutputDir=None, shellCommand='cp -rL', \
+				srcFilenameLs=self.srcFilenameLs, dstFilenameLs=self.dstFilenameLs,\
+				constructRelativePathFunction=genotypeFile.constructRelativePath, data_dir=self.data_dir)
 			#same as this
-			exitCode = self.db_vervet.moveFileIntoDBAffiliatedStorage(db_entry=genotypeFile, filename=inputFileBasename, \
-									inputDir=os.path.split(self.inputFname)[0], \
-									outputDir=self.data_dir, \
-									relativeOutputDir=None, shellCommand='cp -rL', \
-									srcFilenameLs=self.srcFilenameLs, dstFilenameLs=self.dstFilenameLs,\
-									constructRelativePathFunction=genotypeFile.constructRelativePath, data_dir=self.data_dir)
+			exitCode = self.db_vervet.moveFileIntoDBAffiliatedStorage(
+				db_entry=genotypeFile, filename=inputFileBasename, \
+				inputDir=os.path.split(self.inputFname)[0], \
+				outputDir=self.data_dir, \
+				relativeOutputDir=None, shellCommand='cp -rL', \
+				srcFilenameLs=self.srcFilenameLs, dstFilenameLs=self.dstFilenameLs,\
+				constructRelativePathFunction=genotypeFile.constructRelativePath, data_dir=self.data_dir)
 									
 			if exitCode!=0:
 				sys.stderr.write("Error: moveFileIntoDBAffiliatedStorage() exits with %s code.\n"%(exitCode))
@@ -514,7 +613,8 @@ class DBAncestor(object):
 		"""
 		exitCode = 0
 		if constructRelativePathFunction is not None:
-			newPath = constructRelativePathFunction(db_entry=db_entry, sourceFilename=filename, data_dir=data_dir)
+			newPath = constructRelativePathFunction(db_entry=db_entry, \
+				sourceFilename=filename, data_dir=data_dir)
 			newfilename = os.path.basename(newPath)
 		elif relativeOutputDir:
 			newfilename = '%s_%s'%(db_entry.id, filename)
@@ -540,8 +640,10 @@ class DBAncestor(object):
 			if relativeOutputDir:
 				relativePathIndex = outputDir.find(relativeOutputDir)
 				noOfCharsInRelativeOutputDir = len(relativeOutputDir)
-				if outputDir[relativePathIndex:relativePathIndex+noOfCharsInRelativeOutputDir]==relativeOutputDir and newPath.find(relativeOutputDir)>=0:
-					#2013.1.31 bugfix: if relativeOutputDir is included in both outputDir and newPath, use newfilename to avoid double usage. 
+				if outputDir[relativePathIndex:relativePathIndex+noOfCharsInRelativeOutputDir]\
+					==relativeOutputDir and newPath.find(relativeOutputDir)>=0:
+					#2013.1.31 bugfix: if relativeOutputDir is included in both outputDir
+					#  and newPath, use newfilename to avoid double usage. 
 					dstFilename = os.path.join(outputDir, newfilename)
 			if dstFilename is None:	#still nothing , use newPath instead
 				dstFilename = os.path.join(outputDir, newPath)
@@ -560,7 +662,9 @@ class DBAncestor(object):
 				srcFilenameLs.append(srcFilename)
 			if dstFilenameLs is not None:
 				dstFilenameLs.append(dstFilename)
-			if hasattr(db_entry, 'md5sum'):# and getattr(db_entry, 'md5sum', None) is None:	#2012.7.14 has this attribute but it's None
+			if hasattr(db_entry, 'md5sum'):
+				# and getattr(db_entry, 'md5sum', None) is None:
+				#2012.7.14 has this attribute but it's None
 				try:
 					self.updateDBEntryMD5SUM(db_entry=db_entry, absPath=dstFilename)
 				except:
@@ -601,50 +705,23 @@ class DBAncestor(object):
 		oldDataDir=self.data_dir
 		if newDataDir is None:
 			newDataDir=self.data_dir
-		return supplantFilePathWithNewDataDir(filePath=filePath, oldDataDir=oldDataDir, newDataDir=newDataDir)
-	
-	"""
-	def session(self):
-		#2008-07-09
-		from elixir import session
-		#session = scoped_session(sessionmaker(autoflush=True, transactional=True, bind=self._url))
-		return session
-	
-	session = property(session)
-	
-	def connection(self):
-		return self.session.connection
-	connection = property(connection)
-	"""
-
-"""
-from elixir import Entity, Field, using_options, using_table_options
-from elixir import DateTime, String
-from datetime import datetime
-class README(Entity):
-	#2008-08-07
-	title = Field(String(2000))
-	description = Field(String(60000))
-	created_by = Field(String(128))
-	updated_by = Field(String(128))
-	date_created = Field(DateTime, default=datetime.now)
-	date_updated = Field(DateTime)
-	using_options(tablename='readme')
-	using_table_options(mysql_engine='InnoDB')
-"""
+		return supplantFilePathWithNewDataDir(filePath=filePath, \
+			oldDataDir=oldDataDir, newDataDir=newDataDir)
 
 def formReadmeObj(argv, ad, READMEClass):
 	"""
 	2008-08-26
 		if argument contains 'password' or 'passwd', mark its value as '*'
 	2008-05-06
-		create a readme instance (like a log) based on the program's sys.argv and argument dictionary
+		create a readme instance (like a log) based 
+		on the program's sys.argv and argument dictionary
 	"""
 	readme_description_ls = []
 	argument_ls = ad.keys()
 	argument_ls.sort()
 	for argument in argument_ls:
-		if argument.find('passwd')!=-1 or argument.find('password')!=-1:	#password info not into db
+		if argument.find('passwd')!=-1 or argument.find('password')!=-1:
+			#password info not into db
 			value = '*'
 		else:
 			value = ad[argument]
@@ -679,22 +756,25 @@ def db_connect(hostname, dbname, schema=None, password=None, user=None):
 	return (conn, curs)
 
 
-def get_sequence_segment(curs, gi=None, start=None, stop=None, annot_assembly_id=None, \
-						annot_assembly_table='sequence.annot_assembly', \
-						raw_sequence_table='sequence.raw_sequence', chunk_size=10000):
+def get_sequence_segment(curs, gi=None, start=None, stop=None, \
+	annot_assembly_id=None, \
+	annot_assembly_table='sequence.annot_assembly', \
+	raw_sequence_table='sequence.raw_sequence', chunk_size=10000):
 	"""
 	2011-10-25
 		add argument annot_assembly_id
 		Primary key of table annot_assembly is a self-contained "id". "gi" is no longer a primary key,
 			although it's still kept. For some entries, it could be null.
 		start and stop are 1-based.
-	2010-10-05 if this AnnotAssembly is not associated with any raw sequence (raw_sequence_start_id is None).
+	2010-10-05 if this AnnotAssembly is not associated with any raw sequence
+		(raw_sequence_start_id is None).
 		return ''
 	2009-01-03
 		moved from annot/bin/codense/common.py
 		curs could be elixirdb.metadata.bind other than the raw curs from psycopg
 		raw_sequence_table replaced column acc_ver with annot_assembly_gi
-		make sure no_of_chunks_before >=0. old expression becomes negative for genes that are near the tip of a chromosome, within chunk_size.
+		make sure no_of_chunks_before >=0. old expression becomes negative 
+			for genes that are near the tip of a chromosome, within chunk_size.
 	11-12-05 get a specified segment from chromosome sequence table
 		reverse is handled but complement(strand) is not. Upper level function should take care of this.
 	11-15-05 improve it to be more robust, add acc_ver and report if not found in raw_sequence_table
@@ -704,19 +784,21 @@ def get_sequence_segment(curs, gi=None, start=None, stop=None, annot_assembly_id
 	need_reverse = int(start>stop)
 	if need_reverse:
 		start, stop = stop, start
-	if annot_assembly_id:	#2011-10-25
+	if annot_assembly_id:
 		annot_assembly_key_name = "id"
 		annot_assembly_key_value = annot_assembly_id
 	else:
 		annot_assembly_key_name = "gi"
 		annot_assembly_key_value = gi
-	rows = curs.execute("select acc_ver, start, stop, raw_sequence_start_id from %s where %s=%s"%(annot_assembly_table, \
-															annot_assembly_key_name, annot_assembly_key_value))
+	rows = curs.execute("select acc_ver, start, stop, raw_sequence_start_id from %s where %s=%s"%(
+		annot_assembly_table, \
+		annot_assembly_key_name, annot_assembly_key_value))
 	is_elixirdb = 1
-	if hasattr(curs, 'fetchall'):	#2009-01-03 this curs is not elixirdb.metadata.bind
+	if hasattr(curs, 'fetchall'):
+		#2009-01-03 this curs is not elixirdb.metadata.bind
 		rows = curs.fetchall()
 		is_elixirdb = 0
-	if is_elixirdb:	#2009-01-03
+	if is_elixirdb:
 		row = rows.fetchone()
 		acc_ver = row.acc_ver
 		orig_start = row.start
@@ -724,41 +806,53 @@ def get_sequence_segment(curs, gi=None, start=None, stop=None, annot_assembly_id
 		raw_sequence_start_id = row.raw_sequence_start_id
 	else:
 		acc_ver, orig_start, orig_stop, raw_sequence_start_id = rows[0]
-	if stop>orig_stop:	#11-14-05 to avoid exceeding the boundary
+	if stop>orig_stop:
+		#11-14-05 to avoid exceeding the boundary
 		stop = orig_stop
 	
-	if raw_sequence_start_id is None:	# 2010-10-05 this AnnotAssembly is not associated with any raw sequence.
+	if raw_sequence_start_id is None:
+		# 2010-10-05 this AnnotAssembly is not associated with any raw sequence.
 		return ''
 	
-	no_of_chunks_before = max(0, start/chunk_size-1)	#how many chunks are before this segment (2006-08-28) -1 ensures the edge.
-		#2008-01-03 max(0, ...) to make sure it >=0. old expression becomes negative for genes that are near the tip of a chromosome, within chunk_size.
+	no_of_chunks_before = max(0, start/chunk_size-1)
+	#how many chunks are before this segment (2006-08-28) -1 ensures the edge.
+	#2008-01-03 max(0, ...) to make sure it >=0. old expression becomes negative 
+	# for genes that are near the tip of a chromosome, within chunk_size.
 	
 	segment_size = stop - start +1
-	no_of_chunks_segment = segment_size/chunk_size + 1	#how many chunks could be included in this segment
-	raw_sequence_start_id += no_of_chunks_before	#the first chunk which contains teh segment
-	offset = no_of_chunks_segment + 2	#add two more chunks to ensure the segment is enclosed(2006-08-28)
+	no_of_chunks_segment = segment_size/chunk_size + 1
+	#how many chunks could be included in this segment
+	raw_sequence_start_id += no_of_chunks_before
+	#the first chunk which contains teh segment
+	offset = no_of_chunks_segment + 2
+	#add two more chunks to ensure the segment is enclosed(2006-08-28)
 	#get the sequence from raw_sequence_table
 	seq = ''
 	for i in range(offset):
 		rows = curs.execute("select sequence from %s where annot_assembly_%s=%s and id=%s"%\
-				(raw_sequence_table, annot_assembly_key_name, annot_assembly_key_value, raw_sequence_start_id+i))
+			(raw_sequence_table, annot_assembly_key_name, 
+			annot_assembly_key_value, raw_sequence_start_id+i))
 		if is_elixirdb:	#2009-01-03
 			rows = rows.fetchone()
 		else:
 			rows = curs.fetchall()
 		
-		if rows:	#11/14/05 it's possible to exceed the whole raw_sequence table because the offset adds one more chunk
+		if rows:
+			#11/14/05 it's possible to exceed the whole raw_sequence table
+			#  because the offset adds one more chunk
 			if is_elixirdb:
 				seq += rows.sequence
 			else:
 				seq += rows[0][0]
 		else:
-			sys.stderr.write("id %s missing in raw_sequence table.\n"%(raw_sequence_start_id+i))
+			sys.stderr.write("id %s missing in raw_sequence table.\n"%(
+				raw_sequence_start_id+i))
 			sys.stderr.write("%s: %s, start: %s, stop: %s, raw_sequence_start_id: %s\n"%\
-							(annot_assembly_key_name, \
-							annot_assembly_key_value, start, stop, raw_sequence_start_id))
+				(annot_assembly_key_name, \
+				annot_assembly_key_value, start, stop, raw_sequence_start_id))
 	relative_start = start - no_of_chunks_before*chunk_size
-	segment = seq[relative_start-1:relative_start-1+segment_size]	#WATCH index needs -1
+	segment = seq[relative_start-1:relative_start-1+segment_size]
+	#WATCH index needs -1
 	if need_reverse:
 		segment = list(segment)
 		segment.reverse()	#only 
@@ -766,184 +860,12 @@ def get_sequence_segment(curs, gi=None, start=None, stop=None, annot_assembly_id
 	return segment
 
 
-
-class Database(DBAncestor):
-	__doc__ = __doc__
-	option_default_dict = copy.deepcopy(DBAncestor.option_default_dict)
-	
-	def __init__(self, **keywords):
-		DBAncestor.__init__(self, **keywords)
-	
-	@property
-	def engine(self):
-		"""
-		20200105 executemanymode='values': 
-			https://docs.sqlalchemy.org/en/13/dialects/postgresql.html#psycopg2-fast-execution-helpers
-			
-			sqlalchemy 1.3.7 has support for the psycopg2 "execute_values()" feature
-			Batch insert is a lot faster than the default approach.
-
-		The executemany_batch_page_size and executemany_values_page_size arguments 
-			control how many parameter sets should be represented in each execution. 
-			Because "values" mode implies a fallback down to "batch" mode for
-			non-INSERT statements, there are two independent page size arguments. 
-			For each, the default value of None means to use psycopg2's defaults, 
-			which at the time of this writing are quite low at 100. For the 
-			execute_values method, a number as high as 10000 may prove to be performant,
-			whereas for execute_batch, as the number represents full statements 
-			repeated, a number closer to the default of 100 is likely more appropriate:
-		"""
-		if self._engine is None:
-			self._engine = create_engine(self.url, pool_recycle=self.pool_recycle, 
-				echo=self.sql_echo, executemany_mode='values',
-				executemany_values_page_size=10000, executemany_batch_page_size=500)
-		return self._engine
-
-	@property
-	def session(self):
-		if self._session is None:
-			SessionClass = scoped_session(sessionmaker(autoflush=False, autocommit=True, bind=self.engine))
-			self._session = SessionClass()
-		return self._session
-
-	def setup(self, create_tables=True, Base=None):
-		if create_tables:
-			#from sqlalchemy.ext.declarative import declarative_base
-			#Base = declarative_base()
-			Base.metadata.create_all(self.engine)
-
-	def SessionDown(self):
-		self.session.close()
-
-class ElixirDB(DBAncestor):
-	"""
-	2008-11-07
-		add option sql_echo
-	2008-10-07 add option pool_recycle
-	2008-08-07
-		expose metadata from elixir
-	2008-07-11
-		elixir db base class
-	"""
-	option_default_dict = copy.deepcopy(DBAncestor.option_default_dict)
-	option_default_dict[('is_elixir', 0, int)][0]=1
-	#from elixir import metadata	#2008-08-07
-	#metadata = metadata
-	def __init__(self, **keywords):
-		"""
-		2008-07-09
-		"""
-		#2013.1.10 backwards compatibility
-		keywords = self._setInputArgumentsEquivalentValue(keywords=keywords, argument1Name='username', argument2Name='db_user')
-		keywords = self._setInputArgumentsEquivalentValue(keywords=keywords, argument1Name='password', argument2Name='db_passwd')
-		keywords = self._setInputArgumentsEquivalentValue(keywords=keywords, argument1Name='database', argument2Name='dbname')
-
-		self.metadata = None
-		self.SessionClass = None
-		self.session_factory = None
-		
-		DBAncestor.__init__(self, **keywords)
-		
-	
-	@property
-	def engine(self):
-		if self._engine is None:
-			self._engine = create_engine(self.url, pool_recycle=self.pool_recycle, echo=self.sql_echo)
-			#, convert_unicode=True, encoding="utf8")
-			self.metadata.bind = self._engine
-		return self._engine
-
-	@property
-	def session(self):
-		if self._session is None:
-			#SessionClass = scoped_session(sessionmaker(autoflush=False, autocommit=True, bind=self.engine))
-			self.session_factory.bind = self.engine
-			#SessionClass = scoped_session(self.session_factory)
-			self._session = self.SessionClass
-		return self._session
-	   
-	def _setInputArgumentsEquivalentValue(self, keywords=None, argument1Name=None, argument2Name=None):
-		"""
-		2013.1.10 to deal with transition that 'username' is now changed to 'db_user' and etc.
-		"""
-		if argument1Name in keywords and argument2Name not in keywords:
-			keywords[argument2Name] = keywords[argument1Name]
-		return keywords
-	
-	def setup_postgres_schema(self, entities=[]):
-		"""
-		20170416
-			setup schema for each table properly for postgres
-			split from setup_engine()
-		"""
-		from elixir.options import using_table_options_handler
-		if getattr(self, 'schema', None):	#for postgres
-			for entity in entities:
-				if entity.__module__==self.__module__:	#entity in the same module
-					#2012.5.16 this changes the entity._descriptor.table_fullname
-					using_table_options_handler(entity, schema=self.schema)	
-					#using_table_options_handler(entity, session=self.session)	
-					#using_table_options_handler(entity, metadata=self.metadata)	
-					
-					#if self.schema!='public':
-					#	entity._descriptor.tablename = '%s.%s'%(self.schema, entity._descriptor.tablename)	#2012.5.16 change the tablename
-	
-	def setup_engine(self, metadata=None, Session=None, session_factory=None, entities=[]):
-		"""
-		2008-10-09
-			a common theme for all other databases
-		"""
-		#2008-10-05 MySQL typically close connections after 8 hours resulting in a "MySQL server has gone away" error.
-		self.metadata = metadata
-		self.SessionClass = Session
-		self.session_factory = session_factory
-		sys.stderr.write("self.session: %s\n"%self.session)
-		self.setup_postgres_schema(entities)
-		#2012.12.28
-		self.cleanUpMetadatas()
-	
-	def cleanUpMetadatas(self):
-		"""
-		2012.12.28 because GenomeDB, TaxonomyDB are by default imported into the namespace through pymodule all the time
-			their unbound metadata is automatically added into elixir's metadatas variable.
-			which caused this error if create_tables=True:
-			
-				  File "/home/crocea/script/variation/src/db/Stock_250kDB.py", line 2582, in setup
-					setup_all(create_tables=create_tables)	  #create_tables=True causes setup_all to call elixir.create_all(), which in turn calls me
-				tadata.create_all()
-				  File "/usr/local/lib/python2.7/dist-packages/elixir/__init__.py", line 98, in setup_all
-					create_all(*args, **kwargs)
-				  File "/usr/local/lib/python2.7/dist-packages/elixir/__init__.py", line 76, in create_all
-					md.create_all(*args, **kwargs)
-				  File "/usr/local/lib/python2.7/dist-packages/sqlalchemy/schema.py", line 2560, in create_all
-					bind = _bind_or_error(self)
-				  File "/usr/local/lib/python2.7/dist-packages/sqlalchemy/schema.py", line 3176, in _bind_or_error
-					raise exc.UnboundExecutionError(msg)
-				sqlalchemy.exc.UnboundExecutionError: The MetaData is not bound to an Engine or Connection.  Execution can not proceed without a databas
-				e to execute against.  Either execute with an explicit connection or assign the MetaData's .bind to enable implicit execution.
-		"""
-		import elixir
-		newMetadatas = set()
-		for md in elixir.metadatas:
-			if md.bind is not None:
-				newMetadatas.add(md)
-		elixir.metadatas = newMetadatas
-	
-	def setup(self, create_tables=True):
-		"""
-		2008-10-09
-			add option create_tables
-		2008-08-26
-		"""
-		from elixir import setup_all
-		setup_all(create_tables=create_tables)	#create_tables=True causes setup_all to call elixir.create_all(),
-				#which in turn calls metadata.create_all()
-
-
 if __name__ == '__main__':
 	from palos import process_options, generate_program_doc
 	main_class = Database
-	opts_dict = process_options(sys.argv, main_class.option_default_dict, error_doc=generate_program_doc(sys.argv[0], main_class.option_default_dict)+main_class.__doc__)
+	opts_dict = process_options(sys.argv, main_class.option_default_dict, \
+		error_doc=generate_program_doc(sys.argv[0], main_class.option_default_dict) + \
+			main_class.__doc__)
 	
 	"""
 	
@@ -974,7 +896,9 @@ if __name__ == '__main__':
 	
 	i = 0
 	while i <10:
-		row = session.query(Results).offset(i).limit(1).list()	#all() = list() returns a list of objects. first() returns the 1st object. one() woud raise error because 'Multiple rows returned for one()'
+		row = session.query(Results).offset(i).limit(1).list()
+		#all() = list() returns a list of objects. first() returns the 1st object.
+		#  one() woud raise error because 'Multiple rows returned for one()'
 		print len(row)
 		row = row[0]
 		i += 1

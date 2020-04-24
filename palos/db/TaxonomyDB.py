@@ -22,34 +22,35 @@ import sys, os
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 
 from sqlalchemy.engine.url import URL
-from elixir import Unicode, DateTime, String, Integer, UnicodeText, Text
-from elixir import Entity, Field, using_options, using_table_options
-from elixir import OneToMany, ManyToOne, ManyToMany, OneToOne
-from elixir import setup_all, session, metadata, entities
-from elixir.options import using_table_options_handler	#using_table_options() can only work inside Entity-inherited class.
+from sqlalchemy import Unicode, DateTime, String, BigInteger, Integer
+from sqlalchemy import UnicodeText, Text, Boolean, Float, Binary, Enum, Table
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import relationship
+from sqlalchemy import UniqueConstraint
 from datetime import datetime
 from sqlalchemy.schema import ThreadLocalMetaData, MetaData
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy import UniqueConstraint, create_engine
 from sqlalchemy import and_, or_, not_
 
-from __init__ import ElixirDB
+from __init__ import Database, TableClass
 
-__session__ = scoped_session(sessionmaker(autoflush=False, autocommit=True))
-#__metadata__ = ThreadLocalMetaData() #2008-11-04 not good for pylon
-
-__metadata__ = MetaData()
-
-class Citation(Entity):
+Base = declarative_base()
+#Set it staticaly because DB is undefined at this point 
+# and it has to be defined after this.
+_schemaname_ = "taxonomy"
+class Citation(Base, TableClass):
 	"""
 	2012.6.6
 	"""
-	cit_id = Field(Integer)	#- the unique id of citation
-	cit_key = Field(Text)	# -- citation key
-	pubmed_id = Field(Integer)	#  -- unique id in PubMed database (0 if not in PubMed)
-	medline_id = Field(Integer)		#  -- unique id in MedLine database (0 if not in MedLine)
-	url = Field(Text)	# -- URL associated with citation
-	text = Field(Text)	#-- any text (usually article name and authors).
+	cit_id = Column(Integer)	#- the unique id of citation
+	cit_key = Column(Text)	# -- citation key
+	pubmed_id = Column(Integer)	#  -- unique id in PubMed database (0 if not in PubMed)
+	medline_id = Column(Integer)		#  -- unique id in MedLine database (0 if not in MedLine)
+	url = Column(Text)	# -- URL associated with citation
+	text = Column(Text)	#-- any text (usually article name and authors).
 		#-- The following characters are escaped in this text by a backslash:
 		#-- newline (appear as "\n"),
 		#-- tab character ("\t"),
@@ -57,124 +58,124 @@ class Citation(Entity):
 		#-- backslash character ("\\").
 	tax_list = ManyToMany("Node", tablename='citation2node', local_colname='citation_id')
 		# -- list of node ids separated by a single space
-	created_by = Field(String(256))
-	updated_by = Field(String(256))
-	date_created = Field(DateTime, default=datetime.now)
-	date_updated = Field(DateTime)
+	created_by = Column(String(256))
+	updated_by = Column(String(256))
+	date_created = Column(DateTime, default=datetime.now)
+	date_updated = Column(DateTime)
 	using_options(tablename='citation')
 	using_table_options(mysql_engine='InnoDB')
 
-class Delnode(Entity):
+class Delnode(Base, TableClass):
 	"""
 	2012.6.6
 	"""
-	tax_id = Field(Integer, unique=True)	# -- taxonomy database division id
-	created_by = Field(String(256))
-	updated_by = Field(String(256))
-	date_created = Field(DateTime, default=datetime.now)
-	date_updated = Field(DateTime)
+	tax_id = Column(Integer, unique=True)	# -- taxonomy database division id
+	created_by = Column(String(256))
+	updated_by = Column(String(256))
+	date_created = Column(DateTime, default=datetime.now)
+	date_updated = Column(DateTime)
 	using_options(tablename='delnode')
 	using_table_options(mysql_engine='InnoDB')
 
-class Division(Entity):
+class Division(Base, TableClass):
 	"""
 	2012.6.6
 	"""
-	id = Field(Integer, primary_key=True)	# -- taxonomy database division id
-	code = Field(Text)	# -- GenBank division code (three characters)
+	id = Column(Integer, primary_key=True)	# -- taxonomy database division id
+	code = Column(Text)	# -- GenBank division code (three characters)
 		# e.g. BCT, PLN, VRT, MAM, PRI...
-	name = Field(Text)
-	comments = Field(Text)
-	created_by = Field(String(256))
-	updated_by = Field(String(256))
-	date_created = Field(DateTime, default=datetime.now)
-	date_updated = Field(DateTime)
+	name = Column(Text)
+	comments = Column(Text)
+	created_by = Column(String(256))
+	updated_by = Column(String(256))
+	date_created = Column(DateTime, default=datetime.now)
+	date_updated = Column(DateTime)
 	using_options(tablename='division')
 	using_table_options(mysql_engine='InnoDB')
 
-class Gencode(Entity):
+class Gencode(Base, TableClass):
 	"""
 	"""
-	id = Field(Integer, primary_key=True)	# -- GenBank genetic code id
-	abbreviation = Field(Text)	# -- genetic code name abbreviation
-	name = Field(Text)	# -- genetic code name
-	code = Field(Text)	#-- translation table for this genetic code
-	starts = Field(Text)	#	-- start codons for this genetic code
-	comment = Field(Text)
-	created_by = Field(String(256))
-	updated_by = Field(String(256))
-	date_created = Field(DateTime, default=datetime.now)
-	date_updated = Field(DateTime)
+	id = Column(Integer, primary_key=True)	# -- GenBank genetic code id
+	abbreviation = Column(Text)	# -- genetic code name abbreviation
+	name = Column(Text)	# -- genetic code name
+	code = Column(Text)	#-- translation table for this genetic code
+	starts = Column(Text)	#	-- start codons for this genetic code
+	comment = Column(Text)
+	created_by = Column(String(256))
+	updated_by = Column(String(256))
+	date_created = Column(DateTime, default=datetime.now)
+	date_updated = Column(DateTime)
 	using_options(tablename='gencode')
 	using_table_options(mysql_engine='InnoDB')
 
-class Merged(Entity):
+class Merged(Base, TableClass):
 	"""
 	2012.6.6
 	"""
-	old_tax_id = Field(Integer)		#-- id of nodes which has been merged
+	old_tax_id = Column(Integer)		#-- id of nodes which has been merged
 	new_tax = ManyToOne('%s.Node'%__name__, colname='new_tax_id', ondelete='CASCADE', onupdate='CASCADE')
 		#-- id of nodes which is result of merging
-	created_by = Field(String(256))
-	updated_by = Field(String(256))
-	date_created = Field(DateTime, default=datetime.now)
-	date_updated = Field(DateTime)
+	created_by = Column(String(256))
+	updated_by = Column(String(256))
+	date_created = Column(DateTime, default=datetime.now)
+	date_updated = Column(DateTime)
 	using_options(tablename='merged')
 	using_table_options(mysql_engine='InnoDB')
 
 
-class Name(Entity):
+class Name(Base, TableClass):
 	"""
 	2012.6.6
 		taxonomy name
 	"""
 	tax = ManyToOne('%s.Node'%__name__, colname='tax_id', ondelete='CASCADE', onupdate='CASCADE')
-	name_txt = Field(Text)
-	unique_name = Field(Text)
-	name_class = Field(Text)
-	created_by = Field(String(256))
-	updated_by = Field(String(256))
-	date_created = Field(DateTime, default=datetime.now)
-	date_updated = Field(DateTime)
+	name_txt = Column(Text)
+	unique_name = Column(Text)
+	name_class = Column(Text)
+	created_by = Column(String(256))
+	updated_by = Column(String(256))
+	date_created = Column(DateTime, default=datetime.now)
+	date_updated = Column(DateTime)
 	using_options(tablename='name')
 	using_table_options(mysql_engine='InnoDB')
 	using_table_options(UniqueConstraint('tax_id','name_txt','name_class'))
 	
 
-class Node(Entity):
+class Node(Base, TableClass):
 	"""
 	2012.6.6
 		taxonomy node and its parent node
 	"""
-	tax_id = Field(Integer, unique=True, primary_key=True)	#-- node id in GenBank taxonomy database
-	parent_tax_id = Field(Integer)	#2012.6.7 some parent taxonomy node might not exist at all.
+	tax_id = Column(Integer, unique=True, primary_key=True)	#-- node id in GenBank taxonomy database
+	parent_tax_id = Column(Integer)	#2012.6.7 some parent taxonomy node might not exist at all.
 	#parent_tax = ManyToOne('%s.Node'%__name__, colname='parent_tax_id', ondelete='CASCADE', onupdate='CASCADE')
-	rank = Field(Text)	#-- rank of this node (superkingdom, kingdom, ...)
-	embl_code = Field(Text)	#-- locus-name prefix; not unique
+	rank = Column(Text)	#-- rank of this node (superkingdom, kingdom, ...)
+	embl_code = Column(Text)	#-- locus-name prefix; not unique
 	division = ManyToOne('%s.Division'%__name__, colname='division_id', ondelete='CASCADE', onupdate='CASCADE')
 		#see division.dmp file
-	inherited_div_flag = Field(Integer)	#  (1 or 0) -- 1 if node inherits division from parent
+	inherited_div_flag = Column(Integer)	#  (1 or 0) -- 1 if node inherits division from parent
 	genetic_code = ManyToOne('%s.Gencode'%__name__, colname='genetic_code_id', ondelete='CASCADE', onupdate='CASCADE')
 		# -- see gencode.dmp file
-	inherited_GC_flag = Field(Integer)	#(1 or 0) -- 1 if node inherits genetic code from parent
+	inherited_GC_flag = Column(Integer)	#(1 or 0) -- 1 if node inherits genetic code from parent
 	mitochondrial_genetic_code = ManyToOne('%s.Gencode'%__name__, colname='mitochondrial_genetic_code_id', \
 										ondelete='CASCADE', onupdate='CASCADE')
 		# -- see gencode.dmp file
-	inherited_MGC_flag = Field(Integer) #(1 or 0)	#  -- 1 if node inherits mitochondrial gencode from parent
-	GenBank_hidden_flag = Field(Integer)	# (1 or 0) -- 1 if name is suppressed in GenBank entry lineage
-	hidden_subtree_root_flag = Field(Integer)		#(1 or 0) -- 1 if this subtree has no sequence data yet
-	comments = Field(Text)
+	inherited_MGC_flag = Column(Integer) #(1 or 0)	#  -- 1 if node inherits mitochondrial gencode from parent
+	GenBank_hidden_flag = Column(Integer)	# (1 or 0) -- 1 if name is suppressed in GenBank entry lineage
+	hidden_subtree_root_flag = Column(Integer)		#(1 or 0) -- 1 if this subtree has no sequence data yet
+	comments = Column(Text)
 	citation_list = ManyToMany("Citation", tablename='citation2node', local_colname='tax_id')
-	created_by = Field(String(256))
-	updated_by = Field(String(256))
-	date_created = Field(DateTime, default=datetime.now)
-	date_updated = Field(DateTime)
+	created_by = Column(String(256))
+	updated_by = Column(String(256))
+	date_created = Column(DateTime, default=datetime.now)
+	date_updated = Column(DateTime)
 	using_options(tablename='node')
 	using_table_options(mysql_engine='InnoDB')
 
-class TaxonomyDB(ElixirDB):
+class TaxonomyDB(Database):
 	__doc__ = __doc__
-	option_default_dict = ElixirDB.option_default_dict.copy()
+	option_default_dict = Database.option_default_dict.copy()
 	option_default_dict[('drivername', 1,)][0] = 'postgresql'
 	option_default_dict[('dbname', 1,)][0] = 'taxonomy'
 	option_default_dict.update({
@@ -186,10 +187,10 @@ class TaxonomyDB(ElixirDB):
 	def __init__(self, **keywords):
 		"""
 		2008-10-08
-			simplified further by moving db-common lines to ElixirDB
+			simplified further by moving db-common lines to Database
 		2008-07-09
 		"""
-		ElixirDB.__init__(self, **keywords)
+		Database.__init__(self, **keywords)
 		self.setup_engine(metadata=__metadata__, session=__session__, entities=entities)
 		self.ncbiTaxDumpFileDelimiter = '\t|\t'
 		
