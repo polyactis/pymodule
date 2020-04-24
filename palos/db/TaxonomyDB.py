@@ -29,7 +29,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy import UniqueConstraint, create_engine
 from sqlalchemy import and_, or_, not_
 
-from __init__ import Database, TableClass
+from palos.db import Database, TableClass
 
 Base = declarative_base()
 #Set it staticaly because DB is undefined at this point 

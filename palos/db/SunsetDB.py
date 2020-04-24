@@ -31,7 +31,7 @@ from palos import ngs
 from palos.utils import runLocalCommand
 from palos.utils import returnZeroFunc
 from palos.ngs.io.VCFFile import VCFFile
-from __init__ import Database, TableClass, AbstractTableWithFilename
+from palos.db import Database, TableClass, AbstractTableWithFilename
 
 Base = declarative_base()
 #Set it staticaly because DB is undefined at this point 

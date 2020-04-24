@@ -33,7 +33,7 @@ from palos.algorithm.RBTree import RBDict
 from palos.Genome import GeneModel
 #2010-9-21 although "from Genome import GeneModel" works,
 # it causes problem in pickle.load() because Genome is not directly visible outside.
-from __init__ import Database, TableClass, get_sequence_segment
+from palos.db import Database, TableClass, get_sequence_segment
 
 Base = declarative_base()
 #Set it staticaly because SunsetDB is undefined at this point 

@@ -29,7 +29,7 @@ from sqlalchemy.types import LargeBinary
 from datetime import datetime
 
 from palos import ProcessOptions, PassingData
-from . import Database, TableClass
+from palos.db import Database, TableClass
 
 
 Base = declarative_base()
