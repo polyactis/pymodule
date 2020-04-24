@@ -11,8 +11,7 @@ Examples:
     GenomeDB.py -v mysql -u yh -z papaya -d genome -k "" -t 3702 -o /tmp/geneAnnotationTax3702.pickle
 
 Description:
-    2008-07-09
-    This is a wrapper for the genome database, build on top of elixir. supercedes the table definitions in genomedb.sql.
+    This is the genome database ORM.
 """
 import sys, os
 from sqlalchemy.engine.url import URL
