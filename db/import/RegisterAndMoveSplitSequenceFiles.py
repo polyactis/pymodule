@@ -10,10 +10,10 @@ from palos.mapper.AbstractSunsetMapper import AbstractSunsetMapper as ParentClas
 class RegisterAndMoveSplitSequenceFiles(ParentClass):
     """
 Examples:
-    %s  --drivername postgresql --hostname 149.142.212.14 
-        --dbname pmdb --schema public --db_user yh 
+    %s --drivername postgresql --hostname pdc
+        --dbname pmdb --schema vervet --db_user yh 
         -i isq_id.txt --inputDir 3185_gerald_D14CGACXX_7_GCCAAT
-        -o /Network/Data/vervet/db/individual_sequence/3185_6059_2002099_GA_0_0
+        -o ~/vervet/db/individual_sequence/3185_6059_2002099_GA_0_0
         --relativeOutputDir individual_sequence/3185_6059_2002099_GA_0_0
         --library gerald_D14CGACXX_7_GCCAAT --individual_sequence_id 3185
         --sequence_format fastq --commit
@@ -21,22 +21,28 @@ Examples:
         --logFilename  3185_gerald_D14CGACXX_7_GCCAAT_1.register.log
 
 Description:
-    Program to register and move split files by picard's SplitReadFile.jar to db storage.
-    If inputFname (one variable on each line.) is given, it will be parsed to get 
-        outputDir, relativeOutputDir, individual_sequence_id, individual_sequence_file_raw_id.
+    Program to register and move/cp split files by picard's
+        SplitReadFile.jar to db storage.
+    If inputFname is given, it will be parsed to get:
+        outputDir, relativeOutputDir, individual_sequence_id, 
+        individual_sequence_file_raw_id.
+        One variable on each line.
     """
     __doc__ = __doc__%(sys.argv[0])
     option_default_dict = copy.deepcopy(ParentClass.option_default_dict)
     option_default_dict.pop(('outputFname', 0, ))
     option_default_dict.pop(('outputFnamePrefix', 0, ))
     option_default_dict.update({
-        ('inputDir', 1, ): ['', '', 1, 'input folder that contains split fastq files', ],
+        ('inputDir', 1, ): ['', '', 1, 
+            'input folder that contains split fastq files', ],
         ('original_file_path', 0, ): ['', '', 1, 
             'The original file from which all input files originate '],
         ('outputDir', 0, ): ['', 'o', 1, 
             'output folder to which files from inputDir will be moved.', ],
-        ('relativeOutputDir', 0, ): ['', '', 1, 'the output folder path relative to db.data_dir. '
-            'It should form the last part of outputDir. If not given, parse from inputFname.', ],
+        ('relativeOutputDir', 0, ): ['', '', 1, 
+            'The output folder path relative to db.data_dir. '
+            'It should form the last part of outputDir. '
+            'If not given, parse from inputFname.', ],
         ('individual_sequence_id', 0, int): [None, '', 1, 
             'individual_sequence.id associated with all files.'],
         ('individual_sequence_file_raw_id', 0, int): [None, '', 1, 
@@ -45,7 +51,8 @@ Description:
         ('mate_id', 0, int): [None, 'm', 1, 
             '1: first end; 2: 2nd end. of paired-end or mate-paired libraries'],
         ("sequence_format", 1, ): ["fastq", 'f', 1, 'fasta, fastq, etc.'],
-        ('logFilename', 0, ): [None, 'g', 1, 'output file to contain logs. optional.'],
+        ('logFilename', 0, ): [None, 'g', 1, 
+            'output file to contain logs. optional.'],
         })
 
     def __init__(self,  **keywords):
@@ -60,7 +67,8 @@ Description:
         """
         20190206
         """
-        #parse inputFname to get individual_sequence_id & individual_sequence_file_raw_id
+        #parse inputFname to get individual_sequence_id & 
+        # individual_sequence_file_raw_id and others.
         inputFile = utils.openGzipFile(self.inputFname)
         input_variable_dict = {}
         for line in inputFile:
@@ -81,13 +89,15 @@ Description:
             self.individual_sequence_file_raw_id = individual_sequence_file_raw_id
 
         self.outputDir = input_variable_dict.get("outputDir", self.outputDir)
-        self.relativeOutputDir = input_variable_dict.get("relativeOutputDir", self.relativeOutputDir)
+        self.relativeOutputDir = input_variable_dict.get("relativeOutputDir", \
+            self.relativeOutputDir)
         
         relativePathIndex = self.outputDir.find(self.relativeOutputDir)
         noOfCharsInRelativeOutputDir = len(self.relativeOutputDir)
-        if self.outputDir[relativePathIndex:relativePathIndex+noOfCharsInRelativeOutputDir]!=self.relativeOutputDir:
-            sys.stderr.write('Error: relativeOutputDir %s is not the last part of outputDir %s.\n'%\
-                            (self.relativeOutputDir, self.outputDir))
+        if self.outputDir[relativePathIndex:relativePathIndex+\
+                noOfCharsInRelativeOutputDir]!=self.relativeOutputDir:
+            logging.error('relativeOutputDir %s is not the last part of outputDir %s.\n'%\
+                (self.relativeOutputDir, self.outputDir))
             sys.exit(4)
     
     def parseSplitOrderOutOfFilename(self, filename, library, mate_id=None):
@@ -130,7 +140,8 @@ Description:
         counter = 0
         real_counter = 0
         for filename in os.listdir(self.inputDir):
-            split_order = self.parseSplitOrderOutOfFilename(filename, self.library, self.mate_id)
+            split_order = self.parseSplitOrderOutOfFilename(filename, \
+                self.library, self.mate_id)
             counter += 1
             if split_order:
                 #save db entry
@@ -149,7 +160,8 @@ Description:
                     srcFilenameLs=self.srcFilenameLs, dstFilenameLs=self.dstFilenameLs,\
                     constructRelativePathFunction=None)
                 if exitCode!=0:
-                    logging.error("moveFileIntoDBAffiliatedStorage() exits with %s code."%(exitCode))
+                    logging.error("moveFileIntoDBAffiliatedStorage() exits with %s code."%\
+                        (exitCode))
                     self.sessionRollback(session)
                     #delete all recorded target files
                     self.cleanUpAndExitOnFailure(exitCode=exitCode)
@@ -157,7 +169,8 @@ Description:
         
         if self.logFilename:
             outf = open(self.logFilename, 'w')
-            outf.write("%s files processed, %s of them added into db.\n"%(counter, real_counter))
+            outf.write("%s files processed, %s of them added into db.\n"%(\
+                counter, real_counter))
             outf.close()
         
         if self.commit:

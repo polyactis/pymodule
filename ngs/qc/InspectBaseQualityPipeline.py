@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-2011-8-16
-	construct a pegasus workflow to run InspectBaseQuality.py over a list of individual sequences
+A pegasus workflow to run InspectBaseQuality.py over a list of individual sequences
 
 Examples:
 	# 2011-8-16 on condorpool
@@ -9,7 +8,7 @@ Examples:
 	
 	# 2011-8-16 use hoffman2 site_handler
 	%s -o inspectBaseQuality.xml -u yh -i 1-8,15-130 
-		-l hoffman2 -e /u/home/eeskin/polyacti -t /u/home/eeskin/polyacti/NetworkData/vervet/db
+		-l hoffman2 -e /u/home/eeskin/polyacti -t ~/NetworkData/vervet/db
 
 """
 import sys, os, copy
@@ -17,24 +16,26 @@ __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
 from palos.db import SunsetDB
-from Sunset.pegasus.AbstractAccuWorkflow import AbstractAccuWorkflow as ParentClass
+from palos.ngs.AbstractNGSWorkflow import AbstractNGSWorkflow
 
-class InspectBaseQualityPipeline(ParentClass):
+class InspectBaseQualityPipeline(AbstractNGSWorkflow):
 	__doc__ = __doc__
 	
-	commonOptionDict = copy.deepcopy(ParentClass.option_default_dict)
+	commonOptionDict = copy.deepcopy(AbstractNGSWorkflow.option_default_dict)
 	#commonOptionDict.pop(('inputDir', 0, ))
 
 	option_default_dict = copy.deepcopy(commonOptionDict)
 	option_default_dict.update({
-				('ind_seq_id_ls', 1, ): ['', 'i', 1, 'a comma/dash-separated list of IndividualSequence.id. non-fastq entries will be discarded.', ],\
-						})
+		('ind_seq_id_ls', 1, ): ['', 'i', 1, \
+			'a comma/dash-separated list of IndividualSequence.id. '
+			'Non-fastq entries will be discarded.', ],\
+		})
 
 	def __init__(self, **keywords):
 		"""
 		2011-7-11
 		"""
-		ParentClass.__init__(self, **keywords)
+		AbstractNGSWorkflow.__init__(self, **keywords)
 		if self.ind_seq_id_ls:
 			self.ind_seq_id_ls = getListOutOfStr(self.ind_seq_id_ls, data_type=int)
 
@@ -72,8 +73,10 @@ class InspectBaseQualityPipeline(ParentClass):
 		
 		
 		#must use db_vervet.data_dir.
-		# If self.data_dir differs from db_vervet.data_dir, this program (must be run on submission host) won't find files.
-		individualSequenceID2FilePairLs = db_main.getIndividualSequenceID2FilePairLs(self.ind_seq_id_ls, data_dir=self.data_dir)
+		# If self.data_dir differs from db_vervet.data_dir, 
+		# this program (must be run on submission host) won't find files.
+		individualSequenceID2FilePairLs = db_main.getIndividualSequenceID2FilePairLs(
+			self.ind_seq_id_ls, data_dir=self.data_dir)
 		
 		for ind_seq_id, FilePairLs in individualSequenceID2FilePairLs.items():
 			individual_sequence = db_main.queryTable(SunsetDB.IndividualSequence).get(ind_seq_id)
@@ -90,18 +93,19 @@ class InspectBaseQualityPipeline(ParentClass):
 				for filepath in inputFilepathLs:
 					prefix, suffix = utils.getRealPrefixSuffixOfFilenameWithVariableSuffix(filepath)
 					if suffix=='.fastq':	#sometimes other files get in the way
-						inspectBaseQuality_job = self.addGenericDBJob(executable=self.InspectBaseQuality, \
-												inputFile=None, \
-												inputArgumentOption='-i',\
-												outputFile=None, outputArgumentOption=None,\
-												parentJobLs=None, extraDependentInputLs=None, \
-												extraOutputLs=None, extraArguments=None, \
-												transferOutput=False, \
-												extraArgumentList=['-i', filepath, '--read_sampling_rate', '0.005', \
-														'--quality_score_format', individual_sequence.quality_score_format], \
-												objectWithDBArguments=self,\
-												job_max_memory=20000, \
-												walltime=120)
+						inspectBaseQuality_job = self.addGenericDBJob(
+							executable=self.InspectBaseQuality, \
+							inputFile=None, \
+							inputArgumentOption='-i',\
+							outputFile=None, outputArgumentOption=None,\
+							parentJobLs=None, extraDependentInputLs=None, \
+							extraOutputLs=None, extraArguments=None, \
+							transferOutput=False, \
+							extraArgumentList=['-i', filepath, '--read_sampling_rate', '0.005', \
+									'--quality_score_format', individual_sequence.quality_score_format], \
+							objectWithDBArguments=self,\
+							job_max_memory=20000, \
+							walltime=120)
 		
 		sys.stderr.write("%s jobs.\n"%(self.no_of_jobs))
 		# Write the DAX to stdout

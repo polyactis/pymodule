@@ -38,7 +38,9 @@ from __init__ import Database, TableClass, get_sequence_segment
 Base = declarative_base()
 #Set it staticaly because SunsetDB is undefined at this point 
 # and it has to be defined after this.
-_schemaname_ = "genome"
+# 20200424 now that schema is set at the engine level.
+#  Try not to use _schemaname_.
+#_schemaname_ = "genome"
 
 class SequenceType(Base, TableClass):
     """
@@ -47,8 +49,8 @@ class SequenceType(Base, TableClass):
         a table storing meta information to be referenced by other tables
     """
     __tablename__ = 'sequence_type'
-    __table_args__ = {'schema':_schemaname_}
-    id = Column(Integer,primary_key=True)
+    #__table_args__ = {'schema':_schemaname_}
+    id = Column(Integer, primary_key=True)
     short_name = Column(String(223), unique=True)
     description = Column(Text)
     created_by = Column(String(256))
@@ -58,25 +60,24 @@ class SequenceType(Base, TableClass):
 
 class RawSequence(Base, TableClass):
     """
-    2011-8-24
-        annot_assembly_gi is not a foreign key anymore.
-        annot_assembly_id replaces it.
-    2010-12-17
-        add a foreign key constraint to column annot_assembly_gi
-        so that if the associated entry in AnnotAssembly is deleted, all raw sequences will be deleted as well.
-    2008-07-27
-        to store chunks of sequences of entries from AnnotAssembly
+    A table to store chunks of sequences of entries from AnnotAssembly.
+    annot_assembly_gi is not a foreign key anymore.
+    annot_assembly_id replaces it.
+    If the associated entry in AnnotAssembly is deleted,
+        all raw sequences will be deleted as well.
     """
     __tablename__ = 'raw_sequence'
-    __table_args__ = {'schema':_schemaname_}
+    #__table_args__ = {'schema':_schemaname_}
     id = Column(Integer,primary_key=True)
-    annot_assembly_id = Column(Integer, ForeignKey(_schemaname_+".annot_assembly.annot_assembly_id"))
+    annot_assembly_id = Column(Integer, \
+        ForeignKey("annot_assembly.annot_assembly_id"))
     annot_assembly = relationship('AnnotAssembly')
     annot_assembly_gi = Column(Integer)
     start = Column(Integer)
     stop = Column(Integer)
     sequence = Column(String(10000))	#each fragment is 10kb
-    UniqueConstraint('annot_assembly_id', 'start', 'stop', name='raw_sequence_uniq_cnst')
+    UniqueConstraint('annot_assembly_id', 'start', 'stop', \
+        name='raw_sequence_uniq_cnst')
 
 class AnnotAssembly(Base, TableClass):
     """
@@ -89,7 +90,8 @@ class AnnotAssembly(Base, TableClass):
         gi is no longer the primary key.
         a new id is added as primary key.
     2010-12-17
-        column raw_sequence_start_id is no longer a foreign key. to avoid circular dependency with RawSequence.
+        Column raw_sequence_start_id is no longer a foreign key.
+        To avoid circular dependency with RawSequence.
     2008-07-27
         table to store meta info of chromosome sequences
     """
