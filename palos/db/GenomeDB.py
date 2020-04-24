@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 """
 Examples:
-    #setup database in postgresql
-    GenomeDB.py -u crocea -k genome
-    
     # 2010-12-15 setup genome schema in vervetdb.
-    GenomeDB.py -u yh -k genome -d vervetdb -v postgresql
+    GenomeDB.py -v postgresql -k genome -d vervetdb -u yh
     
-    #setup database in mysql (if it's already setup, output the pickled geneAnnotation data structure)
-    GenomeDB.py -v mysql -u yh -z papaya -d genome -k "" -t 3702 -o /tmp/geneAnnotationTax3702.pickle
+    #setup database in mysql
+    #  (if it's already setup, output the pickled geneAnnotation data structure)
+    GenomeDB.py -v mysql -z papaya -d genome -k "" -u yh -t 3702
+        -o /tmp/geneAnnotationTax3702.pickle
 
 Description:
     This is the genome database ORM.
@@ -34,7 +33,7 @@ from palos.algorithm.RBTree import RBDict
 from palos.Genome import GeneModel
 #2010-9-21 although "from Genome import GeneModel" works,
 # it causes problem in pickle.load() because Genome is not directly visible outside.
-from palos.db import Database, TableClass, get_sequence_segment
+from __init__ import Database, TableClass, get_sequence_segment
 
 Base = declarative_base()
 #Set it staticaly because SunsetDB is undefined at this point 
@@ -1183,7 +1182,7 @@ class OneGenomeData(PassingData):
 class GenomeDatabase(Database):
     __doc__ = __doc__
     option_default_dict = Database.option_default_dict.copy()
-    option_default_dict[('drivername', 1,)][0] = 'mysql'
+    option_default_dict[('drivername', 1,)][0] = 'postgresql'
     option_default_dict[('dbname', 1,)][0] = 'genome'
     option_default_dict.update({
         ('geneAnnotationPickleFname', 0, ): ['', 'o', 1, 
@@ -1191,21 +1190,15 @@ class GenomeDatabase(Database):
             '1. gene_id2model \n \'
             '2. chr_id2gene_id_ls \n \'
             '3. geneSpanRBDict. \n \'
-            'It is optional because it is only used when you run GenomeDB.py as a standalone program'],\
+            'It is optional because it is only used when you run GenomeDB.py as a standalone program'
+            ],
         ('tax_id', 0, int): [3702, 't', 1, 'Taxonomy ID for geneAnnotationPickleFname.'],\
         })
     def __init__(self, **keywords):
         """
-        2011-3-25
-            wrap _chr_id2size, _chr_id2cumu_size, _chr_id2cumu_start etc. into OneGenomeData class.
-        2011-3-13
-            to store some internal data structures
-        2008-10-08
-            simplified further by moving db-common lines to Database
-        2008-07-09
+        wrap _chr_id2size, _chr_id2cumu_size, _chr_id2cumu_start etc. into OneGenomeData class.
         """
         Database.__init__(self, **keywords)
-        self.setup_engine(metadata=__metadata__, Session=__session__, session_factory=__session_factory__, entities=entities)
         #2011-3-25
         self.tax_id2genomeData = {}
     
@@ -1316,10 +1309,7 @@ class GenomeDatabase(Database):
             Gene.id is the new gene_id (was Gene.gene_id).
         2010-10-3
             bug fixed: (chr, start, stop) is not unique.
-             There are genes with the same coordinates.
-        2010-9-23
-            becomes a classmethod
-        2010-8-17
+            There are genes with the same coordinates.
         """
         sys.stderr.write("Creating a RBDict for all genes from organism %s ... \n"%tax_id)
         genomeRBDict = RBDict()
@@ -1363,7 +1353,7 @@ class GenomeDatabase(Database):
                     geneCommentaryRBDict.no_of_introns = gene_commentary.no_of_introns
                     
                     #box_ls = gene_commentary.constructAnnotatedBox()
-                    # 	#2012.5.15 constructAnnotatedBox() requires GeneSegment to have UTR,exon,CDS,intron already in place
+                    #2012.5.15 constructAnnotatedBox() requires GeneSegment to have UTR,exon,CDS,intron already in place
                     #box_ls = gene_commentary.box_ls
                     no_of_boxes = len(box_ls)
                     

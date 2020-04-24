@@ -1,12 +1,6 @@
 #!/usr/bin/env python3
 """
 Examples:
-	#setup database in postgresql
-	TaxonomyDB.py -u crocea -k taxonomy
-	
-	# 2012.6.6 setup taxonomy schema in vervetdb.
-	TaxonomyDB.py -u yh -k taxonomy -d vervetdb -v postgresql
-	
 	#setup database in mysql
 	%s -v mysql -u yh -z papaya -d taxonomy -k ""
 	
@@ -14,8 +8,8 @@ Examples:
 	%s -u yh -k taxonomy -d vervetdb -v postgresql -i /usr/local/research_data/NCBI/taxonomy
 	
 Description:
-	2012.6.6 (funcitonal now)
-	This is a wrapper for the taxonomy database (taxdump in ftp://ftp.ncbi.nih.gov/pub/taxonomy/), built on top of elixir.
+	This is the taxonomy database ORM.
+	The data is from taxdump in ftp://ftp.ncbi.nih.gov/pub/taxonomy/.
 	It also imports the taxdump into db if given a folder of un-tarred dump files (-i).
 """
 import sys, os
