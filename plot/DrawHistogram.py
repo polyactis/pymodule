@@ -18,7 +18,7 @@ import csv
 from palos import ProcessOptions, getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter
 from palos.plot import yh_matplotlib
 import numpy, random, pylab
-from palos.plot.AbstractPlot import AbstractPlot
+from . AbstractPlot import AbstractPlot
 
 class DrawHistogram(AbstractPlot):
 	__doc__ = __doc__

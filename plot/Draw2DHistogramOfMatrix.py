@@ -19,7 +19,7 @@ import csv
 from palos import ProcessOptions, PassingData
 from palos.plot import yh_matplotlib
 import numpy, random
-from palos.plot.AbstractPlot import AbstractPlot
+from . AbstractPlot import AbstractPlot
 
 class Draw2DHistogramOfMatrix(AbstractPlot):
 	__doc__ = __doc__

@@ -114,7 +114,8 @@ class ImportIndividualSequence2DB(ParentClass):
             'isq.sequence_type_id table column: SequenceType.short_name.'],\
         ("sequence_format", 1, ): ["fastq", 'f', 1, 'Fasta, fastq, etc.'],\
         ("tissueSourceSiteFname", 0, ): ["", '', 1, 'TCGA tissue source site file'],\
-        ('inputType', 1, int): [1, 'y', 1, 'input type. 1: TCGA bam files; 2: HCC1187 bam files', ],\
+        ('inputType', 1, int): [1, 'y', 1, 'input type. 1: fastQ files with sample_sheet; '
+            '2: TCGA bam files; 3: HCC1187 bam files', ],\
         ('study_id', 0, int): [None, '', 1, 'Field study.id from db, used to group individuals.', ],\
         ('site_id', 0, int): [None, '', 1, 'Field site.id from db, used to group individuals.', ],\
         })
@@ -549,7 +550,7 @@ Example ("Library" and "Bam Path" are required):
 
     def addJobsToImportFastQ(self, db_main=None, \
         sample_sheet=None, input_path=None, data_dir=None, \
-        minNoOfReads=None, commit=None):
+        commit=None):
         """
         a general importer
         """
@@ -597,7 +598,7 @@ Example ("Library" and "Bam Path" are required):
                 logFile = File(f'{individual_sequence.id}_{mate_id}.split.log')
                 splitReadFileJob1 = self.addSplitReadFileJob(
                     inputF=fastqFile, outputFnamePrefix=splitFastQFnamePrefix, \
-                    outputFnamePrefixTail="", minNoOfReads=minNoOfReads, \
+                    outputFnamePrefixTail="", minNoOfReads=self.minNoOfReads, \
                     logFile=logFile, parentJobLs=[splitOutputDirJob], \
                     job_max_memory=4000, walltime = 800, \
                     extraDependentInputLs=None, transferOutput=True)
@@ -630,7 +631,7 @@ Example ("Library" and "Bam Path" are required):
     
     def addJobsToImportUNGCVervetFastQ(self, db_main=None, \
         sample_sheet=None, input_path=None, data_dir=None, \
-        minNoOfReads=None, commit=None,\
+        commit=None,\
         sequencer_name=None, sequence_type_name=None, sequence_format=None):
         """
         2013.04.04
@@ -646,7 +647,7 @@ Example ("Library" and "Bam Path" are required):
             sample_id2data=sample_id2data)
         self.addJobsToSplitAndRegisterFastQ(db_main=db_main, \
             sample_id2fastq_obj_ls=sample_id2fastq_obj_ls, \
-            data_dir=data_dir, minNoOfReads=minNoOfReads, commit=commit,\
+            data_dir=data_dir, minNoOfReads=self.minNoOfReads, commit=commit,\
             sequencer_name=sequencer_name, sequence_type_name=sequence_type_name, 
             sequence_format=sequence_format)
 
@@ -832,7 +833,7 @@ D1HYNACXX	2	UNGC Human Sample 1	S1	AS001A	ATTACTCG	TruSeq DNA PCR Free beta kit	
     
     def addJobsToImportSouthAfricanRNAFastQ(self, db_main=None, \
         sample_sheet=None, input_path=None, data_dir=None, \
-        minNoOfReads=None, commit=None,\
+        commit=None,\
         sequencer_name=None, sequence_type_name=None, sequence_format=None):
         """
         2012.6.1
@@ -847,7 +848,7 @@ D1HYNACXX	2	UNGC Human Sample 1	S1	AS001A	ATTACTCG	TruSeq DNA PCR Free beta kit	
             filenameSignature2SampleID=filenameSignature2SampleID)
         self.addJobsToSplitAndRegisterFastQ(db_main=db_main, 
             sample_id2fastq_obj_ls=sample_id2fastq_obj_ls, data_dir=data_dir, \
-            minNoOfReads=minNoOfReads, commit=commit,\
+            minNoOfReads=self.minNoOfReads, commit=commit,\
             sequencer_name=sequencer_name, \
             sequence_type_name=sequence_type_name, sequence_format=sequence_format)		
     
@@ -911,7 +912,7 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
     
     def addJobsToSplitAndRegisterFastQ(self, db_main=None, 
         sample_id2fastq_obj_ls=None, data_dir=None, \
-        minNoOfReads=None, commit=None, \
+        commit=None, \
         sequencer_name=None, sequence_type_name=None, sequence_format=None):
         """
         split out of addJobsToImportMcGillFastQ(), also used in addJobsToImportUNGCVervetFastQ().
@@ -956,7 +957,7 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
                 logFile = File('%s_%s_%s.split.log'%(individual_sequence.id, library, mate_id))
                 splitReadFileJob1 = self.addSplitReadFileJob(
                     inputF=fastqFile, outputFnamePrefix=splitFastQFnamePrefix, \
-                    outputFnamePrefixTail="", minNoOfReads=minNoOfReads, \
+                    outputFnamePrefixTail="", minNoOfReads=self.minNoOfReads, \
                     logFile=logFile, parentJobLs=[splitOutputDirJob], \
                     job_max_memory=4000, walltime = 800, \
                     extraDependentInputLs=None, transferOutput=True)
@@ -976,7 +977,7 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
         
     def addJobsToImportMcGillFastQ(self, db_main=None, 
         input_path=None, data_dir=None, \
-        minNoOfReads=None, commit=None,\
+        commit=None,\
         sequencer_name=None, sequence_type_name=None, sequence_format=None):
         """
         20120430
@@ -988,14 +989,14 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
         
         self.addJobsToSplitAndRegisterFastQ(db_main=db_main, \
             sample_id2fastq_obj_ls=sample_id2fastq_obj_ls, data_dir=data_dir, \
-            minNoOfReads=minNoOfReads, commit=commit,\
+            minNoOfReads=self.minNoOfReads, commit=commit,\
             sequencer_name=sequencer_name, sequence_type_name=sequence_type_name, \
             sequence_format=sequence_format)
 
     
     def addJobsToImportWUSTLBam(self, db_main=None, sample_sheet=None, 
         input_path=None, data_dir=None, \
-        minNoOfReads=None, commit=None,\
+        commit=None,\
         sequencer_name=None, sequence_type_name=None, sequence_format=None):
         """
         20120430
@@ -1063,7 +1064,7 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
                 executable=self.SplitReadFileWrapper, \
                 inputF=convertBamToFastqAndGzip_job.output1, 
                 outputFnamePrefix=splitFastQFnamePrefix, \
-                outputFnamePrefixTail="", minNoOfReads=minNoOfReads, \
+                outputFnamePrefixTail="", minNoOfReads=self.minNoOfReads, \
                 logFile=logFile, parentJobLs=[convertBamToFastqAndGzip_job, splitOutputDirJob], \
                 job_max_memory=6000, walltime = 800, \
                 extraDependentInputLs=None, transferOutput=True)
@@ -1087,7 +1088,7 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
             logFile = File('%s_%s_%s.split.log'%(individual_sequence.id, library, mate_id))
             splitReadFileJob2 = self.addSplitReadFileJob(executable=self.SplitReadFileWrapper, \
                 inputF=convertBamToFastqAndGzip_job.output2, outputFnamePrefix=splitFastQFnamePrefix, \
-                outputFnamePrefixTail="", minNoOfReads=minNoOfReads, \
+                outputFnamePrefixTail="", minNoOfReads=self.minNoOfReads, \
                 logFile=logFile, parentJobLs=[convertBamToFastqAndGzip_job, splitOutputDirJob], \
                 job_max_memory=6000, walltime = 800, \
                 extraDependentInputLs=None, transferOutput=True)
@@ -1232,7 +1233,7 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
 
     def addJobsToImportTCGABam(self, db_main=None, input_path=None, \
         tax_id=9606, data_dir=None, \
-        minNoOfReads=None, commit=None,\
+        commit=None,\
         sequencer_name=None, sequence_type_name=None, sequence_format=None, **keywords):
         """
         20170407
@@ -1327,7 +1328,7 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
             splitSRFileJob = self.addSplitReadFileJob(
                 inputF=convertBamToFastqAndGzip_job.output_unpaired, \
                 outputFnamePrefix=splitFastQFnamePrefix, \
-                outputFnamePrefixTail="", minNoOfReads=minNoOfReads, \
+                outputFnamePrefixTail="", minNoOfReads=self.minNoOfReads, \
                 logFile=logFile, \
                 parentJobLs=[registerUnpairedSequence2DBJob, splitSROutputDirJob], \
                 job_max_memory=4000, walltime = 800, no_of_cpus=4, \
@@ -1378,7 +1379,7 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
             splitReadFileJob1 = self.addSplitReadFileJob(
                 inputF=convertBamToFastqAndGzip_job.output1, 
                 outputFnamePrefix=splitFastQFnamePrefix, \
-                outputFnamePrefixTail="", minNoOfReads=minNoOfReads, \
+                outputFnamePrefixTail="", minNoOfReads=self.minNoOfReads, \
                 logFile=logFile, \
                 parentJobLs=[registerPairedEndSequence2DBJob, splitOutputDirJob], \
                 job_max_memory=4000, walltime = 800, no_of_cpus=4, \
@@ -1399,7 +1400,7 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
             splitReadFileJob2 = self.addSplitReadFileJob(
                 inputF=convertBamToFastqAndGzip_job.output2, 
                 outputFnamePrefix=splitFastQFnamePrefix, \
-                outputFnamePrefixTail="", minNoOfReads=minNoOfReads, \
+                outputFnamePrefixTail="", minNoOfReads=self.minNoOfReads, \
                 logFile=logFile, \
                 parentJobLs=[registerPairedEndSequence2DBJob, splitOutputDirJob], \
                 job_max_memory=4000, walltime = 800, no_of_cpus=4, \
@@ -1464,7 +1465,7 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
 
     def addJobsToImportHCC1187Bam(self, db_main=None, input_path=None, \
         tax_id=9606, data_dir=None, \
-        minNoOfReads=None, commit=None,\
+        commit=None,\
         sequencer_name=None, sequence_type_name=None, sequence_format=None, **keywords):
         """
         20170607
@@ -1538,7 +1539,7 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
             splitSRFileJob = self.addSplitReadFileJob(
                 inputF=convertBamToFastqAndGzip_job.output_unpaired, \
                 outputFnamePrefix=splitFastQFnamePrefix, \
-                outputFnamePrefixTail="", minNoOfReads=minNoOfReads, \
+                outputFnamePrefixTail="", minNoOfReads=self.minNoOfReads, \
                 logFile=logFile, \
                 parentJobLs=[registerUnpairedSequence2DBJob, splitSROutputDirJob], \
                 job_max_memory=4000, walltime = 800, no_of_cpus=4, \
@@ -1587,7 +1588,7 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
             logFile = File('%s_split.log'%(splitFastQFnamePrefix))
             splitReadFileJob1 = self.addSplitReadFileJob(
                 inputF=convertBamToFastqAndGzip_job.output1, outputFnamePrefix=splitFastQFnamePrefix, \
-                outputFnamePrefixTail="", minNoOfReads=minNoOfReads, \
+                outputFnamePrefixTail="", minNoOfReads=self.minNoOfReads, \
                 logFile=logFile, \
                 parentJobLs=[registerPairedEndSequence2DBJob, splitOutputDirJob], \
                 job_max_memory=4000, walltime = 800, no_of_cpus=4, \
@@ -1609,7 +1610,7 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
             splitReadFileJob2 = self.addSplitReadFileJob(
                 inputF=convertBamToFastqAndGzip_job.output2, \
                 outputFnamePrefix=splitFastQFnamePrefix, \
-                outputFnamePrefixTail="", minNoOfReads=minNoOfReads, \
+                outputFnamePrefixTail="", minNoOfReads=self.minNoOfReads, \
                 logFile=logFile, \
                 parentJobLs=[registerPairedEndSequence2DBJob, splitOutputDirJob], \
                 job_max_memory=4000, walltime = 800, no_of_cpus=4, \
@@ -1633,21 +1634,30 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
         """
         pdata = self.setup_run()
         if self.inputType==1:
-            self.addJobsToImportTCGABam(db_main=self.db_main, \
-            sample_sheet=self.sample_sheet, \
-            input_path=self.input_path, data_dir=self.data_dir, \
-            minNoOfReads=self.minNoOfReads, commit=self.commit,\
-            sequencer_name=self.sequencer_name, 
-            sequence_type_name=self.sequence_type_name, \
-            sequence_format=self.sequence_format)
+            self.addJobsToImportFastQ(db_main=self.db_main,
+            sample_sheet=self.sample_sheet,
+            input_path=self.input_path, data_dir=self.data_dir,
+            commit=self.commit
+            )
         elif self.inputType==2:
-            self.addJobsToImportHCC1187Bam(db_main=self.db_main, \
-            sample_sheet=self.sample_sheet, \
-            input_path=self.input_path, data_dir=self.data_dir, \
-            minNoOfReads=self.minNoOfReads, commit=self.commit,\
+            self.addJobsToImportTCGABam(db_main=self.db_main,
+            sample_sheet=self.sample_sheet,
+            input_path=self.input_path, data_dir=self.data_dir,
+            commit=self.commit,
             sequencer_name=self.sequencer_name, 
-            sequence_type_name=self.sequence_type_name, \
+            sequence_type_name=self.sequence_type_name,
             sequence_format=self.sequence_format)
+        elif self.inputType==3:
+            self.addJobsToImportHCC1187Bam(db_main=self.db_main,
+            sample_sheet=self.sample_sheet,
+            input_path=self.input_path, data_dir=self.data_dir,
+            commit=self.commit,
+            sequencer_name=self.sequencer_name,
+            sequence_type_name=self.sequence_type_name,
+            sequence_format=self.sequence_format)
+        else:
+            logging.error(f"Unsupported input type {self.inputType}.")
+            sys.exit(3)
         # Write the DAX
         self.end_run()
         

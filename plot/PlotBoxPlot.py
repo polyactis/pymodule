@@ -17,7 +17,7 @@ import csv
 import numpy, random, pylab
 from palos import ProcessOptions, getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter
 from palos.plot import yh_matplotlib
-from palos.plot.AbstractPlot import AbstractPlot
+from . AbstractPlot import AbstractPlot
 
 class PlotBoxPlot(AbstractPlot):
 	__doc__ = __doc__

@@ -8,6 +8,10 @@ from palos import ProcessOptions, getListOutOfStr, PassingData, utils
 from pegaflow.Workflow import Workflow
 from pegaflow.DAX3 import Executable, File, PFN, Profile, Namespace, Link, Use, Job, Dependency
 
+#path to the source code directory
+src_dir = os.path.dirname(os.path.abspath(__file__))
+
+
 class AbstractWorkflow(Workflow):
     __doc__ = __doc__
     db_option_dict = {
@@ -37,7 +41,7 @@ class AbstractWorkflow(Workflow):
         ("thisModulePath", 1, ): ["%s", '', 1, 
             'path of the module that owns this program. '
             'used to add executables from this module.'],\
-        ("javaPath", 1, ): ["%s/bin/jdk/bin/java", 'J', 1, 'the path to java binary'],\
+        ("javaPath", 1, ): ["%s/bin/java", 'J', 1, 'the path to java binary'],\
         ("site_handler", 1, ): ["condor", 'l', 1, 
             'which computing site to run the jobs. check your Pegasus setup.'],\
         ("input_site_handler", 0, ): ["None", 'j', 1, 
@@ -131,20 +135,10 @@ class AbstractWorkflow(Workflow):
         #2013.2.7 convert, an image swissknife program, part of imagemagick
         self.registerOneExecutable(path="/usr/bin/convert", name='convertImage',\
             clusterSizeMultiplier=1)
-
-        #2013.08.23 c++ version of SelectRowsFromMatrix.py
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, 
-            'mapper/extractor/SelectRowsFromMatrixCC'), \
-            name='SelectRowsFromMatrixCC', clusterSizeMultiplier=1)
-        #2012.08.13 SelectRowsFromMatrix is a derivative of AbstractMatrixFileWalker,
-        #  so use addAbstractMatrixFileWalkerJob()
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, 
-            'mapper/extractor/SelectRowsFromMatrix.py'), \
-            name='SelectRowsFromMatrix', clusterSizeMultiplier=1)
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, 
-        "mapper/extractor/SelectLineBlockFromFile.py"), 
+            "mapper/extractor/SelectLineBlockFromFile.py"), 
             name='SelectLineBlockFromFile', clusterSizeMultiplier=1)
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath,
             "plot/AbstractPlot.py"), 
             name='AbstractPlot', clusterSizeMultiplier=1)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
@@ -160,10 +154,6 @@ class AbstractWorkflow(Workflow):
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
             "plot/Draw2DHistogramOfMatrix.py"), 
             name='Draw2DHistogramOfMatrix', clusterSizeMultiplier=1)
-        # C++ binary
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
-            "mapper/CalculateMedianMeanOfInputColumn"), 
-            name='CalculateMedianMeanOfInputColumn', clusterSizeMultiplier=1)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
             "statistics/SampleRows.py"), 
             name='SampleRows', clusterSizeMultiplier=1)

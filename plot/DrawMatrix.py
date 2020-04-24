@@ -28,7 +28,7 @@ Description:
 10-31-05 basic functions to draw images
 """
 import sys,os
-from palos import ProcessOptions, getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter
+from palos import ProcessOptions, getListOutOfStr, PassingData, figureOutDelimiter
 from palos.polymorphism.SNP import SNPData
 
 

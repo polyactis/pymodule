@@ -15,7 +15,7 @@ import numpy, random, pylab
 from palos import ProcessOptions, getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter
 from palos import statistics
 from palos.io.AbstractMatrixFileWalker import AbstractMatrixFileWalker
-from palos.plot.AbstractPlot import AbstractPlot
+from . AbstractPlot import AbstractPlot
 
 class PlotLD(AbstractPlot):
 	__doc__ = __doc__
