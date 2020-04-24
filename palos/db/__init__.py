@@ -192,7 +192,7 @@ class Database(object):
 	__doc__ = __doc__
 	option_default_dict = {
 		('drivername', 1,):['postgresql', 'v', 1, 
-			'which type of database? mysql or postgres', ],\
+			'which type of database? mysql or postgresql', ],\
 		('hostname', 1, ):['localhost', 'z', 1, 'hostname of the db server', ],\
 		('dbname', 1, ):["", 'd', 1, 'database name',],\
 		('schema', 0, ): ["", 'k', 1, 'database schema name', ],\
@@ -211,7 +211,7 @@ class Database(object):
 		('report', 0, int):[0, 'r', 0, 'toggle report, more verbose stdout/stderr.']
 		}
 	def __init__(self, drivername:str='postgresql', hostname:str="localhost",\
-		dbname:str=None, schema:str=None, db_user:str=None, db_passswd:str=None,\
+		dbname:str=None, schema:str=None, db_user:str=None, db_passwd:str=None,\
 		port:int=5432, pool_recycle:int=3600, echo_pool:bool=False,
 		sql_echo:bool=False, is_elixir:bool=False, commit:int=0, 
 		debug:int=0, report:int=0):
@@ -222,7 +222,7 @@ class Database(object):
 		self.dbname=dbname
 		self.schema=schema
 		self.db_user=db_user
-		self.db_passswd=db_passwd
+		self.db_passwd=db_passwd
 		self.port=port
 		self.pool_recycle=pool_recycle
 		self.echo_pool=echo_pool
@@ -232,6 +232,11 @@ class Database(object):
 		self.commit=commit 
 		self.debug=debug
 		self.report=report
+		if not self.db_passwd:
+			import getpass
+			self.db_passwd = getpass.getpass(
+				prompt=f'Please enter password for database user {self.db_user}:')
+
 		if self.echo_pool:
 			#2010-9-19 passing echo_pool to create_engine() causes error. all pool log disappeared.
 			#2010-9-19 Set up a specific logger with our desired output level
@@ -285,9 +290,18 @@ class Database(object):
 			repeated, a number closer to the default of 100 is likely more appropriate:
 		"""
 		if self._engine is None:
-			self._engine = create_engine(self.url, pool_recycle=self.pool_recycle, 
-				echo=self.sql_echo, executemany_mode='values',
-				executemany_values_page_size=10000, executemany_batch_page_size=500)
+			if self.drivername=='postgresql':
+				#schema set at the engine level
+				self._engine = create_engine(self.url, pool_recycle=self.pool_recycle, 
+					echo=self.sql_echo, executemany_mode='values',
+					executemany_values_page_size=10000, executemany_batch_page_size=500,
+					connect_args={'options': f'-csearch_path={self.schema}'},
+					)
+			else:
+				self._engine = create_engine(self.url, pool_recycle=self.pool_recycle, 
+					echo=self.sql_echo, executemany_mode='values',
+					executemany_values_page_size=10000, executemany_batch_page_size=500,
+					)
 		return self._engine
 
 	@property
@@ -296,14 +310,16 @@ class Database(object):
 			SessionClass = scoped_session(sessionmaker(autoflush=False, 
 				autocommit=True, bind=self.engine))
 			self._session = SessionClass()
-			# set the search path
-			self._session.execute(f"SET search_path TO {self.schema}")
+			# set the search path. too late.
+			# set it in the engine level.
+			#self._session.execute(f"SET search_path TO {self.schema}")
 		return self._session
 
 	def setup(self, create_tables=True, Base=None):
 		if create_tables:
 			#from sqlalchemy.ext.declarative import declarative_base
 			#Base = declarative_base()
+			print(self.engine, flush=True)
 			Base.metadata.create_all(self.engine)
 
 	def SessionDown(self):

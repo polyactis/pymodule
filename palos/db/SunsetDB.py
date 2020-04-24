@@ -28,14 +28,15 @@ from sqlalchemy.types import LargeBinary
 from datetime import datetime
 from palos import ProcessOptions, utils, PassingData
 from palos import ngs
-from palos.db import Database, TableClass, AbstractTableWithFilename
 from palos.utils import runLocalCommand
 from palos.utils import returnZeroFunc
 from palos.ngs.io.VCFFile import VCFFile
+from __init__ import Database, TableClass, AbstractTableWithFilename
 
 Base = declarative_base()
-#Set it staticaly because SunsetDB is undefined at this point 
+#Set it staticaly because DB is undefined at this point 
 # and it has to be defined after this.
+Base.metadata.schema = 'sunset'
 _schemaname_ = "sunset"
 
     
@@ -2169,8 +2170,7 @@ class SunsetDB(Database):
     def isThisAlignmentComplete(self, individual_alignment=None, \
         data_dir=None, returnFalseIfInexitentFile=False):
         """
-        2013.05.04 added argument returnFalseIfInexitentFile
-        2013.04.29 whether os.path.isfile(alignmentAbsPath) is true or not is not mandatory anymore.
+        whether os.path.isfile(alignmentAbsPath) is true or not is not mandatory anymore.
             Will give a warning though. 
         2013.04.10 bugfix. individual_alignment.path could be None.
         2013.03.28
@@ -2180,7 +2180,7 @@ class SunsetDB(Database):
         if not individual_alignment.path:
             return False
         alignmentAbsPath= os.path.join(data_dir, individual_alignment.path)
-        #2012.3.29	check if the alignment exists or not. if it already exists, no alignment jobs.
+        #check if the alignment exists or not. if it already exists, no alignment jobs.
         if individual_alignment.file_size is not None and individual_alignment.file_size>0:
             if not os.path.isfile(alignmentAbsPath):
                 if returnFalseIfInexitentFile:	#2013.05.04
