@@ -514,7 +514,7 @@ Example ("Library" and "Bam Path" are required):
         #numpy.isnan can't be used in lambda function.
         # so change nan to '' first. then lambda.
         df = df.fillna('')
-        NoneForNan = lambda x: (x=='' and None or x)
+        NoneForNan = lambda x: None if x=='' else x
         no_of_files = 0
         for idx, row in df.iterrows():
             file_path = row.file_path.strip()
