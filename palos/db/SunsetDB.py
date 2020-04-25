@@ -2813,11 +2813,13 @@ class SunsetDB(Database):
         return newAlignmentLs
     
     @classmethod
-    def getCumulativeAlignmentMedianDepth(cls, alignmentLs=[], defaultSampleAlignmentDepth=10):
+    def getCumulativeAlignmentMedianDepth(cls, alignmentLs=[],
+        defaultSampleAlignmentDepth=10):
         """
         2012.8.7
         """
-        sys.stderr.write("Getting cumulative median depth of %s alignments ..."%(len(alignmentLs)))
+        logging.warn("Getting cumulative median depth of %s alignments ..."%(\
+            len(alignmentLs)))
         cumulativeDepth = 0
         for alignment in alignmentLs:
             if alignment and alignment.median_depth is not None:
@@ -2832,7 +2834,8 @@ class SunsetDB(Database):
         """
         2011-2-11
         """
-        db_entry = self.queryTable(AlleleType).filter_by(short_name=allele_type_name).first()
+        db_entry = self.queryTable(AlleleType).\
+            filter_by(short_name=allele_type_name).first()
         if not db_entry:
             db_entry = AlleleType(short_name=allele_type_name)
             self.session.add(db_entry)
@@ -2891,9 +2894,8 @@ class SunsetDB(Database):
         tissue_name: str=None, tissue_id: int=None, 
         condition_name: str=None, condition_id: int=None, 
         parent_individual_sequence_id: int=None,\
-        no_of_chromosomes: int=None, sequence_batch_id: int=None, version=None, \
-        filtered: int=0,\
-        is_contaminated: int=0, outdated_index: int=0, 
+        no_of_chromosomes: int=None, sequence_batch_id: int=None, version=None,
+        filtered: int=0, is_contaminated: int=0, outdated_index: int=0, 
         returnFirstEntry:bool=True):
         """
         """
@@ -2938,16 +2940,16 @@ class SunsetDB(Database):
         else:
             query = query.filter_by(parent_individual_sequence_id=None)
         
-        if sequence_batch_id is not None:
+        if sequence_batch_id!='' and sequence_batch_id is not None:
             query = query.filter_by(sequence_batch_id=sequence_batch_id)
         else:
             query = query.filter_by(sequence_batch_id=None)
         
-        if version is not None:
+        if version != '' and version is not None:
             #default is 1. so if argument is None, don't query it
             query = query.filter_by(version=version)
         
-        if no_of_chromosomes is not None:
+        if no_of_chromosomes!='' and no_of_chromosomes is not None:
             query = query.filter_by(no_of_chromosomes=no_of_chromosomes)
         else:
             query = query.filter_by(no_of_chromosomes=None)
@@ -2972,15 +2974,18 @@ class SunsetDB(Database):
             return query
     
     def checkIndividualAlignment(self, individual_code=None, individual_id=None,
-        individual=None, individual_sequence_id=None, \
-        path_to_original_alignment=None, sequencer_name='GA', sequencer_id=None, \
-        sequence_type_name=None, sequence_type_id=None, sequence_format='fastq', \
+        individual=None, individual_sequence_id=None,
+        path_to_original_alignment=None, sequencer_name='GA', sequencer_id=None,
+        sequence_type_name=None, sequence_type_id=None, sequence_format='fastq',
         ref_individual_sequence_id=10, \
-        alignment_method_name='bwa-short-read', alignment_method_id=None, alignment_method=None,\
-        alignment_format='bam', subFolder='individual_alignment', \
-        createSymbolicLink=False, individual_sequence_filtered=0, read_group_added=None, data_dir=None, \
-        outdated_index=0, mask_genotype_method_id=None, parent_individual_alignment_id=None,\
-        individual_sequence_file_raw_id=None, md5sum=None, local_realigned=0, reduce_reads=None):
+        alignment_method_name='bwa-short-read', alignment_method_id=None,
+        alignment_method=None,
+        alignment_format='bam', subFolder='individual_alignment',
+        createSymbolicLink=False, individual_sequence_filtered=0,
+        read_group_added=None, data_dir=None, outdated_index=0,
+        mask_genotype_method_id=None, parent_individual_alignment_id=None,
+        individual_sequence_file_raw_id=None, md5sum=None, local_realigned=0,
+        reduce_reads=None):
         """
         2013.04.11 added argument reduce_reads
         2013.04.05 split out of getAlignment()
@@ -2993,15 +2998,18 @@ class SunsetDB(Database):
             individual = self.queryTable(Individual).get(individual_id)
         
         if individual_sequence_id:
-            individual_sequence = self.queryTable(IndividualSequence).get(individual_sequence_id)
+            individual_sequence = self.queryTable(IndividualSequence).\
+                get(individual_sequence_id)
             if individual is None:
                 individual = individual_sequence.individual
         elif individual:
-            individual_sequence = self.getIndividualSequence(individual_id=individual.id, 
-            sequencer_name=sequencer_name, \
-            sequencer_id=sequencer_id, sequence_type_id=sequence_type_id,\
-            sequence_type_name=sequence_type_name,\
-            sequence_format=sequence_format, filtered=individual_sequence_filtered)
+            individual_sequence = self.getIndividualSequence(
+                individual_id=individual.id,
+                sequencer_name=sequencer_name,
+                sequencer_id=sequencer_id, sequence_type_id=sequence_type_id,
+                sequence_type_name=sequence_type_name,
+                sequence_format=sequence_format,
+                filtered=individual_sequence_filtered)
         else:
             logging.error(f"Not able to get individual_sequence because "
                 f"individual_sequence_id={individual_sequence_id}; "

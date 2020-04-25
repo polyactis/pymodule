@@ -74,7 +74,7 @@ Examples:
     # 2017.04.28 added TCGA sequences (.bam) into db
     %s -i /y/Sunset/tcga/HNSC_TCGA/
         --hostname pdc -u huangyu -j condor -l condor 
-        -o dags/ImportTCGAHNSCSamples.xml -y6
+        -o dags/Import_TCGA_HNSC_Samples.xml -y6
         --tissueSourceSiteFname /y/Sunset/tcga/tcga_code_tables/tissueSourceSite.tsv 
         --minNoOfReads 8000000 --dbname pmdb -k sunset --commit
 
@@ -84,6 +84,7 @@ __doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], \
     sys.argv[0], sys.argv[0])
 
 import copy, re, csv
+import numpy
 import pandas as pd
 from pegaflow.DAX3 import File
 from palos import ProcessOptions, PassingData, utils
@@ -502,50 +503,55 @@ Example ("Library" and "Bam Path" are required):
         Only the first two columns are required. The rest is optional.
         But should provide as much as you can.
         Columns of sample_sheet:
-            file_path,sample_id,study_name,study_id,site_id,
+            file_path,sample_id,study,site,
             sequence_type,sequencer,sequence_batch_id,libarary,
-            tissue_name,tissue_id
+            condition,tissue_name,tissue_id
         """
-        logging.info(f"Getting sample_id2data from {sample_sheet} ...")
+        logging.warn(f"Getting sample_id2data from {sample_sheet} ...")
         filename_pattern = re.compile(r'(?P<other>.*)_(?P<mate_id>\d).(fastq|fq)')
         sample_id2data = {}
-        df = pd.read_excel(sample_sheet, header=True)
+        df = pd.read_excel(sample_sheet, header=0)
+        #numpy.isnan can't be used in lambda function.
+        # so change nan to '' first. then lambda.
+        df = df.fillna('')
+        NoneForNan = lambda x: (x=='' and None or x)
         no_of_files = 0
         for idx, row in df.iterrows():
-            find_path_func = lambda x: x.find(row['file_path']) >= 0
+            file_path = row.file_path.strip()
+            find_path_func = lambda x: x.find(file_path) >= 0
             found_path_ls = list(filter(find_path_func, fastq_path_ls))
             if len(found_path_ls)==1:
                 abs_path = found_path_ls[0]
             elif len(found_path_ls)==0:
-                logging.warning(f"No file found for {row['file_path']}.")
+                logging.warn(f"No file found for {file_path}.")
                 continue
             else:
-                logging.warning(f">1 files found for {row['file_path']}: "
+                logging.warn(f">1 files found for {file_path}: "
                     f"{found_path_ls}.")
                 continue
             #replace space in sample_id
-            sample_id = row['sample_id'].replace(' ', '_')
+            sample_id = row.sample_id.strip().replace(' ', '_')
             if sample_id not in sample_id2data:
                 sample_id2data[sample_id] = PassingData(
-                    sample_id=sample_id,
-                    study_name=row['study_name'], study_id=row['study_id'], 
-                    site_id=row['site_id'], fastq_obj_ls=[])
-            search_result = filename_pattern.search(row['file_path'])
+                    sample_id=sample_id, study=NoneForNan(row.study),
+                    site=NoneForNan(row.site), fastq_obj_ls=[])
+            search_result = filename_pattern.search(file_path)
             mate_id = search_result.group('mate_id')
 
             fastq_obj = PassingData(
-                abs_path = abs_path, 
+                abs_path = abs_path,
                 library=None, mate_id = mate_id,
-                sequence_type=row['sequence_type'],
-                sequencer=row['sequencer'], 
-                sequence_batch_id=row['sequence_batch_id'],
-                tissue_name=row['tissue_name'], tissue_id=row['tissue_id'],
-                condition=row['condition'],
+                sequence_type=NoneForNan(row.sequence_type),
+                sequencer=NoneForNan(row.sequencer),
+                sequence_batch_id=NoneForNan(row.sequence_batch_id),
+                tissue_name=NoneForNan(row.tissue_name),
+                tissue_id=NoneForNan(row.tissue_id),
+                condition=NoneForNan(row.condition),
                 )
             sample_id2data[sample_id].fastq_obj_ls.append(fastq_obj)
             no_of_files +=1
         
-        logging.info(f"{len(sample_id2data)} samples with {no_of_files} files.")
+        logging.warn(f"{len(sample_id2data)} samples with {no_of_files} files.")
         return sample_id2data
 
     def addJobsToImportFastQ(self, db_main=None, \
@@ -556,14 +562,15 @@ Example ("Library" and "Bam Path" are required):
         """
         fastq_path_ls = self.getInputPathLsFromInput(
             input_path, suffixSet=set(['.fastq', '.fq']), fakeSuffix='.gz')
+        print(f'Found {len(fastq_path_ls)} files.', flush=True)
         sample_id2data = self.readSampleSheetFastQ(sample_sheet, fastq_path_ls)
         
         logging.info("Adding split-read & register jobs ...")
         filenameKey2PegasusFile = {}
         for sample_id, sample_data in sample_id2data.items():
-            individual = db_main.getIndividual(code=sample_id, tax_id=9606, 
-                study_name=sample_data.study_name, study_id=sample_data.study_id, 
-                site_id=sample_data.site_id)
+            individual = db_main.getIndividual(code=sample_id, tax_id=9606,
+                study_name=sample_data.study,
+                site_name=sample_data.site)
             fastq_obj_1 = sample_data.fastq_obj_ls[0]
             individual_sequence = db_main.getIndividualSequence(
                 individual_id=individual.id, 
