@@ -105,8 +105,6 @@ class AnalysisMethod(Base, TableClass):
     updated_by = Column(String(200))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    #using_options(tablename='analysis_method', metadata=__metadata__, session=__session__)
-    #using_table_options(mysql_engine='InnoDB')
     
     score_method_list_in_analysis_method = relationship('ScoreMethod',
         back_populates='analysis_method',cascade='all,delete')
@@ -121,8 +119,6 @@ class README(Base, TableClass):
     updated_by = Column(String(128))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    #using_options(tablename='readme', metadata=__metadata__, session=__session__)
-    #using_table_options(mysql_engine='InnoDB')
 
 class Family(Base, TableClass):
     __tablename__ = 'family'
@@ -134,8 +130,6 @@ class Family(Base, TableClass):
     updated_by = Column(String(128))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    #using_options(tablename='family', metadata=__metadata__, session=__session__)
-    #using_table_options(mysql_engine='InnoDB')
     
     individual_list_in_family = relationship('Individual', 
         back_populates="family",cascade='all,delete')
@@ -157,10 +151,9 @@ class Country(Base):
     updated_by = Column(String(128))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    #using_options(tablename='country', metadata=__metadata__, session=__session__)
-    #using_table_options(mysql_engine='InnoDB')
     
-    site_list_in_country = relationship('Site',back_populates='country',cascade='all,delete')
+    site_list_in_country = relationship('Site',back_populates='country',\
+        cascade='all,delete')
 
 class Site(Base, TableClass):
     """
@@ -174,25 +167,16 @@ class Site(Base, TableClass):
     latitude = Column(Float)
     longitude = Column(Float)
     altitude = Column(Float)
-    #study = ManyToOne('%s.Study'%(__name__), colname='study_id', 
-    # 	ondelete='CASCADE', onupdate='CASCADE')
     study_id = Column(Integer,ForeignKey(_schemaname_+".study.id"))
     city = Column(String(100))
     stateprovince = Column(String(100))
     region = Column(String(100))
     zippostal = Column(String(20))
-    #country = ManyToOne("%s.Country"%(__name__), colname='country_id',
-    # 	ondelete='CASCADE', onupdate='CASCADE')
     country_id = Column(Integer,ForeignKey(_schemaname_+".country.id"))
     created_by = Column(String(128))
     updated_by = Column(String(128))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    #using_options(tablename='site', metadata=__metadata__, session=__session__)
-    #using_table_options(mysql_engine='InnoDB')
-    #using_table_options(UniqueConstraint('short_name', 'latitude', 
-    # 	'longitude', 'city', 'stateprovince', 'country_id'))
-    #using_table_options(UniqueConstraint('short_name', 'latitude', 'longitude'))
     UniqueConstraint('short_name', 'latitude', 'longitude', 'city', 
         'stateprovince', 'country_id',name='site_sllcsc')
     UniqueConstraint('short_name', 'latitude', 'longitude',name='site_sll')
@@ -210,18 +194,7 @@ class Group(Base):
     __table_args__ = {'schema':_schemaname_}
         
     id = Column(Integer,primary_key=True)
-    #name = Column(Unicode(512),required=True)
     name = Column(Unicode(512))
-    #user_ls = ManyToMany('%s.User'%(__name__), tablename='user2group', \
-    # local_colname='group_id')
-    #phenotype_method_ls = ManyToMany("%s.PhenotypeMethod"%(__name__),
-    #  tablename='group2phenotype_method', local_colname='group_id')
-    #individual_ls = ManyToMany("%s.Individual"%(__name__),
-    # 	tablename='individual2group', local_colname='group_id')
-    #using_table_options(mysql_engine='InnoDB', useexisting=True)
-    #using_options(tablename='acl_group', metadata=__metadata__, session=__session__)
-    #group is preserved keyword in postgresql (mysql likely)
-    
     user_ls = relationship('User',secondary=user2group_table, \
         back_populates='group_ls')
     phenotype_method_ls = relationship('PhenotypeMethod',
@@ -244,27 +217,14 @@ class User(Base):
     realname = Column(Unicode(512))
     email = Column(String(100))
     username = Column(String(10))
-    #_password = Column(String(40), colname='password', synonym='password')
     _password = Column(String(40))
     organisation = Column(Unicode(100))
-    #isAdmin = Column(postgresql.Enum(('Y','N'), name=is_admin_enum_type), \
-    # default='N', required=True,)
     isAdmin = Column(Enum("Y","N", name="is_admin_enum_type"), \
         default='N')
-    #group_ls = ManyToMany('%s.Group'%(__name__), tablename='user2group', \
-    # local_colname='user_id')
-    #phenotype_method_ls = ManyToMany("%s.PhenotypeMethod"%(__name__),
-    # tablename='user2phenotype_method', local_colname='user_id')
-    #individual_ls = ManyToMany("%s.Individual"%(__name__),
-    # tablename='individual2user', local_colname='user_id')
     created_by = Column(String(128))
     updated_by = Column(String(128))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    #using_options(tablename='acl_user', metadata=__metadata__, session=__session__)
-    #user is preserved keyword in postgresql (mysql likely)
-    #using_table_options(mysql_engine='InnoDB')
-    #using_table_options(UniqueConstraint('realname', 'username'))
     UniqueConstraint('realname', 'username',name='acl_user_realname_username')
     
     individual_list_in_acl_user = relationship('Individual',\
@@ -345,8 +305,6 @@ class Individual(Base, TableClass):
     __table_args__ = {'schema':_schemaname_}
     
     id = Column(Integer,primary_key=True)
-    #family = ManyToOne('%s.Family'%(__name__), colname='family_id',
-    #  ondelete='CASCADE', onupdate='CASCADE')
     family_id = Column(Integer,ForeignKey(_schemaname_+'.family.id'))
     code = Column(String(256), unique=True)
     name = Column(String(256))
@@ -358,34 +316,17 @@ class Individual(Base, TableClass):
     tax_id =Column(Integer)
     age = Column(Integer)
     collection_date = Column(DateTime)
-    #collector = ManyToOne("%s.User"%(__name__), colname='collector_id', 
-    # 	ondelete='CASCADE', onupdate='CASCADE')
     collector_id = Column(Integer,ForeignKey(_schemaname_+".acl_user.id"))
-    #site = ManyToOne("%s.Site"%(__name__), colname='site_id', 
-    # 	ondelete='CASCADE', onupdate='CASCADE')	#2011-3-1
     site_id = Column(Integer,ForeignKey(_schemaname_+".site.id"))
-    #group_ls = ManyToMany('%s.Group'%(__name__),tablename='individual2group', 
-    # local_colname='individual_id', remote_colname='group_id')
-    #user_ls = ManyToMany('%s.User'%(__name__), tablename='individual2user', 
-    # local_colname='individual_id', remote_colname='user_id')
     comment = Column(String(4096))
     target_coverage = Column(Integer)
     #any non-zero means outdated. 
     outdated_index = Column(Integer, default=0)
-    #sequence_batch_ls = ManyToMany('%s.SequenceBatch'%(__name__), 
-    # tablename='individual2batch', local_colname='individual_id')
-    #study = ManyToOne('%s.Study'%(__name__), colname='study_id', 
-    # 	ondelete='CASCADE', onupdate='CASCADE')
     study_id = Column(Integer,ForeignKey(_schemaname_+".study.id"))
-    #ManyToOne('SequenceBatch', colname='sequence_batch_id', 
-    # 	ondelete='CASCADE', onupdate='CASCADE')
     created_by = Column(String(128))
     updated_by = Column(String(128))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    #using_options(tablename='individual', metadata=__metadata__, session=__session__)
-    #using_table_options(mysql_engine='InnoDB')
-    #using_table_options(UniqueConstraint('family_id', 'code', 'tax_id'))
     UniqueConstraint('family_id', 'code', 'tax_id',\
         name='individual_family_id_code_tax_id')
     
@@ -424,7 +365,8 @@ class Individual(Base, TableClass):
                 return query
             clause = or_(clause,TableClass.collector == user, \
                 TableClass.user_ls.any(User.id == user.id),
-                TableClass.group_ls.any(Group.id.in_([group.id for group in user.group_ls])))
+                TableClass.group_ls.any(Group.id.in_(\
+                    [group.id for group in user.group_ls])))
         query = query.filter(clause)
         return query
     
@@ -489,26 +431,15 @@ class Ind2Ind(Base, TableClass):
     __table_args__ = {'schema':_schemaname_}
     
     id = Column(Integer,primary_key=True)
-    #individual1 = ManyToOne('%s.Individual'%(__name__), 
-    # colname='individual1_id', ondelete='CASCADE', onupdate='CASCADE')
     individual1_id = Column(Integer,ForeignKey(_schemaname_+'.individual.id'))
-    #individual2 = ManyToOne('%s.Individual'%(__name__), 
-    # colname='individual2_id', ondelete='CASCADE', onupdate='CASCADE')
     individual2_id = Column(Integer,ForeignKey(_schemaname_+'.individual.id'))
-    #relationship_type = ManyToOne('%s.RelationshipType'%(__name__),
-    # 	 colname='relationship_type_id', ondelete='CASCADE', onupdate='CASCADE')
-    relationship_type_id = Column(Integer,ForeignKey(_schemaname_+".relationship_type.id"))
-    #study = ManyToOne('%s.Study'%(__name__), colname='study_id', 
-    # ondelete='CASCADE', onupdate='CASCADE')	#2013.03.13
+    relationship_type_id = Column(Integer,\
+        ForeignKey(_schemaname_+".relationship_type.id"))
     study_id = Column(Integer,ForeignKey(_schemaname_+'.study.id'))
     created_by = Column(String(128))
     updated_by = Column(String(128))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    #using_options(tablename='ind2ind')
-    #using_table_options(mysql_engine='InnoDB')
-    #using_table_options(UniqueConstraint('individual1_id', \
-    # 'individual2_id', 'relationship_type_id', 'study_id'))
 
     UniqueConstraint('individual1_id', 'individual2_id', 
         'relationship_type_id', 'study_id',name='ind2ind_iirs')
@@ -517,9 +448,11 @@ class Ind2Ind(Base, TableClass):
         back_populates='ind2ind_list_in_relationship_type')
     study = relationship('Study', back_populates='ind2ind_list_in_study')
     individual1 = relationship('Individual', 
-        back_populates='ind2ind_list_in_individual1',foreign_keys='Ind2Ind.individual1_id')
+        back_populates='ind2ind_list_in_individual1',
+        foreign_keys='Ind2Ind.individual1_id')
     individual2 = relationship('Individual',
-        back_populates='ind2ind_list_in_individual2',foreign_keys='Ind2Ind.individual2_id')
+        back_populates='ind2ind_list_in_individual2',
+        foreign_keys='Ind2Ind.individual2_id')
 
 class RelationshipType(Base, TableClass):
     __tablename__ = 'relationship_type'
@@ -532,8 +465,6 @@ class RelationshipType(Base, TableClass):
     updated_by = Column(String(128))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    #using_options(tablename='relationship_type', metadata=__metadata__, session=__session__)
-    #using_table_options(mysql_engine='InnoDB')
 
     ind2ind_list_in_relationship_type = relationship('Ind2Ind',
         back_populates='relationship_type', cascade='all,delete')
@@ -548,14 +479,10 @@ class AlignmentMethod(Base):
     short_name = Column(String(256), unique=True)
     command = Column(String(256))	#sub-command of bwa
     description = Column(Text)
-    #individual_alignment_ls = OneToMany("%s.IndividualAlignment"%(__name__))
     created_by = Column(String(128))
     updated_by = Column(String(128))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    #using_options(tablename='alignment_method', metadata=__metadata__, session=__session__)
-    #using_table_options(mysql_engine='InnoDB')
-    
     individual_alignment_ls = relationship('IndividualAlignment',
         back_populates='alignment_method',cascade='all,delete')
 
@@ -572,17 +499,12 @@ class IndividualAlignment(Base, AbstractTableWithFilename):
     __table_args__ = {'schema':_schemaname_}
     
     id = Column(Integer,primary_key=True)
-    #individual_sequence = ManyToOne('%s.IndividualSequence'%__name__, 
-    # colname='ind_seq_id', ondelete='CASCADE', onupdate='CASCADE')
-    ind_seq_id = Column(Integer,ForeignKey(_schemaname_+'.individual_sequence.id'))
-    #ref_sequence = ManyToOne('%s.IndividualSequence'%__name__, 
-    # colname='ref_ind_seq_id', ondelete='CASCADE', onupdate='CASCADE')
-    ref_ind_seq_id = Column(Integer,ForeignKey(_schemaname_+'.individual_sequence.id'))
-    #alignment_method = ManyToOne('%s.AlignmentMethod'%__name__, 
-    # colname='alignment_method_id', ondelete='CASCADE', onupdate='CASCADE')
-    alignment_method_id = Column(Integer,ForeignKey(_schemaname_+'.alignment_method.id'))
-    #genotype_method_ls = ManyToMany("%s.GenotypeMethod"%__name__,
-    # 	tablename='genotype_method2individual_alignment', local_colname='individual_alignment_id')
+    ind_seq_id = Column(Integer,
+        ForeignKey(_schemaname_+'.individual_sequence.id'))
+    ref_ind_seq_id = Column(Integer,
+        ForeignKey(_schemaname_+'.individual_sequence.id'))
+    alignment_method_id = Column(Integer,
+        ForeignKey(_schemaname_+'.alignment_method.id'))
     path = Column(Text)
     path_to_depth_file = Column(Text)	#2013.08.08
     depth_file_size = Column(BigInteger)	#2013.08.08
@@ -592,7 +514,8 @@ class IndividualAlignment(Base, AbstractTableWithFilename):
     mean_depth = Column(Float)	#2011-9-12
     #2011-11-28	QC = (base quality>=20, read mapping quality >=30). 
     pass_qc_read_base_count = Column(BigInteger)
-    read_group_added = Column(Integer, default=0)	# 2011-9-15 0=No, 1=Yes
+    # 2011-9-15 0=No, 1=Yes
+    read_group_added = Column(Integer, default=0)
     perc_reads_mapped = Column(Float)	#2012.4.2
     perc_secondary = Column(Float)	#20170603
     perc_supplementary = Column(Float)	#20170603
@@ -613,35 +536,24 @@ class IndividualAlignment(Base, AbstractTableWithFilename):
     #record read_group here so that if getReadGroup() changes. it'll be fine.
     read_group = Column(Text)
     #2012.7.26 the parent individual_alignment
-    #parent_individual_alignment = ManyToOne('%s.IndividualAlignment'%__name__,
-    #  colname='parent_individual_alignment_id', ondelete='CASCADE', onupdate='CASCADE')
     parent_individual_alignment_id = Column(\
         Integer,ForeignKey(_schemaname_+'.individual_alignment.id', 
         ondelete='CASCADE',onupdate='CASCADE'))
     #2012.7.26 mask loci of the alignment out for read-recalibration 
-    #mask_genotype_method = ManyToOne('%s.GenotypeMethod'%__name__,
-    #  colname='mask_genotype_method_id', ondelete='CASCADE', onupdate='CASCADE')
-    mask_genotype_method_id = Column(Integer,ForeignKey(_schemaname_+'.genotype_method.id'))
+    mask_genotype_method_id = Column(Integer,\
+        ForeignKey(_schemaname_+'.genotype_method.id'))
     #2012.9.19 to distinguish alignments from different libraries/lanes/batches
-    #individual_sequence_file_raw = ManyToOne(
-    #	'%s.IndividualSequenceFileRaw'%__name__, colname='individual_sequence_file_raw_id', \
-    #	ondelete='CASCADE', onupdate='CASCADE')
     individual_sequence_file_raw_id = Column(\
         Integer,ForeignKey(_schemaname_+'.individual_sequence_file_raw.id'))
     created_by = Column(String(128))
     updated_by = Column(String(128))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    #using_options(tablename='individual_alignment', metadata=__metadata__, session=__session__)
-    #using_table_options(mysql_engine='InnoDB')
-    #using_table_options(UniqueConstraint('ind_seq_id', 'ref_ind_seq_id', \
-    # 'alignment_method_id', 'outdated_index', \
-    #	'parent_individual_alignment_id', 'mask_genotype_method_id',\
-    #	'individual_sequence_file_raw_id', 'local_realigned', 'reduce_reads'))
-    UniqueConstraint('ind_seq_id', 'ref_ind_seq_id', 'alignment_method_id', 'outdated_index', \
-                    'parent_individual_alignment_id', 'mask_genotype_method_id',\
-                    'individual_sequence_file_raw_id', 'local_realigned', 'reduce_reads',\
-                    name='individual_alignment_iraopmilr')
+    UniqueConstraint('ind_seq_id', 'ref_ind_seq_id', 'alignment_method_id', \
+        'outdated_index', \
+        'parent_individual_alignment_id', 'mask_genotype_method_id',\
+        'individual_sequence_file_raw_id', 'local_realigned', 'reduce_reads',\
+        name='individual_alignment_iraopmilr')
     
     individual_sequence = relationship('IndividualSequence',\
         back_populates='individual_alignment_list_in_individual_sequence',
@@ -747,9 +659,6 @@ class IndividualAlignmentConsensusSequence(Base, AbstractTableWithFilename):
     __table_args__ = {'schema':_schemaname_}
     
     id = Column(Integer, primary_key=True)
-    #individual_alignment = ManyToOne('%s.IndividualAlignment'%__name__,
-    #  colname='individual_alignment_id', \
-    #	ondelete='CASCADE', onupdate='CASCADE')
     individual_alignment_id = Column(Integer,\
         ForeignKey(_schemaname_+'.individual_alignment.id'))
     path = Column(Text, unique=True)
@@ -772,14 +681,7 @@ class IndividualAlignmentConsensusSequence(Base, AbstractTableWithFilename):
     updated_by = Column(String(128))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    #using_options(tablename='individual_alignment_consensus_sequence', \
-    # 	metadata=__metadata__, session=__session__)
-    #using_table_options(mysql_engine='InnoDB')
-    #using_table_options(UniqueConstraint('individual_alignment_id', \
-    # 'minDP', 'maxDP', 'minBaseQ',\
-    #	'minMapQ', 'minRMSMapQ', 'minDistanceToIndel', 'no_of_chromosomes'))
-    
-    UniqueConstraint('individual_alignment_id', 'minDP', 'maxDP', 'minBaseQ', \
+    UniqueConstraint('individual_alignment_id', 'minDP', 'maxDP', 'minBaseQ',
         'minMapQ', 'minRMSMapQ', 'minDistanceToIndel', 'no_of_chromosomes', \
         name='individual_alignment_consensus_sequence_immmmmmn')
     
@@ -826,20 +728,13 @@ class IndividualSequence(Base, AbstractTableWithFilename):
     __table_args__ = {'schema':_schemaname_}
     
     id = Column(Integer, primary_key=True)
-    #individual = ManyToOne('%s.Individual'%(__name__), colname='individual_id',
-    #  ondelete='CASCADE', onupdate='CASCADE')
     individual_id = Column(Integer, ForeignKey(_schemaname_ + '.individual.id'))
-    #sequencer = ManyToOne('%s.Sequencer'%(__name__), colname='sequencer_id',
-    #  ondelete='CASCADE', onupdate='CASCADE')
     sequencer_id = Column(Integer, ForeignKey(_schemaname_ + '.sequencer.id'))
     # 454, GA, Sanger
-    #sequence_type = ManyToOne('%s.SequenceType'%(__name__),
-    #  colname='sequence_type_id', ondelete='CASCADE', onupdate='CASCADE')
-    sequence_type_id = Column(Integer, ForeignKey(_schemaname_ + '.sequence_type.id'))
-        #genome, contig, SR (single-end read) or PE ...
+    sequence_type_id = Column(Integer, \
+        ForeignKey(_schemaname_ + '.sequence_type.id'))
+    #genome, contig, SR (single-end read) or PE ...
     no_of_chromosomes = Column(Integer)	#1,2,4,5,X,Y,etc
-    #tissue  = ManyToOne('%s.Tissue'%(__name__), colname='tissue_id',
-    #  ondelete='CASCADE', onupdate='CASCADE')
     tissue_id = Column(Integer, ForeignKey(_schemaname_ + '.tissue.id'))
     condition_id = Column(Integer, ForeignKey(_schemaname_ + '.condition.id'))
     coverage = Column(Float)
@@ -852,17 +747,12 @@ class IndividualSequence(Base, AbstractTableWithFilename):
     # (roughly, check pymodule/utils for exact formula)
     quality_score_format = Column(String(512))
     # Illumina1.8+ (after 2011-02) is Standard.
-    #parent_individual_sequence = ManyToOne('%s.IndividualSequence'%(__name__), 
-    # colname='parent_individual_sequence_id', ondelete='SET NULL', onupdate='CASCADE')
     parent_individual_sequence_id = Column(Integer, 
         ForeignKey(_schemaname_ + '.individual_sequence.id', 
         ondelete='SET NULL', onupdate='CASCADE'))
     filtered = Column(Integer, default=0)	#0 means not. 1 means yes.
-    #individual_sequence_file_ls = OneToMany("%s.IndividualSequenceFile"%(__name__))
-    #individual_sequence_file_raw_ls = OneToMany("%s.IndividualSequenceFileRaw"%(__name__))
-    #sequence_batch = ManyToOne('%s.SequenceBatch'%(__name__),
-    #  colname='sequence_batch_id', ondelete='CASCADE', onupdate='CASCADE')
-    sequence_batch_id = Column(Integer, ForeignKey(_schemaname_ + '.sequence_batch.id'))
+    sequence_batch_id = Column(Integer, \
+        ForeignKey(_schemaname_ + '.sequence_batch.id'))
     #2013.3.15 field to mark whether it's contaminated or not.
     is_contaminated = Column(Integer, default=0)
     #2013.3.15 any non-zero means outdated. to allow multiple outdated alignments
@@ -873,18 +763,11 @@ class IndividualSequence(Base, AbstractTableWithFilename):
     updated_by = Column(String(128))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    #using_options(tablename='individual_sequence', metadata=__metadata__, 
-    # 	session=__session__)
-    #using_table_options(mysql_engine='InnoDB')
-    #using_table_options(UniqueConstraint('individual_id', 'sequencer_id', 
-    # 	'sequence_type_id', 'tissue_id',\
-    #	'filtered','no_of_chromosomes','format', 'parent_individual_sequence_id',
-    #  'sequence_batch_id', 'version', \
-    #	'is_contaminated', 'outdated_index'))
     UniqueConstraint('individual_id', 'sequencer_id', 'sequence_type_id', 
         'tissue_id', 'filtered', 'no_of_chromosomes', 'format', 
         'parent_individual_sequence_id', 'sequence_batch_id', 'version', 
-        'is_contaminated', 'outdated_index', name='individual_sequence_isstfnfpsvio')
+        'is_contaminated', 'outdated_index', \
+        name='individual_sequence_isstfnfpsvio')
     
     individual_alignment_list_in_individual_sequence = relationship(
         'IndividualAlignment', back_populates='individual_sequence', 
@@ -892,9 +775,11 @@ class IndividualSequence(Base, AbstractTableWithFilename):
     individual_alignment_list_with_this_reference = relationship(
         'IndividualAlignment', back_populates='ref_sequence', 
         cascade='all,delete', foreign_keys='IndividualAlignment.ref_ind_seq_id')
-    individual = relationship('Individual', back_populates='ind_seq_list_in_individual')
+    individual = relationship('Individual', \
+        back_populates='ind_seq_list_in_individual')
     sequencer = relationship('Sequencer', back_populates='ind_seq_in_sequencer')
-    sequence_type = relationship('SequenceType', back_populates='ind_seq_in_sequence_type')
+    sequence_type = relationship('SequenceType', \
+        back_populates='ind_seq_in_sequence_type')
     tissue = relationship('Tissue', back_populates='ind_seq_ls')
     condition = relationship('Condition', back_populates='ind_seq_ls')
     parent_individual_sequence = relationship(
@@ -992,14 +877,10 @@ class SequenceBatch(Base):
     short_name = Column(String(256), unique=True)
     description = Column(Text)
     coverage = Column(Integer)
-    #individual_ls = ManyToMany('%s.Individual'%(__name__), tablename='individual2batch', \
-    #		local_colname='sequence_batch_id')	#2012.7.5
     created_by = Column(String(128))
     updated_by = Column(String(128))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    #using_options(tablename='sequence_batch', metadata=__metadata__, session=__session__)
-    #using_table_options(mysql_engine='InnoDB')
     ind_seq_list_in_sequence_batch = relationship('IndividualSequence', 
         back_populates='sequence_batch', cascade='all,delete')
     individual_ls = relationship('Individual', \
@@ -1036,9 +917,6 @@ class Study(Base):
     updated_by = Column(String(128))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    #using_options(tablename='study', metadata=__metadata__, \
-    # session=__session__)
-    #using_table_options(mysql_engine='InnoDB')
     site_list_in_study = relationship('Site', back_populates='study', \
         cascade='all,delete')
     individual_list_in_study = relationship('Individual', \
@@ -1055,13 +933,8 @@ class IndividualSequenceFile(Base, AbstractTableWithFilename):
     __table_args__ = {'schema':_schemaname_}
     
     id = Column(Integer, primary_key=True)
-    #individual_sequence = ManyToOne('%s.IndividualSequence'%(__name__),
-    #  colname='individual_sequence_id', ondelete='CASCADE', onupdate='CASCADE')
     individual_sequence_id = Column(Integer, \
         ForeignKey(_schemaname_ + '.individual_sequence.id'))
-    #individual_sequence_file_raw = ManyToOne(
-    # 	'%s.IndividualSequenceFileRaw'%(__name__), colname='individual_sequence_file_raw_id', \
-    #	ondelete='CASCADE', onupdate='CASCADE')
     individual_sequence_file_raw_id = Column(Integer, \
         ForeignKey(_schemaname_ + '.individual_sequence_file_raw.id'))
     library = Column(Text)	#id for the preparation library
@@ -1074,14 +947,11 @@ class IndividualSequenceFile(Base, AbstractTableWithFilename):
     path = Column(Text, unique=True)	#path to the actual file
     format = Column(String(512))	#fasta, fastq
     quality_score_format = Column(String(512), default='Standard')
-        #Standard=Phred+33 (=Sanger), Illumina=Phred+64 
-        # (roughly, check pymodule/utils for exact formula)
-        # Illumina1.8+ (after 2011-02) is Standard.
+    #Standard=Phred+33 (=Sanger), Illumina=Phred+64 
+    # (roughly, check pymodule/utils for exact formula)
+    # Illumina1.8+ (after 2011-02) is Standard.
     filtered = Column(Integer, default=0)	#0 means not. 1 means yes.
     md5sum = Column(Text, unique=True)
-    #parent_individual_sequence_file = ManyToOne(
-    # 	'%s.IndividualSequenceFile'%(__name__), colname='parent_individual_sequence_file_id', \
-    #	ondelete='CASCADE', onupdate='CASCADE')
     parent_individual_sequence_file_id = Column(Integer, 
         ForeignKey(_schemaname_ + '.individual_sequence_file.id', \
         ondelete='cascade', onupdate='cascade'))
@@ -1090,12 +960,6 @@ class IndividualSequenceFile(Base, AbstractTableWithFilename):
     updated_by = Column(String(128))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    #using_options(tablename='individual_sequence_file',
-    # 	 metadata=__metadata__, session=__session__)
-    #using_table_options(mysql_engine='InnoDB')
-    #using_table_options(UniqueConstraint('individual_sequence_id',
-    # 	 'library', 'split_order', 'mate_id', 'filtered',\
-    #	'parent_individual_sequence_file_id'))
     UniqueConstraint('individual_sequence_id', 'library', 'split_order', 
         'mate_id', 'filtered', 'parent_individual_sequence_file_id', \
         name='individual_sequence_file_ilsmfp')
@@ -1111,8 +975,10 @@ class IndividualSequenceFile(Base, AbstractTableWithFilename):
         """
         2012.7.13 
         """
-        folderRelativePath = self.individual_sequence.constructRelativePath(subFolder=subFolder)
-        relativePath = os.path.join(folderRelativePath, '%s_%s'%(self.id, sourceFilename))
+        folderRelativePath = self.individual_sequence.constructRelativePath(
+            subFolder=subFolder)
+        relativePath = os.path.join(folderRelativePath, \
+            '%s_%s'%(self.id, sourceFilename))
         return relativePath
 
 
@@ -1135,11 +1001,8 @@ class IndividualSequenceFileRaw(Base, AbstractTableWithFilename):
     __table_args__ = {'schema':_schemaname_}
     
     id = Column(Integer, primary_key=True)
-    #individual_sequence = ManyToOne('%s.IndividualSequence'%(__name__),
-    #  colname='individual_sequence_id', ondelete='CASCADE', onupdate='CASCADE')
-    individual_sequence_id = Column(Integer, \
+    individual_sequence_id = Column(Integer,
         ForeignKey(_schemaname_ + '.individual_sequence.id'))
-    #individual_sequence_file_ls = OneToMany("%s.IndividualSequenceFile"%(__name__))
     library = Column(Text)	#id for the preparation library
     mate_id = Column(Integer)	#2012.4.30 to handle fastq raw sequence files.
     read_count = Column(BigInteger)	#2012.2.27
@@ -1148,18 +1011,14 @@ class IndividualSequenceFileRaw(Base, AbstractTableWithFilename):
     original_path = Column(Text)	#path to the original file
     md5sum = Column(Text, unique=True)	#used to identify each raw file
     quality_score_format = Column(String(512), default='Standard')
-        #Standard=Phred+33 (=Sanger), Illumina=Phred+64 
-        # (roughly, check pymodule/utils for exact formula)
-        # Illumina1.8+ (after 2011-02) is Standard.
+    #Standard=Phred+33 (=Sanger), Illumina=Phred+64 
+    # (roughly, check pymodule/utils for exact formula)
+    # Illumina1.8+ (after 2011-02) is Standard.
     file_size = Column(BigInteger)	#2012.7.12
     created_by = Column(String(128))
     updated_by = Column(String(128))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    #using_options(tablename='individual_sequence_file_raw', \
-    # metadata=__metadata__, session=__session__)
-    #using_table_options(mysql_engine='InnoDB')
-    #using_table_options(UniqueConstraint('library', 'md5sum', 'mate_id'))
     UniqueConstraint('library', 'md5sum', 'mate_id',
         name='individual_sequence_file_raw_library_md5sum_mate_id')
     
@@ -1182,8 +1041,6 @@ class Tissue(Base, TableClass):
     updated_by = Column(String(128))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    #using_options(tablename='tissue', metadata=__metadata__, session=__session__)
-    #using_table_options(mysql_engine='InnoDB')
 
     ind_seq_ls = relationship('IndividualSequence', 
         back_populates='tissue', cascade='all,delete')
@@ -1196,16 +1053,12 @@ class IndividualSequence2Sequence(Base, TableClass):
     __table_args__ = {'schema':_schemaname_}
     
     id = Column(Integer, primary_key=True)
-    #individual1_sequence = ManyToOne('%s.IndividualSequence'%(__name__), 
-    #	colname='individual1_sequence_id', ondelete='CASCADE', onupdate='CASCADE')
-    individual1_sequence_id = Column(Integer, \
+    individual1_sequence_id = Column(Integer,
         ForeignKey(_schemaname_ + '.individual_sequence.id'))
     individual1_chr = Column(String(512))
     individual1_start = Column(Integer)
     individual1_stop = Column(Integer)
-    #individual2_sequence = ManyToOne('%s.IndividualSequence'%(__name__), 
-    #	colname='individual2_sequence_id', ondelete='CASCADE', onupdate='CASCADE')
-    individual2_sequence_id = Column(Integer, \
+    individual2_sequence_id = Column(Integer,
         ForeignKey(_schemaname_ + '.individual_sequence.id'))
     individual2_chr = Column(String(512))
     individual2_start = Column(Integer)
@@ -1214,14 +1067,10 @@ class IndividualSequence2Sequence(Base, TableClass):
     updated_by = Column(String(128))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    #using_options(tablename='individual_seq2seq_map')
-    #using_table_options(mysql_engine='InnoDB')
-    #using_table_options(UniqueConstraint(
-    # 	'individual1_sequence_id', 'individual1_chr', 'individual1_start', 'individual1_stop',\
-    #	'individual2_sequence_id', 'individual2_chr', 'individual2_start', 'individual2_stop'))
     UniqueConstraint('individual1_sequence_id', 'individual1_chr', 
         'individual1_start', 'individual1_stop', \
-        'individual2_sequence_id', 'individual2_chr', 'individual2_start', 'individual2_stop', \
+        'individual2_sequence_id', 'individual2_chr',
+        'individual2_start', 'individual2_stop', \
         name='individual_seq2seq_map_iiiiiiii')
     individual1_sequence = relationship('IndividualSequence',
         back_populates='ind_seq2_list_in_ind1_seq',
@@ -1245,33 +1094,20 @@ class Locus(Base, TableClass):
     chromosome = Column(String(512))
     start = Column(Integer)
     stop = Column(Integer)
-    #ref_seq = ManyToOne('%s.AlleleSequence'%(__name__),
-    #	colname='ref_seq_id', required=True, ondelete='CASCADE', onupdate='CASCADE')
     ref_seq_id = Column(Integer, ForeignKey(_schemaname_ + '.allele_sequence.id'))
-    #alt_seq = ManyToOne('%s.AlleleSequence'%(__name__),
-    #	colname='alt_seq_id', ondelete='CASCADE', onupdate='CASCADE')
     alt_seq_id = Column(Integer, ForeignKey(_schemaname_ + '.allele_sequence.id'))
-    #ref_sequence = ManyToOne('%s.IndividualSequence'%(__name__),
-    # 	colname='ref_ind_seq_id', required=True, ondelete='CASCADE', onupdate='CASCADE')
-    ref_ind_seq_id = Column(Integer, ForeignKey(_schemaname_ + '.individual_sequence.id'))
-    #locus_type = ManyToOne('%s.LocusType'%(__name__),
-    # 	colname='locus_type_id', required=True, ondelete='CASCADE', onupdate='CASCADE')
+    ref_ind_seq_id = Column(Integer, \
+        ForeignKey(_schemaname_ + '.individual_sequence.id'))
     locus_type_id = Column(Integer, ForeignKey(_schemaname_ + '.locus_type.id'))
     ## which study, or SNPs/ indels 
     
-    #locus_method_ls = ManyToMany('LocusMethod',
-    # 	tablename='locus2locus_method', local_colname='locus_id', \
-    #	remote_colname='locus_method_id')
     created_by = Column(String(128))
     updated_by = Column(String(128))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    #using_options(tablename='locus', metadata=__metadata__, session=__session__)
-    #using_table_options(mysql_engine='InnoDB')
-    #using_table_options(UniqueConstraint('chromosome', 'start', 'stop', 
-    # 'ref_ind_seq_id', 'locus_type_id'))
-    UniqueConstraint('chromosome', 'start', 'stop', 'ref_ind_seq_id', 'locus_type_id', \
-                    name='locus_chromosome_start_stop_ref_ind_seq_id_locus_type_id')
+    UniqueConstraint('chromosome', 'start', 'stop', 'ref_ind_seq_id',
+        'locus_type_id',
+        name='locus_chromosome_start_stop_ref_ind_seq_id_locus_type_id')
     ref_seq = relationship('AlleleSequence', \
         back_populates='locus_list_in_ref_seq', foreign_keys='Locus.ref_seq_id')
     alt_seq = relationship('AlleleSequence', \
@@ -1300,25 +1136,22 @@ class LocusScore(Base, TableClass):
     __table_args__ = {'schema':_schemaname_}
     
     id = Column(Integer, primary_key=True)
-    #locus = ManyToOne('%s.Locus'%(__name__), colname='locus_id', ondelete='CASCADE', onupdate='CASCADE')
     locus_id = Column(Integer,ForeignKey(_schemaname_+'.locus.id'))
-    #score_method = ManyToOne('%s.ScoreMethod'%(__name__), \
-    # colname='score_method_id', ondelete='CASCADE', onupdate='CASCADE')
     score_method_id = Column(Integer, ForeignKey(_schemaname_ + '.score_method.id'))
     score = Column(Float)
     rank = Column(Integer)
-    #object = Column(LargeBinary(134217728), deferred=True)	#a python dictionary to store other attributes
+    #object = Column(LargeBinary(134217728), deferred=True)
+    # #a python dictionary to store other attributes
     object = Column(LargeBinary(134217728))
     created_by = Column(String(128))
     updated_by = Column(String(128))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    #using_options(tablename='locus_score', metadata=__metadata__, session=__session__)
-    #using_table_options(mysql_engine='InnoDB')
-    #using_table_options(UniqueConstraint('locus_id', 'score_method_id'))
-    UniqueConstraint('locus_id', 'score_method_id', name='locus_score_locus_id_score_method_id')
+    UniqueConstraint('locus_id', 'score_method_id', \
+        name='locus_score_locus_id_score_method_id')
 
-    score_method = relationship('ScoreMethod', back_populates='locus_score_list_in_score_method')
+    score_method = relationship('ScoreMethod', \
+        back_populates='locus_score_list_in_score_method')
     locus = relationship('Locus',back_populates='locus_score_list_in_locus')
 
 class LocusAnnotation(Base):
@@ -1335,23 +1168,23 @@ class LocusAnnotation(Base):
     __table_args__ = {'schema':_schemaname_}
     
     id = Column(Integer, primary_key=True)
-    #locus = ManyToOne('%s.Locus'%__name__, colname='locus_id', ondelete='CASCADE', onupdate='CASCADE')
     locus_id = Column(Integer, ForeignKey(_schemaname_ + '.locus.id'))
-    #locus_context = ManyToOne('%s.LocusContext'%__name__, 
-    # 	colname='locus_context_id', ondelete='CASCADE', onupdate='CASCADE')
     locus_context_id = Column(Integer, ForeignKey(_schemaname_ + '.locus_context.id'))
     gene_id = Column(Integer)
     gene_commentary_id = Column(Integer)
     gene_segment_id = Column(Integer)
     #locus_annotation_type = ManyToOne('%s.LocusAnnotationType'%__name__, 
     # 	colname='locus_annotation_type_id', ondelete='CASCADE', onupdate='CASCADE')
-    locus_annotation_type_id = Column(Integer, ForeignKey(_schemaname_ + '.locus_annotation_type.id'))
+    locus_annotation_type_id = Column(Integer, \
+        ForeignKey(_schemaname_ + '.locus_annotation_type.id'))
     which_exon_or_intron = Column(Integer)
-    #which position in the tri-nucleotide codon, this locus is at. for synonymou/non-syn nucleotide changes.
+    #which position in the tri-nucleotide codon, this locus is at.
+    #  for synonymou/non-syn nucleotide changes.
     pos_within_codon = Column(Integer)
     #2012.5.18 which AA this locus affects if synonymous, or non-synonymous, 
     which_codon = Column(Integer)
-    label = Column(Text)	#what type of gene segment it is, exon, cds, intron, 3UTR, 5UTR
+   	#what type of gene segment it is, exon, cds, intron, 3UTR, 5UTR
+    label = Column(Text)
     utr_number = Column(Integer)	#2012.5.14 
     cds_number = Column(Integer)
     intron_number = Column(Integer)
@@ -1364,9 +1197,6 @@ class LocusAnnotation(Base):
     updated_by = Column(String(200))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    #using_options(tablename='locus_annotation', metadata=__metadata__, session=__session__)
-    #using_table_options(mysql_engine='InnoDB')
-    #using_table_options(UniqueConstraint('locus_id', 'gene_commentary_id', 'locus_annotation_type_id'))
     UniqueConstraint('locus_id', 'gene_commentary_id',
         'locus_annotation_type_id', name='locus_annotation_lgl')
     
@@ -1395,7 +1225,8 @@ class LocusAnnotationType(Base):
     date_updated = Column(DateTime)
     
     locus_annotation_list_in_locus_annotation_type = relationship(
-        'LocusAnnotation', back_populates='locus_annotation_type', cascade='all,delete')
+        'LocusAnnotation', back_populates='locus_annotation_type',\
+        cascade='all,delete')
 
 class LocusContext(Base):
     """
@@ -1428,10 +1259,8 @@ class LocusContext(Base):
     date_created = Column(DateTime, default=datetime.now())
     #date_updated = Column(DateTime, deferred=True)
     date_updated = Column(DateTime)
-    #using_options(tablename='locus_context', metadata=__metadata__, session=__session__)
-    #using_table_options(mysql_engine='InnoDB')
-    #using_table_options(UniqueConstraint('locus_id', 'gene_id'))
-    UniqueConstraint('locus_id', 'gene_id', name='locus_context_locus_id_gene_id')
+    UniqueConstraint('locus_id', 'gene_id', \
+        name='locus_context_locus_id_gene_id')
     
     locus_annotation_list_in_locus_context = relationship('LocusAnnotation', \
         back_populates='locus_context', cascade='all,delete')
@@ -1450,9 +1279,8 @@ class ScoreMethod(Base, TableClass):
     original_filename = Column(Text)
     description = Column(Text)
     min_maf = Column(Float)
-    #genotype_method = ManyToOne('%s.GenotypeMethod'%__name__,
-    #  colname='genotype_method_id', ondelete='CASCADE', onupdate='CASCADE')
-    genotype_method_id = Column(Integer, ForeignKey(_schemaname_ + '.genotype_method.id'))
+    genotype_method_id = Column(Integer, \
+        ForeignKey(_schemaname_ + '.genotype_method.id'))
     analysis_method_id = Column(Integer, \
         ForeignKey(_schemaname_ + '.analysis_method.id'))
     phenotype_method_id = Column(Integer, \
@@ -1658,30 +1486,22 @@ class Genotype(Base, TableClass):
     __table_args__ = {'schema':_schemaname_}
     
     id = Column(Integer, primary_key=True)
-    #individual = ManyToOne('%s.Individual'%(__name__), colname='individual_id',
-    # 	ondelete='CASCADE', onupdate='CASCADE')
     individual_id = Column(Integer, ForeignKey(_schemaname_ + '.individual.id'))
     locus_id = Column(Integer, ForeignKey(_schemaname_ + '.locus.id'))	
     chromosome_copy = Column(Integer, default=0)
-    #on which chromosome copy (multi-ploid), 0=unknown (for un-phased), 1 =1st chromosome, so on
+    #on which chromosome copy (multi-ploid), 0=unknown (for un-phased),
+    #  1 =1st chromosome, so on
     
-    #allele_type = ManyToOne('%s.AlleleType'%(__name__), 
-    # 	colname='allele_type_id', ondelete='CASCADE', onupdate='CASCADE')
     allele_type_id = Column(Integer, ForeignKey(_schemaname_ + '.allele_type.id'))
     # SNP/MNP/Indel/inversion
-    
-    #allele_sequence = ManyToOne('%s.AlleleSequence'%(__name__), 
-    # 	colname='allele_sequence_id', ondelete='CASCADE', onupdate='CASCADE')
-    allele_sequence_id = Column(Integer, ForeignKey(_schemaname_ + '.allele_sequence.id'))
+    allele_sequence_id = Column(Integer, \
+        ForeignKey(_schemaname_ + '.allele_sequence.id'))
     #the actual allele
     allele_sequence_length = Column(Integer)
     score = Column(Float)
-    #target_locus = ManyToOne('%s.Locus'%(__name__), colname='target_locus_id', 
-    # 	ondelete='CASCADE', onupdate='CASCADE')	#for translocated allele only
     target_locus_id = Column(Integer, ForeignKey(_schemaname_ + '.locus.id'))
-    #genotype_method = ManyToOne('%s.GenotypeMethod'%(__name__), 
-    # 	colname='genotype_method_id', ondelete='CASCADE', onupdate='CASCADE')
-    genotype_method_id = Column(Integer, ForeignKey(_schemaname_ + '.genotype_method.id'))
+    genotype_method_id = Column(Integer, \
+        ForeignKey(_schemaname_ + '.genotype_method.id'))
     comment = Column(Text)
     created_by = Column(String(128))
     updated_by = Column(String(128))
@@ -1789,7 +1609,7 @@ class GenotypeFile(Base, AbstractTableWithFilename):
          corresponds to GenotypeMethod.
     2011-2-4
         file format:
-            locus.id	allele_order	allele_type	seq.id	score	target_locus
+        locus.id allele_order allele_type  seq.id  score  target_locus
     """
     __tablename__ = 'genotype_file'
     __table_args__ = {'schema':_schemaname_}
@@ -1805,8 +1625,6 @@ class GenotypeFile(Base, AbstractTableWithFilename):
     no_of_individuals = Column(Integer)
     no_of_loci = Column(BigInteger)
     format = Column(Text)
-    #genotype_method = ManyToOne('%s.GenotypeMethod'%(__name__), 
-    # 	colname='genotype_method_id', ondelete='CASCADE', onupdate='CASCADE')
     genotype_method_id = Column(Integer, \
         ForeignKey(_schemaname_ + '.genotype_method.id'))
     comment = Column(String(4096))
@@ -1868,13 +1686,8 @@ class AlignmentDepthIntervalMethod(Base, AbstractTableWithFilename):
     short_name = Column(String(256), unique=True)
     description = Column(Text)
     path = Column(Text, unique=True)
-    #individual_alignment_ls = ManyToMany("%s.IndividualAlignment"%(__name__), 
-    # 	tablename='alignment_depth_interval_method2individual_alignment', \
-    #	local_colname='alignment_depth_interval_method_id')
-    #parent = ManyToOne("%s.AlignmentDepthIntervalMethod"%(__name__), 
-    # 	colname='parent_id', ondelete='CASCADE', onupdate='CASCADE')
     parent_id = Column(Integer, \
-        oreignKey(_schemaname_ + '.alignment_depth_interval_method.id', 
+        ForeignKey(_schemaname_ + '.alignment_depth_interval_method.id', 
         ondelete='CASCADE', onupdate='CASCADE'))
     ref_ind_seq_id = Column(Integer, ForeignKey(_schemaname_ + '.individual_sequence.id'))
     no_of_alignments = Column(Integer)
@@ -2654,8 +2467,8 @@ class SunsetDB(Database):
                 2: individual.code
         """
         query_string = "select * from view_alignment_with_country"
-        where_condition = f"filtered=1 and outdated_index=0 and "
-            f"ref_ind_seq_id={ref_ind_seq_id} and "
+        where_condition = f"filtered=1 and outdated_index=0 and "+\
+            f"ref_ind_seq_id={ref_ind_seq_id} and "+\
             f"alignment_method_id={alignment_method_id} "
         query_string = f"{query_string} where {where_condition}"
         query = self.metadata.bind.execute(query_string)
@@ -2668,10 +2481,10 @@ class SunsetDB(Database):
             if monkeyID not in monkeyID2ProperAlignment:
                 monkeyID2ProperAlignment[monkeyID] = row
             else:
-                print(f"Warning: monkey {monkeyID} has >1 proper alignments. "
-                    f"Only used the 1st one from ref_ind_seq_id={ref_ind_seq_id} and "
-                    f"alignment_method_id={alignment_method_id}"
-                    , flush=True)
+                print(f"Warning: monkey {monkeyID} has >1 proper alignments. "\
+                    f"Only used the 1st one from ref_ind_seq_id={ref_ind_seq_id}"\
+                    f" and alignment_method_id={alignment_method_id}",
+                    flush=True)
         return monkeyID2ProperAlignment
     
     def filterAlignments(self, data_dir=None, alignmentLs=None, min_coverage=None, 
@@ -2687,9 +2500,11 @@ class SunsetDB(Database):
         completeAlignmentCheckFunction=None, report=True):
         """
         2013.10.04 added alignment_method_id, outdated_index
-        2013.07.03 added argument is_contaminated (whether to fetch contaminated samples or not)
+        2013.07.03 added argument is_contaminated
+            (whether to fetch contaminated samples or not)
         2013.05.04 added argument completeAlignmentCheckFunction
-            if mask_genotype_method_id is 0 or '0', then this requires alignment.mask_genotype_method_id to be null. 
+            if mask_genotype_method_id is 0 or '0',
+                then this requires alignment.mask_genotype_method_id to be null. 
             if mask_genotype_method_id is None or '', then it's not checked .
         2013.05.03 added argument completedAlignment
         2013.04.11 added argument reduce_reads
@@ -2779,7 +2594,8 @@ class SunsetDB(Database):
                         alignment.individual_sequence.individual.code))
                     continue
                 elif (alignment.individual_sequence.individual.site is None or \
-                    alignment.individual_sequence.individual.site.country_id not in country_id_set):
+                    alignment.individual_sequence.individual.site.country_id \
+                        not in country_id_set):
                     continue
             if tax_id_set:
                 if alignment.individual_sequence.individual.tax_id is None:
