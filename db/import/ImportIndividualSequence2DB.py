@@ -479,9 +479,9 @@ Example ("Library" and "Bam Path" are required):
         return sample_id2fastq_obj_ls
 
     def addJobsToImportSouthAfricanDNAFastQ(self, db_main=None, 
-            sample_sheet=None, input_path=None, data_dir=None, \
-            minNoOfReads=None, commit=None,\
-            sequencer_name=None, sequence_type_name=None, sequence_format=None):
+        sample_sheet=None, input_path=None, data_dir=None, \
+        minNoOfReads=None, commit=None,\
+        sequencer_name=None, sequence_type_name=None, sequence_format=None):
         """
         2012.6.2
             input fastq files could be gzipped or not.
