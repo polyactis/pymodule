@@ -1393,8 +1393,6 @@ class LocusAnnotationType(Base):
     updated_by = Column(String(200))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    #using_options(tablename='locus_annotation_type', metadata=__metadata__, session=__session__)
-    #using_table_options(mysql_engine='InnoDB')
     
     locus_annotation_list_in_locus_annotation_type = relationship(
         'LocusAnnotation', back_populates='locus_annotation_type', cascade='all,delete')
@@ -1410,9 +1408,9 @@ class LocusContext(Base):
     __table_args__ = {'schema':_schemaname_}
     
     id = Column(Integer, primary_key=True)
-    #locus = ManyToOne('%s.Locus'%__name__, colname='locus_id', ondelete='CASCADE', onupdate='CASCADE')
     locus_id = Column(Integer, ForeignKey(_schemaname_ + '.locus.id'))
-    disp_pos = Column(Float)	#[0,1) is for within gene fraction, <=-1 is upstream. >=1 is downstream
+    disp_pos = Column(Float)
+    #[0,1) is for within gene fraction, <=-1 is upstream. >=1 is downstream
     gene_id = Column(Integer)
     gene_strand = Column(String(2))
     #left_or_right = Column(String(200), deferred=True)
@@ -1455,30 +1453,22 @@ class ScoreMethod(Base, TableClass):
     #genotype_method = ManyToOne('%s.GenotypeMethod'%__name__,
     #  colname='genotype_method_id', ondelete='CASCADE', onupdate='CASCADE')
     genotype_method_id = Column(Integer, ForeignKey(_schemaname_ + '.genotype_method.id'))
-    #analysis_method = ManyToOne('%s.AnalysisMethod'%__name__,
-    #  colname='analysis_method_id', ondelete='CASCADE', onupdate='CASCADE')
-    analysis_method_id = Column(Integer, ForeignKey(_schemaname_ + '.analysis_method.id'))
-    #phenotype_method = ManyToOne('%s.PhenotypeMethod'%__name__,
-    #  colname='phenotype_method_id', ondelete='CASCADE', onupdate='CASCADE')
-    phenotype_method_id = Column(Integer, ForeignKey(_schemaname_ + '.phenotype_method.id'))
-    #transformation_method = ManyToOne('%s.TransformationMethod'%__name__,
-    #  colname='transformation_method_id', ondelete='CASCADE', onupdate='CASCADE')
+    analysis_method_id = Column(Integer, \
+        ForeignKey(_schemaname_ + '.analysis_method.id'))
+    phenotype_method_id = Column(Integer, \
+        ForeignKey(_schemaname_ + '.phenotype_method.id'))
     transformation_method_id = Column(Integer, ForeignKey(_schemaname_ + 
         '.transformation_method.id'))
-    #score_method_type = ManyToOne('%s.ScoreMethodType'%__name__,
-    #  colname='score_method_type_id', ondelete='CASCADE', onupdate='CASCADE')
-    score_method_type_id = Column(Integer, ForeignKey(_schemaname_ + '.score_method_type.id'))
+    score_method_type_id = Column(Integer, \
+        ForeignKey(_schemaname_ + '.score_method_type.id'))
     created_by = Column(String(128))
     updated_by = Column(String(128))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    #using_options(tablename='score_method', metadata=__metadata__, session=__session__)
-    #using_table_options(mysql_engine='InnoDB')
-    #using_table_options(UniqueConstraint('genotype_method_id', '
-    #	analysis_method_id', 'phenotype_method_id', \
-    #	'score_method_type_id', 'transformation_method_id'))
-    UniqueConstraint('genotype_method_id', 'analysis_method_id', 'phenotype_method_id', \
-        'score_method_type_id', 'transformation_method_id', name='score_method_gapst')
+    UniqueConstraint('genotype_method_id', 'analysis_method_id', \
+        'phenotype_method_id', \
+        'score_method_type_id', 'transformation_method_id', \
+            name='score_method_gapst')
     locus_score_list_in_score_method = relationship('LocusScore',
          back_populates='score_method', cascade='all,delete')
     genotype_method = relationship('GenotypeMethod',
@@ -1504,8 +1494,6 @@ class TransformationMethod(Base):
     description = Column(Text)
     formular = Column(String(100))
     function = Column(String(20))
-    #using_options(tablename='transformation_method', metadata=__metadata__, session=__session__)
-    #using_table_options(mysql_engine='InnoDB')
 
     score_method_list_in_transformation_method = relationship('ScoreMethod',
         back_populates='transformation_method', cascade='all,delete')
@@ -1525,8 +1513,6 @@ class ScoreMethodType(Base):
     updated_by = Column(String(200))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    #using_options(tablename='score_method_type', metadata=__metadata__, session=__session__)
-    #using_table_options(mysql_engine='InnoDB')
 
     score_method_list_in_score_method_type = relationship('ScoreMethod',
         back_populates='score_method_type', cascade='all,delete')
@@ -1548,8 +1534,6 @@ class Sequencer(Base):
     updated_by = Column(String(200))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    #using_options(tablename='sequencer', metadata=__metadata__, session=__session__)
-    #using_table_options(mysql_engine='InnoDB')
     
     ind_seq_in_sequencer = relationship('IndividualSequence',
         back_populates='sequencer', cascade='all,delete')
@@ -1571,10 +1555,9 @@ class SeqCenter(Base):
     updated_by = Column(String(200))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    #using_options(tablename='seq_center', metadata=__metadata__, session=__session__)
-    #using_table_options(mysql_engine='InnoDB')
     
-    sequencer_ls = relationship('Sequencer', back_populates='seq_center', cascade='all,delete')
+    sequencer_ls = relationship('Sequencer', back_populates='seq_center',\
+        cascade='all,delete')
 
 class SequenceType(Base):
     """
@@ -1601,8 +1584,6 @@ class SequenceType(Base):
     updated_by = Column(String(200))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    #using_options(tablename='sequence_type', metadata=__metadata__, session=__session__)
-    #using_table_options(mysql_engine='InnoDB')
 
     ind_seq_in_sequence_type = relationship('IndividualSequence',
         back_populates='sequence_type', cascade='all,delete')
@@ -1624,10 +1605,9 @@ class LocusType(Base, TableClass):
     updated_by = Column(String(128))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    #using_options(tablename='locus_type', metadata=__metadata__, session=__session__)
-    #using_table_options(mysql_engine='InnoDB')
 
-    locus_list_in_locus_type = relationship('Locus', back_populates='locus_type', cascade='all,delete')
+    locus_list_in_locus_type = relationship('Locus', \
+        back_populates='locus_type', cascade='all,delete')
 
 class AlleleType(Base, TableClass):
     __tablename__ = 'allele_type'
@@ -1640,8 +1620,6 @@ class AlleleType(Base, TableClass):
     updated_by = Column(String(128))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    #using_options(tablename='allele_type', metadata=__metadata__, session=__session__)
-    #using_table_options(mysql_engine='InnoDB')
     
     genotype_list_in_allele_type = relationship('Genotype',
         back_populates='allele_type', cascade='all,delete')
@@ -1662,9 +1640,6 @@ class AlleleSequence(Base, TableClass):
     updated_by = Column(String(128))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    #using_options(tablename='allele_sequence', metadata=__metadata__, session=__session__)
-    #using_table_options(mysql_engine='InnoDB')
-    #using_table_options(UniqueConstraint('sequence'))
     UniqueConstraint('sequence', name='allele_sequence_sequence')
     
     locus_list_in_ref_seq = relationship('Locus', back_populates='ref_seq',
@@ -1686,7 +1661,6 @@ class Genotype(Base, TableClass):
     #individual = ManyToOne('%s.Individual'%(__name__), colname='individual_id',
     # 	ondelete='CASCADE', onupdate='CASCADE')
     individual_id = Column(Integer, ForeignKey(_schemaname_ + '.individual.id'))
-    #locus = ManyToOne('%s.Locus'%(__name__), colname='locus_id', ondelete='CASCADE', onupdate='CASCADE')
     locus_id = Column(Integer, ForeignKey(_schemaname_ + '.locus.id'))	
     chromosome_copy = Column(Integer, default=0)
     #on which chromosome copy (multi-ploid), 0=unknown (for un-phased), 1 =1st chromosome, so on
@@ -1713,20 +1687,22 @@ class Genotype(Base, TableClass):
     updated_by = Column(String(128))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    #using_options(tablename='genotype', metadata=__metadata__, session=__session__)
-    #using_table_options(mysql_engine='InnoDB')
-    #using_table_options(UniqueConstraint('individual_id', 'locus_id', 'chromosome_copy'))
     UniqueConstraint('individual_id', 'locus_id', 'chromosome_copy', 
         name='genotype_individual_id_locus_id_chromosome_copy')
     
-    individual = relationship('Individual', back_populates='genotype_list_in_individual')
+    individual = relationship('Individual', \
+        back_populates='genotype_list_in_individual')
     locus = relationship('Locus', back_populates='genotype_list_in_locus', 
         foreign_keys='Genotype.locus_id')
-    allele_type = relationship('AlleleType', back_populates='genotype_list_in_allele_type')
-    allele_sequence = relationship('AlleleSequence', back_populates='genotype_list_in_allele_sequence')
-    target_locus = relationship('Locus', back_populates='genotype_list_in_target_locus', 
+    allele_type = relationship('AlleleType', \
+        back_populates='genotype_list_in_allele_type')
+    allele_sequence = relationship('AlleleSequence', \
+        back_populates='genotype_list_in_allele_sequence')
+    target_locus = relationship('Locus', \
+        back_populates='genotype_list_in_target_locus',
         foreign_keys='Genotype.target_locus_id')
-    genotype_method = relationship('GenotypeMethod', back_populates='genotype_list_in_genotype_method')
+    genotype_method = relationship('GenotypeMethod', \
+        back_populates='genotype_list_in_genotype_method')
 
 
 
@@ -1750,17 +1726,10 @@ class GenotypeMethod(Base, AbstractTableWithFilename):
     short_name = Column(String(256), unique=True)
     description = Column(Text)
     path = Column(Text, unique=True)
-    #individual_alignment_ls = ManyToMany("%s.IndividualAlignment"%(__name__),
-    # 	tablename='genotype_method2individual_alignment', \
-    #	local_colname='genotype_method_id')
-    #ref_sequence = ManyToOne('%s.IndividualSequence'%(__name__),
-    #  colname='ref_ind_seq_id', ondelete='CASCADE', onupdate='CASCADE')
-    ref_ind_seq_id = Column(Integer, ForeignKey(_schemaname_ + '.individual_sequence.id'))
-    #parent = ManyToOne("%s.GenotypeMethod"%(__name__), colname='parent_id', 
-    # ondelete='CASCADE', onupdate='CASCADE')
+    ref_ind_seq_id = Column(Integer, \
+        ForeignKey(_schemaname_ + '.individual_sequence.id'))
     parent_id = Column(Integer, ForeignKey(_schemaname_ + '.genotype_method.id',
         ondelete='CASCADE', onupdate='CASCADE'))
-    #genotype_file_ls = OneToMany('%s.GenotypeFile'%(__name__))	#2012.7.17
     no_of_individuals = Column(Integer)
     no_of_loci = Column(BigInteger)
     min_depth = Column(Float)
@@ -1768,25 +1737,27 @@ class GenotypeMethod(Base, AbstractTableWithFilename):
     max_missing_rate = Column(Float)
     min_maf = Column(Float)
     min_neighbor_distance = Column(Integer)
-    is_phased = Column(Integer, default=0)	#2013.3.6. unphased = 0, phased = 1
+    is_phased = Column(Integer, default=0)
+    #2013.3.6. unphased = 0, phased = 1
     created_by = Column(String(128))
     updated_by = Column(String(128))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    #using_options(tablename='genotype_method', metadata=__metadata__, session=__session__)
-    #using_table_options(mysql_engine='InnoDB')
-    #using_table_options(UniqueConstraint('short_name', 'ref_ind_seq_id'))
-    UniqueConstraint('short_name', 'ref_ind_seq_id', name='genotype_method_short_name_ref_ind_seq_id')
+    UniqueConstraint('short_name', 'ref_ind_seq_id', \
+        name='genotype_method_short_name_ref_ind_seq_id')
     
     individual_alignment_list_in_genotype_method = relationship(
-        'IndividualAlignment', back_populates='mask_genotype_method', cascade='all,delete')
+        'IndividualAlignment', back_populates='mask_genotype_method', \
+            cascade='all,delete')
     score_method_list_in_genotype_method = relationship(
         'ScoreMethod', back_populates='genotype_method', cascade='all,delete')
     genotype_list_in_genotype_method = relationship(
         'Genotype', back_populates='genotype_method', cascade='all,delete')
-    ref_sequence = relationship('IndividualSequence', back_populates='genotype_method_list_in_ind_seq')
+    ref_sequence = relationship('IndividualSequence', \
+        back_populates='genotype_method_list_in_ind_seq')
     parent = relationship('GenotypeMethod')
-    genotype_file_ls = relationship('GenotypeFile', back_populates='genotype_method', cascade='all,delete')
+    genotype_file_ls = relationship('GenotypeFile', 
+        back_populates='genotype_method', cascade='all,delete')
     individual_alignment_ls = relationship('IndividualAlignment', 
         secondary=genotype_method2individual_alignment_table,
         back_populates='genotype_method_ls')
@@ -1797,7 +1768,8 @@ class GenotypeMethod(Base, AbstractTableWithFilename):
         2012.7.12
         """
         #'/' must not be put in front of the relative path.
-        # otherwise, os.path.join(self.data_dir, dst_relative_path) will only take the path of dst_relative_path.
+        # otherwise, os.path.join(self.data_dir, dst_relative_path) will
+        #  only take the path of dst_relative_path.
         dst_relative_path = '%s/method_%s'%(subFolder, self.id)
         return dst_relative_path
     
@@ -1813,7 +1785,8 @@ class GenotypeFile(Base, AbstractTableWithFilename):
     """
     2012.8.30 add column no_of_chromosomes
     2012.7.11
-        modify it so that this holds files, each of which corresponds to GenotypeMethod.
+        modify it so that this holds files, each of which
+         corresponds to GenotypeMethod.
     2011-2-4
         file format:
             locus.id	allele_order	allele_type	seq.id	score	target_locus
@@ -1834,38 +1807,41 @@ class GenotypeFile(Base, AbstractTableWithFilename):
     format = Column(Text)
     #genotype_method = ManyToOne('%s.GenotypeMethod'%(__name__), 
     # 	colname='genotype_method_id', ondelete='CASCADE', onupdate='CASCADE')
-    genotype_method_id = Column(Integer, ForeignKey(_schemaname_ + '.genotype_method.id'))
+    genotype_method_id = Column(Integer, \
+        ForeignKey(_schemaname_ + '.genotype_method.id'))
     comment = Column(String(4096))
     created_by = Column(String(128))
     updated_by = Column(String(128))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    #using_options(tablename='genotype_file', metadata=__metadata__, session=__session__)
-    #using_table_options(mysql_engine='InnoDB')
-    #using_table_options(UniqueConstraint('genotype_method_id', 'chromosome', 'format', 'no_of_chromosomes'))
     UniqueConstraint('genotype_method_id', 'chromosome', 'format', 
         'no_of_chromosomes', name='genotype_file_gcfn')
     
-    genotype_method = relationship('GenotypeMethod', back_populates='genotype_file_ls')
+    genotype_method = relationship('GenotypeMethod', \
+        back_populates='genotype_file_ls')
     
     folderName = 'genotype_file'
-    def constructRelativePath(self, subFolder='genotype_file', sourceFilename="", **keywords):
+    def constructRelativePath(self, subFolder='genotype_file', \
+        sourceFilename="", **keywords):
         """
         2012.8.30
             name differently when the no_of_chromosomes is >1
         2012.7.12
             path relative to self.data_dir
         """
-        folderRelativePath = self.genotype_method.constructRelativePath(subFolder=subFolder)
+        folderRelativePath = self.genotype_method.constructRelativePath(\
+            subFolder=subFolder)
         #'/' must not be put in front of the relative path.
-        # otherwise, os.path.join(self.data_dir, dst_relative_path) will only take the path of dst_relative_path.
+        # otherwise, os.path.join(self.data_dir, dst_relative_path) will only
+        #  take the path of dst_relative_path.
         folderRelativePath = folderRelativePath.lstrip('/')
         if self.no_of_chromosomes<=1:
             dst_relative_path = os.path.join(folderRelativePath, '%s_chr_%s_%s'%(
                 self.id, self.chromosome, sourceFilename))
         else:	#files with more than 1 chromosome
             # 2012.8.30
-            # it'll be something like genotype_file/method_6_$id_$format_#chromosomes_sourceFilename
+            # it'll be like 
+            #   genotype_file/method_6_$id_$format_#chromosomes_sourceFilename
             # do not put it in genotype_file/method_6/ folder.
             folderRelativePath= folderRelativePath.rstrip('/')
             dst_relative_path = '%s_%s_%schromosomes_%s'%(
@@ -1897,24 +1873,20 @@ class AlignmentDepthIntervalMethod(Base, AbstractTableWithFilename):
     #	local_colname='alignment_depth_interval_method_id')
     #parent = ManyToOne("%s.AlignmentDepthIntervalMethod"%(__name__), 
     # 	colname='parent_id', ondelete='CASCADE', onupdate='CASCADE')
-    parent_id = Column(Integer, ForeignKey(_schemaname_ + '.alignment_depth_interval_method.id', 
+    parent_id = Column(Integer, \
+        oreignKey(_schemaname_ + '.alignment_depth_interval_method.id', 
         ondelete='CASCADE', onupdate='CASCADE'))
-    #alignment_depth_interval_file_ls = OneToMany('%s.AlignmentDepthIntervalFile'%(__name__))
-    #ref_sequence = ManyToOne('%s.IndividualSequence'%(__name__), 
-    # 	colname='ref_ind_seq_id', ondelete='CASCADE', onupdate='CASCADE')
     ref_ind_seq_id = Column(Integer, ForeignKey(_schemaname_ + '.individual_sequence.id'))
     no_of_alignments = Column(Integer)
     no_of_intervals = Column(BigInteger)
     sum_median_depth = Column(Float)	#across all alignments
     sum_mean_depth = Column(Float)	#across all alignments
-    min_segment_length = Column(Integer)	#2013.09.02 this is a parameter of segmentation program
+    #2013.09.02 this is a parameter of segmentation program
+    min_segment_length = Column(Integer)
     created_by = Column(String(128))
     updated_by = Column(String(128))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    #using_options(tablename='alignment_depth_interval_method', metadata=__metadata__, session=__session__)
-    #using_table_options(mysql_engine='InnoDB')
-    #using_table_options(UniqueConstraint('short_name', 'parent_id'))
     
     parent = relationship('AlignmentDepthIntervalMethod')
     alignment_depth_interval_file_ls = relationship('AlignmentDepthIntervalFile', 
@@ -1934,7 +1906,8 @@ class AlignmentDepthIntervalMethod(Base, AbstractTableWithFilename):
         if not subFolder:
             subFolder =  self.folderName
         #'/' must not be put in front of the relative path.
-        # otherwise, os.path.join(self.data_dir, dst_relative_path) will only take the path of dst_relative_path.
+        # otherwise, os.path.join(self.data_dir, dst_relative_path)
+        #  will only take the path of dst_relative_path.
         dst_relative_path = '%s/method_%s'%(subFolder, self.id)
         return dst_relative_path
     
@@ -1968,8 +1941,6 @@ class AlignmentDepthIntervalFile(Base, AbstractTableWithFilename):
     max_interval_length = Column(Integer)
     median_interval_length = Column(Integer)
     format = Column(Text)	# BED or other
-    #alignment_depth_interval_method = ManyToOne('%s.AlignmentDepthIntervalMethod'%(__name__), \
-    #	colname='alignment_depth_interval_method_id', ondelete='CASCADE', onupdate='CASCADE')
     alignment_depth_interval_method_id = Column(Integer, 
         ForeignKey(_schemaname_ + '.alignment_depth_interval_method.id'))
     comment = Column(String(4096))
@@ -1977,11 +1948,6 @@ class AlignmentDepthIntervalFile(Base, AbstractTableWithFilename):
     updated_by = Column(String(128))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    #using_options(tablename='alignment_depth_interval_file', \
-    # 	metadata=__metadata__, session=__session__)
-    #using_table_options(mysql_engine='InnoDB')
-    #using_table_options(UniqueConstraint('alignment_depth_interval_method_id', \
-    # 'chromosome', 'format', 'no_of_chromosomes'))
     
     alignment_depth_interval_method = relationship('AlignmentDepthIntervalMethod',
         back_populates='alignment_depth_interval_file_ls')
@@ -2025,12 +1991,9 @@ class Phenotype(Base, TableClass):
     __table_args__ = {'schema':_schemaname_}
     
     id = Column(Integer, primary_key=True)
-    #individual = ManyToOne('%s.Individual'%(__name__),
-    # 	colname='individual_id', ondelete='CASCADE', onupdate='CASCADE')
     individual_id = Column(Integer, ForeignKey(_schemaname_ + '.individual.id'))
-    #phenotype_method = ManyToOne('%s.PhenotypeMethod'%(__name__),
-    # 	colname='phenotype_method_id', ondelete='CASCADE', onupdate='CASCADE')
-    phenotype_method_id = Column(Integer, ForeignKey(_schemaname_ + '.phenotype_method.id'))
+    phenotype_method_id = Column(Integer, 
+        ForeignKey(_schemaname_ + '.phenotype_method.id'))
     value = Column(Float)
     comment = Column(Text)
     replicate = Column(Integer, default=1)
@@ -2038,13 +2001,11 @@ class Phenotype(Base, TableClass):
     updated_by = Column(String(128))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    #using_options(tablename='phenotype', metadata=__metadata__, session=__session__)
-    #using_table_options(mysql_engine='InnoDB')
-    #using_table_options(UniqueConstraint('individual_id', 'replicate', 'phenotype_method_id'))
     UniqueConstraint('individual_id', 'replicate', 'phenotype_method_id',
         name='phenotype_individual_id_replicate_phenotype_method_id')
     
-    individual = relationship('Individual', back_populates='phenotype_list_in_individual')
+    individual = relationship('Individual', \
+        back_populates='phenotype_list_in_individual')
     phenotype_method = relationship('PhenotypeMethod',
         back_populates='phenotype_list_in_phenotype_method')
 
@@ -2061,8 +2022,6 @@ class BiologyCategory(Base):
     updated_by = Column(String(128))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    #using_options(tablename='biology_category', metadata=__metadata__, session=__session__)
-    #using_table_options(mysql_engine='InnoDB')
 
     phenotype_method_ls = relationship('PhenotypeMethod', 
         back_populates='biology_category', cascade='all,delete')
@@ -2084,7 +2043,8 @@ class PhenotypeMethod(Base, TableClass):
     #biology_category = ManyToOne("%s.BiologyCategory"%(__name__), \
     # 	colname='biology_category_id', \
     #	ondelete='CASCADE', onupdate='CASCADE')
-    biology_category_id = Column(Integer, ForeignKey(_schemaname_ + '.biology_category.id'))
+    biology_category_id = Column(Integer, 
+        ForeignKey(_schemaname_ + '.biology_category.id'))
     #collector = ManyToOne("%s.User"%(__name__),colname='collector_id')
     collector_id = Column(Integer, ForeignKey(_schemaname_ + '.acl_user.id'))
     access = Column(Enum("public", "restricted", name="access_enum_type"), \
@@ -2182,8 +2142,10 @@ class SunsetDB(Database):
         if not individual_alignment.path:
             return False
         alignmentAbsPath= os.path.join(data_dir, individual_alignment.path)
-        #check if the alignment exists or not. if it already exists, no alignment jobs.
-        if individual_alignment.file_size is not None and individual_alignment.file_size>0:
+        #check if the alignment exists or not. if it already exists,
+        #  no alignment jobs.
+        if individual_alignment.file_size is not None and \
+                individual_alignment.file_size>0:
             if not os.path.isfile(alignmentAbsPath):
                 if returnFalseIfInexitentFile:	#2013.05.04
                     sys.stderr.write("Warning: Skip alignment file for id=%s, %s "
@@ -2223,8 +2185,8 @@ class SunsetDB(Database):
     
     def getAlignment(self, individual_code=None, individual_id=None, 
         individual=None, individual_sequence_id=None, \
-        path_to_original_alignment=None, sequencer_name='GA', sequencer_id=None, \
-        sequence_type_name=None, sequence_type_id=None, sequence_format='fastq', \
+        path_to_original_alignment=None, sequencer_name='GA', sequencer_id=None,
+        sequence_type_name=None, sequence_type_id=None, sequence_format='fastq',
         ref_individual_sequence_id=10, \
         alignment_method_name='bwa-short-read', alignment_method_id=None, 
         alignment_method=None,\
@@ -2281,7 +2243,8 @@ class SunsetDB(Database):
         2011-7-11
             add argument createSymbolicLink. default to False
                 if True, create a symbolic from source file to target, instead of cp
-        subFolder is the name of the folder in self.data_dir that is used to hold the alignment files.
+        subFolder is the name of the folder in self.data_dir that is used to 
+            hold the alignment files.
         """
         if data_dir is None:
             data_dir = self.data_dir
@@ -2297,47 +2260,63 @@ class SunsetDB(Database):
                 individual = individual_sequence.individual
         elif individual:
             individual_sequence = self.getIndividualSequence(
-                individual_id=individual.id, sequencer_name=sequencer_name, \
-                sequencer_id=sequencer_id, sequence_type_id=sequence_type_id,\
+                individual_id=individual.id, sequencer_name=sequencer_name,
+                sequencer_id=sequencer_id, sequence_type_id=sequence_type_id,
                 sequence_type_name=sequence_type_name,\
-                sequence_format=sequence_format, filtered=individual_sequence_filtered)
+                sequence_format=sequence_format,
+                filtered=individual_sequence_filtered)
         else:
-            logging.error("Not able to get individual_sequence cuz individual_sequence_id=%s; "
-                "individual_code=%s; individual_id=%s ."%\
-                (individual_sequence_id, individual_code, individual_id))
+            logging.error(f"Not able to get individual_sequence cuz "
+                f"individual_sequence_id={individual_sequence_id}; "
+                f"individual_code={individual_code}; individual_id={individual_id}.")
             return None
         
         if alignment_method_name:
-            alignment_method = self.getAlignmentMethod(alignment_method_name=alignment_method_name)
+            alignment_method = self.getAlignmentMethod(
+                alignment_method_name=alignment_method_name)
         elif alignment_method_id:
-            alignment_method = self.queryTable(AlignmentMethod).get(alignment_method_id)
+            alignment_method = self.queryTable(AlignmentMethod).\
+                get(alignment_method_id)
         elif alignment_method is None:
-            sys.stderr.write("Error: not able to get alignment_method cuz alignment_method_name=%s and alignment_method_id=%s.\n"%\
-                            (alignment_method_name, alignment_method_id))
+            logging.error(f"Not able to get alignment_method with "
+                f"alignment_method_name={alignment_method_name} and "
+                f"alignment_method_id={alignment_method_id}")
             return None
         
         
         db_entry = self.checkIndividualAlignment(
-            individual_code=None, individual_id=individual.id, individual_sequence_id=individual_sequence_id, \
-            path_to_original_alignment=path_to_original_alignment, sequencer_name=sequencer_name, sequencer_id=sequencer_id, \
-            sequence_type_name=sequence_type_name, sequence_type_id=sequence_type_id, sequence_format=sequence_format, \
+            individual_code=None, individual_id=individual.id, 
+            individual_sequence_id=individual_sequence_id, \
+            path_to_original_alignment=path_to_original_alignment, 
+            sequencer_name=sequencer_name, sequencer_id=sequencer_id, \
+            sequence_type_name=sequence_type_name, 
+            sequence_type_id=sequence_type_id, sequence_format=sequence_format,
             ref_individual_sequence_id=ref_individual_sequence_id, \
             alignment_method_name=alignment_method_name, 
-            alignment_method_id=alignment_method_id, alignment_method=alignment_method,\
+            alignment_method_id=alignment_method_id,
+            alignment_method=alignment_method,
             alignment_format=alignment_format, subFolder=subFolder, \
-            createSymbolicLink=createSymbolicLink, individual_sequence_filtered=individual_sequence_filtered, \
+            createSymbolicLink=createSymbolicLink,
+            individual_sequence_filtered=individual_sequence_filtered, \
             read_group_added=read_group_added, data_dir=data_dir, \
-            outdated_index=outdated_index, mask_genotype_method_id=mask_genotype_method_id, \
+            outdated_index=outdated_index,
+            mask_genotype_method_id=mask_genotype_method_id,
             parent_individual_alignment_id=parent_individual_alignment_id,\
-            individual_sequence_file_raw_id=individual_sequence_file_raw_id, md5sum=md5sum, \
+            individual_sequence_file_raw_id=individual_sequence_file_raw_id,
+            md5sum=md5sum,
             local_realigned=local_realigned, reduce_reads=reduce_reads)
         if not db_entry:
-            db_entry = IndividualAlignment(ind_seq_id=individual_sequence.id, ref_ind_seq_id=ref_individual_sequence_id,\
-                alignment_method_id=alignment_method.id, format=alignment_format, read_group_added=read_group_added,\
-                outdated_index=outdated_index, mask_genotype_method_id=mask_genotype_method_id,\
-                parent_individual_alignment_id=parent_individual_alignment_id,\
-                individual_sequence_file_raw_id=individual_sequence_file_raw_id, md5sum=md5sum,\
-                local_realigned=local_realigned, read_group=read_group, reduce_reads=reduce_reads)
+            db_entry = IndividualAlignment(ind_seq_id=individual_sequence.id,
+                ref_ind_seq_id=ref_individual_sequence_id,
+                alignment_method_id=alignment_method.id, format=alignment_format,
+                read_group_added=read_group_added,
+                outdated_index=outdated_index,
+                mask_genotype_method_id=mask_genotype_method_id,
+                parent_individual_alignment_id=parent_individual_alignment_id,
+                individual_sequence_file_raw_id=individual_sequence_file_raw_id,
+                md5sum=md5sum,
+                local_realigned=local_realigned, read_group=read_group,
+                reduce_reads=reduce_reads)
             self.session.add(db_entry)
             self.session.flush()
             
@@ -2346,7 +2325,8 @@ class SunsetDB(Database):
             if path_to_original_alignment and (os.path.isfile(path_to_original_alignment) \
                 or os.path.isdir(path_to_original_alignment)):
                 #'/' must not be put in front of the relative path.
-                # otherwise, os.path.join(data_dir, dst_relative_path) will only take the path of dst_relative_path.
+                # otherwise, os.path.join(data_dir, dst_relative_path)
+                #  will only take the path of dst_relative_path.
                 dst_relative_path = db_entry.constructRelativePath(subFolder=subFolder)
                 #update its path in db to the relative path
                 db_entry.path = dst_relative_path
@@ -2355,12 +2335,14 @@ class SunsetDB(Database):
                 dst_dir = os.path.join(data_dir, subFolder)
                 if not os.path.isdir(dst_dir):	#the upper directory has to be created at this moment.
                     commandline = 'mkdir %s'%(dst_dir)
-                    return_data = runLocalCommand(commandline, report_stderr=True, report_stdout=True)
+                    return_data = runLocalCommand(commandline, report_stderr=True,
+                        report_stdout=True)
                 if createSymbolicLink:
                     commandline = 'ln -s %s %s'%(path_to_original_alignment, dst_pathname)
                 else:
                     commandline = 'cp -r %s %s'%(path_to_original_alignment, dst_pathname)
-                return_data = runLocalCommand(commandline, report_stderr=True, report_stdout=True)
+                return_data = runLocalCommand(commandline, report_stderr=True,
+                    report_stdout=True)
                 
                 #2011-7-11 copy the samtools index file as well
                 indexFname = '%s.bai'%(path_to_original_alignment)
@@ -2370,7 +2352,8 @@ class SunsetDB(Database):
                         commandline = 'ln -s %s %s'%(indexFname, dstIndexPathname)
                     else:
                         commandline = 'cp -r %s %s'%(indexFname, dstIndexPathname)
-                    return_data = runLocalCommand(commandline, report_stderr=True, report_stdout=True)
+                    return_data = runLocalCommand(commandline, report_stderr=True,
+                        report_stdout=True)
                 
                 #since the .path has been updated, so add & flush
                 self.session.add(db_entry)
@@ -2389,12 +2372,16 @@ class SunsetDB(Database):
         ind_aln_id_ls=None, alignment_method_id=None, \
         data_dir=None, sequence_type_name=None, sequence_type_id=None, 
         outdated_index=0, mask_genotype_method_id=None, \
-        parent_individual_alignment_id=None, individual_sequence_file_raw_id_type=1,\
-        country_id_ls=None, tax_id_ls=None, excludeAlignmentWithoutLocalFile=True, local_realigned=1,\
-        reduce_reads=None, completedAlignment=None, completeAlignmentCheckFunction=None):
+        parent_individual_alignment_id=None,
+        individual_sequence_file_raw_id_type=1,
+        country_id_ls=None, tax_id_ls=None, 
+        excludeAlignmentWithoutLocalFile=True, local_realigned=1,
+        reduce_reads=None, completedAlignment=None,
+        completeAlignmentCheckFunction=None):
         """
         2013.05.04 added argument completeAlignmentCheckFunction
-            if mask_genotype_method_id is 0 or '0', then this requires alignment.mask_genotype_method_id to be null. 
+            if mask_genotype_method_id is 0 or '0',
+                then this requires alignment.mask_genotype_method_id to be null. 
             if mask_genotype_method_id is None or '', then it's not checked .
             ditto for parent_individual_alignment_id
         2013.05.03 added argument completedAlignment
@@ -2405,11 +2392,14 @@ class SunsetDB(Database):
         2012.9.23 add argument country_id_ls and tax_id_ls
         2012.9.20 rename aln_method_id to alignment_method_id
         2012.9.19 & 2012.9.22 add argument individual_sequence_file_raw_id_type:
-            1: only all-library-fused libraries, (individual_sequence_file_raw_id is null)
-            2: only library-specific alignments, (individual_sequence_file_raw_id is non-null)
+            1: only all-library-fused libraries,
+                (individual_sequence_file_raw_id is null)
+            2: only library-specific alignments,
+                (individual_sequence_file_raw_id is non-null)
             3 or else: both all-library-fused and library-specific alignments, 
                 (no filter based on individual_sequence_file_raw_id)
-        2012.7.26 added argument mask_genotype_method_id & parent_individual_alignment_id
+        2012.7.26 added argument mask_genotype_method_id &
+             parent_individual_alignment_id
         2012.6.13 add argument outdated_index
         2012.4.13
             moved from AlignmentToCallPipeline.py
@@ -2418,18 +2408,23 @@ class SunsetDB(Database):
         2011-11-27
             add argument sequence_type
         2011-9-16
-        order each alignment by id. It is important because this is the order that gatk&samtools take input bams.
-        #Read group in each bam is beginned by alignment.id. GATK would arrange bams in the order of read groups.
-        # while samtools doesn't do that and vcf-isect could combine two vcfs with columns in different order.
+        order each alignment by id. It is important because this is the order
+            that gatk&samtools take input bams.
+        #Read group in each bam is beginned by alignment.id. GATK would
+        #   arrange bams in the order of read groups.
+        # while samtools doesn't do that and vcf-isect could combine two vcfs
+        #  with columns in different order.
         2011-9-13
-            add argument data_dir, to filter out alignments that don't exist on file storage
+            add argument data_dir, to filter out alignments that don't exist
+            on file storage.
         2011-8-31
-            add argument aln_method_id
+            add argument aln_method_id.
         2011-7-12
         
         """
         if completedAlignment is not None:
-            if completedAlignment==0 or completedAlignment=='0' or completedAlignment=='':
+            if completedAlignment==0 or completedAlignment=='0' or \
+                    completedAlignment=='':
                 completedAlignment = False
             elif completedAlignment!=False:
                 completedAlignment = True
@@ -2504,9 +2499,12 @@ class SunsetDB(Database):
         if reduce_reads is not None:	#2013.04.11
             sys.stderr.write("Adding filter reduce_reads=%s ... \n"%(reduce_reads))
             query = query.filter_by(reduce_reads=reduce_reads)
-        #order by TableClass.id is important because this is the order that gatk&samtools take input bams.
-        #Read group in each bam is beginned by alignment.id. GATK would arrange bams in the order of read groups.
-        # while samtools doesn't do that and vcf-isect could combine two vcfs with columns in different order.
+        #order by TableClass.id is important because this is the order that
+        #  gatk&samtools take input bams.
+        #Read group in each bam is beginned by alignment.id. GATK would
+        #  arrange bams in the order of read groups.
+        # while samtools doesn't do that and vcf-isect could combine two
+        #  vcfs with columns in different order.
         if outdated_index is not None:	#2013.04.11
             sys.stderr.write("Adding filter outdated_index=%s ... \n"%(outdated_index))
             query = query.filter_by(outdated_index=outdated_index)
@@ -2524,7 +2522,8 @@ class SunsetDB(Database):
             if parent_individual_alignment_id==0 or parent_individual_alignment_id=='0':
                 query = query.filter_by(parent_individual_alignment_id=None)
             else:
-                query = query.filter_by(parent_individual_alignment_id=parent_individual_alignment_id)
+                query = query.filter_by(
+                    parent_individual_alignment_id=parent_individual_alignment_id)
         
         query = query.order_by(TableClass.id)
         if sequence_type_name:
@@ -2839,13 +2838,13 @@ class SunsetDB(Database):
             self.session.flush()
         return db_entry
     
-    def getIndividual(self, code: str=None, name: str=None, sex=None, age=None, 
-        latitude: float=None, longitude: float=None, \
+    def getIndividual(self, code: str=None, name: str=None, sex=None, age=None,
+        latitude: float=None, longitude: float=None,
         altitude: float=None, 
-        site: Site=None, site_name: str=None, site_id: int=None,\
-        city: str=None, stateprovince: str=None, country_name: str=None, \
+        site: Site=None, site_name: str=None, site_id: int=None,
+        city: str=None, stateprovince: str=None, country_name: str=None,
         collection_date=None, collector=None,
-        study: Study=None, study_name: str=None, study_id: int=None,\
+        study: Study=None, study_name: str=None, study_id: int=None,
         tax_id: int=None, birthdate=None, comment:str=None):
         """
         Examples:
@@ -2864,9 +2863,10 @@ class SunsetDB(Database):
                 query = query.filter_by(tax_id=tax_id)
             db_entry = query.first()
         if not db_entry:
-            if sex is None or sex=='?' or sex=='':	#2011-4-29
+            if sex is None or sex=='?' or sex=='':
                 sex = None
-            elif len(sex)>=1:	#2011-5-5 take the first letter
+            elif len(sex)>=1:
+                #2011-5-5 take the first letter
                 sex = sex[0].upper()
             if not site and site_name and country_name:
                 site = self.getSite(description=site_name, city=city, \
@@ -2891,7 +2891,7 @@ class SunsetDB(Database):
         tissue_name: str=None, tissue_id: int=None, 
         condition_name: str=None, condition_id: int=None, 
         parent_individual_sequence_id: int=None,\
-        no_of_chromosomes: int=None, sequence_batch_id: int=None, version=None, \
+        no_of_chromosomes: int=None, sequence_batch_id: int=None, version=None,
         filtered: int=0,\
         is_contaminated: int=0, outdated_index: int=0, 
         returnFirstEntry:bool=True):
@@ -2971,18 +2971,23 @@ class SunsetDB(Database):
         else:
             return query
     
-    def checkIndividualAlignment(self, individual_code=None, individual_id=None,
-        individual=None, individual_sequence_id=None, \
-        path_to_original_alignment=None, sequencer_name='GA', sequencer_id=None, \
-        sequence_type_name=None, sequence_type_id=None, sequence_format='fastq', \
+    def checkIndividualAlignment(self, individual_code=None,
+        individual_id=None, individual=None, individual_sequence_id:str=None,
+        sequencer_id:int=None,
+        sequencer_name:str='GA',
+        sequence_type_name:str=None, sequence_type_id:int=None,
+        sequence_format:str='fastq', alignment_format:str='bam',
         ref_individual_sequence_id=10, \
-        alignment_method_name='bwa-short-read', alignment_method_id=None, alignment_method=None,\
-        alignment_format='bam', subFolder='individual_alignment', \
-        createSymbolicLink=False, individual_sequence_filtered=0, read_group_added=None, data_dir=None, \
-        outdated_index=0, mask_genotype_method_id=None, parent_individual_alignment_id=None,\
-        individual_sequence_file_raw_id=None, md5sum=None, local_realigned=0, reduce_reads=None):
+        alignment_method=None, 
+        alignment_method_id:int=None,
+        alignment_method_name:str='bwa-short-read',
+        createSymbolicLink=False, individual_sequence_filtered=0,
+        read_group_added=None, data_dir=None, \
+        outdated_index=0, mask_genotype_method_id=None,
+        parent_individual_alignment_id=None,\
+        individual_sequence_file_raw_id=None,
+        local_realigned=0, reduce_reads=None):
         """
-        2013.04.11 added argument reduce_reads
         2013.04.05 split out of getAlignment()
         """
         if data_dir is None:
@@ -2993,34 +2998,42 @@ class SunsetDB(Database):
             individual = self.queryTable(Individual).get(individual_id)
         
         if individual_sequence_id:
-            individual_sequence = self.queryTable(IndividualSequence).get(individual_sequence_id)
+            individual_sequence = self.queryTable(IndividualSequence).\
+                get(individual_sequence_id)
             if individual is None:
                 individual = individual_sequence.individual
         elif individual:
-            individual_sequence = self.getIndividualSequence(individual_id=individual.id, 
-            sequencer_name=sequencer_name, \
-            sequencer_id=sequencer_id, sequence_type_id=sequence_type_id,\
-            sequence_type_name=sequence_type_name,\
-            sequence_format=sequence_format, filtered=individual_sequence_filtered)
+            individual_sequence = self.getIndividualSequence(
+                individual_id=individual.id, 
+                sequencer_name=sequencer_name, \
+                sequencer_id=sequencer_id, sequence_type_id=sequence_type_id,
+                sequence_type_name=sequence_type_name,\
+                sequence_format=sequence_format,
+                filtered=individual_sequence_filtered)
         else:
-            logging.error(f"Not able to get individual_sequence because "
+            logging.error(f"Not able to get individual_sequence where "
                 f"individual_sequence_id={individual_sequence_id}; "
-                f"individual_code={individual_code}; individual_id={individual_id}.")
+                f"individual_code={individual_code}; "
+                f"individual_id={individual_id}.")
             return None
         
         if alignment_method_name:
-            alignment_method = self.getAlignmentMethod(alignment_method_name=alignment_method_name)
+            alignment_method = self.getAlignmentMethod(
+                alignment_method_name=alignment_method_name)
         elif alignment_method_id:
-            alignment_method = self.queryTable(AlignmentMethod).get(alignment_method_id)
+            alignment_method = self.queryTable(AlignmentMethod).\
+                get(alignment_method_id)
         elif alignment_method is None:
-            logging.error(f"Not able to get alignment_method because "
+            logging.error(f"Not able to get alignment_method where "
                 f"alignment_method_name={alignment_method_name} and "
                 f"alignment_method_id={alignment_method_id}.")
             return None
         
-        query = self.queryTable(IndividualAlignment).filter_by(ind_seq_id=individual_sequence.id).\
+        query = self.queryTable(IndividualAlignment).\
+            filter_by(ind_seq_id=individual_sequence.id).\
             filter_by(ref_ind_seq_id=ref_individual_sequence_id).\
-            filter_by(alignment_method_id=alignment_method.id).filter_by(outdated_index=outdated_index).\
+            filter_by(alignment_method_id=alignment_method.id).\
+            filter_by(outdated_index=outdated_index).\
             filter_by(mask_genotype_method_id=mask_genotype_method_id).\
             filter_by(parent_individual_alignment_id=parent_individual_alignment_id).\
             filter_by(individual_sequence_file_raw_id=individual_sequence_file_raw_id)
@@ -3034,19 +3047,24 @@ class SunsetDB(Database):
         
         no_of_entries = query.count()
         if no_of_entries>1:
-            logging.error(f">1 entries ({no_of_entries}) returned for IndividualAlignment "
+            logging.error(f">1 entries ({no_of_entries}) "
+                f"fetched for IndividualAlignment "
                 f"(individual_id={individual_id}, "
                 f"ref_individual_sequence_id={ref_individual_sequence_id}, "
-                f"sequencer_id={sequencer_id}, sequence_type_id={sequence_type_id}, "
+                f"sequencer_id={sequencer_id}, "
+                f"sequence_type_id={sequence_type_id}, "
                 f"sequence_format={sequence_format}, "
                 f"filtered={individual_sequence_filtered}, "
                 f"outdated_index={outdated_index}, "
                 f"alignment_method_id={alignment_method_id}, "
                 f"mask_genotype_method_id ={mask_genotype_method_id}, "
                 f"parent_individual_alignment_id={parent_individual_alignment_id}, "
-                f"individual_sequence_file_raw_id={individual_sequence_file_raw_id},"
+                f"individual_sequence_file_raw_id={individual_sequence_file_raw_id}, "
                 f"alignment_format={alignment_format}, "
-                f"local_realigned={local_realigned}, reduce_reads={reduce_reads}).")
+                f"local_realigned={local_realigned}, "
+                f"reduce_reads={reduce_reads}), "
+                f"md5sum={md5sum}"
+                )
             sys.exit(4)
         db_entry = query.first()
         return db_entry
@@ -3066,11 +3084,11 @@ class SunsetDB(Database):
         outdated_index=0, comment=None, 
         subFolder=None, data_dir=None):
         """
-        Columns that are None will be part of the db query to see if entry is in db already
+        Columns that are None will be part of the db query to see if entry is
+            in db already.
         The path field is usually considered a folder (rather than a file).
             But if copy_original_file==True and path_to_original_sequence is given,
                 it will copy path_to_original_sequence to db storage.
-        subFolder is the name of the folder in data_dir that is used to hold the sequence files.
         """
         if not data_dir:
             data_dir = self.data_dir
@@ -3141,7 +3159,8 @@ class SunsetDB(Database):
                     return_data = runLocalCommand(commandline, 
                         report_stderr=True, report_stdout=True)
                 commandline = 'cp -r %s %s'%(path_to_original_sequence, dst_abs_path)
-                return_data = runLocalCommand(commandline, report_stderr=True, report_stdout=True)
+                return_data = runLocalCommand(commandline, report_stderr=True,
+                    report_stdout=True)
             self.session.add(db_entry)
             self.session.flush()
         return db_entry
@@ -3159,7 +3178,7 @@ class SunsetDB(Database):
     
     def copyParentIndividualSequence(self, parent_individual_sequence=None, \
         parent_individual_sequence_id=None,\
-        subFolder='individual_sequence', quality_score_format='Standard', filtered=1,\
+        subFolder='individual_sequence', quality_score_format='Standard', filtered=1,
         data_dir=None):
         """
         call getIndividualSequence to construct individual_sequence,
@@ -3193,7 +3212,8 @@ class SunsetDB(Database):
             data_dir=data_dir, subFolder=subFolder)
         return individual_sequence
     
-    def copyParentIndividualSequenceFile(self, parent_individual_sequence_file=None, 
+    def copyParentIndividualSequenceFile(self, \
+        parent_individual_sequence_file=None, 
         parent_individual_sequence_file_id=None,\
         individual_sequence_id=None,\
         quality_score_format='Standard', filtered=1):
@@ -3204,11 +3224,13 @@ class SunsetDB(Database):
         """
         if parent_individual_sequence_file is None:
             if parent_individual_sequence_file_id is not None:
-                parent_individual_sequence_file = self.queryTable(IndividualSequenceFile).\
+                parent_individual_sequence_file = self.queryTable(
+                    IndividualSequenceFile).\
                     get(parent_individual_sequence_file_id)
             else:
-                sys.stderr.write("Warning: parent individual_sequence_id is None. "
-                    "No IndividualSequenceFile instance to be created.\n")
+                logging.warn("copyParentIndividualSequenceFile(): "
+                    "The parent individual_sequence_id is None. "
+                    "No IndividualSequenceFile instance to be created.")
                 return None
         
         parent = parent_individual_sequence_file
@@ -3218,20 +3240,23 @@ class SunsetDB(Database):
             library=parent.library, mate_id=parent.mate_id, \
             split_order=parent.split_order, format=parent.format,\
             filtered=filtered, parent_individual_sequence_file_id=parent.id, \
-            individual_sequence_file_raw_id=parent.individual_sequence_file_raw_id,\
+            individual_sequence_file_raw_id=\
+                parent.individual_sequence_file_raw_id,\
             quality_score_format=quality_score_format)
         return db_entry
     
-    def copyParentIndividualAlignment(self, parent_individual_alignment=None, \
-        parent_individual_alignment_id=None, mask_genotype_method=None, \
-        mask_genotype_method_id=None, data_dir=None, local_realigned=0, read_group=None,\
+    def copyParentIndividualAlignment(self, parent_individual_alignment=None,
+        parent_individual_alignment_id=None, mask_genotype_method=None,
+        mask_genotype_method_id=None, data_dir=None, local_realigned=0,
+        read_group=None,
         reduce_reads=None):
         """
         Examples:
             in AlignmentReduceReadsWorkflow.py
             new_individual_alignment = self.db.copyParentIndividualAlignment(
                 parent_individual_alignment_id=individual_alignment.id,\
-                data_dir=self.data_dir, local_realigned=individual_alignment.local_realigned,\
+                data_dir=self.data_dir,
+                local_realigned=individual_alignment.local_realigned,\
                 reduce_reads=1)
         
         2013.04.11 added argument reduce_reads
@@ -3240,10 +3265,11 @@ class SunsetDB(Database):
         2012.7.28
         """
         if parent_individual_alignment is None and parent_individual_alignment_id:
-            parent_individual_alignment = self.queryTable(IndividualAlignment).get(
-                parent_individual_alignment_id)
+            parent_individual_alignment = self.queryTable(IndividualAlignment).\
+                get(parent_individual_alignment_id)
         if mask_genotype_method is None and mask_genotype_method_id:
-            mask_genotype_method = self.queryTable(GenotypeMethod).get(mask_genotype_method_id)
+            mask_genotype_method = self.queryTable(GenotypeMethod).\
+                get(mask_genotype_method_id)
         
         individual_sequence = parent_individual_alignment.individual_sequence
         ref_sequence = parent_individual_alignment.ref_sequence
@@ -3251,18 +3277,21 @@ class SunsetDB(Database):
         individual_alignment = self.getAlignment(
             individual_code=individual_sequence.individual.code, \
             individual_sequence_id=individual_sequence.id,\
-            path_to_original_alignment=None, sequencer_id=individual_sequence.sequencer_id, \
+            path_to_original_alignment=None,
+            sequencer_id=individual_sequence.sequencer_id,
             sequence_type_id=individual_sequence.sequence_type_id, 
             sequence_format=individual_sequence.format, \
             ref_individual_sequence_id=ref_sequence.id, \
             alignment_method_name=alignment_method.short_name, 
             alignment_format=parent_individual_alignment.format,\
-            individual_sequence_filtered=individual_sequence.filtered, read_group_added=1,
-            data_dir=data_dir, outdated_index=0, 
+            individual_sequence_filtered=individual_sequence.filtered,
+            read_group_added=1, data_dir=data_dir, outdated_index=0, 
             mask_genotype_method_id=getattr(mask_genotype_method, 'id', None),\
             parent_individual_alignment_id=parent_individual_alignment.id,\
-            individual_sequence_file_raw_id=parent_individual_alignment.individual_sequence_file_raw_id,\
-            local_realigned=local_realigned, read_group=read_group, reduce_reads=reduce_reads)
+            individual_sequence_file_raw_id=\
+                parent_individual_alignment.individual_sequence_file_raw_id,
+            local_realigned=local_realigned, read_group=read_group,
+            reduce_reads=reduce_reads)
             #read-group addition is part of pipeline
         #if not individual_alignment.path:
         #	individual_alignment.path = individual_alignment.constructRelativePath()
@@ -3303,9 +3332,11 @@ class SunsetDB(Database):
                     file_size = utils.getFileOrFolderSize(path)
                 elif original_path and os.path.isfile(original_path):
                     file_size = utils.getFileOrFolderSize(path)
-            db_entry = IndividualSequenceFileRaw(individual_sequence_id=individual_sequence_id, 
+            db_entry = IndividualSequenceFileRaw(
+                individual_sequence_id=individual_sequence_id, 
                 library=library, md5sum=md5sum, \
-                path=path, mate_id=mate_id, file_size=file_size, original_path=original_path)
+                path=path, mate_id=mate_id, file_size=file_size,
+                original_path=original_path)
             self.session.add(db_entry)
             self.session.flush()
         return db_entry
@@ -3328,17 +3359,19 @@ class SunsetDB(Database):
             original_sequence_filepath))
         if not md5sum:
             md5sum = utils.get_md5sum(original_sequence_filepath)
-        db_entry = self.queryTable(IndividualSequenceFileRaw).filter_by(md5sum=md5sum).first()
+        db_entry = self.queryTable(IndividualSequenceFileRaw).\
+            filter_by(md5sum=md5sum).first()
         if db_entry:
-            logging.warn("Another file %s with the identical md5sum %s (library=%s) as "
-                "this file %s is already in db."%\
-                (db_entry.path, md5sum, library, original_sequence_filepath))
+            logging.warn(f"Another file {db_entry.path} with the identical "
+                f"md5sum {md5sum} (library={library}) as "
+                f"this file {original_sequence_filepath} is already in db.")
         else:
             file_size = utils.getFileOrFolderSize(original_sequence_filepath)
             db_entry = self.getIndividualSequenceFileRaw(
                 individual_sequence_id=individual_sequence_id,
                 library=library, md5sum=md5sum,
-                original_path=original_sequence_filepath, mate_id=mate_id, file_size=file_size)
+                original_path=original_sequence_filepath, mate_id=mate_id,
+                file_size=file_size)
         mate_id2split_order_ls = {}
         for individual_sequence_file in db_entry.individual_sequence_file_ls:
             mate_id = individual_sequence_file.mate_id
@@ -3347,12 +3380,14 @@ class SunsetDB(Database):
                 mate_id = 1
             if mate_id not in mate_id2split_order_ls:
                 mate_id2split_order_ls[mate_id] = []
-            mate_id2split_order_ls[mate_id].append(individual_sequence_file.split_order)
+            mate_id2split_order_ls[mate_id].append(
+                individual_sequence_file.split_order)
         if len(mate_id2split_order_ls)>2:
-            logging.error(f"Something WRONG. DB sequence files spawned from file {db_entry.path} "
-                f"(md5sum={md5sum}) are from {len(mate_id2split_order_ls)}(>2) mates. "
+            logging.error(f"Something WRONG. DB sequence files spawned from "
+                f"file {db_entry.path} (md5sum={md5sum}) are from "
+                f"{len(mate_id2split_order_ls)}(>2) mates. "
                 "Unless this bam/fastq file contains reads from >2 mates, "
-                "reads from this file should be stored in db already.")
+                "Reads from this file should be stored in db already.")
             sys.exit(4)
         return db_entry
     
@@ -3376,7 +3411,8 @@ class SunsetDB(Database):
             filter_by(individual_sequence_file_raw_id=individual_sequence_file_raw_id)
         db_entry = query.first()
         if not db_entry:
-            db_entry = IndividualSequenceFile(individual_sequence_id=individual_sequence_id,\
+            db_entry = IndividualSequenceFile(
+                individual_sequence_id=individual_sequence_id,\
                 library=library, mate_id=mate_id, split_order=split_order,\
                 format=format, filtered=filtered, \
                 parent_individual_sequence_file_id=parent_individual_sequence_file_id,\
@@ -3391,7 +3427,8 @@ class SunsetDB(Database):
         2011-5-5
             fetch (and add) a RelationshipType entry
         """
-        query = self.queryTable(RelationshipType).filter_by(short_name=relationship_type_name)
+        query = self.queryTable(RelationshipType).\
+            filter_by(short_name=relationship_type_name)
         db_entry = query.first()
         if not db_entry:
             db_entry = RelationshipType(short_name=relationship_type_name)
@@ -3399,14 +3436,16 @@ class SunsetDB(Database):
             self.session.flush()
         return db_entry
     
-    def checkSpecificRelationOfIndividual2(self, individual2=None, relationship_type_name=None):
+    def checkSpecificRelationOfIndividual2(self, individual2=None, \
+        relationship_type_name=None):
         """
         2012.1.23
             check to see if specific relationship of individual2 exists in Ind2Ind already.
             This is to detect errors where one individual has >1 father/mother in the database.
         """
         relationship_type = self.getRelationshipType(relationship_type_name)
-        query = self.queryTable(Ind2Ind).filter_by(individual2_id=individual2.id).\
+        query = self.queryTable(Ind2Ind).\
+            filter_by(individual2_id=individual2.id).\
             filter_by(relationship_type_id=relationship_type.id)
         db_entry = query.first()
         if not db_entry:
@@ -3414,13 +3453,15 @@ class SunsetDB(Database):
         else:
             return db_entry
     
-    def checkIndividualAlignmentConsensusSequence(self, individual_alignment_id=None, 
-        minDP=None, maxDP=None, minBaseQ=None, minMapQ=None,\
-        minRMSMapQ=None, minDistanceToIndel=None, no_of_chromosomes=None, **keywords):
+    def checkIndividualAlignmentConsensusSequence(self,
+        individual_alignment_id=None,
+        minDP=None, maxDP=None, minBaseQ=None, minMapQ=None,
+        minRMSMapQ=None, minDistanceToIndel=None, no_of_chromosomes=None,
+        **keywords):
         """
-        2013.2.8 check whether one IndividualAlignmentConsensusSequence is in db or not.
+        2013.2.8
+        check whether one IndividualAlignmentConsensusSequence is in db or not.
         """
-        
         query = self.queryTable(IndividualAlignmentConsensusSequence).\
             filter_by(individual_alignment_id=individual_alignment_id).\
             filter_by(minDP=minDP).filter_by(maxDP=maxDP)
@@ -3441,7 +3482,8 @@ class SunsetDB(Database):
         else:
             return None
     
-    def getIndividualAlignmentConsensusSequence(self, individual_alignment_id=None,
+    def getIndividualAlignmentConsensusSequence(self,
+        individual_alignment_id=None,
         format=None, minDP=None, maxDP=None, minBaseQ=None, \
         minMapQ=None, minRMSMapQ=None, minDistanceToIndel=None, 
         no_of_chromosomes=None,no_of_bases=None, \
@@ -3468,40 +3510,46 @@ class SunsetDB(Database):
             self.session.add(db_entry)
             self.session.flush()
             if db_entry.path and db_entry.file_size is None:
-                self.updateDBEntryPathFileSize(db_entry=db_entry, data_dir=data_dir)
+                self.updateDBEntryPathFileSize(db_entry=db_entry,
+                    data_dir=data_dir)
             if db_entry.path and db_entry.md5sum is None:
                 self.updateDBEntryMD5SUM(db_entry=db_entry, data_dir=data_dir)
         return db_entry
     
-    def getInd2Ind(self, individual1=None, individual2=None, relationship_type_name=None):
+    def getInd2Ind(self, individual1=None, individual2=None, 
+        relationship_type_name=None):
         """
         2011-5-5
             fetch (and add) a Ind2Ind entry
         """
         relationship_type = self.getRelationshipType(relationship_type_name)
-        query = self.queryTable(Ind2Ind).filter_by(individual1_id=individual1.id).\
+        query = self.queryTable(Ind2Ind).\
+            filter_by(individual1_id=individual1.id).\
             filter_by(individual2_id=individual2.id).\
             filter_by(relationship_type_id=relationship_type.id)
         db_entry = query.first()
         if not db_entry:
-            db_entry = Ind2Ind(individual1=individual1, individual2=individual2, \
+            db_entry = Ind2Ind(individual1=individual1, individual2=individual2,
                 relationship_type=relationship_type)
             self.session.add(db_entry)
             self.session.flush()
         return db_entry
     
-    def checkAlignmentDepthIntervalMethod(self, db_entry_id=None, short_name=None, \
+    def checkAlignmentDepthIntervalMethod(self, db_entry_id=None,
+        short_name=None,
         ref_ind_seq_id=None, parent_id=None, \
         min_segment_length=None,**keywords):
         """
         2013.09.02
         """
         if db_entry_id:
-            db_entry = self.checkIfEntryInTable(TableClass=AlignmentDepthIntervalMethod, id=db_entry_id)
+            db_entry = self.checkIfEntryInTable(
+                TableClass=AlignmentDepthIntervalMethod, id=db_entry_id)
         else:
             db_entry = None
         if not db_entry:
-            query = self.queryTable(AlignmentDepthIntervalMethod).filter_by(short_name=short_name)
+            query = self.queryTable(AlignmentDepthIntervalMethod).\
+                filter_by(short_name=short_name)
             if ref_ind_seq_id:
                 query = query.filter_by(ref_ind_seq_id=ref_ind_seq_id)
             if parent_id:
@@ -3514,17 +3562,18 @@ class SunsetDB(Database):
         else:
             return None
     
-    def getAlignmentDepthIntervalMethod(self, short_name=None, description=None, 
+    def getAlignmentDepthIntervalMethod(self, short_name=None, description=None,
         ref_ind_seq_id=None, individualAlignmentLs=None, 
         parent_db_entry=None, parent_id=None, \
-        no_of_alignments=None, no_of_intervals=None, sum_median_depth=None, sum_mean_depth=None,\
+        no_of_alignments=None, no_of_intervals=None,
+        sum_median_depth=None, sum_mean_depth=None,
         min_segment_length=None, data_dir=None):
         """
         2013.09.02 added min_segment_length
         examples:
-            alignmentDepthIntervalMethod = self.db_vervet.getAlignmentDepthIntervalMethod(
-                short_name="725VRCAlignmentDepthInterval", \
-                individualAlignmentLs=individualAlignmentLs)
+        alignmentDepthIntervalMethod = self.db_vervet.getAlignmentDepthIntervalMethod(
+            short_name="725VRCAlignmentDepthInterval", \
+            individualAlignmentLs=individualAlignmentLs)
         """
         if not short_name:
             sys.stderr.write("Error: short_name (%s) is empty.\n"%(short_name))
@@ -3537,22 +3586,27 @@ class SunsetDB(Database):
         if parent_db_entry and parent_id is None:
             parent_id = parent_db_entry.id
         
-        db_entry = self.checkAlignmentDepthIntervalMethod(db_entry_id=None, short_name=short_name, \
-                    ref_ind_seq_id=ref_ind_seq_id, parent_id=parent_id, \
-                    min_segment_length=min_segment_length)
+        db_entry = self.checkAlignmentDepthIntervalMethod(db_entry_id=None,\
+            short_name=short_name, \
+            ref_ind_seq_id=ref_ind_seq_id, parent_id=parent_id, \
+            min_segment_length=min_segment_length)
         if not db_entry:
             if individualAlignmentLs:
                 if no_of_alignments is None:
                     no_of_alignments = len(individualAlignmentLs)
                 if sum_median_depth is None:
-                    sum_median_depth = sum([db_entry.median_depth for db_entry in individualAlignmentLs])
+                    sum_median_depth = sum([db_entry.median_depth for db_entry \
+                        in individualAlignmentLs])
                 if sum_mean_depth is None:
-                    sum_mean_depth = sum([db_entry.mean_depth for db_entry in individualAlignmentLs])
+                    sum_mean_depth = sum([db_entry.mean_depth for db_entry in \
+                        individualAlignmentLs])
             
             db_entry = AlignmentDepthIntervalMethod(short_name=short_name, 
-                description=description, ref_ind_seq_id=ref_ind_seq_id,\
-                parent_id=parent_id, no_of_alignments=no_of_alignments, no_of_intervals=no_of_intervals, \
-                sum_median_depth=sum_median_depth, sum_mean_depth=sum_mean_depth, 
+                description=description, ref_ind_seq_id=ref_ind_seq_id,
+                parent_id=parent_id, no_of_alignments=no_of_alignments,
+                no_of_intervals=no_of_intervals,
+                sum_median_depth=sum_median_depth,
+                sum_mean_depth=sum_mean_depth,
                 min_segment_length=min_segment_length)
             db_entry.individual_alignment_ls = individualAlignmentLs
             self.session.add(db_entry)
@@ -3563,9 +3617,11 @@ class SunsetDB(Database):
             db_entry.path = db_entry.constructRelativePath()
             folderAbsPath = os.path.join(data_dir, db_entry.path)
             
-            if not os.path.isdir(folderAbsPath):	#the upper directory has to be created at this moment.
+            if not os.path.isdir(folderAbsPath):
+                #the upper directory has to be created at this moment.
                 commandline = 'mkdir -p %s'%(folderAbsPath)
-                return_data = runLocalCommand(commandline, report_stderr=True, report_stdout=True)
+                return_data = runLocalCommand(commandline, report_stderr=True,\
+                    report_stdout=True)
             self.session.add(db_entry)
             self.session.flush()
         return db_entry
@@ -3578,12 +3634,14 @@ class SunsetDB(Database):
         2013.08.23
         """
         if db_entry_id:
-            db_entry = self.checkIfEntryInTable(TableClass=AlignmentDepthIntervalFile, id=db_entry_id)
+            db_entry = self.checkIfEntryInTable(
+                TableClass=AlignmentDepthIntervalFile, id=db_entry_id)
         else:
             db_entry = None
         if not db_entry:
             query = self.queryTable(AlignmentDepthIntervalFile).\
-                filter_by(alignment_depth_interval_method_id=alignment_depth_interval_method_id)
+                filter_by(
+                    alignment_depth_interval_method_id=alignment_depth_interval_method_id)
             if format:
                 query = query.filter_by(format=format)
             if no_of_chromosomes:
@@ -3600,11 +3658,12 @@ class SunsetDB(Database):
     def getAlignmentDepthIntervalFile(self, alignment_depth_interval_method=None, 
         alignment_depth_interval_method_id=None,  \
         path=None, file_size=None, \
-        chromosome=None, chromosome_size=None, no_of_chromosomes=None, no_of_intervals=None,\
-        format="tsv",\
+        chromosome=None, chromosome_size=None, no_of_chromosomes=None,
+        no_of_intervals=None, format="tsv",\
         mean_interval_value=None, median_interval_value=None, \
         min_interval_value=None, max_interval_value=None, \
-        min_interval_length=None, max_interval_length=None, median_interval_length=None,\
+        min_interval_length=None, max_interval_length=None,
+        median_interval_length=None,\
         md5sum=None, original_path=None, data_dir=None):
         """
         2013.08.30 added min_interval_length, max_interval_length, median_interval_length
@@ -3624,14 +3683,17 @@ class SunsetDB(Database):
         
         if not db_entry:
             db_entry = AlignmentDepthIntervalFile(path=path, \
-                alignment_depth_interval_method_id=alignment_depth_interval_method_id, \
+                alignment_depth_interval_method_id=alignment_depth_interval_method_id,
                 chromosome=chromosome, \
                 chromosome_size=chromosome_size, no_of_chromosomes=no_of_chromosomes, 
                 no_of_intervals=no_of_intervals,\
                 file_size=file_size, format=format,\
-                mean_interval_value=mean_interval_value, median_interval_value=median_interval_value, \
-                min_interval_value=min_interval_value, max_interval_value=max_interval_value,\
-                min_interval_length=min_interval_length, max_interval_length=max_interval_length, \
+                mean_interval_value=mean_interval_value,
+                median_interval_value=median_interval_value, \
+                min_interval_value=min_interval_value,
+                max_interval_value=max_interval_value,\
+                min_interval_length=min_interval_length,
+                max_interval_length=max_interval_length, \
                 median_interval_length=median_interval_length,\
                 md5sum=md5sum, original_path=original_path)
             if not data_dir:
@@ -3647,18 +3709,21 @@ class SunsetDB(Database):
             if not os.path.isdir(folderAbsPath):
                 #the upper directory has to be created at this moment.
                 commandline = 'mkdir -p %s'%(folderAbsPath)
-                return_data = runLocalCommand(commandline, report_stderr=True, report_stdout=True)
+                return_data = runLocalCommand(commandline, report_stderr=True,
+                    report_stdout=True)
         return db_entry
     
-    def getGenotypeMethod(self, short_name=None, description=None, ref_ind_seq_id=None, \
-        individualAlignmentLs=None, parent_genotype_method=None, parent_id=None, \
+    def getGenotypeMethod(self, short_name=None, description=None,
+        ref_ind_seq_id=None, individualAlignmentLs=None,
+        parent_genotype_method=None, parent_id=None,
         min_depth=None, max_depth=None, max_missing_rate=None, min_maf=None,\
         no_of_individuals=None, no_of_loci=None, is_phased=0, data_dir=None, \
         subFolder='genotype_file'):
         """
         examples:
-        genotypeMethod = self.db_vervet.getGenotypeMethod(short_name=self.genotypeMethodShortName, \
-                                                individualAlignmentLs=individualAlignmentLs)
+        genotypeMethod = self.db_vervet.getGenotypeMethod(
+            short_name=self.genotypeMethodShortName, \
+            individualAlignmentLs=individualAlignmentLs)
         """
         if not short_name:
             sys.stderr.write("Error: short_name (%s) is empty.\n"%(short_name))
@@ -3681,11 +3746,13 @@ class SunsetDB(Database):
         
         db_entry = query.first()
         if not db_entry:
-            db_entry = GenotypeMethod(short_name=short_name, description=description, 
+            db_entry = GenotypeMethod(
+                short_name=short_name, description=description,
                 ref_ind_seq_id=ref_ind_seq_id,\
-                parent_id=parent_id, min_depth=min_depth, max_depth=max_depth, \
+                parent_id=parent_id, min_depth=min_depth, max_depth=max_depth,
                 max_missing_rate=max_missing_rate, min_maf=min_maf,\
-                no_of_individuals=no_of_individuals, no_of_loci=no_of_loci, is_phased=is_phased)
+                no_of_individuals=no_of_individuals, no_of_loci=no_of_loci,
+                is_phased=is_phased)
             db_entry.individual_alignment_ls = individualAlignmentLs
             self.session.add(db_entry)
             self.session.flush()
@@ -3698,15 +3765,17 @@ class SunsetDB(Database):
             if not os.path.isdir(folderAbsPath):
                 #the upper directory has to be created at this moment.
                 commandline = 'mkdir -p %s'%(folderAbsPath)
-                return_data = runLocalCommand(commandline, report_stderr=True, report_stdout=True)
+                return_data = runLocalCommand(commandline, report_stderr=True,
+                    report_stdout=True)
             self.session.add(db_entry)
             self.session.flush()
         return db_entry
         
-    def getGenotypeFile(self, genotype_method=None, genotype_method_id=None, 
+    def getGenotypeFile(self, genotype_method=None, genotype_method_id=None,
         chromosome=None, format=None, path=None, file_size=None, \
-        no_of_individuals=None, no_of_loci=None, md5sum=None, no_of_chromosomes=1,
-        original_path=None, data_dir=None, subFolder='genotype_file',):
+        no_of_individuals=None, no_of_loci=None, md5sum=None,
+        no_of_chromosomes=1,
+        original_path=None, data_dir=None, subFolder='genotype_file'):
         """
         2012.8.30
             add argument no_of_chromosomes
@@ -3715,11 +3784,14 @@ class SunsetDB(Database):
         if genotype_method_id is None and genotype_method.id:
             genotype_method_id = genotype_method.id
             
-        query = self.queryTable(GenotypeFile).filter_by(genotype_method_id=genotype_method_id)
+        query = self.queryTable(GenotypeFile).filter_by(\
+            genotype_method_id=genotype_method_id)
 
         if format:
             query = query.filter_by(format=format)
-        if md5sum:	#2012.8.6 if format is not given, then use md5sum as the sole unique identifier 
+        if md5sum:
+            #2012.8.6 if format is not given, then use md5sum as the sole
+            # unique identifier 
             query = query.filter_by(md5sum=md5sum)
         if no_of_chromosomes:
             query = query.filter_by(no_of_chromosomes=no_of_chromosomes)
@@ -3732,10 +3804,11 @@ class SunsetDB(Database):
         
         if not db_entry:
             
-            db_entry = GenotypeFile(format=format, path=path, \
-                no_of_individuals=no_of_individuals, no_of_loci=no_of_loci, \
-                chromosome=chromosome, md5sum=md5sum, file_size=file_size, \
-                original_path=original_path, genotype_method_id=genotype_method_id, 
+            db_entry = GenotypeFile(format=format, path=path,
+                no_of_individuals=no_of_individuals, no_of_loci=no_of_loci,
+                chromosome=chromosome, md5sum=md5sum, file_size=file_size,
+                original_path=original_path,
+                genotype_method_id=genotype_method_id, 
                 no_of_chromosomes=no_of_chromosomes)
             if not data_dir:
                 data_dir = self.data_dir
@@ -3745,11 +3818,14 @@ class SunsetDB(Database):
             self.session.flush()
             
             folderAbsPath = os.path.join(data_dir, \
-                db_entry.genotype_method.constructRelativePath(subFolder=subFolder))
+                db_entry.genotype_method.constructRelativePath(
+                    subFolder=subFolder))
             
-            if not os.path.isdir(folderAbsPath):	#the upper directory has to be created at this moment.
+            if not os.path.isdir(folderAbsPath):
+                #the upper directory has to be created at this moment.
                 commandline = 'mkdir -p %s'%(folderAbsPath)
-                return_data = runLocalCommand(commandline, report_stderr=True, report_stdout=True)
+                return_data = runLocalCommand(commandline, report_stderr=True,
+                    report_stdout=True)
             
         return db_entry
     
@@ -3770,8 +3846,10 @@ class SunsetDB(Database):
             locus_type_id = locus_type.id
         
         query = self.queryTable(Locus).filter_by(chromosome=chr).\
-            filter_by(start=start).filter_by(stop=stop).filter_by(ref_seq_id=ref_seq_id).\
-            filter_by(alt_seq_id=alt_seq_id).filter_by(locus_type_id=locus_type_id).\
+            filter_by(start=start).filter_by(stop=stop).\
+            filter_by(ref_seq_id=ref_seq_id).\
+            filter_by(alt_seq_id=alt_seq_id).\
+            filter_by(locus_type_id=locus_type_id).\
             filter_by(ref_ind_seq_id=ref_ind_seq_id)
                     
         db_entry = query.first()
@@ -3809,10 +3887,13 @@ class SunsetDB(Database):
     
     def getLocusAnnotation(self, locus_id=None, locus_context_id=None, \
         locus_context=None, gene_id=None, gene_commentary_id=None, \
-        gene_segment_id=None, locus_annotation_type =None, locus_annotation_type_id=None,\
-        which_exon_or_intron = None, pos_within_codon=None, which_codon=None, \
-        label=None, utr_number=None, cds_number=None, intron_number=None, exon_number=None, 
-        overlap_length=None, overlap_fraction_in_locus=None, overlap_fraction_in_gene=None,\
+        gene_segment_id=None, locus_annotation_type =None,
+        locus_annotation_type_id=None,\
+        which_exon_or_intron = None, pos_within_codon=None, which_codon=None,
+        label=None, utr_number=None, cds_number=None, intron_number=None,
+        exon_number=None, 
+        overlap_length=None, overlap_fraction_in_locus=None,
+        overlap_fraction_in_gene=None,\
         comment=None):
         """
         2012.5.14
@@ -3822,7 +3903,8 @@ class SunsetDB(Database):
         if locus_annotation_type_id is None and locus_annotation_type:
             locus_annotation_type_id = locus_annotation_type.id
         locus_annotation = self.queryTable(LocusAnnotation).\
-            filter_by(locus_id=locus_id).filter_by(locus_context_id=locus_context.id).\
+            filter_by(locus_id=locus_id).\
+            filter_by(locus_context_id=locus_context.id).\
             filter_by(gene_id=gene_id).\
             filter_by(gene_commentary_id= gene_commentary_id).\
             filter_by(gene_segment_id= gene_segment_id).\
@@ -3834,7 +3916,8 @@ class SunsetDB(Database):
                 gene_segment_id=gene_segment_id, \
                 locus_annotation_type=locus_annotation_type, \
                 locus_annotation_type_id=locus_annotation_type_id,\
-                which_exon_or_intron=which_exon_or_intron, pos_within_codon=pos_within_codon, \
+                which_exon_or_intron=which_exon_or_intron,
+                pos_within_codon=pos_within_codon, \
                 which_codon=which_codon, label=label, \
                 utr_number = utr_number, cds_number = cds_number, \
                 intron_number = intron_number, exon_number = exon_number,\
@@ -3852,7 +3935,8 @@ class SunsetDB(Database):
         ty = self.queryTable(LocusAnnotation).\
             filter_by(short_name=locus_annotation_type_short_name).first()
         if not ty:
-            ty = LocusAnnotationType(short_name=locus_annotation_type_short_name)
+            ty = LocusAnnotationType(
+                short_name=locus_annotation_type_short_name)
             self.session.add(ty)
             self.session.flush()
         return ty
@@ -3862,22 +3946,28 @@ class SunsetDB(Database):
         2013.3.13
         
         """
-        db_entry = self.queryTable(Sequencer).filter_by(short_name=short_name).first()
+        db_entry = self.queryTable(Sequencer).\
+            filter_by(short_name=short_name).first()
         if not db_entry and short_name is not None:
-            db_entry = Sequencer(short_name=short_name, seq_center_id=seq_center_id)
+            db_entry = Sequencer(short_name=short_name, \
+                seq_center_id=seq_center_id)
             self.session.add(db_entry)
             self.session.flush()
         return db_entry
     
-    def getSequenceType(self, short_name=None, id=None, read_length_mean=None, paired_end=0, \
-        insert_size_mean=None, insert_size_variance=None, per_base_error_rate=None, **keywords):
+    def getSequenceType(self, short_name=None, id=None, read_length_mean=None,
+        paired_end=0, insert_size_mean=None, insert_size_variance=None,
+        per_base_error_rate=None, **keywords):
         """
         """
-        db_entry = self.checkIfEntryInTable(TableClass=SequenceType, short_name=short_name, id=id)
+        db_entry = self.checkIfEntryInTable(TableClass=SequenceType,
+            short_name=short_name, id=id)
         if not db_entry:
-            db_entry = SequenceType(short_name=short_name, read_length_mean=read_length_mean,\
-                paired_end=paired_end, insert_size_mean=insert_size_mean, \
-                insert_size_variance=insert_size_variance, per_base_error_rate=per_base_error_rate)
+            db_entry = SequenceType(short_name=short_name,
+                read_length_mean=read_length_mean,\
+                paired_end=paired_end, insert_size_mean=insert_size_mean,
+                insert_size_variance=insert_size_variance,
+                per_base_error_rate=per_base_error_rate)
             self.session.add(db_entry)
             self.session.flush()
         return db_entry
@@ -3885,7 +3975,8 @@ class SunsetDB(Database):
     def getAlleleSequence(self, sequence=None, comment=None):
         """
         """
-        db_entry = self.queryTable(AlleleSequence).filter_by(sequence=sequence).first()
+        db_entry = self.queryTable(AlleleSequence).\
+            filter_by(sequence=sequence).first()
         if not db_entry:
             db_entry = AlleleSequence(sequence=sequence, comment=comment)
             self.session.add(db_entry)
@@ -3896,9 +3987,11 @@ class SunsetDB(Database):
         """
         2012.7.5
         """
-        db_entry = self.queryTable(SequenceBatch).filter_by(short_name=short_name).first()
+        db_entry = self.queryTable(SequenceBatch).\
+            filter_by(short_name=short_name).first()
         if not db_entry:
-            db_entry = SequenceBatch(short_name=short_name, description=description)
+            db_entry = SequenceBatch(short_name=short_name, \
+                description=description)
             self.session.add(db_entry)
             self.session.flush()
         return db_entry
@@ -3954,7 +4047,8 @@ class SunsetDB(Database):
     def getStudy(self, short_name: str=None, description: str=None):
         """
         """
-        db_entry = self.queryTable(Study).filter_by(short_name=short_name).first()
+        db_entry = self.queryTable(Study).\
+            filter_by(short_name=short_name).first()
         if not db_entry:
             db_entry = Study(short_name=short_name, description=description)
             self.session.add(db_entry)
@@ -3973,7 +4067,7 @@ class SunsetDB(Database):
             db_entry = self.queryTable(Condition).\
                 filter_by(short_name=short_name).first()
         if not db_entry and (db_entry_id or short_name):
-            db_entry = Condition(id=db_entry_id, short_name=short_name, \
+            db_entry = Condition(id=db_entry_id, short_name=short_name,
                 description=description)
             self.session.add(db_entry)
             self.session.flush()
@@ -3997,13 +4091,14 @@ class SunsetDB(Database):
             self.session.flush()
         return db_entry
     
-    def getCountry(self, country_name=None, capital=None, abbr=None, latitude=None, \
-        longitude=None):
+    def getCountry(self, country_name=None, capital=None, abbr=None,
+        latitude=None, longitude=None):
         """
         """
-        db_entry = self.queryTable(Country).filter_by(name=country_name).first()
+        db_entry = self.queryTable(Country).\
+            filter_by(name=country_name).first()
         if not db_entry:
-            db_entry = Country(name=country_name, capital=capital, abbr=abbr, \
+            db_entry = Country(name=country_name, capital=capital, abbr=abbr,
                 latitude=latitude, longitude=longitude)
             self.session.add(db_entry)
             self.session.flush()
@@ -4018,26 +4113,29 @@ class SunsetDB(Database):
             query = query.filter_by(username=username)
         db_entry = query.first()
         if not db_entry:
-            db_entry = User(realname=name, username=username, _password="123456")
+            db_entry = User(realname=name, username=username,\
+                _password="123456")
             self.session.add(db_entry)
             self.session.flush()
         return db_entry
     
-    def getPhenotype(self, phenotype_name=None, value=None, replicate=None, \
+    def getPhenotype(self, phenotype_name=None, value=None, replicate=None,
         individual_id=None, comment=None, collector_name=None):
         """
         2011-4-28
         """
-        phenotype_method = self.getPhenotypeMethod(phenotype_name=phenotype_name, 
+        phenotype_method = self.getPhenotypeMethod(
+            phenotype_name=phenotype_name, 
             collector_name=collector_name)
         if replicate is None:
             replicate = 1
         db_entry = self.queryTable(Phenotype).\
-            filter_by(phenotype_method_id=phenotype_method.id).filter_by(individual_id=individual_id).\
+            filter_by(phenotype_method_id=phenotype_method.id).\
+            filter_by(individual_id=individual_id).\
             filter_by(replicate=replicate).first()
         if not db_entry:
-            db_entry = Phenotype(phenotype_method=phenotype_method, value=value, \
-                replicate=replicate,\
+            db_entry = Phenotype(phenotype_method=phenotype_method,
+                value=value, replicate=replicate,
                 individual_id=individual_id, comment=comment)
             self.session.add(db_entry)
             self.session.flush()
@@ -4048,7 +4146,8 @@ class SunsetDB(Database):
         """
         2011-4-28
         """
-        db_entry = self.queryTable(PhenotypeMethod).filter_by(short_name=phenotype_name).first()
+        db_entry = self.queryTable(PhenotypeMethod).\
+            filter_by(short_name=phenotype_name).first()
         if not db_entry:
             if collector_name:
                 collector = self.getUser(name=collector_name)
@@ -4059,13 +4158,14 @@ class SunsetDB(Database):
             self.session.flush()
         return db_entry
     
-    def getIndividualSequenceID2FilePairLs(self, individualSequenceIDList=None, \
+    def getIndividualSequenceID2FilePairLs(self, individualSequenceIDList=None,
         data_dir=None, needPair=True, checkOldPath=False):
         """
         2013.3.14 replace SR, PE with individual_sequence.sequence_type
         2012.2.10
         add argument checkOldPath.
-            True: find files in IndividualSequence.path[:-6], (=path without the trailing '_split').
+            True: find files in IndividualSequence.path[:-6],
+                (=path without the trailing '_split').
                 This is the old format.
             False: find files in IndividualSequence.path 
         2011-8-30
@@ -4080,7 +4180,8 @@ class SunsetDB(Database):
         if not data_dir:
             data_dir = self.data_dir
         for individualSequenceID in individualSequenceIDList:
-            individual_sequence = self.queryTable(IndividualSequence).get(individualSequenceID)
+            individual_sequence = self.queryTable(IndividualSequence).\
+                get(individualSequenceID)
             if individual_sequence and individual_sequence.path:
                 if checkOldPath:
                     path = individual_sequence.path[:-6]
@@ -4091,10 +4192,13 @@ class SunsetDB(Database):
                     individualSequenceID2FilePairLs[individual_sequence.id] = []
                 if os.path.isfile(abs_path):
                     fileRecord = [path, individual_sequence.format, \
-                        individual_sequence.sequence_type, individual_sequence.sequencer]
+                        individual_sequence.sequence_type,\
+                        individual_sequence.sequencer]
                         #"SR" means it's single-end
-                    individualSequenceID2FilePairLs[individual_sequence.id].append([fileRecord])
-                elif os.path.isdir(abs_path):	#it's a folder, sometimes it's nothing there
+                    individualSequenceID2FilePairLs[individual_sequence.id].\
+                        append([fileRecord])
+                elif os.path.isdir(abs_path):
+                    #it's a folder, sometimes it's nothing there
                     if individual_sequence.sequence_type.paired_end==1:
                         isPE = True
                     else:
@@ -4102,29 +4206,35 @@ class SunsetDB(Database):
                     pairedEndPrefix2FileLs = ngs.getPEInputFiles(abs_path, isPE=isPE)
                     for pairedEndPrefix, fileLs in pairedEndPrefix2FileLs.items():
                         if isPE and len(fileLs)==2 and fileLs[0] and fileLs[1]:	#PE
-                            filename = os.path.join(path, fileLs[0])	#take one file only
+                            filename = os.path.join(path, fileLs[0])
+                            #take one file only
                             fileRecord = [filename, individual_sequence.format, \
-                                individual_sequence.sequence_type, individual_sequence.sequencer]
+                                individual_sequence.sequence_type, \
+                                individual_sequence.sequencer]
                             #"PE" means it's paired-end
-                            filename2 = os.path.join(path, fileLs[1])	#take one file only
+                            filename2 = os.path.join(path, fileLs[1])
+                            #take one file only
                             fileRecord2 = [filename2, individual_sequence.format, \
-                                individual_sequence.sequence_type, individual_sequence.sequencer]
+                                individual_sequence.sequence_type,\
+                                individual_sequence.sequencer]
                             #"PE" means it's paired-end
-                            individualSequenceID2FilePairLs[individual_sequence.id].append(
-                                [fileRecord, fileRecord2])	#"PE" means it's paired-end
+                            individualSequenceID2FilePairLs[individual_sequence.id].\
+                                append([fileRecord, fileRecord2])
                         else:
                             for filename in fileLs:	#usually should be only one file
                                 if filename:
                                     filename = os.path.join(path, filename)
                                     fileRecord = [filename, individual_sequence.format, \
-                                        individual_sequence.sequence_type, individual_sequence.sequencer]
+                                        individual_sequence.sequence_type, \
+                                        individual_sequence.sequencer]
                                     #"SR" means it's single-end
                                     individualSequenceID2FilePairLs[individual_sequence.id].\
                                         append([fileRecord])
-        sys.stderr.write("%s individual sequences. Done.\n"%(len(individualSequenceID2FilePairLs)))
+        sys.stderr.write("%s individual sequences. Done.\n"%(
+            len(individualSequenceID2FilePairLs)))
         return individualSequenceID2FilePairLs
     
-    def getISQ_ID2LibrarySplitOrder2FileLs(self, individualSequenceIDList=None, \
+    def getISQ_ID2LibrarySplitOrder2FileLs(self, individualSequenceIDList=None,
         data_dir=None, filtered=None, \
         ignoreEmptyReadFile=True, is_contaminated=0, outdated_index=0):
         """
@@ -4136,28 +4246,31 @@ class SunsetDB(Database):
             
         2012.2.10
             If for one (isq_id, librarySplitOrder), there is only one mate (single-end).
-                The isq_id2LibrarySplitOrder2FileLs only stores one file object (FileLs is of length 1).
+                The isq_id2LibrarySplitOrder2FileLs only stores one file object
+                 (FileLs is of length 1).
             Length of FileLs is commesurate with the number of ends.
         """
-        sys.stderr.write("Getting isq_id2LibrarySplitOrder2FileLs for %s isq entries ..."%(
-            len(individualSequenceIDList)))
+        logging.warn(f"Getting isq_id2LibrarySplitOrder2FileLs for "
+            f"{len(individualSequenceIDList)} isq entries ...")
         isq_id2LibrarySplitOrder2FileLs = {}
         if not data_dir:
             data_dir = self.data_dir
         counter = 0
         
         for individualSequenceID in individualSequenceIDList:
-            individual_sequence = self.queryTable(IndividualSequence).get(individualSequenceID)
+            individual_sequence = self.queryTable(IndividualSequence).\
+                get(individualSequenceID)
             if not individual_sequence:	#not present in db, ignore
                 continue
             if is_contaminated is not None:
                 if individual_sequence.is_contaminated!=is_contaminated:
-                    sys.stderr.write(" individual_sequence %s 's is_contaminated=%s (!=%s). ignore.\n"%\
-                        (individual_sequence.id, individual_sequence.is_contaminated, is_contaminated))
+                    logging.warn(f"Individual_sequence {individual_sequence.id}"
+                        f"is_contaminated={individual_sequence.is_contaminated}"
+                        f" (!={is_contaminated}). Ignore.")
                     continue
             if outdated_index is not None:
                 if individual_sequence.outdated_index!=outdated_index:
-                    sys.stderr.write(" individual_sequence %s 's outdated_index=%s (!=%s). ignore.\n"%\
+                    logging.warn(" individual_sequence %s 's outdated_index=%s (!=%s). ignore.\n"%\
                         (individual_sequence.id, individual_sequence.outdated_index, outdated_index))
                     continue
             for individual_sequence_file in individual_sequence.individual_sequence_file_ls:
@@ -4166,8 +4279,10 @@ class SunsetDB(Database):
                     #skip entries that don't matched the filtered argument
                     continue
                 if ignoreEmptyReadFile:	#2012.3.19	ignore empty read files.
-                    if individual_sequence_file.read_count is None:	#calculate it on the fly
-                        baseCountData = ngs.getReadBaseCount(path, onlyForEmptyCheck=True)
+                    if individual_sequence_file.read_count is None:
+                        #calculate it on the fly
+                        baseCountData = ngs.getReadBaseCount(path, \
+                            onlyForEmptyCheck=True)
                         read_count = baseCountData.read_count
                     else:
                         read_count = individual_sequence_file.read_count
@@ -4189,16 +4304,18 @@ class SunsetDB(Database):
                     for i in range(mate_id-len(LibrarySplitOrder2FileLs[key])):
                         #expand the list to match the number of mates
                         LibrarySplitOrder2FileLs[key].append(None)
-                isq_file_obj = PassingData(db_entry=individual_sequence_file, path=path)
+                isq_file_obj = PassingData(db_entry=individual_sequence_file, \
+                    path=path)
                 LibrarySplitOrder2FileLs[key][mate_id-1] = isq_file_obj
         
-        sys.stderr.write("%s individual sequence files from %s isq entries.\n"%(
+        logging.warn("%s individual sequence files from %s isq entries.\n"%(
             counter, len(isq_id2LibrarySplitOrder2FileLs)))
         return isq_id2LibrarySplitOrder2FileLs
     
     def filterIndividualSequenceList(self, individual_sequence_list=None, 
         min_coverage=None, max_coverage=None, individual_site_id=None, \
-        individual_site_id_set=None, individual_id_set=None, sequence_type_id_set=None,\
+        individual_site_id_set=None, individual_id_set=None,
+        sequence_type_id_set=None,\
         sequencer_id_set=None, sequence_filtered=None,\
         sequence_batch_id_set=None, parent_individual_sequence_id_set=None, \
         version_set=None,\
@@ -4207,7 +4324,8 @@ class SunsetDB(Database):
         outdated_index=0, report=True):
         """
         2013.3.15 added argument outdated_index
-        use individual_sequence.is_contaminated, instead of individual_sequence.individual.is_contaminated
+        use individual_sequence.is_contaminated,
+            instead of individual_sequence.individual.is_contaminated
         """
         if report:
             sys.stderr.write("Filter %s individual_sequence entries to select %s=<coverage <=%s "
