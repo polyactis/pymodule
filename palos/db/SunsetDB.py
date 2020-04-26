@@ -733,23 +733,26 @@ class IndividualSequence(Base, AbstractTableWithFilename):
     sequence_type_id = Column(Integer, \
         ForeignKey(_schemaname_ + '.sequence_type.id'))
     #genome, contig, SR (single-end read) or PE ...
-    no_of_chromosomes = Column(Integer)	#1,2,4,5,X,Y,etc
+    no_of_chromosomes = Column(Integer)
     tissue_id = Column(Integer, ForeignKey(_schemaname_ + '.tissue.id'))
     condition_id = Column(Integer, ForeignKey(_schemaname_ + '.condition.id'))
     coverage = Column(Float)
     read_count = Column(BigInteger)
     base_count = Column(BigInteger)
-    path = Column(Text, unique=True)	#storage folder path
+    #storage folder path
+    path = Column(Text, unique=True)
     format = Column(String(512))	#fasta, fastq
-    original_path = Column(Text)	#the path to the original file
+    #the path to the original file
+    original_path = Column(Text)
     #Standard=Phred+33 (=Sanger), Illumina=Phred+64 
     # (roughly, check pymodule/utils for exact formula)
-    quality_score_format = Column(String(512))
     # Illumina1.8+ (after 2011-02) is Standard.
+    quality_score_format = Column(String(512))
     parent_individual_sequence_id = Column(Integer, 
         ForeignKey(_schemaname_ + '.individual_sequence.id', 
         ondelete='SET NULL', onupdate='CASCADE'))
-    filtered = Column(Integer, default=0)	#0 means not. 1 means yes.
+    #0 means not. 1 means yes.
+    filtered = Column(Integer, default=0)
     sequence_batch_id = Column(Integer, \
         ForeignKey(_schemaname_ + '.sequence_batch.id'))
     #2013.3.15 field to mark whether it's contaminated or not.
