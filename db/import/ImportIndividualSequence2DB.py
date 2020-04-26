@@ -575,34 +575,42 @@ Example ("Library" and "Bam Path" are required):
         sample_id2data = self.readSampleSheetFastQ(sample_sheet, fastq_path_ls)
         
         logging.info("Adding split-read & register jobs ...")
-        filenameKey2PegasusFile = {}
+        isq_id2data = {}
         for sample_id, sample_data in sample_id2data.items():
             individual = db_main.getIndividual(code=sample_id, tax_id=9606,
                 study_name=sample_data.study,
                 site_name=sample_data.site)
-            fastq_obj_1 = sample_data.fastq_obj_ls[0]
-            individual_sequence = db_main.getIndividualSequence(
-                individual_id=individual.id, 
-                sequencer_name=fastq_obj_1.sequencer,
-                sequence_type_name=fastq_obj_1.sequence_type, 
-                sequence_format=self.sequence_format, 
-                path_to_original_sequence=fastq_obj_1.abs_path, 
-                coverage=None,
-                sequence_batch_name=fastq_obj_1.sequence_batch, 
-                tissue_name=fastq_obj_1.tissue_name, 
-                tissue_id=fastq_obj_1.tissue_id,
-                condition_name=fastq_obj_1.condition,
-                filtered=0, version=None, is_contaminated=0, outdated_index=0, 
-                data_dir=data_dir)
-            
-            sequenceAbsDir = os.path.join(data_dir, individual_sequence.path)
-            createSequenceAbsDirJob = self.addMkDirJob(outputDir=sequenceAbsDir)
-            
-            splitOutputDir = f'{individual_sequence.id}'
-            #One directory containing split files from both mates is fine,
-            # as RegisterAndMoveSplitSequenceFiles could pick up.
-            splitOutputDirJob = self.addMkDirJob(outputDir=splitOutputDir)
             for fastq_obj in sample_data.fastq_obj_ls:
+                individual_sequence = db_main.getIndividualSequence(
+                    individual_id=individual.id, 
+                    sequencer_name=fastq_obj.sequencer,
+                    sequence_type_name=fastq_obj.sequence_type, 
+                    sequence_format=self.sequence_format, 
+                    path_to_original_sequence=fastq_obj.abs_path, 
+                    coverage=None,
+                    sequence_batch_name=fastq_obj.sequence_batch, 
+                    tissue_name=fastq_obj.tissue_name, 
+                    tissue_id=fastq_obj.tissue_id,
+                    condition_name=fastq_obj.condition,
+                    filtered=0, version=None, is_contaminated=0, outdated_index=0, 
+                    data_dir=data_dir)
+                isq_id = individual_sequence.id
+                if isq_id not in isq_id2data:
+                    #multiple files may belong to the same individual_sequence.
+                    sequenceAbsDir = os.path.join(data_dir, individual_sequence.path)
+                    mkSequenceAbsDirJob = self.addMkDirJob(outputDir=sequenceAbsDir)
+                    
+                    splitOutputDir = f'{individual_sequence.id}'
+                    #One directory containing split files from both mates is fine,
+                    # as RegisterAndMoveSplitSequenceFiles could pick up.
+                    splitOutputDirJob = self.addMkDirJob(outputDir=splitOutputDir)
+                    isq_id2data[isq_id] = PassingData(
+                        sequenceAbsDir=sequenceAbsDir,
+                        mkSequenceAbsDirJob=mkSequenceAbsDirJob,
+                        splitOutputDir=splitOutputDir,
+                        splitOutputDirJob=splitOutputDirJob)
+                isq_job_data = isq_id2data[isq_id]
+
                 library = fastq_obj.library
                 mate_id = fastq_obj.mate_id
                 fastq_path = fastq_obj.abs_path
@@ -610,18 +618,19 @@ Example ("Library" and "Bam Path" are required):
                 fastqFile.sample_id = sample_id
             
                 splitFastQFnamePrefix = os.path.join(
-                    splitOutputDir, f'{individual_sequence.id}_{mate_id}')
+                    isq_job_data.splitOutputDir, 
+                    f'{individual_sequence.id}_{mate_id}')
                 logFile = File(f'{individual_sequence.id}_{mate_id}.split.log')
                 splitReadFileJob1 = self.addSplitReadFileJob(
                     inputF=fastqFile, outputFnamePrefix=splitFastQFnamePrefix, \
                     outputFnamePrefixTail="", minNoOfReads=self.minNoOfReads, \
-                    logFile=logFile, parentJobLs=[splitOutputDirJob], \
+                    logFile=logFile, parentJobLs=[isq_job_data.splitOutputDirJob], \
                     job_max_memory=4000, walltime = 800, \
                     extraDependentInputLs=None, transferOutput=True)
                 
                 logFile = File(f'{individual_sequence.id}_{mate_id}.register.log')
                 extraArgumentList=['--inputDir', splitOutputDir,
-                    '--outputDir', sequenceAbsDir,
+                    '--outputDir', isq_job_data.sequenceAbsDir,
                     '--relativeOutputDir', individual_sequence.path,
                     '--sequence_format', self.sequence_format,
                     '--individual_sequence_id', individual_sequence.id,
@@ -633,11 +642,12 @@ Example ("Library" and "Bam Path" are required):
                     extraArgumentList.append(f'--mate_id {mate_id}')
                 
                 registerJob = self.addData2DBJob(
-                    executable=self.RegisterAndMoveSplitSequenceFiles, \
-                    logFile=logFile, commit=commit,\
-                    parentJobLs=[splitReadFileJob1, createSequenceAbsDirJob], 
+                    executable=self.RegisterAndMoveSplitSequenceFiles,
+                    logFile=logFile, commit=commit,
+                    parentJobLs=[splitReadFileJob1, \
+                        isq_job_data.mkSequenceAbsDirJob],
                     extraDependentInputLs=[fastqFile], \
-                    extraOutputLs=None, transferOutput=True, \
+                    extraOutputLs=None, transferOutput=True,
                     extraArgumentList=extraArgumentList,
                     job_max_memory=100, walltime=60,\
                     sshDBTunnel=self.needSSHDBTunnel,
@@ -946,7 +956,7 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
                 sequence_format=sequence_format, data_dir=data_dir)
             
             sequenceAbsDir = os.path.join(data_dir, individual_sequence.path)
-            createSequenceAbsDirJob = self.addMkDirJob(outputDir=sequenceAbsDir)
+            mkSequenceAbsDirJob = self.addMkDirJob(outputDir=sequenceAbsDir)
             
             splitOutputDir = '%s'%(individual_sequence.id)
             #Same directory containing split files from both mates is fine 
@@ -987,7 +997,7 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
                     relativeOutputDir=individual_sequence.path, logFile=logFile,\
                     individual_sequence_id=individual_sequence.id, \
                     library=library, mate_id=mate_id, \
-                    parentJobLs=[splitReadFileJob1, createSequenceAbsDirJob], 
+                    parentJobLs=[splitReadFileJob1, mkSequenceAbsDirJob], 
                     job_max_memory=100, walltime = 60, \
                     commit=commit, sequence_format=sequence_format, extraDependentInputLs=None, \
                     transferOutput=True, sshDBTunnel=self.needSSHDBTunnel)
@@ -1052,7 +1062,7 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
                 session.flush()
             """
             sequenceAbsDir = os.path.join(data_dir, individual_sequence.path)
-            createSequenceAbsDirJob = self.addMkDirJob(outputDir=sequenceAbsDir)
+            mkSequenceAbsDirJob = self.addMkDirJob(outputDir=sequenceAbsDir)
             
             bamInputF = self.registerOneInputFile(bamFname)
             
@@ -1096,7 +1106,7 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
                 individual_sequence_id=individual_sequence.id, 
                 original_file=bamInputF, 
                 library=library, mate_id=mate_id, \
-                parentJobLs=[splitReadFileJob1, createSequenceAbsDirJob], 
+                parentJobLs=[splitReadFileJob1, mkSequenceAbsDirJob], 
                 job_max_memory=100, walltime = 60, \
                 commit=commit, sequence_format=sequence_format, extraDependentInputLs=None, \
                 transferOutput=True, sshDBTunnel=self.needSSHDBTunnel)
@@ -1120,7 +1130,7 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
                 individual_sequence_id=individual_sequence.id, 
                 original_file=bamInputF, 
                 library=library, mate_id=mate_id, \
-                parentJobLs=[splitReadFileJob2, createSequenceAbsDirJob], 
+                parentJobLs=[splitReadFileJob2, mkSequenceAbsDirJob], 
                 job_max_memory=100, walltime = 60, \
                 commit=commit, sequence_format=sequence_format, extraDependentInputLs=None, \
                 transferOutput=True, sshDBTunnel=self.needSSHDBTunnel)
