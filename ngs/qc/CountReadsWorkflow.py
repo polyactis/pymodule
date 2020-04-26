@@ -111,12 +111,12 @@ class CountReadsWorkflow(ParentClass):
                     transferOutput=True, extraArguments=None, \
                     job_max_memory=10, sshDBTunnel=1, **keywords):
         """
-        20170502 use addGenericFile2DBJob()
+        20170502 use addData2DBJob()
         2012.5.3
             add argument sshDBTunnel
         2012.3.14
         """
-        job = self.addGenericFile2DBJob(executable=executable, \
+        job = self.addData2DBJob(executable=executable, \
                     inputFile=None, inputArgumentOption="-i", \
                     outputFile=logFile, outputArgumentOption="--logFilename", inputFileList=inputFileLs, \
                     data_dir=None, commit=commit,\

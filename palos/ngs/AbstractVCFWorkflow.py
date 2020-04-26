@@ -53,7 +53,7 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
         extraArguments=None, job_max_memory=2000, **keywords):
         """
         2012.12.12 use extended argument name
-        2012.10.6 use addGenericDBJob() instead of addGenericJob()
+        2012.10.6 use addDBJob() instead of addGenericJob()
         2012.8.30 moved from vervet/src/AddVCFFolder2DBWorkflow.py
         2012.6.27
         """
@@ -71,7 +71,7 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
         if extraArguments:
             extraArgumentList.append(extraArguments)
         
-        job= self.addGenericDBJob(executable=executable, inputFile=inputFile, outputFile=None, \
+        job= self.addDBJob(executable=executable, inputFile=inputFile, outputFile=None, \
                         parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
                         extraOutputLs=[logFile],\
                         transferOutput=transferOutput, \

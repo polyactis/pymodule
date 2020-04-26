@@ -612,7 +612,7 @@ class InspectAlignmentPipeline(ParentClass, AbstractNGSWorkflow):
             #job to add an AlignmentDepthIntervalMethod
             logFile = File(os.path.join(self.logOutputDirJob.output, \
                 'AddAlignmentDepthIntervalMethod2DB.log'))
-            addMethod2DBJob = self.addGenericFile2DBJob(
+            addMethod2DBJob = self.addData2DBJob(
                 executable=self.AddAlignmentDepthIntervalMethod2DB, \
                 inputFile=None, inputArgumentOption="-i", \
                 outputFile=None, outputArgumentOption="-o", \
@@ -627,7 +627,7 @@ class InspectAlignmentPipeline(ParentClass, AbstractNGSWorkflow):
                 job_max_memory=2000, walltime=30,  sshDBTunnel=self.needSSHDBTunnel)
 
             logFile = File(os.path.join(self.logOutputDirJob.output, 'updateMethodNoOfIntervals.log'))
-            updateMethodNoOfIntervalsJob = self.addGenericFile2DBJob(
+            updateMethodNoOfIntervalsJob = self.addData2DBJob(
                 executable=self.UpdateAlignmentDepthIntervalMethodNoOfIntervals, \
                 data_dir=self.data_dir, logFile=logFile, commit=True,\
                 parentJobLs=[self.logOutputDirJob], extraDependentInputLs=None, extraOutputLs=None, \
@@ -703,7 +703,7 @@ class InspectAlignmentPipeline(ParentClass, AbstractNGSWorkflow):
                 #job that adds AlignmentDepthIntervalFile
                 logFile = File(os.path.join(self.logOutputDirJob.output, \
                     'AddAlignmentDepthIntervalFile2DB_chr_%s.log'%(chromosome)))
-                addFile2DBJob = self.addGenericFile2DBJob(
+                addFile2DBJob = self.addData2DBJob(
                     executable=self.AddAlignmentDepthIntervalFile2DB, \
                     inputFile=GADAJob.output, \
                     inputArgumentOption="-i", \

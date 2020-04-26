@@ -79,9 +79,11 @@ class InspectBaseQualityPipeline(AbstractNGSWorkflow):
 			self.ind_seq_id_ls, data_dir=self.data_dir)
 		
 		for ind_seq_id, FilePairLs in individualSequenceID2FilePairLs.items():
-			individual_sequence = db_main.queryTable(SunsetDB.IndividualSequence).get(ind_seq_id)
+			individual_sequence = db_main.queryTable(
+				SunsetDB.IndividualSequence).get(ind_seq_id)
 			if individual_sequence is not None and individual_sequence.format=='fastq':
-				#start to collect all files affiliated with this individual_sequence record 
+				#start to collect all files affiliated with
+				#  this individual_sequence record 
 				inputFilepathLs = []
 				for filePair in FilePairLs:
 					for fileRecord in filePair:
@@ -93,7 +95,7 @@ class InspectBaseQualityPipeline(AbstractNGSWorkflow):
 				for filepath in inputFilepathLs:
 					prefix, suffix = utils.getRealPrefixSuffixOfFilenameWithVariableSuffix(filepath)
 					if suffix=='.fastq':	#sometimes other files get in the way
-						inspectBaseQuality_job = self.addGenericDBJob(
+						inspectBaseQuality_job = self.addDBJob(
 							executable=self.InspectBaseQuality, \
 							inputFile=None, \
 							inputArgumentOption='-i',\
@@ -101,8 +103,10 @@ class InspectBaseQualityPipeline(AbstractNGSWorkflow):
 							parentJobLs=None, extraDependentInputLs=None, \
 							extraOutputLs=None, extraArguments=None, \
 							transferOutput=False, \
-							extraArgumentList=['-i', filepath, '--read_sampling_rate', '0.005', \
-									'--quality_score_format', individual_sequence.quality_score_format], \
+							extraArgumentList=['-i', filepath, \
+								'--read_sampling_rate', '0.005', \
+								'--quality_score_format', \
+								individual_sequence.quality_score_format],
 							objectWithDBArguments=self,\
 							job_max_memory=20000, \
 							walltime=120)

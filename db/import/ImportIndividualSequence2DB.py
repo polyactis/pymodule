@@ -355,7 +355,7 @@ Example ("Library" and "Bam Path" are required):
         for name, value in keywords.items():
             if value is not None and value != "":
                 extraArgumentList.append("--%s %s"%(name, value))
-        job = self.addGenericFile2DBJob(executable=executable, \
+        job = self.addData2DBJob(executable=executable, \
             inputFile=inputFile, inputArgumentOption="-i", \
             outputFile=outputFile, outputArgumentOption="-o", inputFileList=None, \
             data_dir=None, commit=commit,\
@@ -404,7 +404,7 @@ Example ("Library" and "Bam Path" are required):
         if mate_id:
             extraArgumentList.append('--mate_id %s'%(mate_id))
         
-        job = self.addGenericFile2DBJob(executable=self.RegisterAndMoveSplitSequenceFiles, \
+        job = self.addData2DBJob(executable=self.RegisterAndMoveSplitSequenceFiles, \
             inputFile=inputFile, inputArgumentOption="-i", \
             data_dir=None, logFile=logFile, commit=commit,\
             parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
@@ -623,7 +623,7 @@ Example ("Library" and "Bam Path" are required):
                 if mate_id:
                     extraArgumentList.append(f'--mate_id {mate_id}')
                 
-                registerJob = self.addGenericFile2DBJob(
+                registerJob = self.addData2DBJob(
                     executable=self.RegisterAndMoveSplitSequenceFiles, \
                     logFile=logFile, commit=commit,\
                     parentJobLs=[splitReadFileJob1, createSequenceAbsDirJob], 
