@@ -631,7 +631,7 @@ Example ("Library" and "Bam Path" are required):
                     extraOutputLs=None, transferOutput=True, \
                     extraArgumentList=extraArgumentList,
                     job_max_memory=100, walltime=60,\
-                    sshDBTunnel=self.needneedSSHDBTunnel,
+                    sshDBTunnel=self.needSSHDBTunnel,
                     objectWithDBArguments=self)
             
         logging.info(f"{self.no_of_jobs} jobs.")
