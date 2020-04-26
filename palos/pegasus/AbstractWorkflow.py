@@ -133,58 +133,62 @@ class AbstractWorkflow(Workflow):
         Workflow.registerExecutables(self)
         
         #2013.2.7 convert, an image swissknife program, part of imagemagick
-        self.registerOneExecutable(path="/usr/bin/convert", name='convertImage',\
-            clusterSizeMultiplier=1)
+        self.registerOneExecutable(path="/usr/bin/convert",
+            name='convertImage', clusterSizeMultiplier=1)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, 
             "mapper/extractor/SelectLineBlockFromFile.py"), 
             name='SelectLineBlockFromFile', clusterSizeMultiplier=1)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath,
             "plot/AbstractPlot.py"), 
             name='AbstractPlot', clusterSizeMultiplier=1)
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath,
             "plot/PlotYAsBar.py"), 
             name='PlotYAsBar', clusterSizeMultiplier=1)
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath,
             "plot/DrawHistogram.py"), 
             name='DrawHistogram', clusterSizeMultiplier=1)
 
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath,
             "plot/DrawMatrix.py"), 
             name='DrawMatrix', clusterSizeMultiplier=1)
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath,
             "plot/Draw2DHistogramOfMatrix.py"), 
             name='Draw2DHistogramOfMatrix', clusterSizeMultiplier=1)
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath,
             "statistics/SampleRows.py"), 
             name='SampleRows', clusterSizeMultiplier=1)
         #2013.2.11 all reducers
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath,
             "statistics/EstimateOutliersIn2DData.py"), \
             name='EstimateOutliersIn2DData', clusterSizeMultiplier=0)
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath,
             'reducer/MergeSameHeaderTablesIntoOne.py'), \
             name='mergeSameHeaderTablesIntoOne', clusterSizeMultiplier=0)
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath,
             'reducer/MergeSameHeaderTablesIntoOne.py'), \
             name='MergeSameHeaderTablesIntoOne', clusterSizeMultiplier=0)
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath,
             'reducer/ReduceMatrixByAverageColumnsWithSameKey.py'), \
-            name='ReduceMatrixByAverageColumnsWithSameKey', clusterSizeMultiplier=0)
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
+            name='ReduceMatrixByAverageColumnsWithSameKey',
+            clusterSizeMultiplier=0)
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath,
             'reducer/ReduceMatrixByChosenColumn.py'), \
             name='ReduceMatrixByChosenColumn', clusterSizeMultiplier=0)
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath,
             'reducer/ReduceMatrixByMergeColumnsWithSameKey.py'), \
-            name='ReduceMatrixByMergeColumnsWithSameKey', clusterSizeMultiplier=0)
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
-            'reducer/ReduceMatrixBySumSameKeyColsAndThenDivide.py'), \
-            name='ReduceMatrixBySumSameKeyColsAndThenDivide', clusterSizeMultiplier=0)
+            name='ReduceMatrixByMergeColumnsWithSameKey',
+            clusterSizeMultiplier=0)
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath,
+            'reducer/ReduceMatrixBySumSameKeyColsAndThenDivide.py'),
+            name='ReduceMatrixBySumSameKeyColsAndThenDivide',
+            clusterSizeMultiplier=0)
         """
         # 2013.05.20 DISABLE this
         if self.site_handler=='hcondor' and self.input_site_handler=='hcondor':
             #2013.04.19 to make pegasus cleanup run on local universe of condor pool
             # only enable this on hcondor because
-            #	1) its filesystem is very slow and these cleanup & transfer jobs take forever.
+            #	1) its filesystem is very slow and these cleanup & transfer
+            #       jobs take forever.
             #	2) workers in vanilla universe expire after certain time.
             #	3) it does not run on ycondor local universe somehow.
             #    pegasus keeps submitting but no condor jobs in the queue.
@@ -193,7 +197,8 @@ class AbstractWorkflow(Workflow):
             cleanupExecutable = self.registerOneExecutable(
                 path=self.pegasusCleanupPath, name='cleanup', \
                 clusterSizeMultiplier=0, noVersion=True)
-            condorUniverseProfile = Profile(Namespace.CONDOR, key="universe", value="local")
+            condorUniverseProfile = Profile(Namespace.CONDOR, key="universe",
+                value="local")
             if cleanupExecutable.hasProfile(condorUniverseProfile):
                 cleanupExecutable.removeProfile(condorUniverseProfile)
             cleanupExecutable.addProfile(condorUniverseProfile)
@@ -201,7 +206,8 @@ class AbstractWorkflow(Workflow):
             transferExecutable = self.registerOneExecutable(
                 path=self.pegasusTransferPath, name='transfer', \
                 clusterSizeMultiplier=0, noVersion=True)
-            condorUniverseProfile = Profile(Namespace.CONDOR, key="universe", value="local")
+            condorUniverseProfile = Profile(Namespace.CONDOR, key="universe",
+                value="local")
             if transferExecutable.hasProfile(condorUniverseProfile):
                 transferExecutable.removeProfile(condorUniverseProfile)
             transferExecutable.addProfile(condorUniverseProfile)
@@ -224,22 +230,24 @@ class AbstractWorkflow(Workflow):
             key2ObjectForJob = {}
         if extraArguments:
             extraArgumentList.append(extraArguments)
-        job= self.addGenericJob(executable=statMergeProgram, inputFile=None, 
-            inputArgumentOption='-i',
+        job= self.addGenericJob(executable=statMergeProgram,
+            inputFile=None, inputArgumentOption='-i',
             outputFile=outputF, outputArgumentOption='-o', 
-            parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, 
+            parentJobLs=parentJobLs,
+            extraDependentInputLs=extraDependentInputLs,
             extraOutputLs=extraOutputLs,
             transferOutput=transferOutput,
-            extraArgumentList=extraArgumentList, key2ObjectForJob=key2ObjectForJob,
+            extraArgumentList=extraArgumentList,
+            key2ObjectForJob=key2ObjectForJob,
             job_max_memory=job_max_memory, **keywords)
         return job
 
-    def addConvertImageJob(self, inputFile=None, inputArgumentOption=None, \
-        outputFile=None, outputArgumentOption=None, density=None, \
+    def addConvertImageJob(self, inputFile=None, inputArgumentOption=None,
+        outputFile=None, outputArgumentOption=None, density=None,
         resizeDimension=None, \
-        parentJobLs=None, extraDependentInputLs=None, extraOutputLs=None, \
+        parentJobLs=None, extraDependentInputLs=None, extraOutputLs=None,
         transferOutput=False, \
-        frontArgumentList=None, extraArguments=None, extraArgumentList=None, \
+        frontArgumentList=None, extraArguments=None, extraArgumentList=None,
         job_max_memory=200,\
         key2ObjectForJob=None, **keywords):
         """
@@ -293,12 +301,14 @@ class AbstractWorkflow(Workflow):
         return job
     
     def addCalculateDepthMeanMedianModeJob(self, executable=None, \
-        inputFile=None, outputFile=None, alignmentID=None, fractionToSample=0.001, \
-        whichColumn=None, maxNumberOfSamplings=1E7, inputStatName=None,\
-        parentJobLs=None, job_max_memory = 500, extraArguments=None, \
+        inputFile=None, outputFile=None, alignmentID=None,
+        fractionToSample=0.001,
+        whichColumn=None, maxNumberOfSamplings=1E7, inputStatName=None,
+        parentJobLs=None, job_max_memory = 500, extraArguments=None,
         transferOutput=False, **keywords):
         """
-        2013.1.8 moved from vervet.src.alignment.InspectAlignmentPipeline and use addGenericJob()
+        2013.1.8 moved from vervet.src.alignment.InspectAlignmentPipeline and
+            use addGenericJob().
         2012.6.15 turn maxNumberOfSamplings into integer when passing it to the job
         2012.5.7
             a job to take input of samtoolsDepth
@@ -316,12 +326,12 @@ class AbstractWorkflow(Workflow):
             extraArgumentList.append("--inputStatName %s"%(inputStatName))
         if extraArguments:
             extraArgumentList.append(extraArguments)
-        job= self.addGenericJob(executable=executable, inputFile=inputFile, outputFile=outputFile, \
-                parentJobLs=parentJobLs, extraDependentInputLs=None, \
-                extraOutputLs=None,\
-                transferOutput=transferOutput, \
-                extraArgumentList=extraArgumentList, key2ObjectForJob=None, \
-                sshDBTunnel=None, job_max_memory=job_max_memory, **keywords)
+        job= self.addGenericJob(executable=executable,
+            inputFile=inputFile, outputFile=outputFile,
+            parentJobLs=parentJobLs, extraDependentInputLs=None,
+            extraOutputLs=None, transferOutput=transferOutput,
+            extraArgumentList=extraArgumentList, key2ObjectForJob=None,
+            sshDBTunnel=None, job_max_memory=job_max_memory, **keywords)
         return job
 
     def addDBGenomeArgumentsToOneJob(self, job=None, objectWithDBArguments=None):
@@ -348,12 +358,13 @@ class AbstractWorkflow(Workflow):
 
 
     def addGzipSubWorkflow(self, inputData=None, transferOutput=True,\
-                        outputDirPrefix="", topOutputDirJob=None, **keywords):
+        outputDirPrefix="", topOutputDirJob=None, **keywords):
         """
         2012.8.2 bugfix.
         2012.7.19
         """
-        sys.stderr.write("Adding gzip jobs for %s input job data ... "%(len(inputData.jobDataLs)))
+        sys.stderr.write("Adding gzip jobs for %s input job data ... "%(
+            len(inputData.jobDataLs)))
         returnData = PassingData(topOutputDirJob=None)
         returnData.jobDataLs = []
         if inputData:
@@ -381,14 +392,6 @@ class AbstractWorkflow(Workflow):
                             extraArgumentList=extraArgumentList,
                             key2ObjectForJob=key2ObjectForJob, \
                             job_max_memory=200, **keywords)
-                        """
-                        # 2012.8.2 wrong, because -i and -o will be added in front.
-                        abstractMapperJob = self.addAbstractMapperLikeJob(executable=self.gzip, \
-                                inputF=None, outputF=outputF, \
-                                parentJobLs=[topOutputDirJob]+jobData.jobLs, 
-                                transferOutput=transferOutput, job_max_memory=200,\
-                                extraArguments=None, extraDependentInputLs=[inputF], )
-                        """
                         returnData.jobDataLs.append(PassingData(jobLs=[job], \
                             vcfFile=None, file=outputF, fileLs=[outputF]))
         sys.stderr.write("no_of_jobs = %s.\n"%(self.no_of_jobs))
@@ -477,10 +480,12 @@ class AbstractWorkflow(Workflow):
 ('whichColumnHeader', 0, ): ["", 'W', 1, 
     'column label (in the header) for the data to be plotted as y-axis value, substitute whichColumn'],\
 ('logWhichColumn', 0, int): [0, 'g', 0, 'whether to take -log of the whichColumn'],\
-('whichColumnPlotLabel', 1, ): ['#SNPs in 100kb window', 'D', 1, 'plot label for data of the whichColumn', ],\
+('whichColumnPlotLabel', 1, ): ['#SNPs in 100kb window', 'D', 1, \
+    'plot label for data of the whichColumn', ],\
 ('chrLengthColumnHeader', 1, ): ['chrLength', 'c', 1, 'label of the chromosome length column', ],\
 ('chrColumnHeader', 1, ): ['CHR', 'C', 1, 'label of the chromosome column', ],\
-('minChrLength', 1, int): [1000000, 'm', 1, 'minimum chromosome length for one chromosome to be included', ],\
+('minChrLength', 1, int): [1000000, 'm', 1, \
+    'minimum chromosome length for one chromosome to be included', ],\
 ('pos1ColumnLabel', 1, ): ['POS1', 'l', 1, 'label of the 1st position column', ],\
 ('pos2ColumnLabel', 1, ): ['POS2', 'p', 1, 'label of the 2nd position column', ],\
 ('posColumnPlotLabel', 1, ): ['distance', 'x', 1, 'x-axis label in  plot', ],\

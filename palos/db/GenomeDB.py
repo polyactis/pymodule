@@ -13,6 +13,7 @@ Description:
     This is the genome database ORM.
 """
 import sys, os
+import logging
 from sqlalchemy.engine.url import URL
 from sqlalchemy import Unicode, DateTime, String, BigInteger, Integer
 from sqlalchemy import UnicodeText, Text, Boolean, Float, Binary, Enum, Table
@@ -149,9 +150,9 @@ class GenomeAnnotation(Base, TableClass):
     comment = Column(Text)
     
     annot_assembly = ManyToOne('%s.AnnotAssembly'%__name__, colname='annot_assembly_id', \
-                            ondelete='CASCADE', onupdate='CASCADE')
+        ondelete='CASCADE', onupdate='CASCADE')
     genome_annotation_type = ManyToOne('%s.GenomeAnnotationType'%__name__, \
-                                    colname='genome_annotation_type_id', ondelete='CASCADE', onupdate='CASCADE')
+        colname='genome_annotation_type_id', ondelete='CASCADE', onupdate='CASCADE')
     
     created_by = Column(String(256))
     updated_by = Column(String(256))
@@ -160,7 +161,7 @@ class GenomeAnnotation(Base, TableClass):
     using_options(tablename='genome_annotation', metadata=__metadata__, session=__session__)
     using_table_options(mysql_engine='InnoDB')
     using_table_options(UniqueConstraint('strand', 'start', 'stop', 'annot_assembly_id',\
-                                        'genome_annotation_type_id'))
+        'genome_annotation_type_id'))
 
 
 class GenomeAnnotationType(Base, TableClass):
@@ -242,12 +243,15 @@ class GeneCommentary(Base, TableClass):
     accession = Column(String(32))
     version = Column(Integer)
     gi = Column(Integer)
-    gene = ManyToOne('%s.Gene'%__name__, colname='gene_id', ondelete='CASCADE', onupdate='CASCADE')
-    gene_commentary = ManyToOne('%s.GeneCommentary'%__name__, colname='gene_commentary_id', ondelete='CASCADE', onupdate='CASCADE')
+    gene = ManyToOne('%s.Gene'%__name__, colname='gene_id',
+        ondelete='CASCADE', onupdate='CASCADE')
+    gene_commentary = ManyToOne('%s.GeneCommentary'%__name__,
+        colname='gene_commentary_id', ondelete='CASCADE', onupdate='CASCADE')
     gene_commentaries = OneToMany('%s.GeneCommentary'%__name__)
     start = Column(Integer)
     stop = Column(Integer)
-    gene_commentary_type = ManyToOne('%s.GeneCommentaryType'%__name__, colname='gene_commentary_type_id', ondelete='CASCADE', onupdate='CASCADE')
+    gene_commentary_type = ManyToOne('%s.GeneCommentaryType'%__name__,
+        colname='gene_commentary_type_id', ondelete='CASCADE', onupdate='CASCADE')
     label = Column(Text)
     text = Column(Text)
     comment = Column(Text)
@@ -258,17 +262,19 @@ class GeneCommentary(Base, TableClass):
     date_updated = Column(DateTime)
     using_options(tablename='gene_commentary', metadata=__metadata__, session=__session__)
     using_table_options(mysql_engine='InnoDB')
-    using_table_options(UniqueConstraint('gene_id', 'start', 'stop', 'gene_commentary_type_id', 'gene_commentary_id'))
+    using_table_options(UniqueConstraint('gene_id', 'start', 'stop',
+        'gene_commentary_type_id', 'gene_commentary_id'))
     
     def getSequence(self, box_ls):
         """
-        2012.5.16
-            it uses annot_assembly_id preferentially, if it is null, then uses genomic_gi.
-        2012.3.26
-            get_sequence_segment()'s API has been changed.
-            But this way of calling get_sequence_segment() is still outdated. valid only for banyan's mysql genome db
-                because annot_assembly_id was not used. check GenomeDatabase.getSequenceSegment()
-        2009-01-03
+2012.5.16
+    it uses annot_assembly_id preferentially, if it is null, then uses genomic_gi.
+2012.3.26
+    get_sequence_segment()'s API has been changed.
+    But this way of calling get_sequence_segment() is still outdated.
+        valid only for banyan's mysql genome db
+        because annot_assembly_id was not used. check GenomeDatabase.getSequenceSegment()
+2009-01-03
         """
         seq = ''
         curs = __metadata__.bind	#or self.table.bind or self.table.metadata.bind
@@ -285,9 +291,9 @@ class GeneCommentary(Base, TableClass):
                 annot_assembly_id = None
             schema = self._descriptor.table_options.get('schema')
             seq += get_sequence_segment(curs, gi=gi, start=genomic_start, stop=genomic_stop, \
-                                    annot_assembly_id=annot_assembly_id,\
-                                    annot_assembly_table='%s.%s'%(schema, AnnotAssembly.table.name),\
-                                    raw_sequence_table='%s.%s'%(schema, RawSequence.table.name))
+                annot_assembly_id=annot_assembly_id,\
+                annot_assembly_table='%s.%s'%(schema, AnnotAssembly.table.name),\
+                raw_sequence_table='%s.%s'%(schema, RawSequence.table.name))
         if self.gene.strand=='-1' and seq:	#need to reverse complement
             from Bio.Seq import Seq
             from Bio.Alphabet import IUPAC
@@ -326,7 +332,8 @@ class GeneCommentary(Base, TableClass):
         if gene_commentary_type:
             gene_commentary_type_id_ls.append(gene_commentary_type.id)
         
-        gene_segments = GeneSegment.query.filter(GeneSegment.gene_commentary_type_id.in_(gene_commentary_type_id_ls)).\
+        gene_segments = GeneSegment.query.filter(\
+            GeneSegment.gene_commentary_type_id.in_(gene_commentary_type_id_ls)).\
             filter_by(gene_commentary_id=self.id)
         self.mrna_box_ls = []
         for gene_segment in gene_segments:
@@ -340,14 +347,15 @@ class GeneCommentary(Base, TableClass):
             GeneSegment.gene_commentary_type could be either CDS or peptide.
             add gene_segment.id into the protein_box
         2008-09-22
-            find the corresponding protein gene_commentary if it's available. and construct a protein_box_ls
+            find the corresponding protein gene_commentary if it's available.
+            and construct a protein_box_ls
         """
         self.protein_box_ls = []
         if len(self.gene_commentaries)==1:
             gene_commentary = self.gene_commentaries[0]
         elif len(self.gene_commentaries)>1:
-            sys.stderr.write('Warning: more than 1 gene_commentaries for this commentary id=%s, gene_id=%s.\n'%\
-                            (self.id, self.gene_id))
+            logging.warn('More than 1 gene_commentaries for this commentary id=%s, gene_id=%s.'\
+                %(self.id, self.gene_id))
             gene_commentary = self.gene_commentaries[0]
         else:
             gene_commentary = None
@@ -357,14 +365,17 @@ class GeneCommentary(Base, TableClass):
             gene_commentary_type = GeneCommentaryType.query.filter_by(type='CDS').first()
             if gene_commentary_type:
                 gene_commentary_type_id_ls.append(gene_commentary_type.id)
-            gene_commentary_type = GeneCommentaryType.query.filter_by(type='peptide').first()
+            gene_commentary_type = GeneCommentaryType.query.\
+                filter_by(type='peptide').first()
             if gene_commentary_type:
                 gene_commentary_type_id_ls.append(gene_commentary_type.id)
             
-            gene_segments = GeneSegment.query.filter(GeneSegment.gene_commentary_type_id.in_(gene_commentary_type_id_ls)).\
+            gene_segments = GeneSegment.query.\
+                filter(GeneSegment.gene_commentary_type_id.in_(gene_commentary_type_id_ls)).\
                 filter_by(gene_commentary_id=gene_commentary.id)
             for gene_segment in gene_segments:
-                self.protein_box_ls.append([gene_segment.start, gene_segment.stop, gene_segment.id])
+                self.protein_box_ls.append([gene_segment.start, \
+                    gene_segment.stop, gene_segment.id])
             self.protein_label = gene_commentary.label
             self.protein_comment = gene_commentary.comment
             self.protein_text = gene_commentary.text
@@ -377,13 +388,16 @@ class GeneCommentary(Base, TableClass):
     
     def constructAnnotatedBox(self):
         """
-        2010-8-18
-            deal with the db (GeneSegment, etc.) populated by TAIRGeneXML2GenomeDB.py, not GeneASNXML2gene_mapping.py.
-            GeneSegment stores, UTR, CDS, exon, intron in their commentary_type already.
-            
-            #each entry is a tuple, (start, stop, box_type, is_translated, gene_segment.id, protein_box_index)
+2010-8-18
+    deal with the db (GeneSegment, etc.) populated by TAIRGeneXML2GenomeDB.py,
+        not GeneASNXML2gene_mapping.py.
+    GeneSegment stores, UTR, CDS, exon, intron in their commentary_type already.
+    
+    #each entry is a tuple, (start, stop, box_type, is_translated, gene_segment.id, protein_box_index)
         """
-        box_ls = []	#each entry is a tuple, (start, stop, box_type, is_translated, gene_segment.id, protein_box_index)
+        #each entry is a tuple, (start, stop, box_type, is_translated,
+        #  gene_segment.id, protein_box_index)
+        box_ls = []
         if len(self.gene_commentaries)==1:	#it's translated into protein.
             protein_commentary = self.gene_commentaries[0]
         elif len(self.gene_commentaries)>1:
@@ -394,14 +408,15 @@ class GeneCommentary(Base, TableClass):
             protein_commentary = None
         
         query = GeneSegment.query.filter_by(gene_commentary_id=self.id)
-        if protein_commentary:	#restrict the gene segment to intron only. exons will be covered by CDS and UTR.
+        if protein_commentary:
+            #restrict the gene segment to intron only. exons will be covered by CDS and UTR.
             gene_commentary_type = GeneCommentaryType.query.filter_by(type='intron').first()
             if gene_commentary_type:
                 query = query.filter_by(gene_commentary_type_id=gene_commentary_type.id)
         
         for gene_segment in query:
-            box_ls.append([gene_segment.start, gene_segment.stop, gene_segment.gene_commentary_type.type, \
-                        0, gene_segment.id, None])
+            box_ls.append([gene_segment.start, gene_segment.stop,\
+                gene_segment.gene_commentary_type.type, 0, gene_segment.id, None])
         if protein_commentary:
             for gene_segment in protein_commentary.gene_segments:
                 if gene_segment.gene_commentary_type.type.find('UTR')!=-1:
@@ -409,25 +424,27 @@ class GeneCommentary(Base, TableClass):
                 else:
                     is_translated = 1
                 
-                box_ls.append([gene_segment.start, gene_segment.stop, gene_segment.gene_commentary_type.type, \
-                            is_translated, gene_segment.id,  None])
+                box_ls.append([gene_segment.start, gene_segment.stop,\
+                    gene_segment.gene_commentary_type.type, \
+                    is_translated, gene_segment.id,  None])
         box_ls.sort()
         return box_ls
         
     def construct_annotated_box(self):
         """
-        2012.5.15
-            add gene_segment.id(or None) and cumulativeWithinCDSUTRAndIntronLen into box_ls
-        2008-10-01
-            fix a bug that coordinates of a whole untranslated mrna block are replaced by that of a protein block
-        2008-10-01
-            fix a bug that a whole untranslated mrna block got totally omitted.
-        2008-09-22
-            combine mrna_box_ls and protein_box_ls to partition the whole gene into finer segments.
-            box_ls = []	#each entry is a tuple,
-                (start, stop, box_type, is_translated, protein_box_index, gene_segment.id, detailed_box_type, \
-                    cumulativeWithinCDSUTRAndIntronLen, exon_number)
-            box_type = 'intron' or 'exon'. is_translated = 0 or 1. if it's translated, protein_box_index is index in protein_box_ls.
+2012.5.15
+    add gene_segment.id(or None) and cumulativeWithinCDSUTRAndIntronLen into box_ls
+2008-10-01
+    fix a bug that coordinates of a whole untranslated mrna block are replaced by that of a protein block
+2008-10-01
+    fix a bug that a whole untranslated mrna block got totally omitted.
+2008-09-22
+    combine mrna_box_ls and protein_box_ls to partition the whole gene into finer segments.
+    box_ls = []	#each entry is a tuple,
+        (start, stop, box_type, is_translated, protein_box_index, gene_segment.id, detailed_box_type, \
+            cumulativeWithinCDSUTRAndIntronLen, exon_number)
+    box_type = 'intron' or 'exon'. is_translated = 0 or 1. if it's translated,
+        protein_box_index is index in protein_box_ls.
         """
         #each entry is a tuple, (start, stop, box_type, is_translated, protein_box_index)
         self.box_ls = []
@@ -508,17 +525,19 @@ class GeneCommentary(Base, TableClass):
                     else:
                         detailed_box_type = '3UTR'
                     self.box_ls.append((mrna_start, mrna_stop, 'exon', 0, None, \
-                        mrna_gene_segment_id, detailed_box_type, cumulativeWithinCDSUTRAndIntronLen, exon_number))
+                        mrna_gene_segment_id, detailed_box_type, \
+                        cumulativeWithinCDSUTRAndIntronLen, exon_number))
                     #2008-10-1 UTR
                     if CDS_5_end_pos!=-1:	#CDS has already begun
                             nonCDSLength = abs(mrna_stop-mrna_start+1)
                             cumulativeWithinCDSUTRAndIntronLen += nonCDSLength
                 elif prot_start<=mrna_stop and prot_stop>mrna_stop:	#not supposed to happen
-                    sys.stderr.write("Error: protein box: [%s, %s] of gene id=%s is partial overlapping of mrna box [%s, %s].\n"%\
-                                    (prot_start, prot_stop, self.gene_id, mrna_start, mrna_stop))
+                    logging.error("protein box: [%s, %s] of gene id=%s is partial overlapping of mrna box [%s, %s]."%\
+                        (prot_start, prot_stop, self.gene_id, mrna_start, mrna_stop))
             else:	#passing all protein boxes
-                self.box_ls.append((mrna_start, mrna_stop, 'exon', 0, None, mrna_gene_segment_id, default_detailed_box_type, \
-                                cumulativeWithinCDSUTRAndIntronLen, exon_number))
+                self.box_ls.append((mrna_start, mrna_stop, 'exon', 0, None, \
+                    mrna_gene_segment_id, default_detailed_box_type, \
+                    cumulativeWithinCDSUTRAndIntronLen, exon_number))
                 if CDS_5_end_pos!=-1:	#CDS has already begun
                     nonCDSLength = abs(mrna_stop-mrna_start+1)
                     cumulativeWithinCDSUTRAndIntronLen += nonCDSLength
@@ -593,11 +612,13 @@ class GeneSegment(Base, TableClass):
     2008-07-28
         table to store position info of segments (exon, intron, CDS, UTR ...) of gene-products (mRNA, peptide) in table GeneProduct
     """
-    gene_commentary = ManyToOne('%s.GeneCommentary'%__name__, colname='gene_commentary_id', ondelete='CASCADE', onupdate='CASCADE')
+    gene_commentary = ManyToOne('%s.GeneCommentary'%__name__, \
+        colname='gene_commentary_id', ondelete='CASCADE', onupdate='CASCADE')
     gi = Column(Integer)
     start = Column(Integer)
     stop = Column(Integer)
-    gene_commentary_type = ManyToOne('%s.GeneCommentaryType'%__name__, colname='gene_commentary_type_id', ondelete='CASCADE', onupdate='CASCADE')
+    gene_commentary_type = ManyToOne('%s.GeneCommentaryType'%__name__, \
+        colname='gene_commentary_type_id', ondelete='CASCADE', onupdate='CASCADE')
     created_by = Column(String(256))
     updated_by = Column(String(256))
     date_created = Column(DateTime, default=datetime.now)
@@ -638,8 +659,10 @@ class Gene(Base, TableClass):
     genomic_accession = Column(String(32))
     genomic_version = Column(Integer)
     genomic_gi = Column(Integer)
-    annot_assembly = ManyToOne('%s.AnnotAssembly'%__name__, colname='annot_assembly_id', ondelete='CASCADE', onupdate='CASCADE')
-    entrezgene_type = ManyToOne('%s.EntrezgeneType'%__name__, colname='entrezgene_type_id', ondelete='CASCADE', onupdate='CASCADE')
+    annot_assembly = ManyToOne('%s.AnnotAssembly'%__name__, \
+        colname='annot_assembly_id', ondelete='CASCADE', onupdate='CASCADE')
+    entrezgene_type = ManyToOne('%s.EntrezgeneType'%__name__, \
+        colname='entrezgene_type_id', ondelete='CASCADE', onupdate='CASCADE')
     comment = Column(Text)
     gene_commentaries = OneToMany('%s.GeneCommentary'%__name__)
     
@@ -1464,18 +1487,21 @@ at this moment, The output is with symap in mind.
 
 i.e.:
 outputDir = os.path.expanduser("~/script/variation/bin/symap_3_3/data/pseudo/vervet177BAC/sequence/pseudo/")
-db_genome.outputGenomeSequence(tax_id=60711, sequence_type_id=10, fastaTitlePrefix='BAC', outputDir=outputDir, chunkSize=70)
+db_genome.outputGenomeSequence(tax_id=60711, sequence_type_id=10,
+    fastaTitlePrefix='BAC', outputDir=outputDir, chunkSize=70)
         """
-        sys.stderr.write("Outputting genome sequences from tax %s, seq-type %s to %s ...\n"%(tax_id, \
-                                        sequence_type_id, outputDir))
+        sys.stderr.write("Outputting genome sequences from tax %s, seq-type %s to %s ...\n"\
+            %(tax_id, sequence_type_id, outputDir))
         query = AnnotAssembly.query.filter_by(tax_id=tax_id).\
-            filter_by(sequence_type_id=sequence_type_id).filter_by(outdated_index=0).order_by(AnnotAssembly.id)
+            filter_by(sequence_type_id=sequence_type_id).\
+            filter_by(outdated_index=0).order_by(AnnotAssembly.id)
         for row in query:
             fastaTitle = '%s%s'%(fastaTitlePrefix, row.id)
             outputFname = os.path.join(outputDir, '%s.seq'%(fastaTitle))
             outf = open(outputFname, 'w')
             outf.write(">%s\n"%(fastaTitle))
-            sub_query = RawSequence.query.filter_by(annot_assembly_id=row.id).order_by(RawSequence.start)
+            sub_query = RawSequence.query.filter_by(annot_assembly_id=row.id).\
+                order_by(RawSequence.start)
             for seq_row in sub_query:
                 sequence = seq_row.sequence
                 while len(sequence)>0:
@@ -1484,7 +1510,7 @@ db_genome.outputGenomeSequence(tax_id=60711, sequence_type_id=10, fastaTitlePref
             del outf
         sys.stderr.write("Done.\n")
     
-    def getSequenceSegment(self, tax_id=None, chromosome=None, start=None, \
+    def getSequenceSegment(self, tax_id=None, chromosome=None, start=None,
         stop=None, schema='genome'):
         """
         #2014.01.12 added outdated_index=0 to filter AnnotAssembly
@@ -1493,14 +1519,17 @@ db_genome.outputGenomeSequence(tax_id=60711, sequence_type_id=10, fastaTitlePref
         """
         chromosome = str(chromosome)
         query = AnnotAssembly.query.filter_by(tax_id=tax_id).\
-            filter_by(chromosome=chromosome).filter_by(outdated_index=0).order_by(AnnotAssembly.id)
+            filter_by(chromosome=chromosome).filter_by(outdated_index=0).\
+            order_by(AnnotAssembly.id)
         annot_assembly_id_ls = []
         for row in query:
             annot_assembly_id_ls.append(row.id)
         if len(annot_assembly_id_ls)>1:
-            sys.stderr.write("Warning: more than 1 entries from tax_id %s, chromosome %s. take first one.\n"%(tax_id, chromosome))
+            logging.warn("more than 1 entries from tax_id %s, chromosome %s. take first one."\
+                %(tax_id, chromosome))
         elif len(annot_assembly_id_ls)==0:
-            sys.stderr.write("Warning: no entry available from tax_id %s, chromosome %s.\n"%(tax_id, chromosome))
+            logging.warn("No entry available from tax_id %s, chromosome %s."%(\
+                tax_id, chromosome))
             return ""
         annot_assembly_id = annot_assembly_id_ls[0]
         curs = __metadata__.bind	#or self.table.bind or self.table.metadata.bind
@@ -1510,11 +1539,12 @@ db_genome.outputGenomeSequence(tax_id=60711, sequence_type_id=10, fastaTitlePref
             raw_sequence_table='%s.%s'%(schema, RawSequence.table.name))
         return seq
     
-    def getSequenceType(self, short_name=None, id=None, **keywords):
+    def getSequenceType(self, short_name=None, entry_id=None, **keywords):
         """
         2013.3.14
         """
-        db_entry = self.checkIfEntryInTable(TableClass=SequenceType, short_name=short_name, id=id)
+        db_entry = self.checkIfEntryInTable(TableClass=SequenceType, 
+            short_name=short_name, entry_id=entry_id)
         if not db_entry:
             db_entry = SequenceType(short_name=short_name)
             self.session.add(db_entry)
@@ -1529,7 +1559,8 @@ db_genome.outputGenomeSequence(tax_id=60711, sequence_type_id=10, fastaTitlePref
         2013.3.19 added argument outdated_index
         2013.3.14 added argument version, chromosome
         2013.2.15 added argument chromosome_type_id
-        chromosome_type_id: what type of chromosomes to be included, same as table genome.chromosome_type.
+        chromosome_type_id: what type of chromosomes to be included,
+             same as table genome.chromosome_type.
             0: all, 1: autosomes, 2: X, 3:Y, 4: mitochondrial
         2011-11-7
             copied from vervet/src/AlignmentToCallPipeline.py
@@ -1567,12 +1598,14 @@ db_genome.outputGenomeSequence(tax_id=60711, sequence_type_id=10, fastaTitlePref
         sys.stderr.write("%s contigs. Done.\n"%(len(chr2size)))
         return chr2size
     
-    def getChromosomeType(self, short_name=None, id=None, comment=None, **keywords):
+    def getChromosomeType(self, short_name=None, id=None, comment=None,
+        **keywords):
         """
         2013.3.14
         """
         TableClass=ChromosomeType
-        db_entry = self.checkIfEntryInTable(TableClass=TableClass, short_name=short_name, id=id)
+        db_entry = self.checkIfEntryInTable(TableClass=TableClass, \
+            short_name=short_name, entry_id=id)
         if not db_entry:
             db_entry = TableClass(short_name=short_name, comment=comment)
             self.session.add(db_entry)
@@ -1580,17 +1613,18 @@ db_genome.outputGenomeSequence(tax_id=60711, sequence_type_id=10, fastaTitlePref
         return db_entry
     
     def checkAnnotAssembly(self, id=None, accession = None, \
-                        version=None, tax_id=None, chromosome =None, \
-                        start=None, stop =None, orientation=None, \
-                        sequence_type_id=None, chromosome_type_id=None,\
-                        outdated_index=0):
+        version=None, tax_id=None, chromosome =None, \
+        start=None, stop =None, orientation=None, \
+        sequence_type_id=None, chromosome_type_id=None,\
+        outdated_index=0):
         """
         2013.3.15 added argument outdated_index
         2013.3.14
             all arguments part of unique key
         """
         if id is not None:
-            db_entry = self.checkIfEntryInTable(TableClass=AnnotAssembly, id=id)
+            db_entry = self.checkIfEntryInTable(TableClass=AnnotAssembly,
+                entry_id=id)
             if db_entry:
                 return db_entry
         
@@ -1655,14 +1689,15 @@ db_genome.outputGenomeSequence(tax_id=60711, sequence_type_id=10, fastaTitlePref
             self.session.flush()
         return db_entry
     
-    def checkGenomeAnnotation(self, id=None, strand=None, start=None, stop =None, \
-        annot_assembly_id=None, \
+    def checkGenomeAnnotation(self, entry_id=None, strand=None, start=None,
+        stop =None, annot_assembly_id=None,
         genome_annotation_type_id=None, description=None, comment=None):
         """
         2013.08.01
         """
-        if id is not None:
-            db_entry = self.checkIfEntryInTable(TableClass=GenomeAnnotation, id=id)
+        if entry_id is not None:
+            db_entry = self.checkIfEntryInTable(TableClass=GenomeAnnotation, \
+                entry_id=entry_id)
             if db_entry:
                 return db_entry
         
@@ -1676,53 +1711,60 @@ db_genome.outputGenomeSequence(tax_id=60711, sequence_type_id=10, fastaTitlePref
         if annot_assembly_id:
             query = query.filter_by(annot_assembly_id=annot_assembly_id)
         if genome_annotation_type_id:
-            query = query.filter_by(genome_annotation_type_id=genome_annotation_type_id)
+            query = query.filter_by(
+                genome_annotation_type_id=genome_annotation_type_id)
         db_entry = query.first()
         return db_entry
     
-    def getGenomeAnnotation(self, id=None, strand=None, start=None, stop =None, \
+    def getGenomeAnnotation(self, entry_id=None, strand=None,
+        start=None, stop =None,
         annot_assembly_id=None, \
         tax_id=None, chromosome=None, version=None, \
         sequence_type_name=None, sequence_type_id=None, \
-        genome_annotation_type_id=None, genome_annotation_type_name=None,\
+        genome_annotation_type_id=None, genome_annotation_type_name=None,
         description=None, comment=None, **keywords):
         """
         2013.8.1
         """
         if not annot_assembly_id:
             if tax_id and chromosome:
-                annot_assembly = self.getAnnotAssembly(id=None, gi=None, \
-                    acc_ver=None, accession=None, version=version, \
-                    tax_id=tax_id, chromosome=chromosome, start=None, stop=None, \
-                    orientation=None, sequence=None, raw_sequence_start_id=None, \
-                    original_path=None, sequence_type_id=sequence_type_id, \
-                    sequence_type_name=sequence_type_name, chromosome_type_id=None, \
-                    chromosome_type_name=None, outdated_index=None, comment=None)
+                annot_assembly = self.getAnnotAssembly(id=None, gi=None,
+                    acc_ver=None, accession=None, version=version,
+                    tax_id=tax_id, chromosome=chromosome, start=None, stop=None,
+                    orientation=None, sequence=None, raw_sequence_start_id=None,
+                    original_path=None, sequence_type_id=sequence_type_id,
+                    sequence_type_name=sequence_type_name,
+                    chromosome_type_id=None,
+                    chromosome_type_name=None, outdated_index=None,
+                    comment=None)
                 annot_assembly_id = annot_assembly.id
         if not genome_annotation_type_id:
             if genome_annotation_type_name:
                 genome_annotation_type = self.getGenomeAnnotationType(
-                    short_name=genome_annotation_type_name, description=None, comment=None)
+                    short_name=genome_annotation_type_name, description=None,
+                    comment=None)
                 genome_annotation_type_id = genome_annotation_type.id
-        db_entry=self.checkGenomeAnnotation(id=id, strand=strand, start=start, stop=stop, \
+        db_entry=self.checkGenomeAnnotation(entry_id=entry_id, strand=strand,
+            start=start, stop=stop,
             annot_assembly_id=annot_assembly_id, \
             genome_annotation_type_id=genome_annotation_type_id, \
             description=description, comment=comment)
         if not db_entry:
             db_entry = GenomeAnnotation(strand = strand, start = start,\
-                        stop =stop, annot_assembly_id=annot_assembly_id, \
-                        genome_annotation_type_id = genome_annotation_type_id, \
-                        description=description, comment = comment)
+                stop =stop, annot_assembly_id=annot_assembly_id, \
+                genome_annotation_type_id = genome_annotation_type_id, \
+                description=description, comment = comment)
             self.session.add(db_entry)
             self.session.flush()
         return db_entry
     
-    def checkGenomeAnnotationType(self, id=None, short_name=None):
+    def checkGenomeAnnotationType(self, entry_id=None, short_name=None):
         """
         2013.08.01
         """
         if id is not None:
-            db_entry = self.checkIfEntryInTable(TableClass=GenomeAnnotationType, id=id)
+            db_entry = self.checkIfEntryInTable(
+                TableClass=GenomeAnnotationType, entry_id=entry_id)
             if db_entry:
                 return db_entry
         
@@ -1732,22 +1774,24 @@ db_genome.outputGenomeSequence(tax_id=60711, sequence_type_id=10, fastaTitlePref
         db_entry = query.first()
         return db_entry
     
-    def getGenomeAnnotationType(self, id=None, short_name=None, \
+    def getGenomeAnnotationType(self, entry_id=None, short_name=None, \
         description=None, comment=None, **keywords):
         """
         2013.8.1
         """
-        db_entry=self.checkGenomeAnnotationType(id=id, short_name=short_name)
+        db_entry=self.checkGenomeAnnotationType(entry_id=entry_id,
+            short_name=short_name)
         if not db_entry:
             db_entry = GenomeAnnotationType(short_name = short_name, \
-                        description=description, comment = comment)
+                description=description, comment = comment)
             self.session.add(db_entry)
             self.session.flush()
         return db_entry
     
-    def getGeneCommentary(self, gene_id=None, start=None, stop=None, \
+    def getGeneCommentary(self, gene_id=None, start=None, stop=None,
         gene_commentary_type_id=None, gene_commentary_id=None,\
-        accession=None, version=None, gi=None, label=None, text=None, comment=None,
+        accession=None, version=None, gi=None, label=None, text=None,
+        comment=None,
         gene=None, gene_commentary=None):
         """
         2012.4.26
@@ -1910,9 +1954,11 @@ def get_entrezgene_annotated_anchor(curs, tax_id, entrezgene_mapping_table='geno
     sys.stderr.write("Getting entrezgene_annotated_anchor ...")
     chromosome2anchor_gene_tuple_ls = {}
     gene_id2coord = {}
-    curs.execute("select e.genomic_gi, a.chromosome, e.id, e.strand, \
-            e.start, e.stop from %s e, %s a where e.genomic_gi = a.gi and e.tax_id=%s and a.chromosome is not null"%\
-            (entrezgene_mapping_table, annot_assembly_table, tax_id))	#2010-8-1 make sure chromosome is not null
+    curs.execute(f"select e.genomic_gi, a.chromosome, e.id, e.strand, "
+        f"e.start, e.stop from {entrezgene_mapping_table} e, "
+        f"{annot_assembly_table} a where e.genomic_gi = a.gi and "
+        f"e.tax_id={tax_id} and a.chromosome is not null")
+        #2010-8-1 make sure chromosome is not null
     
     #curs.execute("fetch 5000 from eaa_crs")
     rows = curs.fetchall()
@@ -1939,14 +1985,15 @@ def get_entrezgene_annotated_anchor(curs, tax_id, entrezgene_mapping_table='geno
     for chromosome in chromosome2anchor_gene_tuple_ls:	#sort the list
         chromosome2anchor_gene_tuple_ls[chromosome].sort()
     #curs.execute("close eaa_crs")
-    sys.stderr.write("%s genes (including AS-isoforms). Done.\n"%counter)	#2010-8-1 report counter
+    sys.stderr.write("%s genes (including AS-isoforms). Done.\n"%counter)
     return chromosome2anchor_gene_tuple_ls, gene_id2coord
 
 if __name__ == '__main__':
     import sys, os
     from palos import ProcessOptions
     main_class = GenomeDatabase
-    po = ProcessOptions(sys.argv, main_class.option_default_dict, error_doc=main_class.__doc__)
+    po = ProcessOptions(sys.argv, main_class.option_default_dict, \
+        error_doc=main_class.__doc__)
     
     instance = main_class(**po.long_option2value)
     instance.setup()
@@ -1958,7 +2005,8 @@ if __name__ == '__main__':
     
     import pickle
     #2011-1-20 check if the pickled file already exists or not
-    pickle_fname = po.arguments[0]	#2012.3.26 stopped using '~/at_gene_model_pickelf', instead use the 1st argument
+    pickle_fname = po.arguments[0]
+    #2012.3.26 stopped using '~/at_gene_model_pickelf', instead use the 1st argument
     if os.path.isfile(os.path.expanduser(pickle_fname)):
         sys.stderr.write("File %s already exists, no gene model pickle output.\n"%(pickle_fname))
     else:

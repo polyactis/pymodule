@@ -504,7 +504,7 @@ Example ("Library" and "Bam Path" are required):
         But should provide as much as you can.
         Columns of sample_sheet:
             file_path,sample_id,study,site,
-            sequence_type,sequencer,sequence_batch_id,libarary,
+            sequence_type,sequencer,sequence_batch,libarary,
             condition,tissue_name,tissue_id
         """
         logging.warn(f"Getting sample_id2data from {sample_sheet} ...")
@@ -543,7 +543,7 @@ Example ("Library" and "Bam Path" are required):
                 library=None, mate_id = mate_id,
                 sequence_type=NoneForNan(row.sequence_type),
                 sequencer=NoneForNan(row.sequencer),
-                sequence_batch_id=NoneForNan(row.sequence_batch_id),
+                sequence_batch=NoneForNan(row.sequence_batch),
                 tissue_name=NoneForNan(row.tissue_name),
                 tissue_id=NoneForNan(row.tissue_id),
                 condition=NoneForNan(row.condition),
@@ -579,7 +579,7 @@ Example ("Library" and "Bam Path" are required):
                 sequence_format=self.sequence_format, 
                 path_to_original_sequence=fastq_obj_1.abs_path, 
                 coverage=None,
-                sequence_batch_id=fastq_obj_1.sequence_batch_id, 
+                sequence_batch_name=fastq_obj_1.sequence_batch, 
                 tissue_name=fastq_obj_1.tissue_name, 
                 tissue_id=fastq_obj_1.tissue_id,
                 condition_name=fastq_obj_1.condition,
@@ -759,20 +759,23 @@ D1HYNACXX	2	UNGC Human Sample 1	S1	AS001A	ATTACTCG	TruSeq DNA PCR Free beta kit	
             VSAB5004_R      GGCTAC  sample1
             VSAA2015_RN     CTTGTA  sample2
         """
-        sys.stderr.write("Getting filenameSignature2SampleID dictionary from %s ..."%(sample_sheet))
+        logging.warn("Getting filenameSignature2SampleID dictionary from %s ..."\
+            %(sample_sheet))
         filenameSignature2SampleID = {}
         reader = csv.reader(open(sample_sheet), delimiter='\t')
         sampleIDIndex = 0
         folderNameIndex = 1
         subSampleNameIndex = 2
-        sampleIDPattern = re.compile(r'(\w+)_R[\w]*')	# 2012.6.2 VSAA2015_RN or VSAB5004_R
+        # 2012.6.2 VSAA2015_RN or VSAB5004_R
+        sampleIDPattern = re.compile(r'(\w+)_R[\w]*')
         for row in reader:
             sample_id = row[sampleIDIndex]
             pa_search = sampleIDPattern.search(sample_id)
             if pa_search:
                 sample_id = pa_search.group(1)
             else:
-                sys.stderr.write("Warning: could not parse sample ID from %s. Ignore.\n"%(sample_id))
+                logging.warn("Warning: could not parse sample ID from %s. Ignore."\
+                    %(sample_id))
                 continue
             folderName = row[folderNameIndex]
             subSampleName = row[subSampleNameIndex]
@@ -793,7 +796,8 @@ D1HYNACXX	2	UNGC Human Sample 1	S1	AS001A	ATTACTCG	TruSeq DNA PCR Free beta kit	
             .../GCCAAT/tile_1101_sample1_end1.fastq
             .../GCCAAT/tile_1101_sample1_end2.fastq
         """
-        sys.stderr.write("Parsing sample_id2fastq_obj_ls from %s files ..."%(len(fastq_path_ls)))
+        sys.stderr.write("Parsing sample_id2fastq_obj_ls from %s files ..."\
+            %(len(fastq_path_ls)))
         sample_id2fastq_obj_ls = {}
         import random
         filename_pattern = re.compile(r'/(?P<folderName>[ACGT]{6})/(?P<library>[\w]+)'
@@ -815,7 +819,6 @@ D1HYNACXX	2	UNGC Human Sample 1	S1	AS001A	ATTACTCG	TruSeq DNA PCR Free beta kit	
                 filenameSignature = (folderName, subSampleName)
                 if filenameSignature in filenameSignature2SampleID:
                     sample_id = filenameSignature2SampleID.get(filenameSignature)
-                    
                     #concoct a unique library ID
                     #this combination insures two ends from the same library are grouped together
                     libraryKey = (folderName, library)

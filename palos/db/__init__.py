@@ -7,7 +7,8 @@ Can't directly use it because of trouble in
   understanding how to use adapter involved in TreadlocalDatabaseTransactions.
 """
 import sys, os, math
-import sqlalchemy, threading
+import logging
+import sqlalchemy
 from sqlalchemy.engine.url import URL
 from sqlalchemy import Table, create_engine
 from sqlalchemy.orm import mapper, relation
@@ -15,24 +16,34 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from palos import utils
 import copy
 
-def supplantFilePathWithNewDataDir(filePath="", oldDataDir=None, newDataDir=None):
+def supplantFilePathWithNewDataDir(filePath="", oldDataDir=None,
+    newDataDir=None):
     """
-    2012.12.15 argument filePath could be relative path and return join(newDataDir, filePath). oldDataDir is ignored.
-        So it could handle both Stock_250kDB (absolute path) and VervetDB (relative path)'s path
+    2012.12.15 argument filePath could be relative path and return 
+        join(newDataDir, filePath). oldDataDir is ignored.
+        So it could handle both Stock_250kDB (absolute path) and VervetDB
+            (relative path)'s path.
         i.e. 
-        supplantFilePathWithNewDataDir(filePath='genotype_file/method_31/32093_VCF_26356_VCF_24680_VCF_Contig900.subset.vcf.gz',\
+        supplantFilePathWithNewDataDir(
+            filePath='method_31/32093_VCF_26356_VCF_24680_VCF_Contig900.subset.vcf.gz',\
             newDataDir='/Network/Data/vervet/db')
         is same as:
-            supplantFilePathWithNewDataDir(filePath='genotype_file/method_31/32093_VCF_26356_VCF_24680_VCF_Contig900.subset.vcf.gz',\
-                oldDataDir='/Network/Data/vervet/db', newDataDir='/Network/Data/vervet/db')
+            supplantFilePathWithNewDataDir(
+                filePath='genotype_file/method_31/32093_VCF_26356_VCF_24680_VCF_Contig900.subset.vcf.gz',\
+                oldDataDir='/Network/Data/vervet/db',
+                newDataDir='/Network/Data/vervet/db')
         for absolute path:
-            supplantFilePathWithNewDataDir(filePath='/Network/Data/250k/db/results/type_1/16_results.tsv',\
-                oldDataDir='/Network/Data/250k/db', newDataDir='~/NetworkData/250k/db') 
+            supplantFilePathWithNewDataDir(
+                filePath='/Network/Data/250k/db/results/type_1/16_results.tsv',\
+                oldDataDir='/Network/Data/250k/db',
+                newDataDir='~/NetworkData/250k/db') 
     2012.11.13
         expose the oldDataDir argument
     2012.3.23
-        in case that the whole /Network/Data/250k/db is stored in a different place (=newDataDir)
-            how to rescale the filePath ( stored in the database tables) to reflect its new path.
+        in case that the whole /Network/Data/250k/db is stored in a different
+            place (=newDataDir).
+        How to rescale the filePath ( stored in the database tables)
+            to reflect its new path.
         Stock_250kDB stores absolute path for each file.
         This function helps to adjust that path.
     """
@@ -46,11 +57,11 @@ def supplantFilePathWithNewDataDir(filePath="", oldDataDir=None, newDataDir=None
                 if filePath.find(oldDataDir)==0:
                     relativePath = filePath[len(oldDataDir):]
                     if relativePath[0]=='/':
-                        #2012.12.28 have to remove the initial "/" otherwise os.path.join() won't work
+                        #Remove the initial "/" alas os.path.join() won't work
                         relativePath = relativePath[1:]
                     newFilePath = os.path.join(newDataDir, relativePath)
                 else:
-                    sys.stderr.write("Warning: %s doesn't include old data dir %s. Return Nothing.\n"%(
+                    logging.warn("%s doesn't include old data dir %s. Return Nothing."%(
                         filePath, oldDataDir))
                     newFilePath = None
         else:	#relative path
@@ -367,31 +378,36 @@ class Database(object):
             query = self.session.query(TableClass)
         return query
     
-    def checkIfEntryInTable(self, TableClass=None, short_name=None, id=None):
+    def checkIfEntryInTable(self, TableClass=None, short_name=None,
+        entry_id=None):
         """
         2013.04.03 bugfix. query = query.filter_by...
-            and check how many entries return from db query. should be one. otherwise raise exception.
+            and check how many entries return from db query. should be one.
+            otherwise raise exception.
         2013.3.14
-            this could be used as generic way to query tables with short_name (unique) & id columns
+            this could be used as generic way to query tables with short_name
+                (unique) & id columns.
         """
         query = self.queryTable(TableClass)
-        if short_name or id:
+        if short_name or entry_id:
             if short_name:
                 query = query.filter_by(short_name=short_name)
                 db_entry = query.first()
-            if id:
-                query = query.filter_by(id=id)
+            if entry_id:
+                query = query.filter_by(id=entry_id)
                 db_entry = query.first()
-                #20170419 not sure if it's right. For elixir, it should be TableClass.get(id)
+                #20170419 not sure if it's right.
+                #  For elixir, it should be TableClass.get(id)
                 #return db_entry
         else:
-            sys.stderr.write("Either short_name (%s) or id (%s) have to be non-None.\n"%(short_name, id))
+            logging.error(f"Either short_name ({short_name}) or id ({entry_id})"
+                f" have to be non-None.")
             raise
         no_of_entries = query.count()
         db_entry = query.first()
         if no_of_entries>1:
-            sys.stderr.write("Error, query table %s by short_name=%s, id=%s returns %s entries (>1).\n"%\
-                (TableClass, short_name, id, no_of_entries))
+            logging.error(f"Query table {TableClass} by short_name={short_name}"
+                f", id={entry_id} returns {no_of_entries} entries (>1).")
             raise
         if db_entry:
             return db_entry

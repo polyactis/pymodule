@@ -81,7 +81,6 @@ alignment_depth_interval_method2individual_alignment_table = Table(
         ForeignKey(_schemaname_+'.alignment_depth_interval_method.id')),
     Column('individual_alignment_id',Integer,\
         ForeignKey(_schemaname_+'.individual_alignment.id'))
-
     )
 
 user2phenotype_method_table = Table('user2phenotype_method',Base.metadata,
@@ -549,10 +548,10 @@ class IndividualAlignment(Base, AbstractTableWithFilename):
     updated_by = Column(String(128))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    UniqueConstraint('ind_seq_id', 'ref_ind_seq_id', 'alignment_method_id', \
+    UniqueConstraint('ind_seq_id', 'ref_ind_seq_id', 'alignment_method_id',
         'outdated_index', \
         'parent_individual_alignment_id', 'mask_genotype_method_id',\
-        'individual_sequence_file_raw_id', 'local_realigned', 'reduce_reads',\
+        'individual_sequence_file_raw_id', 'local_realigned', 'reduce_reads',
         name='individual_alignment_iraopmilr')
     
     individual_sequence = relationship('IndividualSequence',\
@@ -565,7 +564,7 @@ class IndividualAlignment(Base, AbstractTableWithFilename):
         back_populates='individual_alignment_ls')
     mask_genotype_method = relationship('GenotypeMethod',\
         back_populates='individual_alignment_list_in_genotype_method')
-    individual_sequence_file_raw = relationship('IndividualSequenceFileRaw',\
+    individual_sequence_file_raw = relationship('IndividualSequenceFileRaw',
         back_populates='ind_alig_list_in_ind_seq_file_raw')
     individual_alignment_consensus_seq_list = relationship(
         'IndividualAlignmentConsensusSequence',
@@ -577,7 +576,8 @@ class IndividualAlignment(Base, AbstractTableWithFilename):
     genotype_method_ls = relationship('GenotypeMethod',\
         secondary=genotype_method2individual_alignment_table, 
         back_populates='individual_alignment_ls')
-    alignment_depth_interval_method_ls = relationship('AlignmentDepthIntervalMethod', 
+    alignment_depth_interval_method_ls = relationship(
+        'AlignmentDepthIntervalMethod',
         secondary=alignment_depth_interval_method2individual_alignment_table,
         back_populates="individual_alignment_ls")
 
@@ -682,7 +682,7 @@ class IndividualAlignmentConsensusSequence(Base, AbstractTableWithFilename):
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
     UniqueConstraint('individual_alignment_id', 'minDP', 'maxDP', 'minBaseQ',
-        'minMapQ', 'minRMSMapQ', 'minDistanceToIndel', 'no_of_chromosomes', \
+        'minMapQ', 'minRMSMapQ', 'minDistanceToIndel', 'no_of_chromosomes',
         name='individual_alignment_consensus_sequence_immmmmmn')
     
     individual_alignment = relationship('IndividualAlignment', \
@@ -726,9 +726,8 @@ class IndividualSequence(Base, AbstractTableWithFilename):
     """
     __tablename__ = 'individual_sequence'
     __table_args__ = {'schema':_schemaname_}
-    
     id = Column(Integer, primary_key=True)
-    individual_id = Column(Integer, ForeignKey(_schemaname_ + '.individual.id'))
+    individual_id = Column(Integer,ForeignKey(_schemaname_ + '.individual.id'))
     sequencer_id = Column(Integer, ForeignKey(_schemaname_ + '.sequencer.id'))
     # 454, GA, Sanger
     sequence_type_id = Column(Integer, \
@@ -755,7 +754,8 @@ class IndividualSequence(Base, AbstractTableWithFilename):
         ForeignKey(_schemaname_ + '.sequence_batch.id'))
     #2013.3.15 field to mark whether it's contaminated or not.
     is_contaminated = Column(Integer, default=0)
-    #2013.3.15 any non-zero means outdated. to allow multiple outdated alignments
+    #2013.3.15 any non-zero means outdated.
+    #  to allow multiple outdated alignments
     outdated_index = Column(Integer, default=0)
     version = Column(Integer, default=1)
     comment = Column(Text)
@@ -795,7 +795,7 @@ class IndividualSequence(Base, AbstractTableWithFilename):
         'IndividualSequenceFileRaw', back_populates='individual_sequence', 
         cascade='all,delete')
     sequence_batch = relationship('SequenceBatch', 
-        back_populates='ind_seq_list_in_sequence_batch')
+        back_populates='ind_seq_list')
     ind_seq2_list_in_ind1_seq = relationship(
         'IndividualSequence2Sequence', back_populates='individual1_sequence', 
         cascade='all,delete', \
@@ -816,7 +816,8 @@ class IndividualSequence(Base, AbstractTableWithFilename):
         """
         2012.7.13 link to constructRelativePathForIndividualSequence()
         """
-        return self.constructRelativePathForIndividualSequence(subFolder=subFolder)
+        return self.constructRelativePathForIndividualSequence(
+            subFolder=subFolder)
     
     folderName='individual_sequence'
     def constructRelativePathForIndividualSequence(self, subFolder=None):
@@ -881,7 +882,7 @@ class SequenceBatch(Base):
     updated_by = Column(String(128))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    ind_seq_list_in_sequence_batch = relationship('IndividualSequence', 
+    ind_seq_list = relationship('IndividualSequence', 
         back_populates='sequence_batch', cascade='all,delete')
     individual_ls = relationship('Individual', \
         secondary=individual2batch_table, back_populates='sequence_batch_ls')
@@ -938,7 +939,8 @@ class IndividualSequenceFile(Base, AbstractTableWithFilename):
     individual_sequence_file_raw_id = Column(Integer, \
         ForeignKey(_schemaname_ + '.individual_sequence_file_raw.id'))
     library = Column(Text)	#id for the preparation library
-    # the number that designates the order of this split fastq file within the large file
+    # the number that designates the order of this split
+    #  fastq file within the large file
     split_order = Column(Integer)
     # id of the mate pair. 1 = 1st end. 2 = 2nd end. null = single-end.
     mate_id = Column(Integer)
@@ -1004,8 +1006,8 @@ class IndividualSequenceFileRaw(Base, AbstractTableWithFilename):
     individual_sequence_id = Column(Integer,
         ForeignKey(_schemaname_ + '.individual_sequence.id'))
     library = Column(Text)	#id for the preparation library
-    mate_id = Column(Integer)	#2012.4.30 to handle fastq raw sequence files.
-    read_count = Column(BigInteger)	#2012.2.27
+    mate_id = Column(Integer)
+    read_count = Column(BigInteger)
     base_count = Column(BigInteger)
     path = Column(Text)	#path to the file
     original_path = Column(Text)	#path to the original file
@@ -1014,7 +1016,7 @@ class IndividualSequenceFileRaw(Base, AbstractTableWithFilename):
     #Standard=Phred+33 (=Sanger), Illumina=Phred+64 
     # (roughly, check pymodule/utils for exact formula)
     # Illumina1.8+ (after 2011-02) is Standard.
-    file_size = Column(BigInteger)	#2012.7.12
+    file_size = Column(BigInteger)
     created_by = Column(String(128))
     updated_by = Column(String(128))
     date_created = Column(DateTime, default=datetime.now())
@@ -1094,13 +1096,14 @@ class Locus(Base, TableClass):
     chromosome = Column(String(512))
     start = Column(Integer)
     stop = Column(Integer)
-    ref_seq_id = Column(Integer, ForeignKey(_schemaname_ + '.allele_sequence.id'))
-    alt_seq_id = Column(Integer, ForeignKey(_schemaname_ + '.allele_sequence.id'))
-    ref_ind_seq_id = Column(Integer, \
+    ref_seq_id = Column(Integer,
+        ForeignKey(_schemaname_ + '.allele_sequence.id'))
+    alt_seq_id = Column(Integer,
+        ForeignKey(_schemaname_ + '.allele_sequence.id'))
+    ref_ind_seq_id = Column(Integer, 
         ForeignKey(_schemaname_ + '.individual_sequence.id'))
-    locus_type_id = Column(Integer, ForeignKey(_schemaname_ + '.locus_type.id'))
+    locus_type_id = Column(Integer,ForeignKey(_schemaname_ + '.locus_type.id'))
     ## which study, or SNPs/ indels 
-    
     created_by = Column(String(128))
     updated_by = Column(String(128))
     date_created = Column(DateTime, default=datetime.now())
@@ -1109,18 +1112,20 @@ class Locus(Base, TableClass):
         'locus_type_id',
         name='locus_chromosome_start_stop_ref_ind_seq_id_locus_type_id')
     ref_seq = relationship('AlleleSequence', \
-        back_populates='locus_list_in_ref_seq', foreign_keys='Locus.ref_seq_id')
+        back_populates='locus_list_in_ref_seq',foreign_keys='Locus.ref_seq_id')
     alt_seq = relationship('AlleleSequence', \
-        back_populates='locus_list_in_alt_seq', foreign_keys='Locus.alt_seq_id')
+        back_populates='locus_list_in_alt_seq',foreign_keys='Locus.alt_seq_id')
     ref_sequence = relationship('IndividualSequence', \
         back_populates='locus_list_in_ref_sequence')
-    locus_type = relationship('LocusType', back_populates='locus_list_in_locus_type')
+    locus_type = relationship('LocusType',
+        back_populates='locus_list_in_locus_type')
     locus_annotation_list_in_locus = relationship('LocusAnnotation', \
         back_populates='locus', cascade='all,delete')
     locus_context_list_in_locus = relationship('LocusContext', \
         back_populates='locus', cascade='all,delete')
     genotype_list_in_locus = relationship('Genotype', 
-        back_populates='locus', cascade='all,delete', foreign_keys='Genotype.locus_id')
+        back_populates='locus', cascade='all,delete',
+        foreign_keys='Genotype.locus_id')
     genotype_list_in_target_locus = relationship('Genotype', 
         back_populates='target_locus', cascade='all,delete',
         foreign_keys='Genotype.target_locus_id')
@@ -1137,7 +1142,8 @@ class LocusScore(Base, TableClass):
     
     id = Column(Integer, primary_key=True)
     locus_id = Column(Integer,ForeignKey(_schemaname_+'.locus.id'))
-    score_method_id = Column(Integer, ForeignKey(_schemaname_ + '.score_method.id'))
+    score_method_id = Column(Integer, 
+        ForeignKey(_schemaname_ + '.score_method.id'))
     score = Column(Float)
     rank = Column(Integer)
     #object = Column(LargeBinary(134217728), deferred=True)
@@ -1169,12 +1175,11 @@ class LocusAnnotation(Base):
     
     id = Column(Integer, primary_key=True)
     locus_id = Column(Integer, ForeignKey(_schemaname_ + '.locus.id'))
-    locus_context_id = Column(Integer, ForeignKey(_schemaname_ + '.locus_context.id'))
+    locus_context_id = Column(Integer, 
+        ForeignKey(_schemaname_ + '.locus_context.id'))
     gene_id = Column(Integer)
     gene_commentary_id = Column(Integer)
     gene_segment_id = Column(Integer)
-    #locus_annotation_type = ManyToOne('%s.LocusAnnotationType'%__name__, 
-    # 	colname='locus_annotation_type_id', ondelete='CASCADE', onupdate='CASCADE')
     locus_annotation_type_id = Column(Integer, \
         ForeignKey(_schemaname_ + '.locus_annotation_type.id'))
     which_exon_or_intron = Column(Integer)
@@ -1251,9 +1256,7 @@ class LocusContext(Base):
     overlap_length = Column(Integer)	#for structural variation
     overlap_fraction_in_gene = Column(Float)		#for structural variation
     overlap_fraction_in_locus = Column(Float)	#for structural variation
-    #created_by = Column(String(200), deferred=True)
     created_by = Column(String(200))
-    #updated_by = Column(String(200), deferred=True)
     updated_by = Column(String(200))
     #date_created = Column(DateTime, default=datetime.now, deferred=True)
     date_created = Column(DateTime, default=datetime.now())
@@ -1354,8 +1357,6 @@ class Sequencer(Base):
     id = Column(Integer, primary_key=True)
     short_name = Column(String(128), unique=True)
     description = Column(String(8000))
-    #seq_center = ManyToOne('%s.SeqCenter'%(__name__), colname='seq_center_id',
-    # 	ondelete='CASCADE', onupdate='CASCADE')
     seq_center_id = Column(Integer, ForeignKey(_schemaname_ + '.seq_center.id'))
     center_type= Column(String(200)) 
     created_by = Column(String(200))
@@ -1486,15 +1487,16 @@ class Genotype(Base, TableClass):
     __table_args__ = {'schema':_schemaname_}
     
     id = Column(Integer, primary_key=True)
-    individual_id = Column(Integer, ForeignKey(_schemaname_ + '.individual.id'))
+    individual_id = Column(Integer,ForeignKey(_schemaname_ + '.individual.id'))
     locus_id = Column(Integer, ForeignKey(_schemaname_ + '.locus.id'))	
     chromosome_copy = Column(Integer, default=0)
     #on which chromosome copy (multi-ploid), 0=unknown (for un-phased),
     #  1 =1st chromosome, so on
     
-    allele_type_id = Column(Integer, ForeignKey(_schemaname_ + '.allele_type.id'))
+    allele_type_id = Column(Integer,
+        ForeignKey(_schemaname_ + '.allele_type.id'))
     # SNP/MNP/Indel/inversion
-    allele_sequence_id = Column(Integer, \
+    allele_sequence_id = Column(Integer,
         ForeignKey(_schemaname_ + '.allele_sequence.id'))
     #the actual allele
     allele_sequence_length = Column(Integer)
@@ -1548,7 +1550,7 @@ class GenotypeMethod(Base, AbstractTableWithFilename):
     path = Column(Text, unique=True)
     ref_ind_seq_id = Column(Integer, \
         ForeignKey(_schemaname_ + '.individual_sequence.id'))
-    parent_id = Column(Integer, ForeignKey(_schemaname_ + '.genotype_method.id',
+    parent_id = Column(Integer,ForeignKey(_schemaname_ + '.genotype_method.id',
         ondelete='CASCADE', onupdate='CASCADE'))
     no_of_individuals = Column(Integer)
     no_of_loci = Column(BigInteger)
@@ -1567,8 +1569,8 @@ class GenotypeMethod(Base, AbstractTableWithFilename):
         name='genotype_method_short_name_ref_ind_seq_id')
     
     individual_alignment_list_in_genotype_method = relationship(
-        'IndividualAlignment', back_populates='mask_genotype_method', \
-            cascade='all,delete')
+        'IndividualAlignment', back_populates='mask_genotype_method',
+        cascade='all,delete')
     score_method_list_in_genotype_method = relationship(
         'ScoreMethod', back_populates='genotype_method', cascade='all,delete')
     genotype_list_in_genotype_method = relationship(
@@ -1647,23 +1649,25 @@ class GenotypeFile(Base, AbstractTableWithFilename):
         2012.7.12
             path relative to self.data_dir
         """
-        folderRelativePath = self.genotype_method.constructRelativePath(\
+        folderRelativePath = self.genotype_method.constructRelativePath(
             subFolder=subFolder)
         #'/' must not be put in front of the relative path.
         # otherwise, os.path.join(self.data_dir, dst_relative_path) will only
         #  take the path of dst_relative_path.
         folderRelativePath = folderRelativePath.lstrip('/')
         if self.no_of_chromosomes<=1:
-            dst_relative_path = os.path.join(folderRelativePath, '%s_chr_%s_%s'%(
-                self.id, self.chromosome, sourceFilename))
-        else:	#files with more than 1 chromosome
+            dst_relative_path = os.path.join(folderRelativePath,
+                '%s_chr_%s_%s'%(self.id, self.chromosome, sourceFilename))
+        else:
+            #files with more than 1 chromosome
             # 2012.8.30
             # it'll be like 
             #   genotype_file/method_6_$id_$format_#chromosomes_sourceFilename
             # do not put it in genotype_file/method_6/ folder.
             folderRelativePath= folderRelativePath.rstrip('/')
             dst_relative_path = '%s_%s_%schromosomes_%s'%(
-                folderRelativePath, self.id, self.no_of_chromosomes, sourceFilename)
+                folderRelativePath, self.id, self.no_of_chromosomes,
+                sourceFilename)
         return dst_relative_path
     
     def getFileSize(self, data_dir=None):
@@ -1687,9 +1691,10 @@ class AlignmentDepthIntervalMethod(Base, AbstractTableWithFilename):
     description = Column(Text)
     path = Column(Text, unique=True)
     parent_id = Column(Integer, \
-        ForeignKey(_schemaname_ + '.alignment_depth_interval_method.id', 
+        ForeignKey(_schemaname_ + '.alignment_depth_interval_method.id',
         ondelete='CASCADE', onupdate='CASCADE'))
-    ref_ind_seq_id = Column(Integer, ForeignKey(_schemaname_ + '.individual_sequence.id'))
+    ref_ind_seq_id = Column(Integer,
+        ForeignKey(_schemaname_ + '.individual_sequence.id'))
     no_of_alignments = Column(Integer)
     no_of_intervals = Column(BigInteger)
     sum_median_depth = Column(Float)	#across all alignments
@@ -1702,7 +1707,8 @@ class AlignmentDepthIntervalMethod(Base, AbstractTableWithFilename):
     date_updated = Column(DateTime)
     
     parent = relationship('AlignmentDepthIntervalMethod')
-    alignment_depth_interval_file_ls = relationship('AlignmentDepthIntervalFile', 
+    alignment_depth_interval_file_ls = relationship(
+        'AlignmentDepthIntervalFile',
         back_populates='alignment_depth_interval_method', 
         cascade='all,delete')
     ref_sequence = relationship('IndividualSequence',
@@ -1731,7 +1737,8 @@ class AlignmentDepthIntervalFile(Base, AbstractTableWithFilename):
     __tablename__ = 'alignment_depth_interval_file'
     __table_args__ = (
         UniqueConstraint('alignment_depth_interval_method_id', 'chromosome', 
-            'format', 'no_of_chromosomes', name='alignment_depth_interval_file_acfn'),
+            'format', 'no_of_chromosomes',
+            name='alignment_depth_interval_file_acfn'),
         {'schema':_schemaname_},
     )
     
@@ -2433,7 +2440,7 @@ class SunsetDB(Database):
         if alignmentIDList:
             for alignmentID in  alignmentIDList:
                 individualAlignment = self.checkIfEntryInTable(
-                    TableClass=IndividualAlignment, id=int(alignmentID))
+                    TableClass=IndividualAlignment, entry_id=int(alignmentID))
                 alignmentLs.append(individualAlignment)
         sys.stderr.write("%s alignments.\n"%(len(alignmentLs)))
         return alignmentLs
@@ -2723,7 +2730,9 @@ class SunsetDB(Database):
         tissue_name: str=None, tissue_id: int=None, 
         condition_name: str=None, condition_id: int=None, 
         parent_individual_sequence_id: int=None,\
-        no_of_chromosomes: int=None, sequence_batch_id: int=None, version=None,
+        no_of_chromosomes: int=None,
+        sequence_batch_id: int=None,
+        version=None,
         filtered: int=0, is_contaminated: int=0, outdated_index: int=0, 
         returnFirstEntry:bool=True):
         """
@@ -2802,22 +2811,31 @@ class SunsetDB(Database):
         else:
             return query
     
-    def checkIndividualAlignment(self, individual_code=None,
-        individual_id=None, individual=None, individual_sequence_id:str=None,
+    def checkIndividualAlignment(self,
+        individual=None,
+        individual_code=None,
+        individual_id=None,
+        individual_sequence_id:str=None,
         sequencer_id:int=None,
         sequencer_name:str='GA',
-        sequence_type_name:str=None, sequence_type_id:int=None,
-        sequence_format:str='fastq', alignment_format:str='bam',
+        sequence_type_name:str=None,
+        sequence_type_id:int=None,
+        sequence_format:str='fastq',
+        alignment_format:str='bam',
         ref_individual_sequence_id=10, \
         alignment_method=None, 
         alignment_method_id:int=None,
         alignment_method_name:str='bwa-short-read',
-        createSymbolicLink=False, individual_sequence_filtered=0,
-        read_group_added=None, data_dir=None, \
-        outdated_index=0, mask_genotype_method_id=None,
+        createSymbolicLink=False,
+        individual_sequence_filtered=0,
+        read_group_added=None,
+        data_dir=None,
+        outdated_index=0,
+        mask_genotype_method_id=None,
         parent_individual_alignment_id=None,\
         individual_sequence_file_raw_id=None,
-        local_realigned=0, reduce_reads=None):
+        local_realigned=0,
+        reduce_reads=None):
         """
         2013.04.05 split out of getAlignment()
         """
@@ -2894,7 +2912,6 @@ class SunsetDB(Database):
                 f"alignment_format={alignment_format}, "
                 f"local_realigned={local_realigned}, "
                 f"reduce_reads={reduce_reads}), "
-                f"md5sum={md5sum}"
                 )
             sys.exit(4)
         db_entry = query.first()
@@ -2910,6 +2927,7 @@ class SunsetDB(Database):
         coverage:float=None, quality_score_format:str="Standard", 
         parent_individual_sequence_id:int=None,\
         read_count:int=None, no_of_chromosomes:int=None, 
+        sequence_batch_name:str=None,
         sequence_batch_id:int=None,
         filtered:int=0, version:int=None, is_contaminated=0, 
         outdated_index=0, comment=None, 
@@ -2929,47 +2947,52 @@ class SunsetDB(Database):
         if sequencer_id is None and sequencer_name:
             sequencer = self.getSequencer(short_name=sequencer_name)
             if sequencer:
-                sequencer_id=sequencer.id
+                sequencer_id = sequencer.id
         if sequence_type_id is None and sequence_type_name:
             sequence_type = self.getSequenceType(short_name=sequence_type_name)
             if sequence_type:
-                sequence_type_id=sequence_type.id
+                sequence_type_id = sequence_type.id
+        if sequence_batch_name and sequence_batch_id is None:
+            sequence_batch = self.getSequenceBatch(
+                short_name=sequence_batch_name)
+            if sequence_batch:
+                sequence_batch_id = sequence_batch.id
         
         db_entry = self.checkIndividualSequence(
-            individual_id=individual_id, sequencer_id=sequencer_id, \
+            individual_id=individual_id, sequencer_id=sequencer_id,
             sequencer_name=sequencer_name, 
-            sequence_type_name=sequence_type_name, \
+            sequence_type_name=sequence_type_name,
             sequence_type_id=sequence_type_id, 
             sequence_format=sequence_format, 
             tissue_name=tissue_name, tissue_id=tissue_id,
             condition_name=condition_name, condition_id=condition_id,
-            filtered=filtered, \
-            parent_individual_sequence_id=parent_individual_sequence_id, \
-            no_of_chromosomes=no_of_chromosomes, 
-            sequence_batch_id=sequence_batch_id, \
-            version=version, is_contaminated=is_contaminated, \
+            filtered=filtered,
+            parent_individual_sequence_id=parent_individual_sequence_id,
+            no_of_chromosomes=no_of_chromosomes,
+            sequence_batch_id=sequence_batch_id,
+            version=version, is_contaminated=is_contaminated,
             outdated_index=outdated_index)
         if not db_entry:
             tissue = self.getTissue(db_entry_id=tissue_id, short_name=tissue_name)
-            condition = self.getCondition(db_entry_id=condition_id, \
+            condition = self.getCondition(db_entry_id=condition_id,
                 short_name=condition_name)
             db_entry = IndividualSequence(
-                individual_id=individual_id, sequencer_id=sequencer_id, \
-                sequence_type_id=sequence_type_id,\
-                format=sequence_format, original_path=path_to_original_sequence,\
+                individual_id=individual_id, sequencer_id=sequencer_id,
+                sequence_type_id=sequence_type_id,
+                format=sequence_format, original_path=path_to_original_sequence,
                 tissue=tissue, condition=condition,
-                coverage=coverage, \
-                quality_score_format=quality_score_format, filtered=filtered,\
-                parent_individual_sequence_id=parent_individual_sequence_id, \
-                read_count=read_count, no_of_chromosomes=no_of_chromosomes,\
-                sequence_batch_id=sequence_batch_id, version=version, \
-                is_contaminated=is_contaminated, outdated_index=outdated_index,\
+                coverage=coverage,
+                quality_score_format=quality_score_format, filtered=filtered,
+                parent_individual_sequence_id=parent_individual_sequence_id,
+                read_count=read_count, no_of_chromosomes=no_of_chromosomes,
+                sequence_batch_id=sequence_batch_id, version=version,
+                is_contaminated=is_contaminated, outdated_index=outdated_index,
                 comment=comment)
             #to make db_entry.id valid
             self.session.add(db_entry)
             self.session.flush()
             
-            dst_relative_path = db_entry.constructRelativePathForIndividualSequence(\
+            dst_relative_path = db_entry.constructRelativePathForIndividualSequence(
                 subFolder=subFolder)
             #update its path in db to the relative path
             db_entry.path = dst_relative_path
@@ -3007,9 +3030,10 @@ class SunsetDB(Database):
             self.dbID2indEntry[db_id] = monkey
             return monkey
     
-    def copyParentIndividualSequence(self, parent_individual_sequence=None, \
-        parent_individual_sequence_id=None,\
-        subFolder='individual_sequence', quality_score_format='Standard', filtered=1,
+    def copyParentIndividualSequence(self, parent_individual_sequence=None,
+        parent_individual_sequence_id=None,
+        subFolder='individual_sequence', quality_score_format='Standard',
+        filtered=1,
         data_dir=None):
         """
         call getIndividualSequence to construct individual_sequence,
@@ -3375,7 +3399,7 @@ class SunsetDB(Database):
         """
         if db_entry_id:
             db_entry = self.checkIfEntryInTable(
-                TableClass=AlignmentDepthIntervalMethod, id=db_entry_id)
+                TableClass=AlignmentDepthIntervalMethod, entry_id=db_entry_id)
         else:
             db_entry = None
         if not db_entry:
@@ -3466,7 +3490,7 @@ class SunsetDB(Database):
         """
         if db_entry_id:
             db_entry = self.checkIfEntryInTable(
-                TableClass=AlignmentDepthIntervalFile, id=db_entry_id)
+                TableClass=AlignmentDepthIntervalFile, entry_id=db_entry_id)
         else:
             db_entry = None
         if not db_entry:
@@ -3698,7 +3722,8 @@ class SunsetDB(Database):
             self.session.flush()
         return db_entry
     
-    def getLocusContext(self, locus_id=None, gene_id=None, gene_strand=None, \
+    def getLocusContext(self, locus_id:int=None, gene_id:int=None,
+        gene_strand=None,
         disp_pos=None, overlap_length=None,\
         overlap_fraction_in_locus=None, overlap_fraction_in_gene=None):
         """
@@ -3760,22 +3785,19 @@ class SunsetDB(Database):
             self.session.add(locus_annotation)
         return locus_annotation
     
-    def getLocusAnnotationType(self, locus_annotation_type_short_name=None):
+    def getLocusAnnotationType(self, short_name=None):
         """
         """
         ty = self.queryTable(LocusAnnotation).\
-            filter_by(short_name=locus_annotation_type_short_name).first()
+            filter_by(short_name=short_name).first()
         if not ty:
-            ty = LocusAnnotationType(
-                short_name=locus_annotation_type_short_name)
+            ty = LocusAnnotationType(short_name=short_name)
             self.session.add(ty)
             self.session.flush()
         return ty
     
     def getSequencer(self, short_name=None, seq_center_id=None):
         """
-        2013.3.13
-        
         """
         db_entry = self.queryTable(Sequencer).\
             filter_by(short_name=short_name).first()
@@ -3786,13 +3808,13 @@ class SunsetDB(Database):
             self.session.flush()
         return db_entry
     
-    def getSequenceType(self, short_name=None, id=None, read_length_mean=None,
+    def getSequenceType(self, short_name=None, entry_id=None, read_length_mean=None,
         paired_end=0, insert_size_mean=None, insert_size_variance=None,
         per_base_error_rate=None, **keywords):
         """
         """
         db_entry = self.checkIfEntryInTable(TableClass=SequenceType,
-            short_name=short_name, id=id)
+            short_name=short_name, entry_id=entry_id)
         if not db_entry:
             db_entry = SequenceType(short_name=short_name,
                 read_length_mean=read_length_mean,\

@@ -342,7 +342,7 @@ class chromosome_fasta2db(AbstractDBJob):
                 continue
             
             chromosome = headerData.chromosome
-            sequence_type = db.getSequenceType(short_name=sequence_type_name, id=sequence_type_id)
+            sequence_type = db.getSequenceType(short_name=sequence_type_name, entry_id=sequence_type_id)
             start = 1
             aa_attr_instance = db.checkAnnotAssembly(version=version, tax_id=tax_id, \
                                 chromosome=chromosome, start=start, stop=None, \

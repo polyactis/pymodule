@@ -353,23 +353,24 @@ class PolymorphismTableFile(YHFile):
 			self._locusChrStartStopList.sort()
 		return self._locusChrStartStopList
 	
-	def checkIfEntryInTable(self, tableObject=None, name=None, id=None):
+	def checkIfEntryInTable(self, tableObject=None, name=None, entry_id=None):
 		"""
 		2013.3.8
 			for Population, Species, Chromosome, similar structure
 		"""
 		returnValue = None
-		if tableObject and (name or id):
+		if tableObject and (name or entry_id):
 			where_condition_ls = []
 			if name:
 				where_condition_ls.append("name=='%s'"%(name))
-			if id:
-				where_condition_ls.append("id==%s"%(id))
+			if entry_id:
+				where_condition_ls.append("id==%s"%(entry_id))
 			rows = tableObject.readWhere("""%s"""%(' & '.join(where_condition_ls)))
 			if len(rows)==1:
 				returnValue = rows[0]
 			elif len(rows)>1:
-				sys.stderr.write("Error: %s (>1) %s entries with same name.\n"%(len(rows), tableObject.name))
+				sys.stderr.write("Error: %s (>1) %s entries with same name.\n"%\
+					(len(rows), tableObject.name))
 				raise
 			else:
 				returnValue = False
@@ -381,7 +382,8 @@ class PolymorphismTableFile(YHFile):
 		"""
 		2013.3.8
 		"""
-		return self.checkIfEntryInTable(tableObject=self.chromosomeTable, name=name, id=id)
+		return self.checkIfEntryInTable(tableObject=self.chromosomeTable, \
+			name=name, entry_id=id)
 	
 	def addChromosome(self, name=None, length=None, speciesName=None, ploidy=None, path=None):
 		"""
@@ -428,7 +430,8 @@ class PolymorphismTableFile(YHFile):
 		"""
 		2013.3.8
 		"""
-		return self.checkIfEntryInTable(tableObject=self.populationTable, name=name, id=id)
+		return self.checkIfEntryInTable(tableObject=self.populationTable, 
+			name=name, entry_id=id)
 	
 	def addPopulation(self, name=None, size=None, speciesName=None):
 		"""
@@ -460,7 +463,8 @@ class PolymorphismTableFile(YHFile):
 		"""
 		2013.3.8
 		"""
-		return self.checkIfEntryInTable(tableObject=self.speciesTable, name=name, id=id)
+		return self.checkIfEntryInTable(tableObject=self.speciesTable,
+			name=name, entry_id=id)
 	
 	def addSpecies(self, name=None, scientific_name=None, ploidy=None):
 		"""
@@ -480,18 +484,20 @@ class PolymorphismTableFile(YHFile):
 		if name or id:
 			entry= self.checkSpecies(name=name, id=id)
 			if not entry:
-				entry = self.addSpecies(name=name, scientific_name=scientific_name, ploidy=ploidy)
+				entry = self.addSpecies(name=name,
+					scientific_name=scientific_name, ploidy=ploidy)
 		return entry
 	
 	def checkIndividual(self, name=None, id=None):
 		"""
 		2013.3.8
 		"""
-		return self.checkIfEntryInTable(tableObject=self.individualTable, name=name, id=id)
+		return self.checkIfEntryInTable(tableObject=self.individualTable,
+			name=name, entry_id=id)
 	
-	def addIndividual(self, name=None, family_id = None, father_name = None, \
-					mother_name = None, sex = None, phenotype = None, \
-					populationName=None, speciesName=None, ploidy=None):
+	def addIndividual(self, name=None, family_id = None, father_name = None,
+		mother_name = None, sex = None, phenotype = None, \
+		populationName=None, speciesName=None, ploidy=None):
 		"""
 		2013.3.8
 		"""
@@ -507,8 +513,8 @@ class PolymorphismTableFile(YHFile):
 				if population:
 					population_id = population.id
 			oneCell = PassingData(name=name,family_id =family_id, father_name=father_name,\
-								mother_name=mother_name, sex=sex, phenotype=phenotype,\
-								population_id=population_id)
+				mother_name=mother_name, sex=sex, phenotype=phenotype,\
+				population_id=population_id)
 			self.individualTable.writeOneCell(oneCell, cellType=2)
 			self.flush()
 			if name in self._individualName2ID:
@@ -516,9 +522,11 @@ class PolymorphismTableFile(YHFile):
 								(name, self._individualName2ID.get(name)))
 				raise
 			else:
-				self._individualName2ID[name] = self.individualTable.no_of_rows	#nrows is not updated until flush()
+				self._individualName2ID[name] = self.individualTable.no_of_rows
+				#nrows is not updated until flush()
 		
-		return self.checkIndividual(name=name)	#would this work without flush()?
+		#would this work without flush()?
+		return self.checkIndividual(name=name)
 	
 	def getIndividual(self, name=None, id=None, family_id = None, father_name = None, \
 					mother_name = None, sex = None, phenotype = None, \
@@ -530,23 +538,27 @@ class PolymorphismTableFile(YHFile):
 		if name or id:
 			entry= self.checkIndividual(name=name, id=id)
 			if not entry:
-				entry = self.addIndividual(name=name, family_id=family_id, father_name=father_name, \
-								mother_name=mother_name, sex=sex, phenotype=phenotype, \
-								populationName=populationName, speciesName=speciesName, ploidy=ploidy)
+				entry = self.addIndividual(name=name, family_id=family_id,
+					father_name=father_name,
+					mother_name=mother_name, sex=sex, phenotype=phenotype,
+					populationName=populationName, speciesName=speciesName,
+					ploidy=ploidy)
 		return entry
 	
 	def checkLocus(self, name=None, id=None):
 		"""
 		2013.3.10
 		"""
-		return self.checkIfEntryInTable(tableObject=self.locusTable, name=name, id=id)
+		return self.checkIfEntryInTable(tableObject=self.locusTable,
+			name=name, entry_id=id)
 	
 	def addLocus(self, name=None, chromosomeName=None,\
-				start = None, stop = None, ref_allele = None, ref_allele_length=None,\
-				ref_allele_frequency =None, alt_allele=None, alt_allele_length=None,\
-				alt_allele_frequency=None, generation_mutation_arose=None, generation_mutation_fixed=None,\
-				mutation_type =None, fitness = None, ancestral_amino_acid =None, \
-				derived_amino_acid =None, **keywords):
+		start = None, stop = None, ref_allele = None, ref_allele_length=None,
+		ref_allele_frequency =None, alt_allele=None, alt_allele_length=None,\
+		alt_allele_frequency=None, generation_mutation_arose=None,
+		generation_mutation_fixed=None,\
+		mutation_type =None, fitness = None, ancestral_amino_acid =None, \
+		derived_amino_acid =None, **keywords):
 		"""
 		2013.3.8
 		"""
@@ -554,13 +566,17 @@ class PolymorphismTableFile(YHFile):
 			chromosome_id = None
 			if chromosomeName:
 				chromosome_id = self.getChromosome(name=chromosomeName).id
-			oneCell = PassingData(name=name, chromosome_id=chromosome_id, start = start, stop = stop, \
-					ref_allele = ref_allele, ref_allele_length=ref_allele_length,\
-					ref_allele_frequency =ref_allele_frequency, alt_allele=alt_allele, alt_allele_length=alt_allele_length,\
-					alt_allele_frequency=alt_allele_frequency, generation_mutation_arose=generation_mutation_arose, \
-					generation_mutation_fixed=generation_mutation_fixed,\
-					mutation_type =mutation_type, fitness = fitness, ancestral_amino_acid =ancestral_amino_acid, \
-					derived_amino_acid =derived_amino_acid, **keywords)
+			oneCell = PassingData(name=name, chromosome_id=chromosome_id,
+				start = start, stop = stop, \
+				ref_allele = ref_allele, ref_allele_length=ref_allele_length,\
+				ref_allele_frequency =ref_allele_frequency,
+				alt_allele=alt_allele, alt_allele_length=alt_allele_length,\
+				alt_allele_frequency=alt_allele_frequency,
+				generation_mutation_arose=generation_mutation_arose, \
+				generation_mutation_fixed=generation_mutation_fixed,\
+				mutation_type =mutation_type, fitness = fitness,
+				ancestral_amino_acid =ancestral_amino_acid, \
+				derived_amino_acid =derived_amino_acid, **keywords)
 			self.locusTable.writeOneCell(oneCell, cellType=2)
 			self.flush()
 		return self.checkLocus(name=name)	#would this work without flush()?
@@ -568,7 +584,8 @@ class PolymorphismTableFile(YHFile):
 	def getLocus(self, name=None, id=None, chromosomeName=None,\
 				start = None, stop = None, ref_allele = None, ref_allele_length=None,\
 				ref_allele_frequency =None, alt_allele=None, alt_allele_length=None,\
-				alt_allele_frequency=None, generation_mutation_arose=None, generation_mutation_fixed=None,\
+				alt_allele_frequency=None, generation_mutation_arose=None,
+				generation_mutation_fixed=None,\
 				mutation_type =None, fitness = None, ancestral_amino_acid =None, \
 				derived_amino_acid =None, **keywords):
 		"""
@@ -579,11 +596,15 @@ class PolymorphismTableFile(YHFile):
 			entry= self.checkLocus(name=name, id=id)
 			if not entry:
 				entry = self.addLocus(name=name, chromosomeName=chromosomeName,\
-					start = start, stop = stop, ref_allele = ref_allele, ref_allele_length=ref_allele_length,\
-					ref_allele_frequency =ref_allele_frequency, alt_allele=alt_allele, alt_allele_length=alt_allele_length,\
-					alt_allele_frequency=alt_allele_frequency, generation_mutation_arose=generation_mutation_arose, \
+					start = start, stop = stop, ref_allele = ref_allele,
+					ref_allele_length=ref_allele_length,\
+					ref_allele_frequency =ref_allele_frequency,
+					alt_allele=alt_allele, alt_allele_length=alt_allele_length,\
+					alt_allele_frequency=alt_allele_frequency,
+					generation_mutation_arose=generation_mutation_arose, \
 					generation_mutation_fixed=generation_mutation_fixed,\
-					mutation_type =mutation_type, fitness = fitness, ancestral_amino_acid =ancestral_amino_acid, \
+					mutation_type =mutation_type, fitness = fitness,
+					ancestral_amino_acid =ancestral_amino_acid, \
 					derived_amino_acid =derived_amino_acid, **keywords)
 		return entry
 	
@@ -591,20 +612,23 @@ class PolymorphismTableFile(YHFile):
 		"""
 		2013.3.10
 		"""
-		return self.checkIfEntryInTable(tableObject=self.polymorphismTable, name=name, id=id)
+		return self.checkIfEntryInTable(tableObject=self.polymorphismTable,
+			name=name, entry_id=id)
 	
-	def addPolymorphism(self, name=None, individualName=None, locusName=None, chromosome_copy = None,\
-					allele_sequence=None, allele_sequence_length=None, allele_type =None, **keywords):
+	def addPolymorphism(self, name=None, individualName=None, locusName=None,
+		chromosome_copy = None,\
+		allele_sequence=None, allele_sequence_length=None, allele_type =None, **keywords):
 		"""
 		2013.3.10
 		"""
 		if name:
 			individual_id = self.getIndividual(name=individualName).id
 			locus_id = self.getLocus(name=locusName).id
-			oneCell = PassingData(name=name, individual_id=individual_id, locus_id = locus_id, \
-					chromosome_copy=chromosome_copy,\
-					allele_sequence = allele_sequence, allele_sequence_length=allele_sequence_length,\
-					allele_type=allele_type, **keywords)
+			oneCell = PassingData(name=name, individual_id=individual_id, locus_id = locus_id,
+				chromosome_copy=chromosome_copy,
+				allele_sequence = allele_sequence,
+				allele_sequence_length=allele_sequence_length,\
+				allele_type=allele_type, **keywords)
 			self.polymorphismTable.writeOneCell(oneCell, cellType=2)
 			self.flush()
 		return self.checkPolymorphism(name=name)	#would this work without flush()?
