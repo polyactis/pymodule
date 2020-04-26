@@ -225,7 +225,8 @@ Example ("Library" and "Bam Path" are required):
         """
         individual = db_main.getIndividual(code=code, name=name, tax_id=tax_id, 
             study_name=study_name, study_id=study_id, site_id=site_id)
-        individual_sequence = db_main.getIndividualSequence(individual_id=individual.id, 
+        individual_sequence = db_main.getIndividualSequence(
+            individual_id=individual.id,
             sequencer_name=sequencer_name, 
             sequence_type_name=sequence_type_name, sequence_format=sequence_format, 
             path_to_original_sequence=path_to_original_sequence, coverage=None,
@@ -240,7 +241,8 @@ Example ("Library" and "Bam Path" are required):
     def registerJars(self):
         ParentClass.registerJars(self)
         
-        self.registerOneJar(name="SplitReadFileJar", path=self.SplitReadFileJarPath)
+        self.registerOneJar(name="SplitReadFileJar",
+            path=self.SplitReadFileJarPath)
         self.registerOneJar(name="PicardJar", path=self.picard_path)
 
     def registerExecutables(self):
@@ -276,7 +278,6 @@ Example ("Library" and "Bam Path" are required):
         2012.1.3
             walltime is in minutes (max time allowed on hoffman2 is 24 hours).
             The executable should be convertBamToFastqAndGzip.
-            
         """
         if extraDependentInputLs is None:
             extraDependentInputLs = []
@@ -286,8 +287,9 @@ Example ("Library" and "Bam Path" are required):
         output2 = File("%s_2.fastq.gz"%(outputFnamePrefix))
         output_unpaired = File("%s_unpaired.fastq.gz"%(outputFnamePrefix))
         extraOutputLs= [output1, output2, output_unpaired]
-        extraArgumentList = ["F=", output1, "F2=", output2, "UNPAIRED_FASTQ=", output_unpaired, \
-            "VALIDATION_STRINGENCY=LENIENT", "INCLUDE_NON_PF_READS=true"]
+        extraArgumentList = ["F=", output1, "F2=", output2, "UNPAIRED_FASTQ=",
+            output_unpaired, "VALIDATION_STRINGENCY=LENIENT",
+            "INCLUDE_NON_PF_READS=true"]
         
         job = self.addGenericJavaJob(executable=self.SamToFastqJava, 
             jarFile=self.PicardJar, \
@@ -295,7 +297,7 @@ Example ("Library" and "Bam Path" are required):
             outputFile=None, outputArgumentOption="",\
             parentJobLs=parentJobLs, transferOutput=transferOutput, \
             frontArgumentList=["SamToFastq"], \
-            extraArgumentList=extraArgumentList, extraOutputLs=extraOutputLs, \
+            extraArgumentList=extraArgumentList, extraOutputLs=extraOutputLs,
             extraDependentInputLs=extraDependentInputLs, \
             job_max_memory=job_max_memory, walltime=walltime, **keywords)
         
@@ -314,14 +316,16 @@ Example ("Library" and "Bam Path" are required):
             which calls "wc -l" to count the number of reads beforehand to 
             derive a proper minNoOfReads, avoiding files with too few reads.
         Run SplitReadFile and generate the output directly into the db-affiliated folders.
-        A log file is generated and registered for transfer (so that pegasus won't skip it).
+        A log file is generated and registered for transfer
+            (so that pegasus won't skip it).
         Walltime is in minutes (max time allowed on hoffman2 is 24 hours).
         """
         if executable is None:
             executable = self.SplitReadFileWrapper
         if extraDependentInputLs is None:
             extraDependentInputLs = []
-        frontArgumentList = [self.javaPath, repr(job_max_memory), self.SplitReadFileJar]
+        frontArgumentList = [self.javaPath, repr(job_max_memory), \
+            self.SplitReadFileJar]
         extraArgumentList = [outputFnamePrefix, repr(minNoOfReads)]
         extraDependentInputLs.append(self.SplitReadFileJar)
         if logFile:
@@ -338,10 +342,10 @@ Example ("Library" and "Bam Path" are required):
             job_max_memory=job_max_memory, walltime=walltime, **keywords)
         return job
     
-    def addRegisterIndividualSequence2DBJob(self, executable=None, \
-        inputFile=None, individual_id=None, outputFile=None, \
-        parentJobLs=None, job_max_memory=100, walltime = 60, commit=0, \
-        extraDependentInputLs=None, extraArguments=None, \
+    def addRegisterIndividualSequence2DBJob(self, executable=None,
+        inputFile=None, individual_id=None, outputFile=None,
+        parentJobLs=None, job_max_memory=100, walltime = 60, commit=0,
+        extraDependentInputLs=None, extraArguments=None,
         transferOutput=False, sshDBTunnel=1, **keywords):
         """
         20170428
@@ -355,14 +359,17 @@ Example ("Library" and "Bam Path" are required):
         for name, value in keywords.items():
             if value is not None and value != "":
                 extraArgumentList.append("--%s %s"%(name, value))
-        job = self.addData2DBJob(executable=executable, \
-            inputFile=inputFile, inputArgumentOption="-i", \
-            outputFile=outputFile, outputArgumentOption="-o", inputFileList=None, \
-            data_dir=None, commit=commit,\
-            parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
+        job = self.addData2DBJob(executable=executable,
+            inputFile=inputFile, inputArgumentOption="-i",
+            outputFile=outputFile, outputArgumentOption="-o",
+            inputFileList=None,
+            data_dir=None, commit=commit,
+            parentJobLs=parentJobLs,
+            extraDependentInputLs=extraDependentInputLs,
             extraOutputLs=None, transferOutput=transferOutput, \
-            extraArguments=extraArguments, extraArgumentList=extraArgumentList, \
-            job_max_memory=job_max_memory,  sshDBTunnel=sshDBTunnel, walltime=walltime,\
+            extraArguments=extraArguments, extraArgumentList=extraArgumentList,
+            job_max_memory=job_max_memory, walltime=walltime,\
+            sshDBTunnel=sshDBTunnel, 
             key2ObjectForJob=None, objectWithDBArguments=self)
         return job
     
@@ -390,7 +397,8 @@ Example ("Library" and "Bam Path" are required):
         if relativeOutputDir:
             extraArgumentList.extend(['--relativeOutputDir', relativeOutputDir])
         if individual_sequence_id:
-            extraArgumentList.extend(['--individual_sequence_id', individual_sequence_id])
+            extraArgumentList.extend(['--individual_sequence_id',
+                individual_sequence_id])
         if individual_sequence_file_raw_id:
             extraArgumentList.extend(
                 ['--individual_sequence_file_raw_id', individual_sequence_file_raw_id])
@@ -404,10 +412,10 @@ Example ("Library" and "Bam Path" are required):
         if mate_id:
             extraArgumentList.append('--mate_id %s'%(mate_id))
         
-        job = self.addData2DBJob(executable=self.RegisterAndMoveSplitSequenceFiles, \
+        job = self.addData2DBJob(executable=self.RegisterAndMoveSplitSequenceFiles,
             inputFile=inputFile, inputArgumentOption="-i", \
             data_dir=None, logFile=logFile, commit=commit,\
-            parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
+            parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs,
             extraOutputLs=None, transferOutput=transferOutput, \
             extraArguments=extraArguments, extraArgumentList=extraArgumentList, \
             job_max_memory=job_max_memory, walltime=walltime,\
@@ -466,8 +474,8 @@ Example ("Library" and "Bam Path" are required):
                     libraryKey2UniqueLibrary[libraryKey] = uniqueLibrary
                 
                 uniqueLibrary = libraryKey2UniqueLibrary[libraryKey]
-                fastq_obj = PassingData(library=uniqueLibrary, sample_id=sample_id, 
-                    mate_id=mate_id, abs_path=fastq_path)
+                fastq_obj = PassingData(library=uniqueLibrary,
+                    sample_id=sample_id, mate_id=mate_id, abs_path=fastq_path)
                 if sample_id not in sample_id2fastq_obj_ls:
                     sample_id2fastq_obj_ls[sample_id] = []
                 sample_id2fastq_obj_ls[sample_id].append(fastq_obj)
@@ -487,14 +495,15 @@ Example ("Library" and "Bam Path" are required):
             input fastq files could be gzipped or not.
             data generated by Joe DeYoung's core, demultiplexed by ICNN.
         """
-        fastq_path_ls = self.getInputPathLsFromInput(input_path, suffixSet=set(['.fastq']), 
-        fakeSuffix='.gz')
+        fastq_path_ls = self.getInputPathLsFromInput(input_path, 
+            suffixSet=set(['.fastq']), fakeSuffix='.gz')
         sample_id2fastq_obj_ls = self.getSampleID2FastqObjectLsForSouthAfricanDNAFastQ(
             fastq_path_ls=fastq_path_ls)
         self.addJobsToSplitAndRegisterFastQ(db_main=db_main, 
-            sample_id2fastq_obj_ls=sample_id2fastq_obj_ls, data_dir=data_dir, \
-            minNoOfReads=minNoOfReads, commit=commit,\
-            sequencer_name=sequencer_name, sequence_type_name=sequence_type_name, 
+            sample_id2fastq_obj_ls=sample_id2fastq_obj_ls, data_dir=data_dir,
+            minNoOfReads=minNoOfReads, commit=commit,
+            sequencer_name=sequencer_name,
+            sequence_type_name=sequence_type_name,
             sequence_format=sequence_format)
 
     def readSampleSheetFastQ(self, sample_sheet: str, fastq_path_ls: list):
@@ -614,7 +623,7 @@ Example ("Library" and "Bam Path" are required):
                 extraArgumentList=['--inputDir', splitOutputDir,
                     '--outputDir', sequenceAbsDir,
                     '--relativeOutputDir', individual_sequence.path,
-                    '--sequence_format', self.sequence_format, 
+                    '--sequence_format', self.sequence_format,
                     '--individual_sequence_id', individual_sequence.id,
                     '--original_file_path', fastqFile,
                     ]
