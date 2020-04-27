@@ -24,8 +24,9 @@ class AbstractSunsetMapper(AbstractDBJob):
         """
         """
         self.db_main = SunsetDB.SunsetDB(drivername=self.drivername, 
-            db_user=self.db_user, db_passwd=self.db_passwd, hostname=self.hostname,
-            dbname=self.dbname, schema=self.schema, port=self.port)
+            hostname=self.hostname,
+            dbname=self.dbname, schema=self.schema, port=self.port,
+            db_user=self.db_user, db_passwd=self.db_passwd)
         self.db_main.setup(create_tables=False)
     
     def checkIfAlignmentListMatchMethodDBEntry(self, 
@@ -33,13 +34,15 @@ class AbstractSunsetMapper(AbstractDBJob):
         """
         moved from AddVCFFile2DB.py
         """
-        #make sure methodDBEntry.individual_alignment_ls is identical to individualAlignmentLs
+        #make sure methodDBEntry.individual_alignment_ls is identical to 
+        # individualAlignmentLs
         alignmentIDSetInFile = set([alignment.id for alignment in individualAlignmentLs])
         alignmentIDSetInGenotypeMethod = set([alignment.id \
             for alignment in methodDBEntry.individual_alignment_ls])
         if alignmentIDSetInFile!=alignmentIDSetInGenotypeMethod:
             logging.error(f"alignmentIDSetInFile ({repr(alignmentIDSetInFile)}) "
-                f"doesn't match alignmentIDSetInFile ({repr(alignmentIDSetInGenotypeMethod)}).")
+                f"doesn't match alignmentIDSetInFile "
+                f"({repr(alignmentIDSetInGenotypeMethod)}).")
             if session:
                 session.rollback()
             #delete all target files if there is any
@@ -47,6 +50,7 @@ class AbstractSunsetMapper(AbstractDBJob):
             
 if __name__ == '__main__':
     main_class = AbstractSunsetMapper
-    po = ProcessOptions(sys.argv, main_class.option_default_dict, error_doc=main_class.__doc__)
+    po = ProcessOptions(sys.argv, main_class.option_default_dict,
+        error_doc=main_class.__doc__)
     instance = main_class(**po.long_option2value)
     instance.run()

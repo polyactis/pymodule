@@ -1,4 +1,5 @@
 import os, sys, csv, re, numpy
+import logging
 
 def dict_map(dictionaryStructure=None, ls=None, type=1):
     """
@@ -11,7 +12,8 @@ def dict_map(dictionaryStructure=None, ls=None, type=1):
         bug, "if value" could miss 0
     """
     if type==3:
-        new_list = {}	#it's a dictionary
+        new_list = {}
+        #it's a dictionary
         for item in ls:
             value = dictionaryStructure.get(item)
             if value is not None:
@@ -59,34 +61,40 @@ class PassingData(object):
     def __getitem__(self, key):
         """
         2012.12.20 enable it to work like a dictionary
-            i.e. pdata.chromosome or pdata['chromosome'] is equivalent if attribute 0 is chromosome.
+        i.e. pdata.chromosome or pdata['chromosome'] is equivalent if 
+            attribute 0 is chromosome.
         """
         return self.__getattribute__(key)
 
 class PassingDataList(list, object):
     """
-    2012.12.20 could access value/attributes as a dictionary due to __getitem__(self, key)
+    2012.12.20 could access value/attributes as a dictionary due to
+         __getitem__(self, key)
     2012.11.24
-        Could be accessed as a list as well.
-        The position of each individual attribute in this list is based on the order in which the variables are put into the list.
-        i.e.
-            association_peak = PassingDataList()
-            association_peak.chromosome=peak_start_data_obj.chromosome
-            association_peak.start=peak_start_data_obj.peak_start
-            association_peak.stop=intersection_point.x()
-            association_peak[0] == association_peak.chromosome	#this is True
-        
-        But if you assign everything in the initialization, the order is not guaranteed. i.e.
-            association_peak = PassingDataList(chromosome=peak_start_data_obj.chromosome, start=peak_start_data_obj.peak_start,\
-                stop=intersection_point.x(), start_locus_id=1)
-            association_peak[0] == association_peak.chromosome	#not sure. the order of arguments is not preserved inside __init__(**keywords).
-        
-        list has to be ahead of object as parental class, otherwise
-            "TypeError: Error when calling the metaclass basesCannot create a 
-                consistent method resolution order (MRO) for bases list, object"
-        a list needs these methods.
-            http://snipplr.com/view.php?codeview&id=6626
-            http://docs.python.org/2/reference/datamodel.html#sequence-types
+    Could be accessed as a list as well.
+    The position of each individual attribute in this list is based on
+            the order in which the variables are put into the list.
+    i.e.
+        association_peak = PassingDataList()
+        association_peak.chromosome=peak_start_data_obj.chromosome
+        association_peak.start=peak_start_data_obj.peak_start
+        association_peak.stop=intersection_point.x()
+        association_peak[0] == association_peak.chromosome	#this is True
+    
+    But if you assign everything in the initialization, the order is not guaranteed. i.e.
+        association_peak = PassingDataList(
+            chromosome=peak_start_data_obj.chromosome,
+            start=peak_start_data_obj.peak_start,\
+            stop=intersection_point.x(), start_locus_id=1)
+        association_peak[0] == association_peak.chromosome
+        #not sure. the order of arguments is not preserved inside __init__(**keywords).
+    
+    list has to be ahead of object as parental class, otherwise
+        "TypeError: Error when calling the metaclass basesCannot create a 
+            consistent method resolution order (MRO) for bases list, object"
+    a list needs these methods.
+        http://snipplr.com/view.php?codeview&id=6626
+        http://docs.python.org/2/reference/datamodel.html#sequence-types
     05/09/08
         a class to hold any data structure
     """
@@ -186,8 +194,10 @@ class PassingDataList(list, object):
     
     def __getitem__(self, index_or_key):
         """
-        2012.12.20 enable it to retrieve item using either index or attributeName (like a dictionary)
-            i.e. pdata[0] or pdata['chromosome'] is equivalent if attribute 0 is chromosome.
+        2012.12.20 enable it to retrieve item using either index or
+            attributeName (like a dictionary).
+        i.e. pdata[0] or pdata['chromosome'] is equivalent if attribute 0 is
+             chromosome.
         """
         if type(index_or_key)==int:
             return list.__getitem__(self, index_or_key)
@@ -262,20 +272,25 @@ def importNumericArray():
     """
     return num
 
-def figureOutDelimiter(input_fname, report=0, delimiter_choice_ls = ['\t', ',', ' '], use_sniff=False):
+def figureOutDelimiter(input_fname, report=0,
+    delimiter_choice_ls = ['\t', ',', ' '], use_sniff=False):
     """
     #2012.8.10 max count determines the delimiter
     2012.5.8
-        if input_fname is a file object, don't delete it (deleting closes it) and seek to the beginning of the file.
+        if input_fname is a file object, don't delete it (deleting closes it) 
+            and seek to the beginning of the file.
             bugfix: the file object could be file or gzip.GzipFile 
     2008-01-08
-        don't use cs.sniff unless the user specifies it. sniff gives you unexpected delimiter when it's a single-column.
+        don't use cs.sniff unless the user specifies it. sniff gives you
+            unexpected delimiter when it's a single-column.
     2008-08-28
         nothing weird on hpc-cmb. it's a bug in other code.
         back to 'return None' if input_fname escapes all condition checking.
     2008-08-28
-        try 'open(input_fname)' anyway if input_fname escapes all condition checking.
-        something weird happened during a mpi job on hpc-cmb. the file is there. but escape the first condition.
+        try 'open(input_fname)' anyway if input_fname escapes all condition
+            checking.
+        something weird happened during a mpi job on hpc-cmb. the file is there.
+            but escape the first condition.
     2008-05-25
         now 3 possible types of input_fname
         1. a file name (path)
@@ -283,7 +298,8 @@ def figureOutDelimiter(input_fname, report=0, delimiter_choice_ls = ['\t', ',', 
         3. input_fname is input data, string
         
         for a file object or input file name:
-        it could be binary file which doesn't have readline(). have to use this dumb approach due to '\n' might mess up sniff()
+        it could be binary file which doesn't have readline(). have to use this
+            dumb approach due to '\n' might mess up sniff().
     2008-05-21
         csv.Sniffer is handy, use it figure out csv.Sniffer instead.
     2008-05-12
@@ -301,27 +317,31 @@ def figureOutDelimiter(input_fname, report=0, delimiter_choice_ls = ['\t', ',', 
         #a file/gzip-file object
         inf = input_fname
         inputIsFileObject = True
-    elif isinstance(input_fname, str) and not os.path.isfile(input_fname):	#it's the input
+    elif isinstance(input_fname, str) and not os.path.isfile(input_fname):
+        #it's the input
         from io import StringIO
         inf = StringIO(input_fname)
     else:
         import sys
-        sys.stderr.write("Error: %s is neither a file name nor a file object. But try 'open' anyway.\n"%input_fname)
+        logging.warn(f"{input_fname} is neither a file name nor a file object. "
+        "But try 'open' it anyway.")
         inf = openGzipFile(input_fname)
-    if getattr(inf, 'readline', None) is not None and use_sniff:	#2008-01-08 don't use cs.sniff unless the user specifies it. 
+    if getattr(inf, 'readline', None) is not None and use_sniff:
+        #2008-01-08 don't use cs.sniff unless the user specifies it. 
         #	sniff gives you unexpected delimiter when it's a single-column.
         line = inf.readline()
         delimiter_chosen = cs.sniff(line).delimiter
     else:
-        line = inf.read(20000)	##binary file doesn't have readline(). have to use this dumb approach due to '\n' might mess up sniff()
+        line = inf.read(20000)
+        ##binary file doesn't have readline().
+        # have to use this dumb approach due to '\n' might mess up sniff()
         delimiter_chosen = None
         delimiterData = PassingData(delimiterWithMaxCount='\t', maxCount=-1)
         for delimiter in delimiter_choice_ls:
             delimiter_count = line.count(delimiter)
-            if delimiter_count>delimiterData.maxCount:	#2012.8.10 max count
+            if delimiter_count>delimiterData.maxCount:
                 delimiterData.delimiterWithMaxCount = delimiter
-                delimiterData.maxCount = delimiter_count	#2012.8.13 bugfix
-            
+                delimiterData.maxCount = delimiter_count
                 
         delimiter_chosen = delimiterData.delimiterWithMaxCount
     if inputIsFileObject:
@@ -332,7 +352,8 @@ def figureOutDelimiter(input_fname, report=0, delimiter_choice_ls = ['\t', ',', 
         sys.stderr.write("Done.\n")
     return delimiter_chosen
 
-def get_gene_symbol2gene_id_set(curs, tax_id, table='genome.gene_symbol2id', upper_case_gene_symbol=0):
+def get_gene_symbol2gene_id_set(curs, tax_id, table='genome.gene_symbol2id',
+    upper_case_gene_symbol=0):
     """
     2008-07-10 derived from annot.bin.codense.common.get_gene_symbol2gene_id()
     """
@@ -366,8 +387,8 @@ def get_gene_id2gene_symbol(curs, tax_id, table='genome.gene', upper_case_gene_s
         if gene_id not in gene_id2gene_symbol:
             gene_id2gene_symbol[gene_id] = gene_symbol
         else:
-            sys.stderr.write("Warning: gene_id %s(%s) already in gene_id2gene_symbol with symbol=%s.\n"%(gene_id, \
-                                                                                gene_symbol, gene_id2gene_symbol[gene_id]))
+            logging.warn(f"Warning: gene_id {gene_id}({gene_symbol}) already "
+            f"in gene_id2gene_symbol with symbol={gene_id2gene_symbol[gene_id]}.")
     sys.stderr.write(" %s entries. Done.\n"%len(gene_id2gene_symbol))
     return gene_id2gene_symbol
 
@@ -376,23 +397,26 @@ class FigureOutTaxID(object):
     2012.8.28 deprecated. moved to pymodule/TaxonomyDB.py
     2008-07-29 class to figure out tax_id using postgres database taxonomy schema
     """
-    option_default_dict = {('hostname', 1, ): ['localhost', 'z', 1, 'hostname of the db server', ],\
-                            ('dbname', 1, ): ['graphdb', 'd', 1, 'database name', ],\
-                            ('schema', 1, ): ['taxonomy', 'k', 1, 'database schema name', ],\
-                            ('db_user', 0, ): [None, 'u', 1, 'database username', ],\
-                            ('db_passwd', 0, ): [None, 'p', 1, 'database password', ],\
-                            }
+    option_default_dict = {
+        ('hostname', 1, ): ['localhost', 'z', 1, 'hostname of the db server', ],\
+        ('dbname', 1, ): ['graphdb', 'd', 1, 'database name', ],\
+        ('schema', 1, ): ['taxonomy', 'k', 1, 'database schema name', ],\
+        ('db_user', 0, ): [None, 'u', 1, 'database username', ],\
+        ('db_passwd', 0, ): [None, 'p', 1, 'database password', ],\
+    }
     def __init__(self,  **keywords):
         """
         2008-07-29
         """
         from . ProcessOptions import ProcessOptions
-        self.ad = ProcessOptions.process_function_arguments(keywords, self.option_default_dict, error_doc=self.__doc__, \
-                                                        class_to_have_attr=self)		
+        self.ad = ProcessOptions.process_function_arguments(keywords, 
+            self.option_default_dict, error_doc=self.__doc__, \
+            class_to_have_attr=self)		
     
     def curs(self):
         from db import db_connect
-        conn, curs =  db_connect(self.hostname, self.dbname, self.schema, user=self.db_user, password=self.db_passwd)
+        conn, curs =  db_connect(self.hostname, self.dbname, self.schema,
+            user=self.db_user, password=self.db_passwd)
         return curs
     
     curs = property(curs)
@@ -405,8 +429,11 @@ class FigureOutTaxID(object):
         from db import TaxonomyDB
         scientific_name2tax_id = {}
         curs = self.curs
-        curs.execute("SELECT n.name_txt, n.tax_id FROM taxonomy.%s n, taxonomy.%s o where n.name_class='scientific name' \
-                and n.tax_id=o.tax_id and o.rank='species'"%(TaxonomyDB.Name.tablename, TaxonomyDB.Node.tablename))
+        curs.execute(f"SELECT n.name_txt, n.tax_id FROM "
+            f"taxonomy.{TaxonomyDB.Name.tablename} n, "
+            f"taxonomy.{TaxonomyDB.Node.tablename} o "
+            f"where n.name_class='scientific name' "
+            f"and n.tax_id=o.tax_id and o.rank='species'")
         rows = curs.fetchall()
         for row in rows:
             scientific_name, tax_id = row
@@ -435,7 +462,8 @@ def getColName2IndexFromHeader(header, skipEmptyColumn=False):
         add argument skipEmptyColumn
     2008-09-16
         convenient function to read input files with flexible column order.
-        One variable doesn't have to be in the same column in different files, as far as the name is same.
+        One variable doesn't have to be in the same column in different files,
+         as far as the name is same.
     """
     col_name2index = {}
     for i in range(len(header)):
@@ -445,29 +473,33 @@ def getColName2IndexFromHeader(header, skipEmptyColumn=False):
         col_name2index[column_name] = i
     return col_name2index
 
-def getListOutOfStr(list_in_str=None, data_type=int, separator1=',', separator2='-'):
+def getListOutOfStr(list_in_str=None, data_type=int, separator1=',', 
+    separator2='-'):
     """
-        This function parses a list from a string representation of a list, such as '1,3-7,11'=[1,3,4,5,6,7,11].
+        This function parses a list from a string representation of a list, 
+            such as '1,3-7,11'=[1,3,4,5,6,7,11].
     If only separator2, '-', is used ,all numbers have to be integers.
     If all are separated by separator1, it could be in non-int data_type.
     strip the strings as much as u can.
     if separator2 is None or nothing or 0, it wont' be used.
 
     Examples:
-        self.chromosomeList = utils.getListOutOfStr('1-5,7,9', data_type=str, separator2=None)
+        self.chromosomeList = utils.getListOutOfStr('1-5,7,9', data_type=str,
+            separator2=None)
     """
     list_to_return = []
     if list_in_str=='' or list_in_str is None:
         return list_to_return
-    list_in_str = list_in_str.strip()	#2013.04.09
+    list_in_str = list_in_str.strip()
     if list_in_str=='' or list_in_str is None:
         return list_to_return
-    if type(list_in_str)==int:	#just one integer, put it in and return immediately
+    if type(list_in_str)==int:
+        #just one integer, put it in and return immediately
         return [list_in_str]
     index_anchor_ls = list_in_str.split(separator1)
     for index_anchor in index_anchor_ls:
-        index_anchor = index_anchor.strip()	#2013.04.09
-        if len(index_anchor)==0:	#nothing there, skip
+        index_anchor = index_anchor.strip()
+        if len(index_anchor)==0:
             continue
         if separator2:
             start_stop_tup = index_anchor.split(separator2)
@@ -478,7 +510,7 @@ def getListOutOfStr(list_in_str=None, data_type=int, separator1=',', separator2=
         elif len(start_stop_tup)>1:
             start_stop_tup = map(int, start_stop_tup)
             list_to_return += range(start_stop_tup[0], start_stop_tup[1]+1)
-    list_to_return = map(data_type, list_to_return)	#2008-10-27
+    list_to_return = map(data_type, list_to_return)
     return list_to_return
 
 def getStrOutOfList(ls, separator=','):
@@ -524,8 +556,10 @@ def getSuccinctStrOutOfList(ls=None, step=1, separator=','):
             previousValue = ls_copy[i-1]
             newValue = ls_copy[i]
             if newValue == (previousValue + step):
-                spanStopValue = newValue	#increase the spanStopValue
-            else:	#more than the step
+                spanStopValue = newValue
+                #increase the spanStopValue
+            else:
+                #more than the step
                 spanStopValue = previousValue
                 if spanStartValue==spanStopValue:	#singleton
                     span_tuple_ls.append(str(spanStartValue))
@@ -550,7 +584,8 @@ def runLocalCommand(commandline, report_stderr=True, report_stdout=False):
     2008-1-5
         copied from utility/grid_job_mgr/hpc_cmb_pbs.py
     2008-11-07
-        command_handler.communicate() is more stable than command_handler.stderr.read()
+        command_handler.communicate() is more stable than
+            command_handler.stderr.read()
     2008-11-04
         refactor out of runRemoteCommand()
         
@@ -558,21 +593,26 @@ def runLocalCommand(commandline, report_stderr=True, report_stdout=False):
     """
     import subprocess
     from io import StringIO
-    command_handler = subprocess.Popen(commandline, shell=True, \
-                                    stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-    #command_handler.wait() #Warning: This will deadlock if the child process generates enough output to a stdout or stderr pipe
-    #	 such that it blocks waiting for the OS pipe buffer to accept more data. Use communicate() to avoid that.
+    command_handler = subprocess.Popen(commandline, shell=True,
+        stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+    #command_handler.wait() #Warning: This will deadlock if the child process
+    #   generates enough output to a stdout or stderr pipe
+    #	such that it blocks waiting for the OS pipe buffer to accept more data.
+    # Use communicate() to avoid that.
     
-    #command_handler.stderr.read() command_handler.stdout.read() also constantly deadlock the whole process.
+    #command_handler.stderr.read() command_handler.stdout.read() also constantly
+    #   deadlock the whole process.
     
     stderr_content = None
     stdout_content = None
     
-    stdout_content, stderr_content = command_handler.communicate()	#to circumvent deadlock caused by command_handler.stderr.read()
+    stdout_content, stderr_content = command_handler.communicate()
+    #to circumvent deadlock caused by command_handler.stderr.read()
     
     output_stdout = None
     output_stderr = None
-    if not report_stdout:	#if not reporting, assume the user wanna to have a file handler returned
+    if not report_stdout:
+        #if not reporting, assume the user wanna to have a file handler returned
         output_stdout = StringIO(stdout_content)
     if not report_stderr:
         output_stderr = StringIO(stderr_content)
@@ -583,27 +623,32 @@ def runLocalCommand(commandline, report_stderr=True, report_stdout=False):
     if report_stderr and stderr_content:
         sys.stderr.write('stderr of %s: %s \n'%(commandline, stderr_content))
     
-    return_data = PassingData(commandline=commandline, output_stdout=output_stdout, output_stderr=output_stderr,\
-                            stderr_content=stderr_content, stdout_content=stdout_content)
+    return_data = PassingData(commandline=commandline, 
+        output_stdout=output_stdout, output_stderr=output_stderr,
+        stderr_content=stderr_content, stdout_content=stdout_content)
     return return_data
 
 
 #2009-2-4 code to link something like AT1G01010.1 or AT1G01040 to NCBI gene id
 #refactored out of PutGeneListIntoDB.py
 p_acc_ver = re.compile(r'(\w+)\.(\d+)')
-p_acc = re.compile(r'(\w+)')	#2008-12-11 only alphanumeric characters in gene_symbol (suzi's file contains weird characters sometimes)	
+#2008-12-11 only alphanumeric characters in gene_symbol
+#  (suzi's file contains weird characters sometimes)	
+p_acc = re.compile(r'(\w+)')
 def getGeneIDSetGivenAccVer(acc_ver, gene_symbol2gene_id_set, noUpperCase=0):
     if not noUpperCase:
         gene_symbol = acc_ver.upper()
     if p_acc_ver.search(gene_symbol):
         gene_symbol, version = p_acc_ver.search(gene_symbol).groups()
-    if p_acc.search(gene_symbol):	#2008-12-11 pick out alphanumeric characters
+    if p_acc.search(gene_symbol):
+        #2008-12-11 pick out alphanumeric characters
         gene_symbol, = p_acc.search(gene_symbol).groups()
     gene_id_set = gene_symbol2gene_id_set.get(gene_symbol)
     return gene_id_set
 
 
-def calGreatCircleDistance(lat1=None, lon1=None, lat2=None, lon2=None, earth_radius=6372.795):
+def calGreatCircleDistance(lat1=None, lon1=None, lat2=None, lon2=None,
+    earth_radius=6372.795):
     """
     2009-4-18
         copied from CreatePopulation.cal_great_circle_distance()
@@ -621,15 +666,16 @@ def calGreatCircleDistance(lat1=None, lon1=None, lat2=None, lon2=None, earth_rad
     cos_lat1 = math.cos(lat1_rad)
     sin_lat2 = math.sin(lat2_rad)
     cos_lat2 = math.cos(lat2_rad)
-    spheric_angular_diff = math.atan2(math.sqrt(math.pow(cos_lat2*math.sin(long_diff),2) + 
-                                    math.pow(cos_lat1*sin_lat2-sin_lat1*cos_lat2*math.cos(long_diff),2)),
-                                    sin_lat1*sin_lat2+cos_lat1*cos_lat2*math.cos(long_diff))
+    spheric_angular_diff = math.atan2(
+        math.sqrt(math.pow(cos_lat2*math.sin(long_diff),2) + 
+        math.pow(cos_lat1*sin_lat2-sin_lat1*cos_lat2*math.cos(long_diff),2)),
+        sin_lat1*sin_lat2+cos_lat1*cos_lat2*math.cos(long_diff))
     return earth_radius*spheric_angular_diff
     
 def addExtraToFilenamePrefix(filename, extra):
     """
     2010-4-5
-        add the extra bits (string, integer, etc.) before the file name suffix
+    add the extra bits (string, integer, etc.) before the file name suffix
     """
     import os
     fname_prefix, fname_suffix = os.path.splitext(filename)
@@ -639,7 +685,8 @@ def addExtraToFilenamePrefix(filename, extra):
 def addExtraLsToFilenamePrefix(filename, extra_ls):
     """
     2010-5-9
-        add a list of the extra bits (string, integer, etc.) before the file name suffix
+    add a list of the extra bits (string, integer, etc.)
+        before the file name suffix
     """
     import os
     for extra in extra_ls:
@@ -649,7 +696,8 @@ def addExtraLsToFilenamePrefix(filename, extra_ls):
 def returnAnyValueIfNothing(string, data_type=int, defaultValue=0):
     """
     2010-12-15
-        used in Transfac.src.GeneASNXML2gene_mapping.return_datetime() in case nothing is returned.
+    used in Transfac.src.GeneASNXML2gene_mapping.return_datetime() in case 
+        nothing is returned.
     """
     if string:
         return data_type(string)
@@ -716,11 +764,14 @@ if __name__ == '__main__':
 def processRegexpString(p_str):
     """
     2011-4-30
-        copied from a pylons controller. used to process regular expressions passed from web client.
+        copied from a pylons controller. used to process regular expressions 
+        passed from web client.
     2009-4-3
-        if p_str includes '(' or ')', mysql complains: ERROR 1139 (42000): Got error 'parentheses not balanced' from regexp
+        if p_str includes '(' or ')', mysql complains: ERROR 1139 (42000):
+             Got error 'parentheses not balanced' from regexp
     """
-    p_str = p_str.replace('(', '\(')	#python re module only needs one '\'
+    p_str = p_str.replace('(', '\(')
+    #python re module only needs one '\'
     p_str = p_str.replace(')', '\)')
     p_str_sql = p_str.replace('(', '\\\(')	#mysql needs more
     p_str_sql = p_str_sql.replace(')', '\\\)')
@@ -734,50 +785,58 @@ def sortCMPBySecondTupleValue(a, b):
     """
     return cmp(a[1], b[1])
 
-def sshTunnel(serverHostname="dl324b-1.cmb.usc.edu", port="5432", middleManCredential="polyacti@login3"):
+def sshTunnel(serverHostname="dl324b-1.cmb.usc.edu", port="5432",
+    middleManCredential="polyacti@login3"):
     """
     2011-9-5
-        replace runLocalCommand() with os.system()
-        runLocalCommand() calls command_handler.communicate() which causes the program to get stuck
-            might be caused by "ssh -f" daemon behavior.
-        Correct way of replacing os.system() through Popen():
-            sts = os.system("mycmd" + " myarg")
-            ==>
-            p = Popen("mycmd" + " myarg", shell=True)
-            sts = os.waitpid(p.pid, 0)[1]
+    replace runLocalCommand() with os.system()
+    runLocalCommand() calls command_handler.communicate() which causes
+        the program to get stuck
+        might be caused by "ssh -f" daemon behavior.
+    Correct way of replacing os.system() through Popen():
+        sts = os.system("mycmd" + " myarg")
+        ==>
+        p = Popen("mycmd" + " myarg", shell=True)
+        sts = os.waitpid(p.pid, 0)[1]
         
     2011-8-15
-        through middleManCredential, run a ssh tunnel to allow access to serverHostname:port as localhost:port
-        
-        example:
-            # forward postgresql db on dl324b-1 to localhost
-            sshTunnel("dl324b-1.cmb.usc.edu", 5432, "polyacti@login3")
+    through middleManCredential, run a ssh tunnel to allow access to
+        serverHostname:port as localhost:port
+    
+    example:
+        # forward postgresql db on dl324b-1 to localhost
+        sshTunnel("dl324b-1.cmb.usc.edu", 5432, "polyacti@login3")
         
     """
-    commandline = "ssh -N -f -L %s:%s:%s %s"%(port, serverHostname, port, middleManCredential)
-    #2011-9-5 uncomment following. program will get stuck. might be caused by "ssh -f" daemon behavior
+    commandline = "ssh -N -f -L %s:%s:%s %s"%(port, serverHostname, port,
+        middleManCredential)
+    #2011-9-5 uncomment following. program will get stuck. might be caused
+    #    by "ssh -f" daemon behavior
     #runLocalCommand(commandline, report_stderr=True, report_stdout=True)
     return os.system(commandline)
 
 def getPhredScoreOutOfSolexaScore(solexaChar):
     """
     2011-8-15
-        main doc: http://en.wikipedia.org/wiki/FASTQ_format
-        
-        simple & approximate formula would just be ord(solexaChar)-64.
-        
-        full formula is at the last line of http://maq.sourceforge.net/fastq.shtml, which is used here.
-            a slight modification: here uses log10, rather than natural log.
+    main doc: http://en.wikipedia.org/wiki/FASTQ_format
+    
+    simple & approximate formula would just be ord(solexaChar)-64.
+    
+    full formula is at the last line of http://maq.sourceforge.net/fastq.shtml,
+        which is used here.
+        a slight modification: here uses log10, rather than natural log.
     """
     import math
     return 10*math.log10(1 + math.pow(10, (ord(solexaChar) - 64) / 10.0))
 
-def getFileBasenamePrefixFromPath(path=None, fakeSuffixSet = set(['.gz', '.zip', '.bz2', '.bz'])):
+def getFileBasenamePrefixFromPath(path=None,
+    fakeSuffixSet = set(['.gz', '.zip', '.bz2', '.bz'])):
     """
     i.e. 
-        path= 'folderHighCoveragePanel/Scaffold97_88626_VCF_87970_VCF_Scaffold97_splitVCF_u1.unphased_familySize3.bgl'
+        path= 'folderHighCoveragePanel/Scaffold97.unphased_familySize3.bgl'
     
-        getFileBasenamePrefixFromPath(path) == "Scaffold97_88626_VCF_87970_VCF_Scaffold97_splitVCF_u1.unphased_familySize3"
+        getFileBasenamePrefixFromPath(path) == 
+            "Scaffold97.unphased_familySize3"
     
     it will also get rid of suffix that are in the fakeSuffixSet.
         path = "folder/input.vcf.gz"
@@ -788,16 +847,19 @@ def getFileBasenamePrefixFromPath(path=None, fakeSuffixSet = set(['.gz', '.zip',
     2013.06.21 convenient function
     """
     fileBasename = os.path.basename(path)
-    return getRealPrefixSuffixOfFilenameWithVariableSuffix(fileBasename, fakeSuffixSet=fakeSuffixSet)[0]
+    return getRealPrefixSuffixOfFilenameWithVariableSuffix(fileBasename,
+        fakeSuffixSet=fakeSuffixSet)[0]
     
     
 
-def getRealPrefixSuffixOfFilenameWithVariableSuffix(path, fakeSuffix='.gz', fakeSuffixSet = set(['.gz', '.zip', '.bz2', '.bz'])):
+def getRealPrefixSuffixOfFilenameWithVariableSuffix(path, fakeSuffix='.gz',
+    fakeSuffixSet = set(['.gz', '.zip', '.bz2', '.bz'])):
     """
-    The purpose of this function is to get the prefix, suffix of a filename regardless of whether it
-        has two suffices (gzipped) or one. 
+    The purpose of this function is to get the prefix, suffix of a 
+        filename regardless of whether it has two suffices (gzipped) or one. 
     i.e.
-        A file name is either sequence_628BWAAXX_4_1.fastq.gz or sequence_628BWAAXX_4_1.fastq (without gz).
+        A file name is either sequence_628BWAAXX_4_1.fastq.gz or
+             sequence_628BWAAXX_4_1.fastq (without gz).
         This function returns ('sequence_628BWAAXX_4_1', '.fastq')
 
     "." is considered part of the filename suffix.
@@ -844,11 +906,13 @@ def get_md5sum(filename, md5sum_command = 'md5sum'):
         copied from variation/src/Array2DB_250k.py
     """
     import subprocess
-    md5sum_p = subprocess.Popen([md5sum_command, filename], stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+    md5sum_p = subprocess.Popen([md5sum_command, filename], 
+        stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     md5sum_stdout_out = md5sum_p.stdout.read()
     md5sum_stderr_out = md5sum_p.stderr.read()
     if md5sum_stderr_out:
-        sys.stderr.write("%s %s failed with stderr: %s.\n"%(md5sum_command, filename, md5sum_stderr_out))
+        sys.stderr.write("%s %s failed with stderr: %s.\n"%(md5sum_command,
+            filename, md5sum_stderr_out))
         sys.exit(4)
     else:
         return md5sum_stdout_out.split()[0].decode("utf-8")
@@ -863,8 +927,8 @@ def getDateStampedFilename(filename):
     from datetime import datetime
     lastModDatetime = datetime.fromtimestamp(os.stat(filename).st_mtime)
     prefix, suffix = os.path.splitext(filename)
-    newFilename = '%s.%s_%s_%s%s'%(prefix, lastModDatetime.year, lastModDatetime.month,\
-                                lastModDatetime.day, suffix)
+    newFilename = '%s.%s_%s_%s%s'%(prefix, lastModDatetime.year,
+        lastModDatetime.month, lastModDatetime.day, suffix)
     return newFilename
 
 def openGzipFile(inputFname, openMode='r'):
@@ -892,13 +956,14 @@ def openGzipFile(inputFname, openMode='r'):
         inf = open(inputFname, openMode)
     return inf
 
-def comeUpSplitFilename(outputFnamePrefix=None, suffixLength=3, fileOrder=0, filenameSuffix=""):
+def comeUpSplitFilename(outputFnamePrefix=None, suffixLength=3, fileOrder=0,
+    filenameSuffix=""):
     """
     2012.5.24
-        
-        '%0*d'%(suffixLength, fileOrder) is same as str(fileOrder).zfill(suffixLength).
-        If fileOrder's length is beyond suffixLength, then it's just fileOrder itself without truncation.
-        like 001, 002, 999, 1234.
+    '%0*d'%(suffixLength, fileOrder) is same as str(fileOrder).zfill(suffixLength).
+    If fileOrder's length is beyond suffixLength,
+        then it's just fileOrder itself without truncation.
+    like 001, 002, 999, 1234.
     """
     
     return '%s%0*d%s'%(outputFnamePrefix, suffixLength, fileOrder, filenameSuffix)
@@ -944,18 +1009,19 @@ def getFileOrFolderSize(path='.'):
 def getNoOfLinesInOneFileByWC(inputFname=None):
     """
     2012.7.30
-        call wc to finish the task
-        
-        "wc -l"'s output looks like this:
-        
-        crocea@crocea:~$ wc -l script/vervet/src/shell/countNoOfVariantsInOneVCFFolder.sh
-        16 script/vervet/src/shell/countNoOfVariantsInOneVCFFolder.sh
+    call wc to finish the task
+    
+    "wc -l"'s output looks like this:
+    
+    crocea@crocea:~$ wc -l shell/countNoOfVariantsInOneVCFFolder.sh
+    16 shell/countNoOfVariantsInOneVCFFolder.sh
 
     """
     counter = 0
     #commandline = "wc -l %s|awk -F ' ' '{print $1}'"%inputFname
     commandline = "wc -l %s"%inputFname	#just wc
-    return_data = runLocalCommand(commandline, report_stderr=False, report_stdout=False)
+    return_data = runLocalCommand(commandline, report_stderr=False, 
+        report_stdout=False)
     stdout_content = return_data.stdout_content
     noOfLines = int(stdout_content.split()[0].strip())
     
@@ -974,21 +1040,24 @@ def getNoOfLinesInOneFileByOpen(inputFname=None):
         counter += 1
     return counter
 
-def copyFile(srcFilename=None, dstFilename=None, copyCommand="cp -aprL", srcFilenameLs=None, dstFilenameLs=None):
+def copyFile(srcFilename=None, dstFilename=None, copyCommand="cp -aprL",
+    srcFilenameLs=None, dstFilenameLs=None):
     """
     2012.7.18
         -L of cp meant "always follow symbolic links in SOURCE".
     """
     #move the file
     commandline = '%s %s %s'%(copyCommand, srcFilename, dstFilename)
-    return_data = runLocalCommand(commandline, report_stderr=True, report_stdout=True)
+    return_data = runLocalCommand(commandline, report_stderr=True,
+        report_stdout=True)
     if srcFilenameLs is not None:
         srcFilenameLs.append(srcFilename)
     if dstFilenameLs is not None:
         dstFilenameLs.append(dstFilename)
     if return_data.stderr_content:
         #something wrong. abort
-        sys.stderr.write("commandline %s failed: %s\n"%(commandline, return_data.stderr_content))
+        sys.stderr.write("commandline %s failed: %s\n"%(commandline,
+            return_data.stderr_content))
         exitCode = 3
     else:
         exitCode = 0
@@ -997,7 +1066,8 @@ def copyFile(srcFilename=None, dstFilename=None, copyCommand="cp -aprL", srcFile
 def getNoOfUnitsNeededToCoverN(N=None, s=None, o=None):
     """
     2012.8.25
-        purpose is to figure out how many blocks/units it needs to split N objects into given N.
+        purpose is to figure out how many blocks/units it needs to split 
+            N objects into given N.
         N could also be smaller than s and o (first block).
         
         s = noOfSitesPerUnit
@@ -1022,7 +1092,8 @@ def getNoOfUnitsNeededToCoverN(N=None, s=None, o=None):
     noOfUnits = max(1, math.ceil(numerator/float(denominator)))
     return int(noOfUnits)
 
-def addObjectAttributeToSet(objectVariable=None, attributeName=None, setVariable=None):
+def addObjectAttributeToSet(objectVariable=None, attributeName=None,
+    setVariable=None):
     """
     2012.11.22
         do not add an attribute to the set if it's not available or if it's none
@@ -1032,40 +1103,49 @@ def addObjectAttributeToSet(objectVariable=None, attributeName=None, setVariable
         setVariable.add(attributeValue)
     return setVariable
 
-def addObjectListAttributeToSet(objectVariable=None, attributeName=None, setVariable=None, data_type=int):
+def addObjectListAttributeToSet(objectVariable=None, attributeName=None,
+    setVariable=None, data_type=int):
     """
     2012.12.2 bugfix
     2012.11.23
     """
     attributeValue = getattr(objectVariable, attributeName, None)
     flag = False
-    if type(attributeValue)==numpy.ndarray:	#"if attributeValue" fails for numpy array
+    if type(attributeValue)==numpy.ndarray:
+        #"if attributeValue" fails for numpy array
         if hasattr(attributeValue, '__len__') and attributeValue.size>0:
             flag = True
     elif attributeValue or attributeValue == 0:
         flag = True
     if flag and setVariable is not None:
-        if type(attributeValue)==list or type(attributeValue)==tuple or type(attributeValue)==numpy.ndarray or type(attributeValue)==set:
+        if type(attributeValue)==list or type(attributeValue)==tuple or\
+            type(attributeValue)==numpy.ndarray or type(attributeValue)==set:
             attributeValueList = attributeValue
         elif type(attributeValue)==str:
-            attributeValueList = getListOutOfStr(attributeValue, data_type=data_type, separator1=',', separator2='-')
+            attributeValueList = getListOutOfStr(attributeValue, \
+                data_type=data_type, separator1=',', separator2='-')
         else:
-            attributeValueList = getListOutOfStr(attributeValue, data_type=data_type, separator1=',', separator2='-')
+            attributeValueList = getListOutOfStr(attributeValue, \
+                data_type=data_type, separator1=',', separator2='-')
             #attributeValueList = attributeValue
         setVariable |= set(list(attributeValueList))
     return setVariable
 
-def pauseForUserInput(message="", continueAnswerSet=set(['Y', 'y', '', 'yes', 'Yes']), exitType=1):
+def pauseForUserInput(message="",
+    continueAnswerSet=set(['Y', 'y', '', 'yes', 'Yes']), exitType=1):
     """
     Examples:
         #exit pending user answer
-        message = "Error: plink merge file %s already exists. Overwrite it? (if its associated workflows do not use it anymore.) [Y/n]:"%\
-                            (outputFname)
-        utils.pauseForUserInput(message=message, continueAnswerSet=set(['Y', 'y', '', 'yes', 'Yes']), exitType=1)
+        message = "Error: plink merge file %s already exists."
+            "Overwrite it? (if its associated workflows do not use it anymore.)"
+            " [Y/n]:"%(outputFname)
+        utils.pauseForUserInput(message=message,
+            continueAnswerSet=set(['Y', 'y', '', 'yes', 'Yes']), exitType=1)
     
         #exit regardless
-        message = "ERRROR in AbstractVCFWorkflow.concatenateIntervalsIntoOneVCFSubWorkflow(): %s is None."%\
-                            (fileBasenamePrefix)
+        message = "ERRROR in "
+            "AbstractVCFWorkflow.concatenateIntervalsIntoOneVCFSubWorkflow():"
+            " %s is None."%(fileBasenamePrefix)
         utils.pauseForUserInput(message=message, continueAnswerSet=None, exitType=1)
     
     
@@ -1079,7 +1159,8 @@ def pauseForUserInput(message="", continueAnswerSet=set(['Y', 'y', '', 'yes', 'Y
     if continueAnswerSet is not None and userAnswer in continueAnswerSet:
         pass
     elif continueAnswerSet is None:
-        sys.stderr.write("continueAnswerSet is None. Exit regardless of user input (%s).\n"%(userAnswer))
+        logging.error(f"continueAnswerSet is None. "
+            f"Exit regardless of user input ({userAnswer}).")
         if exitType==2:
             raise
         elif exitType==1:
@@ -1087,7 +1168,7 @@ def pauseForUserInput(message="", continueAnswerSet=set(['Y', 'y', '', 'yes', 'Y
         else:
             pass
     else:
-        sys.stderr.write("user answered %s, interpreted as no.\n"%(userAnswer))
+        logging.error(f"user answered {userAnswer}, interpreted as no.")
         if exitType==2:
             raise
         elif exitType==1:
@@ -1095,11 +1176,12 @@ def pauseForUserInput(message="", continueAnswerSet=set(['Y', 'y', '', 'yes', 'Y
         else:
             pass
 
-
 #2012.10.5 copied from VervetDB.py
 #used in getattr(individual_site_id_set, '__len__', returnZeroFunc)()
 returnZeroFunc = lambda: 0
 
 if __name__ == '__main__':
     FigureOutTaxID_ins = FigureOutTaxID()
-    print(FigureOutTaxID_ins.returnTaxIDGivenSentence(">gi|172045488|ref|NW_001867254.1| Physcomitrella patens subsp. patens PHYPAscaffold_10696"))
+    print(FigureOutTaxID_ins.returnTaxIDGivenSentence(
+        ">gi|172045488|ref|NW_001867254.1| Physcomitrella patens subsp. "
+        "patens PHYPAscaffold_10696"))

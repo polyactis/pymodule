@@ -1,6 +1,7 @@
 before_script:
   - echo "before script"
-  # let users can modify its own files. git object files are 444 (read-only for everyone.)
+  # let users can modify its own files.
+  # git object files are 444 (read-only for everyone.)
   - chmod u+w -R .git/
 
 after_script:
@@ -29,16 +30,23 @@ check_version:
 test_SunsetDB:
   stage: test_help
   script:
-    - echo "Testing if SunsetDB.py can be run ... "
+    - echo "Testing if SunsetDB.py can print help."
     - pwd
     - ./palos/db/SunsetDB.py -h
 
 test_ImportSeq:
   stage: test_help
   script:
-    - echo "Testing if ImportIndividualSequence2DB.py can be run ... "
+    - echo "Testing if ImportIndividualSequence2DB.py can print help."
     - pwd
     - ./db/import/ImportIndividualSequence2DB.py -h
+
+test_RegisterDB:
+  stage: test_help
+  script:
+    - echo "Testing if RegisterAndMoveSplitSequenceFiles.py can print help."
+    - pwd
+    - ./db/import/RegisterAndMoveSplitSequenceFiles.py -h
 
 test_GADA:
   stage: test_GADA
