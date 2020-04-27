@@ -836,29 +836,9 @@ class IndividualSequence(Base, AbstractTableWithFilename):
             subFolder = self.folderName
         filename_part_ls = []
         if self.id:
-            filename_part_ls.append(self.id)
+            filename_part_ls.append(f'self.id')
         if self.individual_id:
-            filename_part_ls.append('indID%s'%(self.individual_id))
-        if self.individual_id:
-            filename_part_ls.append('code%s'%(self.individual.code))
-        if self.sequencer_id:
-            filename_part_ls.append("sequencer%s"%(self.sequencer_id))
-        if self.sequence_type_id:
-            filename_part_ls.append("seqType%s"%(self.sequence_type_id))
-        if self.tissue_id:
-            filename_part_ls.append("tissueID%s"%(self.tissue_id))
-        if self.condition_id:
-            filename_part_ls.append("conditionID%s"%(self.condition_id))
-        if self.filtered is not None:
-            filename_part_ls.append("filtered%s"%(self.filtered))
-        if self.no_of_chromosomes is not None:
-            filename_part_ls.append("%sChromosomes"%(self.no_of_chromosomes))
-        if self.sequence_batch_id:
-            filename_part_ls.append("batch%s"%(self.sequence_batch_id))
-        if self.version is not None:
-            filename_part_ls.append("version%s"%(self.version))
-        
-        filename_part_ls = map(str, filename_part_ls)
+            filename_part_ls.append(f'i{self.individual_id}')
         
         dst_relative_path = '%s/%s'%(subFolder, '_'.join(filename_part_ls))
         return dst_relative_path
@@ -1647,10 +1627,6 @@ class GenotypeFile(Base, AbstractTableWithFilename):
     def constructRelativePath(self, subFolder='genotype_file', \
         sourceFilename="", **keywords):
         """
-        2012.8.30
-            name differently when the no_of_chromosomes is >1
-        2012.7.12
-            path relative to self.data_dir
         """
         folderRelativePath = self.genotype_method.constructRelativePath(
             subFolder=subFolder)
@@ -1660,17 +1636,11 @@ class GenotypeFile(Base, AbstractTableWithFilename):
         folderRelativePath = folderRelativePath.lstrip('/')
         if self.no_of_chromosomes<=1:
             dst_relative_path = os.path.join(folderRelativePath,
-                '%s_chr_%s_%s'%(self.id, self.chromosome, sourceFilename))
+                f'{self.id}_{sourceFilename}')
         else:
-            #files with more than 1 chromosome
-            # 2012.8.30
-            # it'll be like 
-            #   genotype_file/method_6_$id_$format_#chromosomes_sourceFilename
-            # do not put it in genotype_file/method_6/ folder.
             folderRelativePath= folderRelativePath.rstrip('/')
-            dst_relative_path = '%s_%s_%schromosomes_%s'%(
-                folderRelativePath, self.id, self.no_of_chromosomes,
-                sourceFilename)
+            dst_relative_path = f'{folderRelativePath}_{self.id}_'+\
+                f'{sourceFilename}'
         return dst_relative_path
     
     def getFileSize(self, data_dir=None):
@@ -1796,11 +1766,14 @@ class AlignmentDepthIntervalFile(Base, AbstractTableWithFilename):
         if self.no_of_chromosomes<=1:
             filename_part_ls.append('chr_%s'%(self.chromosome))
         else:
-            filename_part_ls.append('%schromosomes'%(self.no_of_chromosomes))
+            filename_part_ls.append('%schrs'%(self.no_of_chromosomes))
         
+        if sourceFilename:
+            filename_part_ls.append(sourceFilename)
+
         filename_part_ls = map(str, filename_part_ls)
-        fileRelativePath = os.path.join(folderRelativePath, 
-            '%s_%s'%('_'.join(filename_part_ls), sourceFilename))
+        fileRelativePath = os.path.join(folderRelativePath, \
+            '_'.join(filename_part_ls))
         return fileRelativePath
     
     def getFileSize(self, db=None):
@@ -3041,11 +3014,6 @@ class SunsetDB(Database):
         """
         call getIndividualSequence to construct individual_sequence,
             rather than construct it from here.
-        2012.2.10
-            constructRelativePathForIndividualSequence is now moved to
-             Table IndividualSequence.
-        2011-9-1
-            add quality_score_format
         2011-8-11
             make a copy of parent_individual_sequence_id individual_sequence entity
         """
