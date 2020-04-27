@@ -674,7 +674,7 @@ class IndividualAlignmentConsensusSequence(Base, AbstractTableWithFilename):
     no_of_chromosomes = Column(Integer)
     no_of_bases = Column(BigInteger)
     md5sum = Column(Text, unique=True)
-    file_size = Column(BigInteger)	#2012.9.21
+    file_size = Column(BigInteger)
     original_path = Column(Text)
     comment = Column(Text)
     created_by = Column(String(128))
@@ -815,17 +815,9 @@ class IndividualSequence(Base, AbstractTableWithFilename):
         'AlignmentDepthIntervalMethod', back_populates='ref_sequence', 
         cascade='all,delete')
     
-    def constructRelativePath(self, subFolder='individual_sequence', **keywords):
-        """
-        2012.7.13 link to constructRelativePathForIndividualSequence()
-        """
-        return self.constructRelativePathForIndividualSequence(
-            subFolder=subFolder)
-    
     folderName='individual_sequence'
-    def constructRelativePathForIndividualSequence(self, subFolder=None):
+    def constructRelativePath(self, subFolder='individual_sequence'):
         """
-        add "split" in the end of the path.
         called by getIndividualSequence() and other outside programs.
         """
         #'/' must not be put in front of the relative path.
@@ -2968,7 +2960,7 @@ class SunsetDB(Database):
             self.session.add(db_entry)
             self.session.flush()
             
-            dst_relative_path = db_entry.constructRelativePathForIndividualSequence(
+            dst_relative_path = db_entry.constructRelativePath(
                 subFolder=subFolder)
             #update its path in db to the relative path
             db_entry.path = dst_relative_path
