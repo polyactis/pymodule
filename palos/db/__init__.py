@@ -617,7 +617,8 @@ Example:
                 dstFilename=os.path.join(self.data_dir, relativePath), \
                 relativeOutputDir=None, shellCommand='cp -rL', \
                 srcFilenameLs=self.srcFilenameLs, dstFilenameLs=self.dstFilenameLs,\
-                constructRelativePathFunction=genotypeFile.constructRelativePath, data_dir=self.data_dir)
+                constructRelativePathFunction=genotypeFile.constructRelativePath,
+                data_dir=self.data_dir)
             #same as this
             exitCode = self.db_vervet.moveFileIntoDBAffiliatedStorage(
                 db_entry=genotypeFile, filename=inputFileBasename, \
@@ -625,7 +626,8 @@ Example:
                 outputDir=self.data_dir, \
                 relativeOutputDir=None, shellCommand='cp -rL', \
                 srcFilenameLs=self.srcFilenameLs, dstFilenameLs=self.dstFilenameLs,\
-                constructRelativePathFunction=genotypeFile.constructRelativePath, data_dir=self.data_dir)
+                constructRelativePathFunction=genotypeFile.constructRelativePath,
+                data_dir=self.data_dir)
                                     
             if exitCode!=0:
                 sys.stderr.write("Error: moveFileIntoDBAffiliatedStorage() exits with %s code.\n"%(exitCode))

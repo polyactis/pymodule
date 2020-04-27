@@ -1050,17 +1050,6 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
                 site_id=self.site_id, study_id=self.study_id,\
                 sequencer_name=sequencer_name, sequence_type_name=sequence_type_name, \
                 sequence_format=sequence_format, data_dir=data_dir)
-            #2012.2.10 stop passing path_to_original_sequence=bamFname to self.addMonkeySequence()
-            
-            """
-            #2012.2.10 temporary, during transition from old records to new ones.
-            newISQPath = individual_sequence.constructRelativePathForIndividualSequence()
-            newISQPath = '%s_split'%(newISQPath)
-            if individual_sequence.path is None or individual_sequence.path !=newISQPath:
-                individual_sequence.path = newISQPath
-                session.add(individual_sequence)
-                session.flush()
-            """
             sequenceAbsDir = os.path.join(data_dir, individual_sequence.path)
             mkSequenceAbsDirJob = self.addMkDirJob(outputDir=sequenceAbsDir)
             
