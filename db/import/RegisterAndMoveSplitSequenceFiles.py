@@ -5,13 +5,14 @@ import re
 import os
 import sys
 from palos import ProcessOptions, utils
-from palos.mapper.AbstractSunsetMapper import AbstractSunsetMapper as ParentClass
+from palos.mapper.AbstractSunsetMapper import AbstractSunsetMapper
 
+ParentClass = AbstractSunsetMapper
 class RegisterAndMoveSplitSequenceFiles(ParentClass):
     """
 Examples:
-    %s --drivername postgresql --hostname pdc
-        --dbname pmdb --schema vervet --db_user yh 
+    %s --drivername postgresql
+        --hostname pdc --dbname pmdb --schema vervet --db_user yh 
         -i isq_id.txt --inputDir 3185_gerald_D14CGACXX_7_GCCAAT
         -o ~/vervet/db/individual_sequence/3185_6059_2002099_GA_0_0
         --relativeOutputDir individual_sequence/3185_6059_2002099_GA_0_0
@@ -46,8 +47,9 @@ Description:
         ('individual_sequence_id', 0, int): [None, '', 1, 
             'individual_sequence.id associated with all files.'],
         ('individual_sequence_file_raw_id', 0, int): [None, '', 1, 
-            'individual_sequence_file_raw.id associated with the raw file'],\
-        ('library', 1,): [None, 'l', 1, 'library name for files in inputDir', ],
+            'individual_sequence_file_raw.id associated with the raw file'],
+        ('library', 0, ): [None, 'l', 1, 
+            'library name for files in inputDir', ],
         ('mate_id', 0, int): [None, 'm', 1, 
             '1: first end; 2: 2nd end. of paired-end or mate-paired libraries'],
         ("sequence_format", 1, ): ["fastq", 'f', 1, 'fasta, fastq, etc.'],
@@ -83,40 +85,45 @@ Description:
             self.individual_sequence_id = individual_sequence_id
 
         individual_sequence_file_raw_id = input_variable_dict.get(
-            "individual_sequence_file_raw_id", self.individual_sequence_file_raw_id)
+            "individual_sequence_file_raw_id", 
+            self.individual_sequence_file_raw_id)
         if individual_sequence_file_raw_id:
-            individual_sequence_file_raw_id = int(individual_sequence_file_raw_id)
-            self.individual_sequence_file_raw_id = individual_sequence_file_raw_id
+            individual_sequence_file_raw_id = \
+                int(individual_sequence_file_raw_id)
+            self.individual_sequence_file_raw_id = \
+                individual_sequence_file_raw_id
 
         self.outputDir = input_variable_dict.get("outputDir", self.outputDir)
-        self.relativeOutputDir = input_variable_dict.get("relativeOutputDir", \
+        self.relativeOutputDir = input_variable_dict.get("relativeOutputDir",
             self.relativeOutputDir)
         
         relativePathIndex = self.outputDir.find(self.relativeOutputDir)
         noOfCharsInRelativeOutputDir = len(self.relativeOutputDir)
         if self.outputDir[relativePathIndex:relativePathIndex+\
                 noOfCharsInRelativeOutputDir]!=self.relativeOutputDir:
-            logging.error('relativeOutputDir %s is not the last part of outputDir %s.\n'%\
-                (self.relativeOutputDir, self.outputDir))
+            logging.error(f'relativeOutputDir {self.relativeOutputDir} is not'
+            f' the last part of outputDir {self.outputDir}.')
             sys.exit(4)
     
-    def parseSplitOrderOutOfFilename(self, filename, library, mate_id=None):
+    def parseSplitOrderOutOfFilename(self, filename, mate_id=None):
         """
-        mate_id is optional
-        filename might look like gerald_81LL0ABXX_4_TTAGGC_2_1.fastq.gz.
-            library_(mate_id)_(split_order).fastq.gz
-        library is gerald_81LL0ABXX_4_TTAGGC.
-        mate_id is 2.
-        split_order is 1.
+        Parse the split order out of filename. For example:
+        For file gerald_81LL0ABXX_4_TTAGGC_2_1.fastq.gz:
+            .*_(mate_id)_(split_order).fastq.gz
+            mate_id is 2.
+            split_order is 1.
         """
         if mate_id:
-            prefix = '%s_%s'%(library, mate_id)
+            middle = mate_id
         else:
-            prefix = '%s_singleRead'%(library)
-        split_order_pattern = re.compile(r'%s_(\d+).fastq'%(prefix))
+            middle = 'singleRead'
+        split_order_pattern = re.compile(
+            r'(?P<other>.*)_%s_(?P<split_order>\d+).fastq'%(
+                middle
+            ))
         split_order_search_result = split_order_pattern.search(filename)
         if split_order_search_result:
-            split_order = split_order_search_result.group(1)
+            split_order = split_order_search_result.group('split_order')
         else:
             split_order = None
         return split_order
@@ -133,35 +140,39 @@ Description:
         if self.original_file_path:
             file_raw_db_entry = self.db_main.registerOriginalSequenceFileToDB(
                 self.original_file_path, library=self.library,
-                individual_sequence_id=self.individual_sequence_id, mate_id=self.mate_id, 
+                individual_sequence_id=self.individual_sequence_id,
+                mate_id=self.mate_id, 
                 md5sum=None)
             self.individual_sequence_file_raw_id = file_raw_db_entry.id
         
         counter = 0
         real_counter = 0
         for filename in os.listdir(self.inputDir):
-            split_order = self.parseSplitOrderOutOfFilename(filename, \
-                self.library, self.mate_id)
+            split_order = self.parseSplitOrderOutOfFilename(filename,
+                self.mate_id)
             counter += 1
             if split_order:
                 #save db entry
                 db_entry = db_main.getIndividualSequenceFile(
-                    self.individual_sequence_id, library=self.library, \
+                    self.individual_sequence_id, library=self.library,
                     mate_id=self.mate_id, \
-                    split_order=int(split_order), format=self.sequence_format,\
+                    split_order=int(split_order), format=self.sequence_format,
                     filtered=0, parent_individual_sequence_file_id=None, \
-                    individual_sequence_file_raw_id=self.individual_sequence_file_raw_id)
+                    individual_sequence_file_raw_id=\
+                        self.individual_sequence_file_raw_id)
                 
                 #move the file
                 exitCode = db_main.moveFileIntoDBAffiliatedStorage(
-                    db_entry=db_entry, filename=filename, \
-                    inputDir=self.inputDir, outputDir=self.outputDir, \
-                    relativeOutputDir=self.relativeOutputDir, shellCommand='cp -rL', \
-                    srcFilenameLs=self.srcFilenameLs, dstFilenameLs=self.dstFilenameLs,\
+                    db_entry=db_entry, filename=filename,
+                    inputDir=self.inputDir, outputDir=self.outputDir,
+                    relativeOutputDir=self.relativeOutputDir,
+                    shellCommand='cp -rL',
+                    srcFilenameLs=self.srcFilenameLs,
+                    dstFilenameLs=self.dstFilenameLs,
                     constructRelativePathFunction=None)
                 if exitCode!=0:
-                    logging.error("moveFileIntoDBAffiliatedStorage() exits with %s code."%\
-                        (exitCode))
+                    logging.error(f"moveFileIntoDBAffiliatedStorage() exits "
+                        f"with {exitCode} code.")
                     self.sessionRollback(session)
                     #delete all recorded target files
                     self.cleanUpAndExitOnFailure(exitCode=exitCode)
