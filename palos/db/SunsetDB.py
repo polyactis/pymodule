@@ -828,7 +828,7 @@ class IndividualSequence(Base, AbstractTableWithFilename):
             subFolder = self.folderName
         filename_part_ls = []
         if self.id:
-            filename_part_ls.append(f'self.id')
+            filename_part_ls.append(f'{self.id}')
         if self.individual_id:
             filename_part_ls.append(f'i{self.individual_id}')
         
