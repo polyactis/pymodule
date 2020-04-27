@@ -163,7 +163,8 @@ Example ("Library" and "Bam Path" are required):
         bamBaseFname2SampleID = {}
         reader = csv.reader(open(sample_sheet), delimiter='\t')
         header = reader.next()
-        col_name2index = utils.getColName2IndexFromHeader(header, skipEmptyColumn=True)
+        col_name2index = utils.getColName2IndexFromHeader(header,
+            skipEmptyColumn=True)
         sampleIDIndex = col_name2index.get("Library")
         if sampleIDIndex is None:
             sampleIDIndex = col_name2index.get("library")
@@ -186,7 +187,7 @@ Example ("Library" and "Bam Path" are required):
             if pa_search:
                 code = pa_search.group(1)
             else:
-                sys.stderr.write("Warning: could not parse sample ID from %s. Ignore.\n"%(code))
+                logging.warn("Could not parse sample ID from %s. Ignore.\n"%(code))
                 continue
             bamFname = row[bamFnameIndex]
             bamBaseFname = os.path.split(bamFname)[1]
@@ -217,18 +218,19 @@ Example ("Library" and "Bam Path" are required):
         site_id: int =None, 
         tissue_name: str=None, tissue_id: int =None, 
         sequence_batch_id: int =None,
-        sequencer_name: str ='HiSeq', sequence_type_name: str ='PairedEnd', 
+        sequencer_name: str ='HiSeq', sequence_type_name: str ='PairedEnd',
         sequence_format: str ='fastq', isq_comment: str=None, 
         path_to_original_sequence=None, data_dir: str =None):
         """
         add individual and then add individual_sequence
         """
-        individual = db_main.getIndividual(code=code, name=name, tax_id=tax_id, 
+        individual = db_main.getIndividual(code=code, name=name, tax_id=tax_id,
             study_name=study_name, study_id=study_id, site_id=site_id)
         individual_sequence = db_main.getIndividualSequence(
             individual_id=individual.id,
             sequencer_name=sequencer_name, 
-            sequence_type_name=sequence_type_name, sequence_format=sequence_format, 
+            sequence_type_name=sequence_type_name,
+            sequence_format=sequence_format,
             path_to_original_sequence=path_to_original_sequence, coverage=None,
             sequence_batch_id=sequence_batch_id, 
             tissue_name=tissue_name, tissue_id=tissue_id,
@@ -255,16 +257,20 @@ Example ("Library" and "Bam Path" are required):
         ParentClass.registerExecutables(self)
 
         self.registerOneExecutable(
-            path=os.path.join(self.pymodulePath, 'mapper/splitter/SplitReadFileWrapper.sh'), \
+            path=os.path.join(self.pymodulePath,
+                'mapper/splitter/SplitReadFileWrapper.sh'),
             name='SplitReadFileWrapper', clusterSizeMultiplier=0)
         self.registerOneExecutable(
-            path=os.path.join(self.pymodulePath, 'mapper/computer/VerifyFileMD5Sum.py'), \
+            path=os.path.join(self.pymodulePath,
+                'mapper/computer/VerifyFileMD5Sum.py'),
             name='VerifyFileMD5Sum', clusterSizeMultiplier=0)
         self.registerOneExecutable(
-            path=os.path.join(self.pymodulePath, 'db/import/RegisterAndMoveSplitSequenceFiles.py'), \
+            path=os.path.join(self.pymodulePath,
+                'db/import/RegisterAndMoveSplitSequenceFiles.py'),
             name='RegisterAndMoveSplitSequenceFiles', clusterSizeMultiplier=0)
         self.registerOneExecutable(
-            path=os.path.join(self.pymodulePath, 'db/import/RegisterIndividualSequence2DB.py'), \
+            path=os.path.join(self.pymodulePath,
+                'db/import/RegisterIndividualSequence2DB.py'),
             name='RegisterIndividualSequence2DB', clusterSizeMultiplier=0)
         self.registerOneExecutable(path=self.javaPath, \
             name='SamToFastqJava', clusterSizeMultiplier=0)
@@ -367,7 +373,8 @@ Example ("Library" and "Bam Path" are required):
             parentJobLs=parentJobLs,
             extraDependentInputLs=extraDependentInputLs,
             extraOutputLs=None, transferOutput=transferOutput, \
-            extraArguments=extraArguments, extraArgumentList=extraArgumentList,
+            extraArguments=extraArguments,
+            extraArgumentList=extraArgumentList,
             job_max_memory=job_max_memory, walltime=walltime,\
             sshDBTunnel=sshDBTunnel, 
             key2ObjectForJob=None, objectWithDBArguments=self)
@@ -401,7 +408,8 @@ Example ("Library" and "Bam Path" are required):
                 individual_sequence_id])
         if individual_sequence_file_raw_id:
             extraArgumentList.extend(
-                ['--individual_sequence_file_raw_id', individual_sequence_file_raw_id])
+                ['--individual_sequence_file_raw_id',
+                    individual_sequence_file_raw_id])
         if original_file:
             extraArgumentList.extend([
                 '--original_file_path', original_file
@@ -412,18 +420,21 @@ Example ("Library" and "Bam Path" are required):
         if mate_id:
             extraArgumentList.append('--mate_id %s'%(mate_id))
         
-        job = self.addData2DBJob(executable=self.RegisterAndMoveSplitSequenceFiles,
+        job = self.addData2DBJob(
+            executable=self.RegisterAndMoveSplitSequenceFiles,
             inputFile=inputFile, inputArgumentOption="-i", \
             data_dir=None, logFile=logFile, commit=commit,\
-            parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs,
+            parentJobLs=parentJobLs,
+            extraDependentInputLs=extraDependentInputLs,
             extraOutputLs=None, transferOutput=transferOutput, \
-            extraArguments=extraArguments, extraArgumentList=extraArgumentList, \
+            extraArguments=extraArguments, extraArgumentList=extraArgumentList,
             job_max_memory=job_max_memory, walltime=walltime,\
             sshDBTunnel=sshDBTunnel,
             key2ObjectForJob=None, objectWithDBArguments=self)
         return job
     
-    def getInputPathLsFromInput(self, input_path=None, suffixSet=set(['.fastq']), fakeSuffix='.gz'):
+    def getInputPathLsFromInput(self, input_path=None,
+        suffixSet=set(['.fastq']), fakeSuffix='.gz'):
         """
         2012.4.30
             this function supercedes self.getAllBamFiles() and it's more flexible.
@@ -443,13 +454,15 @@ Example ("Library" and "Bam Path" are required):
             sys.exit(4)
         return input_path_list
 
-    def getSampleID2FastqObjectLsForSouthAfricanDNAFastQ(self, fastq_path_ls=None):
+    def getSampleID2FastqObjectLsForSouthAfricanDNAFastQ(self,
+        fastq_path_ls=None):
         """        
         In pairs like this:
             VSAA2015_1.fastq.gz
             VSAA2015_2.fastq.gz
         """
-        sys.stderr.write("Parsing sample_id2fastq_obj_ls from %s files ..."%(len(fastq_path_ls)))
+        sys.stderr.write("Parsing sample_id2fastq_obj_ls from %s files ..."%(\
+            len(fastq_path_ls)))
         sample_id2fastq_obj_ls = {}
         import random
         filename_pattern = re.compile(r'(?P<sample_id>[a-zA-Z0-9]+)_(?P<mate_id>\d).fastq')
@@ -467,7 +480,8 @@ Example ("Library" and "Bam Path" are required):
                 filenameSignature = (sample_id)
                     
                 #concoct a unique library ID
-                #this combination insures two ends from the same library are grouped together
+                #this combination insures two ends from the same library
+                #  are grouped together
                 libraryKey = (sample_id)
                 if libraryKey not in libraryKey2UniqueLibrary:
                     uniqueLibrary = '%s_%s'%(sample_id, repr(random.random())[2:])
@@ -480,7 +494,8 @@ Example ("Library" and "Bam Path" are required):
                     sample_id2fastq_obj_ls[sample_id] = []
                 sample_id2fastq_obj_ls[sample_id].append(fastq_obj)
             else:
-                sys.stderr.write("Error: can't parse sample_id, library, mate_id out of %s.\n"%fastq_path)
+                logging.error(f"Can't parse sample_id, library, mate_id "
+                    f"out of {fastq_path}.")
                 sys.exit(4)
         sys.stderr.write(" %s samples and %s files in the dictionary.\n"%
             (len(sample_id2fastq_obj_ls), real_counter))
@@ -497,8 +512,9 @@ Example ("Library" and "Bam Path" are required):
         """
         fastq_path_ls = self.getInputPathLsFromInput(input_path, 
             suffixSet=set(['.fastq']), fakeSuffix='.gz')
-        sample_id2fastq_obj_ls = self.getSampleID2FastqObjectLsForSouthAfricanDNAFastQ(
-            fastq_path_ls=fastq_path_ls)
+        sample_id2fastq_obj_ls = \
+            self.getSampleID2FastqObjectLsForSouthAfricanDNAFastQ(
+                fastq_path_ls=fastq_path_ls)
         self.addJobsToSplitAndRegisterFastQ(db_main=db_main, 
             sample_id2fastq_obj_ls=sample_id2fastq_obj_ls, data_dir=data_dir,
             minNoOfReads=minNoOfReads, commit=commit,
@@ -564,8 +580,7 @@ Example ("Library" and "Bam Path" are required):
         return sample_id2data
 
     def addJobsToImportFastQ(self, db_main=None, \
-        sample_sheet=None, input_path=None, data_dir=None, \
-        commit=None):
+        sample_sheet=None, input_path=None, data_dir=None, commit=None):
         """
         a general importer
         """
@@ -592,18 +607,22 @@ Example ("Library" and "Bam Path" are required):
                     tissue_name=fastq_obj.tissue_name, 
                     tissue_id=fastq_obj.tissue_id,
                     condition_name=fastq_obj.condition,
-                    filtered=0, version=None, is_contaminated=0, outdated_index=0, 
+                    filtered=0, version=None, is_contaminated=0,
+                    outdated_index=0, 
                     data_dir=data_dir)
                 isq_id = individual_sequence.id
                 if isq_id not in isq_id2data:
                     #multiple files may belong to the same individual_sequence.
-                    sequenceAbsDir = os.path.join(data_dir, individual_sequence.path)
-                    mkSequenceAbsDirJob = self.addMkDirJob(outputDir=sequenceAbsDir)
+                    sequenceAbsDir = os.path.join(data_dir,
+                        individual_sequence.path)
+                    mkSequenceAbsDirJob = self.addMkDirJob(
+                        outputDir=sequenceAbsDir)
                     
                     splitOutputDir = f'{individual_sequence.id}'
                     #One directory containing split files from both mates is fine,
                     # as RegisterAndMoveSplitSequenceFiles could pick up.
-                    splitOutputDirJob = self.addMkDirJob(outputDir=splitOutputDir)
+                    splitOutputDirJob = self.addMkDirJob(
+                        outputDir=splitOutputDir)
                     isq_id2data[isq_id] = PassingData(
                         sequenceAbsDir=sequenceAbsDir,
                         mkSequenceAbsDirJob=mkSequenceAbsDirJob,
@@ -614,19 +633,24 @@ Example ("Library" and "Bam Path" are required):
                 library = fastq_obj.library
                 mate_id = fastq_obj.mate_id
                 fastq_path = fastq_obj.abs_path
-                fastqFile = self.registerOneInputFile(fastq_path)
+                fastqFile = self.registerOneInputFile(fastq_path,
+                    useAbsolutePathAsPegasusFileName=True)
                 fastqFile.sample_id = sample_id
-            
                 splitFastQFnamePrefix = os.path.join(
                     isq_job_data.splitOutputDir, 
                     f'{individual_sequence.id}_{mate_id}')
                 logFile = File(f'{individual_sequence.id}_{mate_id}.split.log')
-                splitReadFileJob1 = self.addSplitReadFileJob(
-                    inputF=fastqFile, outputFnamePrefix=splitFastQFnamePrefix, \
-                    outputFnamePrefixTail="", minNoOfReads=self.minNoOfReads, \
-                    logFile=logFile, parentJobLs=[isq_job_data.splitOutputDirJob], \
-                    job_max_memory=4000, walltime = 800, \
-                    extraDependentInputLs=None, transferOutput=True)
+                #fastqFile is not dependent input of split job.
+                splitReadFileJob = self.addGenericJob(
+                    executable=self.SplitReadFileWrapper,
+                    parentJobLs=[isq_job_data.splitOutputDirJob],
+                    extraDependentInputLs=[self.SplitReadFileJar],
+                    extraOutputLs=[logFile], transferOutput=True,
+                    frontArgumentList=[self.javaPath, 4000,
+                        self.SplitReadFileJar],
+                    extraArgumentList=[fastqFile, splitFastQFnamePrefix,
+                        self.minNoOfReads, logFile],
+                    job_max_memory=4000, walltime=800)
                 
                 logFile = File(f'{individual_sequence.id}_{mate_id}.register.log')
                 extraArgumentList=['--inputDir', splitOutputDir,
@@ -644,7 +668,7 @@ Example ("Library" and "Bam Path" are required):
                 registerJob = self.addData2DBJob(
                     executable=self.RegisterAndMoveSplitSequenceFiles,
                     logFile=logFile, commit=commit,
-                    parentJobLs=[splitReadFileJob1, \
+                    parentJobLs=[splitReadFileJob, \
                         isq_job_data.mkSequenceAbsDirJob],
                     extraDependentInputLs=[fastqFile], \
                     extraOutputLs=None, transferOutput=True,
@@ -666,7 +690,8 @@ Example ("Library" and "Bam Path" are required):
         The input fastq files could be gzipped or not.
         """
         sample_id2data = self.readSampleSheetFastQ_UNGC(sample_sheet)
-        fastq_path_ls = self.getInputPathLsFromInput(input_path, suffixSet=set(['.fastq']),
+        fastq_path_ls = self.getInputPathLsFromInput(
+            input_path, suffixSet=set(['.fastq']),
             fakeSuffix='.gz')
         sample_id2fastq_obj_ls = self.getSampleID2FastqObjectLsForUNGCFastQ(
             fastq_path_ls=fastq_path_ls, \
@@ -721,7 +746,8 @@ D1HYNACXX	2	UNGC Human Sample 1	S1	AS001A	ATTACTCG	TruSeq DNA PCR Free beta kit	
             UNGC_Vervet_Sample_11_1.fastq.gz
             UNGC_Vervet_Sample_11_2.fastq.gz
         """
-        sys.stderr.write("Parsing sample_id2fastq_obj_ls from %s files ..."%(len(fastq_path_ls)))
+        sys.stderr.write("Parsing sample_id2fastq_obj_ls from %s files ..."%(\
+            len(fastq_path_ls)))
         sample_id2fastq_obj_ls = {}
         import random
         filename_pattern = re.compile(r'(?P<sample_id>[\w\d]+)_(?P<mate_id>\d).fastq')
@@ -743,27 +769,34 @@ D1HYNACXX	2	UNGC Human Sample 1	S1	AS001A	ATTACTCG	TruSeq DNA PCR Free beta kit	
                     
                     libraryKey = (sample_id, library)
                     if libraryKey not in libraryKey2UniqueLibrary:
-                        #this ensures two ends from the same library is marked as the same library.
-                        uniqueLibrary = '%s_%s_%s'%(sample_id, library, repr(random.random())[2:])
+                        #this ensures two ends from the same library is
+                        #  marked as the same library.
+                        uniqueLibrary = '%s_%s_%s'%(sample_id, library,
+                            repr(random.random())[2:])
                         libraryKey2UniqueLibrary[libraryKey] = uniqueLibrary
                     else:
-                        print(f"libraryKey {libraryKey} of {fastq_path} is already in "
-                        f"libraryKey2UniqueLibrary with unique library = {libraryKey2UniqueLibrary[libraryKey]}.",
-                        flush=True)
+                        print(f"libraryKey {libraryKey} of {fastq_path} is"
+                            f" already in "
+                            f"libraryKey2UniqueLibrary with unique library = "
+                            f"{libraryKey2UniqueLibrary[libraryKey]}.",
+                            flush=True)
                     
                     uniqueLibrary = libraryKey2UniqueLibrary[libraryKey]
-                    fastq_obj = PassingData(library=uniqueLibrary, sample_id=sample_id, 
+                    fastq_obj = PassingData(
+                        library=uniqueLibrary, sample_id=sample_id, 
                         mate_id=mate_id, abs_path=fastq_path)
                     if sample_id not in sample_id2fastq_obj_ls:
                         sample_id2fastq_obj_ls[sample_id] = []
                     sample_id2fastq_obj_ls[sample_id].append(fastq_obj)
                 else:
-                    print(f"sample_id {sample_id} not in sample_id2data.", flush=True)
+                    print(f"sample_id {sample_id} not in sample_id2data.",
+                        flush=True)
             else:
-                print(f"ERROR: can't parse sample_id, mate_id out of {fastq_path}", flush=True)
+                print(f"ERROR: can't parse sample_id, mate_id out of {fastq_path}",
+                    flush=True)
                 raise
-        print(f" {len(sample_id2fastq_obj_ls)} samples and {real_counter} files in the dictionary.",
-            flush=True)
+        print(f" {len(sample_id2fastq_obj_ls)} samples and {real_counter}"
+            f" files in the dictionary.", flush=True)
         return sample_id2fastq_obj_ls
     
     
