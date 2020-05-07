@@ -154,6 +154,9 @@ class AbstractNGSWorkflow(ParentClass):
         2011-7-11
         """
         # Insert before ParentClass.__init__()
+        ProcessOptions.process_function_arguments(keywords,
+            self.option_default_dict, error_doc=self.__doc__,
+            class_to_have_attr=self)
         self.pathToInsertHomePathList.extend(['samtools_path', 'picard_dir', \
             'gatk_path', 'tabixPath', \
             'bgzipPath', 'gatk2_path', 'ligateVcfPerlPath',\
@@ -165,18 +168,22 @@ class AbstractNGSWorkflow(ParentClass):
         #2013.06.21
         self.needSplitChrIntervalData = True
 
-        listArgumentName_data_type_ls = [("site_id_ls", int), ('country_id_ls', int), ('tax_id_ls', int),\
-            ('sequence_type_id_ls', int), ('sequencer_id_ls', int), \
-            ('sequence_batch_id_ls', int),('version_ls', int)]
-        ProcessOptions.processListArguments(listArgumentName_data_type_ls, emptyContent=[])
+        listArgumentName_data_type_ls = [
+            ("site_id_ls", int), ('country_id_ls', int), ('tax_id_ls', int),\
+            ('sequence_type_id_ls', int), ('sequencer_id_ls', int),\
+            ('sequence_batch_id_ls', int), ('version_ls', int)
+            ]
+        ProcessOptions.processListArguments(listArgumentName_data_type_ls, 
+            emptyContent=[])
 
         if hasattr(self, 'contigMaxRankBySize') and hasattr(self, 'contigMinRankBySize'):
-            #2013.2.6 non-public schema dbs should be connected before the main public schema is connected.
+            #2013.2.6 non-public schema DBs should be connected before the main public schema is connected.
             self.chr2size = self.connectGenomeDBToGetTopChrs(
-                contigMaxRankBySize=self.contigMaxRankBySize, \
-                contigMinRankBySize=self.contigMinRankBySize, tax_id=self.ref_genome_tax_id, \
+                contigMaxRankBySize=self.contigMaxRankBySize,
+                contigMinRankBySize=self.contigMinRankBySize,
+                tax_id=self.ref_genome_tax_id,
                 sequence_type_id=self.ref_genome_sequence_type_id, 
-                version=self.ref_genome_version, \
+                version=self.ref_genome_version,
                 chromosome_type_id=self.chromosome_type_id, 
                 outdated_index=self.ref_genome_outdated_index)
         else:
