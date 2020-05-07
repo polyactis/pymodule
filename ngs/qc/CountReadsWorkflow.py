@@ -23,12 +23,14 @@ from pegaflow.DAX3 import File, Link, PFN, Job
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
 from palos.ngs.AbstractNGSWorkflow import AbstractNGSWorkflow as ParentClass
 from palos.db import SunsetDB
+import logging
 
 class CountReadsWorkflow(ParentClass):
     __doc__ = __doc__
     option_default_dict = copy.deepcopy(ParentClass.option_default_dict)
     option_default_dict.update({
-        ('ind_seq_id_ls', 1, ): ['', 'i', 1, 'a comma/dash-separated list of IndividualSequence.id.'
+        ('ind_seq_id_ls', 1, ): ['', 'i', 1, \
+            'a comma/dash-separated list of IndividualSequence.id.'
             'non-fastq entries will be discarded.', ],\
         })
 
@@ -48,23 +50,25 @@ class CountReadsWorkflow(ParentClass):
         ParentClass.registerCustomExecutables(self)
         
         self.registerOneExecutable(
-            path=os.path.join(self.pymodulePath, 'mapper/computer/CountFastqReadBaseCount.py'), \
+            path=os.path.join(self.pymodulePath,
+                'mapper/computer/CountFastqReadBaseCount.py'),
             name='CountFastqReadBaseCount', clusterSizeMultiplier=1)
         
         self.registerOneExecutable(
-            path=os.path.join(self.pymodulePath, 'db/import/PutReadBaseCountIntoDB.py'), \
+            path=os.path.join(self.pymodulePath,
+                'db/import/PutReadBaseCountIntoDB.py'),
             name='PutReadBaseCountIntoDB', clusterSizeMultiplier=0.2)
         
     
-    def registerISQFiles(self, db_main=None, ind_seq_id_ls=[], local_data_dir='', pegasusFolderName='', \
-                        input_site_handler='local'):
+    def registerISQFiles(self, db_main=None, ind_seq_id_ls=[],
+        local_data_dir='', pegasusFolderName='', \
+        input_site_handler='local'):
         """
         2012.3.14
         """
-        print(f"Finding all ISQ-affiliated files of %s ind seq entries ..."%(len(ind_seq_id_ls)), 
-            flush=True)
+        print(f"Finding all ISQ-affiliated files of {len(ind_seq_id_ls)} "
+            f"ind-seq entries ...", flush=True)
         returnData = PassingData(jobDataLs=[])
-        counter = 0
         Table = SunsetDB.IndividualSequence
         query = db_main.queryTable(Table).filter(Table.id.in_(ind_seq_id_ls))
         individual_sequence_id_set = set()
@@ -72,19 +76,24 @@ class CountReadsWorkflow(ParentClass):
         for individual_sequence in query:
             if individual_sequence.individual_sequence_file_ls:	#not empty
                 for individual_sequence_file in individual_sequence.individual_sequence_file_ls:
-                    absPath = os.path.join(local_data_dir, individual_sequence_file.path)
+                    absPath = os.path.join(local_data_dir, 
+                        individual_sequence_file.path)
                     if os.path.isfile(absPath):
-                        inputF = File(os.path.join(pegasusFolderName, individual_sequence_file.path))
+                        inputF = File(os.path.join(pegasusFolderName,
+                            individual_sequence_file.path))
                         inputF.addPFN(PFN("file://" + absPath, input_site_handler))
                         inputF.absPath = absPath
                         self.addFile(inputF)
-                        returnData.jobDataLs.append(PassingData(output=inputF, jobLs=[], isq_id=individual_sequence.id,\
-                                                            isqf_id=individual_sequence_file.id))
+                        returnData.jobDataLs.append(PassingData(
+                            output=inputF, jobLs=[],
+                            isq_id=individual_sequence.id,
+                            isqf_id=individual_sequence_file.id))
                         individual_sequence_id_set.add(individual_sequence.id)
                     else:
                         missed_individual_sequence_id_set.add(individual_sequence.id)
-                        sys.stderr.write("Warning: IndividualSequenceFile.id=%s (isq-id=%s) doesn't have "
-                            "any affiliated IndividualSequenceFile entries while its path %s is not a file.\n"%\
+                        logging.warn("IndividualSequenceFile.id=%s (isq-id=%s) doesn't have "
+                            "any affiliated IndividualSequenceFile entries "
+                            "while its path %s is not a file."%\
                             (individual_sequence_file.id, individual_sequence.id, absPath))
             elif individual_sequence.path:
                 absPath = os.path.join(local_data_dir, individual_sequence.path)
@@ -93,23 +102,27 @@ class CountReadsWorkflow(ParentClass):
                     inputF.addPFN(PFN("file://" + absPath, input_site_handler))
                     inputF.absPath = absPath
                     self.addFile(inputF)
-                    returnData.jobDataLs.append(PassingData(output=inputF, jobLs=[], isq_id=individual_sequence.id,\
-                                                        isqf_id=None))
+                    returnData.jobDataLs.append(PassingData(output=inputF, 
+                        jobLs=[], isq_id=individual_sequence.id,\
+                        isqf_id=None))
                     individual_sequence_id_set.add(individual_sequence.id)
                 else:
-                    sys.stderr.write("Warning: IndividualSequence.id=%s doesn't have any affiliated "
-                        "IndividualSequenceFile entries while its path %s is not a file.\n"%\
+                    logging.warn("IndividualSequence.id=%s doesn't have any affiliated "
+                        "IndividualSequenceFile entries while its path %s is not a file."%\
                         (individual_sequence.id, absPath))
                     missed_individual_sequence_id_set.add(individual_sequence.id)
         
-        print(" %s files registered for %s individual_sequence entries. missed %s individual-sequence entries.\n"%\
-            (len(returnData.jobDataLs), len(individual_sequence_id_set), len(missed_individual_sequence_id_set)), flush=True)
+        print(f" {len(returnData.jobDataLs)} files registered for "
+            f"{len(individual_sequence_id_set)} individual_sequence entries. "
+            f"Missed {len(missed_individual_sequence_id_set)} "
+            f"individual-sequence entries.",
+            flush=True)
         return returnData
     
     def addPutReadBaseCountIntoDBJob(self, executable=None, inputFileLs=[], \
-                    logFile=None, commit=False, parentJobLs=[], extraDependentInputLs=[], \
-                    transferOutput=True, extraArguments=None, \
-                    job_max_memory=10, sshDBTunnel=1, **keywords):
+        logFile=None, commit=False, parentJobLs=[], extraDependentInputLs=[], \
+        transferOutput=True, extraArguments=None, \
+        job_max_memory=10, sshDBTunnel=1, **keywords):
         """
         20170502 use addData2DBJob()
         2012.5.3
@@ -117,21 +130,23 @@ class CountReadsWorkflow(ParentClass):
         2012.3.14
         """
         job = self.addData2DBJob(executable=executable, \
-                    inputFile=None, inputArgumentOption="-i", \
-                    outputFile=logFile, outputArgumentOption="--logFilename", inputFileList=inputFileLs, \
-                    data_dir=None, commit=commit,\
-                    parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
-                    extraOutputLs=None, transferOutput=transferOutput, \
-                    extraArguments=extraArguments, extraArgumentList=None, \
-                    job_max_memory=job_max_memory,  sshDBTunnel=sshDBTunnel,\
-                    key2ObjectForJob=None, objectWithDBArguments=self, **keywords)
+            inputFile=None, inputArgumentOption="-i", \
+            outputFile=logFile, outputArgumentOption="--logFilename",
+            inputFileList=inputFileLs, \
+            data_dir=None, commit=commit,\
+            parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
+            extraOutputLs=None, transferOutput=transferOutput, \
+            extraArguments=extraArguments, extraArgumentList=None, \
+            job_max_memory=job_max_memory,  sshDBTunnel=sshDBTunnel,\
+            key2ObjectForJob=None, objectWithDBArguments=self, **keywords)
         return job
     
     
     def addCountFastqReadBaseCountJob(self, executable=None, inputFile=None, \
-                                outputFile=None, isq_id=None, isqf_id=None, \
-                    parentJobLs=None, extraDependentInputLs=None, transferOutput=True, extraArguments=None, \
-                    job_max_memory=100, **keywords):
+        outputFile=None, isq_id=None, isqf_id=None, \
+        parentJobLs=None, extraDependentInputLs=None, transferOutput=True,
+        extraArguments=None, \
+        job_max_memory=100, **keywords):
         """
         20170503 use addGenericJob()
         2012.3.14
@@ -146,15 +161,15 @@ class CountReadsWorkflow(ParentClass):
             extraArguments += " --isqf_id %s "%(isqf_id)
         
         job = self.addGenericJob(executable=executable, \
-                    inputFile=inputFile, \
-                    inputArgumentOption="-i", \
-                    outputFile=outputFile, outputArgumentOption="-o", \
-                    parentJobLs=parentJobLs, \
-                    extraDependentInputLs=extraDependentInputLs, \
-                    transferOutput=transferOutput, \
-                    extraArguments=extraArguments, \
-                    job_max_memory=job_max_memory, \
-                    **keywords)
+            inputFile=inputFile, \
+            inputArgumentOption="-i", \
+            outputFile=outputFile, outputArgumentOption="-o", \
+            parentJobLs=parentJobLs, \
+            extraDependentInputLs=extraDependentInputLs, \
+            transferOutput=transferOutput, \
+            extraArguments=extraArguments, \
+            job_max_memory=job_max_memory, \
+            **keywords)
         return job
     
     def addJobs(self, inputData=None, pegasusFolderName="", needSSHDBTunnel=0):
@@ -162,7 +177,8 @@ class CountReadsWorkflow(ParentClass):
         2012.3.14
         """
         
-        sys.stderr.write("Adding read counting jobs on %s input ..."%(len(inputData.jobDataLs)))
+        sys.stderr.write("Adding read counting jobs on %s input ..."%\
+            (len(inputData.jobDataLs)))
         returnJobData = PassingData()
         
         no_of_jobs = 0
@@ -176,26 +192,35 @@ class CountReadsWorkflow(ParentClass):
         
         finalReduceFile = File(os.path.join(topOutputDir, 'read_base_count.tsv'))
         
-        readBaseCountMergeJob = self.addStatMergeJob(statMergeProgram=self.mergeSameHeaderTablesIntoOne, \
-                        outputF=finalReduceFile, transferOutput=True, extraArguments=None, parentJobLs=[topOutputDirJob])
+        readBaseCountMergeJob = self.addStatMergeJob(
+            statMergeProgram=self.mergeSameHeaderTablesIntoOne, \
+            outputF=finalReduceFile, transferOutput=True, extraArguments=None,
+            parentJobLs=[topOutputDirJob])
         
         logFile = File(os.path.join(topOutputDir, 'PutReadBaseCountIntoDB.log'))
-        putCountIntoDBJob = self.addPutReadBaseCountIntoDBJob(executable=self.PutReadBaseCountIntoDB, \
-                    inputFileLs=[finalReduceFile], \
-                    logFile=logFile, commit=self.commit, parentJobLs=[readBaseCountMergeJob], \
-                    extraDependentInputLs=[], transferOutput=True, \
-                    extraArguments=None, \
-                    job_max_memory=10, sshDBTunnel=needSSHDBTunnel)
+        putCountIntoDBJob = self.addPutReadBaseCountIntoDBJob(
+            executable=self.PutReadBaseCountIntoDB,
+            inputFileLs=[finalReduceFile],
+            logFile=logFile, commit=self.commit,
+            parentJobLs=[readBaseCountMergeJob],
+            extraDependentInputLs=[],
+            transferOutput=True,
+            extraArguments=None,
+            job_max_memory=10, sshDBTunnel=needSSHDBTunnel)
         no_of_jobs += 2
         for jobData in inputData.jobDataLs:
             #add the read count job
-            outputFile = File(os.path.join(topOutputDir, 'read_count_isq_%s_isqf_%s.tsv'%(jobData.isq_id, jobData.isqf_id)))
-            readCountJob = self.addCountFastqReadBaseCountJob(executable=self.CountFastqReadBaseCount, \
-                                inputFile=jobData.output, outputFile=outputFile, isq_id=jobData.isq_id, \
-                                isqf_id=jobData.isqf_id, \
-                                parentJobLs=jobData.jobLs + [topOutputDirJob], extraDependentInputLs=None, \
-                                transferOutput=False, extraArguments=None, \
-                                job_max_memory=10, no_of_cpus=4)
+            outputFile = File(os.path.join(topOutputDir, 'read_count_isq_%s_isqf_%s.tsv'%
+                (jobData.isq_id, jobData.isqf_id)))
+            readCountJob = self.addCountFastqReadBaseCountJob(
+                executable=self.CountFastqReadBaseCount, \
+                inputFile=jobData.output, outputFile=outputFile,
+                isq_id=jobData.isq_id,
+                isqf_id=jobData.isqf_id, \
+                parentJobLs=jobData.jobLs + [topOutputDirJob],
+                extraDependentInputLs=None,
+                transferOutput=False, extraArguments=None,
+                job_max_memory=10, no_of_cpus=4)
             
             no_of_jobs += 1
             self.addInputToStatMergeJob(statMergeJob=readBaseCountMergeJob, \
@@ -227,11 +252,12 @@ class CountReadsWorkflow(ParentClass):
             return getattr(self.registry(), name)(*args, **kwargs)
           File "/u/home/eeskin/polyacti/lib/python/sqlalchemy/orm/session.py", line 550, in begin
             "A transaction is already begun.  Use subtransactions=True "
-        sqlalchemy.exc.InvalidRequestError: A transaction is already begun.  Use subtransactions=True to allow subtransactions.
+        sqlalchemy.exc.InvalidRequestError: A transaction is already begun. 
+            Use subtransactions=True to allow subtransactions.
         """
         inputData = self.registerISQFiles(db_main=db_main, ind_seq_id_ls=self.ind_seq_id_ls, \
-                        local_data_dir=self.local_data_dir, pegasusFolderName=self.pegasusFolderName,\
-                        input_site_handler=self.input_site_handler)
+            local_data_dir=self.local_data_dir, pegasusFolderName=self.pegasusFolderName,\
+            input_site_handler=self.input_site_handler)
         
         registerReferenceData = self.getReferenceSequence()
         return PassingData(inputData=inputData,\
