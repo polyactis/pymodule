@@ -23,7 +23,7 @@ class JuxtaposeAlleleFrequencyFromMultiVCFInput(AbstractVCFMapper):
 	option_default_dict = AbstractVCFMapper.option_default_dict.copy()
 	option_default_dict.pop(('inputFname', 1, ))
 	option_default_dict.update({
-						('inputHeaderLs', 1, ): ['AF1,AF2', 'H', 1, 'header of the output column to represent 1st input.', ],\
+		('inputHeaderLs', 1, ): ['AF1,AF2', 'H', 1, 'header of the output column to represent 1st input.', ],\
 						})
 
 	def __init__(self, inputFnameLs=None, **keywords):
@@ -32,11 +32,12 @@ class JuxtaposeAlleleFrequencyFromMultiVCFInput(AbstractVCFMapper):
 		AbstractVCFMapper.__init__(self, inputFnameLs=inputFnameLs, **keywords)
 		
 		listArgumentName_data_type_ls = [("inputHeaderLs", str)]
-		listArgumentName2hasContent = ProcessOptions.processListArguments(listArgumentName_data_type_ls,\
-												emptyContent=[], class_to_have_attr=self)
+		ProcessOptions.processListArguments(listArgumentName_data_type_ls,\
+			emptyContent=[], class_to_have_attr=self)
 	
-	def _juxtaposeAlleleFrequencyFromMultiVCFInput(self, inputFnameLs=None, inputHeaderLs=None, outputFname=None, \
-										defaultNullFrequency=-0, **keywords):
+	def _juxtaposeAlleleFrequencyFromMultiVCFInput(self, inputFnameLs=None,
+		inputHeaderLs=None, outputFname=None, \
+		defaultNullFrequency=-0, **keywords):
 		"""
 		2012.10.5
 		
