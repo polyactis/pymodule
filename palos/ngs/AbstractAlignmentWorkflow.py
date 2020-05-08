@@ -49,7 +49,8 @@ OR to instruct whether local_realigned should be applied (i.e. ShortRead2Alignme
         #extra__init__() will be executed inside __init__()
         AbstractNGSWorkflow.__init__(self, **keywords)
         listArgumentName_data_type_ls = [('ind_seq_id_ls', int), ("ind_aln_id_ls", int)]
-        ProcessOptions.processListArguments(listArgumentName_data_type_ls, emptyContent=[])
+        ProcessOptions.processListArguments(listArgumentName_data_type_ls, 
+            emptyContent=[], class_to_have_attr=self)
 
     def addAlignmentAsInputToJobLs(self, alignmentDataLs=None, jobLs=[], jobInputOption=""):
         """
