@@ -434,7 +434,7 @@ class AbstractBioinfoWorkflow(ParentClass):
             name='FindSNPPositionOnNewRefFromFlankingBWAOutput',
             clusterSizeMultiplier=1)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
-            'Genome/OutputGenomeAnnotation.py'), \
+            'db/export/OutputGenomeAnnotation.py'), \
             name='OutputGenomeAnnotation', clusterSizeMultiplier=0.01)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
                 'statistics/GenomeMovingAverageStatistics.py'), \
