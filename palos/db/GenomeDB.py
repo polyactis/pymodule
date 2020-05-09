@@ -215,17 +215,18 @@ class GeneCommentary(Base, TableClass):
     gene = relationship('Gene')
     gene_commentary_id = Column(Integer, ForeignKey("gene_commentary.id"))
     gene_commentary = relationship('GeneCommentary')
-    gene_commentary_ls = relationship('GeneCommentary',
-        back_populates='gene_commentary',cascade='all,delete')
+    #gene_commentary_ls = relationship('GeneCommentary',
+    #   back_populates='gene_commentary', cascade='all,delete')
     start = Column(Integer)
     stop = Column(Integer)
-    gene_commentary_type_id = Column(Integer, ForeignKey("gene_commentary_type.id"))
+    gene_commentary_type_id = Column(Integer, 
+        ForeignKey("gene_commentary_type.id"))
     gene_commentary_type = relationship('GeneCommentaryType')
     label = Column(Text)
     text = Column(Text)
     comment = Column(Text)
     gene_segment_ls = relationship('GeneSegment',
-        back_populates='gene_commentary',cascade='all,delete')
+        back_populates='gene_commentary', cascade='all,delete')
     created_by = Column(String(256))
     updated_by = Column(String(256))
     date_created = Column(DateTime, default=datetime.now)
@@ -236,12 +237,14 @@ class GeneCommentary(Base, TableClass):
     def getSequence(self, box_ls):
         """
 2012.5.16
-    it uses annot_assembly_id preferentially, if it is null, then uses genomic_gi.
+    it uses annot_assembly_id preferentially, if it is null,
+        then uses genomic_gi.
 2012.3.26
     get_sequence_segment()'s API has been changed.
     But this way of calling get_sequence_segment() is still outdated.
         valid only for banyan's mysql genome db
-        because annot_assembly_id was not used. check GenomeDatabase.getSequenceSegment()
+        because annot_assembly_id was not used.
+        check GenomeDatabase.getSequenceSegment()
 2009-01-03
         """
         seq = ''
@@ -302,12 +305,14 @@ class GeneCommentary(Base, TableClass):
         if gene_commentary_type:
             gene_commentary_type_id_ls.append(gene_commentary_type.id)
         
-        gene_segment_ls = GeneSegment.query.filter(\
-            GeneSegment.gene_commentary_type_id.in_(gene_commentary_type_id_ls)).\
+        gene_segment_ls = GeneSegment.query.\
+            filter(GeneSegment.gene_commentary_type_id.in_(
+                gene_commentary_type_id_ls)).\
             filter_by(gene_commentary_id=self.id)
         self.mrna_box_ls = []
         for gene_segment in gene_segment_ls:
-            self.mrna_box_ls.append([gene_segment.start, gene_segment.stop, gene_segment.id])
+            self.mrna_box_ls.append([gene_segment.start, gene_segment.stop,
+                gene_segment.id])
         self.mrna_box_ls.sort()
         return self.mrna_box_ls
     
@@ -324,8 +329,8 @@ class GeneCommentary(Base, TableClass):
         if len(self.gene_commentary_ls)==1:
             gene_commentary = self.gene_commentary_ls[0]
         elif len(self.gene_commentary_ls)>1:
-            logging.warn('More than 1 gene_commentary_ls for this commentary id=%s, gene_id=%s.'\
-                %(self.id, self.gene_id))
+            logging.warn(f'More than 1 gene_commentary_ls for this '
+                f'commentary id={self.id}, gene_id={self.gene_id}.')
             gene_commentary = self.gene_commentary_ls[0]
         else:
             gene_commentary = None
@@ -341,7 +346,8 @@ class GeneCommentary(Base, TableClass):
                 gene_commentary_type_id_ls.append(gene_commentary_type.id)
             
             gene_segment_ls = GeneSegment.query.\
-                filter(GeneSegment.gene_commentary_type_id.in_(gene_commentary_type_id_ls)).\
+                filter(GeneSegment.gene_commentary_type_id.in_(
+                    gene_commentary_type_id_ls)).\
                 filter_by(gene_commentary_id=gene_commentary.id)
             for gene_segment in gene_segment_ls:
                 self.protein_box_ls.append([gene_segment.start, \
@@ -371,22 +377,26 @@ class GeneCommentary(Base, TableClass):
         if len(self.gene_commentary_ls)==1:	#it's translated into protein.
             protein_commentary = self.gene_commentary_ls[0]
         elif len(self.gene_commentary_ls)>1:
-            sys.stderr.write('Warning: more than 1 gene_commentary_ls for this commentary id=%s, gene_id=%s.\n'%\
-                            (self.id, self.gene_id))
+            logging.warn(f'More than 1 gene_commentary_ls for this '
+                f'commentary id={self.id}, gene_id={self.gene_id}.')
             protein_commentary = self.gene_commentary_ls[0]
         else:
             protein_commentary = None
         
         query = GeneSegment.query.filter_by(gene_commentary_id=self.id)
         if protein_commentary:
-            #restrict the gene segment to intron only. exons will be covered by CDS and UTR.
-            gene_commentary_type = GeneCommentaryType.query.filter_by(type='intron').first()
+            #restrict the gene segment to intron only. 
+            # exons will be covered by CDS and UTR.
+            gene_commentary_type = GeneCommentaryType.query.\
+                filter_by(type='intron').first()
             if gene_commentary_type:
-                query = query.filter_by(gene_commentary_type_id=gene_commentary_type.id)
+                query = query.filter_by(
+                    gene_commentary_type_id=gene_commentary_type.id)
         
         for gene_segment in query:
             box_ls.append([gene_segment.start, gene_segment.stop,\
-                gene_segment.gene_commentary_type.type, 0, gene_segment.id, None])
+                gene_segment.gene_commentary_type.type, 0,
+                gene_segment.id, None])
         if protein_commentary:
             for gene_segment in protein_commentary.gene_segment_ls:
                 if gene_segment.gene_commentary_type.type.find('UTR')!=-1:
@@ -405,13 +415,15 @@ class GeneCommentary(Base, TableClass):
 2012.5.15
     add gene_segment.id(or None) and cumulativeWithinCDSUTRAndIntronLen into box_ls
 2008-10-01
-    fix a bug that coordinates of a whole untranslated mrna block are replaced by that of a protein block
+    fix a bug that coordinates of a whole untranslated mrna block are
+        replaced by that of a protein block
 2008-10-01
     fix a bug that a whole untranslated mrna block got totally omitted.
 2008-09-22
     combine mrna_box_ls and protein_box_ls to partition the whole gene into finer segments.
     box_ls = []	#each entry is a tuple,
-        (start, stop, box_type, is_translated, protein_box_index, gene_segment.id, detailed_box_type, \
+        (start, stop, box_type, is_translated, protein_box_index,
+            gene_segment.id, detailed_box_type, \
             cumulativeWithinCDSUTRAndIntronLen, exon_number)
     box_type = 'intron' or 'exon'. is_translated = 0 or 1. if it's translated,
         protein_box_index is index in protein_box_ls.
@@ -471,7 +483,8 @@ class GeneCommentary(Base, TableClass):
                             nonCDSLength = abs(prot_start - mrna_start)
                             cumulativeWithinCDSUTRAndIntronLen += nonCDSLength
                     self.box_ls.append((prot_start, prot_stop, 'exon', 1, j, \
-                        prot_gene_segment_id, 'CDS', cumulativeWithinCDSUTRAndIntronLen, exon_number))
+                        prot_gene_segment_id, 'CDS', 
+                        cumulativeWithinCDSUTRAndIntronLen, exon_number))
                         #CDS
                     if CDS_5_end_pos==-1:	#first CDS
                         CDS_5_end_pos = prot_start
@@ -488,9 +501,11 @@ class GeneCommentary(Base, TableClass):
                             nonCDSLength = abs(mrna_stop-prot_stop)
                             cumulativeWithinCDSUTRAndIntronLen += nonCDSLength
                     j += 1	#push protein box index up
-                elif prot_stop<mrna_start:	#not supposed to happen
-                    logging.error("protein box: [%s, %s] of gene id=%s is ahead of mrna box [%s, %s].\n"%\
-                        (prot_start, prot_stop, self.gene_id, mrna_start, mrna_stop))
+                elif prot_stop<mrna_start:
+                    #not supposed to happen
+                    logging.error(f"protein box: [{prot_start}, {prot_stop}] of"
+                        f" gene-id={self.gene_id} is ahead of mrna box "
+                        f"[{mrna_start}, {mrna_stop}].")
                 elif prot_start>mrna_stop:
                     if self.gene.strand=='+1':
                         detailed_box_type = '5UTR'
@@ -503,9 +518,11 @@ class GeneCommentary(Base, TableClass):
                     if CDS_5_end_pos!=-1:	#CDS has already begun
                             nonCDSLength = abs(mrna_stop-mrna_start+1)
                             cumulativeWithinCDSUTRAndIntronLen += nonCDSLength
-                elif prot_start<=mrna_stop and prot_stop>mrna_stop:	#not supposed to happen
-                    logging.error("protein box: [%s, %s] of gene id=%s is partial overlapping of mrna box [%s, %s]."%\
-                        (prot_start, prot_stop, self.gene_id, mrna_start, mrna_stop))
+                elif prot_start<=mrna_stop and prot_stop>mrna_stop:
+                    #not supposed to happen
+                    logging.error(f"protein box: [{prot_start}, {prot_stop}] of"
+                        f" gene-id={self.gene_id} overlaps partially with "
+                        f"mRNA box [{mrna_start}, {mrna_stop}].")
             else:	#passing all protein boxes
                 self.box_ls.append((mrna_start, mrna_stop, 'exon', 0, None, \
                     mrna_gene_segment_id, default_detailed_box_type, \
@@ -633,7 +650,6 @@ class Gene(Base, TableClass):
     nomenclature_status = Column(String(64))
     other_designations = Column(Text)
     modification_date = Column(DateTime, default=datetime.now)
-    
     genomic_accession = Column(String(32))
     genomic_version = Column(Integer)
     genomic_gi = Column(Integer)
@@ -648,7 +664,7 @@ class Gene(Base, TableClass):
     updated_by = Column(String(256))
     date_created = Column(DateTime, default=datetime.now)
     date_updated = Column(DateTime)
-    UniqueConstraint('tax_id', 'locustag', 'chromosome', 'strand', 'start', \
+    UniqueConstraint('tax_id', 'locustag', 'chromosome', 'strand', 'start',
         'stop', 'entrezgene_type_id', 'annot_assembly_id')
 
 class Gene2go(Base, TableClass):
@@ -1583,11 +1599,13 @@ db_genome.outputGenomeSequence(tax_id=60711, sequence_type_id=10,
             get all the top contigs
         """
         no_of_contigs_to_fetch = contigMaxRankBySize-contigMinRankBySize+1
-        sys.stderr.write("Getting %s chromosomes with rank (by size) between %s and %s  ..."%\
-            (no_of_contigs_to_fetch, contigMinRankBySize, contigMaxRankBySize))
+        print(f"Getting {no_of_contigs_to_fetch} chromosomes with rank "
+            f"(by size) between {contigMinRankBySize} and {contigMaxRankBySize}:",
+            flush=True)
         chr2size = {}
         query = self.queryTable(AnnotAssembly).filter_by(tax_id=tax_id).\
-            filter_by(sequence_type_id=sequence_type_id).filter_by(outdated_index=0)
+            filter_by(sequence_type_id=sequence_type_id).\
+            filter_by(outdated_index=0)
         if chromosome_type_id:
             query = query.filter_by(chromosome_type_id=chromosome_type_id)
         if version is not None:
@@ -1605,7 +1623,7 @@ db_genome.outputGenomeSequence(tax_id=60711, sequence_type_id=10,
                 chr2size[row.chromosome] = row.stop
             if len(chr2size)>=no_of_contigs_to_fetch:
                 break
-        sys.stderr.write("%s contigs. Done.\n"%(len(chr2size)))
+        print(f"{len(chr2size)} chromosomes.", flush=True)
         return chr2size
     
     def getChromosomeType(self, short_name=None, id=None, comment=None,
@@ -1633,8 +1651,8 @@ db_genome.outputGenomeSequence(tax_id=60711, sequence_type_id=10,
             all arguments part of unique key
         """
         if id is not None:
-            db_entry = self.checkIfEntryInTable(TableClass=AnnotAssembly,
-                entry_id=id)
+            db_entry = self.checkIfEntryInTable(
+                TableClass=AnnotAssembly, entry_id=id)
             if db_entry:
                 return db_entry
         
@@ -1660,8 +1678,8 @@ db_genome.outputGenomeSequence(tax_id=60711, sequence_type_id=10,
         db_entry = query.first()
         return db_entry
     
-    def getAnnotAssembly(self, id=None, gi=None, acc_ver=None, accession = None,
-        version =None, tax_id=None, chromosome =None, \
+    def getAnnotAssembly(self, id=None, gi=None, acc_ver=None,
+        accession = None, version =None, tax_id=None, chromosome =None,
         start =1, stop =None, orientation=None, sequence = None,\
         raw_sequence_start_id=None, original_path=None, \
         sequence_type_id=None, sequence_type_name= None, \
@@ -1684,15 +1702,19 @@ db_genome.outputGenomeSequence(tax_id=60711, sequence_type_id=10,
                 chromosome_type_id=chromosome_type.id
         db_entry=self.checkAnnotAssembly(id=id, accession=accession, \
             version=version, tax_id=tax_id, \
-            chromosome=chromosome, start=start, stop=stop, orientation=orientation, \
-            sequence_type_id=sequence_type_id, chromosome_type_id=chromosome_type_id,\
+            chromosome=chromosome, start=start, stop=stop,
+            orientation=orientation,
+            sequence_type_id=sequence_type_id,
+            chromosome_type_id=chromosome_type_id,
             outdated_index=outdated_index)
         if not db_entry:
-            db_entry = AnnotAssembly(gi =gi, acc_ver=acc_ver, accession=accession, \
-                version=version, tax_id = tax_id, chromosome = chromosome, start = start,\
-                stop =stop, orientation=orientation, sequence=sequence, \
-                raw_sequence_start_id = raw_sequence_start_id, original_path=original_path,\
-                sequence_type_id = sequence_type_id, chromosome_type_id=chromosome_type_id,\
+            db_entry = AnnotAssembly(gi =gi, acc_ver=acc_ver, accession=accession,
+                version=version, tax_id = tax_id, chromosome = chromosome,
+                start = start, stop =stop, orientation=orientation,
+                sequence=sequence, raw_sequence_start_id = raw_sequence_start_id,
+                original_path=original_path,
+                sequence_type_id = sequence_type_id,
+                chromosome_type_id=chromosome_type_id,
                 outdated_index=outdated_index,\
                 comment = comment)
             self.session.add(db_entry)
@@ -1706,8 +1728,8 @@ db_genome.outputGenomeSequence(tax_id=60711, sequence_type_id=10,
         2013.08.01
         """
         if entry_id is not None:
-            db_entry = self.checkIfEntryInTable(TableClass=GenomeAnnotation, \
-                entry_id=entry_id)
+            db_entry = self.checkIfEntryInTable(
+                TableClass=GenomeAnnotation, entry_id=entry_id)
             if db_entry:
                 return db_entry
         
@@ -1833,7 +1855,8 @@ db_genome.outputGenomeSequence(tax_id=60711, sequence_type_id=10,
             self.session.flush()
         return geneCommentary
     
-    def getGeneCommentaryType(self, gene_commentary_type_id=None, commentary_type=None):
+    def getGeneCommentaryType(self, gene_commentary_type_id=None,
+        commentary_type=None):
         """
         2012.5.15
             moved from transfac/src/GeneASNXML2gene_mapping.py
@@ -1848,7 +1871,8 @@ db_genome.outputGenomeSequence(tax_id=60711, sequence_type_id=10,
             gene_commentary_type = None
         if not gene_commentary_type:
             if self.debug:
-                sys.stderr.write("\t Gene-commentary_type %s not in db yet.\n"%commentary_type)
+                logging.warn("\t Gene-commentary_type %s not in db yet."%\
+                    commentary_type)
             gene_commentary_type = GeneCommentaryType(type=commentary_type)
             if gene_commentary_type_id:
                 gene_commentary_type.id = gene_commentary_type_id
@@ -1944,7 +1968,8 @@ using_table_options(UniqueConstraint('tax_id', 'locustag', 'chromosome',
             #2012.3.26 stopped using '~/at_gene_model_pickelf',
             if os.path.isfile(pickle_fname):
                 #2011-1-20 check if the pickled file already exists or not
-                logging.error("File %s already exists, no gene model pickle output."%(pickle_fname))
+                logging.error("File %s already exists, no gene model pickle output."\
+                    %(pickle_fname))
                 sys.exit(2)
             else:
                 #2008-10-01	get gene model and pickle it into a file
