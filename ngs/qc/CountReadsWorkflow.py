@@ -363,7 +363,8 @@ if __name__ == '__main__':
         'It is useful to separate multiple sub-workflows. '
         'If empty or None, everything is in the pegasus root.')
     ap.add_argument("-l", "--site_handler", type=str, required=True,
-        help="The name of the computing site where the jobs run and executables are stored. "
+        help="The name of the computing site where the jobs run and "
+        "executables are stored. "
         "Check your Pegasus configuration in submit.sh.")
     ap.add_argument("-j", "--input_site_handler", type=str,
         help="It is the name of the site that has all the input files."
@@ -374,7 +375,8 @@ if __name__ == '__main__':
         "to the computing site by pegasus-transfer.")
     ap.add_argument("-C", "--cluster_size", type=int, default=30,
         help="Default: %(default)s. "
-        "This number decides how many of pegasus jobs should be clustered into one job. "
+        "This number decides how many of pegasus jobs should be clustered "
+        "into one job. "
         "Good if your workflow contains many quick jobs. "
         "It will reduce Pegasus monitor I/O.")
     ap.add_argument("-o", "--output_path", type=str, required=True,

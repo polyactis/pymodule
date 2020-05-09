@@ -67,7 +67,8 @@ CountReadsWorkflow:
     - echo "Output a CountReadsWorkflow DAG ... "
     - pwd
     - ./ngs/qc/CountReadsWorkflow.py -i 1-800 -o CountReads.ISQ1-800.xml
-      -l condor --hostname pdc --dbname pmdb --schema sunset
+      -l condor --pymodulePath `pwd`
+      --hostname pdc --dbname pmdb --schema sunset
       -u sunset_r -p yfishLabSunset --commit
   artifacts:
     name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}_${CI_BUILD_ID}"
