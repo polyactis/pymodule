@@ -50,7 +50,6 @@ class SequenceType(Base, TableClass):
         a table storing meta information to be referenced by other tables
     """
     __tablename__ = 'sequence_type'
-    #__table_args__ = {'schema':_schemaname_}
     id = Column(Integer, primary_key=True)
     short_name = Column(String(223), unique=True)
     description = Column(Text)
@@ -68,10 +67,8 @@ class RawSequence(Base, TableClass):
         all raw sequences will be deleted as well.
     """
     __tablename__ = 'raw_sequence'
-    #__table_args__ = {'schema':_schemaname_}
-    id = Column(Integer,primary_key=True)
-    annot_assembly_id = Column(Integer, \
-        ForeignKey("annot_assembly.annot_assembly_id"))
+    id = Column(Integer, primary_key=True)
+    annot_assembly_id = Column(Integer, ForeignKey("annot_assembly.id"))
     annot_assembly = relationship('AnnotAssembly')
     annot_assembly_gi = Column(Integer)
     start = Column(Integer)
@@ -82,11 +79,6 @@ class RawSequence(Base, TableClass):
 
 class AnnotAssembly(Base, TableClass):
     """
-    2013.07.26 added argument genome_order
-    2013.3.15 added argument outdated_index
-    2013.3.14 added accession & version & chromosome_type_id into the unique key
-    2013.2.17 added column genome_annotation_list
-    2013.2.12 added column chromosome_type
     2011-8-24
         gi is no longer the primary key.
         a new id is added as primary key.
@@ -96,6 +88,8 @@ class AnnotAssembly(Base, TableClass):
     2008-07-27
         table to store meta info of chromosome sequences
     """
+    __tablename__ = 'annot_assembly'
+    id = Column(Integer, primary_key=True)
     gi = Column(Integer)
     acc_ver = Column(String(32))
     accession = Column(String(32))
@@ -109,67 +103,69 @@ class AnnotAssembly(Base, TableClass):
     sequence = Column(String(10000))
     raw_sequence_start_id = Column(Integer)
     original_path = Column(Text)
-    sequence_type = ManyToOne('%s.SequenceType'%__name__, colname='sequence_type_id', ondelete='SET NULL', onupdate='CASCADE')
-    chromosome_type = ManyToOne('%s.ChromosomeType'%__name__, colname='chromosome_type_id', ondelete='SET NULL', onupdate='CASCADE')
-    genome_annotation_list = OneToMany('%s.GenomeAnnotation'%__name__)
+    sequence_type_id = Column(Integer, ForeignKey("sequence_type.id"))
+    sequence_type = relationship('SequenceType')
+    chromosome_type_id = Column(Integer, ForeignKey("chromosome_type.id"))
+    chromosome_type = relationship('ChromosomeType')
+    genome_annotation_list = relationship('GenomeAnnotation',
+        back_populates='annot_assembly',cascade='all,delete')
+    #non-zero means outdated. to allow multiple outdated alignments
     outdated_index = Column(Integer, default=0)
-    #2013.3.15 any non-zero means outdated. to allow multiple outdated alignments
-    
     comment = Column(Text)
     created_by = Column(String(256))
     updated_by = Column(String(256))
     date_created = Column(DateTime, default=datetime.now)
     date_updated = Column(DateTime)
-    using_options(tablename='annot_assembly', metadata=__metadata__, session=__session__)
-    using_table_options(mysql_engine='InnoDB')
-    using_table_options(UniqueConstraint(
+    UniqueConstraint(
         'accession', 'version','tax_id','chromosome', 'start', 'stop', \
         'orientation', 'sequence_type_id', 'chromosome_type_id',\
-        'outdated_index'))
+        'outdated_index')
 
 
 class ChromosomeType(Base, TableClass):
     """
-    2013.2.12 table to stores things like autosome, X, Y, mitochondrial
+    store autosome, X, Y, mitochondrial
     """
+    __tablename__ = 'chromosome_type'
+    id = Column(Integer, primary_key=True)    
     short_name = Column(String(223), unique=True)
     comment = Column(Text)
     created_by = Column(String(256))
     updated_by = Column(String(256))
     date_created = Column(DateTime, default=datetime.now)
     date_updated = Column(DateTime)
-    using_options(tablename='chromosome_type', metadata=__metadata__, session=__session__)
-    using_table_options(mysql_engine='InnoDB')
 
 class GenomeAnnotation(Base, TableClass):
     """
     2013.2.17
     """
-    strand = Column(String(4))	#2010-8-12 add strand, start, stop
+    __tablename__ = 'genome_annotation'
+    id = Column(Integer, primary_key=True)
+    strand = Column(String(4))
     start = Column(Integer)
     stop = Column(Integer)
     description = Column(Text)
     comment = Column(Text)
-    
-    annot_assembly = ManyToOne('%s.AnnotAssembly'%__name__, colname='annot_assembly_id', \
-        ondelete='CASCADE', onupdate='CASCADE')
-    genome_annotation_type = ManyToOne('%s.GenomeAnnotationType'%__name__, \
-        colname='genome_annotation_type_id', ondelete='CASCADE', onupdate='CASCADE')
-    
+    annot_assembly_id = Column(Integer, ForeignKey("annot_assembly.id"))
+    annot_assembly = relationship('AnnotAssembly')
+    genome_annotation_type_id = Column(Integer, \
+        ForeignKey("genome_annotation_type.id"))
+    genome_annotation_type = relationship('GenomeAnnotationType')
     created_by = Column(String(256))
     updated_by = Column(String(256))
     date_created = Column(DateTime, default=datetime.now)
     date_updated = Column(DateTime)
-    using_options(tablename='genome_annotation', metadata=__metadata__, session=__session__)
-    using_table_options(mysql_engine='InnoDB')
-    using_table_options(UniqueConstraint('strand', 'start', 'stop', 'annot_assembly_id',\
-        'genome_annotation_type_id'))
+    UniqueConstraint('strand', 'start', 'stop', 'annot_assembly_id',\
+        'genome_annotation_type_id')
 
 
 class GenomeAnnotationType(Base, TableClass):
     """
-    2013.2.17 table to stores things like centromere, telemere, euchromatin, heterochromatin
+    2013.2.17
+    table to store centromere, telemere, euchromatin, heterochromatin
     """
+    __tablename__ = 'genome_annotation_type'
+    id = Column(Integer, primary_key=True)
     short_name = Column(String(223), unique=True)
     description = Column(Text)
     comment = Column(Text)
@@ -177,95 +173,65 @@ class GenomeAnnotationType(Base, TableClass):
     updated_by = Column(String(256))
     date_created = Column(DateTime, default=datetime.now)
     date_updated = Column(DateTime)
-    using_options(tablename='genome_annotation_type', metadata=__metadata__, session=__session__)
-    using_table_options(mysql_engine='InnoDB')
 
 class EntrezgeneType(Base, TableClass):
     """
     2008-07-28
         store the entrez gene types
     """
+    __tablename__ = 'entrezgene_type'
+    id = Column(Integer, primary_key=True)
     type = Column(String(223), unique=True)
     created_by = Column(String(256))
     updated_by = Column(String(256))
     date_created = Column(DateTime, default=datetime.now)
     date_updated = Column(DateTime)
-    using_options(tablename='entrezgene_type', metadata=__metadata__, session=__session__)
-    using_table_options(mysql_engine='InnoDB')
-
-    """
-class EntrezgeneMapping(Base, TableClass):
-    2010-12-13
-        merged into Gene
-    2008-07-27
-        table to store position info of genes
-    """
-    """
-    gene = ManyToOne('Gene', colname='gene_id', ondelete='CASCADE', onupdate='CASCADE')
-    tax_id = Column(Integer)
-    genomic_accession = Column(String(32))
-    genomic_version = Column(Integer)
-    annot_assembly = ManyToOne('AnnotAssembly', colname='genomic_gi', ondelete='CASCADE', onupdate='CASCADE')
-    chromosome = Column(String(256))
-    strand = Column(String(4))
-    start = Column(Integer)
-    stop = Column(Integer)
-    entrezgene_type = ManyToOne('EntrezgeneType', colname='entrezgene_type_id', ondelete='CASCADE', onupdate='CASCADE')
-    comment = Column(Text)
-    gene_commentaries = OneToMany('GeneCommentary')
-    created_by = Column(String(256))
-    updated_by = Column(String(256))
-    date_created = Column(DateTime, default=datetime.now)
-    date_updated = Column(DateTime)
-    using_options(tablename='entrezgene_mapping', metadata=__metadata__, session=__session__)
-    using_table_options(mysql_engine='InnoDB')
-    """
 
 class GeneCommentaryType(Base, TableClass):
     """
     2008-07-28
     """
+    __tablename__ = 'gene_commentary_type'
+    id = Column(Integer, primary_key=True)
     type = Column(String(223), unique=True)
     created_by = Column(String(256))
     updated_by = Column(String(256))
     date_created = Column(DateTime, default=datetime.now)
     date_updated = Column(DateTime)
-    using_options(tablename='gene_commentary_type', metadata=__metadata__, session=__session__)
-    using_table_options(mysql_engine='InnoDB')
 
 class GeneCommentary(Base, TableClass):
     """
-    2012.4.26
-        add a unique constraint
     2010-12-15
         gene linked to table Gene
     2008-07-28
         store different mRNAs/Peptides from the same gene or mRNA
     """
+    __tablename__ = 'gene_commentary'
+    id = Column(Integer, primary_key=True)
     accession = Column(String(32))
     version = Column(Integer)
     gi = Column(Integer)
-    gene = ManyToOne('%s.Gene'%__name__, colname='gene_id',
-        ondelete='CASCADE', onupdate='CASCADE')
-    gene_commentary = ManyToOne('%s.GeneCommentary'%__name__,
-        colname='gene_commentary_id', ondelete='CASCADE', onupdate='CASCADE')
-    gene_commentaries = OneToMany('%s.GeneCommentary'%__name__)
+    gene_id = Column(Integer, ForeignKey("gene.id"))
+    gene = relationship('Gene')
+    gene_commentary_id = Column(Integer, ForeignKey("gene_commentary.id"))
+    gene_commentary = relationship('GeneCommentary')
+    gene_commentary_ls = relationship('GeneCommentary',
+        back_populates='gene_commentary',cascade='all,delete')
     start = Column(Integer)
     stop = Column(Integer)
-    gene_commentary_type = ManyToOne('%s.GeneCommentaryType'%__name__,
-        colname='gene_commentary_type_id', ondelete='CASCADE', onupdate='CASCADE')
+    gene_commentary_type_id = Column(Integer, ForeignKey("gene_commentary_type.id"))
+    gene_commentary_type = relationship('GeneCommentaryType')
     label = Column(Text)
     text = Column(Text)
     comment = Column(Text)
-    gene_segments = OneToMany('%s.GeneSegment'%__name__)
+    gene_segment_ls = relationship('GeneSegment',
+        back_populates='gene_commentary',cascade='all,delete')
     created_by = Column(String(256))
     updated_by = Column(String(256))
     date_created = Column(DateTime, default=datetime.now)
     date_updated = Column(DateTime)
-    using_options(tablename='gene_commentary', metadata=__metadata__, session=__session__)
-    using_table_options(mysql_engine='InnoDB')
-    using_table_options(UniqueConstraint('gene_id', 'start', 'stop',
-        'gene_commentary_type_id', 'gene_commentary_id'))
+    UniqueConstraint('gene_id', 'start', 'stop',
+        'gene_commentary_type_id', 'gene_commentary_id')
     
     def getSequence(self, box_ls):
         """
@@ -279,10 +245,11 @@ class GeneCommentary(Base, TableClass):
 2009-01-03
         """
         seq = ''
-        curs = __metadata__.bind	#or self.table.bind or self.table.metadata.bind
+        curs = __metadata__.bind
+        #or self.table.bind or self.table.metadata.bind
         for box in box_ls:
             genomic_start, genomic_stop = box[:2]
-            if self.gene.annot_assembly_id:	#2012.5.16
+            if self.gene.annot_assembly_id:
                 annot_assembly_id = self.gene.annot_assembly_id
                 gi = None
             elif self.gene.genomic_gi:
@@ -292,10 +259,11 @@ class GeneCommentary(Base, TableClass):
                 gi = None
                 annot_assembly_id = None
             schema = self._descriptor.table_options.get('schema')
-            seq += get_sequence_segment(curs, gi=gi, start=genomic_start, stop=genomic_stop, \
-                annot_assembly_id=annot_assembly_id,\
-                annot_assembly_table='%s.%s'%(schema, AnnotAssembly.table.name),\
-                raw_sequence_table='%s.%s'%(schema, RawSequence.table.name))
+            seq += get_sequence_segment(curs, gi=gi, start=genomic_start,
+                stop=genomic_stop,
+                annot_assembly_id=annot_assembly_id,
+                annot_assembly_table='%s.%s'%(schema, AnnotAssembly.__tablename__),
+                raw_sequence_table='%s.%s'%(schema, RawSequence.__tablename__))
         if self.gene.strand=='-1' and seq:	#need to reverse complement
             from Bio.Seq import Seq
             from Bio.Alphabet import IUPAC
@@ -334,11 +302,11 @@ class GeneCommentary(Base, TableClass):
         if gene_commentary_type:
             gene_commentary_type_id_ls.append(gene_commentary_type.id)
         
-        gene_segments = GeneSegment.query.filter(\
+        gene_segment_ls = GeneSegment.query.filter(\
             GeneSegment.gene_commentary_type_id.in_(gene_commentary_type_id_ls)).\
             filter_by(gene_commentary_id=self.id)
         self.mrna_box_ls = []
-        for gene_segment in gene_segments:
+        for gene_segment in gene_segment_ls:
             self.mrna_box_ls.append([gene_segment.start, gene_segment.stop, gene_segment.id])
         self.mrna_box_ls.sort()
         return self.mrna_box_ls
@@ -353,12 +321,12 @@ class GeneCommentary(Base, TableClass):
             and construct a protein_box_ls
         """
         self.protein_box_ls = []
-        if len(self.gene_commentaries)==1:
-            gene_commentary = self.gene_commentaries[0]
-        elif len(self.gene_commentaries)>1:
-            logging.warn('More than 1 gene_commentaries for this commentary id=%s, gene_id=%s.'\
+        if len(self.gene_commentary_ls)==1:
+            gene_commentary = self.gene_commentary_ls[0]
+        elif len(self.gene_commentary_ls)>1:
+            logging.warn('More than 1 gene_commentary_ls for this commentary id=%s, gene_id=%s.'\
                 %(self.id, self.gene_id))
-            gene_commentary = self.gene_commentaries[0]
+            gene_commentary = self.gene_commentary_ls[0]
         else:
             gene_commentary = None
         if gene_commentary:
@@ -372,10 +340,10 @@ class GeneCommentary(Base, TableClass):
             if gene_commentary_type:
                 gene_commentary_type_id_ls.append(gene_commentary_type.id)
             
-            gene_segments = GeneSegment.query.\
+            gene_segment_ls = GeneSegment.query.\
                 filter(GeneSegment.gene_commentary_type_id.in_(gene_commentary_type_id_ls)).\
                 filter_by(gene_commentary_id=gene_commentary.id)
-            for gene_segment in gene_segments:
+            for gene_segment in gene_segment_ls:
                 self.protein_box_ls.append([gene_segment.start, \
                     gene_segment.stop, gene_segment.id])
             self.protein_label = gene_commentary.label
@@ -393,19 +361,19 @@ class GeneCommentary(Base, TableClass):
 2010-8-18
     deal with the db (GeneSegment, etc.) populated by TAIRGeneXML2GenomeDB.py,
         not GeneASNXML2gene_mapping.py.
-    GeneSegment stores, UTR, CDS, exon, intron in their commentary_type already.
+    GeneSegment store, UTR, CDS, exon, intron in their commentary_type already.
     
     #each entry is a tuple, (start, stop, box_type, is_translated, gene_segment.id, protein_box_index)
         """
         #each entry is a tuple, (start, stop, box_type, is_translated,
         #  gene_segment.id, protein_box_index)
         box_ls = []
-        if len(self.gene_commentaries)==1:	#it's translated into protein.
-            protein_commentary = self.gene_commentaries[0]
-        elif len(self.gene_commentaries)>1:
-            sys.stderr.write('Warning: more than 1 gene_commentaries for this commentary id=%s, gene_id=%s.\n'%\
+        if len(self.gene_commentary_ls)==1:	#it's translated into protein.
+            protein_commentary = self.gene_commentary_ls[0]
+        elif len(self.gene_commentary_ls)>1:
+            sys.stderr.write('Warning: more than 1 gene_commentary_ls for this commentary id=%s, gene_id=%s.\n'%\
                             (self.id, self.gene_id))
-            protein_commentary = self.gene_commentaries[0]
+            protein_commentary = self.gene_commentary_ls[0]
         else:
             protein_commentary = None
         
@@ -420,7 +388,7 @@ class GeneCommentary(Base, TableClass):
             box_ls.append([gene_segment.start, gene_segment.stop,\
                 gene_segment.gene_commentary_type.type, 0, gene_segment.id, None])
         if protein_commentary:
-            for gene_segment in protein_commentary.gene_segments:
+            for gene_segment in protein_commentary.gene_segment_ls:
                 if gene_segment.gene_commentary_type.type.find('UTR')!=-1:
                     is_translated = 0
                 else:
@@ -452,7 +420,7 @@ class GeneCommentary(Base, TableClass):
         self.box_ls = []
         cumulativeWithinCDSUTRAndIntronLen=0
         #the cumulative length of all withinCDS UTRs and introns from the 5'\
-            # till the designated CDS
+        # till the designated CDS
         CDS_5_end_pos = -1	#5' end position of the whole CDS sequence
         if not hasattr(self, 'mrna_box_ls'):
             self.construct_mrna_box()
@@ -462,7 +430,8 @@ class GeneCommentary(Base, TableClass):
         
         no_of_mrna_boxes = len(self.mrna_box_ls)
         no_of_prot_boxes = len(self.protein_box_ls)
-        if no_of_prot_boxes==0:	# 2012.5.15 no protein, it's a non-coding gene
+        if no_of_prot_boxes==0:
+            # 2012.5.15 no protein, it's a non-coding gene
             default_detailed_box_type = 'exon'
         else:
             if self.gene.strand=='+1':
@@ -471,8 +440,8 @@ class GeneCommentary(Base, TableClass):
             else:
                 default_detailed_box_type = '5UTR'
         j = 0	#index in protein_box_ls
-        no_of_introns = 0	#2012.5.16
-        exon_number = 0	#2012.5.16
+        no_of_introns = 0
+        exon_number = 0
         for i in range(no_of_mrna_boxes):
             mrna_start, mrna_stop, mrna_gene_segment_id = self.mrna_box_ls[i][:3]
             exon_number += 1
@@ -552,7 +521,7 @@ class GeneCommentary(Base, TableClass):
     def outputSequenceInUpperLowerCase(self, outf):
         """
         2012.6.18
-            get the box_ls from self.gene_segments.
+            get the box_ls from self.gene_segment_ls.
             If it's mRNA commentary, this function outputs pre-splicing mRNA.
             If it's protein commentary, this function outputs CDS sequence with introns.
         2012.6.11
@@ -569,7 +538,7 @@ class GeneCommentary(Base, TableClass):
             box_ls = copy.deepcopy(self.construct_protein_box())
         """
         box_ls = []
-        for geneSegment in self.gene_segments:
+        for geneSegment in self.gene_segment_ls:
             box_ls.append([geneSegment.start, geneSegment.stop])
         box_ls.sort()
         
@@ -618,31 +587,34 @@ class GeneSegment(Base, TableClass):
         table to store position info of segments (exon, intron, CDS, UTR ...)
          of gene-products (mRNA, peptide) in table GeneProduct
     """
-    gene_commentary = ManyToOne('%s.GeneCommentary'%__name__, \
-        colname='gene_commentary_id', ondelete='CASCADE', onupdate='CASCADE')
+    __tablename__ = 'gene_segment'
+    id = Column(Integer, primary_key=True)
+    gene_commentary_id = Column(Integer, ForeignKey("gene_commentary.id"))
+    gene_commentary = relationship('GeneCommentary')
     gi = Column(Integer)
     start = Column(Integer)
     stop = Column(Integer)
-    gene_commentary_type = ManyToOne('%s.GeneCommentaryType'%__name__, \
-        colname='gene_commentary_type_id', ondelete='CASCADE', onupdate='CASCADE')
+    gene_commentary_type_id = Column(Integer, ForeignKey("gene_commentary_type.id"))
+    gene_commentary_type = relationship('GeneCommentaryType')
     created_by = Column(String(256))
     updated_by = Column(String(256))
     date_created = Column(DateTime, default=datetime.now)
     date_updated = Column(DateTime)
-    using_options(tablename='gene_segment', metadata=__metadata__, session=__session__)
-    using_table_options(mysql_engine='InnoDB')
-    using_table_options(UniqueConstraint('gene_commentary_id', 'start', 'stop', 'gene_commentary_type_id'))
+    UniqueConstraint('gene_commentary_id', 'start', 'stop', 'gene_commentary_type_id')
 
 class Gene(Base, TableClass):
     """
     2012.4.26
-        change the unique constraint to include annot_assembly_id, entrezgene_type_id and remove type_of_gene
+        change the unique constraint to include annot_assembly_id,
+         entrezgene_type_id and remove type_of_gene.
     2010-12-15
         move all EntrezgeneMapping-exclusive elements into Gene.
         EntrezgeneMapping will disappear.
     2008-07-27
         table to store meta info of genes
     """
+    __tablename__ = 'gene'
+    id = Column(Integer, primary_key=True)
     tax_id = Column(Integer)
     ncbi_gene_id = Column(Integer, unique=True)
     gene_symbol = Column(String(128))
@@ -650,7 +622,7 @@ class Gene(Base, TableClass):
     synonyms = Column(Text)
     dbxrefs = Column(Text)
     chromosome = Column(String(115))
-    strand = Column(String(4))	#2010-8-12 add strand, start, stop
+    strand = Column(String(4))
     start = Column(Integer)
     stop = Column(Integer)
     map_location = Column(String(256))
@@ -665,19 +637,17 @@ class Gene(Base, TableClass):
     genomic_accession = Column(String(32))
     genomic_version = Column(Integer)
     genomic_gi = Column(Integer)
-    annot_assembly = ManyToOne('%s.AnnotAssembly'%__name__, \
-        colname='annot_assembly_id', ondelete='CASCADE', onupdate='CASCADE')
-    entrezgene_type = ManyToOne('%s.EntrezgeneType'%__name__, \
-        colname='entrezgene_type_id', ondelete='CASCADE', onupdate='CASCADE')
+    annot_assembly_id = Column(Integer, ForeignKey("annot_assembly.id"))
+    annot_assembly = relationship('AnnotAssembly')
+    entrezgene_type_id = Column(Integer, ForeignKey("entrezgene_type.id"))
+    entrezgene_type = relationship('EntrezgeneType')
     comment = Column(Text)
-    gene_commentaries = OneToMany('%s.GeneCommentary'%__name__)
-    
+    gene_commentary_ls = relationship('GeneCommentary',
+        back_populates='gene',cascade='all,delete')
     created_by = Column(String(256))
     updated_by = Column(String(256))
     date_created = Column(DateTime, default=datetime.now)
     date_updated = Column(DateTime)
-    using_options(tablename='gene', metadata=__metadata__, session=__session__)
-    using_table_options(mysql_engine='InnoDB')
     UniqueConstraint('tax_id', 'locustag', 'chromosome', 'strand', 'start', \
         'stop', 'entrezgene_type_id', 'annot_assembly_id')
 
@@ -689,8 +659,11 @@ class Gene2go(Base, TableClass):
     2008-07-27
         table to store mapping between gene and GO
     """
+    __tablename__ = 'gene2go'
+    id = Column(Integer, primary_key=True)
     tax_id = Column(Integer)
-    gene = ManyToOne('%s.Gene'%__name__, colname='gene_id', ondelete='CASCADE', onupdate='CASCADE')
+    gene_id = Column(Integer, ForeignKey("gene.id"))
+    gene = relationship('Gene')
     go_id = Column(String(32))
     evidence = Column(String(3))
     go_qualifier = Column(String(64))
@@ -701,24 +674,23 @@ class Gene2go(Base, TableClass):
     updated_by = Column(String(256))
     date_created = Column(DateTime, default=datetime.now)
     date_updated = Column(DateTime)
-    using_options(tablename='gene2go')
-    using_table_options(mysql_engine='InnoDB')
-    using_table_options(UniqueConstraint('tax_id', 'gene_id', 'go_id', 'evidence', 'category', 'go_qualifier'))
+    UniqueConstraint('tax_id', 'gene_id', 'go_id', 'evidence', 'category', 'go_qualifier')
 
 class Gene2Family(Base, TableClass):
     """
-    2010-8-19
-        a table recording which family TE belongs to
+    2010-8-19 a table recording which family TE belongs to
     """
-    gene = ManyToOne('%s.Gene'%__name__, colname='gene_id', ondelete='CASCADE', onupdate='CASCADE')
-    family = ManyToOne('%s.GeneFamily'%__name__, colname='family_id', ondelete='CASCADE', onupdate='CASCADE')
+    __tablename__ = 'gene2family'
+    id = Column(Integer, primary_key=True)
+    gene_id = Column(Integer, ForeignKey("gene.id"))
+    gene = relationship('Gene')
+    family_id = Column(Integer, ForeignKey("gene_family.id"))
+    family = relationship('GeneFamily')
     created_by = Column(String(256))
     updated_by = Column(String(256))
     date_created = Column(DateTime, default=datetime.now)
     date_updated = Column(DateTime)
-    using_options(tablename='gene2family')
-    using_table_options(mysql_engine='InnoDB')
-    using_table_options(UniqueConstraint('gene_id', 'family_id', ))
+    UniqueConstraint('gene_id', 'family_id')
 
 
 class GeneFamily(Base, TableClass):
@@ -726,26 +698,27 @@ class GeneFamily(Base, TableClass):
     2010-8-19
         family names and etc.
     """
+    __tablename__ = 'gene_family'
+    id = Column(Integer, primary_key=True)
     short_name = Column(String(212), unique=True)
-    super_family = ManyToOne('%s.GeneFamily'%__name__, colname='super_family_id', ondelete='SET NULL', onupdate='CASCADE')
+    parent_family_id = Column(Integer, ForeignKey("gene_family.id"))
+    parent_family = relationship('GeneFamily')
     family_type = Column(String(256))
     description = Column(Text)
     created_by = Column(String(256))
     updated_by = Column(String(256))
     date_created = Column(DateTime, default=datetime.now)
     date_updated = Column(DateTime)
-    using_options(tablename='gene_family', metadata=__metadata__, session=__session__)
-    using_table_options(mysql_engine='InnoDB')
 
 class README(Base, TableClass):
+    __tablename__ = 'readme'
+    id = Column(Integer, primary_key=True)
     title = Column(Text)
     description = Column(Text)
     created_by = Column(String(256))
     updated_by = Column(String(256))
     date_created = Column(DateTime, default=datetime.now)
     date_updated = Column(DateTime)
-    using_options(tablename='readme', metadata=__metadata__, session=__session__)
-    using_table_options(mysql_engine='InnoDB')
 
 class Gene_symbol2id(Base, TableClass):
     """
@@ -754,31 +727,34 @@ class Gene_symbol2id(Base, TableClass):
     2008-07-27
         a derived table from Gene in order to map all available gene names (symbol, locustag, synonym) to gene-id
     """
+    __tablename__ = 'gene_symbol2id'
+    id = Column(Integer, primary_key=True)
     tax_id = Column(Integer)
     gene_symbol = Column(String(256))
-    gene = ManyToOne('%s.Gene'%__name__, colname='gene_id', ondelete='CASCADE', onupdate='CASCADE')
+    gene_id = Column(Integer, ForeignKey("gene.id"))
+    gene = relationship('Gene')
     symbol_type = Column(String(64))
     created_by = Column(String(256))
     updated_by = Column(String(256))
     date_created = Column(DateTime, default=datetime.now)
     date_updated = Column(DateTime)
-    using_options(tablename='gene_symbol2id')
-    using_table_options(mysql_engine='InnoDB')
-    using_table_options(UniqueConstraint('gene_id', 'gene_symbol', 'symbol_type'))
+    UniqueConstraint('gene_id', 'gene_symbol', 'symbol_type')
 
 def getEntrezgeneAnnotatedAnchor(db, tax_id):
     """
     2011-1-25
         row.gene_id -> row.id
     2008-08-13
-        similar to annot.bin.codense.common.get_entrezgene_annotated_anchor, but use elixir db interface
+        similar to annot.bin.codense.common.get_entrezgene_annotated_anchor, 
+        but use elixir db interface
     """
     sys.stderr.write("Getting entrezgene_annotated_anchor ...")
     chromosome2anchor_gene_tuple_ls = {}
     gene_id2coord = {}
     offset_index = 0
     block_size = 5000
-    rows = Gene.query.filter_by(tax_id=tax_id).offset(offset_index).limit(block_size)
+    rows = db.queryTable(Gene).filter_by(tax_id=tax_id).offset(offset_index).\
+        limit(block_size)
     while rows.count()!=0:
         for row in rows:
             genomic_gi = row.genomic_gi
@@ -800,9 +776,10 @@ def getEntrezgeneAnnotatedAnchor(db, tax_id):
             chromosome2anchor_gene_tuple_ls[chromosome].append((start, gene_id))
             gene_id2coord[gene_id] = (start, stop, strand, genomic_gi)
         
-        rows = Gene.query.filter_by(tax_id=tax_id
-                                ).offset(offset_index).limit(block_size)
-    for chromosome in chromosome2anchor_gene_tuple_ls:	#sort the list
+        rows = db.queryTable(Gene).filter_by(tax_id=tax_id).\
+            offset(offset_index).limit(block_size)
+    for chromosome in chromosome2anchor_gene_tuple_ls:
+        #sort the list
         chromosome2anchor_gene_tuple_ls[chromosome].sort()
     sys.stderr.write("Done.\n")
     return chromosome2anchor_gene_tuple_ls, gene_id2coord
@@ -815,10 +792,11 @@ class OneGenomeData(PassingData):
         3: order by column genome_order, ascendingly
     
     2011-11-28 add two arguments
-        self.chrOrder = None	#2011-11-21
-        self.sequence_type_id = None	#2011-11-21
+        self.chrOrder = None
+        self.sequence_type_id = None
     2011-3-25
-        a structure to wrap data related to one genome (identified by tax_id)
+        a structure to wrap data related to one genome
+         (identified by tax_id)
         
         All these data used to be handled by class GenomeDatabase.
             Previous solution is not good because GenomeDatabase
@@ -832,7 +810,6 @@ class OneGenomeData(PassingData):
         #2011-3-25
         """
         #PassingData.__init__(self)
-        
         self.db_genome = db_genome
         self._chr_id2size = None
         self._chr_id2cumu_size = None
@@ -848,13 +825,14 @@ class OneGenomeData(PassingData):
         self._chr_id2annot_assembly = None
         
         self.tax_id = tax_id
-        self.maxPseudoChrSize = maxPseudoChrSize	#2012.8.13
+        self.maxPseudoChrSize = maxPseudoChrSize
         
         self.chr_gap = None
-        self._chr_id_ls = None	#2013.07.29 changed from chr_id_ls to _chr_id_ls 
+        self._chr_id_ls = None
+        #2013.07.29 changed from chr_id_ls to _chr_id_ls 
         
-        self.chrOrder = None	#2011-11-21
-        self.sequence_type_id = None	#2011-11-21
+        self.chrOrder = None
+        self.sequence_type_id = None
         self._cumuSpan2ChrRBDict = None
         
         PassingData.__init__(self, **keywords)
@@ -887,7 +865,8 @@ class OneGenomeData(PassingData):
             chrOrder = self.chrOrder
         sys.stderr.write("Getting chr_id_ls with tax_id=%s, chrOrder=%s ..."%(tax_id, chrOrder))
         
-        query = AnnotAssembly.query.filter_by(tax_id=tax_id).filter_by(start=1).filter_by(outdated_index=0)
+        query = self.db_genome.queryTable(AnnotAssembly).filter_by(tax_id=tax_id).\
+            filter_by(start=1).filter_by(outdated_index=0)
         if self.chrOrder==2:
             query = query.order_by(AnnotAssembly.stop)
         else:	#1 or 3
@@ -944,8 +923,7 @@ class OneGenomeData(PassingData):
             "select id, chromosome, stop from genome.%s where tax_id=%s and start=1 %s %s"%\
             (AnnotAssembly.table.name, tax_id, extraCondition, orderByString))
         """
-        #2014.01.12 added outdated_index=0 to filter AnnotAssembly
-        query = AnnotAssembly.query.filter_by(tax_id=tax_id).\
+        query = self.db_genome.queryTable(AnnotAssembly).filter_by(tax_id=tax_id).\
             filter_by(start=1).filter_by(outdated_index=0)
         if self.chrOrder==2:
             query = query.order_by(AnnotAssembly.stop)
@@ -1043,7 +1021,8 @@ class OneGenomeData(PassingData):
             
             cumu_start is 0-based.
             
-            The difference between chr_id2cumu_size and chr_id2cumu_start is that the former includes the length of
+            The difference between chr_id2cumu_size and chr_id2cumu_start is 
+                that the former includes the length of
                 the current chromosome and the gap before it.
         """
         tax_id, chr_gap = argument_list[:2]
@@ -1191,11 +1170,11 @@ class OneGenomeData(PassingData):
             
         2011-3-16
             Treat one genome of multiple chromsomes as one continuous chromosome (uber-chomosome).
-            This function creates a RB dictionary, which stores a map between 
+            This function creates a RB dictionary, which holds a map between 
                 uberchromosome coordinate and individual chromosome coordinate.
         """
         tax_id, chr_gap = argument_list[:2]
-        sys.stderr.write("Creating cumuSpan2ChrRBDict for tax_id=%s, chr_gap=%s  \n"%(
+        sys.stderr.write("Creating cumuSpan2ChrRBDict for tax_id=%s, chr_gap=%s \n"%(
             tax_id, chr_gap))
         self._cumuSpan2ChrRBDict = RBDict()
         if self._chr_id2size is None:
@@ -1205,14 +1184,17 @@ class OneGenomeData(PassingData):
         for chr_id, cumu_start in self.chr_id2cumu_start.items():
             chr_size = self.chr_id2size.get(chr_id)
             span_ls=[cumu_start+1, cumu_start+chr_size]
-            segmentKey = CNVSegmentBinarySearchTreeKey(chromosome=0, \
-                span_ls=span_ls, \
+            segmentKey = CNVSegmentBinarySearchTreeKey(
+                chromosome=0,
+                span_ls=span_ls,
                 min_reciprocal_overlap=0.00000000000001,)
-                #2010-8-17 overlapping keys are regarded as separate instances as long as they are not identical.
+                #2010-8-17 overlapping keys are regarded as separate instances
+                #  as long as they are not identical.
             if segmentKey not in self._cumuSpan2ChrRBDict:
                 self._cumuSpan2ChrRBDict[segmentKey] = [chr_id, 1, chr_size]
             else:
-                sys.stderr.write("Error: %s of chr %s is already in cumuSpan2ChrRBDict.\n"%(segmentKey, chr_id))
+                logging.error("%s of chr %s is already in cumuSpan2ChrRBDict."%\
+                    (segmentKey, chr_id))
         sys.stderr.write("%s chromosomes.\n"%(len(self._cumuSpan2ChrRBDict)))
 
 class GenomeDatabase(Database):
@@ -1226,7 +1208,7 @@ class GenomeDatabase(Database):
             '1. gene_id2model \n'
             '2. chr_id2gene_id_ls \n'
             '3. geneSpanRBDict. \n'
-            'It is optional because it is only used when you run GenomeDB.py as a standalone program'
+            'OPTIONAL: only used when you run GenomeDB.py as a standalone program'
             ],
         ('tax_id', 0, int): [3702, 't', 1, 'Taxonomy ID for geneAnnotationPickleFname.'],\
         })
@@ -1250,19 +1232,17 @@ class GenomeDatabase(Database):
         2008-10-01
             sort EntrezgeneMapping by chromosome, start
         2008-10-1
-            similar to variation.src.GenomeBrowser.get_gene_id2model() but adapts to the new genome db schema
+            similar to variation.src.GenomeBrowser.get_gene_id2model()
+             but adapts to the new genome db schema
             construct a data structure to hold whole-genome annotation of genes
         """
         sys.stderr.write("Getting gene_id2model and chr_id2gene_id_ls ...\n")
         gene_id2model = {}
         chr_id2gene_id_ls = {}
-        
-        
         geneSpanRBDict = RBDict()
-        
         i = 0
         block_size = 50000
-        query = Gene.query.filter_by(tax_id=tax_id).\
+        query = self.queryTable(Gene).filter_by(tax_id=tax_id).\
             order_by(Gene.chromosome).order_by(Gene.start)
         rows = query.offset(i).limit(block_size)
         while rows.count()!=0:
@@ -1299,13 +1279,14 @@ class GenomeDatabase(Database):
                             geneSpanRBDict[segmentKey] = []
                         geneSpanRBDict[segmentKey].append(gene_id)
                 
-                    for gene_commentary in row.gene_commentaries:
+                    for gene_commentary in row.gene_commentary_ls:
                         if not gene_commentary.gene_commentary_id:
-                            #ignore gene_commentary that are derived from other gene_commentaries.
+                            #ignore gene_commentary that are derived from other gene_commentary_ls.
                             #  they'll be handled within the parental gene_commentary.
                             #gene_commentary.constructAnnotatedBox()
                             gene_commentary.construct_annotated_box()
-                            #2010-9-21 it sets protein_label and etc. constructAnnotatedBox() doesn't do this.
+                            #2010-9-21 it sets protein_label and etc.
+                            #  constructAnnotatedBox() doesn't do this.
                             if needSequence:
                                 gene_commentary.getCDSsequence()
                             #pass everything to a database-independent object, easy for pickling
@@ -1323,7 +1304,7 @@ class GenomeDatabase(Database):
                                 box_ls=gene_commentary.box_ls,
                                 cds_sequence = getattr(gene_commentary, 'cds_sequence', None),
                                 mrna_sequence = getattr(gene_commentary, 'mrna_sequence', None))
-                            gene_id2model[gene_id].gene_commentaries.append(new_gene_commentary)
+                            gene_id2model[gene_id].gene_commentary_ls.append(new_gene_commentary)
                 else:
                     logging.error(f"gene {gene_id} already exists in gene_id2model.")
                 i += 1
@@ -1357,8 +1338,8 @@ class GenomeDatabase(Database):
         """
         sys.stderr.write("Creating a RBDict for all genes from organism %s ... \n"%tax_id)
         genomeRBDict = RBDict()
-        genomeRBDict.genePadding = max_distance	#2012.3.19
-        query = Gene.query.filter_by(tax_id=tax_id).filter(Gene.start!=None).\
+        genomeRBDict.genePadding = max_distance
+        query = self.queryTable(Gene).filter_by(tax_id=tax_id).filter(Gene.start!=None).\
             filter(Gene.stop!=None).filter(Gene.chromosome!=None)
         counter = 0
         real_counter = 0
@@ -1379,9 +1360,9 @@ class GenomeDatabase(Database):
                 gene_stop = row.stop, geneCommentaryRBDictLs=[],\
                 ncbi_gene_id=row.ncbi_gene_id, type_of_gene=row.type_of_gene)
             counter += 1
-            for gene_commentary in row.gene_commentaries:
+            for gene_commentary in row.gene_commentary_ls:
                 if not gene_commentary.gene_commentary_id:
-                    # ignore gene_commentary that are derived from other gene_commentaries. 
+                    # ignore gene_commentary that are derived from other gene_commentary_ls. 
                     # they'll be handled within the parental gene_commentary.
                     geneCommentaryRBDict = RBDict()
                     geneCommentaryRBDict.gene_commentary_id = gene_commentary.id
@@ -1411,7 +1392,8 @@ class GenomeDatabase(Database):
                             box = box_ls[-i-1]
                         else:
                             box = box_ls[i]
-                        start, stop, box_type, is_translated, protein_box_index, gene_segment_id, detailed_box_type, \
+                        start, stop, box_type, is_translated, protein_box_index, \
+                            gene_segment_id, detailed_box_type, \
                             cumulativeWithinCDSUTRAndIntronLen, exon_number = box[:9]
                         
                         geneSegmentKey = CNVSegmentBinarySearchTreeKey(
@@ -1423,7 +1405,8 @@ class GenomeDatabase(Database):
                             cds_number=None, intron_number=None, exon_number=None, \
                             gene_segment_id=gene_segment_id, 
                             cumulativeWithinCDSUTRAndIntronLen=cumulativeWithinCDSUTRAndIntronLen)
-                        #2010-8-17 overlapping keys are regarded as separate instances as long as they are not identical.
+                        #2010-8-17 overlapping keys are regarded as
+                        #  separate instances as long as they are not identical.
                         
                         if detailed_box_type=='3UTR' or detailed_box_type=='5UTR' or detailed_box_type=='UTR':
                             numberPorter.utr_number += 1
@@ -1464,7 +1447,8 @@ class GenomeDatabase(Database):
                 genomeRBDict = pickle.load(picklef)
                 del picklef
             else:
-                #if the file doesn't exist, but the filename is given, pickle snps_context_wrapper into it
+                #if the file doesn't exist, but the filename is given,
+                #  pickle snps_context_wrapper into it
                 genomeRBDict = self.createGenomeRBDict(tax_id=tax_id, \
                     max_distance=max_distance, debug=debug)
                 #2008-09-07 pickle the snps_context_wrapper object
@@ -1517,7 +1501,7 @@ db_genome.outputGenomeSequence(tax_id=60711, sequence_type_id=10,
         """
         sys.stderr.write("Outputting genome sequences from tax %s, seq-type %s to %s ...\n"\
             %(tax_id, sequence_type_id, outputDir))
-        query = AnnotAssembly.query.filter_by(tax_id=tax_id).\
+        query = self.queryTable(AnnotAssembly).filter_by(tax_id=tax_id).\
             filter_by(sequence_type_id=sequence_type_id).\
             filter_by(outdated_index=0).order_by(AnnotAssembly.id)
         for row in query:
@@ -1525,7 +1509,7 @@ db_genome.outputGenomeSequence(tax_id=60711, sequence_type_id=10,
             outputFname = os.path.join(outputDir, '%s.seq'%(fastaTitle))
             outf = open(outputFname, 'w')
             outf.write(">%s\n"%(fastaTitle))
-            sub_query = RawSequence.query.filter_by(annot_assembly_id=row.id).\
+            sub_query = self.queryTable(RawSequence).filter_by(annot_assembly_id=row.id).\
                 order_by(RawSequence.start)
             for seq_row in sub_query:
                 sequence = seq_row.sequence
@@ -1543,7 +1527,7 @@ db_genome.outputGenomeSequence(tax_id=60711, sequence_type_id=10,
             start and stop are 1-based.
         """
         chromosome = str(chromosome)
-        query = AnnotAssembly.query.filter_by(tax_id=tax_id).\
+        query = self.queryTable(AnnotAssembly).filter_by(tax_id=tax_id).\
             filter_by(chromosome=chromosome).filter_by(outdated_index=0).\
             order_by(AnnotAssembly.id)
         annot_assembly_id_ls = []
@@ -1557,11 +1541,12 @@ db_genome.outputGenomeSequence(tax_id=60711, sequence_type_id=10,
                 tax_id, chromosome))
             return ""
         annot_assembly_id = annot_assembly_id_ls[0]
-        curs = __metadata__.bind	#or self.table.bind or self.table.metadata.bind
+        curs = __metadata__.bind
+        #or self.table.bind or self.table.metadata.bind
         seq = get_sequence_segment(curs, gi=None, start=start, stop=stop, \
             annot_assembly_id=annot_assembly_id,\
-            annot_assembly_table='%s.%s'%(schema, AnnotAssembly.table.name), \
-            raw_sequence_table='%s.%s'%(schema, RawSequence.table.name))
+            annot_assembly_table='%s.%s'%(schema, AnnotAssembly.__tablename__), \
+            raw_sequence_table='%s.%s'%(schema, RawSequence.__tablename__))
         return seq
     
     def getSequenceType(self, short_name=None, entry_id=None, **keywords):
@@ -1599,17 +1584,17 @@ db_genome.outputGenomeSequence(tax_id=60711, sequence_type_id=10,
         """
         no_of_contigs_to_fetch = contigMaxRankBySize-contigMinRankBySize+1
         sys.stderr.write("Getting %s chromosomes with rank (by size) between %s and %s  ..."%\
-                        (no_of_contigs_to_fetch, contigMinRankBySize, contigMaxRankBySize))
+            (no_of_contigs_to_fetch, contigMinRankBySize, contigMaxRankBySize))
         chr2size = {}
-        query = AnnotAssembly.query.filter_by(tax_id=tax_id).\
+        query = self.queryTable(AnnotAssembly).filter_by(tax_id=tax_id).\
             filter_by(sequence_type_id=sequence_type_id).filter_by(outdated_index=0)
         if chromosome_type_id:
             query = query.filter_by(chromosome_type_id=chromosome_type_id)
-        if version is not None:	#2013.3.14
+        if version is not None:
             query = query.filter_by(version=version)
-        if chromosome:	#2013.3.14
+        if chromosome:
             query = query.filter_by(chromosome=chromosome)
-        if outdated_index is not None:	#2013.3.19
+        if outdated_index is not None:
             query = query.filter_by(outdated_index=outdated_index)
         #order by size from big to small
         query = query.order_by(desc(AnnotAssembly.stop))
@@ -1653,7 +1638,7 @@ db_genome.outputGenomeSequence(tax_id=60711, sequence_type_id=10,
             if db_entry:
                 return db_entry
         
-        query = AnnotAssembly.query
+        query = self.queryTable(AnnotAssembly)
         if accession:
             query = query.filter_by(accession=accession)
         if version:
@@ -1675,7 +1660,7 @@ db_genome.outputGenomeSequence(tax_id=60711, sequence_type_id=10,
         db_entry = query.first()
         return db_entry
     
-    def getAnnotAssembly(self, id=None, gi=None, acc_ver=None, accession = None, \
+    def getAnnotAssembly(self, id=None, gi=None, acc_ver=None, accession = None,
         version =None, tax_id=None, chromosome =None, \
         start =1, stop =None, orientation=None, sequence = None,\
         raw_sequence_start_id=None, original_path=None, \
@@ -1726,7 +1711,7 @@ db_genome.outputGenomeSequence(tax_id=60711, sequence_type_id=10,
             if db_entry:
                 return db_entry
         
-        query = GenomeAnnotation.query
+        query = self.queryTable(GenomeAnnotation)
         if strand:
             query = query.filter_by(strand=strand)
         if start:
@@ -1793,7 +1778,7 @@ db_genome.outputGenomeSequence(tax_id=60711, sequence_type_id=10,
             if db_entry:
                 return db_entry
         
-        query = GenomeAnnotationType.query
+        query = self.queryTable(GenomeAnnotationType)
         if short_name:
             query = query.filter_by(short_name=short_name)
         db_entry = query.first()
@@ -1827,7 +1812,7 @@ db_genome.outputGenomeSequence(tax_id=60711, sequence_type_id=10,
             gene_commentary_id = gene_commentary.id
         
         if gene_id and start and stop and gene_commentary_type_id:
-            query = GeneCommentary.query
+            query = self.queryTable(GeneCommentary)
             query = query.filter_by(gene_id=gene_id).filter_by(start=start).\
                 filter_by(stop=stop).\
                 filter_by(gene_commentary_type_id=gene_commentary_type_id)
@@ -1854,9 +1839,10 @@ db_genome.outputGenomeSequence(tax_id=60711, sequence_type_id=10,
             moved from transfac/src/GeneASNXML2gene_mapping.py
         """
         if gene_commentary_type_id:
-            gene_commentary_type = GeneCommentaryType.query.get(gene_commentary_type_id)
+            gene_commentary_type = self.checkIfEntryInTable(
+                TableClass=GeneCommentaryType, entry_id=gene_commentary_type_id)
         elif commentary_type:
-            gene_commentary_type = GeneCommentaryType.query.\
+            gene_commentary_type = self.queryTable(GeneCommentaryType).\
                 filter_by(type=commentary_type).first()
         else:
             gene_commentary_type = None
@@ -1893,7 +1879,7 @@ using_table_options(UniqueConstraint('tax_id', 'locustag', 'chromosome',
             annot_assembly_id = annot_assembly.id
         
         if annot_assembly_id and start and stop and tax_id and chromosome and entrezgene_type_id:
-            query = Gene.query.filter_by(annot_assembly_id=annot_assembly.id).\
+            query = self.queryTable(Gene).filter_by(annot_assembly_id=annot_assembly.id).\
                 filter_by(start=start).filter_by(stop=stop).\
                 filter_by(tax_id=tax_id).filter_by(chromosome=chromosome).\
                 filter_by(entrezgene_type_id=entrezgene_type_id)
