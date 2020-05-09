@@ -228,27 +228,7 @@ class AbstractNGSWorkflow(ParentClass):
         debug=False, report=False):
         """
         """
-        # Insert before ParentClass.__init__()
-        self.pathToInsertHomePathList.extend(['samtools_path', 'picard_dir', \
-            'gatk_path', 'tabixPath', \
-            'bgzipPath', 'gatk2_path', 'ligateVcfPerlPath',\
-            'vcftoolsPath', 'vcfSubsetPath', 'vcfsorterPath', 'picard_path',\
-            ])
-        ParentClass.__init__(self,
-            inputSuffixList=inputSuffixList,
-            pegasusFolderName=pegasusFolderName,
-            output_path=output_path,
-            site_handler=site_handler,
-            input_site_handler=input_site_handler,
-            cluster_size=cluster_size,
-            tmpDir=tmpDir, max_walltime=max_walltime, 
-            home_path=home_path,
-            javaPath=javaPath,
-            pymodulePath=pymodulePath, thisModulePath=thisModulePath,
-            jvmVirtualByPhysicalMemoryRatio=jvmVirtualByPhysicalMemoryRatio,
-            plinkPath=plinkPath,
-            needSSHDBTunnel=needSSHDBTunnel, commit=commit,
-            debug=debug, report=report)
+        # Set as ParentClass.__init__() will call connectDB()
         self.drivername = drivername
         self.hostname = hostname
         self.dbname = dbname
@@ -308,14 +288,35 @@ class AbstractNGSWorkflow(ParentClass):
         self.chr_pattern = Genome.chr_pattern
         self.contig_id_pattern = Genome.contig_id_pattern
         self.needSplitChrIntervalData = True
-
+        # Set before ParentClass.__init__()
+        self.pathToInsertHomePathList.extend([
+            'samtools_path', 'picard_dir', \
+            'gatk_path', 'tabixPath', \
+            'bgzipPath', 'gatk2_path', 'ligateVcfPerlPath',\
+            'vcftoolsPath', 'vcfSubsetPath', 'vcfsorterPath', 'picard_path',
+            ])
         listArgumentName_data_type_ls = [
-            ("site_id_ls", int), ('country_id_ls', int), ('tax_id_ls', int),\
+            ("site_id_ls", int), ('country_id_ls', int), ('tax_id_ls', int),
             ('sequence_type_id_ls', int), ('sequencer_id_ls', int),\
             ('sequence_batch_id_ls', int), ('version_ls', int)
             ]
         ProcessOptions.processListArguments(listArgumentName_data_type_ls, 
             emptyContent=[], class_to_have_attr=self)
+        ParentClass.__init__(self,
+            inputSuffixList=inputSuffixList,
+            pegasusFolderName=pegasusFolderName,
+            output_path=output_path,
+            site_handler=site_handler,
+            input_site_handler=input_site_handler,
+            cluster_size=cluster_size,
+            tmpDir=tmpDir, max_walltime=max_walltime, 
+            home_path=home_path,
+            javaPath=javaPath,
+            pymodulePath=pymodulePath, thisModulePath=thisModulePath,
+            jvmVirtualByPhysicalMemoryRatio=jvmVirtualByPhysicalMemoryRatio,
+            plinkPath=plinkPath,
+            needSSHDBTunnel=needSSHDBTunnel, commit=commit,
+            debug=debug, report=report)
 
         if hasattr(self, 'contigMaxRankBySize') and \
             hasattr(self, 'contigMinRankBySize'):

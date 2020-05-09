@@ -101,8 +101,11 @@ class AbstractWorkflow(Workflow):
         debug=False, report=False):
         """
         """
+        # Set before ParentClass.__init__()
         if not home_path:
             home_path = os.path.expanduser("~")
+        self.pymodulePath = pymodulePath
+        self.thisModulePath = thisModulePath
         Workflow.__init__(self, inputSuffixList=inputSuffixList,
             pegasusFolderName=pegasusFolderName,
             site_handler=site_handler,
@@ -115,9 +118,6 @@ class AbstractWorkflow(Workflow):
             jvmVirtualByPhysicalMemoryRatio=jvmVirtualByPhysicalMemoryRatio,
             needSSHDBTunnel=needSSHDBTunnel, commit=commit,
             debug=debug, report=report)
-        
-        self.pymodulePath = pymodulePath
-        self.thisModulePath = thisModulePath
 
     def constructJobDataFromJob(self, job=None):
         """

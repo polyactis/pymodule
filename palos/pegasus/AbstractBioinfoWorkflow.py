@@ -31,6 +31,8 @@ class AbstractBioinfoWorkflow(ParentClass):
         """
         20200129
         """
+        # Set before ParentClass.__init__()
+        self.plinkPath = plinkPath
         ParentClass.__init__(self, 
             inputSuffixList=inputSuffixList,
             pegasusFolderName=pegasusFolderName,
@@ -45,7 +47,6 @@ class AbstractBioinfoWorkflow(ParentClass):
             jvmVirtualByPhysicalMemoryRatio=jvmVirtualByPhysicalMemoryRatio,
             needSSHDBTunnel=needSSHDBTunnel, commit=commit,
             debug=debug, report=report)
-        self.plinkPath = plinkPath
 
     def registerPlinkExecutables(self):
         if getattr(self, 'plinkPath', None):

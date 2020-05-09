@@ -52,11 +52,12 @@ class CountReadsWorkflow(ParentClass):
         pegasusFolderName='folder', output_path=None,
         tmpDir='/tmp/', max_walltime=4320,
         home_path=None, 
-        pymodulePath="%s/src/pymodule",
+        pymodulePath="src/pymodule",
         needSSHDBTunnel=False, commit=False,
         debug=False, report=False):
         """
         """
+        self.ind_seq_id_ls = getListOutOfStr(ind_seq_id_ls, data_type=int)
         ParentClass.__init__(self, 
             inputSuffixList=None, 
             drivername=drivername, hostname=hostname,
@@ -105,9 +106,7 @@ class CountReadsWorkflow(ParentClass):
             plinkPath=None,
             needSSHDBTunnel=needSSHDBTunnel, commit=commit,
             debug=debug, report=report)
-        
-        self.ind_seq_id_ls = getListOutOfStr(ind_seq_id_ls, data_type=int)
-    
+
     def registerCustomExecutables(self):
         """
         2012.3.14
