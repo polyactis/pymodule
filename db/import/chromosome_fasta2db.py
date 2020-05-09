@@ -110,8 +110,6 @@ class chromosome_fasta2db(AbstractDBJob):
         """
         AbstractDBJob.__init__(self, inputFnameLs=inputFnameLs, **keywords)
         #self.connectDB() called within its __init__()
-        
-        
         self.FigureOutTaxID_ins = FigureOutTaxID(db_user=self.db_user,
             db_passwd=self.db_passwd, hostname=self.hostname, dbname=self.dbname)
         if self.organism is not None:
@@ -146,7 +144,8 @@ class chromosome_fasta2db(AbstractDBJob):
             aa_attr_instance.raw_sequence_start_id = raw_sequence.id
         passingdata.current_start += len(seq_to_db)
     
-    def parseFastaDescriptionForGenBank(self, descriptionLine=None, FigureOutTaxID_ins=None):
+    def parseFastaDescriptionForGenBank(self, descriptionLine=None,
+        FigureOutTaxID_ins=None):
         """
         possible header lines:
     
@@ -186,9 +185,7 @@ class chromosome_fasta2db(AbstractDBJob):
         >hs37d5
         """
         header = descriptionLine[1:-1]
-        headerList = header.split()
-        #_tax_id = FigureOutTaxID_ins.returnTaxIDGivenSentence(str)
-        
+        headerList = header.split()        
         chromosome = headerList[0]
         comment = ' '.join(headerList[1:])
         gi = None
@@ -203,9 +200,11 @@ class chromosome_fasta2db(AbstractDBJob):
                 gi = int(commentSplit[1])
                 acc_ver = commentSplit[3]
                 comment = commentSplit[4]
-        return PassingData(tax_id=None, gi=gi, comment=comment, acc_ver=acc_ver, chromosome=chromosome)
+        return PassingData(tax_id=None, gi=gi, comment=comment, acc_ver=acc_ver,
+            chromosome=chromosome)
         
-    def parseFastaDescriptionForWUSTLVervetScaffolds(self, descriptionLine=None, FigureOutTaxID_ins=None):
+    def parseFastaDescriptionForWUSTLVervetScaffolds(self, descriptionLine=None,
+        FigureOutTaxID_ins=None):
         """
         2011-7-6
             
@@ -228,7 +227,8 @@ class chromosome_fasta2db(AbstractDBJob):
         gi = None
         acc_ver = None
         comment = None
-        return PassingData(tax_id=None, gi=gi, comment=comment, acc_ver=acc_ver, chromosome=chromosome)
+        return PassingData(tax_id=None, gi=gi, comment=comment, acc_ver=acc_ver,
+            chromosome=chromosome)
     
     
     def parseFastaDescriptionForWUSTLVervetChromosomeGenome(self, 
@@ -251,9 +251,11 @@ class chromosome_fasta2db(AbstractDBJob):
         gi = None
         acc_ver = None
         comment = None
-        return PassingData(tax_id=None, gi=gi, comment=comment, acc_ver=acc_ver, chromosome=chromosome)
+        return PassingData(tax_id=None, gi=gi, comment=comment, acc_ver=acc_ver,
+            chromosome=chromosome)
     
-    def parseFastaDescriptionForFullVervetBACs(self, descriptionLine=None, FigureOutTaxID_ins=None):
+    def parseFastaDescriptionForFullVervetBACs(self, descriptionLine=None,
+        FigureOutTaxID_ins=None):
         """
         2011-7-6
             
@@ -291,13 +293,11 @@ class chromosome_fasta2db(AbstractDBJob):
         sequence_type_name=None, sequence_type_id=None, run_type=1,
         maxNoOfFastaRecords=500):
         """
-        2011-7-10
-            add argument maxNoOfFastaRecords: the max number of fasta records before quitting
-        2011-7-6
-            add argument run_type
-                1: chromosome sequences from NCBI genbank
-                2: vervet scaffolds from WUSTL
-                3: full vervet BACs from McGill
+        argument maxNoOfFastaRecords: the max number of fasta records before quitting
+        argument run_type
+            1: chromosome sequences from NCBI genbank
+            2: vervet scaffolds from WUSTL
+            3: full vervet BACs from McGill
         2010-12-15
             fix a bug that _tax_id shall be used in query AnnotAssembly.
             This bug caused the db redundancy check to fail.
@@ -326,7 +326,7 @@ class chromosome_fasta2db(AbstractDBJob):
                 for line in inf:	#exhaust this fasta block as it's not what's wanted.
                     if line[0]=='>':
                         new_fasta_block = 1
-                        break	#start from while again
+                        break
                 continue
             headerData = self.parseFastaDescriptionDict[run_type](line, self.FigureOutTaxID_ins)
             if not headerData.chromosome:

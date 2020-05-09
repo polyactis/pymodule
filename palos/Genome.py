@@ -3,13 +3,15 @@
 """
 
 import os,sys
+import logging
 from palos.utils import PassingData
 
 class GeneModel(object):
 	def __init__(self, **keywords):
 		"""
 		2008-10-01
-			moved from transfac.src.GenomeDB in order for the return of GenomeDB.get_gene_id2model() to be pickled independent of transfac.src
+			moved from transfac.src.GenomeDB in order for the return of
+				GenomeDB.get_gene_id2model() to be pickled independent of transfac.src
 		2008-10-01
 			a class to hold all stuff related to a gene (Gene+EntrezgeneMapping)
 			it's hierarchical. Its gene_commentary_ls contains also GeneModel.
@@ -68,7 +70,8 @@ class LargeFastaFileTraverse:
 			Each fasta file in input_dir could contain many fasta blocks.
 		"""
 		import re
-		p_chromosome = re.compile(r'chromosome (\w+)[,\n\r]?')	#the last ? means [,\n\r] is optional
+		p_chromosome = re.compile(r'chromosome (\w+)[,\n\r]?')
+		#the last ? means [,\n\r] is optional
 		files = os.listdir(input_dir)
 		no_of_total_files = len(files)
 		
@@ -82,12 +85,17 @@ class LargeFastaFileTraverse:
 			else:
 				inf = open(input_fname)
 			line = inf.readline()
-			new_fasta_block = 1	#'line' is not enough to stop the 'while' loop. after the file reading is exhausted by "for line in inf:", 'line' still contains the stuff from the last line.
+			new_fasta_block = 1
+			#'line' is not enough to stop the 'while' loop.
+			# after the file reading is exhausted by "for line in inf:",
+			#  'line' still contains the stuff from the last line.
 			no_of_fasta_blocks = 0
 			while line and new_fasta_block:
-				new_fasta_block = 0	#set it to 0, assuming only one fasta block, change upon new fasta block
+				new_fasta_block = 0
+				#set it to 0, assuming only one fasta block, change upon new fasta block
 				if line[0]!='>':	#not fasta block header
-					for line in inf:	#exhaust this fasta block as it's not what's wanted.
+					for line in inf:
+						#exhaust this fasta block as it's not what's wanted.
 						if line[0]=='>':
 							new_fasta_block = 1
 							break	#start from while again
@@ -132,11 +140,15 @@ class LargeFastaFileTraverse:
 			sys.stderr.write("\n")
 
 import re
-chr_pattern = re.compile(r'([a-zA-Z]+[\dXY]+)[._\-:]*')	#the last - has special meaning in [] when it's not the last character. 
-#contig_id_pattern = re.compile(r'Contig(\d+)[._\-:]*')	#2013.3.19
-#contig_id_pattern = re.compile(r'Scaffold(\d+)[._\-:]*')	#2013.3.19 new vervet ref is scaffold-based.
-contig_id_pattern = re.compile(r'[CcS][a-zA-Z]+([\dXY]+)[._\-:]*')	#2013.07.16 new chromosome (Chlorocebus aethiops) vervet ref, add X, Y
-chr_start_stop_pattern = re.compile(r'([a-zA-Z]+[\dXY]+)_(\d+)_(\d+)[._\-:]*')	#the last - has special meaning in [] when it's not the last character. 
+chr_pattern = re.compile(r'([a-zA-Z]+[\dXY]+)[._\-:]*')
+#the last - has special meaning in [] when it's not the last character. 
+#contig_id_pattern = re.compile(r'Contig(\d+)[._\-:]*')
+#contig_id_pattern = re.compile(r'Scaffold(\d+)[._\-:]*')
+# #2013.3.19 new vervet ref is scaffold-based.
+contig_id_pattern = re.compile(r'[CcS][a-zA-Z]+([\dXY]+)[._\-:]*')
+#2013.07.16 new chromosome (Chlorocebus aethiops) vervet ref, add X, Y
+chr_start_stop_pattern = re.compile(r'([a-zA-Z]+[\dXY]+)_(\d+)_(\d+)[._\-:]*')
+#the last - has special meaning in [] when it's not the last character. 
 
 def getContigIDFromFname(filename):
 	"""
@@ -171,11 +183,14 @@ def getChrFromFname(filename):
 		chromosome = os.path.splitext(os.path.split(filename)[1])[0]
 	return chromosome
 
-def parseChrStartStopFromFilename(filename=None, chr2size=None, defaultChromosomeSize=10000000000):
+def parseChrStartStopFromFilename(filename=None, chr2size=None,
+	defaultChromosomeSize=10000000000):
 	"""
 	2013.09.18
-		#10000000000 is used when filename contains data from a whole chromosome and chr2size is not available or not containing chromosome
-		make it very big so that it could be intersected with any interval from any chromosome.
+		#10000000000 is used when filename contains data from a whole chromosome
+		#  and chr2size is not available or not containing chromosome
+		make it very big so that it could be intersected with any interval
+			from any chromosome.
 	"""
 	searchResult = chr_start_stop_pattern.search(filename)
 	if searchResult:
@@ -193,7 +208,8 @@ def parseChrStartStopFromFilename(filename=None, chr2size=None, defaultChromosom
 
 class IntervalData(PassingData):
 	"""
-	Access .overlapInterval for most activities, as it's either equal or bigger than .interval.
+	Access .overlapInterval for most activities, as it's either equal or
+		bigger than .interval.
 	
 	required keywords: chr or chromosome, chromosomeSize, start, stop
 		overlapStart and overlapStop are optional.
@@ -202,11 +218,12 @@ class IntervalData(PassingData):
 		
 		
 	"""
-	def __init__(self, chr=None, chromosome=None, chromosomeSize=None, start=None, stop=None, 
-				overlapStart=None, overlapStop=None, **keywords):
-		PassingData.__init__(self, chr=chr, chromosome=chromosome, chromosomeSize=chromosomeSize, \
-							start=start, stop=stop, 
-				overlapStart=overlapStart, overlapStop=overlapStop, **keywords)
+	def __init__(self, chr=None, chromosome=None, chromosomeSize=None,
+		start=None, stop=None, overlapStart=None, overlapStop=None, **keywords):
+		PassingData.__init__(self, chr=chr, chromosome=chromosome,
+			chromosomeSize=chromosomeSize, \
+			start=start, stop=stop, 
+			overlapStart=overlapStart, overlapStop=overlapStop, **keywords)
 		if not hasattr(self, 'file'):
 			self.file = None
 		if not hasattr(self, 'jobLs'):
@@ -229,8 +246,8 @@ class IntervalData(PassingData):
 		"""
 		"""
 		if self.chromosome!=otherIntervalData.chromosome:
-			sys.stderr.write("Error: this interval %s is trying to union an interval from a different chromosome %s.\n"%\
-							(self.interval, otherIntervalData.interval))
+			logging.error("This interval %s is trying to union an interval from a different chromosome %s."%\
+				(self.interval, otherIntervalData.interval))
 			raise
 		self.subIntervalLs.append((otherIntervalData.overlapStart, otherIntervalData.overlapStop))
 		self.subIntervalLs.sort()

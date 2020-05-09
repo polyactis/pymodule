@@ -107,7 +107,8 @@ class Merged(Base, TableClass):
 	"""
 	2012.6.6
 	"""
-	old_tax_id = Column(Integer)		#-- id of nodes which has been merged
+	old_tax_id = Column(Integer)
+	#-- id of nodes which has been merged
 	new_tax = ManyToOne('%s.Node'%__name__, colname='new_tax_id', ondelete='CASCADE', onupdate='CASCADE')
 		#-- id of nodes which is result of merging
 	created_by = Column(String(256))
@@ -142,22 +143,28 @@ class Node(Base, TableClass):
 		taxonomy node and its parent node
 	"""
 	tax_id = Column(Integer, unique=True, primary_key=True)	#-- node id in GenBank taxonomy database
-	parent_tax_id = Column(Integer)	#2012.6.7 some parent taxonomy node might not exist at all.
+	parent_tax_id = Column(Integer)
+	#2012.6.7 some parent taxonomy node might not exist at all.
 	#parent_tax = ManyToOne('%s.Node'%__name__, colname='parent_tax_id', ondelete='CASCADE', onupdate='CASCADE')
 	rank = Column(Text)	#-- rank of this node (superkingdom, kingdom, ...)
 	embl_code = Column(Text)	#-- locus-name prefix; not unique
 	division = ManyToOne('%s.Division'%__name__, colname='division_id', ondelete='CASCADE', onupdate='CASCADE')
 		#see division.dmp file
-	inherited_div_flag = Column(Integer)	#  (1 or 0) -- 1 if node inherits division from parent
+	inherited_div_flag = Column(Integer)
+	#  (1 or 0) -- 1 if node inherits division from parent
 	genetic_code = ManyToOne('%s.Gencode'%__name__, colname='genetic_code_id', ondelete='CASCADE', onupdate='CASCADE')
 		# -- see gencode.dmp file
-	inherited_GC_flag = Column(Integer)	#(1 or 0) -- 1 if node inherits genetic code from parent
+	inherited_GC_flag = Column(Integer)
+	#(1 or 0) -- 1 if node inherits genetic code from parent
 	mitochondrial_genetic_code = ManyToOne('%s.Gencode'%__name__, colname='mitochondrial_genetic_code_id', \
 										ondelete='CASCADE', onupdate='CASCADE')
 		# -- see gencode.dmp file
-	inherited_MGC_flag = Column(Integer) #(1 or 0)	#  -- 1 if node inherits mitochondrial gencode from parent
-	GenBank_hidden_flag = Column(Integer)	# (1 or 0) -- 1 if name is suppressed in GenBank entry lineage
-	hidden_subtree_root_flag = Column(Integer)		#(1 or 0) -- 1 if this subtree has no sequence data yet
+	inherited_MGC_flag = Column(Integer)
+	#(1 or 0)	#  -- 1 if node inherits mitochondrial gencode from parent
+	GenBank_hidden_flag = Column(Integer)
+	# (1 or 0) -- 1 if name is suppressed in GenBank entry lineage
+	hidden_subtree_root_flag = Column(Integer)	
+	#(1 or 0) -- 1 if this subtree has no sequence data yet
 	comments = Column(Text)
 	citation_list = ManyToMany("Citation", tablename='citation2node', local_colname='tax_id')
 	created_by = Column(String(256))
@@ -173,11 +180,12 @@ class TaxonomyDB(Database):
 	option_default_dict[('drivername', 1,)][0] = 'postgresql'
 	option_default_dict[('dbname', 1,)][0] = 'taxonomy'
 	option_default_dict.update({
-			('inputFolder', 0, ):[None, 'i', 1, 'where taxdump.tar.gz was un-tarred. it should contain citations.dmp, division.dmp, \n\
-	gencode.dmp, names.dmp, delnodes.dmp, merged.dmp, nodes.dmp. \n\
-	If this argument is provided, this program will import them into a taxonomy database.\n'],\
-			('commit', 0, int):[0, 'c', 0, 'commit db transaction'],\
-			})	
+		('inputFolder', 0, ):[None, 'i', 1, 
+		'where taxdump.tar.gz was un-tarred. it should contain citations.dmp, division.dmp, '
+		'gencode.dmp, names.dmp, delnodes.dmp, merged.dmp, nodes.dmp.'
+		'If this argument is provided, this program will import them into a taxonomy database.\n'],
+		('commit', 0, int):[0, 'c', 0, 'commit db transaction'],\
+		})	
 	def __init__(self, **keywords):
 		"""
 		2008-10-08
@@ -239,7 +247,7 @@ class TaxonomyDB(Database):
 				DG.add_edge(parent_tax_id, tax_id)
 		G = DG.to_undirected()
 		sys.stderr.write(" %s nodes, %s edges, %s connected components.\n"%(DG.number_of_nodes(), DG.number_of_edges(),\
-															nx.number_connected_components(G)))
+			nx.number_connected_components(G)))
 
 		#first check if this is DAG , it should be.
 		if not nx.is_directed_acyclic_graph(DG):
@@ -274,9 +282,13 @@ class TaxonomyDB(Database):
 			hidden_subtree_root_flag = int(row[11])
 			comments = row[12].decode('latin1')
 			
-			node = Node(tax_id=tax_id, parent_tax_id=parent_tax_id, rank=rank, embl_code=embl_code, inherited_div_flag=inherited_div_flag,\
-					inherited_GC_flag=inherited_GC_flag, inherited_MGC_flag=inherited_MGC_flag, GenBank_hidden_flag=GenBank_hidden_flag,\
-					hidden_subtree_root_flag=hidden_subtree_root_flag, comments=comments)
+			node = Node(tax_id=tax_id, parent_tax_id=parent_tax_id, rank=rank,
+				embl_code=embl_code, inherited_div_flag=inherited_div_flag,\
+				inherited_GC_flag=inherited_GC_flag,
+				inherited_MGC_flag=inherited_MGC_flag,
+				GenBank_hidden_flag=GenBank_hidden_flag,
+				hidden_subtree_root_flag=hidden_subtree_root_flag,
+				comments=comments)
 			node.division = division
 			node.genetic_code = genetic_code
 			node.mitochondrial_genetic_code = mitochondrial_genetic_code
@@ -319,7 +331,8 @@ class TaxonomyDB(Database):
 			name_txt = row[1]
 			unique_name = row[2]
 			name_class = row[3]
-			db_entry = Name(tax_id=tax_id, name_txt=name_txt, unique_name=unique_name, name_class=name_class)
+			db_entry = Name(tax_id=tax_id, name_txt=name_txt,
+				unique_name=unique_name, name_class=name_class)
 			self.session.add(db_entry)
 			counter += 1
 			if counter%5000==0:
@@ -343,7 +356,8 @@ class TaxonomyDB(Database):
 			name = row[2]
 			code = row[3]
 			starts = row[4]
-			gencode = Gencode(id=gencode_id, abbreviation=abbr, name=name, code=code, starts=starts)
+			gencode = Gencode(id=gencode_id, abbreviation=abbr, name=name,
+				code=code, starts=starts)
 			self.session.add(gencode)
 			self.session.flush()
 			gencodeID2gencode[gencode.id] = gencode
@@ -361,7 +375,8 @@ class TaxonomyDB(Database):
 		divisionID2division = {}
 		for line in inputFile:
 			row = self.splitLine(line)
-			division = Division(id=int(row[0]), code=row[1], name=row[2], comments=row[3])
+			division = Division(id=int(row[0]), code=row[1], name=row[2],
+				comments=row[3])
 			self.session.add(division)
 			self.session.flush()
 			divisionID2division[division.id] = division
@@ -383,7 +398,9 @@ class TaxonomyDB(Database):
 			medline_id = int(row[3])
 			url = row[4].decode('latin1')
 			if len(row)>5:
-				text = row[5].decode('latin1')	#the input file contains utf-8 characters beyond 127 ('ascii' codec limit). 
+				text = row[5].decode('latin1')
+				#the input file contains utf-8 characters beyond 127
+				#  ('ascii' codec limit). 
 				#.encode('ascii','replace')
 			else:
 				text = None
@@ -392,8 +409,9 @@ class TaxonomyDB(Database):
 				taxIDList = map(int, taxIDList)
 			else:
 				taxIDList = []
-			db_entry = Citation(cit_id=cit_id, cit_key=cit_key, pubmed_id=pubmed_id, medline_id=medline_id, url=url,\
-							text=text)
+			db_entry = Citation(cit_id=cit_id, cit_key=cit_key,
+				pubmed_id=pubmed_id, medline_id=medline_id, url=url,
+				text=text)
 			for taxID in taxIDList:
 				tax = Node.get(taxID)
 				if tax is None:
@@ -415,7 +433,8 @@ class TaxonomyDB(Database):
 		2012.6.6
 			
 		"""
-		sys.stderr.write("Importing NCBI tax dump files from %s ...\n"%(inputFolder))
+		sys.stderr.write("Importing NCBI tax dump files from %s ...\n"%\
+			(inputFolder))
 		citationsFile = open(os.path.join(inputFolder, 'citations.dmp'), 'r')
 		divisionFile = open(os.path.join(inputFolder, 'division.dmp'), 'r')
 		gencodeFile = open(os.path.join(inputFolder, 'gencode.dmp'), 'r')
@@ -423,11 +442,13 @@ class TaxonomyDB(Database):
 		delnodesFile = open(os.path.join(inputFolder, 'delnodes.dmp'), 'r')
 		mergedFile = open(os.path.join(inputFolder, 'merged.dmp'), 'r')
 		nodesFile = open(os.path.join(inputFolder, 'nodes.dmp'), 'r')
-		openedFileList = [citationsFile, divisionFile, gencodeFile, namesFile, delnodesFile, mergedFile, nodesFile]
+		openedFileList = [citationsFile, divisionFile, gencodeFile, namesFile,
+			delnodesFile, mergedFile, nodesFile]
 		
 		gencodeID2gencode = self.importGeneticCode(gencodeFile)
 		divisionID2division = self.importDivision(divisionFile)
-		self.importTaxNodes(nodesFile, gencodeID2gencode=gencodeID2gencode, divisionID2division=divisionID2division)
+		self.importTaxNodes(nodesFile, gencodeID2gencode=gencodeID2gencode,
+			divisionID2division=divisionID2division)
 		
 		self.importTaxNames(namesFile)
 		self.importMergedTaxNodes(mergedFile)
@@ -497,8 +518,8 @@ class TaxonomyDB(Database):
 		self._tax_id2scientific_name = {}
 		curs = self.metadata.bind
 		rows = curs.execute("SELECT n.name_txt, n.tax_id FROM %s.%s n, %s.%s o where n.name_class='scientific name' \
-				and n.tax_id=o.tax_id"%(self.schema, Name.table.name, \
-															self.schema, Node.table.name))
+			and n.tax_id=o.tax_id"%(self.schema, Name.table.name, \
+			self.schema, Node.table.name))
 		#rows = curs.fetchall()
 		for row in rows:
 			scientific_name = row.name_txt
@@ -506,7 +527,7 @@ class TaxonomyDB(Database):
 			self._tax_id2scientific_name[tax_id] = scientific_name
 			self._scientific_name2tax_id[scientific_name] = tax_id
 		sys.stderr.write("%s entries in _tax_id2scientific_name. %s entries in _scientific_name2tax_id.\n"%\
-						(len(self._tax_id2scientific_name), len(self._scientific_name2tax_id)))
+			(len(self._tax_id2scientific_name), len(self._scientific_name2tax_id)))
 
 	@property
 	def tax_id2scientific_name(self):
@@ -533,7 +554,7 @@ class TaxonomyDB(Database):
 		curs = self.metadata.bind
 		rows = curs.execute("SELECT n.name_txt, n.tax_id FROM %s.%s n, %s.%s o where n.name_class='scientific name' \
 				and n.tax_id=o.tax_id and n.tax_id=%s"%(self.schema, Name.table.name, \
-																	self.schema, Node.table.name, tax_id))
+				self.schema, Node.table.name, tax_id))
 		row = rows.fetchone()
 		if row:
 			scientific_name = row.name_txt
@@ -549,7 +570,7 @@ class TaxonomyDB(Database):
 		curs = self.metadata.bind
 		rows = curs.execute("SELECT n.name_txt, n.tax_id FROM %s.%s n, %s.%s o where n.name_class='scientific name' \
 				and n.tax_id=o.tax_id and n.name_txt='%s'"%(self.schema, Name.table.name,\
-																		self.schema, Node.table.name, scientific_name))
+				self.schema, Node.table.name, scientific_name))
 		row = rows.fetchone()
 		if row:
 			return row.tax_id
