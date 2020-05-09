@@ -318,8 +318,7 @@ class AbstractNGSWorkflow(ParentClass):
             needSSHDBTunnel=needSSHDBTunnel, commit=commit,
             debug=debug, report=report)
 
-        if hasattr(self, 'contigMaxRankBySize') and \
-            hasattr(self, 'contigMinRankBySize'):
+        if self.contigMaxRankBySize and self.contigMinRankBySize:
             #2013.2.6 non-public schema DBs should be connected
             #  before the main public schema is connected.
             self.chr2size = self.connectGenomeDBToGetTopChrs(
