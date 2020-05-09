@@ -1354,13 +1354,12 @@ class SeqCenter(Base):
     short_name = Column(String(256), unique=True)
     description = Column(String(8000))
     center_short_name = Column(String(200))
-    #sequencer_ls = OneToMany("%s.Sequencer"%(__name__))
     created_by = Column(String(200))
     updated_by = Column(String(200))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
     
-    sequencer_ls = relationship('Sequencer', back_populates='seq_center',\
+    sequencer_ls = relationship('Sequencer', back_populates='seq_center',
         cascade='all,delete')
 
 class SequenceType(Base):
@@ -1805,7 +1804,6 @@ class BiologyCategory(Base):
     id = Column(Integer, primary_key=True)
     short_name = Column(String(256), unique=True)
     description = Column(Text)
-    #phenotype_method_ls = OneToMany("%s.PhenotypeMethod"%(__name__))
     created_by = Column(String(128))
     updated_by = Column(String(128))
     date_created = Column(DateTime, default=datetime.now())
@@ -1833,10 +1831,12 @@ class PhenotypeMethod(Base, TableClass):
     collector_id = Column(Integer, ForeignKey(_schemaname_ + '.acl_user.id'))
     access = Column(Enum("public", "restricted", name="access_enum_type"), \
         default='restricted')
-    #group_ls = ManyToMany('%s.Group'%(__name__),tablename='group2phenotype_method',
-    # 	local_colname='phenotype_method_id', remote_colname='group_id')
-    #user_ls = ManyToMany('%s.User'%(__name__),tablename='user2phenotype_method',
-    # 	local_colname='phenotype_method_id', remote_colname='user_id')
+    #group_ls = ManyToMany('%s.Group'%(__name__),
+    #   tablename='group2phenotype_method',
+    #   local_colname='phenotype_method_id', remote_colname='group_id')
+    #user_ls = ManyToMany('%s.User'%(__name__),
+    #   tablename='user2phenotype_method',
+    #   local_colname='phenotype_method_id', remote_colname='user_id')
     created_by = Column(String(128))
     updated_by = Column(String(128))
     date_created = Column(DateTime, default=datetime.now())
