@@ -341,7 +341,7 @@ class CountReadsWorkflow(ParentClass):
 if __name__ == '__main__':
     from argparse import ArgumentParser
     ap = ArgumentParser()
-    ap.add_argument("--ind_seq_id_ls", required=True,
+    ap.add_argument('-i', "--ind_seq_id_ls", required=True,
         help='a comma/dash-separated list of IndividualSequence.id.'
             'non-fastq entries will be discarded.')
     ap.add_argument("--drivername", default="postgresql",
