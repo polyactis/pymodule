@@ -404,29 +404,31 @@ class FigureOutTaxID(object):
         ('db_user', 0, ): [None, 'u', 1, 'database username', ],\
         ('db_passwd', 0, ): [None, 'p', 1, 'database password', ],\
     }
-    def __init__(self,  **keywords):
+    def __init__(self, hostname='localhost', dbname='graphdb',
+        schema='taxonomy', db_user=None, db_passwd=None):
         """
         2008-07-29
         """
-        from . ProcessOptions import ProcessOptions
-        self.ad = ProcessOptions.process_function_arguments(keywords, 
-            self.option_default_dict, error_doc=self.__doc__, \
-            class_to_have_attr=self)		
+        self.hostname = hostname
+        self.dbname = dbname
+        self.schema = schema
+        self.db_user = db_user
+        self.db_passwd = db_passwd
     
+    @property
     def curs(self):
         from db import db_connect
         conn, curs =  db_connect(self.hostname, self.dbname, self.schema,
             user=self.db_user, password=self.db_passwd)
         return curs
     
-    curs = property(curs)
-    
+    @property
     def scientific_name2tax_id(self):
         """
         2012.6.6
             update it to get table names from TaxonomyDB
         """
-        from db import TaxonomyDB
+        from palos.db import TaxonomyDB
         scientific_name2tax_id = {}
         curs = self.curs
         curs.execute(f"SELECT n.name_txt, n.tax_id FROM "
@@ -439,8 +441,6 @@ class FigureOutTaxID(object):
             scientific_name, tax_id = row
             scientific_name2tax_id[scientific_name] = tax_id
         return scientific_name2tax_id
-    
-    scientific_name2tax_id = property(scientific_name2tax_id)
     
     def returnTaXIDGivenScientificName(self, scientific_name):
         return self.scientific_name2tax_id.get(scientific_name)
@@ -468,7 +468,8 @@ def getColName2IndexFromHeader(header, skipEmptyColumn=False):
     col_name2index = {}
     for i in range(len(header)):
         column_name = header[i]
-        if skipEmptyColumn and not column_name:	#skips empty column
+        if skipEmptyColumn and not column_name:
+            #skips empty column
             continue
         col_name2index[column_name] = i
     return col_name2index
@@ -508,9 +509,9 @@ def getListOutOfStr(list_in_str=None, data_type=int, separator1=',',
         if len(start_stop_tup)==1:
             list_to_return.append(data_type(start_stop_tup[0]))
         elif len(start_stop_tup)>1:
-            start_stop_tup = map(int, start_stop_tup)
-            list_to_return += range(start_stop_tup[0], start_stop_tup[1]+1)
-    list_to_return = map(data_type, list_to_return)
+            start_stop_tup = list(map(int, start_stop_tup))
+            list_to_return += list(range(start_stop_tup[0], start_stop_tup[1]+1))
+    list_to_return = list(map(data_type, list_to_return))
     return list_to_return
 
 def getStrOutOfList(ls, separator=','):
@@ -523,7 +524,7 @@ def getStrOutOfList(ls, separator=','):
         return ''
     firstElement = ls[0]
     if type(firstElement)!=str:
-        ls_str = map(str, ls)
+        ls_str = list(map(str, ls))
     else:
         ls_str = ls
     return separator.join(ls_str)
@@ -605,10 +606,8 @@ def runLocalCommand(commandline, report_stderr=True, report_stdout=False):
     
     stderr_content = None
     stdout_content = None
-    
     stdout_content, stderr_content = command_handler.communicate()
     #to circumvent deadlock caused by command_handler.stderr.read()
-    
     output_stdout = None
     output_stderr = None
     if not report_stdout:
@@ -773,7 +772,8 @@ def processRegexpString(p_str):
     p_str = p_str.replace('(', '\(')
     #python re module only needs one '\'
     p_str = p_str.replace(')', '\)')
-    p_str_sql = p_str.replace('(', '\\\(')	#mysql needs more
+    p_str_sql = p_str.replace('(', '\\\(')
+    #mysql needs more
     p_str_sql = p_str_sql.replace(')', '\\\)')
     return PassingData(p_str=p_str, p_str_sql=p_str_sql)
 
@@ -999,7 +999,7 @@ def getFileOrFolderSize(path='.'):
     """
     file_size = None
     if path:
-        if os.path.isfile(path):	#2012.7.12
+        if os.path.isfile(path):
             statinfo = os.stat(path)
             file_size = statinfo.st_size
         elif os.path.isdir(path):
@@ -1010,21 +1010,17 @@ def getNoOfLinesInOneFileByWC(inputFname=None):
     """
     2012.7.30
     call wc to finish the task
-    
     "wc -l"'s output looks like this:
     
     crocea@crocea:~$ wc -l shell/countNoOfVariantsInOneVCFFolder.sh
     16 shell/countNoOfVariantsInOneVCFFolder.sh
-
     """
-    counter = 0
     #commandline = "wc -l %s|awk -F ' ' '{print $1}'"%inputFname
     commandline = "wc -l %s"%inputFname	#just wc
     return_data = runLocalCommand(commandline, report_stderr=False, 
         report_stdout=False)
     stdout_content = return_data.stdout_content
     noOfLines = int(stdout_content.split()[0].strip())
-    
     return noOfLines
 
 
@@ -1127,7 +1123,6 @@ def addObjectListAttributeToSet(objectVariable=None, attributeName=None,
         else:
             attributeValueList = getListOutOfStr(attributeValue, \
                 data_type=data_type, separator1=',', separator2='-')
-            #attributeValueList = attributeValue
         setVariable |= set(list(attributeValueList))
     return setVariable
 
@@ -1159,8 +1154,8 @@ def pauseForUserInput(message="",
     if continueAnswerSet is not None and userAnswer in continueAnswerSet:
         pass
     elif continueAnswerSet is None:
-        logging.error(f"continueAnswerSet is None. "
-            f"Exit regardless of user input ({userAnswer}).")
+        logging.error(f"pauseForUserInput(): continueAnswerSet is None. "
+            f"Exit regardless of user answer ({userAnswer}).")
         if exitType==2:
             raise
         elif exitType==1:
@@ -1168,7 +1163,8 @@ def pauseForUserInput(message="",
         else:
             pass
     else:
-        logging.error(f"user answered {userAnswer}, interpreted as no.")
+        logging.error(f"pauseForUserInput(): user answered {userAnswer}, "
+            f"interpreted as no.")
         if exitType==2:
             raise
         elif exitType==1:
