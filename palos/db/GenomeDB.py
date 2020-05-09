@@ -41,7 +41,7 @@ Base = declarative_base()
 # and it has to be defined after this.
 # 20200424 now that schema is set at the engine level.
 #  Try not to use _schemaname_.
-#_schemaname_ = "genome"
+_schemaname_ = "genome_hg37"
 
 class SequenceType(Base, TableClass):
     """
@@ -50,6 +50,7 @@ class SequenceType(Base, TableClass):
         a table storing meta information to be referenced by other tables
     """
     __tablename__ = 'sequence_type'
+    __table_args__ = {'schema':_schemaname_}
     id = Column(Integer, primary_key=True)
     short_name = Column(String(223), unique=True)
     description = Column(Text)
@@ -67,8 +68,10 @@ class RawSequence(Base, TableClass):
         all raw sequences will be deleted as well.
     """
     __tablename__ = 'raw_sequence'
+    __table_args__ = {'schema':_schemaname_}
     id = Column(Integer, primary_key=True)
-    annot_assembly_id = Column(Integer, ForeignKey("annot_assembly.id"))
+    annot_assembly_id = Column(Integer,
+        ForeignKey(f"{_schemaname_}.annot_assembly.id"))
     annot_assembly = relationship('AnnotAssembly')
     annot_assembly_gi = Column(Integer)
     start = Column(Integer)
@@ -89,6 +92,7 @@ class AnnotAssembly(Base, TableClass):
         table to store meta info of chromosome sequences
     """
     __tablename__ = 'annot_assembly'
+    __table_args__ = {'schema':_schemaname_}
     id = Column(Integer, primary_key=True)
     gi = Column(Integer)
     acc_ver = Column(String(32))
@@ -103,9 +107,11 @@ class AnnotAssembly(Base, TableClass):
     sequence = Column(String(10000))
     raw_sequence_start_id = Column(Integer)
     original_path = Column(Text)
-    sequence_type_id = Column(Integer, ForeignKey("sequence_type.id"))
+    sequence_type_id = Column(Integer,
+        ForeignKey(f"{_schemaname_}.sequence_type.id"))
     sequence_type = relationship('SequenceType')
-    chromosome_type_id = Column(Integer, ForeignKey("chromosome_type.id"))
+    chromosome_type_id = Column(Integer, 
+        ForeignKey(f"{_schemaname_}.chromosome_type.id"))
     chromosome_type = relationship('ChromosomeType')
     genome_annotation_list = relationship('GenomeAnnotation',
         back_populates='annot_assembly',cascade='all,delete')
@@ -117,8 +123,8 @@ class AnnotAssembly(Base, TableClass):
     date_created = Column(DateTime, default=datetime.now)
     date_updated = Column(DateTime)
     UniqueConstraint(
-        'accession', 'version','tax_id','chromosome', 'start', 'stop', \
-        'orientation', 'sequence_type_id', 'chromosome_type_id',\
+        'accession', 'version','tax_id','chromosome', 'start', 'stop',
+        'orientation', 'sequence_type_id', 'chromosome_type_id',
         'outdated_index')
 
 
@@ -127,6 +133,7 @@ class ChromosomeType(Base, TableClass):
     store autosome, X, Y, mitochondrial
     """
     __tablename__ = 'chromosome_type'
+    __table_args__ = {'schema':_schemaname_}
     id = Column(Integer, primary_key=True)    
     short_name = Column(String(223), unique=True)
     comment = Column(Text)
@@ -140,16 +147,18 @@ class GenomeAnnotation(Base, TableClass):
     2013.2.17
     """
     __tablename__ = 'genome_annotation'
+    __table_args__ = {'schema':_schemaname_}
     id = Column(Integer, primary_key=True)
     strand = Column(String(4))
     start = Column(Integer)
     stop = Column(Integer)
     description = Column(Text)
     comment = Column(Text)
-    annot_assembly_id = Column(Integer, ForeignKey("annot_assembly.id"))
+    annot_assembly_id = Column(Integer,
+        ForeignKey(f"{_schemaname_}.annot_assembly.id"))
     annot_assembly = relationship('AnnotAssembly')
     genome_annotation_type_id = Column(Integer, \
-        ForeignKey("genome_annotation_type.id"))
+        ForeignKey(f"{_schemaname_}.genome_annotation_type.id"))
     genome_annotation_type = relationship('GenomeAnnotationType')
     created_by = Column(String(256))
     updated_by = Column(String(256))
@@ -165,6 +174,7 @@ class GenomeAnnotationType(Base, TableClass):
     table to store centromere, telemere, euchromatin, heterochromatin
     """
     __tablename__ = 'genome_annotation_type'
+    __table_args__ = {'schema':_schemaname_}
     id = Column(Integer, primary_key=True)
     short_name = Column(String(223), unique=True)
     description = Column(Text)
@@ -180,6 +190,7 @@ class EntrezgeneType(Base, TableClass):
         store the entrez gene types
     """
     __tablename__ = 'entrezgene_type'
+    __table_args__ = {'schema':_schemaname_}
     id = Column(Integer, primary_key=True)
     type = Column(String(223), unique=True)
     created_by = Column(String(256))
@@ -192,6 +203,7 @@ class GeneCommentaryType(Base, TableClass):
     2008-07-28
     """
     __tablename__ = 'gene_commentary_type'
+    __table_args__ = {'schema':_schemaname_}
     id = Column(Integer, primary_key=True)
     type = Column(String(223), unique=True)
     created_by = Column(String(256))
@@ -207,20 +219,22 @@ class GeneCommentary(Base, TableClass):
         store different mRNAs/Peptides from the same gene or mRNA
     """
     __tablename__ = 'gene_commentary'
+    __table_args__ = {'schema':_schemaname_}
     id = Column(Integer, primary_key=True)
     accession = Column(String(32))
     version = Column(Integer)
     gi = Column(Integer)
     gene_id = Column(Integer, ForeignKey("gene.id"))
     gene = relationship('Gene')
-    gene_commentary_id = Column(Integer, ForeignKey("gene_commentary.id"))
+    gene_commentary_id = Column(Integer,
+        ForeignKey(f"{_schemaname_}.gene_commentary.id"))
     gene_commentary = relationship('GeneCommentary')
     #gene_commentary_ls = relationship('GeneCommentary',
     #   back_populates='gene_commentary', cascade='all,delete')
     start = Column(Integer)
     stop = Column(Integer)
     gene_commentary_type_id = Column(Integer, 
-        ForeignKey("gene_commentary_type.id"))
+        ForeignKey(f"{_schemaname_}.gene_commentary_type.id"))
     gene_commentary_type = relationship('GeneCommentaryType')
     label = Column(Text)
     text = Column(Text)
@@ -605,19 +619,23 @@ class GeneSegment(Base, TableClass):
          of gene-products (mRNA, peptide) in table GeneProduct
     """
     __tablename__ = 'gene_segment'
+    __table_args__ = {'schema':_schemaname_}
     id = Column(Integer, primary_key=True)
-    gene_commentary_id = Column(Integer, ForeignKey("gene_commentary.id"))
+    gene_commentary_id = Column(Integer,
+        ForeignKey(f"{_schemaname_}.gene_commentary.id"))
     gene_commentary = relationship('GeneCommentary')
     gi = Column(Integer)
     start = Column(Integer)
     stop = Column(Integer)
-    gene_commentary_type_id = Column(Integer, ForeignKey("gene_commentary_type.id"))
+    gene_commentary_type_id = Column(Integer,
+        ForeignKey(f"{_schemaname_}.gene_commentary_type.id"))
     gene_commentary_type = relationship('GeneCommentaryType')
     created_by = Column(String(256))
     updated_by = Column(String(256))
     date_created = Column(DateTime, default=datetime.now)
     date_updated = Column(DateTime)
-    UniqueConstraint('gene_commentary_id', 'start', 'stop', 'gene_commentary_type_id')
+    UniqueConstraint('gene_commentary_id', 'start', 'stop',
+        'gene_commentary_type_id')
 
 class Gene(Base, TableClass):
     """
@@ -631,6 +649,7 @@ class Gene(Base, TableClass):
         table to store meta info of genes
     """
     __tablename__ = 'gene'
+    __table_args__ = {'schema':_schemaname_}
     id = Column(Integer, primary_key=True)
     tax_id = Column(Integer)
     ncbi_gene_id = Column(Integer, unique=True)
@@ -653,9 +672,11 @@ class Gene(Base, TableClass):
     genomic_accession = Column(String(32))
     genomic_version = Column(Integer)
     genomic_gi = Column(Integer)
-    annot_assembly_id = Column(Integer, ForeignKey("annot_assembly.id"))
+    annot_assembly_id = Column(Integer,
+        ForeignKey(f"{_schemaname_}.annot_assembly.id"))
     annot_assembly = relationship('AnnotAssembly')
-    entrezgene_type_id = Column(Integer, ForeignKey("entrezgene_type.id"))
+    entrezgene_type_id = Column(Integer,
+        ForeignKey(f"{_schemaname_}.entrezgene_type.id"))
     entrezgene_type = relationship('EntrezgeneType')
     comment = Column(Text)
     gene_commentary_ls = relationship('GeneCommentary',
@@ -676,9 +697,11 @@ class Gene2go(Base, TableClass):
         table to store mapping between gene and GO
     """
     __tablename__ = 'gene2go'
+    __table_args__ = {'schema':_schemaname_}
     id = Column(Integer, primary_key=True)
     tax_id = Column(Integer)
-    gene_id = Column(Integer, ForeignKey("gene.id"))
+    gene_id = Column(Integer,
+        ForeignKey(f"{_schemaname_}.gene.id"))
     gene = relationship('Gene')
     go_id = Column(String(32))
     evidence = Column(String(3))
@@ -690,17 +713,21 @@ class Gene2go(Base, TableClass):
     updated_by = Column(String(256))
     date_created = Column(DateTime, default=datetime.now)
     date_updated = Column(DateTime)
-    UniqueConstraint('tax_id', 'gene_id', 'go_id', 'evidence', 'category', 'go_qualifier')
+    UniqueConstraint('tax_id', 'gene_id', 'go_id', 'evidence', 'category',
+        'go_qualifier')
 
 class Gene2Family(Base, TableClass):
     """
     2010-8-19 a table recording which family TE belongs to
     """
     __tablename__ = 'gene2family'
+    __table_args__ = {'schema':_schemaname_}
     id = Column(Integer, primary_key=True)
-    gene_id = Column(Integer, ForeignKey("gene.id"))
+    gene_id = Column(Integer,
+        ForeignKey(f"{_schemaname_}.gene.id"))
     gene = relationship('Gene')
-    family_id = Column(Integer, ForeignKey("gene_family.id"))
+    family_id = Column(Integer,
+        ForeignKey(f"{_schemaname_}.gene_family.id"))
     family = relationship('GeneFamily')
     created_by = Column(String(256))
     updated_by = Column(String(256))
@@ -715,9 +742,11 @@ class GeneFamily(Base, TableClass):
         family names and etc.
     """
     __tablename__ = 'gene_family'
+    __table_args__ = {'schema':_schemaname_}
     id = Column(Integer, primary_key=True)
     short_name = Column(String(212), unique=True)
-    parent_family_id = Column(Integer, ForeignKey("gene_family.id"))
+    parent_family_id = Column(Integer,
+        ForeignKey(f"{_schemaname_}.gene_family.id"))
     parent_family = relationship('GeneFamily')
     family_type = Column(String(256))
     description = Column(Text)
@@ -728,6 +757,7 @@ class GeneFamily(Base, TableClass):
 
 class README(Base, TableClass):
     __tablename__ = 'readme'
+    __table_args__ = {'schema':_schemaname_}
     id = Column(Integer, primary_key=True)
     title = Column(Text)
     description = Column(Text)
@@ -741,13 +771,16 @@ class Gene_symbol2id(Base, TableClass):
     2010-6-21
         add created_by, updated_by, date_created, date_updated
     2008-07-27
-        a derived table from Gene in order to map all available gene names (symbol, locustag, synonym) to gene-id
+        a derived table from Gene in order to map all available
+         gene names (symbol, locustag, synonym) to gene-id
     """
     __tablename__ = 'gene_symbol2id'
+    __table_args__ = {'schema':_schemaname_}
     id = Column(Integer, primary_key=True)
     tax_id = Column(Integer)
     gene_symbol = Column(String(256))
-    gene_id = Column(Integer, ForeignKey("gene.id"))
+    gene_id = Column(Integer,
+        ForeignKey(f"{_schemaname_}.gene.id"))
     gene = relationship('Gene')
     symbol_type = Column(String(64))
     created_by = Column(String(256))
@@ -1217,7 +1250,6 @@ class GenomeDatabase(Database):
     __doc__ = __doc__
     option_default_dict = Database.option_default_dict.copy()
     option_default_dict[('drivername', 1,)][0] = 'postgresql'
-    option_default_dict[('dbname', 1,)][0] = 'genome'
     option_default_dict.update({
         ('geneAnnotationPickleFname', 0, ): ['', 'o', 1, 
             'The optional output file to contain a pickled object with three attributes: \n'
