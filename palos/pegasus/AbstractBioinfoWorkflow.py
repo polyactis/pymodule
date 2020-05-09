@@ -54,9 +54,6 @@ class AbstractBioinfoWorkflow(ParentClass):
                 name='plink', clusterSizeMultiplier=1)
             self.registerOneExecutable(path=self.plinkPath, \
                 name='plinkNoClustering', clusterSizeMultiplier=0)
-
-            #2012.8.10 different plinks so that you 
-            # can differentiate between different types of plink jobs
             self.registerOneExecutable(path=self.plinkPath, \
                 name='plinkMerge', clusterSizeMultiplier=0)
             self.registerOneExecutable(path=self.plinkPath, \
@@ -67,12 +64,9 @@ class AbstractBioinfoWorkflow(ParentClass):
                 name='plinkLDPrune', clusterSizeMultiplier=1)
             self.registerOneExecutable(path=self.plinkPath, \
                 name='plinkExtract', clusterSizeMultiplier=1)
-        #2013.07.24
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
             'mapper/modifier/SplitPlinkLMendelFileSNPIDIntoChrPosition.py'), \
             name='SplitPlinkLMendelFileSNPIDIntoChrPosition', clusterSizeMultiplier=1)
-        
-        #2013.07.19
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
             'pedigree/CalculateMendelErrorRateGivenPlinkOutput.py'), \
             name='CalculateMendelErrorRateGivenPlinkOutput', clusterSizeMultiplier=1)
@@ -139,7 +133,8 @@ class AbstractBioinfoWorkflow(ParentClass):
             suffix2PathToFileLs = {}
             if addPicardDictFile:
                 picardDictSuffix = 'dict'
-                pathToFile = '%s.%s'%(os.path.splitext(refFastaFname)[0], picardDictSuffix)
+                pathToFile = '%s.%s'%(os.path.splitext(refFastaFname)[0], \
+                    picardDictSuffix)
                 #remove ".fasta" from refFastaFname
                 if checkAffiliateFileExistence and not os.path.isfile(pathToFile):
                     logging.warn(f"{pathToFile} don't exist or not a file. "
@@ -406,20 +401,22 @@ class AbstractBioinfoWorkflow(ParentClass):
         """
         """
         ParentClass.registerExecutables(self)
-        self.registerOneExecutable(
-            path=self.tabixPath, name='tabix', clusterSizeMultiplier=5)
-        #2013.11.22 2011.12.21	for OutputVCFSiteStat.py
+        if self.tabixPath:
+            self.registerOneExecutable(
+                path=self.tabixPath, name='tabix', clusterSizeMultiplier=5)
+        #for OutputVCFSiteStat.py
         self.registerOneExecutable(
             path=os.path.join(self.pymodulePath, "mapper/extractor/tabixRetrieve.sh"),
             name='tabixRetrieve', clusterSizeMultiplier=1)
 
-        #2013.11.22 moved from palos/polymorphism/FindNewRefCoordinatesGivenVCFFolderWorkflow.py
+        # from palos/polymorphism/FindNewRefCoordinatesGivenVCFFolderWorkflow.py
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
             "polymorphism/mapper/LiftOverVCFBasedOnCoordinateMap.py"), \
             name='LiftOverVCFBasedOnCoordinateMap', clusterSizeMultiplier=1)
 
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
-            "polymorphism/qc/CalculateLociAndGenomeCoveredAtEachSwitchFrequencyThreshold.py"), \
+            "polymorphism/qc/"+\
+            "CalculateLociAndGenomeCoveredAtEachSwitchFrequencyThreshold.py"),
             name='CalculateLociAndGenomeCoveredAtEachSwitchFrequencyThreshold',
             clusterSizeMultiplier=0.01)
 
@@ -429,11 +426,13 @@ class AbstractBioinfoWorkflow(ParentClass):
 
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
             "polymorphism/mapper/FindSNPPositionOnNewRefFromFlankingBlastOutput.py"), \
-            name='FindSNPPositionOnNewRefFromFlankingBlastOutput', clusterSizeMultiplier=2)
+            name='FindSNPPositionOnNewRefFromFlankingBlastOutput',
+            clusterSizeMultiplier=2)
 
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
             "polymorphism/mapper/FindSNPPositionOnNewRefFromFlankingBWAOutput.py"), \
-            name='FindSNPPositionOnNewRefFromFlankingBWAOutput', clusterSizeMultiplier=1)
+            name='FindSNPPositionOnNewRefFromFlankingBWAOutput',
+            clusterSizeMultiplier=1)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
             'Genome/OutputGenomeAnnotation.py'), \
             name='OutputGenomeAnnotation', clusterSizeMultiplier=0.01)
@@ -468,40 +467,36 @@ class AbstractBioinfoWorkflow(ParentClass):
             'mapper/converter/ConvertYuSNPFormat2TPED_TFAM.py'), \
             name='ConvertYuSNPFormat2TPED_TFAM', clusterSizeMultiplier=1)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, 
-            'mapper/CalculatePairwiseDistanceOutOfSNPXStrainMatrix.py'), \
-            name='CalculatePairwiseDistanceOutOfSNPXStrainMatrix', clusterSizeMultiplier=0.5)
+            'mapper/CalculatePairwiseDistanceOutOfSNPXStrainMatrix.py'),
+            name='CalculatePairwiseDistanceOutOfSNPXStrainMatrix',
+            clusterSizeMultiplier=0.5)
         #2013.2.3 use samtools to extract consensus from bam files
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, 
-            'mapper/alignment/ExtractConsensusSequenceFromAlignment.py'), \
-            name='ExtractConsensusSequenceFromAlignment', clusterSizeMultiplier=0.5)
-
-        #2013.2.4, wrapper around psmc's splitfa, a program that splits fasta files
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
+            'mapper/alignment/ExtractConsensusSequenceFromAlignment.py'),
+            name='ExtractConsensusSequenceFromAlignment',
+            clusterSizeMultiplier=0.5)
+        #2013.2.4, wrapper around psmc's splitfa,
+        #  a program that splits fasta files
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath,
                 "mapper/splitter/splitfa.sh"), \
             name='splitfa', clusterSizeMultiplier=1)
-
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath,
                 "plot/PlotVCFtoolsStat.py"), \
             name='PlotVCFtoolsStat', clusterSizeMultiplier=0)
-        
-        #2013.07.19
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
-                'mapper/modifier/AppendExtraPedigreeIndividualsToTPED.py'), \
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath,
+                'mapper/modifier/AppendExtraPedigreeIndividualsToTPED.py'),
             name='AppendExtraPedigreeIndividualsToTPED', clusterSizeMultiplier=1)
-
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
-                'mapper/converter/ConvertMSOutput2FASTQ.py'), \
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath,
+                'mapper/converter/ConvertMSOutput2FASTQ.py'),
             name='ConvertMSOutput2FASTQ', clusterSizeMultiplier=1)
-
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
-                'mapper/extractor/SelectChromosomeSequences.py'), \
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath,
+                'mapper/extractor/SelectChromosomeSequences.py'),
             name='SelectChromosomeSequences', clusterSizeMultiplier=0.5)
-
         #2013.2.11 moved from vervet/src/reduce to pymodule/reducer
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
-                'reducer/MergeGenotypeMatrix.py'), \
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath,
+                'reducer/MergeGenotypeMatrix.py'),
             name='MergeGenotypeMatrix', clusterSizeMultiplier=0.2)
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath,
                 'plot/PlotGenomeWideData.py'),
             name='PlotGenomeWideData', clusterSizeMultiplier=1)
 
