@@ -505,33 +505,33 @@ class IndividualAlignment(Base, AbstractTableWithFilename):
     alignment_method_id = Column(Integer,
         ForeignKey(_schemaname_+'.alignment_method.id'))
     path = Column(Text)
-    path_to_depth_file = Column(Text)	#2013.08.08
-    depth_file_size = Column(BigInteger)	#2013.08.08
+    path_to_depth_file = Column(Text)
+    depth_file_size = Column(BigInteger)
     format = Column(String(512))
-    median_depth = Column(Float)	#2011-8-2
-    mode_depth = Column(Float)	#2011-8-2
-    mean_depth = Column(Float)	#2011-9-12
-    #2011-11-28	QC = (base quality>=20, read mapping quality >=30). 
+    median_depth = Column(Float)
+    mode_depth = Column(Float)
+    mean_depth = Column(Float)
+    #2011-11-28	QC = (base quality>=20, read mapping quality >=30).
     pass_qc_read_base_count = Column(BigInteger)
     # 2011-9-15 0=No, 1=Yes
     read_group_added = Column(Integer, default=0)
-    perc_reads_mapped = Column(Float)	#2012.4.2
-    perc_secondary = Column(Float)	#20170603
-    perc_supplementary = Column(Float)	#20170603
-    perc_duplicates = Column(Float)	#2012.4.2
-    perc_paired = Column(Float)	#2012.4.2
-    perc_properly_paired = Column(Float)	#2012.4.2
-    perc_both_mates_mapped = Column(Float)	#2012.4.2
-    perc_singletons = Column(Float)	#2012.4.2
-    perc_mapped_to_diff_chrs = Column(Float)	#2012.4.2
-    perc_mapq5_mapped_to_diff_chrs = Column(Float)	#2012.4.2
+    perc_reads_mapped = Column(Float)
+    perc_secondary = Column(Float)
+    perc_supplementary = Column(Float)
+    perc_duplicates = Column(Float)
+    perc_paired = Column(Float)
+    perc_properly_paired = Column(Float)
+    perc_both_mates_mapped = Column(Float)
+    perc_singletons = Column(Float)
+    perc_mapped_to_diff_chrs = Column(Float)
+    perc_mapq5_mapped_to_diff_chrs = Column(Float)
     total_no_of_reads = Column(BigInteger)
     local_realigned = Column(Integer, default=0)
     reduce_reads = Column(Integer, default=0)
     #any non-zero means outdated. to allow multiple outdated alignments
     outdated_index = Column(Integer, default=0)
     md5sum = Column(Text, unique=True)
-    file_size = Column(BigInteger)	#2012.9.21
+    file_size = Column(BigInteger)
     #record read_group here so that if getReadGroup() changes. it'll be fine.
     read_group = Column(Text)
     #2012.7.26 the parent individual_alignment
@@ -919,8 +919,8 @@ class IndividualSequenceFile(Base, AbstractTableWithFilename):
     split_order = Column(Integer)
     # id of the mate pair. 1 = 1st end. 2 = 2nd end. null = single-end.
     mate_id = Column(Integer)
-    read_count = Column(BigInteger)	#2012.2.27
-    base_count = Column(BigInteger)	#2011-8-2
+    read_count = Column(BigInteger)
+    base_count = Column(BigInteger)
     path = Column(Text, unique=True)	#path to the actual file
     format = Column(String(512))	#fasta, fastq
     quality_score_format = Column(String(512), default='Standard')
@@ -932,7 +932,7 @@ class IndividualSequenceFile(Base, AbstractTableWithFilename):
     parent_individual_sequence_file_id = Column(Integer, 
         ForeignKey(_schemaname_ + '.individual_sequence_file.id', \
         ondelete='cascade', onupdate='cascade'))
-    file_size = Column(BigInteger)	#2013.04.30
+    file_size = Column(BigInteger)
     created_by = Column(String(128))
     updated_by = Column(String(128))
     date_created = Column(DateTime, default=datetime.now())
@@ -1711,7 +1711,7 @@ class AlignmentDepthIntervalFile(Base, AbstractTableWithFilename):
     path = Column(Text, unique=True)
     original_path = Column(Text)
     md5sum = Column(Text)	# unique=True
-    file_size = Column(BigInteger)	#2012.7.12
+    file_size = Column(BigInteger)
     chromosome = Column(Text)
     chromosome_size = Column(BigInteger)
     #2012.8.30 BigInteger in case some huge number of contigs
@@ -1828,12 +1828,8 @@ class PhenotypeMethod(Base, TableClass):
     short_name = Column(String(256), unique=True)
     description = Column(Text)
     phenotype_scoring = Column(Text)
-    #biology_category = ManyToOne("%s.BiologyCategory"%(__name__), \
-    # 	colname='biology_category_id', \
-    #	ondelete='CASCADE', onupdate='CASCADE')
     biology_category_id = Column(Integer, 
         ForeignKey(_schemaname_ + '.biology_category.id'))
-    #collector = ManyToOne("%s.User"%(__name__),colname='collector_id')
     collector_id = Column(Integer, ForeignKey(_schemaname_ + '.acl_user.id'))
     access = Column(Enum("public", "restricted", name="access_enum_type"), \
         default='restricted')
@@ -1845,10 +1841,6 @@ class PhenotypeMethod(Base, TableClass):
     updated_by = Column(String(128))
     date_created = Column(DateTime, default=datetime.now())
     date_updated = Column(DateTime)
-    #using_options(tablename='phenotype_method', \
-    # metadata=__metadata__, session=__session__)
-    #using_table_options(mysql_engine='InnoDB')
-    
     score_method_list_in_phenotype_method = relationship('ScoreMethod', \
         back_populates='phenotype_method', cascade='all,delete')
     phenotype_list_in_phenotype_method = relationship('Phenotype', \
@@ -1935,7 +1927,7 @@ class SunsetDB(Database):
         if individual_alignment.file_size is not None and \
                 individual_alignment.file_size>0:
             if not os.path.isfile(alignmentAbsPath):
-                if returnFalseIfInexitentFile:	#2013.05.04
+                if returnFalseIfInexitentFile:
                     sys.stderr.write("Warning: Skip alignment file for id=%s, %s "
                         "does not exist but file_size is recorded in DB.\n"%(
                             individual_alignment.id, alignmentAbsPath))
