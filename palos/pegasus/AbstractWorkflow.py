@@ -139,9 +139,10 @@ class AbstractWorkflow(Workflow):
         """
         Workflow.registerExecutables(self)
         
-        #2013.2.7 convert, an image swissknife program, part of imagemagick
-        self.registerOneExecutable(path="/usr/bin/convert",
-            name='convertImage', clusterSizeMultiplier=1)
+        if os.path.isfile("/usr/bin/convert"):
+            #convert, an image swissknife program, part of imagemagick
+            self.registerOneExecutable(path="/usr/bin/convert",
+                name='convertImage', clusterSizeMultiplier=1)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, 
             "mapper/extractor/SelectLineBlockFromFile.py"), 
             name='SelectLineBlockFromFile', clusterSizeMultiplier=1)
