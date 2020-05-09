@@ -89,7 +89,7 @@ class AbstractWorkflow(Workflow):
 
     pathToInsertHomePathList = ['javaPath', 'pymodulePath', 'plinkPath', "thisModulePath"]
 
-    def __init__(self, inputArgumentLs=None, inputSuffixList=None, 
+    def __init__(self, inputSuffixList=None, 
         pegasusFolderName='folder',
         site_handler='condor', input_site_handler='condor', cluster_size=30,
         output_path=None,
@@ -100,8 +100,6 @@ class AbstractWorkflow(Workflow):
         needSSHDBTunnel=False, commit=False,
         debug=False, report=False):
         """
-        2013.06.27
-        argument inputArgumentLs to include everything in the tail of a commandline
         """
         if not home_path:
             home_path = os.path.expanduser("~")
@@ -120,9 +118,6 @@ class AbstractWorkflow(Workflow):
         
         self.pymodulePath = pymodulePath
         self.thisModulePath = thisModulePath
-        self.inputArgumentLs = inputArgumentLs
-        if self.inputArgumentLs is None:
-            self.inputArgumentLs = []
 
     def constructJobDataFromJob(self, job=None):
         """

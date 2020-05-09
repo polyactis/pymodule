@@ -58,7 +58,7 @@ class CountReadsWorkflow(ParentClass):
         """
         """
         ParentClass.__init__(self, 
-            inputArgumentLs=None, inputSuffixList=None, 
+            inputSuffixList=None, 
             drivername=drivername, hostname=hostname,
             dbname=dbname, schema=schema, port=port,
             db_user=db_user, db_passwd=db_passwd,

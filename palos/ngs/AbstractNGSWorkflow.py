@@ -163,7 +163,7 @@ class AbstractNGSWorkflow(ParentClass):
 
     """
 
-    def __init__(self, inputArgumentLs=None, inputSuffixList=None, 
+    def __init__(self, inputSuffixList=None, 
         drivername='postgresql', hostname='localhost',
         dbname='', schema='public', port=None,
         db_user=None,
@@ -235,7 +235,6 @@ class AbstractNGSWorkflow(ParentClass):
             'vcftoolsPath', 'vcfSubsetPath', 'vcfsorterPath', 'picard_path',\
             ])
         ParentClass.__init__(self,
-            inputArgumentLs=inputArgumentLs,
             inputSuffixList=inputSuffixList,
             pegasusFolderName=pegasusFolderName,
             output_path=output_path,

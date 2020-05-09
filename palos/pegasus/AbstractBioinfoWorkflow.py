@@ -32,7 +32,6 @@ class AbstractBioinfoWorkflow(ParentClass):
         20200129
         """
         ParentClass.__init__(self, 
-            inputArgumentLs=None,
             inputSuffixList=inputSuffixList,
             pegasusFolderName=pegasusFolderName,
             output_path=output_path,
