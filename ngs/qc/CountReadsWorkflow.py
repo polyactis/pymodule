@@ -410,9 +410,9 @@ if __name__ == '__main__':
         ind_seq_id_ls=args.ind_seq_id_ls,
 
         drivername=args.drivername, 
-	hostname=args.hostname,
+	    hostname=args.hostname,
         port=args.port,
-        dbname=args.dbname, schema=args.schema
+        dbname=args.dbname, schema=args.schema,
         db_user=args.db_user, db_passwd=args.db_passwd,
 
         pegasusFolderName=args.pegasusFolderName,
