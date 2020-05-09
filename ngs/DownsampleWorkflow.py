@@ -18,9 +18,9 @@ class DownsampleWorkflow(ParentClass):
     option_default_dict = copy.deepcopy(ParentClass.option_default_dict)
     option_default_dict.update(ParentClass.db_option_dict.copy())
     option_default_dict.update({
-        ("thisModulePath", 1,): ["%s/src/Sunset", '', 1, 'path of the module that owns this program. \
-    					used to add executables from this module.'], \
-        ("AccurityPath", 1,):["%s/src/Sunset/src_o/main.py", '', 1, 'path of the AccurityPath'], \
+        ("thisModulePath", 1,): ["src/Sunset", '', 1, 'path of the module that owns this program. '
+ 		'used to add executables from this module.'], \
+        ("AccurityPath", 1,):["src/Sunset/src_o/main.py", '', 1, 'path of the AccurityPath'], \
         })
 
 

@@ -34,14 +34,79 @@ class CountReadsWorkflow(ParentClass):
             'non-fastq entries will be discarded.', ],\
         })
 
-    def __init__(self,  **keywords):
+    def __init__(self, ind_seq_id_ls=None, 
+        drivername='postgresql', hostname='localhost',
+        dbname='', schema='public', port=None,
+        db_user=None, db_passwd=None,
+        data_dir=None, local_data_dir=None,
+        excludeContaminant=False,
+        sequence_filtered=None,
+        site_id_ls=None,
+        country_id_ls=None,
+        tax_id_ls="9606",
+        sequence_type_id_ls=None,
+        sequencer_id_ls=None,
+        sequence_batch_id_ls=None,
+        version_ls=None,
+        site_handler='condor', input_site_handler='condor', cluster_size=30,
+        pegasusFolderName='folder', output_path=None,
+        tmpDir='/tmp/', max_walltime=4320,
+        home_path=None, 
+        pymodulePath="%s/src/pymodule",
+        needSSHDBTunnel=False, commit=False,
+        debug=False, report=False):
         """
-        2011-7-11
         """
-        ParentClass.__init__(self, **keywords)
+        ParentClass.__init__(self, 
+            inputArgumentLs=None, inputSuffixList=None, 
+            drivername=drivername, hostname=hostname,
+            dbname=dbname, schema=schema, port=port,
+            db_user=db_user, db_passwd=db_passwd,
+            data_dir=data_dir, local_data_dir=local_data_dir,
+            ref_ind_seq_id=None,
+            samtools_path=None,
+            picard_dir=None,
+            gatk_path=None,
+            gatk2_path=None,
+            picard_path=None,
+            tabixPath=None,
+            bgzipPath=None,
+            vcftoolsPath=None,
+            vcfSubsetPath=None,
+            ligateVcfPerlPath=None,
+            vcfsorterPath=None,
+            maxContigID=None,
+            minContigID=None,
+            contigMaxRankBySize=None,
+            contigMinRankBySize=None,
+            needFastaIndexJob=False,
+            needFastaDictJob=False,
+            excludeContaminant=excludeContaminant,
+            sequence_filtered=sequence_filtered,
+            site_id_ls=site_id_ls,
+            country_id_ls=country_id_ls,
+            tax_id_ls=tax_id_ls,
+            sequence_type_id_ls=sequence_type_id_ls,
+            sequencer_id_ls=sequencer_id_ls,
+            sequence_batch_id_ls=sequence_batch_id_ls,
+            version_ls=version_ls,
+            sequence_max_coverage=None,
+            sequence_min_coverage=None,
+            site_handler=site_handler,
+            pegasusFolderName=pegasusFolderName,
+            output_path=output_path,
+            input_site_handler=input_site_handler,
+            cluster_size=cluster_size,
+            tmpDir=tmpDir,
+            max_walltime=max_walltime, 
+            home_path=home_path,
+            javaPath=None,
+            pymodulePath=pymodulePath,
+            plinkPath=None,
+            needSSHDBTunnel=needSSHDBTunnel, commit=commit,
+            debug=debug, report=report)
         
-        if self.ind_seq_id_ls:
-            self.ind_seq_id_ls = getListOutOfStr(self.ind_seq_id_ls, data_type=int)
+        self.ind_seq_id_ls = getListOutOfStr(ind_seq_id_ls, data_type=int)
     
     def registerCustomExecutables(self):
         """
@@ -74,7 +139,7 @@ class CountReadsWorkflow(ParentClass):
         individual_sequence_id_set = set()
         missed_individual_sequence_id_set = set()
         for individual_sequence in query:
-            if individual_sequence.individual_sequence_file_ls:	#not empty
+            if individual_sequence.individual_sequence_file_ls:
                 for individual_sequence_file in individual_sequence.individual_sequence_file_ls:
                     absPath = os.path.join(local_data_dir, 
                         individual_sequence_file.path)
@@ -274,7 +339,95 @@ class CountReadsWorkflow(ParentClass):
         self.end_run()
 
 if __name__ == '__main__':
-    main_class = CountReadsWorkflow
-    po = ProcessOptions(sys.argv, main_class.option_default_dict, error_doc=main_class.__doc__)
-    instance = main_class(**po.long_option2value)
+    from argparse import ArgumentParser
+    ap = ArgumentParser()
+    ap.add_argument("--ind_seq_id_ls", required=True,
+        help='a comma/dash-separated list of IndividualSequence.id.'
+            'non-fastq entries will be discarded.')
+    ap.add_argument("--drivername", default="postgresql",
+        help='Type of database server (default: %(default)s)')
+    ap.add_argument("--hostname", default="pdc",
+        help='name/IP of database server (default: %(default)s)')
+    ap.add_argument("--port", default=None,
+        help="database server port (default: %(default)s)")
+    ap.add_argument("--dbname", default='pmdb',
+        help="database name (default: %(default)s)")
+    ap.add_argument('-k', "--schema", default='sunset', 
+        help="database schema (default: %(default)s)")
+    ap.add_argument("-u", "--db_user", required=True, help="Database user")
+    ap.add_argument("-p", "--db_passwd", required=False,
+        help="Password of the database user")
+    ap.add_argument("-F", "--pegasusFolderName", type=str,
+        help='The path relative to the workflow running root. '
+        'This folder will contain pegasus input & output. '
+        'It will be created during the pegasus staging process. '
+        'It is useful to separate multiple sub-workflows. '
+        'If empty or None, everything is in the pegasus root.')
+    ap.add_argument("-l", "--site_handler", type=str, required=True,
+        help="The name of the computing site where the jobs run and executables are stored. "
+        "Check your Pegasus configuration in submit.sh.")
+    ap.add_argument("-j", "--input_site_handler", type=str,
+        help="It is the name of the site that has all the input files."
+        "Possible values can be 'local' or same as site_handler."
+        "If not given, it is asssumed to be the same as site_handler and "
+        "the input files will be symlinked into the running folder."
+        "If input_site_handler=local, the input files will be transferred "
+        "to the computing site by pegasus-transfer.")
+    ap.add_argument("-C", "--cluster_size", type=int, default=30,
+        help="Default: %(default)s. "
+        "This number decides how many of pegasus jobs should be clustered into one job. "
+        "Good if your workflow contains many quick jobs. "
+        "It will reduce Pegasus monitor I/O.")
+    ap.add_argument("-o", "--output_path", type=str, required=True,
+        help="The path to the output file that will contain the Pegasus DAG.")
+    
+    ap.add_argument("--home_path", type=str,
+        help="Path to your home folder. Default is ~.")
+    ap.add_argument("--pymodulePath", type=str, default="src/pymodule",
+        help="Path to the pymodule code folder. "
+        "If relative path, home folder is inserted in the front.")
+    
+    ap.add_argument("--tmpDir", type=str, default='/tmp/',
+        help='Default: %(default)s. '
+        'A local folder for some jobs (MarkDup) to store temp data. '
+        '/tmp/ can be too small for high-coverage sequencing.')
+    ap.add_argument("--max_walltime", type=int, default=4320,
+        help='Default: %(default)s. '
+        'Maximum wall time for any job, in minutes. 4320=3 days. '
+        'Used in addGenericJob(). Most clusters have upper limit for runtime.')
+    ap.add_argument("--needSSHDBTunnel", action='store_true',
+        help="If all DB-interacting jobs need a ssh tunnel to "
+        "access a database that is inaccessible to computing nodes.")
+    ap.add_argument("-c", "--commit", action='store_true',
+        help="Toggle to commit the db transaction (default: %(default)s)")
+    ap.add_argument("--debug", action='store_true',
+        help='Toggle debug mode.')
+    ap.add_argument("--report", action='store_true',
+        help="Toggle verbose mode. Default: %(default)s.")
+
+    args = ap.parse_args()
+    instance = CountReadsWorkflow(
+        ind_seq_id_ls=args.ind_seq_id_ls,
+
+        drivername=args.drivername, 
+	hostname=args.hostname,
+        port=args.port,
+        dbname=args.dbname, schema=args.schema
+        db_user=args.db_user, db_passwd=args.db_passwd,
+
+        pegasusFolderName=args.pegasusFolderName,
+        site_handler=args.site_handler, 
+        input_site_handler=args.input_site_handler,
+        cluster_size=args.cluster_size,
+        output_path=args.output_path,
+
+        home_path=args.home_path,
+        pymodulePath=args.pymodulePath,
+        
+        tmpDir=args.tmpDir,
+        max_walltime=args.max_walltime,
+        needSSHDBTunnel=args.needSSHDBTunnel,
+        commit=args.commit,
+        debug=args.debug,
+        report=args.report)
     instance.run()

@@ -29,27 +29,27 @@ class AbstractNGSWorkflow(ParentClass):
         ('ref_ind_seq_id', 1, int): [None, 'a', 1, 
             'Restrict alignments that using this (IndividualSequence.id) as'
             ' reference'],
-        ("samtools_path", 1, ): ["%s/bin/samtools", '', 1, 'samtools binary'],
-        ("picard_dir", 1, ): ["%s/script/picard/dist", '', 1, 
+        ("samtools_path", 1, ): ["bin/samtools", '', 1, 'samtools binary'],
+        ("picard_dir", 1, ): ["script/picard/dist", '', 1, 
             'picard folder containing its jar binaries'],
-        ("gatk_path", 1, ): ["%s/bin/GenomeAnalysisTK1_6_9.jar", '', 1, 
+        ("gatk_path", 1, ): ["bin/GenomeAnalysisTK1_6_9.jar", '', 1, 
             'my custom GATK 1.6.9 jar compiled from '
             'https://github.com/polyactis/gatk using jdk 1.6'],
-        ("gatk2_path", 1, ): ["%s/bin/GenomeAnalysisTK.jar", '', 1, 
+        ("gatk2_path", 1, ): ["bin/GenomeAnalysisTK.jar", '', 1, 
             'jar of GATK version 2 or afterwards.'],
-        ('picard_path', 1, ): ["%s/script/picard.broad/build/libs/picard.jar",
+        ('picard_path', 1, ): ["script/picard.broad/build/libs/picard.jar",
             '', 1, 'path to the new picard jar'],
-        ('tabixPath', 1, ): ["%s/bin/tabix", '', 1,
+        ('tabixPath', 1, ): ["bin/tabix", '', 1,
             'path to the tabix binary'],
-        ('bgzipPath', 1, ): ["%s/bin/bgzip", '', 1, 
+        ('bgzipPath', 1, ): ["bin/bgzip", '', 1, 
             'path to the bgzip binary'],
-        ('vcftoolsPath', 1, ): ["%s/bin/vcftools/vcftools", '', 1, 
+        ('vcftoolsPath', 1, ): ["bin/vcftools/vcftools", '', 1, 
             'path to the vcftools binary'],
-        ('vcfSubsetPath', 1, ): ["%s/bin/vcftools/vcf-subset", '', 1, 
+        ('vcfSubsetPath', 1, ): ["bin/vcftools/vcf-subset", '', 1, 
             'path to the vcf-subset program'],
-        ("ligateVcfPerlPath", 1, ): ["%s/bin/ligateVcf.pl", '', 1, 
+        ("ligateVcfPerlPath", 1, ): ["bin/ligateVcf.pl", '', 1, 
             'path to ligateVcf.pl'],
-        ("vcfsorterPath", 1, ): ["%s/bin/vcfsorter.pl", '', 1, 
+        ("vcfsorterPath", 1, ): ["bin/vcfsorter.pl", '', 1, 
             'path to vcfsorter.pl, http://code.google.com/p/vcfsorter/'],
         #to filter chromosomes
         ('maxContigID', 0, int): [None, 'x', 1, 
@@ -131,18 +131,16 @@ class AbstractNGSWorkflow(ParentClass):
             'max IndividualSequence.coverage. Empty for no filtering'],\
         ("sequence_min_coverage", 0, float): [None, '', 1, 
             'min IndividualSequence.coverage. Empty for no filtering'],\
-
         ('alignmentDepthIntervalMethodShortName', 0, ): [None, '', 1, 
             'fetch intervals from AlignmentDepthIntervalFile table', ],\
         ('minAlignmentDepthIntervalLength', 0, int): [1000, '', 1, 
             'minimum length for a alignment depth interval to be included', ],\
         ('alignmentDepthMaxFold', 0, float): [2, '', 1, 
-            'depth of an alignment depth interval have to be within a range of '
-            '[1/foldChange, foldChange]*medianDepth', ],\
+            'Restrict intervals whose alignment depth is within a range of '
+            '(alignmentDepthMinFold-alignmentDepthMaxFold)*medianDepth', ],\
         ('alignmentDepthMinFold', 0, float): [0.1, '', 1, 
-            'depth of an alignment depth interval have to be within a range of '
-            '[1/foldChange, foldChange]*medianDepth', ],\
-
+            'Restrict intervals whose alignment depth is within a range of '
+            '(alignmentDepthMinFold-alignmentDepthMaxFold)*medianDepth', ],\
         ('intervalOverlapSize', 1, int): [300000, 'U', 1, 
             'overlap #bps/#loci between adjacent intervals from one contig/chromosome, '
             'only used for TrioCaller, not for SAMtools/GATK', ],\
@@ -165,9 +163,70 @@ class AbstractNGSWorkflow(ParentClass):
 
     """
 
-    def __init__(self, **keywords):
+    def __init__(self, inputArgumentLs=None, inputSuffixList=None, 
+        drivername='postgresql', hostname='localhost',
+        dbname='', schema='public', port=None,
+        db_user=None,
+        db_passwd=None,
+        data_dir=None, local_data_dir=None,
+        ref_ind_seq_id=None,
+        samtools_path="bin/samtools",
+        picard_dir="script/picard/dist",
+        gatk_path="bin/GenomeAnalysisTK1_6_9.jar",
+        gatk2_path="bin/GenomeAnalysisTK.jar",
+        picard_path="script/picard.broad/build/libs/picard.jar",
+        tabixPath="bin/tabix",
+        bgzipPath="bin/bgzip",
+        vcftoolsPath="bin/vcftools/vcftools",
+        vcfSubsetPath="bin/vcftools/vcf-subset",
+        ligateVcfPerlPath="bin/ligateVcf.pl",
+        vcfsorterPath="bin/vcfsorter.pl",
+        maxContigID=None,
+        minContigID=None,
+        contigMaxRankBySize=2500,
+        contigMinRankBySize=1,
+        chromosome_type_id=None, 
+        ref_genome_tax_id=9606,
+        ref_genome_sequence_type_id=1,
+        ref_genome_version=15,
+        ref_genome_outdated_index=0,
+        completedAlignment=None,
+        mask_genotype_method_id=None, 
+        skipDoneAlignment=False,
+        checkEmptyVCFByReading=False,
+        needFastaIndexJob=False,
+        needFastaDictJob=False,
+        reduce_reads=None, 
+        excludeContaminant=False,
+        sequence_filtered=None,
+        site_id_ls="",
+        country_id_ls="",
+        tax_id_ls="9606",
+        sequence_type_id_ls="",
+        sequencer_id_ls="",
+        sequence_batch_id_ls="",
+        version_ls="",
+        sequence_max_coverage=None,
+        sequence_min_coverage=None,
+        alignmentDepthIntervalMethodShortName=None,
+        minAlignmentDepthIntervalLength=1000,
+        alignmentDepthMaxFold=2,
+        alignmentDepthMinFold=0.1,
+        intervalOverlapSize=300000,
+        intervalSize=5000000,
+        defaultGATKArguments=\
+        " --unsafe ALL --validation_strictness SILENT --read_filter BadCigar ",
+        
+        site_handler='condor', input_site_handler='condor', cluster_size=30,
+        pegasusFolderName='folder', output_path=None,
+        tmpDir='/tmp/', max_walltime=4320,
+        home_path=None, javaPath=None, 
+        pymodulePath="src/pymodule", thisModulePath=None,
+        jvmVirtualByPhysicalMemoryRatio=1.2,
+        plinkPath="bin/plink",
+        needSSHDBTunnel=False, commit=False,
+        debug=False, report=False):
         """
-        2011-7-11
         """
         # Insert before ParentClass.__init__()
         self.pathToInsertHomePathList.extend(['samtools_path', 'picard_dir', \
@@ -175,10 +234,80 @@ class AbstractNGSWorkflow(ParentClass):
             'bgzipPath', 'gatk2_path', 'ligateVcfPerlPath',\
             'vcftoolsPath', 'vcfSubsetPath', 'vcfsorterPath', 'picard_path',\
             ])
-        ParentClass.__init__(self, **keywords)
+        ParentClass.__init__(self,
+            inputArgumentLs=inputArgumentLs,
+            inputSuffixList=inputSuffixList,
+            pegasusFolderName=pegasusFolderName,
+            output_path=output_path,
+            site_handler=site_handler,
+            input_site_handler=input_site_handler,
+            cluster_size=cluster_size,
+            tmpDir=tmpDir, max_walltime=max_walltime, 
+            home_path=home_path,
+            javaPath=javaPath,
+            pymodulePath=pymodulePath, thisModulePath=thisModulePath,
+            jvmVirtualByPhysicalMemoryRatio=jvmVirtualByPhysicalMemoryRatio,
+            plinkPath=plinkPath,
+            needSSHDBTunnel=needSSHDBTunnel, commit=commit,
+            debug=debug, report=report)
+        self.drivername = drivername
+        self.hostname = hostname
+        self.dbname = dbname
+        self.schema = schema
+        self.port = port
+        self.db_user = db_user
+        self.db_passwd = db_passwd
+        self.data_dir = data_dir
+        self.local_data_dir = local_data_dir
+        self.ref_ind_seq_id = ref_ind_seq_id
+        self.samtools_path = samtools_path
+        self.picard_dir = picard_dir
+        self.gatk_path = gatk_path
+        self.gatk2_path = gatk2_path
+        self.picard_path = picard_path
+        self.tabixPath = tabixPath
+        self.bgzipPath = bgzipPath
+        self.vcftoolsPath = vcftoolsPath
+        self.vcfSubsetPath = vcfSubsetPath
+        self.ligateVcfPerlPath = ligateVcfPerlPath
+        self.vcfsorterPath = vcfsorterPath
+        self.maxContigID = maxContigID
+        self.minContigID = minContigID
+        self.contigMaxRankBySize = contigMaxRankBySize
+        self.contigMinRankBySize = contigMinRankBySize
+        self.chromosome_type_id = chromosome_type_id 
+        self.ref_genome_tax_id = ref_genome_tax_id
+        self.ref_genome_sequence_type_id = ref_genome_sequence_type_id
+        self.ref_genome_version = ref_genome_version
+        self.ref_genome_outdated_index = ref_genome_outdated_index
+        self.completedAlignment = completedAlignment
+        self.mask_genotype_method_id = mask_genotype_method_id 
+        self.skipDoneAlignment = skipDoneAlignment
+        self.checkEmptyVCFByReading = checkEmptyVCFByReading
+        self.needFastaIndexJob = needFastaIndexJob
+        self.needFastaDictJob = needFastaDictJob
+        self.reduce_reads = reduce_reads 
+        self.excludeContaminant = excludeContaminant
+        self.sequence_filtered = sequence_filtered
+        self.site_id_ls = site_id_ls
+        self.country_id_ls = country_id_ls
+        self.tax_id_ls = tax_id_ls
+        self.sequence_type_id_ls = sequence_type_id_ls
+        self.sequencer_id_ls = sequencer_id_ls
+        self.sequence_batch_id_ls = sequence_batch_id_ls
+        self.version_ls = version_ls
+        self.sequence_max_coverage = sequence_max_coverage
+        self.sequence_min_coverage = sequence_min_coverage
+        self.alignmentDepthIntervalMethodShortName = alignmentDepthIntervalMethodShortName
+        self.minAlignmentDepthIntervalLength = minAlignmentDepthIntervalLength
+        self.alignmentDepthMaxFold = alignmentDepthMaxFold
+        self.alignmentDepthMinFold = alignmentDepthMinFold
+        self.intervalOverlapSize = intervalOverlapSize
+        self.intervalSize = intervalSize
+        self.defaultGATKArguments = defaultGATKArguments
+        
         self.chr_pattern = Genome.chr_pattern
         self.contig_id_pattern = Genome.contig_id_pattern
-        #2013.06.21
         self.needSplitChrIntervalData = True
 
         listArgumentName_data_type_ls = [
@@ -325,34 +454,37 @@ class AbstractNGSWorkflow(ParentClass):
         #2013.06.13
         #self.registerOneJar(name="BeagleJar",
         #  path=os.path.expanduser('~/bin/Beagle/beagle.jar'))
-
-        self.registerOneJar(name="PicardJar", path=self.picard_path)
-        self.registerOneJar(name="MergeSamFilesJar", 
-            path=os.path.join(self.picard_dir, 'MergeSamFiles.jar'))
-        self.registerOneJar(name="BuildBamIndexJar", 
-            path=os.path.join(self.picard_dir, 'BuildBamIndex.jar'))
-        self.registerOneJar(name="SamToFastqJar", 
-            path=os.path.join(self.picard_dir, 'SamToFastq.jar'))
-        self.registerOneJar(name="CreateSequenceDictionaryJar", 
-            path=os.path.join(self.picard_dir, 'CreateSequenceDictionary.jar'))
-        self.registerOneJar(name="AddOrReplaceReadGroupsAndCleanSQHeaderJar", 
-            path=os.path.join(self.picard_dir, 
-                'AddOrReplaceReadGroupsAndCleanSQHeader.jar'))
-        self.registerOneJar(name="AddOrReplaceReadGroupsJar", 
-            path=os.path.join(self.picard_dir, 'AddOrReplaceReadGroups.jar'))
-        self.registerOneJar(name="MarkDuplicatesJar", \
-            path=os.path.join(self.picard_dir, 'MarkDuplicates.jar'))
-        self.registerOneJar(name="SplitReadFileJar", 
-            path=os.path.join(self.picard_dir, 'SplitReadFile.jar'))
-        self.registerOneJar(name="SortSamJar",
-            path=os.path.join(self.picard_dir, 'SortSam.jar'))
-        self.registerOneJar(name="SamFormatConverterJar", 
-            path=os.path.join(self.picard_dir, 'SamFormatConverter.jar'))
-        self.registerOneJar(name="GenomeAnalysisTKJar", path=self.gatk_path)
+        if getattr(self, 'picard_path', None):
+            self.registerOneJar(name="PicardJar", path=self.picard_path)
+        if getattr(self, 'picard_dir', None):
+            self.registerOneJar(name="MergeSamFilesJar", 
+                path=os.path.join(self.picard_dir, 'MergeSamFiles.jar'))
+            self.registerOneJar(name="BuildBamIndexJar", 
+                path=os.path.join(self.picard_dir, 'BuildBamIndex.jar'))
+            self.registerOneJar(name="SamToFastqJar", 
+                path=os.path.join(self.picard_dir, 'SamToFastq.jar'))
+            self.registerOneJar(name="CreateSequenceDictionaryJar", 
+                path=os.path.join(self.picard_dir, 'CreateSequenceDictionary.jar'))
+            self.registerOneJar(name="AddOrReplaceReadGroupsAndCleanSQHeaderJar", 
+                path=os.path.join(self.picard_dir, 
+                    'AddOrReplaceReadGroupsAndCleanSQHeader.jar'))
+            self.registerOneJar(name="AddOrReplaceReadGroupsJar", 
+                path=os.path.join(self.picard_dir, 'AddOrReplaceReadGroups.jar'))
+            self.registerOneJar(name="MarkDuplicatesJar", \
+                path=os.path.join(self.picard_dir, 'MarkDuplicates.jar'))
+            self.registerOneJar(name="SplitReadFileJar", 
+                path=os.path.join(self.picard_dir, 'SplitReadFile.jar'))
+            self.registerOneJar(name="SortSamJar",
+                path=os.path.join(self.picard_dir, 'SortSam.jar'))
+            self.registerOneJar(name="SamFormatConverterJar", 
+                path=os.path.join(self.picard_dir, 'SamFormatConverter.jar'))
+        if getattr(self, 'gatk_path', None):
+            self.registerOneJar(name="GenomeAnalysisTKJar", path=self.gatk_path)
         # Put GenomeAnalysisTK2Jar in a a different folder than the new gatk jar,
         #  otherwise name clash with the old gatk jar file.
-        self.registerOneJar(name="GenomeAnalysisTK2Jar", path=self.gatk2_path,
-            folderName='gatk2Jar')
+        if getattr(self, 'gatk2_path', None):
+            self.registerOneJar(name="GenomeAnalysisTK2Jar", path=self.gatk2_path,
+                folderName='gatk2Jar')
 
 
     def registerCustomJars(self):
@@ -367,9 +499,6 @@ class AbstractNGSWorkflow(ParentClass):
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
                 'polymorphism/qc/mapper/FilterLocusBasedOnLocusStatFile.py'),
             name='FilterLocusBasedOnLocusStatFile', clusterSizeMultiplier=0.5)
-        self.registerOneExecutable(path=self.javaPath,
-            name='CombineBeagleAndPreBeagleVariantsJava',
-            clusterSizeMultiplier=0.6)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, 
                 "reducer/ligateVcf.sh"),
             name="ligateVcf", clusterSizeMultiplier=1)
@@ -380,23 +509,6 @@ class AbstractNGSWorkflow(ParentClass):
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
             "mapper/splitter/SelectAndSplitFastaRecords.py"),\
             name='SelectAndSplitFastaRecords', clusterSizeMultiplier=0)
-        self.registerOneExecutable(path=self.javaPath,
-            name='BuildBamIndexFilesJava', clusterSizeMultiplier=0.5)
-        #2012.9.21 same as BuildBamIndexFilesJava, but no clustering
-        self.registerOneExecutable(path=self.javaPath,
-            name='IndexMergedBamIndexJava', clusterSizeMultiplier=0)
-        self.registerOneExecutable(path=self.javaPath,
-            name='CreateSequenceDictionaryJava', clusterSizeMultiplier=0)
-
-        self.registerOneExecutable(path=self.javaPath,
-            name='DOCWalkerJava', clusterSizeMultiplier=0.05)
-        #no cluster_size for this because it could run on a whole bam for hours
-        self.registerOneExecutable(path=self.javaPath,
-            name='VariousReadCountJava', clusterSizeMultiplier=0)
-        #no cluster_size for this because it could run on a whole bam for hours
-        self.registerOneExecutable(path=self.javaPath,
-            name='MarkDuplicatesJava', clusterSizeMultiplier=0)
-
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
             "mapper/filter/vcf_isec.sh"),\
             name='vcf_isec', clusterSizeMultiplier=1)
@@ -405,13 +517,7 @@ class AbstractNGSWorkflow(ParentClass):
             name='vcfSubset', clusterSizeMultiplier=1)
         #vcfSubsetPath is first argument to vcfSubset
         self.vcfSubset.vcfSubsetPath = self.vcfSubsetPath
-        self.registerOneExecutable(path=self.javaPath,
-            name='SelectVariantsJava', clusterSizeMultiplier=0.5)
-        self.registerOneExecutable(path=self.javaPath,
-            name='CombineVariantsJava', clusterSizeMultiplier=0.3)
-        self.registerOneExecutable(path=self.javaPath,
-            name='CombineVariantsJavaInReduce', clusterSizeMultiplier=0.001)
-
+        
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
                 "mapper/computer/CallVariantBySamtools.sh"),
             name='CallVariantBySamtools', clusterSizeMultiplier=0)
@@ -445,83 +551,109 @@ class AbstractNGSWorkflow(ParentClass):
         self.registerOneExecutable(
             path=os.path.join(self.pymodulePath, "reducer/vcf_concat.sh"),
             name='concatSamtools', clusterSizeMultiplier=1)
-        #2011.12.21 moved from FilterVCFPipeline.py
-        self.registerOneExecutable(path=self.javaPath,
-            name='FilterVCFByDepthJava', clusterSizeMultiplier=1)
         self.registerOneExecutable(
-            path=os.path.join(self.pymodulePath, "reducer/MergeFiles.sh"), \
+            path=os.path.join(self.pymodulePath, "reducer/MergeFiles.sh"),
             name='MergeFiles', clusterSizeMultiplier=0)
         self.registerOneExecutable(
             path=os.path.join(self.pymodulePath, \
                 "mapper/computer/CheckTwoVCFOverlap.py"), \
             name='CheckTwoVCFOverlap', clusterSizeMultiplier=1)
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
-                "mapper/modifier/AppendInfo2SmartPCAOutput.py"), \
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath,
+                "mapper/modifier/AppendInfo2SmartPCAOutput.py"),
             name='AppendInfo2SmartPCAOutput', clusterSizeMultiplier=0)
-        self.registerOneExecutable(path=self.javaPath, \
-            name='MergeSamFilesJava', clusterSizeMultiplier=0)
         #2013.07.09 in order to run vcfsorter.pl from http://code.google.com/p/vcfsorter/
         self.registerOneExecutable(
             path=os.path.join(self.pymodulePath, 'shell/pipe2File.sh'),
             name='vcfsorterShellPipe', clusterSizeMultiplier=1)
-        self.registerOneExecutable(
-            path=self.javaPath, name='GATKJava', clusterSizeMultiplier=0.2)
-        self.registerOneExecutable(
-            path=self.samtools_path, name='samtools', clusterSizeMultiplier=0.2)
-        self.registerOneExecutable(
-            path=self.javaPath, name='genotyperJava', clusterSizeMultiplier=0.1)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
                 "mapper/modifier/AddMissingInfoDescriptionToVCFHeader.py"), \
             name='AddMissingInfoDescriptionToVCFHeader', clusterSizeMultiplier=1)
-
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
                 "mapper/splitter/SplitVCFFile.py"), \
             name='SplitVCFFile', clusterSizeMultiplier=0.01)
-        self.registerOneExecutable(path=self.javaPath,
-                    name='MergeVCFReplicateHaplotypesJava', \
-                    clusterSizeMultiplier=0.5)
-
-        self.registerOneExecutable(path=self.javaPath,
-                name='BeagleJava', clusterSizeMultiplier=0.3)
-        #2013.06.12 use this simple function to register vcftoolsWrapper
         #vcftoolsPath is first argument to vcftoolsWrapper
         self.registerOneExecutable(
             path=os.path.join(self.pymodulePath, "shell/vcftoolsWrapper.sh"),
             name='vcftoolsWrapper', clusterSizeMultiplier=1)
-        self.registerOneExecutable(path=self.javaPath, name='SortSamFilesJava',
-            clusterSizeMultiplier=1)
-        self.registerOneExecutable(path=self.javaPath, name='PrintReadsJava',
-            clusterSizeMultiplier=1)
-        self.registerOneExecutable(path=self.javaPath, \
-            name='AddOrReplaceReadGroupsJava', clusterSizeMultiplier=0.5)
-        #2013.11.22
-        self.bgzipExecutableFile = self.registerOneExecutableAsFile(
-            path=self.bgzipPath)
-        # executable files to be used as input to Executable
-        self.samtoolsExecutableFile = self.registerOneExecutableAsFile(
-            path=self.samtools_path,
-            site_handler=self.input_site_handler)
-        self.tabixExecutableFile = self.registerOneExecutableAsFile(
-            path=self.tabixPath)
-        self.bgzipExecutableFile = self.registerOneExecutableAsFile(
-            path=self.bgzipPath)
-        self.ligateVcfExecutableFile = self.registerOneExecutableAsFile(
-            path=self.ligateVcfPerlPath)
-        self.vcftoolsExecutableFile = self.registerOneExecutableAsFile(
-            path=self.vcftoolsPath)
-        self.vcfSubsetExecutableFile = self.registerOneExecutableAsFile(
-            path=self.vcfSubsetPath)
-        self.vcfsorterExecutableFile = self.registerOneExecutableAsFile(
-            path=self.vcfsorterPath)
+        if self.javaPath:
+            self.registerOneExecutable(path=self.javaPath,
+                name='CombineBeagleAndPreBeagleVariantsJava',
+                clusterSizeMultiplier=0.6)
+            self.registerOneExecutable(path=self.javaPath,
+                name='BuildBamIndexFilesJava', clusterSizeMultiplier=0.5)
+            #2012.9.21 same as BuildBamIndexFilesJava, but no clustering
+            self.registerOneExecutable(path=self.javaPath,
+                name='IndexMergedBamIndexJava', clusterSizeMultiplier=0)
+            self.registerOneExecutable(path=self.javaPath,
+                name='CreateSequenceDictionaryJava', clusterSizeMultiplier=0)
+
+            self.registerOneExecutable(path=self.javaPath,
+                name='DOCWalkerJava', clusterSizeMultiplier=0.05)
+            #no cluster_size for this because it could run on a whole bam for hours
+            self.registerOneExecutable(path=self.javaPath,
+                name='VariousReadCountJava', clusterSizeMultiplier=0)
+            #no cluster_size for this because it could run on a whole bam for hours
+            self.registerOneExecutable(path=self.javaPath,
+                name='MarkDuplicatesJava', clusterSizeMultiplier=0)
+            self.registerOneExecutable(path=self.javaPath,
+                name='SelectVariantsJava', clusterSizeMultiplier=0.5)
+            self.registerOneExecutable(path=self.javaPath,
+                name='CombineVariantsJava', clusterSizeMultiplier=0.3)
+            self.registerOneExecutable(path=self.javaPath,
+                name='CombineVariantsJavaInReduce', clusterSizeMultiplier=0.001)
+            self.registerOneExecutable(path=self.javaPath,
+                name='FilterVCFByDepthJava', clusterSizeMultiplier=1)
+            self.registerOneExecutable(path=self.javaPath, \
+                name='MergeSamFilesJava', clusterSizeMultiplier=0)
+            self.registerOneExecutable(path=self.javaPath, name='SortSamFilesJava',
+                clusterSizeMultiplier=1)
+            self.registerOneExecutable(path=self.javaPath, name='PrintReadsJava',
+                clusterSizeMultiplier=1)
+            self.registerOneExecutable(path=self.javaPath,
+                name='AddOrReplaceReadGroupsJava', clusterSizeMultiplier=0.5)
+            self.registerOneExecutable(path=self.javaPath,
+                name='MergeVCFReplicateHaplotypesJava',
+                clusterSizeMultiplier=0.5)
+            self.registerOneExecutable(path=self.javaPath,
+                    name='BeagleJava', clusterSizeMultiplier=0.3)
+            self.registerOneExecutable(path=self.javaPath,
+                name='GATKJava', clusterSizeMultiplier=0.2)
+            self.registerOneExecutable(path=self.javaPath,
+                name='genotyperJava', clusterSizeMultiplier=0.1)
+        if self.bgzipPath:
+            self.bgzipExecutableFile = self.registerOneExecutableAsFile(
+                path=self.bgzipPath)
+        if self.samtools_path:
+            self.registerOneExecutable(path=self.samtools_path,
+                name='samtools', clusterSizeMultiplier=0.2)
+            self.samtoolsExecutableFile = self.registerOneExecutableAsFile(
+                path=self.samtools_path,
+                site_handler=self.input_site_handler)
+        if self.tabixPath:
+            self.tabixExecutableFile = self.registerOneExecutableAsFile(
+                path=self.tabixPath)
+        if self.bgzipPath:
+            self.bgzipExecutableFile = self.registerOneExecutableAsFile(
+                path=self.bgzipPath)
+        if self.ligateVcfPerlPath:
+            self.ligateVcfExecutableFile = self.registerOneExecutableAsFile(
+                path=self.ligateVcfPerlPath)
+        if self.vcftoolsPath:
+            self.vcftoolsExecutableFile = self.registerOneExecutableAsFile(
+                path=self.vcftoolsPath)
+        if self.vcfSubsetPath:
+            self.vcfSubsetExecutableFile = self.registerOneExecutableAsFile(
+                path=self.vcfSubsetPath)
+        if self.vcfsorterPath:
+            self.vcfsorterExecutableFile = self.registerOneExecutableAsFile(
+                path=self.vcfsorterPath)
 
 
     bwaIndexFileSuffixLs = ['amb', 'ann', 'bwt', 'pac', 'sa']
     #, 'nhr', 'nin', 'nsq' are formatdb (blast) output. 2012.10.18 my guess.
-
     def registerBWAIndexFile(self, refFastaFname=None, input_site_handler=None,
         folderName=""):
         """
-        2012.10.10
         """
         return self.registerRefFastaFile(refFastaFname=refFastaFname, 
             registerAffiliateFiles=True, \
@@ -2689,6 +2821,23 @@ run something like below to extract data from regionOfInterest out of
         print(f" Got {len(chr2size)} chromosomes.", flush=True)
         return chr2size
 
+    def readDictFile(self):
+        ref_dict_filename = os.path.join(self.ref_folder_path, "genome.dict")
+        chromosomeNames = []
+        # dict file's chromosome id should be well sorted
+        pattern = re.compile(r'^chr\d+$')
+        with open(ref_dict_filename, 'r') as f:
+            for line in f:
+                if line.startswith('@SQ'):
+                    records = line.split('\t')
+                    chr_name = records[1].split(':')[1]
+                    m = pattern.findall(chr_name)
+                    if m:
+                        chromosomeNames.append(m[0])
+        self.chromosomeNames = chromosomeNames
+        # chromosomeNames name did not contain sexual chromosome
+        self.NUM_AUTO_CHR = len(chromosomeNames)
+    
     def restrictContigDictionry(self, dc=None, maxContigID=None,
         minContigID=None):
         """

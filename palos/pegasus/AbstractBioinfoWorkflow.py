@@ -4,6 +4,7 @@
     an abstract class for pegasus workflows that work on bioinformatic data
 """
 import sys, os, math
+import logging
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job
 from . AbstractWorkflow import AbstractWorkflow
@@ -13,32 +14,59 @@ class AbstractBioinfoWorkflow(ParentClass):
     __doc__ = __doc__
     option_default_dict = ParentClass.option_default_dict.copy()
     option_default_dict.update({
-        ("plinkPath", 1, ): ["%s/bin/plink", '', 1, 
-            'path to the plink binary, http://pngu.mgh.harvard.edu/~purcell/plink/index.shtml'],
+        ("plinkPath", 1, ): ["bin/plink", '', 1, 
+            'path to plink, http://pngu.mgh.harvard.edu/~purcell/plink/index.shtml'],
         })
-    def __init__(self,  **keywords):
+    def __init__(self, inputSuffixList=None, 
+        site_handler='condor', input_site_handler='condor', cluster_size=30,
+        pegasusFolderName='folder', output_path=None,
+        tmpDir='/tmp/', max_walltime=4320,
+        home_path=None, javaPath=None, 
+        pymodulePath="src/pymodule", thisModulePath=None,
+        jvmVirtualByPhysicalMemoryRatio=1.2,
+        plinkPath="bin/plink",
+
+        needSSHDBTunnel=False, commit=False,
+        debug=False, report=False):
         """
         20200129
         """
-        ParentClass.__init__(self, **keywords)
+        ParentClass.__init__(self, 
+            inputArgumentLs=None,
+            inputSuffixList=inputSuffixList,
+            pegasusFolderName=pegasusFolderName,
+            output_path=output_path,
+            site_handler=site_handler,
+            input_site_handler=input_site_handler,
+            cluster_size=cluster_size,
+            tmpDir=tmpDir, max_walltime=max_walltime, 
+            home_path=home_path,
+            javaPath=javaPath,
+            pymodulePath=pymodulePath, thisModulePath=thisModulePath,
+            jvmVirtualByPhysicalMemoryRatio=jvmVirtualByPhysicalMemoryRatio,
+            needSSHDBTunnel=needSSHDBTunnel, commit=commit,
+            debug=debug, report=report)
+        self.plinkPath = plinkPath
 
     def registerPlinkExecutables(self):
-        self.registerOneExecutable(path=self.plinkPath, \
-            name='plink', clusterSizeMultiplier=1)
-        self.registerOneExecutable(path=self.plinkPath, \
-            name='plinkNoClustering', clusterSizeMultiplier=0)
+        if getattr(self, 'plinkPath', None):
+            self.registerOneExecutable(path=self.plinkPath, \
+                name='plink', clusterSizeMultiplier=1)
+            self.registerOneExecutable(path=self.plinkPath, \
+                name='plinkNoClustering', clusterSizeMultiplier=0)
 
-        #2012.8.10 different plinks so that you can differentiate between different types of plink jobs
-        self.registerOneExecutable(path=self.plinkPath, \
-            name='plinkMerge', clusterSizeMultiplier=0)
-        self.registerOneExecutable(path=self.plinkPath, \
-            name='plinkIBD', clusterSizeMultiplier=0)
-        self.registerOneExecutable(path=self.plinkPath, \
-            name='plinkConvert', clusterSizeMultiplier=1)
-        self.registerOneExecutable(path=self.plinkPath, \
-            name='plinkLDPrune', clusterSizeMultiplier=1)
-        self.registerOneExecutable(path=self.plinkPath, \
-            name='plinkExtract', clusterSizeMultiplier=1)
+            #2012.8.10 different plinks so that you 
+            # can differentiate between different types of plink jobs
+            self.registerOneExecutable(path=self.plinkPath, \
+                name='plinkMerge', clusterSizeMultiplier=0)
+            self.registerOneExecutable(path=self.plinkPath, \
+                name='plinkIBD', clusterSizeMultiplier=0)
+            self.registerOneExecutable(path=self.plinkPath, \
+                name='plinkConvert', clusterSizeMultiplier=1)
+            self.registerOneExecutable(path=self.plinkPath, \
+                name='plinkLDPrune', clusterSizeMultiplier=1)
+            self.registerOneExecutable(path=self.plinkPath, \
+                name='plinkExtract', clusterSizeMultiplier=1)
         #2013.07.24
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
             'mapper/modifier/SplitPlinkLMendelFileSNPIDIntoChrPosition.py'), \
@@ -55,24 +83,27 @@ class AbstractBioinfoWorkflow(ParentClass):
             moved from BlastWorkflow.py
         2012.5.23
         """
-        return self.registerRefFastaFile(refFastaFname=ntDatabaseFname, registerAffiliateFiles=True, \
-                    checkAffiliateFileExistence=True, addPicardDictFile=False, \
-                    affiliateFilenameSuffixLs=['nin', 'nhr', 'nsq'],\
-                    folderName=folderName)
+        return self.registerRefFastaFile(refFastaFname=ntDatabaseFname,
+            registerAffiliateFiles=True, \
+            checkAffiliateFileExistence=True, addPicardDictFile=False,
+            affiliateFilenameSuffixLs=['nin', 'nhr', 'nsq'],\
+            folderName=folderName)
 
-    def registerRefFastaFile(self, refFastaFname=None, registerAffiliateFiles=True, \
+    def registerRefFastaFile(self, refFastaFname=None,
+        registerAffiliateFiles=True,
         checkAffiliateFileExistence=True, addPicardDictFile=True,\
-        affiliateFilenameSuffixLs=['fai', 'amb', 'ann', 'bwt', 'pac', 'sa', 'rbwt', 'rpac', 'rsa', \
-        'stidx', 'sthash'], folderName="reference"):
+        affiliateFilenameSuffixLs=\
+            ['fai', 'amb', 'ann', 'bwt', 'pac', 'sa', 'rbwt', 'rpac', 'rsa', \
+            'stidx', 'sthash'],
+        folderName="reference"):
         """
         suffix here doesn't include ".".
         
-        2013.08.23 bugfix, check if workflow has a file registered before adding it
-        2013.3.26 added refSAMtoolsFastaIndexF, refPicardFastaDictF into returnData
-        2013.3.20 deduce needBWARefIndexJob, needSAMtoolsFastaIndexJob, needPicardFastaDictJob, needStampyRefIndexJob from missing suffixes
-        2010.10.10 added argument folderName
-        2012.5.23
-            add an argument "addPicardDictFile" to offer user option to exclude this file (i.e. in registerBlastNucleotideDatabaseFile)
+        deduce needBWARefIndexJob, needSAMtoolsFastaIndexJob, needPicardFastaDictJob,
+            needStampyRefIndexJob from missing suffixes.
+        argument folderName
+        argument "addPicardDictFile" to offer user option to exclude this file 
+            (i.e. in registerBlastNucleotideDatabaseFile).
         2012.2.24
             dict is via picard, also required for GATK
             fai is via "samtools faidx" (index reference). also required for GATK
@@ -83,30 +114,36 @@ class AbstractBioinfoWorkflow(ParentClass):
             add two suffixes, stidx (stampy index) and sthash (stampy hash)
         2011-11-11
             if needAffiliatedFiles,
-                all other files, with suffix in affiliateFilenameSuffixLs, will be registered (symlinked or copied) as well.
+                all other files, with suffix in affiliateFilenameSuffixLs,
+                 will be registered (symlinked or copied) as well.
         """
-        returnData = PassingData(refFastaFList = [], needBWARefIndexJob=False, needSAMtoolsFastaIndexJob=False, \
-                                needPicardFastaDictJob=False, needStampyRefIndexJob=False, needBlastMakeDBJob=False,\
-                                refPicardFastaDictF=None, refSAMtoolsFastaIndexF=None)
-        missingSuffixSet = set()	#2013.3.20
+        returnData = PassingData(refFastaFList = [], needBWARefIndexJob=False,
+            needSAMtoolsFastaIndexJob=False, \
+            needPicardFastaDictJob=False, needStampyRefIndexJob=False,
+            needBlastMakeDBJob=False,
+            refPicardFastaDictF=None, refSAMtoolsFastaIndexF=None)
+        missingSuffixSet = set()
         
         if registerAffiliateFiles:
-            refFastaF = File(os.path.join(folderName, os.path.basename(refFastaFname)))	#use relative path, otherwise, it'll go to absolute path
+            refFastaF = File(os.path.join(folderName, os.path.basename(refFastaFname)))
+            #use relative path, otherwise, it'll go to absolute path
             # Add it into replica only when needed.
             refFastaF.addPFN(PFN("file://" + refFastaFname, self.input_site_handler))
-            if not self.hasFile(refFastaF):	#2013.08.12
+            if not self.hasFile(refFastaF):
                 self.addFile(refFastaF)
             returnData.refFastaFList.append(refFastaF)
-            # If it's not needed, assume the index is done and all relevant files are in absolute path.
-            # and no replica transfer
+            # If it's not needed, assume the index is done and all relevant files
+            #  are in absolute path. and no replica transfer
             
             #add extra affiliated files
             suffix2PathToFileLs = {}
-            if addPicardDictFile:	#2012.5.23
+            if addPicardDictFile:
                 picardDictSuffix = 'dict'
-                pathToFile = '%s.%s'%(os.path.splitext(refFastaFname)[0], picardDictSuffix)	#remove ".fasta" from refFastaFname
+                pathToFile = '%s.%s'%(os.path.splitext(refFastaFname)[0], picardDictSuffix)
+                #remove ".fasta" from refFastaFname
                 if checkAffiliateFileExistence and not os.path.isfile(pathToFile):
-                    sys.stderr.write("Warning: %s don't exist or not a file on file system. skip registration.\n"%(pathToFile))
+                    logging.warn(f"{pathToFile} don't exist or not a file. "
+                        "Skip registration.")
                     missingSuffixSet.add(picardDictSuffix)
                     #suffix2PathToFileLs.append(pathToFile)
                 else:
@@ -114,22 +151,24 @@ class AbstractBioinfoWorkflow(ParentClass):
             for suffix in affiliateFilenameSuffixLs:
                 pathToFile = '%s.%s'%(refFastaFname, suffix)
                 if checkAffiliateFileExistence and not os.path.isfile(pathToFile):
-                    sys.stderr.write("Warning: %s don't exist or not a file on file system. skip registration.\n"%(pathToFile))
+                    logging.warn(f"{pathToFile} don't exist or not a file. "
+                        "Skip registration.")
                     missingSuffixSet.add(suffix)
                     continue
                 suffix2PathToFileLs[suffix]= pathToFile
             for suffix, pathToFile in suffix2PathToFileLs.items():
                 if checkAffiliateFileExistence and not os.path.isfile(pathToFile):
-                    sys.stderr.write("Warning: %s don't exist or not a file on file system. skip registration.\n"%(pathToFile))
+                    logging.warn(f"{pathToFile} don't exist or not a file. "
+                        "Skip registration.")
                     continue
                 affiliateF = File(os.path.join(folderName, os.path.basename(pathToFile)))
                 #use relative path, otherwise, it'll go to absolute path
                 affiliateF.addPFN(PFN("file://" + pathToFile, self.input_site_handler))
-                if not self.hasFile(affiliateF):	#2013.08.12
+                if not self.hasFile(affiliateF):
                     self.addFile(affiliateF)
                 returnData.refFastaFList.append(affiliateF)
                 
-                if suffix=='dict':	#2013.3.26
+                if suffix=='dict':
                     returnData.refPicardFastaDictF = affiliateF
                 elif suffix=='fai':
                     returnData.refSAMtoolsFastaIndexF = affiliateF
@@ -145,70 +184,87 @@ class AbstractBioinfoWorkflow(ParentClass):
             returnData.needStampyRefIndexJob = True
         if 'dict' in missingSuffixSet:
             returnData.needPicardFastaDictJob = True
-        if 'nin' in missingSuffixSet or 'nhr' in missingSuffixSet or 'nsq' in missingSuffixSet:
+        if 'nin' in missingSuffixSet or 'nhr' in missingSuffixSet or \
+            'nsq' in missingSuffixSet:
             returnData.needBlastMakeDBJob = True
         return returnData
 
-    def addPlinkJob(self, executable=None, inputFileList=None, parentPlinkJob=None,\
+    def addPlinkJob(self, executable=None, inputFileList=None,
+        parentPlinkJob=None,\
         tpedFile=None, tfamFile=None,\
-        pedFile=None, famFile=None, mapFile=None, bedFile=None, bimFile=None,\
+        pedFile=None, famFile=None, mapFile=None, bedFile=None, bimFile=None,
         inputFnamePrefix=None, inputOption='--file', \
         outputFnamePrefix=None, outputOption='--out',\
         makeBED=False, calculateMendelError=False, checkSex=False, \
-        LDPruneWindowSize=100, LDPruneWindowShiftSize=5, LDPruneByPairwiseR2=False, LDPruneMinR2=0.1,\
+        LDPruneWindowSize=100, LDPruneWindowShiftSize=5,
+        LDPruneByPairwiseR2=False, LDPruneMinR2=0.1,\
         LDPruneByRegression=False, LDPruneMinVarianceInflationFactor=2,\
-        estimatePairwiseGenomeWideIBD=False, estimatePairwiseGenomeWideIBDFreqFile=None, \
-        extractSNPFile=None, recodeOutput=False, recodeTransposeOutput=False, estimateAlleFrequency=False, \
+        estimatePairwiseGenomeWideIBD=False,
+        estimatePairwiseGenomeWideIBDFreqFile=None, \
+        extractSNPFile=None, recodeOutput=False,
+        recodeTransposeOutput=False,
+        estimateAlleFrequency=False, \
         mergeListFile=None,\
-        parentJobLs=None, extraDependentInputLs=None, transferOutput=False, \
-        extraArguments=None, extraArgumentList=None, extraOutputLs =None, \
+        parentJobLs=None, extraDependentInputLs=None, transferOutput=False,
+        extraArguments=None, extraArgumentList=None, extraOutputLs =None,
         job_max_memory=2000, **keywords):
         """
         i.e.
 
-            bedFnamePrefix = os.path.join(topOutputDir, '%s_bed'%(commonPrefix))
-            convertSingleTPED2BEDJob = self.addPlinkJob(executable=self.plink, inputFileList=[],
-                                tpedFile=modifyTPEDJob.output, tfamFile=tfamJob.tfamFile,\
-                outputFnamePrefix=bedFnamePrefix, outputOption='--out',\
-                makeBED=True, \
-                extraDependentInputLs=None, transferOutput=transferOutput, \
+        bedFnamePrefix = os.path.join(topOutputDir, '%s_bed'%(commonPrefix))
+        convertSingleTPED2BEDJob = self.addPlinkJob(executable=self.plink, \
+            inputFileList=[],
+            tpedFile=modifyTPEDJob.output, tfamFile=tfamJob.tfamFile,\
+            outputFnamePrefix=bedFnamePrefix, outputOption='--out',\
+            makeBED=True, \
+            extraDependentInputLs=None, transferOutput=transferOutput, \
+            extraArguments=None, job_max_memory=2000,\
+            parentJobLs = convertSingleTPED2BEDParentJobLs)
+
+
+        convertMergedTPED2BEDJob = self.addPlinkJob(executable=self.plink,
+                inputFileList=[tpedFileMergeJob.output, tfamJob.tfamFile], \
+                inputFnamePrefix=mergedPlinkFnamePrefix, inputOption='--tfile', \
+            outputFnamePrefix=mergedPlinkBEDFnamePrefix, outputOption='--out',\
+            makeBED=True, \
+            extraDependentInputLs=None, transferOutput=transferOutput, \
+            extraArguments=None, job_max_memory=2000, parentJobLs=[mergedOutputDirJob, 
+                tpedFileMergeJob, tfamJob])
+
+        mendelFnamePrefix = os.path.join(setupData.mapDirJob.output, '%s'%(commonPrefix))
+        if inputJob.output.name[-4:]=='tped':
+            inputJob.tfamFile = tfamJob.tfamFile
+        plinkMendelJob = self.addPlinkJob(executable=self.plink, \
+                parentPlinkJob=inputJob,\
+                outputFnamePrefix=mendelFnamePrefix, outputOption='--out',\
+                calculateMendelError=True, \
+                extraDependentInputLs=None,
+                transferOutput=transferOneContigPlinkOutput, \
                 extraArguments=None, job_max_memory=2000,\
-                parentJobLs = convertSingleTPED2BEDParentJobLs)
+                parentJobLs =[setupData.mapDirJob, tfamJob]+ jobData.jobLs)
 
+        for plink mendel, LD-prune and other jobs, add extraArguments="--allow-no-sex"
+            to include individuals without sex
 
-            convertMergedTPED2BEDJob = self.addPlinkJob(executable=self.plink, inputFileList=[tpedFileMergeJob.output, tfamJob.tfamFile], \
-                            inputFnamePrefix=mergedPlinkFnamePrefix, inputOption='--tfile', \
-                outputFnamePrefix=mergedPlinkBEDFnamePrefix, outputOption='--out',\
-                makeBED=True, \
-                extraDependentInputLs=None, transferOutput=transferOutput, \
-                extraArguments=None, job_max_memory=2000, parentJobLs=[mergedOutputDirJob, tpedFileMergeJob, tfamJob])
-
-            mendelFnamePrefix = os.path.join(setupData.mapDirJob.output, '%s'%(commonPrefix))
-            if inputJob.output.name[-4:]=='tped':	#2013.07.25 make sure addPlinkJob could get the right tfamFile
-                inputJob.tfamFile = tfamJob.tfamFile
-            plinkMendelJob = self.addPlinkJob(executable=self.plink, \
-                    parentPlinkJob=inputJob,\
-                    outputFnamePrefix=mendelFnamePrefix, outputOption='--out',\
-                    calculateMendelError=True, \
-                    extraDependentInputLs=None, transferOutput=transferOneContigPlinkOutput, \
-                    extraArguments=None, job_max_memory=2000,\
-                    parentJobLs =[setupData.mapDirJob, tfamJob]+ jobData.jobLs)
-
-        for plink mendel, LD-prune and other jobs, add extraArguments="--allow-no-sex" to include individuals without sex
-
-        2013.07.25 added parentPlinkJob (returned from this function), and parse input from that job
+        2013.07.25 added parentPlinkJob (returned from this function),
+            and parse input from that job
         2013.07.24 added argument recodeTransposeOutput (--recode --transpose)
         2012.8.28
             add argument
-                estimateAlleFrequency, estimate frequency of input file. "--nonfounders" could be added as well.
-                estimatePairwiseGenomeWideIBDFreqFile, is the file from which IBD check could draw frequency (rather than estimate from founders)
+                estimateAlleFrequency, estimate frequency of input file.
+                     "--nonfounders" could be added as well.
+                estimatePairwiseGenomeWideIBDFreqFile, is the file from which 
+                    IBD check could draw frequency (rather than estimate from founders)
 
         2012.8.9
-            inputFileList is a list of pegasus Files (.ped, .fam, or .tped, .tfam, etc.) or could be supplied individually.
+            inputFileList is a list of pegasus Files (.ped, .fam, or .tped,
+                 .tfam, etc.) or could be supplied individually.
 
-            inputOption could be, "--file" for .ped .map ; "--tfile" for .tped, .tfam; or '--bfile' for .bed, .fam, .bim
+            inputOption could be, "--file" for .ped .map ; "--tfile" for .tped,
+                 .tfam; or '--bfile' for .bed, .fam, .bim
 
-            if extractSNPFile or mergeListFile is given, either recodeOutput or makeBED have to be on. otherwise, no output.
+            if extractSNPFile or mergeListFile is given, either recodeOutput
+                 or makeBED have to be on. otherwise, no output.
             http://pngu.mgh.harvard.edu/~purcell/plink/index.shtml
         """
         if extraDependentInputLs is None:
@@ -270,31 +326,43 @@ class AbstractBioinfoWorkflow(ParentClass):
         else:
             outputFnamePrefix = 'plink'
 
-        suffixAndNameTupleList = []	# a list of tuples , in each tuple, 1st element is the suffix. 2nd element is the proper name of the suffix.
+        suffixAndNameTupleList = []
+            # a list of tuples , in each tuple, 1st element is the suffix.
+            #  2nd element is the proper name of the suffix.
             #job.$nameFile will be the way to access the file.
-            #if 2nd element (name) is missing, suffix[1:].replace('.', '_') is the name (dot replaced by _)
+            #if 2nd element (name) is missing, suffix[1:].replace('.', '_')
+            #  is the name (dot replaced by _)
         if makeBED:
             extraArgumentList.append('--make-bed')
-            suffixAndNameTupleList.extend([['.bed',], ('.fam',), ['.bim',]])		#, binary map file, is excluded for now
+            suffixAndNameTupleList.extend([['.bed',], ('.fam',), ['.bim',]])
+            #, binary map file, is excluded for now
         if calculateMendelError:
             extraArgumentList.append('--mendel')
-            suffixAndNameTupleList.extend([('.mendel',), ('.imendel',), ('.fmendel',), ('.lmendel',)])
+            suffixAndNameTupleList.extend([('.mendel',), ('.imendel',), 
+                ('.fmendel',), ('.lmendel',)])
             #its output is not tab-delimited. rather it's space (multi) delimited.
         if checkSex:
             extraArgumentList.append('--check-sex')
-            suffixAndNameTupleList.extend([('.sexcheck',), ('.hh', )])	#.sexcheck file is accessible as job.sexcheckFile.
-                #.hh is heterozygous haplotype genotypes
+            suffixAndNameTupleList.extend([('.sexcheck',), ('.hh', )])
+            #.sexcheck file is accessible as job.sexcheckFile.
+            #.hh is heterozygous haplotype genotypes
         if LDPruneByPairwiseR2:
-            extraArgumentList.append('--indep-pairwise %s %s %s'%(LDPruneWindowSize, LDPruneWindowShiftSize, LDPruneMinR2))
-            suffixAndNameTupleList.extend([('.prune.in',), ('.prune.out',)])	#".prune.in" is accessible as job.prune_inFile
+            extraArgumentList.append('--indep-pairwise %s %s %s'%(\
+                LDPruneWindowSize, LDPruneWindowShiftSize, LDPruneMinR2))
+            suffixAndNameTupleList.extend([('.prune.in',), ('.prune.out',)])
+            #".prune.in" is accessible as job.prune_inFile
         if LDPruneByRegression:
-            extraArgumentList.append('--indep %s %s %s'%(LDPruneWindowSize, LDPruneWindowShiftSize, LDPruneMinVarianceInflationFactor))
-            suffixAndNameTupleList.extend([('.prune.in',), ('.prune.out',)])	#".prune.in" is accessible as job.prune_inFile
+            extraArgumentList.append('--indep %s %s %s'%(LDPruneWindowSize,\
+                LDPruneWindowShiftSize, LDPruneMinVarianceInflationFactor))
+            suffixAndNameTupleList.extend([('.prune.in',), ('.prune.out',)])
+            #".prune.in" is accessible as job.prune_inFile
         if estimatePairwiseGenomeWideIBD:
             extraArgumentList.append('--genome')
-            suffixAndNameTupleList.extend([('.genome',)])	#.genome is accessible as job.genomeFile
-            if estimatePairwiseGenomeWideIBDFreqFile:	#2012.8.28
-                extraArgumentList.extend(['--read-freq', estimatePairwiseGenomeWideIBDFreqFile])
+            suffixAndNameTupleList.extend([('.genome',)])
+            #.genome is accessible as job.genomeFile
+            if estimatePairwiseGenomeWideIBDFreqFile:
+                extraArgumentList.extend(['--read-freq', \
+                    estimatePairwiseGenomeWideIBDFreqFile])
                 extraDependentInputLs.append(estimatePairwiseGenomeWideIBDFreqFile)
         if extractSNPFile:
             extraArgumentList.extend(['--extract', extractSNPFile])
@@ -316,7 +384,8 @@ class AbstractBioinfoWorkflow(ParentClass):
             extraArgumentList.append(extraArguments)
 
 
-        self.setupMoreOutputAccordingToSuffixAndNameTupleList(outputFnamePrefix=outputFnamePrefix, \
+        self.setupMoreOutputAccordingToSuffixAndNameTupleList(
+            outputFnamePrefix=outputFnamePrefix, \
             suffixAndNameTupleList=suffixAndNameTupleList, \
             extraOutputLs=extraOutputLs, key2ObjectForJob=key2ObjectForJob)
         #2013.07.24 add it in the end
@@ -324,11 +393,13 @@ class AbstractBioinfoWorkflow(ParentClass):
         logFile = File('%s.log'%(outputFnamePrefix))
         extraOutputLs.append(logFile)
 
-        job= self.addGenericJob(executable=executable, inputFile=None, outputFile=None, \
-                parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
-                extraOutputLs=extraOutputLs,\
-                transferOutput=transferOutput, \
-                extraArgumentList=extraArgumentList, key2ObjectForJob=key2ObjectForJob, job_max_memory=job_max_memory, **keywords)
+        job= self.addGenericJob(executable=executable, inputFile=None,
+            outputFile=None, \
+            parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs,
+            extraOutputLs=extraOutputLs,\
+            transferOutput=transferOutput, extraArgumentList=extraArgumentList,
+            key2ObjectForJob=key2ObjectForJob, job_max_memory=job_max_memory,
+            **keywords)
         return job
 
     def registerExecutables(self):
@@ -349,7 +420,8 @@ class AbstractBioinfoWorkflow(ParentClass):
 
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
             "polymorphism/qc/CalculateLociAndGenomeCoveredAtEachSwitchFrequencyThreshold.py"), \
-            name='CalculateLociAndGenomeCoveredAtEachSwitchFrequencyThreshold', clusterSizeMultiplier=0.01)
+            name='CalculateLociAndGenomeCoveredAtEachSwitchFrequencyThreshold',
+            clusterSizeMultiplier=0.01)
 
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
                 "mapper/extractor/ExtractFlankingSequenceForVCFLoci.py"), \
@@ -362,19 +434,21 @@ class AbstractBioinfoWorkflow(ParentClass):
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
             "polymorphism/mapper/FindSNPPositionOnNewRefFromFlankingBWAOutput.py"), \
             name='FindSNPPositionOnNewRefFromFlankingBWAOutput', clusterSizeMultiplier=1)
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, 'Genome/OutputGenomeAnnotation.py'), \
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
+            'Genome/OutputGenomeAnnotation.py'), \
             name='OutputGenomeAnnotation', clusterSizeMultiplier=0.01)
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, 'statistics/GenomeMovingAverageStatistics.py'), \
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
+                'statistics/GenomeMovingAverageStatistics.py'), \
             name='GenomeMovingAverageStatistics', clusterSizeMultiplier=0.1)
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, 'reducer/ReduceSameChromosomeAlignmentDepthFiles'), \
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
+                'reducer/ReduceSameChromosomeAlignmentDepthFiles'), \
             name='ReduceSameChromosomeAlignmentDepthFiles', clusterSizeMultiplier=0.5)
 
-        #2012.8.7 each cell is a tuple of (executable, clusterSizeMultiplier (0 if u do not need clustering)
-        executableClusterSizeMultiplierList = []
-        
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, 'mapper/computer/OutputVCFSiteGap.py'), \
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
+                'mapper/computer/OutputVCFSiteGap.py'), \
             name='OutputVCFSiteGap', clusterSizeMultiplier=1)
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, 'plot/PlotLD.py'), \
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
+                'plot/PlotLD.py'), \
             name='PlotLD', clusterSizeMultiplier=0)
         
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, 
@@ -402,30 +476,123 @@ class AbstractBioinfoWorkflow(ParentClass):
             name='ExtractConsensusSequenceFromAlignment', clusterSizeMultiplier=0.5)
 
         #2013.2.4, wrapper around psmc's splitfa, a program that splits fasta files
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, "mapper/splitter/splitfa.sh"), \
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
+                "mapper/splitter/splitfa.sh"), \
             name='splitfa', clusterSizeMultiplier=1)
 
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, "plot/PlotVCFtoolsStat.py"), \
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
+                "plot/PlotVCFtoolsStat.py"), \
             name='PlotVCFtoolsStat', clusterSizeMultiplier=0)
         
         #2013.07.19
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, 'mapper/modifier/AppendExtraPedigreeIndividualsToTPED.py'), \
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
+                'mapper/modifier/AppendExtraPedigreeIndividualsToTPED.py'), \
             name='AppendExtraPedigreeIndividualsToTPED', clusterSizeMultiplier=1)
 
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, 'mapper/converter/ConvertMSOutput2FASTQ.py'), \
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
+                'mapper/converter/ConvertMSOutput2FASTQ.py'), \
             name='ConvertMSOutput2FASTQ', clusterSizeMultiplier=1)
 
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, 'mapper/extractor/SelectChromosomeSequences.py'), \
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
+                'mapper/extractor/SelectChromosomeSequences.py'), \
             name='SelectChromosomeSequences', clusterSizeMultiplier=0.5)
 
         #2013.2.11 moved from vervet/src/reduce to pymodule/reducer
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, 'reducer/MergeGenotypeMatrix.py'), \
-                                        name='MergeGenotypeMatrix', clusterSizeMultiplier=0.2)
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, 'plot/PlotGenomeWideData.py'), \
-                                        name='PlotGenomeWideData', clusterSizeMultiplier=1)
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
+                'reducer/MergeGenotypeMatrix.py'), \
+            name='MergeGenotypeMatrix', clusterSizeMultiplier=0.2)
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
+                'plot/PlotGenomeWideData.py'),
+            name='PlotGenomeWideData', clusterSizeMultiplier=1)
 
 if __name__ == '__main__':
-    main_class = AbstractBioinfoWorkflow
-    po = ProcessOptions(sys.argv, main_class.option_default_dict, error_doc=main_class.__doc__)
-    instance = main_class(**po.long_option2value)
-    instance.run()
+    from argparse import ArgumentParser
+    ap = ArgumentParser()
+    ap.add_argument("--inputSuffixList", type=str,
+        help='Coma-separated list of input file suffices. Used to exclude input files.'
+        'If None, no exclusion. The dot is part of the suffix, .tsv not tsv.'
+        'Common zip suffices (.gz, .bz2, .zip, .bz) will be ignored in obtaining the suffix.')
+    ap.add_argument("-F", "--pegasusFolderName", type=str,
+        help='The path relative to the workflow running root. '
+        'This folder will contain pegasus input & output. '
+        'It will be created during the pegasus staging process. '
+        'It is useful to separate multiple sub-workflows. '
+        'If empty or None, everything is in the pegasus root.')
+    ap.add_argument("-l", "--site_handler", type=str, required=True,
+        help="The name of the computing site where the jobs run and executables are stored. "
+        "Check your Pegasus configuration in submit.sh.")
+    ap.add_argument("-j", "--input_site_handler", type=str,
+        help="It is the name of the site that has all the input files."
+        "Possible values can be 'local' or same as site_handler."
+        "If not given, it is asssumed to be the same as site_handler and "
+        "the input files will be symlinked into the running folder."
+        "If input_site_handler=local, the input files will be transferred "
+        "to the computing site by pegasus-transfer.")
+    ap.add_argument("-C", "--cluster_size", type=int, default=30,
+        help="Default: %(default)s. "
+        "This number decides how many of pegasus jobs should be clustered into one job. "
+        "Good if your workflow contains many quick jobs. "
+        "It will reduce Pegasus monitor I/O.")
+    ap.add_argument("-o", "--output_path", type=str, required=True,
+        help="The path to the output file that will contain the Pegasus DAG.")
+    
+    ap.add_argument("--home_path", type=str,
+        help="Path to your home folder. Default is ~.")
+    ap.add_argument("--javaPath", type=str, default='bin/java',
+        help="Path to java. "
+        "If relative path, home folder is inserted in the front.")
+    ap.add_argument("--pymodulePath", type=str, default="src/pymodule",
+        help="Path to the pymodule code folder. "
+        "If relative path, home folder is inserted in the front.")
+    ap.add_argument("--thisModulePath", type=str,
+        help="Path to your own code repo"
+        "If relative path, home folder is inserted in the front.")
+    ap.add_argument("--plinkPath", type=str, default='bin/plink',
+        help="Path to plink, "
+        "http://pngu.mgh.harvard.edu/~purcell/plink/index.shtml "
+        "If relative path, home folder is inserted in the front.")
+    
+    ap.add_argument("--tmpDir", type=str, default='/tmp/',
+        help='Default: %(default)s. '
+        'A local folder for some jobs (MarkDup) to store temp data. '
+        '/tmp/ can be too small for high-coverage sequencing.')
+    ap.add_argument("--max_walltime", type=int, default=4320,
+        help='Default: %(default)s. '
+        'Maximum wall time for any job, in minutes. 4320=3 days. '
+        'Used in addGenericJob(). Most clusters have upper limit for runtime.')
+    ap.add_argument("--jvmVirtualByPhysicalMemoryRatio", type=float,
+        default=1.2,
+        help='Default: %(default)s. '
+        'If a job virtual memory (~1.2X of JVM resident memory) exceeds request, '
+        "it will be killed on some clusters. "
+        "This will make sure your job has enough memory.")
+    ap.add_argument("--debug", action='store_true',
+        help='Toggle debug mode.')
+    ap.add_argument("--report", action='store_true',
+        help="Toggle verbose mode. Default: %(default)s.")
+    ap.add_argument("--needSSHDBTunnel", action='store_true',
+        help="If all DB-interacting jobs need a ssh tunnel to "
+        "access a database that is inaccessible to computing nodes.")
+    args = ap.parse_args()
+    instance = AbstractBioinfoWorkflow(
+        inputSuffixList=args.inputSuffixList, 
+        pegasusFolderName=args.pegasusFolderName,
+        site_handler=args.site_handler, 
+        input_site_handler=args.input_site_handler,
+        cluster_size=args.cluster_size,
+        output_path=args.output_path,
+
+        home_path=args.home_path,
+        javaPath=args.javaPath,
+        pymodulePath=args.pymodulePath,
+        thisModulePath=args.thisModulePath,
+        plinkPath=args.plinkPath,
+        
+        tmpDir=args.tmpDir,
+        max_walltime=args.max_walltime,
+        jvmVirtualByPhysicalMemoryRatio=args.jvmVirtualByPhysicalMemoryRatio,
+        needSSHDBTunnel=args.needSSHDBTunnel,
+        debug=args.debug,
+        report=args.report)
+    instance.setup_run()
+    instance.end_run()

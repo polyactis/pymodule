@@ -100,11 +100,12 @@ class ImportIndividualSequence2DB(ParentClass):
     option_default_dict = copy.deepcopy(ParentClass.option_default_dict)
     option_default_dict.update(ParentClass.db_option_dict)
     option_default_dict.update({
-        ('input_path', 1, ): ['', 'i', 1, 'If it is a folder, get all .bam/.sam/.fastq files recursively. '
+        ('input_path', 1, ): ['', 'i', 1,
+            'If it is a folder, get all .bam/.sam/.fastq files recursively. '
             'If it is a file, every line should be a path to an input file.', ],\
-        ('SplitReadFileJarPath', 1, ): ["%s/script/picard/dist/SplitReadFile.jar", '', 1, 
+        ('SplitReadFileJarPath', 1, ): ["script/picard/dist/SplitReadFile.jar", '', 1, 
             'path to the SplitReadFile jar', ],\
-        ('picard_path', 1, ): ["%s/script/picard.broad/build/libs/picard.jar", '', 1, 
+        ('picard_path', 1, ): ["script/picard.broad/build/libs/picard.jar", '', 1, 
             'path to the new picard jar', ],\
         ('sample_sheet', 0, ): ['', '', 1, 
             'a tsv-format file detailing the corresponding sample ID of each input file.', ],\
@@ -187,7 +188,7 @@ Example ("Library" and "Bam Path" are required):
             if pa_search:
                 code = pa_search.group(1)
             else:
-                logging.warn("Could not parse sample ID from %s. Ignore.\n"%(code))
+                logging.warn(f"Could not parse sample ID from {code}. Ignore.")
                 continue
             bamFname = row[bamFnameIndex]
             bamBaseFname = os.path.split(bamFname)[1]
@@ -1231,8 +1232,8 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
                         #  center_id (sequencer.id)
                         result = tcga_barcode_re.search(description)
                         if result is None:
-                            print("\n  ERROR: not enough (!=7) fields in tcga_barcode of %s/%s: %s."%
-                                (input_path, subfilename, description), flush=True)
+                            logging.error("Not enough (!=7) fields in tcga_barcode of %s/%s: %s."%
+                                (input_path, subfilename, description))
                             sys.exit(-2)
                         tcga_barcode = result.group()
                         split_row = tcga_barcode.split('-')
@@ -1259,8 +1260,8 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
                         #get md5sum
                         fileElemLs = root.findall("ANALYSIS_SET/ANALYSIS/DATA_BLOCK/FILES/FILE")
                         if len(fileElemLs)!=1:
-                            print(f"\n  ERROR: number of files with MD5SUM in %s/%s is not one. It is %s."%
-                                (input_path, subfilename, len(fileElemLs)), flush=True)
+                            logging.error("Number of files with MD5SUM in %s/%s is not one. It is %s."%
+                                (input_path, subfilename, len(fileElemLs)))
                             sys.exit(-2)
                         filename = fileElemLs[0].get('filename')
                         md5sum = fileElemLs[0].get('checksum')
@@ -1270,8 +1271,7 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
                         if filename[-4:]==".bam":
                             sample_obj.md5sum = md5sum
                         else:
-                            print("\n  ERROR: md5sum is for a non-bam file, %s."%(filename),
-                                flush=True)
+                            logging.error("md5sum is for a non-bam file, %s."%(filename))
                             sys.exit(-3)
                         noOfTargets+=1
                 if noOfTargets==2:

@@ -40,11 +40,11 @@ class AbstractWorkflow(Workflow):
     option_default_dict = {
         ("home_path", 1, ): [os.path.expanduser("~"), 'e', 1, \
             'path to the home directory on the working nodes'],\
-        ("pymodulePath", 1, ): ["%s/src/pymodule", '', 1, 'path to the pymodule folder'],\
-        ("thisModulePath", 1, ): ["%s", '', 1, 
+        ("pymodulePath", 1, ): ["src/pymodule", '', 1, 'path to the pymodule folder'],\
+        ("thisModulePath", 1, ): ["", '', 1, 
             'path of the module that owns this program. '
             'used to add executables from this module.'],\
-        ("javaPath", 1, ): ["%s/bin/java", 'J', 1, 'the path to java binary'],\
+        ("javaPath", 1, ): ["bin/java", 'J', 1, 'the path to java binary'],\
         ("site_handler", 1, ): ["condor", 'l', 1, 
             'which computing site to run the jobs. check your Pegasus setup.'],\
         ("input_site_handler", 0, ): ["None", 'j', 1, 
@@ -70,7 +70,7 @@ class AbstractWorkflow(Workflow):
         ('max_walltime', 1, int):[4320, '', 1, \
             'maximum wall time any job could have, in minutes. 20160=2 weeks.\n'
             'used in addGenericJob().'],\
-        ('jvmVirtualByPhysicalMemoryRatio', 1, float):[1.0, '', 1, 
+        ('jvmVirtualByPhysicalMemoryRatio', 1, float):[1.2, '', 1, 
             "if a job's virtual memory (usually 1.2X of JVM resident memory) exceeds request, "
             "it will be killed on hoffman2. Hence this argument"],\
         ('debug', 0, int):[0, 'b', 0, 'toggle debug mode'],\
@@ -78,10 +78,10 @@ class AbstractWorkflow(Workflow):
             'DB-interacting jobs need a ssh tunnel (running on cluster behind firewall).'],\
         ('report', 0, int):[0, 'r', 0, 'toggle report, more verbose stdout/stderr.']
         }
-        #("pegasusCleanupPath", 1, ): ["%s/bin/pegasus/bin/pegasus-cleanup", '', 1, \
+        #("pegasusCleanupPath", 1, ): ["bin/pegasus/bin/pegasus-cleanup", '', 1, \
         #    'path to pegasus-cleanup executable, it will be registered to run in local '
         #    'universe of condor pool (rather than the vanilla universe)'],\
-        #("pegasusTransferPath", 1, ): ["%s/bin/pegasus/bin/pegasus-transfer", '', 1, \
+        #("pegasusTransferPath", 1, ): ["bin/pegasus/bin/pegasus-transfer", '', 1, \
         #    'path to pegasus-transfer executable, it will be registered to run in local '
         #     'universe of condor pool (rather than the vanilla universe)'],\
         #('bamListFname', 1, ): ['/tmp/bamFileList.txt', 'L', 1, 
@@ -89,28 +89,37 @@ class AbstractWorkflow(Workflow):
 
     pathToInsertHomePathList = ['javaPath', 'pymodulePath', 'plinkPath', "thisModulePath"]
 
-    def __init__(self, inputArgumentLs=None, **keywords):
+    def __init__(self, inputArgumentLs=None, inputSuffixList=None, 
+        pegasusFolderName='folder',
+        site_handler='condor', input_site_handler='condor', cluster_size=30,
+        output_path=None,
+        tmpDir='/tmp/', max_walltime=4320,
+        home_path=None, javaPath=None, 
+        pymodulePath="src/pymodule", thisModulePath=None,
+        jvmVirtualByPhysicalMemoryRatio=1.2,
+        needSSHDBTunnel=False, commit=False,
+        debug=False, report=False):
         """
         2013.06.27
-        add argument inputArgumentLs to include everything on the tail of the commandline
-        2012.5.23
+        argument inputArgumentLs to include everything in the tail of a commandline
         """
-        self.ad = ProcessOptions.process_function_arguments(keywords, \
-            self.option_default_dict, error_doc=self.__doc__, \
-            class_to_have_attr=self)
-        Workflow.__init__(self, inputSuffixList=self.inputSuffixList,
-            pegasusFolderName=self.pegasusFolderName,
-            output_path=self.output_path,
-            site_handler=self.site_handler,
-            input_site_handler=self.input_site_handler,
-            cluster_size=self.cluster_size,
-            tmpDir=self.tmpDir, max_walltime=self.max_walltime, 
-            home_path=self.home_path,
-            javaPath=self.javaPath,
-            jvmVirtualByPhysicalMemoryRatio=self.jvmVirtualByPhysicalMemoryRatio,
-            needSSHDBTunnel=self.needSSHDBTunnel,
-            debug=self.debug, report=self.report, commit=self.commit)
+        if not home_path:
+            home_path = os.path.expanduser("~")
+        Workflow.__init__(self, inputSuffixList=inputSuffixList,
+            pegasusFolderName=pegasusFolderName,
+            site_handler=site_handler,
+            input_site_handler=input_site_handler,
+            cluster_size=cluster_size,
+            output_path=output_path,
+            tmpDir=tmpDir, max_walltime=max_walltime, 
+            home_path=home_path,
+            javaPath=javaPath,
+            jvmVirtualByPhysicalMemoryRatio=jvmVirtualByPhysicalMemoryRatio,
+            needSSHDBTunnel=needSSHDBTunnel, commit=commit,
+            debug=debug, report=report)
         
+        self.pymodulePath = pymodulePath
+        self.thisModulePath = thisModulePath
         self.inputArgumentLs = inputArgumentLs
         if self.inputArgumentLs is None:
             self.inputArgumentLs = []
@@ -1158,57 +1167,66 @@ inputFileFormat   1: csv-like plain text file; 2: YHPyTables.YHFile; 3: HDF5Matr
 if __name__ == '__main__':
     from argparse import ArgumentParser
     ap = ArgumentParser()
-    ap.add_argument("-l", "--site_handler", type=str, required=True,
-            help="The name of the computing site where the jobs run and executables are stored. "
-            "Check your Pegasus configuration in submit.sh.")
-    ap.add_argument("-j", "--input_site_handler", type=str,
-            help="It is the name of the site that has all the input files."
-            "Possible values can be 'local' or same as site_handler."
-            "If not given, it is asssumed to be the same as site_handler and "
-            "the input files will be symlinked into the running folder."
-            "If input_site_handler=local, the input files will be transferred "
-            "to the computing site by pegasus-transfer.")
-    ap.add_argument("-C", "--cluster_size", type=int, default=30,
-            help="Default: %(default)s. "
-            "This number decides how many of pegasus jobs should be clustered into one job. "
-            "Good if your workflow contains many quick jobs. "
-            "It will reduce Pegasus monitor I/O.")
-    ap.add_argument("-o", "--output_path", type=str, required=True,
-            help="The path to the output file that will contain the Pegasus DAG.")
-    ap.add_argument("-F", "--pegasusFolderName", type=str,
-            help='The path relative to the workflow running root. '
-            'This folder will contain pegasus input & output. '
-            'It will be created during the pegasus staging process. '
-            'It is useful to separate multiple sub-workflows. '
-            'If empty or None, everything is in the pegasus root.')
     ap.add_argument("--inputSuffixList", type=str,
-            help='Coma-separated list of input file suffices. Used to exclude input files.'
-            'If None, no exclusion. The dot is part of the suffix, .tsv not tsv.'
-            'Common zip suffices (.gz, .bz2, .zip, .bz) will be ignored in obtaining the suffix.')
+        help='Coma-separated list of input file suffices. Used to exclude input files.'
+        'If None, no exclusion. The dot is part of the suffix, .tsv not tsv.'
+        'Common zip suffices (.gz, .bz2, .zip, .bz) will be ignored in obtaining the suffix.')
+    ap.add_argument("-F", "--pegasusFolderName", type=str,
+        help='The path relative to the workflow running root. '
+        'This folder will contain pegasus input & output. '
+        'It will be created during the pegasus staging process. '
+        'It is useful to separate multiple sub-workflows. '
+        'If empty or None, everything is in the pegasus root.')
+    
+    ap.add_argument("-l", "--site_handler", type=str, required=True,
+        help="The name of the computing site where the jobs run and executables are stored. "
+        "Check your Pegasus configuration in submit.sh.")
+    ap.add_argument("-j", "--input_site_handler", type=str,
+        help="It is the name of the site that has all the input files."
+        "Possible values can be 'local' or same as site_handler."
+        "If not given, it is asssumed to be the same as site_handler and "
+        "the input files will be symlinked into the running folder."
+        "If input_site_handler=local, the input files will be transferred "
+        "to the computing site by pegasus-transfer.")
+    ap.add_argument("-C", "--cluster_size", type=int, default=30,
+        help="Default: %(default)s. "
+        "This number decides how many of pegasus jobs should be clustered into one job. "
+        "Good if your workflow contains many quick jobs. "
+        "It will reduce Pegasus monitor I/O.")
+    ap.add_argument("-o", "--output_path", type=str, required=True,
+        help="The path to the output file that will contain the Pegasus DAG.")
+    
     ap.add_argument("--tmpDir", type=str, default='/tmp/',
-            help='Default: %(default)s. A local folder for some jobs (MarkDup) to store temp data.'
-                '/tmp/ can be too small sometimes.')
+        help='Default: %(default)s. A local folder for some jobs (MarkDup) to store temp data.'
+        '/tmp/ can be too small sometimes.')
     ap.add_argument("--max_walltime", type=int, default=4320,
-            help='Default: %(default)s. Maximum wall time for any job, in minutes. 4320=3 days.'
-            'Used in addGenericJob(). Most clusters have upper limit for runtime.')
+        help='Default: %(default)s. Maximum wall time for any job, in minutes. 4320=3 days.'
+        'Used in addGenericJob(). Most clusters have upper limit for runtime.')
     ap.add_argument("--jvmVirtualByPhysicalMemoryRatio", type=float, default=1.2,
-            help='Default: %(default)s. '
-            'If a job virtual memory (usually 1.2X of JVM resident memory) exceeds request, '
-            "it will be killed on some clusters. "
-            "This will make sure your job requests enough memory.")
+        help='Default: %(default)s. '
+        'If a job virtual memory (usually 1.2X of JVM resident memory) exceeds request, '
+        "it will be killed on some clusters. "
+        "This will make sure your job requests enough memory.")
     ap.add_argument("--debug", action='store_true',
-            help='Toggle debug mode.')
+        help='Toggle debug mode.')
     ap.add_argument("--report", action='store_true',
-            help="Toggle verbose mode. Default: %(default)s.")
+        help="Toggle verbose mode. Default: %(default)s.")
     ap.add_argument("--needSSHDBTunnel", action='store_true',
-            help="If all DB-interacting jobs need a ssh tunnel to "
-            "access a database that is inaccessible to computing nodes.")
+        help="If all DB-interacting jobs need a ssh tunnel to "
+        "access a database that is inaccessible to computing nodes.")
     args = ap.parse_args()
-    instance = AbstractWorkflow(site_handler=args.site_handler, 
-        input_site_handler='condor', cluster_size=30, \
-        pegasusFolderName='folder', inputSuffixList=None, 
-        output_path=args.output_path, \
-        tmpDir='/tmp/', max_walltime=4320, jvmVirtualByPhysicalMemoryRatio=1.2,
-        debug=False, needSSHDBTunnel=False, report=False)
+    instance = AbstractWorkflow(
+        inputSuffixList=args.inputSuffixList, 
+        pegasusFolderName=args.pegasusFolderName,
+        site_handler=args.site_handler, 
+        input_site_handler=args.input_site_handler,
+        cluster_size=args.cluster_size,
+        output_path=args.output_path,
+        tmpDir=args.tmpDir,
+        max_walltime=args.max_walltime,
+        jvmVirtualByPhysicalMemoryRatio=args.jvmVirtualByPhysicalMemoryRatio,
+        needSSHDBTunnel=args.needSSHDBTunnel,
+        debug=args.debug,
+        report=args.report)
     instance.setup_run()
     instance.end_run()

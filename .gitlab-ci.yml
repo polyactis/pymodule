@@ -66,9 +66,9 @@ CountReadsWorkflow:
   script:
     - echo "Output a CountReadsWorkflow DAG ... "
     - pwd
-    - ./ngs/qc/CountReadsWorkflow.py -i 1-800 -j condor -l condor
-      -o CountReads.ISQ1-800.xml --ref_ind_seq_id 633 --hostname pdc
-      --dbname pmdb -k sunset --commit -u sunset_r -p yfishLabSunset
+    - ./ngs/qc/CountReadsWorkflow.py -i 1-800 -o CountReads.ISQ1-800.xml
+      -l condor --hostname pdc --dbname pmdb --schema sunset
+      -u sunset_r -p yfishLabSunset --commit
   artifacts:
     name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}_${CI_BUILD_ID}"
     expire_in: 3 mos

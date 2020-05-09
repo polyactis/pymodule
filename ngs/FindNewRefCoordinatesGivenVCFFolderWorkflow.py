@@ -57,25 +57,37 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, Sh
 	option_default_dict = ParentClass.option_default_dict.copy()
 	option_default_dict.update(ShortRead2AlignmentWorkflow.alignment_option_dict.copy())
 	option_default_dict.update({
-						('oldRefFastaFname', 1, ): ['', '', 1, 'path to the old reference sequence file (on which input VCF is based)', ],\
-						("formatdbPath", 1, ): ["%s/bin/blast/bin/formatdb", 'f', 1, 'path to formatdb, index fasta database file'],\
-						("blastallPath", 1, ): ["%s/bin/blast/bin/blastall", 's', 1, 'path to blastall'],\
-						('newRefFastaFname', 1, ): ['', '', 1, 'path to the new reference sequence file (blast db)', ],\
+		('oldRefFastaFname', 1, ): ['', '', 1, 
+                    'path to the old reference sequence file (on which input VCF is based)', ],\
+		("formatdbPath", 1, ): ["bin/blast/bin/formatdb", 'f', 1, 
+                    'path to formatdb, index fasta database file'],\
+		("blastallPath", 1, ): ["bin/blast/bin/blastall", 's', 1, 'path to blastall'],\
+		('newRefFastaFname', 1, ): ['', '', 1, 
+                    'path to the new reference sequence file (blast db)', ],\
 						
-						('minNoOfIdentities', 0, int): [None, '', 1, 'minimum number of identities between a query and target', ],\
-						('maxNoOfMismatches', 0, int): [None, '', 1, 'minimum number of mismatches between a query and target', ],\
-						('minIdentityFraction', 0, float): [None, '', 1, 'minimum percentage of identities between a query and target', ],\
-						('flankingLength', 1, int): [49, '', 1, 'number of flanking bases on either side of the locus.\n\
-	length of flanking = 2*flankingLength+locusLength', ],\
-						('minAlignmentSpan', 0, int): [None, '', 1, 'minimum length of alignment in blast. if not set, 1.8 X flankingLength', ],\
+		('minNoOfIdentities', 0, int): [None, '', 1, 
+                    'minimum number of identities between a query and target', ],\
+		('maxNoOfMismatches', 0, int): [None, '', 1, 
+                    'minimum number of mismatches between a query and target', ],\
+		('minIdentityFraction', 0, float): [None, '', 1,
+                    'minimum percentage of identities between a query and target', ],\
+		('flankingLength', 1, int): [49, '', 1, 
+                    'number of flanking bases on either side of the locus.'
+                    'length of flanking = 2*flankingLength+locusLength', ],\
+		('minAlignmentSpan', 0, int): [None, '', 1, 
+                    'minimum length of alignment in blast. if not set, 1.8 X flankingLength', ],\
 						
-						('alignmentMethodType', 1, int): [1, '', 1, 'which alignment program to use: 1 blast; 2 bwa-mem; 3 bwa-aln', ],\
-						('maxMissingAlignmentFraction', 1, float): [0.04, '', 1, ' max fraction of missing alignments given 2% uniform base error rate if FLOAT.', ],\
-						('maxNoOfGaps', 0, int): [0, '', 1, 'Maximum number of gap opens', ],\
-						('maxSwitchDensity', 0, float): [0.01, '', 1, 'Maximum switch density (#switches/#loci) for one interval to be included in final variants', ],\
-						('minLiftOverMapPvalue', 1, float): [0.5, '', 1, 'locus with mapPvalue lower than this would be removed.', ],\
-						
-						})
+		('alignmentMethodType', 1, int): [1, '', 1, 
+                    'which alignment program to use: 1 blast; 2 bwa-mem; 3 bwa-aln', ],\
+		('maxMissingAlignmentFraction', 1, float): [0.04, '', 1, 
+                    'max fraction of missing alignments given 2% uniform base error rate if FLOAT.', ],\
+		('maxNoOfGaps', 0, int): [0, '', 1, 'Maximum number of gap opens', ],\
+		('maxSwitchDensity', 0, float): [0.01, '', 1, 
+                    'Maximum switch density (#switches/#loci) for one interval to be included in final variants', ],\
+		('minLiftOverMapPvalue', 1, float): [0.5, '', 1, 
+                    'locus with mapPvalue lower than this would be removed.', ],\
+				
+		})
 	
 	#2012.9.25 no overlap and make the interval a lot smaller, (for VCF file)
 	option_default_dict[('intervalOverlapSize', 1, int)][0] = 0

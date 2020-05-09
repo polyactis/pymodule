@@ -40,9 +40,9 @@ class PopGenSimulationWorkflow(ParentClass):
 			measured in terms of the number of chromosomes (haploid).'],\
 						("noOfLociToSimulate", 1, int): [1, '', 1, 'how many loci to simulate'],\
 						("simulateLocusLengthList", 1, ): ['10000000', '', 1, 'a coma-separated list of locus length to simulate. if not a list, assuming just one locus'],\
-						("sfs_code_path", 1, ): ['%s/script/repository/sfscode/bin/sfs_code', '', 1, 'path to the sfs_code pop-gen forward simulator'],\
-						("slim_path", 1, ): ['%s/script/repository/slim/slim', '', 1, 'path to the slim pop-gen forward simulator'],\
-						("msHOT_lite_path", 1, ): ['%s/script/lh3_foreign/msHOT-lite/msHOT-lite', '', 1, 'path to the ms pop-gen backwards simulator'],\
+						("sfs_code_path", 1, ): ['script/repository/sfscode/bin/sfs_code', '', 1, 'path to the sfs_code pop-gen forward simulator'],\
+						("slim_path", 1, ): ['script/repository/slim/slim', '', 1, 'path to the slim pop-gen forward simulator'],\
+						("msHOT_lite_path", 1, ): ['script/lh3_foreign/msHOT-lite/msHOT-lite', '', 1, 'path to the ms pop-gen backwards simulator'],\
 						
 						
 						("simulateIndels", 0, int): [0, '', 1, 'toggle to simulate insertion/deletion polymorphism as well in pop-gen simulation'],\

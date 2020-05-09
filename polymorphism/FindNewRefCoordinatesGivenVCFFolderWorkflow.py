@@ -58,8 +58,8 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, Sh
 	option_default_dict.update(ShortRead2AlignmentWorkflow.alignment_option_dict.copy())
 	option_default_dict.update({
 						('oldRefFastaFname', 1, ): ['', '', 1, 'path to the old reference sequence file (on which input VCF is based)', ],\
-						("formatdbPath", 1, ): ["%s/bin/blast/bin/formatdb", 'f', 1, 'path to formatdb, index fasta database file'],\
-						("blastallPath", 1, ): ["%s/bin/blast/bin/blastall", 's', 1, 'path to blastall'],\
+						("formatdbPath", 1, ): ["bin/blast/bin/formatdb", 'f', 1, 'path to formatdb, index fasta database file'],\
+						("blastallPath", 1, ): ["bin/blast/bin/blastall", 's', 1, 'path to blastall'],\
 						('newRefFastaFname', 1, ): ['', '', 1, 'path to the new reference sequence file (blast db)', ],\
 						
 						('minNoOfIdentities', 0, int): [None, '', 1, 'minimum number of identities between a query and target', ],\
