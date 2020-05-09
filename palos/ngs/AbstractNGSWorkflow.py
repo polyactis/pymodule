@@ -27,7 +27,8 @@ class AbstractNGSWorkflow(ParentClass):
     option_default_dict.update(ParentClass.db_option_dict)
     option_default_dict.update({
         ('ref_ind_seq_id', 1, int): [None, 'a', 1, 
-            'IndividualSequence.id. To pick alignments with this sequence as reference', ],
+            'Restrict alignments that using this (IndividualSequence.id) as'
+            ' reference'],
         ("samtools_path", 1, ): ["%s/bin/samtools", '', 1, 'samtools binary'],
         ("picard_dir", 1, ): ["%s/script/picard/dist", '', 1, 
             'picard folder containing its jar binaries'],
@@ -36,9 +37,10 @@ class AbstractNGSWorkflow(ParentClass):
             'https://github.com/polyactis/gatk using jdk 1.6'],
         ("gatk2_path", 1, ): ["%s/bin/GenomeAnalysisTK.jar", '', 1, 
             'jar of GATK version 2 or afterwards.'],
-        ('picard_path', 1, ): ["%s/script/picard.broad/build/libs/picard.jar", '', 1,
-            'path to the new picard jar'],
-        ('tabixPath', 1, ): ["%s/bin/tabix", '', 1, 'path to the tabix binary'],
+        ('picard_path', 1, ): ["%s/script/picard.broad/build/libs/picard.jar",
+            '', 1, 'path to the new picard jar'],
+        ('tabixPath', 1, ): ["%s/bin/tabix", '', 1,
+            'path to the tabix binary'],
         ('bgzipPath', 1, ): ["%s/bin/bgzip", '', 1, 
             'path to the bgzip binary'],
         ('vcftoolsPath', 1, ): ["%s/bin/vcftools/vcftools", '', 1, 
@@ -48,54 +50,53 @@ class AbstractNGSWorkflow(ParentClass):
         ("ligateVcfPerlPath", 1, ): ["%s/bin/ligateVcf.pl", '', 1, 
             'path to ligateVcf.pl'],
         ("vcfsorterPath", 1, ): ["%s/bin/vcfsorter.pl", '', 1, 
-            'path to vcfsorter.pl, http://code.google.com/p/vcfsorter/'],\
-
+            'path to vcfsorter.pl, http://code.google.com/p/vcfsorter/'],
         #to filter chromosomes
         ('maxContigID', 0, int): [None, 'x', 1, 
-            'if contig/chromosome(non-sex) ID > this number, '
+            'If contig/chromosome(non-sex) ID > this number, '
             'it will not be included. If None or 0, no restriction.'],
         ('minContigID', 0, int): [None, 'V', 1, 
-            'if contig/chromosome(non-sex) ID < this number, '
+            'If contig/chromosome(non-sex) ID < this number, '
             'it will not be included. If None or 0, no restriction.'],
         ("contigMaxRankBySize", 1, int): [2500, 'N', 1, 
-            'maximum rank (rank 1=biggest) of a contig/chr to be included in calling'],
+            'Maximum rank (rank 1=biggest) of a chr to be included in calling'],
         ("contigMinRankBySize", 1, int): [1, 'M', 1, 
-            'minimum rank (rank 1=biggest) of a contig/chr to be included in calling'],
+            'Minimum rank (rank 1=biggest) of a chr to be included in calling'],
         ('chromosome_type_id', 0, int):[None, '', 1, 
-            'what type of chromosomes to be included, '
+            'What type of chromosomes to be included, '
             'same as table genome.chromosome_type. '
             '0 or None: all, 1: autosomes, 2: X, 3:Y, 4: mitochondrial '],
         ('ref_genome_tax_id', 0, int):[9606, '', 1, 
-            'used to fetch chromosome info from GenomeDB. '
+            'Used to fetch chromosome info from GenomeDB. '
             'Column GenomeDB.AnnotAssembly.tax_id'],\
         ('ref_genome_sequence_type_id', 0, int):[1, '', 1, 
             'Used to fetch chromosome info from GenomeDB. '
-            'Column GenomeDB.SequenceType.id 1: assembledChromosome, 9: Scaffold'],\
+            'Column GenomeDB.SequenceType.id'
+            ' 1: assembledChromosome, 9: Scaffold'],
         ('ref_genome_version', 0, int):[15, '', 1, 
-            'used to fetch chromosome info from GenomeDB. '
+            'Used to fetch chromosome info from GenomeDB. '
             'Column GenomeDB.AnnotAssembly.version'],\
         ('ref_genome_outdated_index', 0, int):[0, '', 1, 
-            'used to fetch chromosome info from GenomeDB. 0 means not outdated. '
+            'Used to fetch chromosome info from GenomeDB. 0 means not outdated. '
             'Column GenomeDB.AnnotAssembly.outdated_index'],\
 
         ('completedAlignment', 0, int):[None, '', 1, 
-            'a flag that filters incomplete alignments: '
+            'To filter incomplete alignments: '
             '--completedAlignment 0 is same as --skipDoneAlignment. '
             '--completedAlignment 1 gets you only the alignments that has been '
             ' completed. Default (None) has no effect.'],\
         ('mask_genotype_method_id', 0, int):[None, '', 1, 
-            'to filter alignments with this field'],\
+            'To filter alignments with this field'],\
         ('skipDoneAlignment', 0, int):[0, '', 0, 
-            'skip alignment whose db_entry is complete and affiliated file is valid'
+            'Skip alignment whose db_entry is complete and affiliated file is valid'
             '(for ShortRead2AlignmentWorkflow or '
             'AlignmentReadBaseQualityRecalibrationWorkflow)'],\
         ('checkEmptyVCFByReading', 0, int):[0, 'E', 0, 
-            'toggle to check if a vcf file is empty by reading its content'],\
+            'Toggle to check if a vcf file is empty by reading its content'],\
         ("needFastaIndexJob", 0, int): [0, 'A', 0, 
-            'need to add a reference index job by samtools?'],\
+            'Need to add a reference index job by samtools?'],\
         ("needFastaDictJob", 0, int): [0, 'B', 0, 
-            'need to add a reference dict job by picard CreateSequenceDictionary.jar?'],\
-
+            'Need to add a reference dict job by picard CreateSequenceDictionary.jar?'],\
         #to filter alignment or individual_sequence
         ("reduce_reads", 0, int): [None, '', 1, 
             'To filter which input alignments to fetch from db'],\
@@ -556,7 +557,7 @@ class AbstractNGSWorkflow(ParentClass):
         job_max_memory = memRequirementData.memRequirement
         javaMemRequirement = memRequirementData.memRequirementInStr
         baiFile = File('%s.bai'%inputBamF.name)
-        extraArgumentList = [memRequirementData.memRequirementInStr, 
+        extraArgumentList = [javaMemRequirement, 
             '-jar', self.PicardJar, 'BuildBamIndex',\
             "VALIDATION_STRINGENCY=LENIENT", \
             "INPUT=", inputBamF, "OUTPUT=", baiFile]
