@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 20111122
-    a common class for pegasus workflows that work on NGS (next-gen sequencing) data
+    a pegasus workflow class for analyzing NGS (next-gen sequencing) data
 """
 import sys, os, math
 import logging
@@ -79,7 +79,7 @@ class AbstractNGSWorkflow(ParentClass):
             'Column GenomeDB.AnnotAssembly.outdated_index'],\
 
         ('completedAlignment', 0, int):[None, '', 1, 
-            'a flag requiring whether user chooses alignment that has been completed or not. '
+            'a flag that filters incomplete alignments: '
             '--completedAlignment 0 is same as --skipDoneAlignment. '
             '--completedAlignment 1 gets you only the alignments that has been '
             ' completed. Default (None) has no effect.'],\
@@ -100,16 +100,19 @@ class AbstractNGSWorkflow(ParentClass):
         ("reduce_reads", 0, int): [None, '', 1, 
             'To filter which input alignments to fetch from db'],\
         ('excludeContaminant', 0, int):[0, '', 0, 
-            'toggle this to exclude alignments or sequences that are from contaminated individuals, '
+            'Toggle to exclude alignments or sequences from contaminated individuals, '
             '(IndividualSequence.is_contaminated=1)'],\
         ("sequence_filtered", 0, int): [None, 'Q', 1, 
-            'to filter alignments/individual_sequences. '
-            'None: whatever; 0: unfiltered sequences, 1: filtered sequences: 2: ...'],\
-        ("site_id_ls", 0, ): ["", 'S', 1, 'comma/dash-separated list of site IDs. '
+            'Filter alignments/individual_sequences. '
+            'None: no filter, 0: unfiltered sequences, 1: filtered sequences: 2: ...'],\
+        ("site_id_ls", 0, ): ["", 'S', 1,
+            'comma/dash-separated list of site IDs. '
             'individuals must come from these sites.'],\
-        ("country_id_ls", 0, ): ["", '', 1, 'comma/dash-separated list of country IDs. '
+        ("country_id_ls", 0, ): ["", '', 1,
+            'comma/dash-separated list of country IDs. '
             'individuals must come from these countries.'],\
-        ("tax_id_ls", 0, ): ["9606", '', 1, 'comma/dash-separated list of taxonomy IDs. '
+        ("tax_id_ls", 0, ): ["9606", '', 1,
+            'comma/dash-separated list of taxonomy IDs. '
             'individuals must come from these taxonomies.'],\
         ("sequence_type_id_ls", 0, ): ["", '', 1, 
             'comma/dash-separated list of IndividualSequence.sequence_type_id. '
@@ -143,11 +146,11 @@ class AbstractNGSWorkflow(ParentClass):
             'overlap #bps/#loci between adjacent intervals from one contig/chromosome, '
             'only used for TrioCaller, not for SAMtools/GATK', ],\
         ('intervalSize', 1, int): [5000000, 'Z', 1, 
-            '#bps/#loci for adjacent intervals from one contig/chromosome (alignment or VCF)', ],\
-
+            '#bps/#loci for adjacent intervals from one contig/chromosome '
+            '(alignment or VCF)', ],\
         ('defaultGATKArguments', 1, ): 
-            [" --unsafe ALL --validation_strictness SILENT --read_filter BadCigar ", '', 1, 
-            'arguments that will be added to every GATK-related job', ],\
+            [" --unsafe ALL --validation_strictness SILENT --read_filter BadCigar ",
+            '', 1, 'arguments that will be added to every GATK-related job'],
         })
 
     """
@@ -207,10 +210,8 @@ class AbstractNGSWorkflow(ParentClass):
         """
         ParentClass.connectDB(self)
         self.db_main = SunsetDB.SunsetDB(drivername=self.drivername,
-            hostname=self.hostname,
-            dbname=self.dbname, schema=self.schema,
-            db_user=self.db_user,
-            db_passwd=self.db_passwd)
+            hostname=self.hostname, dbname=self.dbname, schema=self.schema,
+            db_user=self.db_user, db_passwd=self.db_passwd)
         self.db_main.setup(create_tables=False)
 
         if not self.data_dir:
@@ -224,7 +225,8 @@ class AbstractNGSWorkflow(ParentClass):
         """
         Must be run after connectDB()
         """
-        print(f"Getting reference sequences (id={self.ref_ind_seq_id})...", flush=True)
+        print(f"Get and register reference sequence files "
+            f"(id={self.ref_ind_seq_id})...", flush=True)
         refSequence = self.db_main.queryTable(SunsetDB.IndividualSequence).\
             get(self.ref_ind_seq_id)
         refFastaFname = os.path.join(self.data_dir, refSequence.path)
@@ -233,7 +235,8 @@ class AbstractNGSWorkflow(ParentClass):
             registerAffiliateFiles=True,
             checkAffiliateFileExistence=True)
 
-        print(f" {len(registerReferenceData.refFastaFList)} files.", flush=True)
+        print(f"{len(registerReferenceData.refFastaFList)} files.",
+            flush=True)
         return registerReferenceData
 
     def getAlignments(self, db=None):
@@ -364,13 +367,14 @@ class AbstractNGSWorkflow(ParentClass):
                 'polymorphism/qc/mapper/FilterLocusBasedOnLocusStatFile.py'),
             name='FilterLocusBasedOnLocusStatFile', clusterSizeMultiplier=0.5)
         self.registerOneExecutable(path=self.javaPath,
-            name='CombineBeagleAndPreBeagleVariantsJava', clusterSizeMultiplier=0.6)
+            name='CombineBeagleAndPreBeagleVariantsJava',
+            clusterSizeMultiplier=0.6)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, 
                 "reducer/ligateVcf.sh"),
             name="ligateVcf", clusterSizeMultiplier=1)
         #2013.09.17 updated
         #self.registerOneExecutable(
-        #   path=os.path.join(self.pymodulePath, "polymorphism/qc/CheckTwoVCFOverlapCC"), \
+        #   path=os.path.join(self.pymodulePath, "polymorphism/qc/CheckTwoVCFOverlapCC"),
         #   name='CheckTwoVCFOverlapCC', clusterSizeMultiplier=1)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
             "mapper/splitter/SelectAndSplitFastaRecords.py"),\
@@ -423,11 +427,12 @@ class AbstractNGSWorkflow(ParentClass):
             path=os.path.join(self.pymodulePath, "shell/bgzip_tabix.sh"), \
             name='bgzip_tabix_in_reduce', clusterSizeMultiplier=1)
         self.registerOneExecutable(
-            path=os.path.join(self.pymodulePath, "mapper/converter/vcf_convert.sh"), \
+            path=os.path.join(self.pymodulePath, "mapper/converter/vcf_convert.sh"),
             name='vcf_convert', clusterSizeMultiplier=1)
-        #vcf_convert_in_reduce is used in reduce() functions, on whole-scaffold/chromosome VCFs,
+        #vcf_convert_in_reduce is used in reduce() functions,
+        #  on whole-scaffold/chromosome VCFs,
         self.registerOneExecutable(
-            path=os.path.join(self.pymodulePath, "mapper/converter/vcf_convert.sh"), \
+            path=os.path.join(self.pymodulePath, "mapper/converter/vcf_convert.sh"),
             name='vcf_convert_in_reduce', clusterSizeMultiplier=0.2)
 
         self.registerOneExecutable(
@@ -546,8 +551,8 @@ class AbstractNGSWorkflow(ParentClass):
         """
         if javaMaxMemory is not None and job_max_memory is None:
             job_max_memory = javaMaxMemory
-        memRequirementData = self.getJVMMemRequirment(job_max_memory=job_max_memory, 
-            minMemory=2000)
+        memRequirementData = self.getJVMMemRequirment(
+            job_max_memory=job_max_memory, minMemory=2000)
         job_max_memory = memRequirementData.memRequirement
         javaMemRequirement = memRequirementData.memRequirementInStr
         baiFile = File('%s.bai'%inputBamF.name)
@@ -564,13 +569,16 @@ class AbstractNGSWorkflow(ParentClass):
             extraDependentInputLs=[]
         extraDependentInputLs.extend([inputBamF, self.PicardJar])
 
-        job= self.addGenericJob(executable=BuildBamIndexFilesJava, inputFile=None,\
-            outputFile=None, outputArgumentOption="-o", \
-            parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
+        job= self.addGenericJob(executable=BuildBamIndexFilesJava,
+            inputFile=None, outputFile=None,
+            outputArgumentOption="-o",
+            parentJobLs=parentJobLs,
+            extraDependentInputLs=extraDependentInputLs,
             extraOutputLs=[baiFile],\
             transferOutput=transferOutput, \
             extraArgumentList=extraArgumentList, \
-            job_max_memory=memRequirementData.memRequirement, walltime=walltime, **keywords)
+            job_max_memory=memRequirementData.memRequirement,
+            walltime=walltime, **keywords)
         job.bamFile = inputBamF
         job.baiFile = baiFile
         #job.parentJobLs is where the actual alignment job and its bam/sam output are.
@@ -859,7 +867,8 @@ class AbstractNGSWorkflow(ParentClass):
             key2ObjectForJob['singletonPhasedOutputFile'] = phasedFile
             #additional likelihood-related output
             for suffix in ['.bgl.dose.gz', '.bgl.gprobs.gz', '.bgl.r2']:
-                _outputFile=File('%s.%s%s'%(outputFnamePrefix, inputFBasenamePrefix, suffix))
+                _outputFile=File('%s.%s%s'%(outputFnamePrefix,
+                    inputFBasenamePrefix, suffix))
                 extraOutputLs.append(_outputFile)
 
         if phasedBeagleInputFile:	#reference panel
@@ -951,17 +960,19 @@ class AbstractNGSWorkflow(ParentClass):
 
         Advanced options not recommended for general use:
 
-        dump=[file] specifies a file containing sample identifiers (one identifier per line). For
-            each marker window, all the sampled haplotypes for these individuals which are sampled
-            after the burn-in iterations are printed to an output VCF files (dump.[window #].gz).
+        dump=[file] specifies a file containing sample identifiers
+            (one identifier per line). For each marker window, all the sampled
+            haplotypes for these individuals which are sampled after the
+            burn-in iterations are printed to an output VCF files (dump.[window #].gz).
         nsamples=[positive integer] specifies the number of haplotype pairs to sample for each
             individual during each iteration of the algorithm (default: nsamples=4).
         buildwindow=[positive integer] specifies the number of markers used to build the
             haplotype frequency model at each locus (default: buildwindow=500).
 
 
-        Three output files are created whose names begin with the output file prefix specified on
-            the command line argument and whose names end with the suffixes: .log, .vcf.gz, and .ibd.
+        Three output files are created whose names begin with the output file
+            prefix specified on the command line argument and whose names end 
+            with the suffixes: .log, .vcf.gz, and .ibd.
 
         """
         if executable is None:
@@ -1135,15 +1146,16 @@ class AbstractNGSWorkflow(ParentClass):
         extraDependentInputLs.append(self.tabixExecutableFile)
         extraDependentInputLs.append(self.bgzipExecutableFile)
 
-        job = self.addGenericJob(executable=bgzip_tabix, inputFile=inputF, \
+        job = self.addGenericJob(executable=bgzip_tabix, inputFile=inputF,
             inputArgumentOption="", \
             outputFile=outputF, outputArgumentOption="", \
             parentJobLs=parentJobLs, 
             extraDependentInputLs=extraDependentInputLs, 
             extraOutputLs=extraOutputLs, \
             transferOutput=transferOutput, \
-            extraArguments=tabixArguments, extraArgumentList=extraArgumentList, \
-            job_max_memory=job_max_memory,  sshDBTunnel=None, \
+            extraArguments=tabixArguments,
+            extraArgumentList=extraArgumentList, 
+            job_max_memory=job_max_memory, sshDBTunnel=None,
             key2ObjectForJob=key2ObjectForJob, **keywords)
         return job
 
@@ -1172,10 +1184,11 @@ class AbstractNGSWorkflow(ParentClass):
         if parentDirJob:
             parentJobLs.append(parentDirJob)
 
-        job = self.addGenericJob(executable=concatExecutable, inputFile=None, 
+        job = self.addGenericJob(executable=concatExecutable, inputFile=None,
             inputArgumentOption="", \
             outputFile=outputF, outputArgumentOption="", \
-            parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs,
+            parentJobLs=parentJobLs,
+            extraDependentInputLs=extraDependentInputLs,
             extraOutputLs=extraOutputLs, \
             transferOutput=transferOutput, \
             extraArguments=None, extraArgumentList=extraArgumentList, \
@@ -1183,23 +1196,28 @@ class AbstractNGSWorkflow(ParentClass):
             key2ObjectForJob=key2ObjectForJob, **keywords)
         return job
 
-    def addGATKCombineVariantsJob(self, executable=None, GenomeAnalysisTKJar=None,
+    def addGATKCombineVariantsJob(self, executable=None,
+        GenomeAnalysisTKJar=None,
         refFastaFList=None, inputFileList=None, 
-        argumentForEachFileInInputFileList="--variant",\
-        outputFile=None, genotypeMergeOptions='UNSORTED', \
-        parentJobLs=None, transferOutput=True, job_max_memory=2000,walltime=None,
-        extraArguments=None, extraArgumentList=None, extraDependentInputLs=None,
+        argumentForEachFileInInputFileList="--variant",
+        outputFile=None, genotypeMergeOptions='UNSORTED',
+        parentJobLs=None, transferOutput=True,
+        job_max_memory=2000, walltime=None,
+        extraArguments=None, extraArgumentList=None,
+        extraDependentInputLs=None,
         **keywords):
         """
         Examples:
         add input file to this job via
             gatkUnionJob = self.addGATKCombineVariantsJob(...)
-            self.addInputToMergeJob(statMergeJob=gatkUnionJob, parentJobLs=[gatk_job], \
-                                    inputArgumentOption="--variant")
+            self.addInputToMergeJob(statMergeJob=gatkUnionJob,
+                parentJobLs=[gatk_job], inputArgumentOption="--variant")
         OR through the inputFileList argument
-            gatkUnionJob = self.addGATKCombineVariantsJob(.., inputFileList=[gatk_job.output, ...])
+            gatkUnionJob = self.addGATKCombineVariantsJob(.., 
+                inputFileList=[gatk_job.output, ...])
 
-        concatVCFFilename = os.path.join(outputDirJob.folder, '%s.vcf'%(passingData.fileBasenamePrefix))
+        concatVCFFilename = os.path.join(outputDirJob.folder, '%s.vcf'%\
+            (passingData.fileBasenamePrefix))
         concatVCFFile = File(concatVCFFilename)
         concatJob = self.addGATKCombineVariantsJob(executable=None,
             GenomeAnalysisTKJar=None,
@@ -1215,12 +1233,14 @@ class AbstractNGSWorkflow(ParentClass):
         for intervalJob in intervalJobLs:
             self.addInputToMergeJob(statMergeJob=concatJob, 
                 inputF=intervalJob.output, inputArgumentOption="--variant",\
-                parentJobLs=[intervalJob], extraDependentInputLs=intervalJob.outputLs[1:])
+                parentJobLs=[intervalJob],
+                extraDependentInputLs=intervalJob.outputLs[1:])
 
         2012.2.26 replacing addVCFConcatJob using GATK's CombineVariants analysis-type
         Value for genotypeMergeOptions:
             UNIQUIFY
-                Make all sample genotypes unique by file. Each sample shared across RODs gets named sample.ROD.
+                Make all sample genotypes unique by file.
+                Each sample shared across RODs gets named sample.ROD.
             PRIORITIZE
                 Take genotypes in priority order (see the priority argument).
             UNSORTED
@@ -1283,7 +1303,8 @@ class AbstractNGSWorkflow(ParentClass):
             frontArgumentList=None, extraArguments="-selectType INDEL", \
             extraArgumentList=None, extraOutputLs=None, \
             extraDependentInputLs=None, no_of_cpus=None, walltime=None)
-        2013.2.26 add gatkVCFIndexOutput to the extraOutputLs if outputFile is a .vcf file
+        2013.2.26 add gatkVCFIndexOutput to the extraOutputLs
+            if outputFile is a .vcf file.
         2013.2.26 a generic function to add GATK jobs
         """
         if executable is None:
@@ -1309,8 +1330,7 @@ class AbstractNGSWorkflow(ParentClass):
 
         frontArgumentList.extend([javaMemRequirement, '-jar', GenomeAnalysisTKJar, 
             "--reference_sequence",  refFastaFile, \
-            "-T", GATKAnalysisType,\
-            self.defaultGATKArguments])
+            "-T", GATKAnalysisType, self.defaultGATKArguments])
         extraDependentInputLs.append(GenomeAnalysisTKJar)
         if no_of_cpus:
             frontArgumentList.append("--num_threads %s"%no_of_cpus)
@@ -1322,7 +1342,8 @@ class AbstractNGSWorkflow(ParentClass):
                 frontArgumentList.extend(["-L", interval])
         gatkVCFIndexOutput = None
         if outputFile:	#2013.06.09 bugfix
-            outputFnameSuffix = utils.getRealPrefixSuffixOfFilenameWithVariableSuffix(outputFile.name)
+            outputFnameSuffix = utils.\
+                getRealPrefixSuffixOfFilenameWithVariableSuffix(outputFile.name)
             if outputFnameSuffix=='.vcf':
                 #2013.2.26 GATK will generate an index file along with the VCF output
                 gatkVCFIndexOutputFname = '%s.idx'%(outputFile.name)
@@ -1330,8 +1351,10 @@ class AbstractNGSWorkflow(ParentClass):
                 extraOutputLs.append(gatkVCFIndexOutput)
 
         if inputFile:
-            #2013.05.04 this could be None in some cases (addGATKCombineVariantsJob, inputFile is added in later)
-            inputFnameSuffix = utils.getRealPrefixSuffixOfFilenameWithVariableSuffix(inputFile.name)
+            #2013.05.04 this could be None in some cases
+            #  (addGATKCombineVariantsJob, inputFile is added in later)
+            inputFnameSuffix = utils.\
+                getRealPrefixSuffixOfFilenameWithVariableSuffix(inputFile.name)
             if inputFnameSuffix=='.vcf':
                 #2013.04.16 GATK will generate an index file along with the VCF input
                 inputGATKVCFIndexFname = '%s.idx'%(inputFile.name)
@@ -1402,14 +1425,16 @@ class AbstractNGSWorkflow(ParentClass):
         refFastaFList=None, inputFile=None, inputArgumentOption="-I", \
         inputFileList=None, argumentForEachFileInInputFileList=None,\
         outputFile=None, interval=None, \
-        extraArguments=None, extraArgumentList=None, extraDependentInputLs=None, 
+        extraArguments=None, extraArgumentList=None,
+        extraDependentInputLs=None,
         extraOutputLs=None,\
         parentJobLs=None, transferOutput=True, no_of_cpus=None, 
         job_max_memory=2000,walltime=60,\
         needBAMIndexJob=True, **keywords):
         """
         2013.06.06
-        a variant of addGATKJob() that outputs a bam file and thus a bam index file might be needed.
+        a variant of addGATKJob() that outputs a bam file and thus
+            a bam index file might be needed.
         """
         if executable is None:
             executable = self.GATKJava
@@ -1431,9 +1456,11 @@ class AbstractNGSWorkflow(ParentClass):
             parentJobLs=parentJobLs, transferOutput=transferOutput, 
             job_max_memory=job_max_memory,\
             frontArgumentList=None, 
-            extraArguments=extraArguments, extraArgumentList=extraArgumentList,
+            extraArguments=extraArguments,
+            extraArgumentList=extraArgumentList,
             extraOutputLs=extraOutputLs, \
-            extraDependentInputLs=extraDependentInputLs, no_of_cpus=no_of_cpus,
+            extraDependentInputLs=extraDependentInputLs,
+            no_of_cpus=no_of_cpus,
             walltime=walltime)
         if needBAMIndexJob:
             # add the index job on the bam file
@@ -1465,7 +1492,8 @@ class AbstractNGSWorkflow(ParentClass):
         extraOutputLs = [outputF]
         job = self.addGenericJob(executable=executable, inputFile=None, \
             outputFile=None, \
-            parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, 
+            parentJobLs=parentJobLs,
+            extraDependentInputLs=extraDependentInputLs,
             extraOutputLs=extraOutputLs, \
             transferOutput=transferOutput, \
             extraArguments=extraArguments, extraArgumentList=extraArgumentList,
@@ -1491,7 +1519,8 @@ class AbstractNGSWorkflow(ParentClass):
                 parentJobLs=[vcfSorterJob, returnData.filterLiftoverVariantsJob,
                     self.statDirJob])
 
-            self.addVCFBeforeAfterFilterStatJob(chromosome=chromosome, outputF=outputF, \
+            self.addVCFBeforeAfterFilterStatJob(chromosome=chromosome,
+                outputF=outputF,
                 currentVCFJob=currentVCFJob, lastVCFJob=lastVCFJob,\
                 statMergeJob=filterByMaxSNPMissingRateMergeJob)
 
@@ -1533,10 +1562,10 @@ class AbstractNGSWorkflow(ParentClass):
                 parentJobLs=[vcfFilterStatJob])
         return vcfFilterStatJob
 
-    def addVCF2MatrixJob(self, executable=None, inputVCF=None, outputFile=None, \
-        refFastaF=None, run_type=3, numberOfReadGroups=10, seqCoverageF=None, \
+    def addVCF2MatrixJob(self, executable=None, inputVCF=None, outputFile=None,
+        refFastaF=None, run_type=3, numberOfReadGroups=10, seqCoverageF=None,
         outputDelimiter=None, minDepth=0, \
-        parentJobLs=None, extraDependentInputLs=None, transferOutput=False, \
+        parentJobLs=None, extraDependentInputLs=None, transferOutput=False,
         extraArguments=None, job_max_memory=2000, **keywords):
         """
         2012.9.24 added argument minDepth
@@ -1564,20 +1593,23 @@ class AbstractNGSWorkflow(ParentClass):
         if minDepth is not None and minDepth>=0:
             extraArgumentList.append("--minDepth %s"%(minDepth))
 
-        job = self.addGenericJob(executable=executable, inputFile=inputVCF, 
+        job = self.addGenericJob(executable=executable, inputFile=inputVCF,
             inputArgumentOption="-i", \
             outputFile=outputFile, outputArgumentOption="-o", \
-            parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs,
+            parentJobLs=parentJobLs,
+            extraDependentInputLs=extraDependentInputLs,
             extraOutputLs=extraOutputLs, \
-            transferOutput=transferOutput, \
-            extraArguments=extraArguments, extraArgumentList=extraArgumentList,
+            transferOutput=transferOutput,
+            extraArguments=extraArguments,
+            extraArgumentList=extraArgumentList,
             job_max_memory=2000,  sshDBTunnel=None, \
             key2ObjectForJob=key2ObjectForJob, **keywords)
         return job
 
-    def addCalculatePairwiseDistanceFromSNPXStrainMatrixJob(self, executable=None, 
-        inputFile=None, outputFile=None, \
-        min_MAF=0, max_NA_rate=0.4, convertHetero2NA=0, hetHalfMatchDistance=0.5,\
+    def addCalculatePairwiseDistanceFromSNPXStrainMatrixJob(self,
+        executable=None, inputFile=None, outputFile=None, \
+        min_MAF=0, max_NA_rate=0.4, convertHetero2NA=0,
+        hetHalfMatchDistance=0.5,
         parentJobLs=[], extraDependentInputLs=[], transferOutput=False, \
         extraArguments=None, job_max_memory=2000, **keywords):
         """
@@ -1600,10 +1632,11 @@ class AbstractNGSWorkflow(ParentClass):
             self.depends(parent=genotypeCallByCoverage_job, child=calcula_job)
             self.depends(parent=matrixDirJob, child=calcula_job)
         """
-        job = Job(namespace=self.namespace, name=executable.name, version=self.version)
+        job = Job(namespace=self.namespace, name=executable.name,
+            version=self.version)
         job.addArguments("-i", inputFile,  "-n %s"%(min_MAF), \
-                    "-o", outputFile, '-m %s'%(max_NA_rate), '-c %s'%(convertHetero2NA),\
-                    '-H %s'%(hetHalfMatchDistance))
+            "-o", outputFile, '-m %s'%(max_NA_rate), '-c %s'%(convertHetero2NA),\
+            '-H %s'%(hetHalfMatchDistance))
         if extraArguments:
             job.addArguments(extraArguments)
         job.uses(inputFile, transfer=True, register=True, link=Link.INPUT)
@@ -1616,7 +1649,8 @@ class AbstractNGSWorkflow(ParentClass):
                 self.depends(parent=parentJob, child=job)
         for extraInputFile in extraDependentInputLs:
             if extraInputFile:
-                job.uses(extraInputFile, transfer=True, register=True, link=Link.INPUT)
+                job.uses(extraInputFile, transfer=True, register=True,
+                    link=Link.INPUT)
         self.no_of_jobs += 1
         return job
 
@@ -1759,15 +1793,16 @@ option:
         2013.04.05 moved from ShortRead2AlignmentWorkflow
         2012.9.19
         """
-        memRequirementData = self.getJVMMemRequirment(job_max_memory=job_max_memory, 
-            minMemory=2000)
+        memRequirementData = self.getJVMMemRequirment(
+            job_max_memory=job_max_memory, minMemory=2000)
         job_max_memory = memRequirementData.memRequirement
         javaMemRequirement = memRequirementData.memRequirementInStr
 
         extraArgumentList = [memRequirementData.memRequirementInStr, '-jar', 
             SortSamJar, "SortSam",\
             "SORT_ORDER=coordinate", "I=", inputBamFile, \
-            "O=", outputBamFile, "VALIDATION_STRINGENCY=LENIENT", "TMP_DIR=%s"%tmpDir]
+            "O=", outputBamFile, "VALIDATION_STRINGENCY=LENIENT",
+            "TMP_DIR=%s"%tmpDir]
             #not including 'SORT_ORDER=coordinate'
             #(adding the SORT_ORDER doesn't do sorting but it marks the header 
             #  as sorted so that BuildBamIndexJar won't fail.)
@@ -1777,18 +1812,19 @@ option:
             extraDependentInputLs=[]
         extraDependentInputLs.extend([inputBamFile, SortSamJar])
 
-        job= self.addGenericJob(executable=SortSamFilesJava, inputFile=None,\
+        job= self.addGenericJob(executable=SortSamFilesJava, inputFile=None,
             outputFile=None, outputArgumentOption="-o", \
-            parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
+            parentJobLs=parentJobLs,
+            extraDependentInputLs=extraDependentInputLs,
             extraOutputLs=[outputBamFile],\
             transferOutput=transferOutput, \
             extraArgumentList=extraArgumentList, \
-            job_max_memory=memRequirementData.memRequirement, \
+            job_max_memory=memRequirementData.memRequirement,
             walltime=walltime, **keywords)
         if needBAMIndexJob:
             # add the index job on the bam file
             bamIndexJob = self.addBAMIndexJob(
-                BuildBamIndexFilesJava=self.BuildBamIndexFilesJava, \
+                BuildBamIndexFilesJava=self.BuildBamIndexFilesJava,
                 BuildBamIndexJar=self.BuildBamIndexJar, \
                 inputBamF=job.output, parentJobLs=[job], \
                 transferOutput=transferOutput, job_max_memory=2500, 
@@ -1798,8 +1834,8 @@ option:
         job.bamIndexJob = bamIndexJob
         return job
 
-    def addReadGroupInsertionJob(self, individual_alignment=None, inputBamFile=None, \
-        outputBamFile=None,\
+    def addReadGroupInsertionJob(self, individual_alignment=None,
+        inputBamFile=None, outputBamFile=None,
         AddOrReplaceReadGroupsJava=None, AddOrReplaceReadGroupsJar=None,\
         parentJobLs=None, extraDependentInputLs=None, \
         extraArguments=None, job_max_memory = 2500, \
@@ -1817,7 +1853,7 @@ option:
 
         # add RG to this bam
         sequencer = individual_alignment.individual_sequence.sequencer
-        read_group = individual_alignment.getReadGroup()	#2012.9.19
+        read_group = individual_alignment.getReadGroup()
         if sequencer.short_name=='454':
             platform_id = 'LS454'
         elif sequencer.short_name=='GA':
@@ -1825,11 +1861,11 @@ option:
         else:
             platform_id = 'ILLUMINA'
         # the add-read-group job
-
         extraArgumentList = [memRequirementData.memRequirementInStr, \
             '-jar', AddOrReplaceReadGroupsJar, "AddOrReplaceReadGroups",\
             "INPUT=", inputBamFile,\
-            'RGID=%s'%(read_group), 'RGLB=%s'%(platform_id), 'RGPL=%s'%(platform_id), \
+            'RGID=%s'%(read_group), 'RGLB=%s'%(platform_id),
+            'RGPL=%s'%(platform_id),
             'RGPU=%s'%(read_group), 'RGSM=%s'%(read_group),\
             'OUTPUT=', outputBamFile, "VALIDATION_STRINGENCY=LENIENT"]
             #not including 'SORT_ORDER=coordinate'
@@ -1841,9 +1877,11 @@ option:
             extraDependentInputLs=[]
         extraDependentInputLs.extend([inputBamFile, AddOrReplaceReadGroupsJar])
 
-        job= self.addGenericJob(executable=AddOrReplaceReadGroupsJava, inputFile=None,\
+        job= self.addGenericJob(executable=AddOrReplaceReadGroupsJava,
+            inputFile=None,
             outputFile=None, outputArgumentOption="-o", \
-            parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
+            parentJobLs=parentJobLs,
+            extraDependentInputLs=extraDependentInputLs, \
             extraOutputLs=[outputBamFile],\
             transferOutput=transferOutput, \
             extraArgumentList=extraArgumentList, \
@@ -1896,10 +1934,11 @@ option:
                 BuildBamIndexFilesJava=self.BuildBamIndexFilesJava, \
                 BuildBamIndexJar=self.BuildBamIndexJar, \
                 inputBamF=job.output, parentJobLs=[job], \
-                transferOutput=transferOutput, job_max_memory=job_max_memory)
+                transferOutput=transferOutput,
+                job_max_memory=job_max_memory)
         else:
             bamIndexJob = None
-        job.bamIndexJob = bamIndexJob	#2013.04.09
+        job.bamIndexJob = bamIndexJob
         return job, bamIndexJob
 
     def getVCFFileID2object(self, inputDir):
@@ -1927,7 +1966,8 @@ option:
         sys.stderr.write("  found %s files.\n"%(len(vcfFileID2object)))
         return vcfFileID2object
 
-    def constructGenomeFileRBTreeByFilenameInterval(self, jobDataStructure=None, chr2size=None):
+    def constructGenomeFileRBTreeByFilenameInterval(self, jobDataStructure=None,
+        chr2size=None):
         """
         2013.09.18
         """
@@ -1956,13 +1996,14 @@ option:
     def extractVCFSitesIntoBEDFile(self, inputVCFFolder=None, outputFname=None):
         """
         2013.05.29
-            this function is for genotyping at existing sites.
-            BED format is 0-based, tab-delimited, no header, stop position is not inclusive.
-                i.e. to describe a single SNP at Contig994 and position=3446.
-                    Contig994	3445	3446
+        this function is for genotyping at existing sites.
+        BED format is 0-based, tab-delimited, no header.
+            stop position is not inclusive.
+            i.e. to describe a single SNP at Contig994 and position=3446.
+                Contig994	3445	3446
         """
-        sys.stderr.write("Extracting sites from vcf folder %s into file %s ...\n"%(
-            inputVCFFolder, outputFname))
+        print("Extracting sites from vcf folder %s into file %s ..."%(
+            inputVCFFolder, outputFname), flush=True)
         no_of_vcfFiles = 0
         no_of_loci = 0
         outputF = MatrixFile(path=outputFname, openMode='w', delimiter='\t')
@@ -1977,7 +2018,7 @@ option:
                         vcfRecord.position])
                 sys.stderr.write("%s%s\t%s "%('\x08'*40, no_of_vcfFiles, no_of_loci))
         outputF.close()
-        sys.stderr.write(" %s files and %s loci.\n"%(no_of_vcfFiles, no_of_loci))
+        print(f"{no_of_vcfFiles} files and {no_of_loci} loci.", flush=True)
 
 
     def addCheckTwoVCFOverlapJob(self, executable=None, vcf1=None, vcf2=None, 
@@ -2002,7 +2043,8 @@ option:
         #  2nd element is the proper name of the suffix.
         suffixAndNameTupleList = []
         #job.$nameFile will be the way to access the file.
-        #if 2nd element (name) is missing, suffix[1:].replace('.', '_') is the name (dot replaced by _)
+        #if 2nd element (name) is missing, suffix[1:].replace('.', '_')
+        #  is the name (dot replaced by _)
         if extraDependentInputLs is None:
             extraDependentInputLs = []
 
@@ -2023,7 +2065,8 @@ option:
             key2ObjectForJob['perSampleFile'] = perSampleConcordanceOutputFile
             extraOutputLs.append(perSampleConcordanceOutputFile)
         if overlapSiteOutputFile:
-            extraArgumentList.extend(["--overlappingSitesOutputFname", overlapSiteOutputFile])
+            extraArgumentList.extend(["--overlappingSitesOutputFname", 
+                overlapSiteOutputFile])
             #suffixAndNameTupleList.append(['_overlapSitePos.tsv','overlapSitePos'])
             key2ObjectForJob['overlapSitePosFile'] = overlapSiteOutputFile
             extraOutputLs.append(overlapSiteOutputFile)
@@ -2036,10 +2079,12 @@ option:
         #		extraOutputLs=extraOutputLs, key2ObjectForJob=key2ObjectForJob)
         job= self.addGenericJob(executable=executable, inputFile=vcf1,
             outputFile=outputFile, \
-            parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
+            parentJobLs=parentJobLs,
+            extraDependentInputLs=extraDependentInputLs,
             extraOutputLs=extraOutputLs,\
             transferOutput=transferOutput, \
-            extraArgumentList=extraArgumentList, job_max_memory=job_max_memory, \
+            extraArgumentList=extraArgumentList,
+            job_max_memory=job_max_memory,
             key2ObjectForJob=key2ObjectForJob, **keywords)
         #if outputFnamePrefix:
         #	job.overlapSitePosF = overlapSitePosF
@@ -2047,9 +2092,11 @@ option:
 
     def addFilterVCFByDepthJob(self, FilterVCFByDepthJava=None, 
         GenomeAnalysisTKJar=None, \
-        refFastaFList=None, inputVCFF=None, outputVCFF=None, outputSiteStatF=None, \
+        refFastaFList=None, inputVCFF=None, outputVCFF=None,
+        outputSiteStatF=None,
         parentJobLs=[], alnStatForFilterF=None, \
-        job_max_memory=1000, extraDependentInputLs=[], onlyKeepBiAllelicSNP=False, \
+        job_max_memory=1000, extraDependentInputLs=[],
+        onlyKeepBiAllelicSNP=False, 
         namespace=None, version=None, transferOutput=False, **keywords):
         """
         2013.04.09 added the VCFIndexFile in output (transfer=False)
@@ -2058,24 +2105,25 @@ option:
             add argument transferOutput, outputSiteStatF
         """
         # Add a mkdir job for any directory.
-        filterByDepthJob = Job(namespace=getattr(self, 'namespace', namespace), \
+        filterByDepthJob = Job(namespace=getattr(self, 'namespace', namespace),
             name=FilterVCFByDepthJava.name, \
             version=getattr(self, 'version', version))
         refFastaF = refFastaFList[0]
         filterByDepthJob.addArguments("-Xmx%sm"%(job_max_memory), \
-            "-jar", GenomeAnalysisTKJar, "-R", refFastaF, "-T FilterVCFByDepth", \
+            "-jar", GenomeAnalysisTKJar, "-R", refFastaF,
+            "-T FilterVCFByDepth",
             "--variant", inputVCFF, "-depthFname", alnStatForFilterF)
-        self.addJobUse(filterByDepthJob, file=GenomeAnalysisTKJar, transfer=True, \
-            register=True, link=Link.INPUT)
+        self.addJobUse(filterByDepthJob, file=GenomeAnalysisTKJar,
+            transfer=True, register=True, link=Link.INPUT)
         if outputVCFF:
             filterByDepthJob.addArguments("-o", outputVCFF)
-            filterByDepthJob.uses(outputVCFF, transfer=transferOutput, register=True, \
-                link=Link.OUTPUT)
+            filterByDepthJob.uses(outputVCFF, transfer=transferOutput,
+                register=True, link=Link.OUTPUT)
             filterByDepthJob.output = outputVCFF
 
             VCFIndexFile = File('%s.idx'%(outputVCFF.name))
-            self.addJobUse(job=filterByDepthJob, file=VCFIndexFile, transfer=False, \
-                register=True, link=Link.OUTPUT)
+            self.addJobUse(job=filterByDepthJob, file=VCFIndexFile,
+                transfer=False, register=True, link=Link.OUTPUT)
 
         if outputSiteStatF:
             filterByDepthJob.addArguments("-ssFname", outputSiteStatF)
@@ -2087,25 +2135,32 @@ option:
             filterByDepthJob.addArguments("--onlyKeepBiAllelicSNP")
 
         for refFastaFile in refFastaFList:
-            filterByDepthJob.uses(refFastaFile, transfer=True, register=True, link=Link.INPUT)
-        filterByDepthJob.uses(alnStatForFilterF, transfer=True, register=True, link=Link.INPUT)
-        filterByDepthJob.uses(inputVCFF, transfer=True, register=True, link=Link.INPUT)
+            filterByDepthJob.uses(refFastaFile, transfer=True, register=True,
+                link=Link.INPUT)
+        filterByDepthJob.uses(alnStatForFilterF, transfer=True, register=True,
+            link=Link.INPUT)
+        filterByDepthJob.uses(inputVCFF, transfer=True, register=True,
+            link=Link.INPUT)
         for inputF in extraDependentInputLs:
-            filterByDepthJob.uses(inputF, transfer=True, register=True, link=Link.INPUT)
+            filterByDepthJob.uses(inputF, transfer=True, register=True,
+                link=Link.INPUT)
         self.addJob(filterByDepthJob)
         for parentJob in parentJobLs:
             self.depends(parent=parentJob, child=filterByDepthJob)
-        pegaflow.setJobResourceRequirement(filterByDepthJob, job_max_memory=job_max_memory)
+        pegaflow.setJobResourceRequirement(filterByDepthJob,
+            job_max_memory=job_max_memory)
         self.no_of_jobs += 1
         return filterByDepthJob
 
     def addFilterJobByvcftools(self, vcftoolsWrapper=None, inputVCFF=None, 
         outputFnamePrefix=None, \
-        snpMisMatchStatFile=None, minMAC=None, minMAF=None, maxSNPMissingRate=None,\
+        snpMisMatchStatFile=None, minMAC=None, minMAF=None,
+        maxSNPMissingRate=None,\
         perIndividualDepth=False, perIndividualHeterozygosity=False, \
         perSiteHWE=False, haploLD=False, genoLD=False, minLDr2=0, 
         LDWindowByNoOfSites=None,\
-        LDWindowByBP=None, TsTvWindowSize=None, piWindowSize=None, perSitePI=False, \
+        LDWindowByBP=None, TsTvWindowSize=None, piWindowSize=None,
+        perSitePI=False, \
         SNPDensityWindowSize=None, calculateMissingNess=False, 
         calculateFreq=False, calculateFreq2=False,\
         getSiteDepth=False, getSiteMeanDepth=False, getSiteQuality=False,\
@@ -2123,9 +2178,10 @@ option:
             this could be just used to output vcf in various formats
 
         2011-11-21
-            argument vcftools is replaced with a wrapper, which takes vcftools path as 1st argument
-                outputFormat="--recode" instructs vcftools to output a VCF file.
-                Without it, "--recode-INFO-all" will do nothing.
+            argument vcftools is replaced with a wrapper,
+                which takes vcftools path as 1st argument
+            outputFormat="--recode" instructs vcftools to output a VCF file.
+            Without it, "--recode-INFO-all" will do nothing.
     "--recode-INFO-all" is added to vcftools to output input VCF also
          in VCF format and recalculate all the INFO fields.
     OR "--recode-INFO string" options only keeps key=string in the INFO field.
@@ -2173,7 +2229,8 @@ option:
         #  2nd element is the proper name of the suffix.
         suffixAndNameTupleList = []
         #job.$nameFile will be the way to access the file.
-        #if 2nd element (name) is missing, suffix[1:].replace('.', '_') is the name (dot replaced by _)
+        #if 2nd element (name) is missing, suffix[1:].replace('.', '_') 
+        # is the name (dot replaced by _)
 
         #prime output, added into extraOutputLs, ahead of all others.
         if outputFormat:
@@ -2182,15 +2239,16 @@ option:
         if outputFormat=='--recode':	#2012.5.9
             outputVCFF = File("%s.recode.vcf"%(outputFnamePrefix))
             extraOutputLs.insert(0, outputVCFF)
-                #since outputFile passed to addGenericJob is None, 1st entry of extraOutputLs
+                #since outputFile passed to addGenericJob is None,
+                #  1st entry of extraOutputLs
                 # becomes job.output
         elif outputFormat=='--plink-tped':
             suffixAndNameTupleList.extend([['.tped'], ['.tfam']])
         elif outputFormat=='--plink':
             suffixAndNameTupleList.extend([['.ped'], ['.fam']])
         elif outputFormat=='--IMPUTE':
-            suffixAndNameTupleList.extend([['.impute.hap'], ['.impute.hap.legend'],\
-                ['.impute.hap.indv']])
+            suffixAndNameTupleList.extend([['.impute.hap'], 
+                ['.impute.hap.legend'], ['.impute.hap.indv']])
         elif outputFormat=='--BEAGLE-GL':
             suffixAndNameTupleList.extend([['.BEAGLE.GL']])
             #output1 = File("%s.BEAGLE.GL"%(outputFnamePrefix))
@@ -2469,7 +2527,8 @@ Contig966       3160    50
 
         job= self.addGenericJob(executable=vcftoolsWrapper, inputFile=None,
             outputFile=None, \
-            parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs,
+            parentJobLs=parentJobLs,
+            extraDependentInputLs=extraDependentInputLs,
             extraOutputLs=extraOutputLs,\
             transferOutput=transferOutput, \
             extraArgumentList=extraArgumentList, 
@@ -2487,12 +2546,13 @@ Contig966       3160    50
 
         """
         job = Job(namespace=self.namespace, name=executable.name, \
-                                                version=self.version)
+            version=self.version)
         job.addArguments("-i", vcf1, "-j", vcf2, \
-                        "-m %s"%(maxSNPMismatchRate), '-o', snpMisMatchStatFile)
+            "-m %s"%(maxSNPMismatchRate), '-o', snpMisMatchStatFile)
         job.uses(vcf1, transfer=True, register=True, link=Link.INPUT)
         job.uses(vcf2, transfer=True, register=True, link=Link.INPUT)
-        job.uses(snpMisMatchStatFile, transfer=transferOutput, register=True, link=Link.OUTPUT)
+        job.uses(snpMisMatchStatFile, transfer=transferOutput, register=True,
+            link=Link.OUTPUT)
         pegaflow.setJobResourceRequirement(job, job_max_memory=job_max_memory)
         self.addJob(job)
         for input in extraDependentInputLs:
@@ -2509,8 +2569,10 @@ Contig966       3160    50
         """
         Examples:
         #tabix retrieve job
-        outputF = File(os.path.join(trioInconsistencyDir, '%s.trioInconsistency.tsv'%chromosome))
-        tabixRetrieveJob = self.addTabixRetrieveJob(executable=self.tabixRetrieve, \
+        outputF = File(os.path.join(trioInconsistencyDir, 
+            '%s.trioInconsistency.tsv'%chromosome))
+        tabixRetrieveJob = self.addTabixRetrieveJob(
+            executable=self.tabixRetrieve, \
             tabixPath=self.tabixPath, \
             inputF=trioInconsistencyByPosistionF, outputF=outputF, \
             regionOfInterest=chromosome, includeHeader=True,\
@@ -2519,13 +2581,16 @@ Contig966       3160    50
             transferOutput=False)
 
         #tabix index job
-        #index .vcf.gz, output of beagle, without index, GATK can't work on gzipped vcf
+        #index .vcf.gz, output of beagle, without index,
+        #  GATK can't work on gzipped vcf.
         tabixIndexFile = File('%s.tbi'%(beagleJob.output.name))
         tabixJob = self.addGenericJob(executable=self.tabix, \
             inputFile=beagleJob.output, inputArgumentOption="",\
-            outputFile=None, outputArgumentOption="-o", extraDependentInputLs=None, \
-            extraOutputLs=[beagleJob.output, tabixIndexFile], transferOutput=False, \
-            frontArgumentList=["-p vcf"], extraArguments=None, extraArgumentList=None, \
+            outputFile=None, outputArgumentOption="-o",
+            extraDependentInputLs=None,
+            extraOutputLs=[beagleJob.output, tabixIndexFile],
+            transferOutput=False, frontArgumentList=["-p vcf"],
+            extraArguments=None, extraArgumentList=None, \
             parentJobLs=[beagleJob, outputDirJob], no_of_cpus=None, \
             job_max_memory = self.scaleJobWalltimeOrMemoryBasedOnInput(
                 realInputVolume=realInputVolume, \
@@ -2541,8 +2606,9 @@ Contig966       3160    50
 The executable should be tabixRetrieve (a tabix shell wrapper).
     vervet/src/shell/tabixRetrieve.sh
 
-http://samtools.sourceforge.net/tabix.shtml
-run something like below to extract data from regionOfInterest out of bgzipped&tabix-indexed file.
+    http://samtools.sourceforge.net/tabix.shtml
+run something like below to extract data from regionOfInterest out of
+    bgzipped&tabix-indexed file.
     tabix sorted.gff.gz chr1:10,000,000-20,000,000
         """
         if executable is None:
@@ -2610,18 +2676,20 @@ run something like below to extract data from regionOfInterest out of bgzipped&t
             flush=True)
         from palos.db import GenomeDB
         db_genome = GenomeDB.GenomeDatabase(drivername=self.drivername,
-            hostname=self.hostname, database=self.dbname, schema="genome_hg37",
+            hostname=self.hostname, dbname=self.dbname, schema="genome_hg37",
             db_user=self.db_user, db_passwd=self.db_passwd)
         db_genome.setup(create_tables=False)
         chr2size = db_genome.getTopNumberOfChomosomes(
             contigMaxRankBySize=contigMaxRankBySize,
             contigMinRankBySize=contigMinRankBySize,
             tax_id=tax_id, sequence_type_id=sequence_type_id, \
-            version=version, chromosome_type_id=chromosome_type_id, \
+            version=version, chromosome_type_id=chromosome_type_id,
             outdated_index=outdated_index)
+        print(f" Got {len(chr2size)} chromosomes.", flush=True)
         return chr2size
 
-    def restrictContigDictionry(self, dc=None, maxContigID=None, minContigID=None):
+    def restrictContigDictionry(self, dc=None, maxContigID=None,
+        minContigID=None):
         """
         2012.8.2
             if maxContigID is None or zero, no filter. same for minContigID.
@@ -2636,9 +2704,11 @@ run something like below to extract data from regionOfInterest out of bgzipped&t
                 try:
                     contigID = int(self.getContigIDFromFname(contig))
                     included = True
-                    if (maxContigID is not None and maxContigID!=0) and contigID>maxContigID:
+                    if (maxContigID is not None and maxContigID!=0) and \
+                        contigID>maxContigID:
                         included = False
-                    if (minContigID is not None and minContigID!=0) and contigID<minContigID:
+                    if (minContigID is not None and minContigID!=0) and \
+                        contigID<minContigID:
                         included = False
                     if included:
                         new_dc[contig] = data
@@ -2677,8 +2747,8 @@ run something like below to extract data from regionOfInterest out of bgzipped&t
                 add the split job
 
         """
-        sys.stderr.write("Splitting %s into blocks, each block with %s lines ... "%(
-            intervalFname, noOfLinesPerUnit))
+        print(f"Splitting {intervalFname} into blocks, each block with "
+            f"{noOfLinesPerUnit} lines ... ", flush=True)
         #from palos import utils
         #noOfLines = utils.getNoOfLinesInOneFileByWC(intervalFname)
         chr2StartStopDataLs = {}
@@ -2705,44 +2775,55 @@ run something like below to extract data from regionOfInterest out of bgzipped&t
             if previousLine is None or chromosome!=previousLine.chromosome:
                 #first line or different chromosome
                 if previousLine is not None and previousLine.chromosome is not None:
-                    prevChrLastStartStopData = chr2StartStopDataLs[previousLine.chromosome][-1]
+                    prevChrLastStartStopData = \
+                        chr2StartStopDataLs[previousLine.chromosome][-1]
                     if prevChrLastStartStopData.stopLineNumber is None:
                         prevChrLastStartStopData.stopLineNumber = previousLine.lineNumber
                         prevChrLastStartStopData.stopLineStart = previousLine.start
                         prevChrLastStartStopData.stopLineStop = previousLine.stop
 
                 if chromosome not in chr2StartStopDataLs:
-                    StartStopData = PassingData(startLineNumber=lineNumber, \
-                        startLineStart=start, startLineStop=stop, \
-                        stopLineNumber=None, stopLineStart=None, stopLineStop=None)
+                    StartStopData = PassingData(
+                        startLineNumber=lineNumber,
+                        startLineStart=start, startLineStop=stop,
+                        stopLineNumber=None, stopLineStart=None,
+                        stopLineStop=None)
                     chr2StartStopDataLs[chromosome] = [StartStopData]
-            else:	#same chromosome and not first line
+            else:
+                #same chromosome and not first line
                 lastStartStopData = chr2StartStopDataLs[chromosome][-1]
                 if lastStartStopData.stopLineNumber is None:
                     #last block hasn't been closed yet.
-                    noOfLinesInCurrentBlock = lineNumber - lastStartStopData.startLineNumber +1
-                    if noOfLinesInCurrentBlock>=noOfLinesPerUnit:	#time to close it
+                    noOfLinesInCurrentBlock = lineNumber - \
+                        lastStartStopData.startLineNumber +1
+                    if noOfLinesInCurrentBlock>=noOfLinesPerUnit:
+                        #time to close it
                         lastStartStopData.stopLineNumber = lineNumber
                         lastStartStopData.stopLineStart = start
                         lastStartStopData.stopLineStop = stop
                 else:	#generate a new block
-                    StartStopData = PassingData(startLineNumber=lineNumber, \
+                    StartStopData = PassingData(startLineNumber=lineNumber,
                         startLineStart=start, startLineStop=stop, \
-                        stopLineNumber=None, stopLineStart=None, stopLineStop=None)
+                        stopLineNumber=None, stopLineStart=None,
+                        stopLineStop=None)
                     chr2StartStopDataLs[chromosome].append(StartStopData)
             previousLine = PassingData(chromosome = chromosome, start=start,
                 stop=stop, lineNumber=lineNumber)
         #final closure
-        if previousLine is not None:	#intervalFname is not empty
+        if previousLine is not None:
+            #intervalFname is not empty
             lastStartStopData = chr2StartStopDataLs[previousLine.chromosome][-1]
-            if lastStartStopData.stopLineNumber is None:	#last block hasn't been closed yet.
+            if lastStartStopData.stopLineNumber is None:
+                #last block hasn't been closed yet.
                 #close it regardless of whether it has enough lines in it or not.
                 lastStartStopData.stopLineNumber = previousLine.lineNumber
                 lastStartStopData.stopLineStart = previousLine.start
                 lastStartStopData.stopLineStop = previousLine.stop
-        sys.stderr.write("%s chromosomes out of %s lines.\n"%(len(chr2StartStopDataLs), lineNumber))
+        print(f"{len(chr2StartStopDataLs)} chromosomes out of {lineNumber} lines.",
+            flush=True)
 
-        intervalFile = self.registerOneInputFile(intervalFname, folderName=folderName)
+        intervalFile = self.registerOneInputFile(intervalFname,\
+            folderName=folderName)
         chr2IntervalDataLs = {}
         counter = 0
         for chr, startStopDataLs in chr2StartStopDataLs.items():
@@ -2750,27 +2831,33 @@ run something like below to extract data from regionOfInterest out of bgzipped&t
                 blockStartLineNumber = startStopData.startLineNumber
                 blockStopLineNumber = startStopData.stopLineNumber
                 # 2012.8.9 the large interval that encompasses all BED lines
-                interval = '%s:%s-%s'%(chr, startStopData.startLineStart, startStopData.stopLineStop)
-                blockIntervalFile = File(os.path.join(folderName, '%s_line_%s_%s_bed.tsv'%(chr, \
-                    blockStartLineNumber, blockStopLineNumber)))
+                interval = '%s:%s-%s'%(chr, startStopData.startLineStart,
+                    startStopData.stopLineStop)
+                blockIntervalFile = File(os.path.join(folderName, 
+                    '%s_line_%s_%s_bed.tsv'%\
+                        (chr, blockStartLineNumber, blockStopLineNumber)))
                 blockIntervalJob = self.addSelectLineBlockFromFileJob(
-                    executable=self.SelectLineBlockFromFile, \
-                    inputFile=intervalFile, outputFile=blockIntervalFile,\
-                    startLineNumber=blockStartLineNumber, stopLineNumber=blockStopLineNumber, \
-                    parentJobLs=parentJobLs, extraDependentInputLs=None, \
+                    executable=self.SelectLineBlockFromFile,
+                    inputFile=intervalFile, outputFile=blockIntervalFile,
+                    startLineNumber=blockStartLineNumber,
+                    stopLineNumber=blockStopLineNumber,
+                    parentJobLs=parentJobLs, extraDependentInputLs=None,
                     transferOutput=False, job_max_memory=500)
-                intervalFileBasenameSignature = '%s_%s_%s'%(chr, blockStartLineNumber, blockStopLineNumber)
+                intervalFileBasenameSignature = '%s_%s_%s'%(chr,
+                    blockStartLineNumber, blockStopLineNumber)
                 if chr not in chr2IntervalDataLs:
                     chr2IntervalDataLs[chr] = []
                 span = blockStopLineNumber - blockStartLineNumber + 1
                 #how many loci, rather than the region size
-                intervalData = PassingData(file=blockIntervalFile, \
-                    intervalFileBasenameSignature=intervalFileBasenameSignature, interval=interval,\
-                    overlapInterval=interval, span=span, chromosomeSize=chr2MaxStopPosition.get(chr), \
+                intervalData = PassingData(file=blockIntervalFile, 
+                    intervalFileBasenameSignature=intervalFileBasenameSignature,
+                    interval=interval, overlapInterval=interval, span=span,
+                    chromosomeSize=chr2MaxStopPosition.get(chr),
                     chr=chr, jobLs=[blockIntervalJob], job=blockIntervalJob)
                 chr2IntervalDataLs[chr].append(intervalData)
                 counter += 1
-        sys.stderr.write("%s intervals and %s SelectLineBlockFromFile jobs.\n"%(counter, counter))
+        print(f"{counter} intervals and {counter} SelectLineBlockFromFile jobs.",
+            flush=True)
         return chr2IntervalDataLs
 
     def getChr2IntervalDataLsBySplitChrSize(self, chr2size=None, intervalSize=None, 
@@ -2779,12 +2866,14 @@ run something like below to extract data from regionOfInterest out of bgzipped&t
         2013.04.09 added interval-span, chromosomeSize in returning data,
         2012.7.30
         """
-        sys.stderr.write("Splitting %s references into intervals of %s bp (overlap=%s) ... "%(
-            len(chr2size), intervalSize, intervalOverlapSize))
+        print(f"Splitting {len(chr2size)} references into intervals of "
+            f"{intervalSize} bp (overlap={intervalOverlapSize}) ... ",
+            flush=True)
         chr2IntervalDataLs = {}
         counter =0
         for chromosome, chromosomeSize in chr2size.items():
-            no_of_intervals = max(1, int(math.ceil(chromosomeSize/float(intervalSize)))-1)
+            no_of_intervals = max(1, \
+                int(math.ceil(chromosomeSize/float(intervalSize)))-1)
             for i in range(no_of_intervals):
                 originalStartPos = i*intervalSize + 1
                 #to render adjacent intervals overlapping because trioCaller uses LD
@@ -2798,29 +2887,33 @@ run something like below to extract data from regionOfInterest out of bgzipped&t
 
                 if chromosome not in chr2IntervalDataLs:
                     chr2IntervalDataLs[chromosome] = []
-                intervalData = IntervalData(chromosome=chromosome, chromosomeSize=chromosomeSize,\
-                                start=originalStartPos, stop=originalStopPos,\
-                                overlapStart=overlapStart, overlapStop=overlapStop)
+                intervalData = IntervalData(chromosome=chromosome, 
+                    chromosomeSize=chromosomeSize,\
+                    start=originalStartPos, stop=originalStopPos,\
+                    overlapStart=overlapStart, overlapStop=overlapStop)
                 chr2IntervalDataLs[chromosome].append(intervalData)
                 counter += 1
-        sys.stderr.write("%s intervals.\n"%(counter))
+        print(f"{counter} intervals.", flush=True)
         return chr2IntervalDataLs
 
     def getChr2IntervalDataLsFromDBAlignmentDepthInterval(self, db=None, \
         intervalSize=None, intervalOverlapSize=None,\
-        alignmentDepthIntervalMethodShortName=None, alignmentDepthMinFold=0.1, \
-        alignmentDepthMaxFold=2, \
-        minAlignmentDepthIntervalLength=1000, maxContigID=None, minContigID=None):
+        alignmentDepthIntervalMethodShortName=None, alignmentDepthMinFold=0.1,
+        alignmentDepthMaxFold=2, minAlignmentDepthIntervalLength=1000,
+        maxContigID=None, minContigID=None):
         """
         2013.10.27 bugfix
         2013.08.29
         """
-        method = db.getAlignmentDepthIntervalMethod(short_name =alignmentDepthIntervalMethodShortName)
+        method = db.getAlignmentDepthIntervalMethod(
+            short_name=alignmentDepthIntervalMethodShortName)
         minDepth = method.sum_median_depth*float(alignmentDepthMinFold)
         maxDepth = method.sum_median_depth*alignmentDepthMaxFold
-        sys.stderr.write("Getting alignment depth intervals (depth %sX median - %sX median depth)=(%s-%s) "+
-            "from db, maxContigID=%s, minContigID=%s  ... \n "%\
-            (alignmentDepthMinFold, alignmentDepthMaxFold, minDepth, maxDepth, maxContigID, minContigID))
+        print(f"Getting alignment depth intervals (median-depthX"
+            f"{alignmentDepthMinFold} - median-depthX{alignmentDepthMaxFold})"
+            f"=({minDepth}-{maxDepth}) from db, "
+            f"maxContigID={maxContigID}, minContigID={minContigID} ...",
+            flush=True)
         counter =0
 
         noOfRawIntervals = 0
@@ -2828,7 +2921,8 @@ run something like below to extract data from regionOfInterest out of bgzipped&t
         for alignment_depth_interval_file in method.alignment_depth_interval_file_ls:
             chromosome = alignment_depth_interval_file.chromosome
             included = True
-            if (maxContigID is not None and maxContigID!=0) or (minContigID is not None and minContigID!=0):
+            if (maxContigID is not None and maxContigID!=0) or \
+                (minContigID is not None and minContigID!=0):
                 #2012.10.27 bugfix, "and" changed to "or"
                 try:
                     contigID = int(self.getContigIDFromFname(chromosome))
@@ -2848,15 +2942,16 @@ run something like below to extract data from regionOfInterest out of bgzipped&t
             sys.stderr.write("\t %s ..."%(inputFname))
             if os.path.isfile(inputFname):
                 reader = AlignmentDepthIntervalFile(inputFname)
-                intervalLs = reader.getAllIntervalWithinDepthRange(minDepth=minDepth, maxDepth=maxDepth)
+                intervalLs = reader.getAllIntervalWithinDepthRange(
+                    minDepth=minDepth, maxDepth=maxDepth)
                 reader.close()
                 noOfRawIntervals += len(intervalLs)
                 if chromosome not in chr2alignmentDepthIntervalData:
                     chr2alignmentDepthIntervalData[chromosome] = PassingData(
                         chromosomeSize=chromosomeSize, intervalLs=intervalLs)
                 else:
-                    logging.warn("\tchromosome %s sees new alignment depth interval data from %s."%(
-                        chromosome, inputFname))
+                    logging.warn(f"\tchromosome {chromosome} has new alignment"
+                        f" depth interval data from {inputFname}.")
                     chr2alignmentDepthIntervalData[chromosome].intervalLs.extend(intervalLs)
             else:
                 logging.warn("\tinterval file %s of chromosome %s does not exist. Ignore."%(
@@ -2865,28 +2960,33 @@ run something like below to extract data from regionOfInterest out of bgzipped&t
         sys.stderr.write(" %s alignment depth intervals covering %s chromosomes.\n"%(
             noOfRawIntervals, len(chr2alignmentDepthIntervalData)))
 
-        sys.stderr.write("Splitting alignment depth intervals (depth %sX median - %sX median depth), "
+        print("Splitting alignment depth intervals (depth %sX median - %sX median depth), "
             "minAlignmentDepthIntervalLength=%s) into size=%s intervals, overlap=%s,  ... "%\
-            (alignmentDepthMinFold, alignmentDepthMaxFold, minAlignmentDepthIntervalLength, \
-                intervalSize, intervalOverlapSize))
+            (alignmentDepthMinFold, alignmentDepthMaxFold, minAlignmentDepthIntervalLength,
+                intervalSize, intervalOverlapSize), flush=True)
         chr2IntervalDataLs = {}
         for chromosome, alignmentDepthIntervalData in chr2alignmentDepthIntervalData.items():
             intervalLs = alignmentDepthIntervalData.intervalLs
             chromosomeSize = alignmentDepthIntervalData.chromosomeSize
             for interval  in intervalLs:
-                if interval.length<minAlignmentDepthIntervalLength:	#skip short intervals
+                if interval.length<minAlignmentDepthIntervalLength:
+                    #skip short intervals
                     continue
                 if intervalSize is None:
                     no_of_intervals = 1
                 else:
-                    no_of_intervals = max(1, int(math.ceil(interval.length/float(intervalSize)))-1)
+                    no_of_intervals = max(1, \
+                        int(math.ceil(interval.length/float(intervalSize)))-1)
                 for i in range(no_of_intervals):
                     originalStartPos = interval.start + i*intervalSize
                     #to render adjacent intervals overlapping because trioCaller uses LD
-                    overlapStart = max(interval.start, originalStartPos-intervalOverlapSize)
+                    overlapStart = max(interval.start, \
+                        originalStartPos-intervalOverlapSize)
                     if i<no_of_intervals-1:
-                        originalStopPos = min(interval.start + (i+1)*intervalSize-1, interval.stop)
-                    else:	#last chunk, include bp till the end
+                        originalStopPos = min(interval.start + (i+1)*intervalSize-1, \
+                            interval.stop)
+                    else:
+                        #last chunk, include bp till the end
                         originalStopPos = interval.stop
                     #to render adjacent intervals overlapping because trioCaller uses LD
                     overlapStop = min(interval.stop, originalStopPos+intervalOverlapSize)
@@ -2900,7 +3000,7 @@ run something like below to extract data from regionOfInterest out of bgzipped&t
                         start=originalStartPos, stop=originalStopPos)
                     chr2IntervalDataLs[chromosome].append(intervalData)
                     counter += 1
-        sys.stderr.write("%s intervals.\n"%(counter))
+        print(f"{counter} intervals.", flush=True)
         return chr2IntervalDataLs
 
     def addPutStuffIntoDBJob(self, executable=None, \
