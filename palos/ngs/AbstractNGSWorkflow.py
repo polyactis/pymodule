@@ -2591,8 +2591,6 @@ run something like below to extract data from regionOfInterest out of bgzipped&t
         contigMinRankBySize=1, tax_id=60711, sequence_type_id=9,\
         version=None, chromosome_type_id=0, outdated_index=0):
         """
-        2013.3.14 added argument version
-        2013.2.15 added argument chromosome_type_id
         chromosome_type_id: what type of chromosomes to be included,
             same as table genome.chromosome_type.
             0: all, 1: autosomes, 2: X, 3:Y, 4: mitochondrial
@@ -2608,13 +2606,12 @@ run something like below to extract data from regionOfInterest out of bgzipped&t
             get all the top contigs
         """
         no_of_contigs_to_fetch = contigMaxRankBySize-contigMinRankBySize+1
-        print("Getting %s contigs with rank (by size) between %s and %s  ..."%\
-            (no_of_contigs_to_fetch, contigMinRankBySize, contigMaxRankBySize),
+        print(f"Getting <={no_of_contigs_to_fetch} top big chromosomes ...",
             flush=True)
         from palos.db import GenomeDB
-        db_genome = GenomeDB.GenomeDatabase(drivername=self.drivername, username=self.db_user,
-            password=self.db_passwd, hostname=self.hostname,
-            database=self.dbname, schema="genome")
+        db_genome = GenomeDB.GenomeDatabase(drivername=self.drivername,
+            hostname=self.hostname, database=self.dbname, schema="genome_hg37",
+            db_user=self.db_user, db_passwd=self.db_passwd)
         db_genome.setup(create_tables=False)
         chr2size = db_genome.getTopNumberOfChomosomes(
             contigMaxRankBySize=contigMaxRankBySize,
@@ -2629,8 +2626,9 @@ run something like below to extract data from regionOfInterest out of bgzipped&t
         2012.8.2
             if maxContigID is None or zero, no filter. same for minContigID.
         """
-        sys.stderr.write("Restricting a contig dictionary of size %s within minContigID=%s, maxContigID=%s, ... "%\
-                        (len(dc), maxContigID, minContigID))
+        print(f"Restricting the contig dictionary of size {len(dc)} to "
+            f"maxContigID={maxContigID}, minContigID={minContigID} ... ",
+            flush=True)
         if (maxContigID is not None and maxContigID!=0) and \
             (minContigID is not None and minContigID!=0):
             new_dc = {}
@@ -2645,25 +2643,28 @@ run something like below to extract data from regionOfInterest out of bgzipped&t
                     if included:
                         new_dc[contig] = data
                 except:
-                    sys.stderr.write("Error in handling contig %s.\n"%(contig))
+                    logging.error(f"restrictContigDictionry(): contig {contig}.")
                     sys.stderr.write('Except type: %s\n'%repr(sys.exc_info()))
                     import traceback
                     traceback.print_exc()
             dc = new_dc
-        sys.stderr.write(" %s contigs left.\n"%(len(dc)))
+        print(f" {len(dc)} contigs left.")
         return dc
 
     def getChr2IntervalDataLsBySplitBEDFile(self, intervalFname=None, \
         noOfLinesPerUnit=2000, folderName=None, parentJobLs= None):
         """
         2013.05.29 added span and chromosomeSize to final returned data
-        2012.08.09 update it so that the interval encompassing all lines in one block/unit is known.
-            good for mpileup to only work on that interval and then "bcftools view" select from sites from the block.
+        2012.08.09 update it so that the interval encompassing all lines
+            in one block/unit is known.
+            Good for mpileup to only work on that interval and then
+                "bcftools view" select from sites from the block.
             TODO: offer partitioning by equal-chromosome span, rather than number of sites.
                 Some sites could be in far from each other in one block,
                  which could incur long-running mpileup. goal is to skip these deserts.
-        2012.8.8 bugfix add -1 to the starting number below cuz otherwise it's included in the next block's start
-                blockStopLineNumber = min(startLineNumber+(i+1)*noOfLinesPerUnit-1, stopLineNumber)
+        2012.8.8 bugfix add -1 to the starting number below cuz otherwise
+            it's included in the next block's start
+            blockStopLineNumber = min(startLineNumber+(i+1)*noOfLinesPerUnit-1, stopLineNumber)
         2012.7.30
             1. intervalFname is in BED format (tab/comma-delimited, chr start stop) and has to be sorted.
                 start and stop are 0-based. i.e. start=0, stop=100 means bases from 0-99.
@@ -2689,13 +2690,13 @@ run something like below to extract data from regionOfInterest out of bgzipped&t
         previousChromosome = None
         previousLine = None
         chromosome = None
-        chr2MaxStopPosition = {}	#2013.05.29
+        chr2MaxStopPosition = {}
         for row in reader:
             lineNumber += 1
             chromosome, start, stop = row[:3]
             start = int(start)	#0-based, starting base
-            stop = int(stop)	#0-based, stopping base but not inclusive, i.e. [start, stop)
-            #2013.05.29
+            stop = int(stop)
+            #0-based, stopping base but not inclusive, i.e. [start, stop)
             if chromosome not in chr2MaxStopPosition:
                 chr2MaxStopPosition[chromosome] = stop
             elif stop>chr2MaxStopPosition[chromosome]:
@@ -2704,7 +2705,6 @@ run something like below to extract data from regionOfInterest out of bgzipped&t
             if previousLine is None or chromosome!=previousLine.chromosome:
                 #first line or different chromosome
                 if previousLine is not None and previousLine.chromosome is not None:
-
                     prevChrLastStartStopData = chr2StartStopDataLs[previousLine.chromosome][-1]
                     if prevChrLastStartStopData.stopLineNumber is None:
                         prevChrLastStartStopData.stopLineNumber = previousLine.lineNumber
@@ -2855,11 +2855,11 @@ run something like below to extract data from regionOfInterest out of bgzipped&t
                     chr2alignmentDepthIntervalData[chromosome] = PassingData(
                         chromosomeSize=chromosomeSize, intervalLs=intervalLs)
                 else:
-                    sys.stderr.write("\t Warning: chromosome %s sees new alignment depth interval data from %s.\n"%(
+                    logging.warn("\tchromosome %s sees new alignment depth interval data from %s."%(
                         chromosome, inputFname))
                     chr2alignmentDepthIntervalData[chromosome].intervalLs.extend(intervalLs)
             else:
-                sys.stderr.write("\t Warning: interval file %s of chromosome %s does not exist. Ignore.\n"%(
+                logging.warn("\tinterval file %s of chromosome %s does not exist. Ignore."%(
                     inputFname, chromosome))
             sys.stderr.write(" noOfRawIntervals=%s.\n"%(noOfRawIntervals))
         sys.stderr.write(" %s alignment depth intervals covering %s chromosomes.\n"%(
@@ -2931,18 +2931,22 @@ run something like below to extract data from regionOfInterest out of bgzipped&t
         job = self.addData2DBJob(executable=executable, \
             inputFile=inputFile, inputArgumentOption=inputArgumentOption, \
             inputFileList=inputFileList, \
-            outputFile=outputFile, outputArgumentOption=outputArgumentOption, \
+            outputFile=outputFile, outputArgumentOption=outputArgumentOption,
             data_dir=None, logFile=logFile, commit=commit,\
-            parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, extraOutputLs=None, \
+            parentJobLs=parentJobLs,
+            extraDependentInputLs=extraDependentInputLs, extraOutputLs=None,
             transferOutput=transferOutput, \
-            extraArguments=None, extraArgumentList=extraArgumentList, job_max_memory=job_max_memory, \
+            extraArguments=None, extraArgumentList=extraArgumentList,
+            job_max_memory=job_max_memory, \
             sshDBTunnel=sshDBTunnel, \
-            key2ObjectForJob=key2ObjectForJob, objectWithDBArguments=self, **keywords)
+            key2ObjectForJob=key2ObjectForJob, objectWithDBArguments=self,
+            **keywords)
         return job
 
-    def addSamtoolsFlagstatJob(self, executable=None, samtoolsExecutableFile=None, \
+    def addSamtoolsFlagstatJob(self, executable=None,
+        samtoolsExecutableFile=None,
         inputFile=None, outputFile=None, \
-        parentJobLs=None, extraDependentInputLs=None, transferOutput=False, \
+        parentJobLs=None, extraDependentInputLs=None, transferOutput=False,
         extraArguments=None, job_max_memory=2000, walltime=120, **keywords):
         """
         2013.03.25 use pipe2File to get output piped into outputF
@@ -2957,17 +2961,18 @@ run something like below to extract data from regionOfInterest out of bgzipped&t
         if extraDependentInputLs is None:
             extraDependentInputLs = []
         extraDependentInputLs.append(inputFile)
-        job = self.addPipeCommandOutput2FileJob(executable=executable, \
+        job = self.addPipeCommandOutput2FileJob(executable=executable,
             commandFile=samtoolsExecutableFile, \
-            outputFile=outputFile, \
-            parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
+            outputFile=outputFile,
+            parentJobLs=parentJobLs,
+            extraDependentInputLs=extraDependentInputLs,
             extraOutputLs=None, transferOutput=transferOutput, \
             extraArguments=extraArguments, 
-            extraArgumentList=['flagstat', inputFile], sshDBTunnel=None,\
+            extraArgumentList=['flagstat', inputFile], sshDBTunnel=None,
             job_max_memory=job_max_memory, walltime=walltime)
         return job
 
-    def addAddAlignmentFile2DBJob(self, executable=None, inputFile=None,\
+    def addAddAlignmentFile2DBJob(self, executable=None, inputFile=None,
         otherInputFileList=None,\
         individual_alignment_id=None, individual_sequence_id=None,\
         ref_sequence_id=None, \
@@ -2980,13 +2985,15 @@ run something like below to extract data from regionOfInterest out of bgzipped&t
         parentJobLs=None, \
         extraDependentInputLs=None, \
         extraArguments=None, transferOutput=True, \
-        job_max_memory=2000, walltime=180, sshDBTunnel=False, commit=True, **keywords):
+        job_max_memory=2000, walltime=180, sshDBTunnel=False, commit=True,
+        **keywords):
         """
         2013.04.05 added argument local_realigned
         2012.9.20
-            To specify individual_alignment:
-                either individual_alignment_id or (parent_individual_alignment_id + mask_genotype_method_id)
-                or others
+    To specify individual_alignment:
+        either individual_alignment_id or
+            (parent_individual_alignment_id + mask_genotype_method_id)
+        or others
         """
         if extraDependentInputLs is None:
             extraDependentInputLs = []
@@ -3011,7 +3018,8 @@ run something like below to extract data from regionOfInterest out of bgzipped&t
         if mask_genotype_method_id:
             extraArgumentList.append("--mask_genotype_method_id %s"%(mask_genotype_method_id))
         if individual_sequence_file_raw_id:
-            extraArgumentList.append("--individual_sequence_file_raw_id %s"%(individual_sequence_file_raw_id))
+            extraArgumentList.append("--individual_sequence_file_raw_id %s"%\
+                (individual_sequence_file_raw_id))
         if format:
             extraArgumentList.append("--format %s"%(format))
         if data_dir:
@@ -3023,13 +3031,15 @@ run something like below to extract data from regionOfInterest out of bgzipped&t
 
         if extraArguments:
             extraArgumentList.append(extraArguments)
-        job= self.addGenericJob(executable=executable, inputFile=inputFile, outputFile=None, \
-                parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
-                extraOutputLs=extraOutputLs,\
-                transferOutput=transferOutput, \
-                extraArgumentList=extraArgumentList, 
-                key2ObjectForJob=key2ObjectForJob, job_max_memory=job_max_memory, \
-                sshDBTunnel=sshDBTunnel, walltime=walltime, **keywords)
+        job= self.addGenericJob(executable=executable, inputFile=inputFile,
+            outputFile=None, \
+            parentJobLs=parentJobLs,
+            extraDependentInputLs=extraDependentInputLs,
+            extraOutputLs=extraOutputLs,\
+            transferOutput=transferOutput, \
+            extraArgumentList=extraArgumentList, 
+            key2ObjectForJob=key2ObjectForJob, job_max_memory=job_max_memory,
+            sshDBTunnel=sshDBTunnel, walltime=walltime, **keywords)
         job.logFile = logFile
         self.addDBArgumentsToOneJob(job=job, objectWithDBArguments=self)
 
@@ -3041,17 +3051,20 @@ run something like below to extract data from regionOfInterest out of bgzipped&t
                     job.addArguments(inputFile)
         return job
 
-    def addAlignmentMergeJob(self, AlignmentJobAndOutputLs=None, outputBamFile=None,\
+    def addAlignmentMergeJob(self, AlignmentJobAndOutputLs=None,
+        outputBamFile=None,
         MergeSamFilesJava=None, \
         BuildBamIndexFilesJava=None, \
-        mv=None, parentJobLs=None, namespace=None, version=None, transferOutput=False,\
+        mv=None, parentJobLs=None, namespace=None, version=None,
+        transferOutput=False,
         job_max_memory=7000, walltime=680, **keywords):
         """
         not certain, but it looks like MergeSamFilesJar does not require the .bai (bam index) file.
 
         2013.03.31 AlignmentJobAndOutputLs has changed it cell structure
         2012.9.17 copied from vervet/src/ShortRead2AlignmentPipeline.py
-        2012.7.4 bugfix. add job dependency between alignmentJob and merge_sam_job after all have been added to the self.
+        2012.7.4 bugfix. add job dependency between alignmentJob and
+             merge_sam_job after all have been added to the self.
         2012.3.29
             no more threads (only 2 threads at maximum and increase only 20% performance anyway).
             Some nodes' kernels can't handle threads properly and it leads to process hanging forever.
@@ -3116,15 +3129,18 @@ run something like below to extract data from regionOfInterest out of bgzipped&t
             merge_sam_job = self.addGenericJob(executable=mv, 
                 inputFile=alignmentOutput, inputArgumentOption=None, \
                 outputFile=outputBamFile, outputArgumentOption=None, \
-                inputFileList=None, argumentForEachFileInInputFileList=None, \
-                parentJob=None, parentJobLs=alignmentJobLs, extraDependentInputLs=None, \
+                inputFileList=None, argumentForEachFileInInputFileList=None,
+                parentJob=None, parentJobLs=alignmentJobLs,
+                extraDependentInputLs=None,
                 extraOutputLs=None, transferOutput=transferOutput, \
-                frontArgumentList=None, extraArguments=None, extraArgumentList=None, \
+                frontArgumentList=None, extraArguments=None,
+                extraArgumentList=None,
                 job_max_memory=1000,  sshDBTunnel=None, \
                 key2ObjectForJob=None, objectWithDBArguments=None, 
                 no_of_cpus=None, walltime=40)
         else:
-            sys.stderr.write("Error: no input for MergeSamFilesJar to output %s.\n"%(outputBamFile))
+            logging.error("no input for MergeSamFilesJar to output %s."%\
+                (outputBamFile))
             raise
         #assign output
         merge_sam_job.output = outputBamFile
@@ -3134,10 +3150,11 @@ run something like below to extract data from regionOfInterest out of bgzipped&t
                 self.depends(parent=parentJob, child=merge_sam_job)
 
         # add the index job on the merged bam file
-        bamIndexJob = self.addBAMIndexJob(BuildBamIndexFilesJava=BuildBamIndexFilesJava, \
+        bamIndexJob = self.addBAMIndexJob(
+            BuildBamIndexFilesJava=BuildBamIndexFilesJava,
             BuildBamIndexJar=self.BuildBamIndexJar, \
             inputBamF=outputBamFile,\
-            parentJobLs=[merge_sam_job], namespace=namespace, version=version,\
+            parentJobLs=[merge_sam_job], namespace=namespace, version=version,
             transferOutput=transferOutput, job_max_memory=3000, 
             walltime=max(180, int(walltime/3)))
         merge_sam_job.bamIndexJob = bamIndexJob
@@ -3157,7 +3174,8 @@ run something like below to extract data from regionOfInterest out of bgzipped&t
         """
         2013.06.21 use addGATKJob() instead
         2012.8.15
-            add argument analysis_type (could be MergeVCFReplicateHaplotypes, MergeVCFReplicateGenotypeColumns
+            add argument analysis_type
+             (could be MergeVCFReplicateHaplotypes, MergeVCFReplicateGenotypeColumns
         2012.7.25
             use self.addGenericJob() and moved from AlignmentToTrioCallPipeline.py
             added "-XX:MaxPermSize=1024m" jvm combat this error:
@@ -3166,9 +3184,11 @@ run something like below to extract data from regionOfInterest out of bgzipped&t
             change MergeVCFReplicateGenotypeColumns to MergeVCFReplicateHaplotypes
 
         2012.4.2
-java -jar /home/crocea/script/gatk/dist/GenomeAnalysisTK.jar -T MergeVCFReplicateGenotypeColumns
+java -jar /home/crocea/script/gatk/dist/GenomeAnalysisTK.jar
+    -T MergeVCFReplicateGenotypeColumns
     -R /Network/Data/vervet/db/individual_sequence/524_superContigsMinSize2000.fasta
-    --variant /tmp/Contig0.vcf -o /tmp/contig0_afterMerge.vcf --onlyKeepBiAllelicSNP --replicateIndividualTag copy
+    --variant /tmp/Contig0.vcf -o /tmp/contig0_afterMerge.vcf
+    --onlyKeepBiAllelicSNP --replicateIndividualTag copy
         """
         #GATK job
         #MaxPermSize= min(35000, max(1024, job_max_memory*9/7))
