@@ -224,7 +224,7 @@ class GeneCommentary(Base, TableClass):
     accession = Column(String(32))
     version = Column(Integer)
     gi = Column(Integer)
-    gene_id = Column(Integer, ForeignKey("gene.id"))
+    gene_id = Column(Integer, ForeignKey(f"{_schemaname_}.gene.id"))
     gene = relationship('Gene')
     gene_commentary_id = Column(Integer,
         ForeignKey(f"{_schemaname_}.gene_commentary.id"))
