@@ -474,9 +474,6 @@ class AbstractBioinfoWorkflow(ParentClass):
                 "mapper/splitter/splitfa.sh"), \
             name='splitfa', clusterSizeMultiplier=1)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath,
-                "plot/PlotVCFtoolsStat.py"), \
-            name='PlotVCFtoolsStat', clusterSizeMultiplier=0)
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath,
                 'mapper/modifier/AppendExtraPedigreeIndividualsToTPED.py'),
             name='AppendExtraPedigreeIndividualsToTPED', clusterSizeMultiplier=1)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath,
