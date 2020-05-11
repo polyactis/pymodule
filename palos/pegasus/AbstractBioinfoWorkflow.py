@@ -468,7 +468,7 @@ class AbstractBioinfoWorkflow(ParentClass):
             clusterSizeMultiplier=0.5)
         #2013.2.3 use samtools to extract consensus from bam files
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, 
-            'mapper/alignment/ExtractConsensusSequenceFromAlignment.py'),
+            'mapper/alignment/ExtractConsensusSequenceFromAlignment.sh'),
             name='ExtractConsensusSequenceFromAlignment',
             clusterSizeMultiplier=0.5)
         #2013.2.4, wrapper around psmc's splitfa,
