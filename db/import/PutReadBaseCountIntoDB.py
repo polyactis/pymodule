@@ -89,7 +89,7 @@ class PutReadBaseCountIntoDB(ParentClass):
         no_of_isqf_in_db = 0
         for inputFname in self.inputFnameLs:
             df = pd.read_csv(inputFname, sep='\t', header=0)
-            for row in df:
+            for idx, row in df.iterrows():
                 isq_id = int(row.isq_id)
                 isqf_id = row.isqf_id
                 read_count = int(row.read_count)
