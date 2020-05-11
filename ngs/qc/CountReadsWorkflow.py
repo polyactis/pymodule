@@ -71,7 +71,6 @@ class CountReadsWorkflow(ParentClass):
             gatk2_path=None,
             picard_path=None,
             tabixPath=None,
-            bgzipPath=None,
             vcftoolsPath=None,
             ligateVcfPerlPath=None,
             maxContigID=None,

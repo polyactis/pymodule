@@ -172,7 +172,6 @@ class AbstractNGSWorkflow(ParentClass):
         gatk2_path="bin/GenomeAnalysisTK.jar",
         picard_path="script/picard.broad/build/libs/picard.jar",
         tabixPath="bin/tabix",
-        bgzipPath="bin/bgzip",
         vcftoolsPath="bin/vcftools/vcftools",
         ligateVcfPerlPath="bin/ligateVcf.pl",
         maxContigID=None,
@@ -239,7 +238,6 @@ class AbstractNGSWorkflow(ParentClass):
         self.gatk2_path = gatk2_path
         self.picard_path = picard_path
         self.tabixPath = tabixPath
-        self.bgzipPath = bgzipPath
         self.vcftoolsPath = vcftoolsPath
         self.ligateVcfPerlPath = ligateVcfPerlPath
         self.maxContigID = maxContigID
@@ -284,7 +282,7 @@ class AbstractNGSWorkflow(ParentClass):
         self.pathToInsertHomePathList.extend([
             'samtools_path', 'picard_dir', \
             'gatk_path', 'tabixPath', \
-            'bgzipPath', 'gatk2_path', 'ligateVcfPerlPath',\
+            'gatk2_path', 'ligateVcfPerlPath',\
             'vcftoolsPath', 'picard_path',
             ])
         listArgumentName_data_type_ls = [
@@ -601,13 +599,7 @@ class AbstractNGSWorkflow(ParentClass):
             self.registerOneExecutable(path=self.javaPath,
                 name='GATKJava', clusterSizeMultiplier=0.2)
             self.registerOneExecutable(path=self.javaPath,
-                name='genotyperJava', clusterSizeMultiplier=0.1)
-        if self.tabixPath:
-            self.tabixExecutableFile = self.registerOneExecutableAsFile(
-                path=self.tabixPath)
-        if self.bgzipPath:
-            self.bgzipExecutableFile = self.registerOneExecutableAsFile(
-                path=self.bgzipPath)
+                name='genotyperJava', clusterSizeMultiplier=0.1)            
         if self.ligateVcfPerlPath:
             self.ligateVcfExecutableFile = self.registerOneExecutableAsFile(
                 path=self.ligateVcfPerlPath)

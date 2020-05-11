@@ -401,9 +401,6 @@ class AbstractBioinfoWorkflow(ParentClass):
         """
         """
         ParentClass.registerExecutables(self)
-        if self.tabixPath:
-            self.registerOneExecutable(
-                path=self.tabixPath, name='tabix', clusterSizeMultiplier=5)
         #for OutputVCFSiteStat.py
         self.registerOneExecutable(
             path=os.path.join(self.pymodulePath, "mapper/extractor/tabixRetrieve.sh"),
