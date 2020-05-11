@@ -191,15 +191,16 @@ class CountReadsWorkflow(ParentClass):
             add argument sshDBTunnel
         2012.3.14
         """
-        job = self.addData2DBJob(executable=executable, \
-            inputFile=None, inputArgumentOption="-i", \
+        job = self.addData2DBJob(executable=executable,
+            inputFile=None, inputArgumentOption="-i",
             outputFile=logFile, outputArgumentOption="--logFilename",
-            inputFileList=inputFileLs, \
-            data_dir=None, commit=commit,\
-            parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
-            extraOutputLs=None, transferOutput=transferOutput, \
-            extraArguments=extraArguments, extraArgumentList=None, \
-            job_max_memory=job_max_memory,  sshDBTunnel=sshDBTunnel,\
+            inputFileList=inputFileLs,
+            data_dir=None, commit=commit,
+            parentJobLs=parentJobLs,
+            extraDependentInputLs=extraDependentInputLs,
+            extraOutputLs=None, transferOutput=transferOutput,
+            extraArguments=extraArguments, extraArgumentList=None,
+            job_max_memory=job_max_memory,  sshDBTunnel=sshDBTunnel,
             key2ObjectForJob=None, objectWithDBArguments=self, **keywords)
         return job
     
@@ -207,7 +208,7 @@ class CountReadsWorkflow(ParentClass):
     def addCountFastqReadBaseCountJob(self, executable=None, inputFile=None, \
         outputFile=None, isq_id=None, isqf_id=None, \
         parentJobLs=None, extraDependentInputLs=None, transferOutput=True,
-        extraArguments=None, \
+        extraArguments=None,
         job_max_memory=100, **keywords):
         """
         20170503 use addGenericJob()
@@ -238,11 +239,9 @@ class CountReadsWorkflow(ParentClass):
         """
         2012.3.14
         """
-        
         sys.stderr.write("Adding read counting jobs on %s input ..."%\
             (len(inputData.jobDataLs)))
         no_of_jobs = 0
-        
         if topOutputDir:
             topOutputDirJob = self.addMkDirJob(outputDir=topOutputDir)
             no_of_jobs += 1
@@ -269,13 +268,14 @@ class CountReadsWorkflow(ParentClass):
         no_of_jobs += 2
         for jobData in inputData.jobDataLs:
             #add the read count job
-            outputFile = File(os.path.join(topOutputDir, 'read_count_isq_%s_isqf_%s.tsv'%
+            outputFile = File(os.path.join(topOutputDir,
+                'read_count_isq_%s_isqf_%s.tsv'%\
                 (jobData.isq_id, jobData.isqf_id)))
             readCountJob = self.addCountFastqReadBaseCountJob(
-                executable=self.CountFastqReadBaseCount, \
+                executable=self.CountFastqReadBaseCount,
                 inputFile=jobData.output, outputFile=outputFile,
                 isq_id=jobData.isq_id,
-                isqf_id=jobData.isqf_id, \
+                isqf_id=jobData.isqf_id,
                 parentJobLs=jobData.jobLs + [topOutputDirJob],
                 extraDependentInputLs=None,
                 transferOutput=False, extraArguments=None,
@@ -344,7 +344,7 @@ if __name__ == '__main__':
         help="database name (default: %(default)s)")
     ap.add_argument('-k', "--schema", default='sunset', 
         help="database schema (default: %(default)s)")
-    ap.add_argument("-u", "--db_user", required=True, help="Database user")
+    ap.add_argument("-u", "--db_user", help="Database user")
     ap.add_argument("-p", "--db_passwd", required=False,
         help="Password of the database user")
     ap.add_argument("-F", "--pegasusFolderName", default='input',
@@ -396,8 +396,13 @@ if __name__ == '__main__':
         help='Toggle debug mode.')
     ap.add_argument("--report", action='store_true',
         help="Toggle verbose mode. Default: %(default)s.")
-
     args = ap.parse_args()
+    if not args.db_user:
+        args.db_user = getpass.getuser()
+    if not args.db_passwd:
+        import getpass
+        args.db_passwd = getpass.getpass(f"Password for {args.db_user}:")
+    
     instance = CountReadsWorkflow(
         ind_seq_id_ls=args.ind_seq_id_ls,
 
