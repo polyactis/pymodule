@@ -49,7 +49,7 @@ class CountReadsWorkflow(ParentClass):
         sequence_batch_id_ls=None,
         version_ls=None,
         site_handler='condor', input_site_handler='condor', cluster_size=30,
-        pegasusFolderName='folder', output_path=None,
+        pegasusFolderName='input', output_path=None,
         tmpDir='/tmp/', max_walltime=4320,
         home_path=None, 
         pymodulePath="src/pymodule",
@@ -234,7 +234,7 @@ class CountReadsWorkflow(ParentClass):
             **keywords)
         return job
     
-    def addJobs(self, inputData=None, pegasusFolderName="", needSSHDBTunnel=0):
+    def addJobs(self, inputData=None, topOutputDir="output", needSSHDBTunnel=0):
         """
         2012.3.14
         """
@@ -243,7 +243,6 @@ class CountReadsWorkflow(ParentClass):
             (len(inputData.jobDataLs)))
         no_of_jobs = 0
         
-        topOutputDir = pegasusFolderName
         if topOutputDir:
             topOutputDirJob = self.addMkDirJob(outputDir=topOutputDir)
             no_of_jobs += 1
@@ -253,7 +252,7 @@ class CountReadsWorkflow(ParentClass):
         finalReduceFile = File(os.path.join(topOutputDir, 'read_base_count.tsv'))
         
         readBaseCountMergeJob = self.addStatMergeJob(
-            statMergeProgram=self.mergeSameHeaderTablesIntoOne, \
+            statMergeProgram=self.mergeSameHeaderTablesIntoOne,
             outputF=finalReduceFile, transferOutput=True, extraArguments=None,
             parentJobLs=[topOutputDirJob])
         
@@ -325,7 +324,7 @@ class CountReadsWorkflow(ParentClass):
         2011-7-11
         """
         inputData = self.setup_run()
-        self.addJobs(inputData=inputData, pegasusFolderName=self.pegasusFolderName,
+        self.addJobs(inputData=inputData, topOutputDir="output",
             needSSHDBTunnel=self.needSSHDBTunnel)
         self.end_run()
 
