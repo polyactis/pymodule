@@ -353,13 +353,13 @@ if __name__ == '__main__':
     ap.add_argument("-u", "--db_user", required=True, help="Database user")
     ap.add_argument("-p", "--db_passwd", required=False,
         help="Password of the database user")
-    ap.add_argument("-F", "--pegasusFolderName", type=str,
+    ap.add_argument("-F", "--pegasusFolderName", default='input',
         help='The path relative to the workflow running root. '
         'This folder will contain pegasus input & output. '
         'It will be created during the pegasus staging process. '
         'It is useful to separate multiple sub-workflows. '
         'If empty or None, everything is in the pegasus root.')
-    ap.add_argument("-l", "--site_handler", type=str, required=True,
+    ap.add_argument("-l", "--site_handler", required=True,
         help="The name of the computing site where the jobs run and "
         "executables are stored. "
         "Check your Pegasus configuration in submit.sh.")
