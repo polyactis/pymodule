@@ -1562,9 +1562,9 @@ class AbstractNGSWorkflow(ParentClass):
         return job
 
     def addVCFBeforeAfterFilterStatJob(self, executable=None, chromosome=None,
-        outputF=None, vcf1=None, vcf2=None,\
-        lastVCFJob=None, currentVCFJob=None,\
-        None, statMergeJobLs=None, parentJobLs=None):
+        outputF=None, vcf1=None, vcf2=None,
+        lastVCFJob=None, currentVCFJob=None,
+        statMergeJobLs=None, parentJobLs=None):
         """
 
         examples:
@@ -2813,9 +2813,11 @@ run something like below to extract data from regionOfInterest out of
             it's included in the next block's start
             blockStopLineNumber = min(startLineNumber+(i+1)*noOfLinesPerUnit-1, stopLineNumber)
         2012.7.30
-            1. intervalFname is in BED format (tab/comma-delimited, chr start stop) and has to be sorted.
+            1. intervalFname is in BED format (tab/comma-delimited, chr start stop)
+                and has to be sorted.
                 start and stop are 0-based. i.e. start=0, stop=100 means bases from 0-99.
-            2. folderName is the relative path of the folder in the pegasus workflow, that holds intervalFname.
+            2. folderName is the relative path of the folder in the pegasus
+                 workflow, that holds intervalFname.
                 it'll be created upon file stage-in. no mkdir job for it.
 
             get the number of lines in intervalFname.
