@@ -97,28 +97,6 @@ ParentClass=AbstractWorkflow
 
 class ImportIndividualSequence2DB(ParentClass):
     __doc__ = __doc__
-    option_default_dict = copy.deepcopy(ParentClass.option_default_dict)
-    option_default_dict.update(ParentClass.db_option_dict)
-    option_default_dict.update({
-        ('SplitReadFileJarPath', 1, ): ["script/picard/dist/SplitReadFile.jar", '', 1, 
-            'path to the SplitReadFile jar', ],\
-        ('picard_path', 1, ): ["script/picard.broad/build/libs/picard.jar", '', 1, 
-            'path to the new picard jar', ],\
-        ('sample_sheet', 0, ): ['', '', 1, 
-            'a tsv-format file detailing the corresponding sample ID of each input file.', ],\
-        ('minNoOfReads', 1, int): [8000000, '', 1, 'The minimum number of reads in each split fastq file. '
-            'The max number of reads in a split file is 2*minNoOfReads.', ],\
-        ("sequencer_name", 0, ): ["", '', 1, 'sequencing center of TCGA. parsed from TCGA bacode.'],\
-        ("sequence_type_name", 1, ): ["PairedEnd", '', 1,
-            'isq.sequence_type_id table column: SequenceType.short_name.'],\
-        ("sequence_format", 1, ): ["fastq", 'f', 1, 'Fasta, fastq, etc.'],\
-        ("tissueSourceSiteFname", 0, ): ["", '', 1, 'TCGA tissue source site file'],\
-        ('inputType', 1, int): [1, 'y', 1, 'input type. 1: fastQ files with sample_sheet; '
-            '2: TCGA bam files; 3: HCC1187 bam files', ],\
-        ('study_id', 0, int): [None, '', 1, 'Field study.id from db, used to group individuals.', ],\
-        ('site_id', 0, int): [None, '', 1, 'Field site.id from db, used to group individuals.', ],\
-        })
-    
     def __init__(self, input_path=None, 
         drivername='postgresql', hostname='localhost',
         dbname='', schema='public', port=None,
@@ -160,17 +138,17 @@ class ImportIndividualSequence2DB(ParentClass):
         self.db_passwd = db_passwd
         self.data_dir = data_dir
         self.local_data_dir = local_data_dir
-        SplitReadFileJarPath=None,
-        picard_path=None,
-        sample_sheet=None,
-        minNoOfReads=8000000,
-        sequencer_name=None,
-        sequence_type_name=None,
-        sequence_format=None,
-        tissueSourceSiteFname=None,
-        inputType=None,
-        study_id=None,
-        site_id=None,
+        self.SplitReadFileJarPath = SplitReadFileJarPath
+        self.picard_path = picard_path
+        self.sample_sheet = sample_sheet
+        self.minNoOfReads = minNoOfReads
+        self.sequencer_name = sequencer_name
+        self.sequence_type_name = sequence_type_name
+        self.sequence_format = sequence_format
+        self.tissueSourceSiteFname = tissueSourceSiteFname
+        self.inputType = inputType
+        self.study_id = study_id
+        self.site_id = site_id
         ParentClass.__init__(self, inputSuffixList=None, 
             site_handler=site_handler,
             pegasusFolderName=pegasusFolderName,
@@ -1781,9 +1759,41 @@ if __name__ == '__main__':
         help="database name (default: %(default)s)")
     ap.add_argument('-k', "--schema", default='sunset', 
         help="database schema (default: %(default)s)")
-    ap.add_argument("-u", "--db_user", required=True, help="Database user")
+    ap.add_argument("-u", "--db_user", help="Database user")
     ap.add_argument("-p", "--db_passwd", required=False,
         help="Password of the database user")
+
+    ap.add_argument("--SplitReadFileJarPath",
+        default="script/picard/dist/SplitReadFile.jar",
+        help='Default: %(default)s')
+    ap.add_argument("--picard_path",
+        default="script/picard.broad/build/libs/picard.jar",
+        help='Default: %(default)s')
+    ap.add_argument("--sample_sheet", required=True, default=None,
+        help="a tsv-format file detailing the corresponding sample ID of each "
+            "input file.")
+    ap.add_argument("--minNoOfReads", type=int, default=8000000,
+        help="The minimum number of reads in each split fastq file. "
+            "The max number of reads in a split file is 2*minNoOfReads. "
+            "Default: %(default)s")
+    ap.add_argument("--sequencer_name", default='', 
+        help="Sequencing center")
+    ap.add_argument("--sequence_type_name", default='PairedEnd',
+        help="isq.sequence_type_id table column: SequenceType.short_name."
+            "Default: %(default)s")
+    ap.add_argument("--sequence_format", default='fastq',
+        help="Fasta, fastq, etc. Default: %(default)s")
+    ap.add_argument("--tissueSourceSiteFname", default=None,
+        help="TCGA tissue source site file. For TCGA data only")
+    ap.add_argument("--inputType", type=int, default=1,
+        help="input type. 1: fastQ files with sample_sheet; "
+            "2: TCGA bam files; 3: HCC1187 bam files. "
+            "Default: %(default)s")
+    ap.add_argument("--study_id", default=None,
+        help="Field study.id from db, to group individuals.")
+    ap.add_argument("--site_id", default=None,
+        help="Field site.id from db, to group individuals.")
+    
     ap.add_argument("-F", "--pegasusFolderName", default='input',
         help='The path relative to the workflow running root. '
         'This folder will contain pegasus input & output. '
@@ -1833,16 +1843,33 @@ if __name__ == '__main__':
         help='Toggle debug mode.')
     ap.add_argument("--report", action='store_true',
         help="Toggle verbose mode. Default: %(default)s.")
-
     args = ap.parse_args()
+    if not args.db_user:
+        args.db_user = getpass.getuser()
+    if not args.db_passwd:
+        import getpass
+        args.db_passwd = getpass.getpass(f"Password for {args.db_user}:")
+    
     instance = ImportIndividualSequence2DB(
         input_path=args.input_path,
 
-        drivername=args.drivername, 
-	    hostname=args.hostname,
+        drivername=args.drivername,
+        hostname=args.hostname,
         port=args.port,
         dbname=args.dbname, schema=args.schema,
         db_user=args.db_user, db_passwd=args.db_passwd,
+
+        SplitReadFileJarPath=args.SplitReadFileJarPath,
+        picard_path=args.picard_path,
+        sample_sheet=args.sample_sheet,
+        minNoOfReads=args.minNoOfReads,
+        sequencer_name=args.sequencer_name,
+        sequence_type_name=args.sequence_type_name,
+        sequence_format=args.sequence_format,
+        tissueSourceSiteFname=args.tissueSourceSiteFname,
+        inputType=args.inputType,
+        study_id=args.study_id,
+        site_id=args.site_id,
 
         pegasusFolderName=args.pegasusFolderName,
         site_handler=args.site_handler, 
