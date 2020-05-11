@@ -485,16 +485,9 @@ class AbstractNGSWorkflow(ParentClass):
         """
         """
         ParentClass.registerExecutables(self)
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
-                'polymorphism/qc/mapper/FilterLocusBasedOnLocusStatFile.py'),
-            name='FilterLocusBasedOnLocusStatFile', clusterSizeMultiplier=0.5)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, 
                 "reducer/ligateVcf.sh"),
             name="ligateVcf", clusterSizeMultiplier=1)
-        #2013.09.17 updated
-        #self.registerOneExecutable(
-        #   path=os.path.join(self.pymodulePath, "polymorphism/qc/CheckTwoVCFOverlapCC"),
-        #   name='CheckTwoVCFOverlapCC', clusterSizeMultiplier=1)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
             "mapper/splitter/SelectAndSplitFastaRecords.py"),\
             name='SelectAndSplitFastaRecords', clusterSizeMultiplier=0)
