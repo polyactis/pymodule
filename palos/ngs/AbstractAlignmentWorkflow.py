@@ -17,16 +17,23 @@ class AbstractAlignmentWorkflow(AbstractNGSWorkflow):
     option_default_dict.update({
                         })
     commonAlignmentWorkflowOptionDict = {
-        ('ind_seq_id_ls', 0, ): ['', 'i', 1, 'a comma/dash-separated list of IndividualSequence.id. alignments come from these', ],\
-        ('ind_aln_id_ls', 0, ): ['', '', 1, 'a comma/dash-separated list of IndividualAlignment.id. This overrides ind_seq_id_ls.', ],\
-        ('alignment_outdated_index', 0, int): [0, '', 1, 'filter based on value of IndividualAlignment.outdated_index.', ],\
-        ("alignment_method_id", 0, int): [None, 'G', 1, 'To filter alignments. None: whatever; integer: AlignmentMethod.id'],\
-        ("local_realigned", 0, int): [None, '', 1, 'To filter which input alignments to fetch from db (i.e. AlignmentReadBaseQualityRecalibrationWorkflow.py)\
-OR to instruct whether local_realigned should be applied (i.e. ShortRead2AlignmentWorkflow.py)'],\
-        ('defaultSampleAlignmentDepth', 1, int): [10, '', 1, "when database doesn't have median_depth info for one alignment, use this number instead.", ],\
-        ('individual_sequence_file_raw_id_type', 1, int): [1, '', 1, "1: only all-library-fused libraries,\n\
-2: only library-specific alignments,\n\
-3: both all-library-fused and library-specific alignments", ],\
+        ('ind_seq_id_ls', 0, ): ['', 'i', 1, 
+            'a comma/dash-separated list of IndividualSequence.id. alignments come from these', ],\
+        ('ind_aln_id_ls', 0, ): ['', '', 1, 
+            'a comma/dash-separated list of IndividualAlignment.id. This overrides ind_seq_id_ls.', ],\
+        ('alignment_outdated_index', 0, int): [0, '', 1, 
+            'filter based on value of IndividualAlignment.outdated_index.', ],\
+        ("alignment_method_id", 0, int): [None, 'G', 1,
+            'To filter alignments. None: whatever; integer: AlignmentMethod.id'],\
+        ("local_realigned", 0, int): [None, '', 1, 
+        'To filter which input alignments to fetch from db (i.e. AlignmentReadBaseQualityRecalibrationWorkflow.py)'
+        'OR to instruct whether local_realigned should be applied (i.e. ShortRead2AlignmentWorkflow.py)'],\
+        ('defaultSampleAlignmentDepth', 1, int): [10, '', 1, 
+            "when database doesn't have median_depth info for one alignment, use this number instead.", ],\
+        ('individual_sequence_file_raw_id_type', 1, int): [1, '', 1, 
+            "1: only all-library-fused libraries,\n"
+            "2: only library-specific alignments,\n"
+            "3: both all-library-fused and library-specific alignments", ],\
         }
     option_default_dict.update(commonAlignmentWorkflowOptionDict)
     partitionWorkflowOptionDict= {
@@ -100,16 +107,18 @@ OR to instruct whether local_realigned should be applied (i.e. ShortRead2Alignme
                 for parentJob in parentJobLs:
                     if parentJob:
                         self.addJobDependency(parentJob=parentJob, childJob=job)
-            #if alignmentFileFolder:	#2013.05.21 pegasus/condor would truncate long single-argument.
+            #if alignmentFileFolder:
+            # #2013.05.21 pegasus/condor would truncate long single-argument.
             #	job.addArguments('%s/*.bam'%(alignmentFileFolder))
             #else:
             job.addArguments(','.join(fileArgumentLs))
 
-    def addAddRG2BamJobsAsNeeded(self, alignmentDataLs=None, site_handler=None, input_site_handler=None, \
-                            AddOrReplaceReadGroupsJava=None, AddOrReplaceReadGroupsJar=None, \
-                            BuildBamIndexFilesJava=None, BuildBamIndexJar=None, \
-                            mv=None, \
-                            data_dir=None, tmpDir="/tmp", **keywords):
+    def addAddRG2BamJobsAsNeeded(self, alignmentDataLs=None, site_handler=None,
+        input_site_handler=None, \
+        AddOrReplaceReadGroupsJava=None, AddOrReplaceReadGroupsJar=None, \
+        BuildBamIndexFilesJava=None, BuildBamIndexJar=None, \
+        mv=None, \
+        data_dir=None, tmpDir="/tmp", **keywords):
         """
         2012.4.5
             fix some bugs here
@@ -117,7 +126,8 @@ OR to instruct whether local_realigned should be applied (i.e. ShortRead2Alignme
             add a read group only when the alignment doesn't have it according to db record
             DBVervet.pokeBamReadGroupPresence() from misc.py helps to fill in db records if it's unclear.
         2011-9-14
-            The read-group adding jobs will have a "move" part that overwrites the original bam&bai if site_handler and input_site_handler is same.
+            The read-group adding jobs will have a "move" part that overwrites
+                 the original bam&bai if site_handler and input_site_handler is same.
             For those alignment files that don't need to. It doesn't matter. pegasus will transfer/symlink them.
         """
         sys.stderr.write("Adding add-read-group2BAM jobs for %s alignments if read group is not detected ..."%(len(alignmentDataLs)))
@@ -142,7 +152,8 @@ OR to instruct whether local_realigned should be applied (i.e. ShortRead2Alignme
 
                 # add RG to this bam
                 sequencer = alignment.individual_sequence.sequencer
-                #read_group = '%s_%s_%s_%s_vs_%s'%(alignment.id, alignment.ind_seq_id, alignment.individual_sequence.individual.code, \
+                #read_group = '%s_%s_%s_%s_vs_%s'%(alignment.id, alignment.ind_seq_id, 
+                # alignment.individual_sequence.individual.code, \
                 #						sequencer, alignment.ref_ind_seq_id)
                 read_group = alignment.getReadGroup()	##2011-11-02
                 if sequencer=='454':
@@ -158,11 +169,11 @@ OR to instruct whether local_realigned should be applied (i.e. ShortRead2Alignme
                 outputRGSAM = File(os.path.join(addRG2BamDir, os.path.basename(alignment.path)))
 
                 addRGJob.addArguments(javaMemRequirement, '-jar', AddOrReplaceReadGroupsJar, \
-                                    "INPUT=", bamF,\
-                                    'RGID=%s'%(read_group), 'RGLB=%s'%(platform_id), 'RGPL=%s'%(platform_id), \
-                                    'RGPU=%s'%(read_group), 'RGSM=%s'%(read_group),\
-                                    'OUTPUT=', outputRGSAM, 'SORT_ORDER=coordinate', "VALIDATION_STRINGENCY=LENIENT")
-                                    #(adding the SORT_ORDER doesn't do sorting but it marks the header as sorted so that BuildBamIndexJar won't fail.)
+                    "INPUT=", bamF,\
+                    'RGID=%s'%(read_group), 'RGLB=%s'%(platform_id), 'RGPL=%s'%(platform_id), \
+                    'RGPU=%s'%(read_group), 'RGSM=%s'%(read_group),\
+                    'OUTPUT=', outputRGSAM, 'SORT_ORDER=coordinate', "VALIDATION_STRINGENCY=LENIENT")
+                    #(adding the SORT_ORDER doesn't do sorting but it marks the header as sorted so that BuildBamIndexJar won't fail.)
                 self.addJobUse(addRGJob, file=AddOrReplaceReadGroupsJar, transfer=True, register=True, link=Link.INPUT)
                 if tmpDir:
                     addRGJob.addArguments("TMP_DIR=%s"%tmpDir)
@@ -176,7 +187,8 @@ OR to instruct whether local_realigned should be applied (i.e. ShortRead2Alignme
                 self.addJob(addRGJob)
 
 
-                index_sam_job = self.addBAMIndexJob(BuildBamIndexFilesJava=self.BuildBamIndexFilesJava, BuildBamIndexJar=self.BuildBamIndexJar, \
+                index_sam_job = self.addBAMIndexJob(BuildBamIndexFilesJava=self.BuildBamIndexFilesJava,
+                    BuildBamIndexJar=self.BuildBamIndexJar, \
                     inputBamF=outputRGSAM, parentJobLs=[addRGJob], transferOutput=True, javaMaxMemory=2000)
                 newAlignmentData = PassingData(alignment=alignment)
                 newAlignmentData.jobLs = [index_sam_job, addRGJob]
@@ -226,7 +238,8 @@ OR to instruct whether local_realigned should be applied (i.e. ShortRead2Alignme
         return returnData
 
     def mapEachChromosome(self, alignmentData=None, chromosome=None,\
-                VCFJobData=None, passingData=None, reduceBeforeEachAlignmentData=None, transferOutput=True, **keywords):
+        VCFJobData=None, passingData=None,
+        reduceBeforeEachAlignmentData=None, transferOutput=True, **keywords):
         """
         2012.9.17
         """
@@ -235,7 +248,8 @@ OR to instruct whether local_realigned should be applied (i.e. ShortRead2Alignme
         return returnData
 
     def map(self, alignmentData=None, intervalData=None,\
-        VCFJobData=None, passingData=None, mapEachChromosomeData=None, transferOutput=True, **keywords):
+        VCFJobData=None, passingData=None,
+        mapEachChromosomeData=None, transferOutput=True, **keywords):
         """
         2012.9.17
         """
@@ -250,14 +264,16 @@ OR to instruct whether local_realigned should be applied (i.e. ShortRead2Alignme
         return self.map(**keywords)
 
 
-    def linkMapToReduce(self, mapEachIntervalData=None, preReduceReturnData=None, passingData=None, transferOutput=True, **keywords):
+    def linkMapToReduce(self, mapEachIntervalData=None,
+        preReduceReturnData=None, passingData=None, transferOutput=True, **keywords):
         """
         """
         returnData = PassingData(no_of_jobs = 0)
         returnData.jobDataLs = []
         return returnData
 
-    def mapEachAlignment(self, alignmentData=None,  passingData=None, transferOutput=True, **keywords):
+    def mapEachAlignment(self, alignmentData=None,  passingData=None,
+        transferOutput=True, **keywords):
         """
         2012.9.22
             similar to reduceBeforeEachAlignmentData() but for mapping programs that run on one alignment each.
@@ -281,8 +297,9 @@ OR to instruct whether local_realigned should be applied (i.e. ShortRead2Alignme
 
         return returnData
 
-    def reduceAfterEachChromosome(self, chromosome=None, passingData=None, transferOutput=True, \
-                                mapEachIntervalDataLs=None, **keywords):
+    def reduceAfterEachChromosome(self, chromosome=None, passingData=None,
+        transferOutput=True,
+        mapEachIntervalDataLs=None, **keywords):
         """
         """
         returnData = PassingData(no_of_jobs = 0)
@@ -301,8 +318,8 @@ OR to instruct whether local_realigned should be applied (i.e. ShortRead2Alignme
         return returnData
 
     def reduceAfterEachAlignment(self, passingData=None, mapEachChromosomeDataLs=None,\
-                                reduceAfterEachChromosomeDataLs=None,\
-                                transferOutput=True, **keywords):
+        reduceAfterEachChromosomeDataLs=None,\
+        transferOutput=True, **keywords):
         """
         """
         returnData = PassingData(no_of_jobs = 0)
@@ -322,8 +339,8 @@ OR to instruct whether local_realigned should be applied (i.e. ShortRead2Alignme
         return returnData
 
     def mapReduceOneAlignment(self, alignmentData=None, passingData=None, \
-                        chrIDSet=None, chrSizeIDList=None, chr2IntervalDataLs=None, chr2VCFJobData=None, \
-                        outputDirPrefix=None, transferOutput=False, skipChromosomeIfVCFMissing=False, **keywords):
+        chrIDSet=None, chrSizeIDList=None, chr2IntervalDataLs=None, chr2VCFJobData=None, \
+        outputDirPrefix=None, transferOutput=False, skipChromosomeIfVCFMissing=False, **keywords):
         """
         2013.04.11 moved from AbstractAlignmentAndVCFWorkflow.py
         2013.04.08, added skipChromosomeIfVCFMissing
@@ -360,11 +377,13 @@ OR to instruct whether local_realigned should be applied (i.e. ShortRead2Alignme
                         sys.stderr.write("WARNING: no VCFFile for chromosome %s.\n"%(chromosome))
                     if skipChromosomeIfVCFMissing:
                         continue
-            passingData.chromosome = chromosome	#2013.04.08
-            mapEachChromosomeData = self.mapEachChromosome(alignmentData=alignmentData, chromosome=chromosome, \
-                                VCFJobData=VCFJobData, passingData=passingData, reduceBeforeEachAlignmentData=reduceBeforeEachAlignmentData,\
-                                mapEachAlignmentData=mapEachAlignmentData,\
-                                transferOutput=False, **keywords)
+            passingData.chromosome = chromosome
+            mapEachChromosomeData = self.mapEachChromosome(
+                alignmentData=alignmentData, chromosome=chromosome, \
+                VCFJobData=VCFJobData, passingData=passingData,
+                reduceBeforeEachAlignmentData=reduceBeforeEachAlignmentData,\
+                mapEachAlignmentData=mapEachAlignmentData,\
+                transferOutput=False, **keywords)
             passingData.mapEachChromosomeData = mapEachChromosomeData
             mapEachChromosomeDataLs.append(mapEachChromosomeData)
 
@@ -383,11 +402,13 @@ OR to instruct whether local_realigned should be applied (i.e. ShortRead2Alignme
                     overlapInterval = intervalData.overlapInterval
                     overlapFileBasenameSignature = intervalData.overlapIntervalFileBasenameSignature
 
-                    mapEachIntervalData = self.mapEachInterval(alignmentData=alignmentData, intervalData=intervalData,\
-                                        chromosome=chromosome,\
-                                        VCFJobData=VCFJobData, passingData=passingData, reduceBeforeEachAlignmentData=reduceBeforeEachAlignmentData,\
-                                        mapEachAlignmentData=mapEachAlignmentData,\
-                                        mapEachChromosomeData=mapEachChromosomeData, transferOutput=False, **keywords)
+                    mapEachIntervalData = self.mapEachInterval(
+                        alignmentData=alignmentData, intervalData=intervalData,\
+                        chromosome=chromosome,\
+                        VCFJobData=VCFJobData, passingData=passingData,
+                        reduceBeforeEachAlignmentData=reduceBeforeEachAlignmentData,\
+                        mapEachAlignmentData=mapEachAlignmentData,\
+                        mapEachChromosomeData=mapEachChromosomeData, transferOutput=False, **keywords)
                     passingData.mapEachIntervalData = mapEachIntervalData
                     mapEachIntervalDataLs.append(mapEachIntervalData)
 
@@ -460,7 +481,7 @@ OR to instruct whether local_realigned should be applied (i.e. ShortRead2Alignme
 
         if needFastaDictJob or registerReferenceData.needPicardFastaDictJob:
             fastaDictJob = self.addRefFastaDictJob(CreateSequenceDictionaryJava=CreateSequenceDictionaryJava, \
-                                        CreateSequenceDictionaryJar=CreateSequenceDictionaryJar, refFastaF=refFastaF)
+                CreateSequenceDictionaryJar=CreateSequenceDictionaryJar, refFastaF=refFastaF)
             refFastaDictF = fastaDictJob.refFastaDictF
         else:
             fastaDictJob = None
@@ -545,78 +566,87 @@ OR to instruct whether local_realigned should be applied (i.e. ShortRead2Alignme
             passingData.individual_alignment = alignment
             passingData.alignmentData = alignmentData
 
-            if skipDoneAlignment and self.isThisAlignmentComplete(individual_alignment=alignment, data_dir=data_dir):
+            if skipDoneAlignment and self.isThisAlignmentComplete(
+                individual_alignment=alignment, data_dir=data_dir):
                 continue
             no_of_alignments_worked_on += 1
-            mapEachAlignmentData = self.mapEachAlignment(alignmentData=alignmentData, passingData=passingData, \
-                                transferOutput=False, \
-                                preReduceReturnData=preReduceReturnData, **keywords)
+            mapEachAlignmentData = self.mapEachAlignment(
+                alignmentData=alignmentData, passingData=passingData, \
+                transferOutput=False, \
+                preReduceReturnData=preReduceReturnData, **keywords)
             passingData.mapEachAlignmentDataLs.append(mapEachAlignmentData)
             passingData.mapEachAlignmentData = mapEachAlignmentData
 
-            reduceBeforeEachAlignmentData = self.reduceBeforeEachAlignment(passingData=passingData, \
-                                                    preReduceReturnData=preReduceReturnData, transferOutput=False, \
-                                                    **keywords)
+            reduceBeforeEachAlignmentData = self.reduceBeforeEachAlignment(
+                passingData=passingData,
+                preReduceReturnData=preReduceReturnData, transferOutput=False, \
+                **keywords)
             passingData.reduceBeforeEachAlignmentData = reduceBeforeEachAlignmentData
             passingData.reduceBeforeEachAlignmentDataLs.append(reduceBeforeEachAlignmentData)
 
 
-            mapReduceOneAlignmentReturnData = self.mapReduceOneAlignment(alignmentData=alignmentData, \
-                            passingData=passingData, \
-                            chrIDSet=chrIDSet, chrSizeIDList=chrSizeIDList, \
-                            chr2IntervalDataLs=chr2IntervalDataLs, chr2VCFJobData=chr2VCFJobData, \
-                            outputDirPrefix=outputDirPrefix, transferOutput=transferOutput)
+            mapReduceOneAlignmentReturnData = self.mapReduceOneAlignment(
+                alignmentData=alignmentData, \
+                passingData=passingData, \
+                chrIDSet=chrIDSet, chrSizeIDList=chrSizeIDList, \
+                chr2IntervalDataLs=chr2IntervalDataLs, chr2VCFJobData=chr2VCFJobData, \
+                outputDirPrefix=outputDirPrefix, transferOutput=transferOutput)
 
             reduceAfterEachAlignmentData = self.reduceAfterEachAlignment(\
-                                                mapEachAlignmentData=mapEachAlignmentData,\
-                                                mapEachChromosomeDataLs=passingData.mapEachChromosomeDataLs,\
-                                                reduceAfterEachChromosomeDataLs=passingData.reduceAfterEachChromosomeDataLs,\
-                                                passingData=passingData, \
-                                                transferOutput=False, data_dir=data_dir, **keywords)
+                mapEachAlignmentData=mapEachAlignmentData,\
+                mapEachChromosomeDataLs=passingData.mapEachChromosomeDataLs,\
+                reduceAfterEachChromosomeDataLs=passingData.reduceAfterEachChromosomeDataLs,\
+                passingData=passingData, \
+                transferOutput=False, data_dir=data_dir, **keywords)
             passingData.reduceAfterEachAlignmentData = reduceAfterEachAlignmentData
             passingData.reduceAfterEachAlignmentDataLs.append(reduceAfterEachAlignmentData)
 
             gzipReduceBeforeEachAlignmentData = self.addGzipSubWorkflow(\
-                        inputData=reduceBeforeEachAlignmentData, transferOutput=transferOutput,\
-                        outputDirPrefix="%sReduceBeforeEachAlignment"%(outputDirPrefix), \
-                        topOutputDirJob=passingData.gzipReduceBeforeEachAlignmentFolderJob, report=False)
+                inputData=reduceBeforeEachAlignmentData, transferOutput=transferOutput,\
+                outputDirPrefix="%sReduceBeforeEachAlignment"%(outputDirPrefix), \
+                topOutputDirJob=passingData.gzipReduceBeforeEachAlignmentFolderJob, report=False)
             passingData.gzipReduceBeforeEachAlignmentFolderJob = gzipReduceBeforeEachAlignmentData.topOutputDirJob
 
             gzipReduceAfterEachAlignmentData = self.addGzipSubWorkflow(\
-                        inputData=reduceAfterEachAlignmentData, transferOutput=transferOutput,\
-                        outputDirPrefix="%sReduceAfterEachAlignment"%(outputDirPrefix), \
-                        topOutputDirJob=passingData.gzipReduceAfterEachAlignmentFolderJob, \
-                        report=False)
+                inputData=reduceAfterEachAlignmentData, transferOutput=transferOutput,\
+                outputDirPrefix="%sReduceAfterEachAlignment"%(outputDirPrefix), \
+                topOutputDirJob=passingData.gzipReduceAfterEachAlignmentFolderJob, \
+                report=False)
             passingData.gzipReduceAfterEachAlignmentFolderJob = gzipReduceAfterEachAlignmentData.topOutputDirJob
         reduceReturnData = self.reduce(passingData=passingData, \
-                            mapEachAlignmentData=passingData.mapEachAlignmentData, \
-                            reduceAfterEachAlignmentDataLs=passingData.reduceAfterEachAlignmentDataLs,\
-                            **keywords)
+            mapEachAlignmentData=passingData.mapEachAlignmentData, \
+            reduceAfterEachAlignmentDataLs=passingData.reduceAfterEachAlignmentDataLs,\
+            **keywords)
         passingData.reduceReturnData = reduceReturnData
 
 
         #2012.9.18 gzip the final output
-        newReturnData = self.addGzipSubWorkflow(inputData=preReduceReturnData, transferOutput=transferOutput,\
-                        outputDirPrefix="%sGzipPreReduce"%(outputDirPrefix), \
-                        topOutputDirJob=passingData.gzipPreReduceFolderJob, \
-                        report=False)
+        newReturnData = self.addGzipSubWorkflow(inputData=preReduceReturnData,
+            transferOutput=transferOutput,\
+            outputDirPrefix="%sGzipPreReduce"%(outputDirPrefix), \
+            topOutputDirJob=passingData.gzipPreReduceFolderJob, \
+            report=False)
         passingData.gzipPreReduceFolderJob = newReturnData.topOutputDirJob
-        newReturnData = self.addGzipSubWorkflow(inputData=reduceReturnData, transferOutput=transferOutput,\
-                        outputDirPrefix="%sGzipReduce"%(outputDirPrefix), \
-                        topOutputDirJob=passingData.gzipReduceFolderJob, \
-                        report=False)
+        newReturnData = self.addGzipSubWorkflow(inputData=reduceReturnData,
+            transferOutput=transferOutput,\
+            outputDirPrefix="%sGzipReduce"%(outputDirPrefix), \
+            topOutputDirJob=passingData.gzipReduceFolderJob, \
+            report=False)
         passingData.gzipReduceFolderJob = newReturnData.topOutputDirJob
 
         sys.stderr.write("%s alignments to be worked on. %s jobs.\n"%(no_of_alignments_worked_on, self.no_of_jobs))
         return returnData
 
 
-    def registerCustomExecutables(self):
-
+    def registerExecutables(self):
         """
         """
-        AbstractNGSWorkflow.registerCustomExecutables(self)
-        #self.registerOneExecutable(path=self.javaPath, name="exampleJava", clusterSizeMultiplier=0.3)
+        AbstractNGSWorkflow.registerExecutables(self)
+        self.registerOneExecutable(path=self.samtools_path,
+            name='samtools', clusterSizeMultiplier=0.2)
+        self.samtoolsExecutableFile = self.registerOneExecutableAsFile(
+            path=self.samtools_path,
+            site_handler=self.input_site_handler)
 
     def setup_run(self):
         """
@@ -627,23 +657,28 @@ OR to instruct whether local_realigned should be applied (i.e. ShortRead2Alignme
         pdata = AbstractNGSWorkflow.setup_run(self)
         workflow = pdata.workflow
 
-        if self.needSplitChrIntervalData:	#2013.06.21 defined in AbstractNGSWorkflow.__init__()
-            if self.alignmentDepthIntervalMethodShortName and self.db_main and self.db_main.checkAlignmentDepthIntervalMethod(short_name=self.alignmentDepthIntervalMethodShortName):
+        if self.needSplitChrIntervalData:
+            #2013.06.21 defined in AbstractNGSWorkflow.__init__()
+            if self.alignmentDepthIntervalMethodShortName and self.db_main and \
+                self.db_main.checkAlignmentDepthIntervalMethod(
+                    short_name=self.alignmentDepthIntervalMethodShortName):
                 #2013.09.01 fetch intervals from db
                 #make sure it exists in db first
-                chr2IntervalDataLs = self.getChr2IntervalDataLsFromDBAlignmentDepthInterval(db=self.db_main, \
-                                    intervalSize=self.intervalSize, intervalOverlapSize=self.intervalOverlapSize,\
-                                    alignmentDepthIntervalMethodShortName=self.alignmentDepthIntervalMethodShortName, \
-                                    alignmentDepthMinFold=self.alignmentDepthMinFold, alignmentDepthMaxFold=self.alignmentDepthMaxFold, \
-                                    minAlignmentDepthIntervalLength=self.minAlignmentDepthIntervalLength,\
-                                    maxContigID=self.maxContigID, minContigID=self.minContigID)
+                chr2IntervalDataLs = self.getChr2IntervalDataLsFromDBAlignmentDepthInterval(
+                    db=self.db_main, \
+                    intervalSize=self.intervalSize, intervalOverlapSize=self.intervalOverlapSize,\
+                    alignmentDepthIntervalMethodShortName=self.alignmentDepthIntervalMethodShortName, \
+                    alignmentDepthMinFold=self.alignmentDepthMinFold,
+                    alignmentDepthMaxFold=self.alignmentDepthMaxFold, \
+                    minAlignmentDepthIntervalLength=self.minAlignmentDepthIntervalLength,\
+                    maxContigID=self.maxContigID, minContigID=self.minContigID)
             else: #split evenly using chromosome size
                 chr2IntervalDataLs = self.getChr2IntervalDataLsBySplitChrSize(chr2size=self.chr2size, \
-                                                    intervalSize=self.intervalSize, \
-                                                    intervalOverlapSize=self.intervalOverlapSize)
+                    intervalSize=self.intervalSize, \
+                    intervalOverlapSize=self.intervalOverlapSize)
             # 2012.8.2 if maxContigID/minContigID is not well defined. restrictContigDictionry won't do anything.
             chr2IntervalDataLs = self.restrictContigDictionry(dc=chr2IntervalDataLs, \
-                                                maxContigID=self.maxContigID, minContigID=self.minContigID)
+                maxContigID=self.maxContigID, minContigID=self.minContigID)
         else:
             chr2IntervalDataLs = None
 
@@ -651,7 +686,8 @@ OR to instruct whether local_realigned should be applied (i.e. ShortRead2Alignme
 
         registerReferenceData = self.getReferenceSequence()
 
-        alignmentDataLs = self.registerAlignmentAndItsIndexFile(alignmentLs=alignmentLs, data_dir=self.data_dir)
+        alignmentDataLs = self.registerAlignmentAndItsIndexFile(
+            alignmentLs=alignmentLs, data_dir=self.data_dir)
         self.alignmentLs = alignmentLs
         self.alignmentDataLs = alignmentDataLs
         self.chr2IntervalDataLs = chr2IntervalDataLs
@@ -664,20 +700,18 @@ OR to instruct whether local_realigned should be applied (i.e. ShortRead2Alignme
         """
 
         pdata = self.setup_run()
-        workflow = pdata.workflow
-
         self.addAllJobs(alignmentDataLs=pdata.alignmentDataLs, \
-                chr2IntervalDataLs=pdata.chr2IntervalDataLs, samtools=self.samtools, \
-                GenomeAnalysisTKJar=self.GenomeAnalysisTKJar, \
-                MergeSamFilesJar=self.MergeSamFilesJar, \
-                CreateSequenceDictionaryJava=self.CreateSequenceDictionaryJava, \
-                CreateSequenceDictionaryJar=self.CreateSequenceDictionaryJar, \
-                BuildBamIndexFilesJava=self.BuildBamIndexFilesJava, BuildBamIndexJar=self.BuildBamIndexJar,\
-                mv=self.mv, skipDoneAlignment=self.skipDoneAlignment,\
-                registerReferenceData=pdata.registerReferenceData,\
-                needFastaIndexJob=self.needFastaIndexJob, needFastaDictJob=self.needFastaDictJob, \
-                data_dir=self.data_dir, no_of_gatk_threads = 1, transferOutput=True,\
-                outputDirPrefix=self.pegasusFolderName)
+            chr2IntervalDataLs=pdata.chr2IntervalDataLs, samtools=self.samtools, \
+            GenomeAnalysisTKJar=self.GenomeAnalysisTKJar, \
+            MergeSamFilesJar=self.MergeSamFilesJar, \
+            CreateSequenceDictionaryJava=self.CreateSequenceDictionaryJava, \
+            CreateSequenceDictionaryJar=self.CreateSequenceDictionaryJar, \
+            BuildBamIndexFilesJava=self.BuildBamIndexFilesJava, BuildBamIndexJar=self.BuildBamIndexJar,\
+            mv=self.mv, skipDoneAlignment=self.skipDoneAlignment,\
+            registerReferenceData=pdata.registerReferenceData,\
+            needFastaIndexJob=self.needFastaIndexJob, needFastaDictJob=self.needFastaDictJob, \
+            data_dir=self.data_dir, no_of_gatk_threads = 1, transferOutput=True,\
+            outputDirPrefix=self.pegasusFolderName)
 
         self.end_run()
 

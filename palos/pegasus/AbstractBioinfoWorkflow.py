@@ -440,10 +440,6 @@ class AbstractBioinfoWorkflow(ParentClass):
                 'statistics/GenomeMovingAverageStatistics.py'), \
             name='GenomeMovingAverageStatistics', clusterSizeMultiplier=0.1)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
-                'reducer/ReduceSameChromosomeAlignmentDepthFiles'), \
-            name='ReduceSameChromosomeAlignmentDepthFiles', clusterSizeMultiplier=0.5)
-
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
                 'mapper/computer/OutputVCFSiteGap.py'), \
             name='OutputVCFSiteGap', clusterSizeMultiplier=1)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \

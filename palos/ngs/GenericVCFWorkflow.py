@@ -67,50 +67,55 @@ class GenericVCFWorkflow(ParentClass):
     __doc__ = __doc__
     option_default_dict = copy.deepcopy(ParentClass.option_default_dict)
     option_default_dict.update({
-                        ('individualUCLAIDFname', 0, ): [None, 'i', 1, 'a file containing individual ucla_id in each row. one column with header UCLAID. ', ],\
-                        ('vcfSampleIDFname', 0, ): [None, 'w', 1, 'a file containing the sample ID (a composite ID including ucla_id) each row. \
-        any samples not in this file will be removed in subset VCF run_type (1, 3)\
-        You can also use individualUCLAIDFname to specify the sample IDs (UCLAID). \
-        Their composite IDs will be inferred from individualUCLAIDFname + first VCF file header.', ],\
-                        ('vcf2Dir', 0, ): ['', '', 1, 'the 2nd input folder that contains vcf or vcf.gz files.', ],\
-                        ('run_type', 1, int): [1, 'y', 1, 'which run_type to run. \
-                            1: subset VCF based on input file containing sample IDs;\
-                            2: convert to plink format; \
-                            3: subset + convert-2-plink. MAC & MAF & maxSNPMissingRate applied in the convert-to-plink step.\
-                            4: ConvertAlignmentReadGroup2UCLAIDInVCF jobs.\
-                            5: addMergeVCFReplicateHaplotypesJobs to get haplotype distance & majority call support stats.\
-                            6: VCF2YuFormatJobs, \
-                            7: ConvertAlignmentReadGroup2UCLAIDInVCF + VCF2YuFormatJobs, \
-                            8: ConvertAlignmentReadGroup2UCLAIDInVCF + convert to plink format, \
-                            9: combine all single-chromosome VCF into one. \
-                            ?: Combine VCF files from two input folder, chr by chr. (not done yet. check CheckTwoVCFOverlapPipeline.py for howto)', ],\
-                        ("minMAC", 0, int): [None, 'n', 1, 'minimum MinorAlleleCount (by chromosome)'],\
-                        ("minMAF", 0, float): [None, 'f', 1, 'minimum MinorAlleleFrequency (by chromosome)'],\
-                        ("maxSNPMissingRate", 0, float): [1.0, 'L', 1, 'maximum SNP missing rate in one vcf (denominator is #chromosomes)'],\
-                        ('genotypeMethodShortName', 0, ):[None, 's', 1, 'column short_name of GenotypeMethod table,\
+        ('individualUCLAIDFname', 0, ): [None, 'i', 1, 'a file containing individual ucla_id in each row. one column with header UCLAID. ', ],\
+        ('vcfSampleIDFname', 0, ): [None, 'w', 1, 'a file containing the sample ID (a composite ID including ucla_id) each row. \
+    any samples not in this file will be removed in subset VCF run_type (1, 3)\
+    You can also use individualUCLAIDFname to specify the sample IDs (UCLAID). \
+    Their composite IDs will be inferred from individualUCLAIDFname + first VCF file header.', ],
+        ('vcf2Dir', 0, ): ['', '', 1, 'the 2nd input folder that contains vcf or vcf.gz files.', ],
+        ('vcfSubsetPath', 1, ): ["bin/vcftools/vcf-subset", '', 1, 
+            'path to the vcf-subset program'],
+        ('run_type', 1, int): [1, 'y', 1, 'which run_type to run. \
+            1: subset VCF based on input file containing sample IDs;\
+            2: convert to plink format; \
+            3: subset + convert-2-plink. MAC & MAF & maxSNPMissingRate applied in the convert-to-plink step.\
+            4: ConvertAlignmentReadGroup2UCLAIDInVCF jobs.\
+            5: addMergeVCFReplicateHaplotypesJobs to get haplotype distance & majority call support stats.\
+            6: VCF2YuFormatJobs, \
+            7: ConvertAlignmentReadGroup2UCLAIDInVCF + VCF2YuFormatJobs, \
+            8: ConvertAlignmentReadGroup2UCLAIDInVCF + convert to plink format, \
+            9: combine all single-chromosome VCF into one. \
+            ?: Combine VCF files from two input folder, chr by chr. (not done yet. check CheckTwoVCFOverlapPipeline.py for howto)', ],\
+        ("minMAC", 0, int): [None, 'n', 1, 'minimum MinorAlleleCount (by chromosome)'],\
+        ("minMAF", 0, float): [None, 'f', 1, 'minimum MinorAlleleFrequency (by chromosome)'],\
+        ("maxSNPMissingRate", 0, float): [1.0, 'L', 1, 'maximum SNP missing rate in one vcf (denominator is #chromosomes)'],\
+        ('genotypeMethodShortName', 0, ):[None, 's', 1, 'column short_name of GenotypeMethod table,\
     will be created if not present in db.\
     for run_type 9, if given the file would be added into db.'],\
-                        })
-                        #('bamListFname', 1, ): ['/tmp/bamFileList.txt', 'L', 1, 'The file contains path to each bam file, one file per line.'],\
+        })
 
-    def __init__(self,  **keywords):
+    def __init__(self, vcfSubsetPath="bin/vcftools/vcf-subset", **keywords):
         """
         """
+        self.vcfSubsetPath = vcfSubsetPath
+        self.pathToInsertHomePathList.extend(['vcfSubsetPath'])
         ParentClass.__init__(self, **keywords)
     
-    def addVCF2PlinkJobs(self, inputData=None, db_vervet=None, minMAC=None, minMAF=None,\
-                        maxSNPMissingRate=None, transferOutput=True,\
-                        maxContigID=None, outputDirPrefix="", outputPedigreeAsTFAM=False, outputPedigreeAsTFAMInputJobData=None, \
-                        treatEveryOneIndependent=False,\
-                        returnMode=3, ModifyTPEDRunType=1, chr_id2cumu_chr_start=None,\
-                        addUngenotypedDuoParents=False):
+    def addVCF2PlinkJobs(self, inputData=None, db_vervet=None, minMAC=None,
+        minMAF=None,\
+        maxSNPMissingRate=None, transferOutput=True,\
+        maxContigID=None, outputDirPrefix="", outputPedigreeAsTFAM=False,
+        outputPedigreeAsTFAMInputJobData=None, \
+        treatEveryOneIndependent=False,\
+        returnMode=3, ModifyTPEDRunType=1, chr_id2cumu_chr_start=None,\
+        addUngenotypedDuoParents=False):
         """
-            returnMode
-                1: only the final merged binary .bed , .fam file and its generation job(s)
-                2: only the individual contig/chromosome (whatever in inputDat.jobDataLs) binary .bed, .fam files and the associated jobs
-                3: 1 & 2 (all individual binary .bed jobs&files + the last merged file/job)
-                4: the individual contig/chr non-binary (TPED) job data (for Mark mendel error genotype as missing)
-                5: 
+    returnMode
+        1: only the final merged binary .bed , .fam file and its generation job(s)
+        2: only the individual contig/chromosome (whatever in inputDat.jobDataLs) binary .bed, .fam files and the associated jobs
+        3: 1 & 2 (all individual binary .bed jobs&files + the last merged file/job)
+        4: the individual contig/chr non-binary (TPED) job data (for Mark mendel error genotype as missing)
+        5: 
         
         2013.07.18
             added argument addUngenotypedDuoParents
@@ -387,9 +392,35 @@ class GenericVCFWorkflow(ParentClass):
         #				outputDirPrefix="")
         return returnData
     
-    def addVCFSubsetJobs(self, inputData=None, db_vervet=None, sampleIDFile=None, transferOutput=True,\
-                        refFastaFList=None, GenomeAnalysisTKJar=None,\
-                        maxContigID=None, outputDirPrefix=""):
+    def addVCFSubsetJob(self, executable=None, vcfSubsetPath=None, 
+        sampleIDFile=None,
+        inputVCF=None, outputF=None, \
+        parentJobLs=None, transferOutput=True, job_max_memory=200,\
+        extraArguments=None, extraDependentInputLs=None, **keywords):
+        """
+        2012.10.10 use addGenericJob
+        """
+        extraArgumentList = [vcfSubsetPath, sampleIDFile, inputVCF, outputF]
+        if extraDependentInputLs is None:
+            extraDependentInputLs = []
+        extraDependentInputLs.append(sampleIDFile)
+        extraDependentInputLs.append(inputVCF)
+        extraOutputLs = [outputF]
+        job = self.addGenericJob(executable=executable, inputFile=None, \
+            outputFile=None, \
+            parentJobLs=parentJobLs,
+            extraDependentInputLs=extraDependentInputLs,
+            extraOutputLs=extraOutputLs, \
+            transferOutput=transferOutput, \
+            extraArguments=extraArguments, extraArgumentList=extraArgumentList,
+            job_max_memory=job_max_memory, sshDBTunnel=None, \
+            key2ObjectForJob=None, **keywords)
+        return job
+
+    def addVCFSubsetJobs(self, inputData=None, db_vervet=None,
+        sampleIDFile=None, transferOutput=True,\
+        refFastaFList=None, GenomeAnalysisTKJar=None,\
+        maxContigID=None, outputDirPrefix=""):
         """
         2012.10.5
             add a GATK SelectVariants job to update AC/AF of the final VCF file
@@ -428,33 +459,36 @@ class GenericVCFWorkflow(ParentClass):
             inputFBaseName = os.path.basename(inputF.name)
             commonPrefix = inputFBaseName.split('.')[0]
             outputVCF = File(os.path.join(topOutputDir, '%s.subset.vcf'%(commonPrefix)))
-            vcfSubsetJob = self.addVCFSubsetJob(executable=self.vcfSubset, vcfSubsetPath=self.vcfSubsetPath, \
-                        sampleIDFile=sampleIDFile,\
-                        inputVCF=inputF, outputF=outputVCF, \
-                        parentJobLs=[topOutputDirJob]+jobData.jobLs, transferOutput=False, job_max_memory=200,\
-                        extraArguments=None, extraDependentInputLs=None)
+            vcfSubsetJob = self.addVCFSubsetJob(executable=self.vcfSubset,
+                vcfSubsetPath=self.vcfSubsetPath,
+                sampleIDFile=sampleIDFile,\
+                inputVCF=inputF, outputF=outputVCF, \
+                parentJobLs=[topOutputDirJob]+jobData.jobLs,
+                transferOutput=False, job_max_memory=200,\
+                extraArguments=None, extraDependentInputLs=None)
             
             #2012.10.5
             #selectVariants would generate AC, AF so that TrioCaller could read it.
             #samtools uses 'AC1' instead of AC, 'AF1' instead of AF.
             VCF4OutputF = File(os.path.join(topOutputDir, '%s.niceformat.vcf'%commonPrefix))
-            vcfConvertJob = self.addSelectVariantsJob(SelectVariantsJava=self.SelectVariantsJava, \
-                    inputF=vcfSubsetJob.output, outputF=VCF4OutputF, \
-                    refFastaFList=refFastaFList, parentJobLs=[vcfSubsetJob], \
-                    extraDependentInputLs=[], transferOutput=False, \
-                    extraArguments=None, job_max_memory=2000, interval=chr)
+            vcfConvertJob = self.addSelectVariantsJob(
+                SelectVariantsJava=self.SelectVariantsJava, \
+                inputF=vcfSubsetJob.output, outputF=VCF4OutputF, \
+                refFastaFList=refFastaFList, parentJobLs=[vcfSubsetJob], \
+                extraDependentInputLs=[], transferOutput=False, \
+                extraArguments=None, job_max_memory=2000, interval=chr)
             
             VCFGzipOutputF = File("%s.gz"%VCF4OutputF.name)
             VCFGzipOutput_tbi_F = File("%s.gz.tbi"%VCF4OutputF.name)
-            bgzip_tabix_VCF_job = self.addBGZIP_tabix_Job(bgzip_tabix=self.bgzip_tabix, \
-                    parentJobLs=[vcfConvertJob], inputF=vcfConvertJob.output, outputF=VCFGzipOutputF, \
-                    transferOutput=transferOutput)
+            bgzip_tabix_VCF_job = self.addBGZIP_tabix_Job(
+                bgzip_tabix=self.bgzip_tabix, \
+                parentJobLs=[vcfConvertJob], inputF=vcfConvertJob.output, outputF=VCFGzipOutputF, \
+                transferOutput=transferOutput)
             
-            
-            
-            returnData.jobDataLs.append(PassingData(jobLs=[bgzip_tabix_VCF_job], vcfFile=VCFGzipOutputF, \
-                                    tbi_F=VCFGzipOutput_tbi_F, \
-                                    fileLs=[VCFGzipOutputF, VCFGzipOutput_tbi_F]))
+            returnData.jobDataLs.append(
+                PassingData(jobLs=[bgzip_tabix_VCF_job], vcfFile=VCFGzipOutputF, \
+                    tbi_F=VCFGzipOutput_tbi_F, \
+                    fileLs=[VCFGzipOutputF, VCFGzipOutput_tbi_F]))
             
         sys.stderr.write("%s jobs.\n"%(self.no_of_jobs))
         return returnData
@@ -760,11 +794,11 @@ class GenericVCFWorkflow(ParentClass):
         return returnData
         
     
-    def registerCustomExecutables(self):
+    def registerExecutables(self):
         """
         2011-11-28
         """
-        ParentClass.registerCustomExecutables(self)
+        ParentClass.registerExecutables(self)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
             "mapper/ConvertAlignmentReadGroup2UCLAIDInVCF.py"),
             name='ConvertAlignmentReadGroup2UCLAIDInVCF', clusterSizeMultiplier=1)
@@ -774,6 +808,15 @@ class GenericVCFWorkflow(ParentClass):
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
             "mapper/filter/ModifyTPED.py"),
             name='ModifyTPED', clusterSizeMultiplier=1)
+        
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
+            "mapper/extractor/vcfSubset.sh"),\
+            name='vcfSubset', clusterSizeMultiplier=1)
+        #vcfSubsetPath is first argument to vcfSubset
+        self.vcfSubset.vcfSubsetPath = self.vcfSubsetPath
+        if self.vcfSubsetPath:
+            self.vcfSubsetExecutableFile = self.registerOneExecutableAsFile(
+                path=self.vcfSubsetPath)
     
     def run(self):
         """

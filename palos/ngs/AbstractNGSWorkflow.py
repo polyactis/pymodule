@@ -45,12 +45,8 @@ class AbstractNGSWorkflow(ParentClass):
             'path to the bgzip binary'],
         ('vcftoolsPath', 1, ): ["bin/vcftools/vcftools", '', 1, 
             'path to the vcftools binary'],
-        ('vcfSubsetPath', 1, ): ["bin/vcftools/vcf-subset", '', 1, 
-            'path to the vcf-subset program'],
         ("ligateVcfPerlPath", 1, ): ["bin/ligateVcf.pl", '', 1, 
             'path to ligateVcf.pl'],
-        ("vcfsorterPath", 1, ): ["bin/vcfsorter.pl", '', 1, 
-            'path to vcfsorter.pl, http://code.google.com/p/vcfsorter/'],
         #to filter chromosomes
         ('maxContigID', 0, int): [None, 'x', 1, 
             'If contig/chromosome(non-sex) ID > this number, '
@@ -178,9 +174,7 @@ class AbstractNGSWorkflow(ParentClass):
         tabixPath="bin/tabix",
         bgzipPath="bin/bgzip",
         vcftoolsPath="bin/vcftools/vcftools",
-        vcfSubsetPath="bin/vcftools/vcf-subset",
         ligateVcfPerlPath="bin/ligateVcf.pl",
-        vcfsorterPath="bin/vcfsorter.pl",
         maxContigID=None,
         minContigID=None,
         contigMaxRankBySize=2500,
@@ -247,9 +241,7 @@ class AbstractNGSWorkflow(ParentClass):
         self.tabixPath = tabixPath
         self.bgzipPath = bgzipPath
         self.vcftoolsPath = vcftoolsPath
-        self.vcfSubsetPath = vcfSubsetPath
         self.ligateVcfPerlPath = ligateVcfPerlPath
-        self.vcfsorterPath = vcfsorterPath
         self.maxContigID = maxContigID
         self.minContigID = minContigID
         self.contigMaxRankBySize = contigMaxRankBySize
@@ -293,7 +285,7 @@ class AbstractNGSWorkflow(ParentClass):
             'samtools_path', 'picard_dir', \
             'gatk_path', 'tabixPath', \
             'bgzipPath', 'gatk2_path', 'ligateVcfPerlPath',\
-            'vcftoolsPath', 'vcfSubsetPath', 'vcfsorterPath', 'picard_path',
+            'vcftoolsPath', 'picard_path',
             ])
         listArgumentName_data_type_ls = [
             ("site_id_ls", int), ('country_id_ls', int), ('tax_id_ls', int),
@@ -511,11 +503,6 @@ class AbstractNGSWorkflow(ParentClass):
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
             "mapper/filter/vcf_isec.sh"),\
             name='vcf_isec', clusterSizeMultiplier=1)
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
-            "mapper/extractor/vcfSubset.sh"),\
-            name='vcfSubset', clusterSizeMultiplier=1)
-        #vcfSubsetPath is first argument to vcfSubset
-        self.vcfSubset.vcfSubsetPath = self.vcfSubsetPath
         
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
                 "mapper/computer/CallVariantBySamtools.sh"),
@@ -576,16 +563,12 @@ class AbstractNGSWorkflow(ParentClass):
             name='vcftoolsWrapper', clusterSizeMultiplier=1)
         if self.javaPath:
             self.registerOneExecutable(path=self.javaPath,
-                name='CombineBeagleAndPreBeagleVariantsJava',
-                clusterSizeMultiplier=0.6)
-            self.registerOneExecutable(path=self.javaPath,
                 name='BuildBamIndexFilesJava', clusterSizeMultiplier=0.5)
             #2012.9.21 same as BuildBamIndexFilesJava, but no clustering
             self.registerOneExecutable(path=self.javaPath,
                 name='IndexMergedBamIndexJava', clusterSizeMultiplier=0)
             self.registerOneExecutable(path=self.javaPath,
                 name='CreateSequenceDictionaryJava', clusterSizeMultiplier=0)
-
             self.registerOneExecutable(path=self.javaPath,
                 name='DOCWalkerJava', clusterSizeMultiplier=0.05)
             #no cluster_size for this because it could run on a whole bam for hours
@@ -614,20 +597,11 @@ class AbstractNGSWorkflow(ParentClass):
                 name='MergeVCFReplicateHaplotypesJava',
                 clusterSizeMultiplier=0.5)
             self.registerOneExecutable(path=self.javaPath,
-                    name='BeagleJava', clusterSizeMultiplier=0.3)
+                name='BeagleJava', clusterSizeMultiplier=0.3)
             self.registerOneExecutable(path=self.javaPath,
                 name='GATKJava', clusterSizeMultiplier=0.2)
             self.registerOneExecutable(path=self.javaPath,
                 name='genotyperJava', clusterSizeMultiplier=0.1)
-        if self.bgzipPath:
-            self.bgzipExecutableFile = self.registerOneExecutableAsFile(
-                path=self.bgzipPath)
-        if self.samtools_path:
-            self.registerOneExecutable(path=self.samtools_path,
-                name='samtools', clusterSizeMultiplier=0.2)
-            self.samtoolsExecutableFile = self.registerOneExecutableAsFile(
-                path=self.samtools_path,
-                site_handler=self.input_site_handler)
         if self.tabixPath:
             self.tabixExecutableFile = self.registerOneExecutableAsFile(
                 path=self.tabixPath)
@@ -640,12 +614,7 @@ class AbstractNGSWorkflow(ParentClass):
         if self.vcftoolsPath:
             self.vcftoolsExecutableFile = self.registerOneExecutableAsFile(
                 path=self.vcftoolsPath)
-        if self.vcfSubsetPath:
-            self.vcfSubsetExecutableFile = self.registerOneExecutableAsFile(
-                path=self.vcfSubsetPath)
-        if self.vcfsorterPath:
-            self.vcfsorterExecutableFile = self.registerOneExecutableAsFile(
-                path=self.vcfsorterPath)
+        
 
 
     bwaIndexFileSuffixLs = ['amb', 'ann', 'bwt', 'pac', 'sa']
@@ -1605,32 +1574,6 @@ class AbstractNGSWorkflow(ParentClass):
         else:
             bamIndexJob = None
         job.bamIndexJob = bamIndexJob
-        return job
-
-    def addVCFSubsetJob(self, executable=None, vcfSubsetPath=None, 
-        sampleIDFile=None,
-        inputVCF=None, outputF=None, \
-        parentJobLs=None, transferOutput=True, job_max_memory=200,\
-        extraArguments=None, extraDependentInputLs=None, **keywords):
-        """
-        2012.10.10 use addGenericJob
-        2012.5.10
-        """
-        extraArgumentList = [vcfSubsetPath, sampleIDFile, inputVCF, outputF]
-        if extraDependentInputLs is None:
-            extraDependentInputLs = []
-        extraDependentInputLs.append(sampleIDFile)
-        extraDependentInputLs.append(inputVCF)
-        extraOutputLs = [outputF]
-        job = self.addGenericJob(executable=executable, inputFile=None, \
-            outputFile=None, \
-            parentJobLs=parentJobLs,
-            extraDependentInputLs=extraDependentInputLs,
-            extraOutputLs=extraOutputLs, \
-            transferOutput=transferOutput, \
-            extraArguments=extraArguments, extraArgumentList=extraArgumentList,
-            job_max_memory=job_max_memory, sshDBTunnel=None, \
-            key2ObjectForJob=None, **keywords)
         return job
 
     def addVCFBeforeAfterFilterStatJob(self, executable=None, chromosome=None,
