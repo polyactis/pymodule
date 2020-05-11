@@ -6,12 +6,12 @@ Examples:
     # 2012.5.3 run on hoffman2's condorpool, need sshDBTunnel (-H1)
     %s  -i 963-1346 -o dags/ReadCount/read_count_isq_936_1346.xml
         -u yh --commit -z localhost
-        --pegasusFolderName readcount --needSSHDBTunnel
-        -l hcondor -j hcondor -D NetworkData/vervet/db/
+        --pegasusFolderName input --needSSHDBTunnel
+        -l hcondor -D NetworkData/vervet/db/
     
     # 2012.3.14 
     %s -i 1-864 -o dags/ReadCount/read_count_isq_1_864.xml
-        -u yh -l condor -j condor -z uclaOffice
+        -u yh -l condor -z uclaOffice
         --pegasusFolderName readCount --commit
     
 """
@@ -181,7 +181,8 @@ class CountReadsWorkflow(ParentClass):
         return returnData
     
     def addPutReadBaseCountIntoDBJob(self, executable=None, inputFileLs=[], \
-        logFile=None, commit=False, parentJobLs=[], extraDependentInputLs=[], \
+        logFile=None, commit=False, parentJobLs=None,
+        extraDependentInputLs=[],
         transferOutput=True, extraArguments=None, \
         job_max_memory=10, sshDBTunnel=1, **keywords):
         """
@@ -240,8 +241,6 @@ class CountReadsWorkflow(ParentClass):
         
         sys.stderr.write("Adding read counting jobs on %s input ..."%\
             (len(inputData.jobDataLs)))
-        returnJobData = PassingData()
-        
         no_of_jobs = 0
         
         topOutputDir = pegasusFolderName
@@ -296,8 +295,6 @@ class CountReadsWorkflow(ParentClass):
             setting up for run(), called by run()
         """
         pdata = ParentClass.setup_run(self)
-        workflow = pdata.workflow
-        
         db_main = self.db_main
         session = db_main.session
         session.begin(subtransactions=True)
@@ -316,20 +313,18 @@ class CountReadsWorkflow(ParentClass):
         sqlalchemy.exc.InvalidRequestError: A transaction is already begun. 
             Use subtransactions=True to allow subtransactions.
         """
-        inputData = self.registerISQFiles(db_main=db_main, ind_seq_id_ls=self.ind_seq_id_ls, \
-            local_data_dir=self.local_data_dir, pegasusFolderName=self.pegasusFolderName,\
+        inputData = self.registerISQFiles(db_main=db_main,
+            ind_seq_id_ls=self.ind_seq_id_ls,
+            local_data_dir=self.local_data_dir,
+            pegasusFolderName=self.pegasusFolderName,
             input_site_handler=self.input_site_handler)
-        
-        registerReferenceData = self.getReferenceSequence()
-        return PassingData(inputData=inputData,\
-            registerReferenceData=registerReferenceData)
+        return inputData
 
     def run(self):
         """
         2011-7-11
         """
-        pdata = self.setup_run()
-        inputData = pdata.inputData
+        inputData = self.setup_run()
         self.addJobs(inputData=inputData, pegasusFolderName=self.pegasusFolderName,
             needSSHDBTunnel=self.needSSHDBTunnel)
         self.end_run()
