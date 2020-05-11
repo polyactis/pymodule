@@ -1296,7 +1296,7 @@ class AbstractNGSWorkflow(ParentClass):
         Examples:
         add input file to this job via
             gatkUnionJob = self.addGATKCombineVariantsJob(...)
-            self.addInputToMergeJob(statMergeJob=gatkUnionJob,
+            self.addInputToMergeJob(gatkUnionJob,
                 parentJobLs=[gatk_job], inputArgumentOption="--variant")
         OR through the inputFileList argument
             gatkUnionJob = self.addGATKCombineVariantsJob(.., 
@@ -1317,7 +1317,7 @@ class AbstractNGSWorkflow(ParentClass):
             extraArgumentList=['--assumeIdenticalSamples'], extraDependentInputLs=None)
 
         for intervalJob in intervalJobLs:
-            self.addInputToMergeJob(statMergeJob=concatJob, 
+            self.addInputToMergeJob(concatJob, 
                 inputF=intervalJob.output, inputArgumentOption="--variant",\
                 parentJobLs=[intervalJob],
                 extraDependentInputLs=intervalJob.outputLs[1:])
@@ -1564,7 +1564,7 @@ class AbstractNGSWorkflow(ParentClass):
     def addVCFBeforeAfterFilterStatJob(self, executable=None, chromosome=None,
         outputF=None, vcf1=None, vcf2=None,\
         lastVCFJob=None, currentVCFJob=None,\
-        statMergeJob=None, statMergeJobLs=None, parentJobLs=None):
+        None, statMergeJobLs=None, parentJobLs=None):
         """
 
         examples:
@@ -1582,7 +1582,7 @@ class AbstractNGSWorkflow(ParentClass):
             self.addVCFBeforeAfterFilterStatJob(chromosome=chromosome,
                 outputF=outputF,
                 currentVCFJob=currentVCFJob, lastVCFJob=lastVCFJob,\
-                statMergeJob=filterByMaxSNPMissingRateMergeJob)
+                filterByMaxSNPMissingRateMergeJob)
 
         2013.07.11 added argument statMergeJobLs
             statMergeJob could be None.
@@ -1613,11 +1613,11 @@ class AbstractNGSWorkflow(ParentClass):
             extraArguments=None, job_max_memory=1000, \
             perSampleMismatchFraction=False)
         if statMergeJob:
-            self.addInputToMergeJob(statMergeJob=statMergeJob, \
+            self.addInputToMergeJob(statMergeJob, \
                             inputF=vcfFilterStatJob.output , \
                             parentJobLs=[vcfFilterStatJob])
         for _statMergeJob in statMergeJobLs:
-            self.addInputToMergeJob(statMergeJob=_statMergeJob,
+            self.addInputToMergeJob(_statMergeJob,
                 inputF=vcfFilterStatJob.output,
                 parentJobLs=[vcfFilterStatJob])
         return vcfFilterStatJob

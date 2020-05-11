@@ -170,7 +170,6 @@ class GenericVCFWorkflow(ParentClass):
             parentJobLs=[mergedOutputDirJob], \
             extraArguments='--noHeader')
         
-        #2012.8.20
         if outputPedigreeAsTFAMInputJobData is None:
             outputPedigreeAsTFAMInputJobData = inputData.jobDataLs[0]
         if outputPedigreeAsTFAM and outputPedigreeAsTFAMInputJobData:
@@ -264,7 +263,7 @@ class GenericVCFWorkflow(ParentClass):
                 extraDependentInputLs=[])
             
             #add output to the tped merge job
-            self.addInputToMergeJob(statMergeJob=tpedFileMergeJob, \
+            self.addInputToMergeJob(tpedFileMergeJob, \
                 inputF=modifyTPEDJob.output, \
                 parentJobLs=[modifyTPEDJob])
 
@@ -383,7 +382,7 @@ class GenericVCFWorkflow(ParentClass):
                     key2ObjectForJob=None)
             
             #add output to some reduce job
-            self.addInputToMergeJob(statMergeJob=mergeFileJob, \
+            self.addInputToMergeJob(mergeFileJob, \
                                 inputF=vcf2BjarniFormatJob.output, \
                                 parentJobLs=[vcf2BjarniFormatJob])
             
@@ -688,10 +687,10 @@ class GenericVCFWorkflow(ParentClass):
                                 extraArguments=None, job_max_memory=memoryRequest)
             
             #add output to some reduce job
-            self.addInputToMergeJob(statMergeJob=haplotypeDistanceMergeJob, \
+            self.addInputToMergeJob(haplotypeDistanceMergeJob, \
                                 inputF=mergeVCFReplicateColumnsJob.outputLs[1] , \
                                 parentJobLs=[mergeVCFReplicateColumnsJob])
-            self.addInputToMergeJob(statMergeJob=majoritySupportMergeJob, \
+            self.addInputToMergeJob(majoritySupportMergeJob, \
                                 inputF=mergeVCFReplicateColumnsJob.outputLs[2] , \
                                 parentJobLs=[mergeVCFReplicateColumnsJob])
             no_of_jobs += 1
@@ -798,7 +797,7 @@ class GenericVCFWorkflow(ParentClass):
             i += 1
             
             #add this output to a union job
-            self.addInputToMergeJob(statMergeJob=unionJob, inputF=inputF,
+            self.addInputToMergeJob(unionJob, inputF=inputF,
                 parentJobLs=jobData.jobLs, extraDependentInputLs=[jobData.tbi_F])
             
         if genotypeMethodShortName:

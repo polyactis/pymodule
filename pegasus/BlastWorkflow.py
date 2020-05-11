@@ -158,7 +158,7 @@ class BlastWorkflow(ParentClass):
 								extraArguments=None, job_max_memory=1000)
 				
 				#add output to some reduce job
-				self.addInputToMergeJob(statMergeJob=allBlastMergeJob, \
+				self.addInputToMergeJob(allBlastMergeJob, \
 								inputF=blastJob.output, parentJobLs=[blastJob])
 				no_of_jobs += 1
 		sys.stderr.write("%s jobs. Done.\n"%(no_of_jobs))

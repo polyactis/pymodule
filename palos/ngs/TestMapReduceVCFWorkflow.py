@@ -160,7 +160,7 @@ class TestMapReduceVCFWorkflow(ParentClass):
 		
 		for mapEachIntervalDataLs in passingData.mapEachIntervalDataLsLs:
 			for mapEachIntervalData in mapEachIntervalDataLs:
-				self.addInputToMergeJob(statMergeJob=reduceJob, \
+				self.addInputToMergeJob(reduceJob, \
 						parentJobLs=[mapEachIntervalData.mapJob])
 		
 		return returnData

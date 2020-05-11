@@ -211,10 +211,10 @@ class TestMapReduceGenomeFileWorkflow(ParentClass):
 		mapEachIntervalDataLs = chromosome2mapEachIntervalDataLs.get(chromosome)
 		for mapEachIntervalData in mapEachIntervalDataLs:
 			for jobData in mapEachIntervalData.jobDataLs:
-				self.addInputToMergeJob(statMergeJob=reduceChromosomeJob, parentJobLs=[jobData.job])
+				self.addInputToMergeJob(reduceChromosomeJob, parentJobLs=[jobData.job])
 			
 		#add the reduction job to final stat merge job
-		self.addInputToMergeJob(statMergeJob=self.reduceJob, parentJobLs=[reduceChromosomeJob])
+		self.addInputToMergeJob(self.reduceJob, parentJobLs=[reduceChromosomeJob])
 		
 		return returnData
 	
