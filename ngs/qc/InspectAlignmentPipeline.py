@@ -381,7 +381,7 @@ class InspectAlignmentPipeline(ParentClass, AbstractNGSWorkflow):
                 extraArguments="--inputFileFormat=2", \
                 transferOutput=False)
 
-            self.addInputToStatMergeJob(
+            self.addInputToMergeJob(
                 statMergeJob=passingData.depthOfCoverageOutputMergeJob, 
                 inputF=meanMedianModeDepthFile,\
                 parentJobLs=[meanMedianModeDepthJob])
@@ -441,7 +441,7 @@ class InspectAlignmentPipeline(ParentClass, AbstractNGSWorkflow):
                 extraDependentInputLs=[], \
                 transferOutput=False, \
                 extraArguments=None, job_max_memory=20, walltime=30)
-            self.addInputToStatMergeJob(statMergeJob=passingData.flagStatOutputMergeJob, \
+            self.addInputToMergeJob(statMergeJob=passingData.flagStatOutputMergeJob, \
                 inputF=reformatFlagStatOutputJob.output, \
                 parentJobLs=[reformatFlagStatOutputJob])
             self.no_of_alns_with_flagstat_jobs += 1
@@ -548,7 +548,7 @@ class InspectAlignmentPipeline(ParentClass, AbstractNGSWorkflow):
             extraArguments="-r %s"%(chromosome),
             transferOutput=False)
 
-        self.addInputToStatMergeJob(
+        self.addInputToMergeJob(
             statMergeJob=passingData.depthOfCoveragePerChrOutputMergeJob,
             inputF=meanMedianModeDepthFile,\
             parentJobLs=[meanMedianModeDepthJob])
@@ -692,7 +692,7 @@ class InspectAlignmentPipeline(ParentClass, AbstractNGSWorkflow):
                         extraOutputLs=None,\
                         transferOutput=False,
                         key2ObjectForJob=None, job_max_memory=1000, walltime=60)
-                    self.addInputToStatMergeJob(
+                    self.addInputToMergeJob(
                         statMergeJob=reduceSameChromosomeAlignmentDepthFilesJob,
                         inputF=selectRowsFromMatrixCCJob.output, \
                         inputArgumentOption="-i",

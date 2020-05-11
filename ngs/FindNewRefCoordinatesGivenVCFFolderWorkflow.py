@@ -193,7 +193,7 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
             statMergeProgram=self.ReduceMatrixBySumSameKeyColsAndThenDivide, \
             outputF=outputFile, parentJobLs=[self.reduceStatDirJob],\
             extraArguments='--keyColumnLs 0 --valueColumnLs 1,2', transferOutput=False)
-        self.addInputToStatMergeJob(statMergeJob=switchPointBySpanJob, \
+        self.addInputToMergeJob(statMergeJob=switchPointBySpanJob, \
                             parentJobLs=[self.switchPointStatMergeJob])
         
         outputFile = File(os.path.join(self.reduceStatDirJob.folder, 
@@ -202,7 +202,7 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
             statMergeProgram=self.ReduceMatrixBySumSameKeyColsAndThenDivide, \
             outputF=outputFile, parentJobLs=[self.reduceStatDirJob],\
             extraArguments='--keyColumnLs 0 --valueColumnLs 1,3', transferOutput=False)
-        self.addInputToStatMergeJob(statMergeJob=switchPointByNoOfLociJob, \
+        self.addInputToMergeJob(statMergeJob=switchPointByNoOfLociJob, \
                             parentJobLs=[self.switchPointStatMergeJob])
         
         outputFile = File(os.path.join(self.reduceStatDirJob.folder, \
@@ -212,9 +212,9 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
             outputF=outputFile, parentJobLs=[self.reduceStatDirJob],\
             extraArguments='--keyColumnLs 0 --valueColumnLs 1,2,3', transferOutput=False)
         
-        self.addInputToStatMergeJob(statMergeJob=concatenateSwitchPointBySomethingJob, \
+        self.addInputToMergeJob(statMergeJob=concatenateSwitchPointBySomethingJob, \
             parentJobLs=[switchPointBySpanJob])
-        self.addInputToStatMergeJob(statMergeJob=concatenateSwitchPointBySomethingJob, \
+        self.addInputToMergeJob(statMergeJob=concatenateSwitchPointBySomethingJob, \
             parentJobLs=[switchPointByNoOfLociJob])
         returnData.jobDataLs.append(PassingData(jobLs=[concatenateSwitchPointBySomethingJob], \
             fileLs=[concatenateSwitchPointBySomethingJob.output]))
@@ -316,11 +316,11 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
             statMergeProgram=self.ReduceMatrixBySumSameKeyColsAndThenDivide, \
             outputF=outputFile, parentJobLs=[self.reduceStatDirJob],\
             extraArguments='--keyColumnLs 0 --valueColumnLs 2,1', transferOutput=True)
-        self.addInputToStatMergeJob(statMergeJob=reductionByFilterLiftoverPerContigMergeJob, \
+        self.addInputToMergeJob(statMergeJob=reductionByFilterLiftoverPerContigMergeJob, \
             parentJobLs=[self.noOfLociPerContigAfterGATKFilterLiftOverMergeJob])
         
         #concatenate the number of loci per contig to the swtich point info
-        self.addInputToStatMergeJob(statMergeJob=concatenateSwitchPointBySomethingJob, \
+        self.addInputToMergeJob(statMergeJob=concatenateSwitchPointBySomethingJob, \
                             parentJobLs=[reductionByFilterLiftoverPerContigMergeJob])
         
         #stats on the change after ClearVCFBasedOnSwitchDensity
@@ -345,7 +345,7 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
             statMergeProgram=self.ReduceMatrixBySumSameKeyColsAndThenDivide, \
             outputF=outputFile, parentJobLs=[self.reduceStatDirJob],\
             extraArguments='--keyColumnLs 0 --valueColumnLs 2,1', transferOutput=True)
-        self.addInputToStatMergeJob(statMergeJob=reductionByClearVCFPerContigMergeJob, \
+        self.addInputToMergeJob(statMergeJob=reductionByClearVCFPerContigMergeJob, \
             parentJobLs=[self.noOfLociPerContigAfterClearVCFMergeJob])
         
         #2014.01.04 remove loci with low mapPvalue
@@ -374,7 +374,7 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
                 statMergeProgram=self.ReduceMatrixBySumSameKeyColsAndThenDivide, \
                 outputF=outputFile, parentJobLs=[self.reduceStatDirJob],\
                 extraArguments='--keyColumnLs 0 --valueColumnLs 2,1', transferOutput=True)
-        self.addInputToStatMergeJob(
+        self.addInputToMergeJob(
             statMergeJob=reductionByRemoveLocusFromVCFWithLowLiftOverMapPvaluePerContigMergeJob, \
             parentJobLs=[self.noOfLociPerContigAfterRemoveLocusFromVCFWithLowLiftOverMapPvalueMergeJob])
         
@@ -404,7 +404,7 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
             outputF=outputFile, parentJobLs=[self.reduceStatDirJob],\
             extraArguments='--keyColumnLs 0 --valueColumnLs 2,1', transferOutput=True)
             # = (#sites after filter) / (#sites before filter)
-        self.addInputToStatMergeJob(statMergeJob=reductionByRemoveRedundancyPerContigMergeJob, \
+        self.addInputToMergeJob(statMergeJob=reductionByRemoveRedundancyPerContigMergeJob, \
                             parentJobLs=[self.noOfLociPerContigAfterRemoveRedundancyMergeJob])
         
         outputFile = File(os.path.join(self.plotDirJob.folder, 'noOfLoci_vs_noOfSwitchPoints.png'))
@@ -720,7 +720,7 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
                 extraArgumentList=None, extraDependentInputLs=[bamIndexJob.output], \
                 extraOutputLs=None)
         
-        self.addInputToStatMergeJob(statMergeJob=self.switchPointStatMergeJob,
+        self.addInputToMergeJob(statMergeJob=self.switchPointStatMergeJob,
             inputF=findNewRefCoordinateJob.switchPointFile, \
             parentJobLs=[findNewRefCoordinateJob])
         
@@ -745,7 +745,7 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
             extraArguments=None, transferOutput=transferOutput,
             job_max_memory=2000, sshDBTunnel=False,
             objectWithDBArguments=None)
-        self.addInputToStatMergeJob(
+        self.addInputToMergeJob(
             statMergeJob=self.mergeLocusLiftOverProbabilityJob,
             inputF=computeLiftOverLocusProbJob.output, \
             parentJobLs=[computeLiftOverLocusProbJob])
@@ -1011,7 +1011,7 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
         intervalJobLs = []
         for mapEachIntervalDataLs in passingData.mapEachIntervalDataLsLs:
             for mapEachIntervalData in mapEachIntervalDataLs:
-                self.addInputToStatMergeJob(statMergeJob=reduceJob, \
+                self.addInputToMergeJob(statMergeJob=reduceJob, \
                         parentJobLs=[mapEachIntervalData.findNewRefCoordinateJob])
                 intervalJobLs.append(mapEachIntervalData.mapJob)
         

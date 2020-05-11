@@ -283,8 +283,8 @@ class CountReadsWorkflow(ParentClass):
                 job_max_memory=10, no_of_cpus=4)
             
             no_of_jobs += 1
-            self.addInputToStatMergeJob(statMergeJob=readBaseCountMergeJob, \
-                                inputF=readCountJob.output, parentJobLs=[readCountJob])
+            self.addInputToMergeJob(statMergeJob=readBaseCountMergeJob,
+                inputF=readCountJob.output, parentJobLs=[readCountJob])
             
         sys.stderr.write("%s jobs.\n"%(no_of_jobs))
         return putCountIntoDBJob

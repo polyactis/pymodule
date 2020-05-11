@@ -1784,7 +1784,7 @@ if __name__ == '__main__':
     ap.add_argument("-u", "--db_user", required=True, help="Database user")
     ap.add_argument("-p", "--db_passwd", required=False,
         help="Password of the database user")
-    ap.add_argument("-F", "--pegasusFolderName", type=str,
+    ap.add_argument("-F", "--pegasusFolderName", default='input',
         help='The path relative to the workflow running root. '
         'This folder will contain pegasus input & output. '
         'It will be created during the pegasus staging process. '
