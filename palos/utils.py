@@ -595,7 +595,8 @@ def runLocalCommand(commandline, report_stderr=True, report_stdout=False):
     import subprocess
     from io import StringIO
     command_handler = subprocess.Popen(commandline, shell=True,
-        stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        stderr=subprocess.PIPE, stdout=subprocess.PIPE,
+        encoding='utf8')
     #command_handler.wait() #Warning: This will deadlock if the child process
     #   generates enough output to a stdout or stderr pipe
     #	such that it blocks waiting for the OS pipe buffer to accept more data.
