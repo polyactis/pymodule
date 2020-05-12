@@ -935,10 +935,7 @@ def openGzipFile(inputFname, openMode='r'):
     """
     2014.05.21 support 'a' mode
     2013.2.1 support openMode='w'
-    2012.8.21
-        add argument openMode
-    2012.5.23
-        if suffix is .gz, use gzip to open it
+    if suffix is .gz, use gzip to open it
     """
     fname_prefix, fname_suffix = os.path.splitext(inputFname)
     if fname_suffix=='.gz':
@@ -952,8 +949,10 @@ def openGzipFile(inputFname, openMode='r'):
         else:
             mode='rb'
         inf = gzip.open(inputFname, mode=mode)
+        inf.is_gzip = True
     else:
         inf = open(inputFname, openMode)
+        inf.is_gzip = False
     return inf
 
 def comeUpSplitFilename(outputFnamePrefix=None, suffixLength=3, fileOrder=0,
