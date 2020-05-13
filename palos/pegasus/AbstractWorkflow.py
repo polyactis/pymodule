@@ -12,7 +12,6 @@ from pegaflow.DAX3 import Namespace, Link, Use, Job, Dependency
 #path to the source code directory
 src_dir = os.path.dirname(os.path.abspath(__file__))
 
-
 class AbstractWorkflow(Workflow):
     __doc__ = __doc__
     db_option_dict = {
@@ -895,13 +894,14 @@ inputFileFormat   1: csv-like plain text file; 2: YHPyTables.YHFile; 3: HDF5Matr
         if extraArguments:
             extraArgumentList.append(extraArguments)
 
-        job = self.addGenericJob(executable=executable, inputFile=inputFile, 
+        job = self.addGenericJob(executable=executable,
+            inputFile=inputFile, 
             inputArgumentOption='-i',
             outputFile=outputFile, outputArgumentOption='-o', \
             inputFileList = inputFileList,\
             parentJob=parentJob, parentJobLs=parentJobLs, \
             extraDependentInputLs=extraDependentInputLs, \
-            extraOutputLs=extraOutputLs, transferOutput=transferOutput, \
+            extraOutputLs=extraOutputLs, transferOutput=transferOutput,
             extraArgumentList=extraArgumentList,
             key2ObjectForJob=key2ObjectForJob,
             job_max_memory=job_max_memory, \
@@ -1077,7 +1077,8 @@ inputFileFormat   1: csv-like plain text file; 2: YHPyTables.YHFile; 3: HDF5Matr
             whichColumnHeader=whichColumnHeader,
             whichColumnPlotLabel=whichColumnPlotLabel,
             xScaleLog=xScaleLog, yScaleLog=yScaleLog,\
-            logY=logY, valueForNonPositiveYValue=valueForNonPositiveYValue,
+            logY=logY,
+            valueForNonPositiveYValue=valueForNonPositiveYValue,
             missingDataNotation=missingDataNotation,\
             xColumnHeader=None, xColumnPlotLabel=None, title=title, \
             minNoOfTotal=minNoOfTotal, \
@@ -1100,7 +1101,8 @@ inputFileFormat   1: csv-like plain text file; 2: YHPyTables.YHFile; 3: HDF5Matr
         missingDataNotation='NA',\
         xColumnHeader=None, xColumnPlotLabel=None, \
         minNoOfTotal=100,\
-        figureDPI=300, formatString='.', samplingRate=0.001, need_svg=False,
+        figureDPI=300, formatString='.', samplingRate=0.001,
+        need_svg=False,
         inputFileFormat=None, outputFileFormat=None,\
         zColumnHeader=None, \
         parentJobLs=None, \
@@ -1132,18 +1134,21 @@ inputFileFormat   1: csv-like plain text file; 2: YHPyTables.YHFile; 3: HDF5Matr
             logX=logX, logY=logY,
             valueForNonPositiveYValue=valueForNonPositiveYValue,
             missingDataNotation=missingDataNotation,\
-            xColumnHeader=xColumnHeader, xColumnPlotLabel=xColumnPlotLabel, \
+            xColumnHeader=xColumnHeader, xColumnPlotLabel=xColumnPlotLabel,
             minNoOfTotal=minNoOfTotal, \
-            figureDPI=figureDPI, formatString=formatString, ylim_type=None, \
+            figureDPI=figureDPI, formatString=formatString, ylim_type=None,
             samplingRate=samplingRate, need_svg=need_svg, \
-            inputFileFormat=inputFileFormat, outputFileFormat=outputFileFormat,\
-            parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs,
+            inputFileFormat=inputFileFormat,
+            outputFileFormat=outputFileFormat,
+            parentJobLs=parentJobLs,
+            extraDependentInputLs=extraDependentInputLs,
             extraArguments=extraArguments, transferOutput=transferOutput,
             job_max_memory=job_max_memory,
             **keywords)
 
-    def setupMoreOutputAccordingToSuffixAndNameTupleList(self, outputFnamePrefix=None, \
-            suffixAndNameTupleList=None, extraOutputLs=None, key2ObjectForJob=None):
+    def setupMoreOutputAccordingToSuffixAndNameTupleList(self,
+        outputFnamePrefix=None,
+        suffixAndNameTupleList=None, extraOutputLs=None, key2ObjectForJob=None):
         """
         2012.8.16
             split from addPlinkJob()
@@ -1152,7 +1157,8 @@ inputFileFormat   1: csv-like plain text file; 2: YHPyTables.YHFile; 3: HDF5Matr
             if len(suffixNameTuple)==1:
                 suffix = suffixNameTuple[0]
                 name = suffix[1:].replace('.', '_')
-                #replace dot with underscore. as dot is used to access method/attribute of python object
+                #replace dot with underscore. as dot is used to access
+                #  method/attribute of python object.
                 # i.e. ".prune.in" is accessible as job.prune_inFile
             elif len(suffixNameTuple)>=2:
                 suffix, name = suffixNameTuple[:2]

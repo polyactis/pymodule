@@ -42,14 +42,14 @@ will be created if not present in db.'],\
 		AbstractVervetMapper.__init__(self, inputFnameLs=inputFnameLs, **keywords)
 		
 	
-	def getAlignmentLsFromVCF(self, db_vervet=None, vcfFile=None):
+	def getAlignmentLsFromVCF(self, db_main=None, vcfFile=None):
 		"""
 		2012.7.13
 		"""
 		sys.stderr.write("Parsing a list of alignments out of vcfFile sample id list ...")
 		alignmentList = []
 		for read_group in vcfFile.getSampleIDList():	#sample_id_ls is not good because its index 0 is "ref"
-			individualAlignment = db_vervet.parseAlignmentReadGroup(read_group).individualAlignment
+			individualAlignment = db_main.parseAlignmentReadGroup(read_group).individualAlignment
 			alignmentList.append(individualAlignment)
 		sys.stderr.write(" %s alignment IDs.\n"%(len(alignmentList)))
 		return alignmentList
@@ -84,11 +84,11 @@ will be created if not present in db.'],\
 		if self.debug:
 			import pdb
 			pdb.set_trace()
-		session = self.db_vervet.session
+		session = self.db_main.session
 		
 		session.begin()
 		if not self.data_dir:
-			self.data_dir = self.db_vervet.data_dir
+			self.data_dir = self.db_main.data_dir
 		data_dir = self.data_dir
 		
 		realPath = os.path.realpath(self.inputFname)
@@ -97,9 +97,9 @@ will be created if not present in db.'],\
 				not NextGenSeq.isVCFFileEmpty(realPath, checkContent=self.checkEmptyVCFByReading):
 			vcfFile = VCFFile(inputFname=self.inputFname)
 			
-			individualAlignmentLs = self.getAlignmentLsFromVCF(db_vervet=self.db_vervet, vcfFile=vcfFile)
+			individualAlignmentLs = self.getAlignmentLsFromVCF(db_main=self.db_main, vcfFile=vcfFile)
 			
-			genotypeMethod = self.db_vervet.getGenotypeMethod(short_name=self.genotypeMethodShortName, \
+			genotypeMethod = self.db_main.getGenotypeMethod(short_name=self.genotypeMethodShortName, \
 															individualAlignmentLs=individualAlignmentLs,\
 															no_of_individuals=len(individualAlignmentLs), no_of_loci=None,\
 															data_dir=self.data_dir)
@@ -134,12 +134,12 @@ will be created if not present in db.'],\
 				chromosome = chromosome2noOfLoci.keys()[0]
 			else:
 				chromosome = None
-			genotypeFile = self.db_vervet.getGenotypeFile(genotype_method=genotypeMethod,\
+			genotypeFile = self.db_main.getGenotypeFile(genotype_method=genotypeMethod,\
 										chromosome=chromosome, format=self.format, path=None, file_size=None, md5sum=md5sum,\
 										original_path=realPath, no_of_individuals=no_of_individuals, no_of_loci=no_of_loci,\
 										data_dir=self.data_dir, no_of_chromosomes=no_of_chromosomes)
 			if genotypeFile.id and genotypeFile.path:
-				isPathInDB = self.db_vervet.isPathInDBAffiliatedStorage(relativePath=genotypeFile.path, data_dir=self.data_dir)
+				isPathInDB = self.db_main.isPathInDBAffiliatedStorage(relativePath=genotypeFile.path, data_dir=self.data_dir)
 				if isPathInDB==-1:
 					sys.stderr.write("Error while updating genotypeFile.path with the new path, %s.\n"%(genotypeFile.path))
 					self.cleanUpAndExitOnFailure(exitCode=isPathInDB)
@@ -153,7 +153,7 @@ will be created if not present in db.'],\
 			#move the file and update the db_entry's path as well
 			inputFileBasename = os.path.basename(self.inputFname)
 			relativePath = genotypeFile.constructRelativePath(sourceFilename=inputFileBasename)
-			exitCode = self.db_vervet.moveFileIntoDBAffiliatedStorage(db_entry=genotypeFile, filename=inputFileBasename, \
+			exitCode = self.db_main.moveFileIntoDBAffiliatedStorage(db_entry=genotypeFile, filename=inputFileBasename, \
 									inputDir=os.path.split(self.inputFname)[0], dstFilename=os.path.join(self.data_dir, relativePath), \
 									relativeOutputDir=None, shellCommand='cp -rL', \
 									srcFilenameLs=self.srcFilenameLs, dstFilenameLs=self.dstFilenameLs,\
@@ -172,9 +172,9 @@ will be created if not present in db.'],\
 				utils.copyFile(srcFilename=srcFilename, dstFilename=dstFilename)
 				logMessage += "tbi file %s has been copied to %s.\n"%(srcFilename, dstFilename)
 			## 2012.7.17 commented out because md5sum is calcualted above
-			#db_vervet.updateDBEntryMD5SUM(db_entry=genotypeFile, data_dir=data_dir)
+			#db_main.updateDBEntryMD5SUM(db_entry=genotypeFile, data_dir=data_dir)
 			# #2012.7.17 record the size of db_entry.path (folder or file)
-			self.db_vervet.updateDBEntryPathFileSize(db_entry=genotypeFile, data_dir=self.data_dir)
+			self.db_main.updateDBEntryPathFileSize(db_entry=genotypeFile, data_dir=self.data_dir)
 			
 			vcfFile.close()
 			logMessage += "%s individuals, %s loci, md5sum=%s.\n"%(no_of_individuals, no_of_loci, md5sum)

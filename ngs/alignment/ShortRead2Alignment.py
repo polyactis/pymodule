@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 """
-    # 2011-8-30 workflow on condor, always commit (--commit)
-    %s --ind_seq_id_ls 165-167 -o ShortRead2Alignment_isq_id_165_167_vs_9.xml -u yh -a 9 -l condor
-        -n1 -z dl324b-1.cmb.usc.edu --commit --needSSHDBTunnel
-
+Examples:
     # 2011-8-30 a workflow with 454 long-read and short-read PE. need a ref index job (-n1).
     %s --ind_seq_id_ls 165-167 -o ShortRead2Alignment_isq_id_165_167_vs_9.xml -u yh -a 9
         -e /u/home/eeskin/polyacti -l hoffman2 --data_dir NetworkData/vervet/db -n1
@@ -15,10 +12,10 @@
     # 2012.3.20 use /work/ or /u/scratch/p/polyacti/tmp as TMP_DIR for
     #   MarkDuplicates.jar (/tmp is too small for 30X genome)
     # 2012.5.4 cluster 4 alignment jobs (before merging) as a unit
-    #   (--alignmentJobClustersSizeFraction 0.2), skip done alignment (--skipDoneAlignment)
-    # 2012.9.21 add "--needSSHDBTunnel" because AddAlignmentFile2DB need db conneciton
-    # 2012.9.21 add "--alignmentPerLibrary" to also get alignment
-    # for each library within one individual_sequence
+    #   (--alignmentJobClustersSizeFraction 0.2), skip done alignment
+    #   (--skipDoneAlignment)
+    # 2012.9.21 add "--alignmentPerLibrary" to align
+    #   for each library within one individual_sequence
     # 2013.3.15 add "--coreAlignmentJobWallTimeMultiplier 0.5" to
     #  reduce wall time for core-alignment (bwa/stampy) jobs by half
     ref=3280; %s --ind_seq_id_ls 632-3230 --sequence_min_coverage 15
@@ -40,16 +37,6 @@
     # to enable symlink of input files. need ref index job (--needRefIndexJob).
     # If input_site_handler is "local", pegasus will report error 
     #   saying it doesn't know how to replica-transfer input files.
-    %s --ind_seq_id_ls 176,178-183,207-211
-        -o ShortRead2Alignment_8VWP_vs_9_condor_no_refIndex.xml
-        -u yh -a 9 -j condor -l condor --needRefIndexJob
-        -z dl324b-1.cmb.usc.edu -p secret  --commit --needSSHDBTunnel
-
-    # 2011-8-30 a workflow to run on condor, no ref index job.
-    #  Note the site_handler and input_site_handler are both condor
-    # to enable symlink of input files.
-    # If input_site_handler is "local", pegasus will report error
-    #  saying it doesn't know how to replica-transfer input files.
     %s --ind_seq_id_ls 176,178-183,207-211
         -o ShortRead2Alignment_8VWP_vs_9_condor_no_refIndex.xml
         -u yh -a 9 -j condor -l condor --needRefIndexJob
@@ -79,7 +66,7 @@
     # 2011-11-16 a workflow to run on uschpc, Need ref index job 
     #  (--needRefIndexJob), and 4 threads for each alignment job.
     # Note the site_handler, input_site_handler. this will stage in all
-    #    input and output (--notStageOutFinalOutput).
+    #    input and output (--noStageOutFinalOutput).
     %s --ind_seq_id_ls 391-397,456,473,493
         -o dags/ShortRead2Alignment_4DeepVRC_6LowCovVRC_392_397_vs_9_local2usc.xml
         -u yh -a 9
@@ -87,7 +74,6 @@
         -e /home/cmb-03/mn/yuhuang -z 10.8.0.10
         --javaPath /home/cmb-03/mn/yuhuang/bin/jdk/bin/java
         --needSSHDBTunnel
-
 
     #2011-9-13 no ref index job, staging input files from localhost to uschpc,
     #  stage output files back to localhost
@@ -103,12 +89,12 @@
     %s --ind_seq_id_ls 391-397,456,473,493
         -o dags/ShortRead2Alignment_4DeepVRC_6LowCovVRC_392_397_vs_9.xml
         -u yh -a 9 -j condor -l condor --needRefIndexJob -z 10.8.0.10
-        -p secret  --commit --alignmentPerLibrary
+        -p secret --commit --alignmentPerLibrary
 
     # 2012-4-5 new alignment method, stampy (--alignment_method_name)
     %s --ind_seq_id_ls 167,176,178,182,183,207-211,391-397,456,473,493
         -o dags/ShortRead2Alignment_10VWP_4DeepVRC_6LowCovVRC_392_397_vs_508.xml
-        -u yh -a 508 -j condor -l condor -n1 -z 10.8.0.10  -p secret
+        -u yh -a 508 -j condor -l condor -n1 -z 10.8.0.10 -p secret
         --commit --alignment_method_name stampy
 
     # 2013.2.28 use the new alignment-method: bwaShortReadHighMismatches
@@ -127,12 +113,12 @@
         --max_walltime 1440
 
     # 2013.04.04 use the new alignment-method: bwa-mem, get rid of "-q 20"
-    #  by --additionalArguments " " as mem doesn't support -q.
+    #  by --extraAlignArgs " " as mem doesn't support -q.
     # 23*0.1 hrs walltime for the core alignment (bwa mem) jobs
     #  (--coreAlignmentJobWallTimeMultiplier 0.1) because it's much faster
     # set max walltime for any job to be 1 day (--max_walltime 1440)
     ref=1;
-    %s --ind_seq_id_ls 87 -a $ref --additionalArguments " "
+    %s --ind_seq_id_ls 87 -a $ref --extraAlignArgs " "
         -o dags/ShortRead2AlignmentPipeline_Aethiops_vs_$ref\_AlnMethod6.xml
         -l hcondor -j hcondor -z pdc -u luozhihui --commit --tmpDir /tmp/
         --no_of_aln_threads 1 --skipDoneAlignment --clusters_size 1
@@ -147,76 +133,204 @@ Description:
     It will also stage out every output file.
     Be careful about -R, only toggle it if you know every input
         individual_sequence_file is not empty.
-    Empty read files would fail alignment jobs and thus no final alignment for a few indivdiuals.
+    Empty read files would fail alignment jobs and
+        thus no final alignment for a few indivdiuals.
     Use "--alignmentJobClustersSizeFraction ..." to cluster the alignment jobs,
         if the input read file is small enough (~1 Million reads for bwa, ~300K for stampy).
-    The arguments related to chromosomes/contigs do not matter unless local_realigned=1.
+    The arguments related to chromosomes/contigs do not matter
+        unless local_realigned=1.
 """
 import sys, os
-__doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0],
-    sys.argv[0], sys.argv[0], sys.argv[0], \
+__doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0],\
     sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0])
 
+import getpass
+import logging
 import copy
+import pegaflow
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
-import pegaflow
+from palos.db import SunsetDB
 from palos.ngs.AbstractAlignmentWorkflow import AbstractAlignmentWorkflow
 ParentClass = AbstractAlignmentWorkflow
 
 class ShortRead2Alignment(ParentClass):
     __doc__ = __doc__
-    option_default_dict = copy.deepcopy(
-        ParentClass.option_default_dict)
-    alignment_option_dict = {
-        ('noCheckEmptyReadFile', 0, int):[0, '', 0, 
-            "toggle to not check whether each read file is empty (if empty, exclude it). "
-            "If IndividualSequenceFile.read_count is null, "
-            "it'll try to count them on the fly and take a lot of time. "
-            "However, only toggle it if you know every input individual_sequence_file is not empty. "
-            "Empty read file fails alignment jobs."],\
-        ('additionalArguments', 0, ): ["", '', 1, 
-            'a string of additional arguments passed to aln, '
-            'not bwasw, add double quote if empty space. i.e. "-q 20"'],\
-        ("bwa_path", 1, ): ["%s/bin/bwa", '', 1, 'bwa binary'],\
-        ("alignment_method_name", 1, ): ["bwaShortRead", '', 1, 
-            'alignment_method.short_name from db. '
-            'used only when unable to guess based on individual_sequence.sequencer '
-            'and individual_sequence.sequence_type'],\
-        ("needRefIndexJob", 0, int): [0, '', 0, 
-            'need to add a reference index job by bwa?'],\
-        ('no_of_aln_threads', 1, int): [1, '', 1, 
-            'number of threads during alignment'],\
-        ('alignmentJobClusterSizeFraction', 1, float): [0.01, '', 1, 
-            'alignment job cluster size relative to self.cluster_size, '
-            'for bwa, PEAlignmentByBWA, LongSEAlignmentByBWA, '
-            'AddOrReplaceReadGroupsJava/SortSamFilesJava/samtools jobs'],\
-        ('notStageOutFinalOutput', 0, int):[0, '', 0, 
-            'toggle to not stage out final output (bam + bam.bai)'],\
-        ("coreAlignmentJobWallTimeMultiplier", 1, float): [0.2, '', 1, 
-            'The default wall time is 23 hours (for bwa aln, stampy, etc.). '
-            'This option controls walltime by multiplying the default with this number.'],
-        ("alignmentPerLibrary", 0, int): [0, '', 0, 
-            'toggle to run alignment for each library of one individual_sequence'],
-        }
-    option_default_dict.update(alignment_option_dict.copy())
-    #by default not to apply known-indel-free local re-alignment
-    option_default_dict[('local_realigned', 0, int)][0] = 0
+    def __init__(self,
+        drivername='postgresql', hostname='localhost',
+        dbname='', schema='public', port=None,
+        db_user=None,
+        db_passwd=None,
+        data_dir=None, local_data_dir=None,
 
+        ind_seq_id_ls=None,
+        local_realigned=0,
 
-    def __init__(self,  **keywords):
+        excludeContaminant=False,
+        sequence_filtered=None,
+        completedAlignment=None,
+        skipDoneAlignment=False,
+        
+        noCheckEmptyReadFile=False,
+        alignment_method_name='bwamem',
+        bwa_path='bin/bwa',
+        no_of_aln_threads=1,
+        extraAlignArgs="",
+        alignmentJobClusterSizeFraction=0.01,
+        coreAlignmentJobWallTimeMultiplier=0.2,
+        needRefIndexJob=False,
+        noStageOutFinalOutput=False,
+        alignmentPerLibrary=False,
+
+        ref_ind_seq_id=None,
+
+        samtools_path="bin/samtools",
+        picard_dir="script/picard/dist",
+        gatk_path="bin/GenomeAnalysisTK1_6_9.jar",
+        gatk2_path="bin/GenomeAnalysisTK.jar",
+        picard_path="script/picard.broad/build/libs/picard.jar",
+        tabixPath="bin/tabix",
+        vcftoolsPath="bin/vcftools/vcftools",
+        ligateVcfPerlPath="bin/ligateVcf.pl",
+        maxContigID=None,
+        minContigID=None,
+        contigMaxRankBySize=None,
+        contigMinRankBySize=None,
+
+        chromosome_type_id=None, 
+        ref_genome_tax_id=9606,
+        ref_genome_sequence_type_id=1,
+        ref_genome_version=15,
+        ref_genome_outdated_index=0,
+
+        mask_genotype_method_id=None, 
+        checkEmptyVCFByReading=False,
+
+        needFastaIndexJob=False,
+        needFastaDictJob=False,
+        reduce_reads=None,
+
+        site_id_ls="",
+        country_id_ls="",
+        tax_id_ls="9606",
+        sequence_type_id_ls="",
+        sequencer_id_ls="",
+        sequence_batch_id_ls="",
+        version_ls="",
+        sequence_max_coverage=None,
+        sequence_min_coverage=None,
+        alignmentDepthIntervalMethodShortName=None,
+        minAlignmentDepthIntervalLength=1000,
+        alignmentDepthMaxFold=2,
+        alignmentDepthMinFold=0.1,
+        intervalOverlapSize=500000,
+        intervalSize=5000000,
+        defaultGATKArguments=\
+        " --unsafe ALL --validation_strictness SILENT --read_filter BadCigar ",
+        
+        site_handler='condor',
+        input_site_handler='condor',
+        cluster_size=30,
+        pegasusFolderName='input',
+        output_path=None,
+        tmpDir='/tmp/',
+        max_walltime=4320,
+        home_path=None,
+        javaPath=None,
+        pymodulePath="src/pymodule",
+        thisModulePath=None,
+        jvmVirtualByPhysicalMemoryRatio=1.2,
+        needSSHDBTunnel=False,
+        commit=False,
+        debug=False, report=False):
         """
-        2012.3.29
-            default to stage out final output.
-            Argument stageOutFinalOutput morphs into notStageOutFinalOutput.
-        2011-7-11
         """
-        ParentClass.__init__(self, **keywords)
-        #ParentClass.__init__(self, **keywords)
-        if self.ind_seq_id_ls:
-            self.ind_seq_id_ls = getListOutOfStr(self.ind_seq_id_ls, data_type=int)
-        self.bwa_path =  self.insertHomePath(self.bwa_path, self.home_path)
-        if self.notStageOutFinalOutput:
+        ParentClass.__init__(self,
+            drivername=drivername, hostname=hostname,
+            dbname=dbname, schema=schema, port=port,
+            db_user=db_user, db_passwd=db_passwd,
+            data_dir=data_dir, local_data_dir=local_data_dir,
+
+            ind_seq_id_ls=ind_seq_id_ls,
+            local_realigned=local_realigned,
+            excludeContaminant=excludeContaminant,
+            sequence_filtered=sequence_filtered,
+            completedAlignment=completedAlignment,
+            skipDoneAlignment=skipDoneAlignment,
+
+            ref_ind_seq_id=ref_ind_seq_id,
+
+            samtools_path=samtools_path,
+            picard_dir=picard_dir,
+            gatk_path=gatk_path,
+            gatk2_path=gatk2_path,
+            picard_path=picard_path,
+            tabixPath=tabixPath,
+            vcftoolsPath=vcftoolsPath,
+            ligateVcfPerlPath=ligateVcfPerlPath,
+            maxContigID=maxContigID,
+            minContigID=minContigID,
+            contigMaxRankBySize=contigMaxRankBySize,
+            contigMinRankBySize=contigMinRankBySize,
+
+            chromosome_type_id=chromosome_type_id, 
+            ref_genome_tax_id=ref_genome_tax_id,
+            ref_genome_sequence_type_id=ref_genome_sequence_type_id,
+            ref_genome_version=ref_genome_version,
+            ref_genome_outdated_index=ref_genome_outdated_index,
+
+            mask_genotype_method_id=mask_genotype_method_id, 
+            checkEmptyVCFByReading=checkEmptyVCFByReading,
+
+            needFastaIndexJob=needFastaIndexJob,
+            needFastaDictJob=needFastaDictJob,
+            reduce_reads=reduce_reads,
+
+            site_id_ls=site_id_ls,
+            country_id_ls=country_id_ls,
+            tax_id_ls=tax_id_ls,
+            sequence_type_id_ls=sequence_type_id_ls,
+            sequencer_id_ls=sequencer_id_ls,
+            sequence_batch_id_ls=sequence_batch_id_ls,
+            version_ls=version_ls,
+            sequence_max_coverage=sequence_max_coverage,
+            sequence_min_coverage=sequence_min_coverage,
+            alignmentDepthIntervalMethodShortName=alignmentDepthIntervalMethodShortName,
+            minAlignmentDepthIntervalLength=minAlignmentDepthIntervalLength,
+            alignmentDepthMaxFold=alignmentDepthMaxFold,
+            alignmentDepthMinFold=alignmentDepthMinFold,
+            intervalOverlapSize=intervalOverlapSize,
+            intervalSize=intervalSize,
+            defaultGATKArguments=defaultGATKArguments,
+
+            site_handler=site_handler,
+            input_site_handler=input_site_handler,
+            cluster_size=cluster_size,
+            pegasusFolderName=pegasusFolderName,
+            output_path=output_path,
+            tmpDir=tmpDir,
+            max_walltime=max_walltime, 
+            home_path=home_path,
+            javaPath=javaPath,
+            pymodulePath=pymodulePath,
+            thisModulePath=thisModulePath,
+            jvmVirtualByPhysicalMemoryRatio=jvmVirtualByPhysicalMemoryRatio,
+            needSSHDBTunnel=needSSHDBTunnel,
+            commit=commit,
+            debug=debug, report=report)
+        
+        self.noCheckEmptyReadFile = noCheckEmptyReadFile
+        self.alignment_method_name = alignment_method_name
+        self.bwa_path = self.insertHomePath(bwa_path, self.home_path)
+        self.no_of_aln_threads = no_of_aln_threads
+        self.extraAlignArgs = extraAlignArgs
+        self.alignmentJobClusterSizeFraction = alignmentJobClusterSizeFraction
+        self.coreAlignmentJobWallTimeMultiplier = coreAlignmentJobWallTimeMultiplier
+        self.needRefIndexJob = needRefIndexJob
+        self.noStageOutFinalOutput = noStageOutFinalOutput
+        self.alignmentPerLibrary = alignmentPerLibrary
+
+        if self.noStageOutFinalOutput:
             self.stageOutFinalOutput = False
         else:
             self.stageOutFinalOutput = True
@@ -243,7 +357,8 @@ class ShortRead2Alignment(ParentClass):
         self.registerOneExecutable(path=self.bwa_path, \
             name="bwa", clusterSizeMultiplier=self.alignmentJobClusterSizeFraction)
         self.registerOneExecutable(
-            path=os.path.join(self.pymodulePath, 'mapper/alignment/ShortSEAlignmentByBWA.sh'),
+            path=os.path.join(self.pymodulePath,
+                'mapper/alignment/ShortSEAlignmentByBWA.sh'),
             name="ShortSEAlignmentByBWA",
             clusterSizeMultiplier=self.alignmentJobClusterSizeFraction)
         self.registerOneExecutable(
@@ -272,10 +387,12 @@ class ShortRead2Alignment(ParentClass):
             path=os.path.join(self.pymodulePath, "db/import/AddAlignmentFile2DB.py"),
             name="AddAlignmentFile2DB",
             clusterSizeMultiplier=self.alignmentJobClustersSizeFraction)
-        #self.registerOneExecutable(path=self.javaPath, name='RealignerTargetCreatorJava', 
-        # clusterSizeMultiplier=0.7)
-        #self.registerOneExecutable(path=self.javaPath, name='IndelRealignerJava', 
-        # clusterSizeMultiplier=0.2)
+        #self.registerOneExecutable(path=self.javaPath,
+        #   name='RealignerTargetCreatorJava', 
+        #   clusterSizeMultiplier=0.7)
+        #self.registerOneExecutable(path=self.javaPath,
+        #   name='IndelRealignerJava', 
+        #   clusterSizeMultiplier=0.2)
 
     def addBWAReferenceIndexJob(self, refFastaFList=None, \
         refSequenceBaseCount=3000000000, bwa=None,\
@@ -356,7 +473,7 @@ class ShortRead2Alignment(ParentClass):
             extraDependentInputLs=[genomeIndexFile],
             extraOutputLs=extraOutputLs,\
             transferOutput=transferOutput, \
-            extraArguments=None, extraArgumentList=extraArgumentList, \
+            extraArguments=None, extraArgumentList=extraArgumentList,
             key2ObjectForJob=None,\
             job_max_memory=job_max_memory, walltime=walltime)
         return stampyGenomeHashJob
@@ -389,7 +506,7 @@ class ShortRead2Alignment(ParentClass):
                 register=True, link=Link.INPUT)
 
     def addStampyAlignmentJob(self, fileObjectLs=None, \
-        refFastaFList=None, bwa=None, additionalArguments=None, \
+        refFastaFList=None, bwa=None, extraAlignArgs=None, \
         samtools=None, refIndexJob=None, parentJobLs=None,\
         alignment_method=None, outputDir=None, \
         PEAlignmentByBWA=None, ShortSEAlignmentByBWA=None,
@@ -424,13 +541,15 @@ class ShortRead2Alignment(ParentClass):
         #bwa: memory 2.5GB is enough for 4.5G gzipped fastq versus 480K contigs
         #  (total size~3G)
 
-        bwasw_job_max_memory = 3800	#in MB, same ref, bwasw needs more memory
+        bwasw_job_max_memory = 3800
+        #in MB, same ref, bwasw needs more memory
         samse_job_max_memory = 4500	#in MB
         sampe_job_max_memory = 6000	#in MB
         addRGJob_max_memory = 2500	#in MB
         #2013.3.1 change the walltime by multiplying it
         baseAlnJobWalltime = int(1380*self.coreAlignmentJobWallTimeMultiplier)
-        #1380 is 23 hours, because all reads are stored in chunks of 5-million-read files
+        #1380 is 23 hours, because all reads are stored in chunks of
+        #  5-million-read files
 
         refFastaFile = refFastaFList[0]
         firstFileObject = fileObjectLs[0]
@@ -454,7 +573,7 @@ class ShortRead2Alignment(ParentClass):
         #   during xml translation.
         alignmentJob.addArguments(" --bwa=%s "%(
             pegaflow.getAbsPathOutOfExecutable(bwa)),
-            "--bwaoptions='%s -t%s %s' "%(additionalArguments, 
+            "--bwaoptions='%s -t%s %s' "%(extraAlignArgs, 
                 no_of_aln_threads, refFastaFile.name),
             "-g", refFastaFile, "-h", refFastaFile, "-o", outputSamFile,
             '--overwrite',
@@ -498,7 +617,7 @@ class ShortRead2Alignment(ParentClass):
         fileObject=None, outputFile=None,\
         refFastaFList=None, no_of_aln_threads=3, \
         maxMissingAlignmentFraction=None, maxNoOfGaps=None,
-        additionalArguments=None, \
+        extraAlignArgs=None, \
         refIndexJob=None,\
         parentJobLs=None, extraDependentInputLs=None, extraOutputLs=None,
         transferOutput=False, \
@@ -511,8 +630,8 @@ class ShortRead2Alignment(ParentClass):
         if extraArgumentList is None:
             extraArgumentList = []
         extraArgumentList.append(bwaCommand)
-        if additionalArguments:
-            extraArgumentList.append(additionalArguments)
+        if extraAlignArgs:
+            extraArgumentList.append(extraAlignArgs)
         if fileObject.db_entry.quality_score_format=='Illumina':
             extraArgumentList.append("-I")
         if no_of_aln_threads:
@@ -550,7 +669,7 @@ class ShortRead2Alignment(ParentClass):
         return alignmentJob
 
     def addBWAAlignmentWrapJob(self, fileObjectLs=None, \
-        refFastaFList=None, bwa=None, additionalArguments=None, \
+        refFastaFList=None, bwa=None, extraAlignArgs=None, \
         samtools=None, \
         refIndexJob=None, parentJobLs=None,\
         alignment_method=None, outputDir=None,
@@ -588,7 +707,8 @@ class ShortRead2Alignment(ParentClass):
                 1. aln doesn't use pipe, outputs to sai files.
                 2. sampe/samse, convert, sort => connected through pipe
         """
-        #in MB, 2.5GB is enough for 4.5G gzipped fastq versus 480K contigs (total size~3G)
+        #in MB, 2.5GB is enough for 4.5G gzipped fastq versus 480K contigs
+        #  (total size~3G)
         aln_job_max_memory = 2600
         bwasw_job_max_memory = 3800	#in MB, same ref, bwasw needs more memory
         samse_job_max_memory = 4500	#in MB
@@ -597,7 +717,8 @@ class ShortRead2Alignment(ParentClass):
 
         #2013.3.1 change the walltime by multiplying it
         baseAlnJobWalltime = int(1380*self.coreAlignmentJobWallTimeMultiplier)
-        #1380 is 23 hours, because all reads are stored in chunks of 5-million-read files
+        #1380 is 23 hours, because all reads are stored in chunks of
+        #  5-million-read files
 
         memRequirementData = self.getJVMMemRequirment(
             job_max_memory=addRGJob_max_memory, minMemory=2000)
@@ -632,7 +753,7 @@ class ShortRead2Alignment(ParentClass):
                     no_of_aln_threads=no_of_aln_threads,
                     maxMissingAlignmentFraction=maxMissingAlignmentFraction,
                     maxNoOfGaps=maxNoOfGaps,
-                    additionalArguments=additionalArguments, \
+                    extraAlignArgs=extraAlignArgs, \
                     refIndexJob=refIndexJob, parentJobLs=parentJobLs, \
                     extraDependentInputLs=None, extraOutputLs=None,
                     transferOutput=transferOutput, \
@@ -640,9 +761,10 @@ class ShortRead2Alignment(ParentClass):
                     job_max_memory=aln_job_max_memory,
                     key2ObjectForJob=None, walltime=aln_job_walltime)
 
-                alignmentSamF = File('%s.sam.gz'%(os.path.join(outputDir, fileBasenamePrefix)))
-                sai2samJob = Job(namespace=self.namespace, name=ShortSEAlignmentByBWA.name,
-                    version=self.version)
+                alignmentSamF = File('%s.sam.gz'%(os.path.join(outputDir, \
+                    fileBasenamePrefix)))
+                sai2samJob = Job(name=ShortSEAlignmentByBWA.name,
+                    namespace=self.namespace, version=self.version)
                 sai2samJob.addArguments(refFastaFList[0], saiOutput, fastqF, alignmentSamF)
                 for refFastaFile in refFastaFList:
                     sai2samJob.uses(refFastaFile, transfer=True, register=True,
@@ -711,7 +833,8 @@ class ShortRead2Alignment(ParentClass):
             pegaflow.setJobResourceRequirement(sai2samJob,
                 job_max_memory=sampe_job_max_memory)
             for refFastaFile in refFastaFList:
-                sai2samJob.uses(refFastaFile, transfer=True, register=True, link=Link.INPUT)
+                sai2samJob.uses(refFastaFile, transfer=True, register=True,
+                    link=Link.INPUT)
             self.addJob(sai2samJob)
             self.no_of_jobs += 1
             for fileObject in fileObjectLs:
@@ -731,10 +854,10 @@ class ShortRead2Alignment(ParentClass):
                 alignmentJob = self.addBWAAlignmentJob(executable=bwa, 
                     bwaCommand=alignment_method.command, \
                     fileObject=fileObject, outputFile=saiOutput,\
-                    refFastaFList=refFastaFList, no_of_aln_threads=no_of_aln_threads, \
+                    refFastaFList=refFastaFList, no_of_aln_threads=no_of_aln_threads,
                     maxMissingAlignmentFraction=maxMissingAlignmentFraction,
                     maxNoOfGaps=maxNoOfGaps, \
-                    additionalArguments=additionalArguments, \
+                    extraAlignArgs=extraAlignArgs, \
                     refIndexJob=refIndexJob, parentJobLs=parentJobLs, \
                     extraDependentInputLs=None, extraOutputLs=None,
                     transferOutput=transferOutput,
@@ -753,8 +876,8 @@ class ShortRead2Alignment(ParentClass):
                 sai2samJob.uses(fastqF, transfer=True, register=True, link=Link.INPUT)
             sai2samJob.addArguments(alignmentSamF)
         else:
-            sys.stderr.write("addBWAAlignmentWrapJob Error: %s (!=1, !=2) file objects (%s).\n"%\
-                            (len(fileObjectLs), fileObjectLs))
+            logging.error("addBWAAlignmentWrapJob(): %s (!=1, !=2) file objects (%s)."%\
+                (len(fileObjectLs), fileObjectLs))
             raise
 
         sai2samJob.uses(alignmentSamF, transfer=transferOutput, register=True, link=Link.OUTPUT)
@@ -770,7 +893,7 @@ class ShortRead2Alignment(ParentClass):
         return sai2samJob
 
     def addBWAMemAlignmentJob(self, fileObjectLs=None, \
-        refFastaFList=None, bwa=None, additionalArguments=None, \
+        refFastaFList=None, bwa=None, extraAlignArgs=None, \
         samtools=None, refIndexJob=None, parentJobLs=None,\
         alignment_method=None, outputDir=None,
         PEAlignmentByBWA=None, ShortSEAlignmentByBWA=None,
@@ -781,7 +904,7 @@ class ShortRead2Alignment(ParentClass):
         maxNoOfGaps=None,
         extraArgumentList=None, transferOutput=False, **keywords):
         """
-        additionalArguments = additionalArguments.strip()
+        extraAlignArgs = extraAlignArgs.strip()
         #2013.06.20 strip all the spaces around it.
         2013.04.04
 new alignment method from Heng Li
@@ -794,10 +917,10 @@ in pipe2File:
             extraArgumentList = []
         extraArgumentList.append(alignment_method.command)
         #add mem first
-        additionalArguments = additionalArguments.strip()
+        extraAlignArgs = extraAlignArgs.strip()
         #2013.06.20 strip all the spaces around it.
-        if additionalArguments:
-            extraArgumentList.append(additionalArguments)
+        if extraAlignArgs:
+            extraArgumentList.append(extraAlignArgs)
         if no_of_aln_threads:
             extraArgumentList.append("-t %s"%no_of_aln_threads)
         #in MB, 2.5GB is enough for 4.5G gzipped fastq versus 480K contigs (total size~3G)
@@ -851,7 +974,7 @@ in pipe2File:
         return alignmentJob
 
     def addAlignmentJob(self, fileObjectLs=None, individual_alignment=None,
-        refFastaFList=None, bwa=None, additionalArguments=None, \
+        refFastaFList=None, bwa=None, extraAlignArgs=None, \
         samtools=None, refIndexJob=None, parentJobLs=None, \
         alignment_method=None, outputDir=None,
         PEAlignmentByBWA=None,
@@ -871,7 +994,7 @@ in pipe2File:
             fileObjectLs=newFileObjLs, \
             individual_alignment=None, \
             data_dir=data_dir, refFastaFList=refFastaFList, bwa=bwa, \
-            additionalArguments=additionalArguments, samtools=samtools, \
+            extraAlignArgs=extraAlignArgs, samtools=samtools, \
             refIndexJob=refIndexJob, parentJobLs=[refIndexJob, mkdirJob], \
             alignment_method=alignment_method, \
             outputDir=tmpOutputDir,
@@ -891,7 +1014,8 @@ in pipe2File:
         added argument maxMissingAlignmentFraction, maxNoOfGaps for bwa
         each fileObject in fileObjectLs should have 2 attributes
             fastqF: a registered pegasus file
-            db_entry: an individual_sequence_file db_entry or equivalent object. 2 attributes:
+            db_entry: an individual_sequence_file db_entry or equivalent object.
+                    2 attributes:
                 quality_score_format: 'Standard', 'Illumina'
                 individual_sequence: 2 attributes:
                     sequencer:  'GA' , '454'
@@ -917,7 +1041,7 @@ in pipe2File:
             alignmentJob = self.addStampyAlignmentJob(
                 fileObjectLs=fileObjectLs,
                 refFastaFList=refFastaFList, bwa=bwa, \
-                additionalArguments=additionalArguments, samtools=samtools, \
+                extraAlignArgs=extraAlignArgs, samtools=samtools, \
                 refIndexJob=refIndexJob, parentJobLs=parentJobLs, \
                 alignment_method=alignment_method, \
                 outputDir=outputDir,
@@ -934,7 +1058,7 @@ in pipe2File:
             alignmentJob = self.addBWAMemAlignmentJob(
                 fileObjectLs=fileObjectLs,
                 refFastaFList=refFastaFList, bwa=bwa, \
-                additionalArguments=additionalArguments, samtools=samtools, \
+                extraAlignArgs=extraAlignArgs, samtools=samtools, \
                 refIndexJob=refIndexJob, parentJobLs=parentJobLs, \
                 alignment_method=alignment_method, \
                 outputDir=outputDir,
@@ -951,7 +1075,7 @@ in pipe2File:
             alignmentJob = self.addBWAAlignmentWrapJob(
                 fileObjectLs=fileObjectLs, \
                 refFastaFList=refFastaFList, bwa=bwa, \
-                additionalArguments=additionalArguments, samtools=samtools, \
+                extraAlignArgs=extraAlignArgs, samtools=samtools, \
                 refIndexJob=refIndexJob, parentJobLs=parentJobLs, \
                 alignment_method=alignment_method, \
                 outputDir=outputDir,
@@ -965,7 +1089,7 @@ in pipe2File:
                 maxMissingAlignmentFraction=maxMissingAlignmentFraction, 
                 maxNoOfGaps=maxNoOfGaps, transferOutput=transferOutput)
         else:
-            sys.stderr.write("Alignment method %s is not supported.\n"%(alignment_method.short_name))
+            logging.error("Alignment method %s is not supported."%(alignment_method.short_name))
             sys.exit(3)
         fileBasenamePrefix = alignmentJob.fileBasenamePrefix
 
@@ -1011,7 +1135,8 @@ in pipe2File:
         # 2010-2-4
             sort it so that it could be used for merge
         """
-        bam_output_fname_prefix = '%s.sorted'%(os.path.join(outputDir, fileBasenamePrefix))
+        bam_output_fname_prefix = '%s.sorted'%(os.path.join(outputDir,
+            fileBasenamePrefix))
         sortBamF = File('%s.bam'%(bam_output_fname_prefix))
         sortAlignmentJob = self.addSortAlignmentJob(
             inputBamFile=sortAlnParentJob.output, \
@@ -1227,8 +1352,8 @@ in pipe2File:
         chr2VCFJobData = {}
 
         if self.report:
-            sys.stderr.write("Adding local indel-realignment jobs for %s chromosomes/contigs ..."%\
-                            (len(chrIDSet)))
+            print("Adding local indel-realignment jobs for %s chromosomes/contigs ..."%\
+                (len(chrIDSet)), flush=True)
         refFastaFList = registerReferenceData.refFastaFList
         topOutputDir = "%sMap"%(outputDirPrefix)
         topOutputDirJob = self.addMkDirJob(outputDir=topOutputDir)
@@ -1238,7 +1363,8 @@ in pipe2File:
         returnData.jobDataLs = []
 
         #2012.9.22 AlignmentJobAndOutputLs is a relic.
-        #	but it's similar to mapEachIntervalDataLs but designed for addAlignmentMergeJob(),
+        #	but it's similar to mapEachIntervalDataLs but designed for
+        #    addAlignmentMergeJob(),
         #	so AlignmentJobAndOutputLs gets re-set for every alignment.
         # 	mapEachAlignmentDataLs is never reset.
         #	mapEachChromosomeDataLs is reset right after a new alignment is chosen.
@@ -1641,7 +1767,7 @@ in pipe2File:
         isqLs=None,\
         refSequence=None, registerReferenceData=None, \
         chr2IntervalDataLs=None,\
-        bwa=None, additionalArguments=None, samtools=None,
+        bwa=None, extraAlignArgs=None, samtools=None,
         mkdirWrap=None, mv=None,\
         java=None, MergeSamFilesJava=None, MergeSamFilesJar=None,
         MarkDuplicatesJava=None, MarkDuplicatesJar=None,
@@ -1659,31 +1785,19 @@ in pipe2File:
         """
         Scale MarkDuplicates and MergeSam jobs memory & walltime to
             the sequence coverage
-        2012.9.19
-            isq_id2LibrarySplitOrder2FileLs is replaced by isqLs.
-            add argument alignmentPerLibrary
-        2012.4.20
         bugfix, pass alignment_method.short_name instead of
             alignment_method_name to db_main.getAlignment()
             because alignment_method might be changed according to sequencer
                 regardless of alignment_method_name.
-        2012.4.12
-            add argument skipDoneAlignment
         2012.4.5
             fetch the alignment_method directly based on the
                 alignment_method_name, except for 454 sequences.
                 officially merges "bwa-short-read-SR" (single-read) into "bwa-short-read"
-        2012.2.24
-            pass data_dir to db_main.getAlignment()
-            add stampy part
         2011-9-15
             adjust alignment_method_name according to individual_sequence.sequencer
                 and individual_sequence.sequence_type
             only when this is not possible, value of argument
                 alignment_method_name is used.
-        2011-9-14
-            give different names to different java jobs according to jars
-        2011-8-28
         """
         print(f"Adding alignment jobs for {len(isqLs)} individual sequences ...",
             flush=True)
@@ -1789,8 +1903,8 @@ in pipe2File:
                         skipLibraryAlignment = False
                         if oneLibraryAlignmentEntry.path:
                             if skipDoneAlignment and self.isThisAlignmentComplete(
-                                individual_alignment=individual_alignment, data_dir=data_dir):
-                                # 2013.3.22
+                                individual_alignment=individual_alignment,
+                                data_dir=data_dir):
                                 # file_size is updated in the last of AddAlignmentFile2DB.py.
                                 # if it fails in the middle of copying, file_size would be None.
                                 skipLibraryAlignment = True
@@ -1804,12 +1918,12 @@ in pipe2File:
                         fileObjectLs = fileObjectPairLs[splitOrderIndex]
                         #for fileObject in fileObjectLs:
                         #	print fileObject,"222222222222"
-                        #	print "111111111111111111111111111111111111111111111111111111"
+                        #	print "1111111"
                         #	exit(2)
                         oneLibraryCumulativeBaseCount += sum([fileObject.db_entry.base_count \
                             for fileObject in fileObjectLs])
-                        if mkdirJob is None:	#now it's time to add the mkdirJob
-                            # add a mkdir job
+                        if mkdirJob is None:
+                            #time to add a mkdirJob
                             mkdirJob = self.addMkDirJob(outputDir=tmpOutputDir)
                         newFileObjLs = self.registerISQFileObjLsToWorkflow(
                             fileObjectLs=fileObjectLs)
@@ -1821,7 +1935,7 @@ in pipe2File:
                             data_dir=data_dir,
                             refFastaFList=refFastaFList,
                             bwa=bwa,
-                            additionalArguments=additionalArguments,
+                            extraAlignArgs=extraAlignArgs,
                             samtools=samtools,
                             refIndexJob=refIndexJob,
                             parentJobLs=[refIndexJob, mkdirJob],
@@ -2034,9 +2148,11 @@ in pipe2File:
 
 
                     if self.local_realigned:
-                        alignmentData = PassingData(jobLs=[markDupJob, markDupBamIndexJob],
+                        alignmentData = PassingData(jobLs=[markDupJob,
+                                markDupBamIndexJob],
                             bamF=markDupJob.output,
-                            baiF=markDupBamIndexJob.output, alignment=individual_alignment)
+                            baiF=markDupBamIndexJob.output,
+                            alignment=individual_alignment)
                         preDBAlignmentJob, preDBAlignmentIndexJob = \
                             self.addLocalRealignmentSubWorkflow(
                                 chr2IntervalDataLs=chr2IntervalDataLs,
@@ -2133,23 +2249,25 @@ in pipe2File:
             registerReferenceData=registerReferenceData,
             chr2IntervalDataLs=chr2IntervalDataLs,\
             bwa=self.bwa_path,
-            additionalArguments=self.additionalArguments,
-            samtools=self.samtools, \
-            mkdirWrap=self.mkdirWrap, mv=self.cp,
-            java=self.java, \
+            extraAlignArgs=self.extraAlignArgs,
+            samtools=self.samtools,
+            mkdirWrap=self.mkdirWrap,
+            mv=self.cp,
+            java=self.java,
             MergeSamFilesJava=self.MergeSamFilesJava,
-            MergeSamFilesJar=self.PicardJar, \
+            MergeSamFilesJar=self.PicardJar,
             MarkDuplicatesJava=self.MarkDuplicatesJava,
-            MarkDuplicatesJar=self.PicardJar, tmpDir=self.tmpDir,
+            MarkDuplicatesJar=self.PicardJar,
+            tmpDir=self.tmpDir,
             BuildBamIndexFilesJava=self.BuildBamIndexFilesJava,
-            BuildBamIndexJar=self.PicardJar, \
+            BuildBamIndexJar=self.PicardJar,
             SortSamFilesJava=self.SortSamFilesJava,
             SortSamJar=self.PicardJar,
             AddOrReplaceReadGroupsJava=self.AddOrReplaceReadGroupsJava,
-            AddOrReplaceReadGroupsJar=self.PicardJar,\
+            AddOrReplaceReadGroupsJar=self.PicardJar,
             alignment_method_name=self.alignment_method_name,
             alignment_format='bam',
-            transferOutput=self.stageOutFinalOutput,\
+            transferOutput=self.stageOutFinalOutput,
             PEAlignmentByBWA=self.PEAlignmentByBWA,
             ShortSEAlignmentByBWA=self.ShortSEAlignmentByBWA,
             LongSEAlignmentByBWA=self.LongSEAlignmentByBWA,
@@ -2161,9 +2279,171 @@ in pipe2File:
 
         self.end_run()
 
+
+
 if __name__ == '__main__':
-    main_class = ShortRead2Alignment
-    po = ProcessOptions(sys.argv, main_class.option_default_dict,
-        error_doc=main_class.__doc__)
-    instance = main_class(**po.long_option2value)
+    from argparse import ArgumentParser
+    ap = ArgumentParser()
+    ap.add_argument('-i', "--ind_seq_id_ls", required=True,
+        help='a comma/dash-separated list of IndividualSequence.id.')
+    ap.add_argument("--local_realigned", type=int, default=0,
+        help='Set it to 1 to enable local realignment. '
+            "Default: %(default)s")
+    
+    ap.add_argument("--drivername", default="postgresql",
+        help='Type of database server (default: %(default)s)')
+    ap.add_argument("--hostname", default="pdc",
+        help='name/IP of database server (default: %(default)s)')
+    ap.add_argument("--port", default=None,
+        help="database server port (default: %(default)s)")
+    ap.add_argument("--dbname", default='pmdb',
+        help="database name (default: %(default)s)")
+    ap.add_argument('-k', "--schema", default='sunset', 
+        help="database schema (default: %(default)s)")
+    ap.add_argument("-u", "--db_user", help="Database user")
+    ap.add_argument("-p", "--db_passwd", required=False,
+        help="Password of the database user")
+
+    ap.add_argument("--noCheckEmptyReadFile", action='store_true',
+        help="Toggle to NOT check if each read file is empty and skip them. "
+            "If IndividualSequenceFile.read_count is null, "
+            "it'll try to count them on the fly (may take lots of time). "
+            "Only toggle it if you are certain every input "
+                "individual_sequence_file is not empty. "
+            "Empty read file will fail alignment jobs.")
+    ap.add_argument("--alignment_method_name", default='bwamem', 
+        help='Which alignment method to use. '
+            'It must match alignment_method.short_name from db. '
+            'Used only when unable to guess based on individual_sequence.sequencer '
+            'and individual_sequence.sequence_type')
+    ap.add_argument("--bwa_path",
+        default="bin/bwa",
+        help='Path to bwa. Default: %(default)s')
+    ap.add_argument("--no_of_aln_threads", type=int, default=2,
+        help="The number of threads for each alignment job."
+            "Default: %(default)s")
+    ap.add_argument("--extraAlignArgs", default='',
+        help='Additional arguments passed to an alignment command, '
+            'not bwasw, add double quote if empty space. i.e. "-q 20"'
+            'Default: %(default)s')
+    ap.add_argument("--alignmentJobClusterSizeFraction", type=float, default=0.01,
+        help="alignment job cluster size relative to self.cluster_size, "
+            "for bwa, PEAlignmentByBWA, LongSEAlignmentByBWA, "
+            "AddOrReplaceReadGroupsJava/SortSamFilesJava/samtools jobs. "
+            "Default: %(default)s")
+    ap.add_argument("--coreAlignmentJobWallTimeMultiplier", type=float, default=0.2,
+        help='The usual wall time is decided by --max_wall_time. '
+            'This option controls alignment job walltime by multiplying '
+            'max_wall_time with this number.'
+            "Default: %(default)s")
+    ap.add_argument("--needRefIndexJob", action='store_true',
+        help="Toggle to add a reference index job by bwa before alignment"
+            "Default: %(default)s")
+    ap.add_argument("--noStageOutFinalOutput", action='store_true',
+        help="Toggle to not stage out final output (bam + bam.bai)"
+            "Default: %(default)s")
+    ap.add_argument("--alignmentPerLibrary", action='store_true',
+        help="Toggle to run alignment for each library of an individual_sequence."
+            "Default: %(default)s")
+    
+    ap.add_argument("-F", "--pegasusFolderName", default='input',
+        help='The path relative to the workflow running root. '
+        'This folder will contain pegasus input & output. '
+        'It will be created during the pegasus staging process. '
+        'It is useful to separate multiple sub-workflows. '
+        'If empty or None, everything is in the pegasus root.')
+    ap.add_argument("-l", "--site_handler", type=str, required=True,
+        help="The name of the computing site where the jobs run and "
+        "executables are stored. "
+        "Check your Pegasus configuration in submit.sh.")
+    ap.add_argument("-j", "--input_site_handler", type=str,
+        help="It is the name of the site that has all the input files."
+        "Possible values can be 'local' or same as site_handler."
+        "If not given, it is asssumed to be the same as site_handler and "
+        "the input files will be symlinked into the running folder."
+        "If input_site_handler=local, the input files will be transferred "
+        "to the computing site by pegasus-transfer.")
+    ap.add_argument("-C", "--cluster_size", type=int, default=30,
+        help="Default: %(default)s. "
+        "This number decides how many of pegasus jobs should be clustered "
+        "into one job. "
+        "Good if your workflow contains many quick jobs. "
+        "It will reduce Pegasus monitor I/O.")
+    ap.add_argument("-o", "--output_path", type=str, required=True,
+        help="The path to the output file that will contain the Pegasus DAG.")
+    
+    ap.add_argument("--home_path", type=str,
+        help="Path to your home folder. Default is ~.")
+    ap.add_argument("--pymodulePath", type=str, default="src/pymodule",
+        help="Path to the pymodule code folder. "
+        "If relative path, home folder is inserted in the front.")
+    
+    ap.add_argument("--tmpDir", type=str, default='/tmp/',
+        help='Default: %(default)s. '
+        'A local folder for some jobs (MarkDup) to store temp data. '
+        '/tmp/ can be too small for high-coverage sequencing.')
+    ap.add_argument("--max_walltime", type=int, default=4320,
+        help='Default: %(default)s. '
+        'Maximum wall time for any job, in minutes. 4320=3 days. '
+        'Used in addGenericJob(). Most clusters have upper limit for runtime.')
+    ap.add_argument("--needSSHDBTunnel", action='store_true',
+        help="If all DB-interacting jobs need a ssh tunnel to "
+        "access a database that is inaccessible to computing nodes.")
+    ap.add_argument("-c", "--commit", action='store_true',
+        help="Toggle to commit the db transaction (default: %(default)s)")
+    ap.add_argument("--debug", action='store_true',
+        help='Toggle debug mode.')
+    ap.add_argument("--report", action='store_true',
+        help="Toggle verbose mode. Default: %(default)s.")
+    args = ap.parse_args()
+    if not args.db_user:
+        args.db_user = getpass.getuser()
+    if not args.db_passwd:
+        args.db_passwd = getpass.getpass(f"Password for {args.db_user}:")
+    
+    instance = ShortRead2Alignment(
+        drivername=args.drivername,
+        hostname=args.hostname,
+        port=args.port,
+        dbname=args.dbname, schema=args.schema,
+        db_user=args.db_user, db_passwd=args.db_passwd,
+
+        ind_seq_id_ls=None,
+        local_realigned=0,
+        
+        excludeContaminant=False,
+        sequence_filtered=None,
+        completedAlignment=None,
+        skipDoneAlignment=False,
+
+        noCheckEmptyReadFile=False,
+        alignment_method_name='bwamem',
+        bwa_path='bin/bwa',
+        no_of_aln_threads=1,
+        extraAlignArgs="",
+        alignmentJobClusterSizeFraction=0.01,
+        coreAlignmentJobWallTimeMultiplier=0.2,
+        needRefIndexJob=False,
+        noStageOutFinalOutput=False,
+        alignmentPerLibrary=False,
+
+        ref_ind_seq_id=None,
+
+        site_handler=args.site_handler, 
+        input_site_handler=args.input_site_handler,
+        cluster_size=args.cluster_size,
+        pegasusFolderName=args.pegasusFolderName,
+        output_path=args.output_path,
+        tmpDir=args.tmpDir,
+        max_walltime=args.max_walltime,
+
+        home_path=args.home_path,
+        javaPath=None,
+        pymodulePath=args.pymodulePath,
+        thisModulePath=None,
+        needSSHDBTunnel=args.needSSHDBTunnel,
+        commit=args.commit,
+        debug=args.debug,
+        report=args.report)
     instance.run()
+

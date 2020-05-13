@@ -174,7 +174,7 @@ class PlotGenomeWideData(ParentClass, AbstractGenomeFileWalker):
 		2012.10.15
 			run before anything is run
 		"""
-		#without commenting out db_vervet connection code. schema "genome" wont' be default path.
+		#without commenting out db_main connection code. schema "genome" wont' be default path.
 		#db_genome = GenomeDB.GenomeDatabase(drivername=self.drivername, username=self.db_user,
 		#				password=self.db_passwd, hostname=self.hostname, database=self.dbname, schema="genome")
 		AbstractGenomeFileWalker._loadGenomeStructureFromDB(self, **keywords)

@@ -47,18 +47,18 @@ class AddGenotypeMethod2DB(AddVCFFile2DB):
 		if self.debug:
 			import pdb
 			pdb.set_trace()
-		session = self.db_vervet.session
+		session = self.db_main.session
 		
 		session.begin()
 		if not self.data_dir:
-			self.data_dir = self.db_vervet.data_dir
+			self.data_dir = self.db_main.data_dir
 		
 		
 		vcfFile = VCFFile(inputFname=self.inputFname)
 		
-		individualAlignmentLs = self.getAlignmentLsFromVCF(db_vervet=self.db_vervet, vcfFile=vcfFile)
+		individualAlignmentLs = self.getAlignmentLsFromVCF(db_main=self.db_main, vcfFile=vcfFile)
 		
-		genotypeMethod = self.db_vervet.getGenotypeMethod(short_name=self.genotypeMethodShortName, \
+		genotypeMethod = self.db_main.getGenotypeMethod(short_name=self.genotypeMethodShortName, \
 												individualAlignmentLs=individualAlignmentLs,\
 												no_of_individuals=len(individualAlignmentLs), no_of_loci=None,\
 												data_dir=self.data_dir)

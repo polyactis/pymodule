@@ -58,7 +58,7 @@ class AppendInfo2SmartPCAOutput(AbstractVervetMapper):
 		self.db_taxonomy = db_taxonomy
 	
 	
-	def appendInfo(self, inputFname=None, db_vervet=None, outputFname=None,\
+	def appendInfo(self, inputFname=None, db_main=None, outputFname=None,\
 				inversePCValue=True):
 		"""
 		#2012.9.25 skip samples whose individual_alignment entry could not be parsed.
@@ -79,7 +79,7 @@ class AppendInfo2SmartPCAOutput(AbstractVervetMapper):
 		for row in reader:
 			row = row[:len(header)]	#don't take extra columns
 			sampleID = row[0]
-			individualAlignment = db_vervet.parseAlignmentReadGroup(sampleID).individualAlignment
+			individualAlignment = db_main.parseAlignmentReadGroup(sampleID).individualAlignment
 			if individualAlignment is None:
 				#2012.9.25
 				#sampleID is not beginned with alignment ID, probably "ref" but could be something , skip them
@@ -119,7 +119,7 @@ class AppendInfo2SmartPCAOutput(AbstractVervetMapper):
 			import pdb
 			pdb.set_trace()
 		
-		self.appendInfo(inputFname=self.inputFname, db_vervet=self.db_vervet, outputFname=self.outputFname, \
+		self.appendInfo(inputFname=self.inputFname, db_main=self.db_main, outputFname=self.outputFname, \
 				inversePCValue=self.inversePCValue)
 		
 

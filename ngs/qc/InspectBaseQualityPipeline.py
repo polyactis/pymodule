@@ -72,8 +72,8 @@ class InspectBaseQualityPipeline(AbstractNGSWorkflow):
 		self.registerCustomExecutables()
 		
 		
-		#must use db_vervet.data_dir.
-		# If self.data_dir differs from db_vervet.data_dir, 
+		#must use db_main.data_dir.
+		# If self.data_dir differs from db_main.data_dir, 
 		# this program (must be run on submission host) won't find files.
 		individualSequenceID2FilePairLs = db_main.getIndividualSequenceID2FilePairLs(
 			self.ind_seq_id_ls, data_dir=self.data_dir)

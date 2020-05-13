@@ -141,7 +141,7 @@ class PlotVCFtoolsStat(PlotTrioInconsistencyOverFrequency, AbstractMatrixFileWal
 			import pdb
 			pdb.set_trace()
 		
-		#without commenting out db_vervet connection code. schema "genome" wont' be default path.
+		#without commenting out db_main connection code. schema "genome" wont' be default path.
 		db_genome = GenomeDB.GenomeDatabase(drivername=self.drivername, username=self.db_user,
 						password=self.db_passwd, hostname=self.hostname, database=self.dbname, schema="genome")
 		db_genome.setup(create_tables=False)

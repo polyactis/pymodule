@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 """
-2013.1.25 an abstract class for pegasus workflows that work on alignment files (already aligned).
+abstract class for pegasus workflows that work on alignment files (already aligned).
 """
 import sys, os, math
 import copy
 import logging
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job
-from palos import ProcessOptions, getListOutOfStr, PassingData, utils
-from palos import ngs
 import pegaflow
+from palos import ProcessOptions, getListOutOfStr, PassingData, utils
 from . MapReduceGenomeFileWorkflow import MapReduceGenomeFileWorkflow
 
 ParentClass = MapReduceGenomeFileWorkflow
@@ -18,17 +17,19 @@ class AbstractAlignmentWorkflow(ParentClass):
     #option_default_dict.pop(('inputDir', 0, ))
     commonAlignmentWorkflowOptionDict = {
         ('ind_seq_id_ls', 0, ): ['', 'i', 1, 
-            'a comma/dash-separated list of IndividualSequence.id. alignments come from these', ],\
+            'a comma/dash-separated list of IndividualSequence.id.'],\
         ('ind_aln_id_ls', 0, ): ['', '', 1, 
-            'a comma/dash-separated list of IndividualAlignment.id. This overrides ind_seq_id_ls.', ],\
+            'a comma/dash-separated list of IndividualAlignment.id. '
+            'This overrides ind_seq_id_ls.', ],\
         ('alignment_outdated_index', 0, int): [0, '', 1, 
             'filter based on value of IndividualAlignment.outdated_index.', ],\
         ("alignment_method_id", 0, int): [None, 'G', 1,
             'To filter alignments. None: whatever; integer: AlignmentMethod.id'],\
         ("local_realigned", 0, int): [None, '', 1, 
-        'To filter which input alignments to fetch from db (i.e. '
-        'AlignmentReadBaseQualityRecalibration.py)'
-        'OR to instruct whether local_realigned should be applied (i.e. ShortRead2Alignment.py)'],\
+            'To filter which input alignments to fetch from db (i.e. '
+            'AlignmentReadBaseQualityRecalibration.py)'
+            'OR to instruct whether local_realigned should be applied '
+            '(i.e. ShortRead2Alignment.py)'],\
         ('defaultSampleAlignmentDepth', 1, int): [10, '', 1, 
             "when database doesn't have median_depth info for one alignment, "
             "use this number instead.", ],\
@@ -55,20 +56,185 @@ class AbstractAlignmentWorkflow(ParentClass):
         }
     option_default_dict.update(partitionWorkflowOptionDict)
 
-    def __init__(self,  **keywords):
+    def __init__(self, drivername='postgresql', hostname='localhost',
+        dbname='', schema='public', port=None,
+        db_user=None,
+        db_passwd=None,
+        data_dir=None, local_data_dir=None,
+
+        ind_seq_id_ls=None,
+        ind_aln_id_ls=None,
+        local_realigned=0,
+        completedAlignment=None,
+        skipDoneAlignment=False,
+        excludeContaminant=False,
+        sequence_filtered=None,
+
+        alignment_outdated_index=0,
+        alignment_method_id=None,
+        defaultSampleAlignmentDepth=10,
+        individual_sequence_file_raw_id_type=1,
+
+        selectedRegionFname=None,
+        maxNoOfRegionsPerJob=5000,
+        
+        ref_ind_seq_id=None,
+
+        samtools_path="bin/samtools",
+        picard_dir="script/picard/dist",
+        gatk_path="bin/GenomeAnalysisTK1_6_9.jar",
+        gatk2_path="bin/GenomeAnalysisTK.jar",
+        picard_path="script/picard.broad/build/libs/picard.jar",
+        tabixPath="bin/tabix",
+        vcftoolsPath="bin/vcftools/vcftools",
+        ligateVcfPerlPath="bin/ligateVcf.pl",
+        maxContigID=None,
+        minContigID=None,
+        contigMaxRankBySize=2500,
+        contigMinRankBySize=1,
+
+        chromosome_type_id=None, 
+        ref_genome_tax_id=9606,
+        ref_genome_sequence_type_id=1,
+        ref_genome_version=15,
+        ref_genome_outdated_index=0,
+
+        mask_genotype_method_id=None, 
+        checkEmptyVCFByReading=False,
+
+        needFastaIndexJob=False,
+        needFastaDictJob=False,
+        reduce_reads=None,
+
+        site_id_ls="",
+        country_id_ls="",
+        tax_id_ls="9606",
+        sequence_type_id_ls="",
+        sequencer_id_ls="",
+        sequence_batch_id_ls="",
+        version_ls="",
+        sequence_max_coverage=None,
+        sequence_min_coverage=None,
+        alignmentDepthIntervalMethodShortName=None,
+        minAlignmentDepthIntervalLength=1000,
+        alignmentDepthMaxFold=2,
+        alignmentDepthMinFold=0.1,
+        intervalOverlapSize=500000,
+        intervalSize=5000000,
+        defaultGATKArguments=\
+        " --unsafe ALL --validation_strictness SILENT --read_filter BadCigar ",
+        
+        site_handler='condor',
+        input_site_handler='condor',
+        cluster_size=30,
+        pegasusFolderName='input',
+        output_path=None,
+        tmpDir='/tmp/',
+        max_walltime=4320,
+        home_path=None,
+        javaPath=None,
+        pymodulePath="src/pymodule",
+        thisModulePath=None,
+        jvmVirtualByPhysicalMemoryRatio=1.2,
+        needSSHDBTunnel=False,
+        commit=False,
+        debug=False, report=False):
         """
         2012.1.17
         """
-        #extra__init__() will be executed inside __init__()
-        ParentClass.__init__(self, **keywords)
+        ParentClass.__init__(self, inputSuffixList=None, 
+            drivername=drivername, hostname=hostname,
+            dbname=dbname, schema=schema, port=port,
+            db_user=db_user, db_passwd=db_passwd,
+            data_dir=data_dir, local_data_dir=local_data_dir,
+
+            completedAlignment=completedAlignment,
+            skipDoneAlignment=skipDoneAlignment,
+            excludeContaminant=excludeContaminant,
+            sequence_filtered=sequence_filtered,
+
+            ref_ind_seq_id=ref_ind_seq_id,
+
+            samtools_path=samtools_path,
+            picard_dir=picard_dir,
+            gatk_path=gatk_path,
+            gatk2_path=gatk2_path,
+            picard_path=picard_path,
+            tabixPath=tabixPath,
+            vcftoolsPath=vcftoolsPath,
+            ligateVcfPerlPath=ligateVcfPerlPath,
+            maxContigID=maxContigID,
+            minContigID=minContigID,
+            contigMaxRankBySize=contigMaxRankBySize,
+            contigMinRankBySize=contigMinRankBySize,
+
+            chromosome_type_id=chromosome_type_id, 
+            ref_genome_tax_id=ref_genome_tax_id,
+            ref_genome_sequence_type_id=ref_genome_sequence_type_id,
+            ref_genome_version=ref_genome_version,
+            ref_genome_outdated_index=ref_genome_outdated_index,
+            
+            mask_genotype_method_id=mask_genotype_method_id, 
+            checkEmptyVCFByReading=checkEmptyVCFByReading,
+
+            needFastaIndexJob=needFastaIndexJob,
+            needFastaDictJob=needFastaDictJob,
+            reduce_reads=reduce_reads,
+
+            site_id_ls=site_id_ls,
+            country_id_ls=country_id_ls,
+            tax_id_ls=tax_id_ls,
+            sequence_type_id_ls=sequence_type_id_ls,
+            sequencer_id_ls=sequencer_id_ls,
+            sequence_batch_id_ls=sequence_batch_id_ls,
+            version_ls=version_ls,
+            
+            sequence_max_coverage=sequence_max_coverage,
+            sequence_min_coverage=sequence_min_coverage,
+            alignmentDepthIntervalMethodShortName=alignmentDepthIntervalMethodShortName,
+            minAlignmentDepthIntervalLength=minAlignmentDepthIntervalLength,
+            alignmentDepthMaxFold=alignmentDepthMaxFold,
+            alignmentDepthMinFold=alignmentDepthMinFold,
+            intervalOverlapSize=intervalOverlapSize,
+            intervalSize=intervalSize,
+            defaultGATKArguments=defaultGATKArguments,
+
+            site_handler=site_handler,
+            input_site_handler=input_site_handler,
+            cluster_size=cluster_size,
+            pegasusFolderName=pegasusFolderName,
+            output_path=output_path,
+            tmpDir=tmpDir,
+            max_walltime=max_walltime, 
+            home_path=home_path,
+            javaPath=javaPath,
+            pymodulePath=pymodulePath,
+            thisModulePath=thisModulePath,
+            jvmVirtualByPhysicalMemoryRatio=jvmVirtualByPhysicalMemoryRatio,
+            needSSHDBTunnel=needSSHDBTunnel,
+            commit=commit,
+            debug=debug, report=report)
+        
+        self.ind_aln_id_ls = ind_aln_id_ls
+        self.ind_seq_id_ls = ind_seq_id_ls
+        self.local_realigned = local_realigned
+        self.alignment_outdated_index = alignment_outdated_index
+        self.alignment_method_id = alignment_method_id
+        self.defaultSampleAlignmentDepth = defaultSampleAlignmentDepth
+        self.individual_sequence_file_raw_id_type = individual_sequence_file_raw_id_type
+
+        self.selectedRegionFname = selectedRegionFname
+        self.maxNoOfRegionsPerJob = maxNoOfRegionsPerJob
+
         listArgumentName_data_type_ls = [('ind_seq_id_ls', int), ("ind_aln_id_ls", int)]
         ProcessOptions.processListArguments(listArgumentName_data_type_ls, 
             emptyContent=[], class_to_have_attr=self)
 
-    def addAlignmentAsInputToJobLs(self, alignmentDataLs=None, jobLs=[], jobInputOption=""):
+    def addAlignmentAsInputToJobLs(self, alignmentDataLs=None, jobLs=[],
+        jobInputOption=""):
         """
-        2012.1.9
-            used in addGenotypeCallJobs() to add alignment files as input to calling jobs
+        Used in addGenotypeCallJobs() to add alignment files as input
+            to calling jobs.
         """
         for alignmentData in alignmentDataLs:
             alignment = alignmentData.alignment
@@ -469,7 +635,8 @@ class AbstractAlignmentWorkflow(ParentClass):
         """
         2012.7.26
         """
-        prePreprocessData = self.setup(chr2IntervalDataLs=chr2IntervalDataLs,
+        prePreprocessData = self.setup(
+            chr2IntervalDataLs=chr2IntervalDataLs,
             **keywords)
         chrIDSet = prePreprocessData.chrIDSet
         chrSizeIDList = prePreprocessData.chrSizeIDList
@@ -741,9 +908,4 @@ class AbstractAlignmentWorkflow(ParentClass):
 
         self.end_run()
 
-if __name__ == '__main__':
-    main_class = AbstractAlignmentWorkflow
-    po = ProcessOptions(sys.argv, main_class.option_default_dict,
-        error_doc=main_class.__doc__)
-    instance = main_class(**po.long_option2value)
-    instance.run()
+

@@ -128,7 +128,7 @@ class AddVCFFolder2DBWorkflow(GenericVCFWorkflow):
         self.addDBArgumentsToOneJob(job=job, objectWithDBArguments=self)
         return job
     
-    def addJobs(self, inputData=None, db_vervet=None, genotypeMethodShortName=None, commit=None,\
+    def addJobs(self, inputData=None, db_main=None, genotypeMethodShortName=None, commit=None,\
             data_dir=None, checkEmptyVCFByReading=False, transferOutput=True,\
             maxContigID=None, outputDirPrefix="", needSSHDBTunnel=False):
         """
@@ -196,7 +196,7 @@ class AddVCFFolder2DBWorkflow(GenericVCFWorkflow):
             import pdb
             pdb.set_trace()
         
-        db_vervet = self.db_vervet
+        db_main = self.db_main
         
         # Create a abstract dag
         workflow = self.initiateWorkflow()
@@ -215,7 +215,7 @@ class AddVCFFolder2DBWorkflow(GenericVCFWorkflow):
         
         if self.run_type==1:
             self.addJobs(
-                inputData=inputData, db_vervet=db_vervet, genotypeMethodShortName=self.genotypeMethodShortName, \
+                inputData=inputData, db_main=db_main, genotypeMethodShortName=self.genotypeMethodShortName, \
                 commit=True,\
                 data_dir=self.data_dir, checkEmptyVCFByReading=self.checkEmptyVCFByReading, transferOutput=True,\
                 maxContigID=self.maxContigID, outputDirPrefix="", needSSHDBTunnel=self.needSSHDBTunnel)

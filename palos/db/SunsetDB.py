@@ -1980,7 +1980,7 @@ class SunsetDB(Database):
         reduce_reads=0):
         """
         i.e.
-        individual_alignment = self.db_vervet.getAlignment(
+        individual_alignment = self.db_main.getAlignment(
             individual_sequence_id=self.individual_sequence_id,\
             path_to_original_alignment=None, sequencer=individual_sequence.sequencer,\
             sequence_type=individual_sequence.sequence_type, 
@@ -1994,7 +1994,7 @@ class SunsetDB(Database):
             individual_sequence_file_raw_id=self.individual_sequence_file_raw_id,\
             local_realigned=self.local_realigned, read_group=self.read_group)
                                     
-        oneLibraryAlignmentEntry = db_vervet.getAlignment(
+        oneLibraryAlignmentEntry = db_main.getAlignment(
             individual_code=individual_sequence.individual.code, \
             individual_sequence_id=individual_sequence.id,\
             path_to_original_alignment=None, sequencer_id=individual_sequence.sequencer_id, \
@@ -2159,18 +2159,14 @@ class SunsetDB(Database):
         reduce_reads=None, completedAlignment=None,
         completeAlignmentCheckFunction=None):
         """
+        select alignment using AND between all input arguments
         2013.05.04 added argument completeAlignmentCheckFunction
             if mask_genotype_method_id is 0 or '0',
                 then this requires alignment.mask_genotype_method_id to be null. 
             if mask_genotype_method_id is None or '', then it's not checked .
             ditto for parent_individual_alignment_id
-        2013.05.03 added argument completedAlignment
-        2013.04.11 added argument reduce_reads
-        2013.04.05 added argument local_realigned
-        2012.11.29 added argument excludeAlignmentWithoutLocalFile,
+        argument excludeAlignmentWithoutLocalFile:
             (exclude an alignment if it does not exist in local storage)
-        2012.9.23 add argument country_id_ls and tax_id_ls
-        2012.9.20 rename aln_method_id to alignment_method_id
         2012.9.19 & 2012.9.22 add argument individual_sequence_file_raw_id_type:
             1: only all-library-fused libraries,
                 (individual_sequence_file_raw_id is null)
@@ -2178,29 +2174,14 @@ class SunsetDB(Database):
                 (individual_sequence_file_raw_id is non-null)
             3 or else: both all-library-fused and library-specific alignments, 
                 (no filter based on individual_sequence_file_raw_id)
-        2012.7.26 added argument mask_genotype_method_id &
-             parent_individual_alignment_id
-        2012.6.13 add argument outdated_index
-        2012.4.13
-            moved from AlignmentToCallPipeline.py
-        2012.4.5
-            select alignment using AND between all input arguments
-        2011-11-27
-            add argument sequence_type
-        2011-9-16
         order each alignment by id. It is important because this is the order
             that gatk&samtools take input bams.
         #Read group in each bam is beginned by alignment.id. GATK would
         #   arrange bams in the order of read groups.
         # while samtools doesn't do that and vcf-isect could combine two vcfs
         #  with columns in different order.
-        2011-9-13
-            add argument data_dir, to filter out alignments that don't exist
+        Argument data_dir: filter out alignments that don't exist
             on file storage.
-        2011-8-31
-            add argument aln_method_id.
-        2011-7-12
-        
         """
         if completedAlignment is not None:
             if completedAlignment==0 or completedAlignment=='0' or \
@@ -2209,11 +2190,12 @@ class SunsetDB(Database):
             elif completedAlignment!=False:
                 completedAlignment = True
         
-        sys.stderr.write("Get alignments to from local_realigned=%s, reduce_reads=%s \n\
-    mask_genotype_method_id=%s, parent_individual_alignment_id=%s, completedAlignment=%s ..."%(
-            local_realigned, reduce_reads, \
-            mask_genotype_method_id, parent_individual_alignment_id, completedAlignment,\
-            ))
+        print(f"Get alignments to from local_realigned={local_realigned}, "
+            f"reduce_reads={reduce_reads}, "
+            f"mask_genotype_method_id={mask_genotype_method_id}, "
+            f"parent_individual_alignment_id={parent_individual_alignment_id}, "
+            f"completedAlignment={completedAlignment} ...",
+            flush=True)
         if data_dir is None:
             data_dir = self.data_dir
         alignmentLs = []
@@ -2647,8 +2629,8 @@ class SunsetDB(Database):
         tax_id: int=None, birthdate=None, comment:str=None):
         """
         Examples:
-            individual = db_vervet.getIndividual(code=code)
-            individual = db_vervet.getIndividual(code=code, site=None,
+            individual = db_main.getIndividual(code=code)
+            individual = db_main.getIndividual(code=code, site=None,
                 site_name='YBK', country_name='Gambia')
             
         2012.12.6 If site is None and is to be created,
@@ -3381,7 +3363,7 @@ class SunsetDB(Database):
         """
         2013.09.02 added min_segment_length
         examples:
-        alignmentDepthIntervalMethod = self.db_vervet.getAlignmentDepthIntervalMethod(
+        alignmentDepthIntervalMethod = self.db_main.getAlignmentDepthIntervalMethod(
             short_name="725VRCAlignmentDepthInterval", \
             individualAlignmentLs=individualAlignmentLs)
         """
@@ -3531,7 +3513,7 @@ class SunsetDB(Database):
         subFolder='genotype_file'):
         """
         examples:
-        genotypeMethod = self.db_vervet.getGenotypeMethod(
+        genotypeMethod = self.db_main.getGenotypeMethod(
             short_name=self.genotypeMethodShortName, \
             individualAlignmentLs=individualAlignmentLs)
         """
@@ -4738,9 +4720,9 @@ class SunsetDB(Database):
         Scan the individual_sequence folder to see which subfolder is
              not in individual_sequence.path
         i.e.
-            orphanPathList = db_vervet.findISQFoldersNotInDB(
+            orphanPathList = db_main.findISQFoldersNotInDB(
                 data_dir=None, subFolder='individual_sequence',)
-            orphanPathList = db_vervet.findISQFoldersNotInDB(
+            orphanPathList = db_main.findISQFoldersNotInDB(
                 data_dir='/u/home/eeskin2/polyacti/NetworkData/vervet/db/', \
                 subFolder='individual_sequence',)
         """
@@ -4769,7 +4751,7 @@ class SunsetDB(Database):
         """
         Scan the individual_alignment folder to see which file is not in individual_alignment.path
         i.e.
-        orphanPathList = db_vervet.findAlignmentFileNotInDB(data_dir=None, subFolder='individual_alignment',)
+        orphanPathList = db_main.findAlignmentFileNotInDB(data_dir=None, subFolder='individual_alignment',)
         """
         sys.stderr.write("Finding individual_alignment folders that are not in db (orphaned)... ")
         dbPath2dbEntry = {}

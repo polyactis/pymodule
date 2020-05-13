@@ -18,22 +18,17 @@ Examples:
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 
-import subprocess, copy
-from pegaflow.DAX3 import File, Link, PFN, Job
-from palos import ProcessOptions, getListOutOfStr, PassingData, utils
-from palos.ngs.AbstractNGSWorkflow import AbstractNGSWorkflow as ParentClass
-from palos.db import SunsetDB
+import getpass
 import logging
+import subprocess
+from pegaflow.DAX3 import File, Link, PFN, Job
+from palos import getListOutOfStr, PassingData, utils
+from palos.ngs.AbstractNGSWorkflow import AbstractNGSWorkflow
+from palos.db import SunsetDB
 
+ParentClass = AbstractNGSWorkflow
 class CountReadsWorkflow(ParentClass):
     __doc__ = __doc__
-    option_default_dict = copy.deepcopy(ParentClass.option_default_dict)
-    option_default_dict.update({
-        ('ind_seq_id_ls', 1, ): ['', 'i', 1, \
-            'a comma/dash-separated list of IndividualSequence.id.'
-            'non-fastq entries will be discarded.', ],\
-        })
-
     def __init__(self, ind_seq_id_ls=None, 
         drivername='postgresql', hostname='localhost',
         dbname='', schema='public', port=None,
@@ -64,6 +59,7 @@ class CountReadsWorkflow(ParentClass):
             dbname=dbname, schema=schema, port=port,
             db_user=db_user, db_passwd=db_passwd,
             data_dir=data_dir, local_data_dir=local_data_dir,
+            
             ref_ind_seq_id=None,
             samtools_path=None,
             picard_dir=None,
@@ -90,6 +86,7 @@ class CountReadsWorkflow(ParentClass):
             version_ls=version_ls,
             sequence_max_coverage=None,
             sequence_min_coverage=None,
+
             site_handler=site_handler,
             pegasusFolderName=pegasusFolderName,
             output_path=output_path,
@@ -100,7 +97,6 @@ class CountReadsWorkflow(ParentClass):
             home_path=home_path,
             javaPath=None,
             pymodulePath=pymodulePath,
-            plinkPath=None,
             needSSHDBTunnel=needSSHDBTunnel, commit=commit,
             debug=debug, report=report)
 
@@ -400,7 +396,6 @@ if __name__ == '__main__':
     if not args.db_user:
         args.db_user = getpass.getuser()
     if not args.db_passwd:
-        import getpass
         args.db_passwd = getpass.getpass(f"Password for {args.db_user}:")
     
     instance = CountReadsWorkflow(

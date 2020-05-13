@@ -46,7 +46,7 @@ class ExtractSamplesFromVCF(AbstractVervetMapper):
                 emptyContent=[], class_to_have_attr=self)
     
     
-    def extractSamples(self, db_vervet=None, inputFname=None, outputFname=None, \
+    def extractSamples(self, db_main=None, inputFname=None, outputFname=None, \
         tax_id_set=None, site_id_set=None, country_id_set=None, \
         min_coverage=None, max_coverage=None, outputFormat=1, is_contaminated=None,\
         **keywords):
@@ -72,9 +72,9 @@ class ExtractSamplesFromVCF(AbstractVervetMapper):
         no_of_samples = 0
         col_index2sampleID = {}	#this structure stores the selected samples and their column index 
         for col_index, individual_name in vcfFile.get_col_index_individual_name_ls():
-            individualAlignment = db_vervet.parseAlignmentReadGroup(individual_name).individualAlignment
+            individualAlignment = db_main.parseAlignmentReadGroup(individual_name).individualAlignment
             if individualAlignment is not None:
-                filteredAlignmentList = db_vervet.filterAlignments(alignmentLs=[individualAlignment], min_coverage=min_coverage, \
+                filteredAlignmentList = db_main.filterAlignments(alignmentLs=[individualAlignment], min_coverage=min_coverage, \
                         max_coverage=max_coverage, individual_site_id=None, \
                         sequence_filtered=None, individual_site_id_set=site_id_set, \
                         mask_genotype_method_id=None, parent_individual_alignment_id=None,\
@@ -125,7 +125,7 @@ class ExtractSamplesFromVCF(AbstractVervetMapper):
             import pdb
             pdb.set_trace()
         
-        self.extractSamples(db_vervet=self.db_vervet, inputFname=self.inputFname, outputFname=self.outputFname, \
+        self.extractSamples(db_main=self.db_main, inputFname=self.inputFname, outputFname=self.outputFname, \
                     tax_id_set=set(self.tax_id_ls), site_id_set=set(self.site_id_ls), country_id_set=set(self.country_id_ls),\
                     min_coverage=self.min_coverage, max_coverage=self.max_coverage, outputFormat=self.outputFormat,
                     is_contaminated=self.is_contaminated)

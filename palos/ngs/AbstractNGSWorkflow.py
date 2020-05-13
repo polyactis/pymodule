@@ -26,9 +26,54 @@ class AbstractNGSWorkflow(ParentClass):
     option_default_dict = ParentClass.option_default_dict.copy()
     option_default_dict.update(ParentClass.db_option_dict)
     option_default_dict.update({
+         #to filter alignment or individual_sequence
+        ("reduce_reads", 0, int): [None, '', 1, 
+            'To filter which input alignments to fetch from db'],\
+        ('excludeContaminant', 0, int):[0, '', 0, 
+            'Toggle to exclude alignments or sequences from contaminated individuals, '
+            '(IndividualSequence.is_contaminated=1)'],\
+        ("sequence_filtered", 0, int): [None, 'Q', 1, 
+            'Filter alignments/individual_sequences. '
+            'None: no filter, 0: unfiltered sequences, 1: filtered sequences: 2: ...'],\
+        ('completedAlignment', 0, int):[None, '', 1, 
+            'To filter incomplete alignments: '
+            '--completedAlignment 0 is same as --skipDoneAlignment. '
+            '--completedAlignment 1 gets you only the alignments that has been '
+            ' completed. Default (None) has no effect.'],\
+        ('skipDoneAlignment', 0, int):[0, '', 0, 
+            'Skip alignment whose db_entry is complete and affiliated file is valid'
+            '(for ShortRead2Alignment or '
+            'AlignmentReadBaseQualityRecalibration)'],\
+        ("site_id_ls", 0, ): ["", 'S', 1,
+            'comma/dash-separated list of site IDs. '
+            'individuals must come from these sites.'],\
+        ("country_id_ls", 0, ): ["", '', 1,
+            'comma/dash-separated list of country IDs. '
+            'individuals must come from these countries.'],\
+        ("tax_id_ls", 0, ): ["9606", '', 1,
+            'comma/dash-separated list of taxonomy IDs. '
+            'individuals must come from these taxonomies.'],\
+        ("sequence_type_id_ls", 0, ): ["", '', 1, 
+            'comma/dash-separated list of IndividualSequence.sequence_type_id. '
+            'Empty for no filtering'],\
+        ("sequencer_id_ls", 0, ): ["", '', 1, 
+            'comma/dash-separated list of IndividualSequence.sequencer_id. '
+            'Empty for no filtering'],\
+        ("sequence_batch_id_ls", 0, ): ["", '', 1, 
+            'comma/dash-separated list of IndividualSequence.sequence_batch_id. '
+            'Empty for no filtering'],\
+        ("version_ls", 0, ): ["", '', 1, 
+            'comma/dash-separated list of IndividualSequence.version. '
+            'Empty for no filtering'],\
+        ("sequence_max_coverage", 0, float): [None, '', 1, 
+            'max IndividualSequence.coverage. Empty for no filtering'],\
+        ("sequence_min_coverage", 0, float): [None, '', 1, 
+            'min IndividualSequence.coverage. Empty for no filtering'],\
+        
         ('ref_ind_seq_id', 1, int): [None, 'a', 1, 
             'Restrict alignments that using this (IndividualSequence.id) as'
             ' reference'],
+        
         ("samtools_path", 1, ): ["bin/samtools", '', 1, 'samtools binary'],
         ("picard_dir", 1, ): ["script/picard/dist", '', 1, 
             'picard folder containing its jar binaries'],
@@ -76,57 +121,16 @@ class AbstractNGSWorkflow(ParentClass):
             'Used to fetch chromosome info from GenomeDB. 0 means not outdated. '
             'Column GenomeDB.AnnotAssembly.outdated_index'],\
 
-        ('completedAlignment', 0, int):[None, '', 1, 
-            'To filter incomplete alignments: '
-            '--completedAlignment 0 is same as --skipDoneAlignment. '
-            '--completedAlignment 1 gets you only the alignments that has been '
-            ' completed. Default (None) has no effect.'],\
         ('mask_genotype_method_id', 0, int):[None, '', 1, 
             'To filter alignments with this field'],\
-        ('skipDoneAlignment', 0, int):[0, '', 0, 
-            'Skip alignment whose db_entry is complete and affiliated file is valid'
-            '(for ShortRead2Alignment or '
-            'AlignmentReadBaseQualityRecalibration)'],\
         ('checkEmptyVCFByReading', 0, int):[0, 'E', 0, 
             'Toggle to check if a vcf file is empty by reading its content'],\
         ("needFastaIndexJob", 0, int): [0, 'A', 0, 
             'Need to add a reference index job by samtools?'],\
         ("needFastaDictJob", 0, int): [0, 'B', 0, 
             'Need to add a reference dict job by picard CreateSequenceDictionary.jar?'],\
-        #to filter alignment or individual_sequence
-        ("reduce_reads", 0, int): [None, '', 1, 
-            'To filter which input alignments to fetch from db'],\
-        ('excludeContaminant', 0, int):[0, '', 0, 
-            'Toggle to exclude alignments or sequences from contaminated individuals, '
-            '(IndividualSequence.is_contaminated=1)'],\
-        ("sequence_filtered", 0, int): [None, 'Q', 1, 
-            'Filter alignments/individual_sequences. '
-            'None: no filter, 0: unfiltered sequences, 1: filtered sequences: 2: ...'],\
-        ("site_id_ls", 0, ): ["", 'S', 1,
-            'comma/dash-separated list of site IDs. '
-            'individuals must come from these sites.'],\
-        ("country_id_ls", 0, ): ["", '', 1,
-            'comma/dash-separated list of country IDs. '
-            'individuals must come from these countries.'],\
-        ("tax_id_ls", 0, ): ["9606", '', 1,
-            'comma/dash-separated list of taxonomy IDs. '
-            'individuals must come from these taxonomies.'],\
-        ("sequence_type_id_ls", 0, ): ["", '', 1, 
-            'comma/dash-separated list of IndividualSequence.sequence_type_id. '
-            'Empty for no filtering'],\
-        ("sequencer_id_ls", 0, ): ["", '', 1, 
-            'comma/dash-separated list of IndividualSequence.sequencer_id. '
-            'Empty for no filtering'],\
-        ("sequence_batch_id_ls", 0, ): ["", '', 1, 
-            'comma/dash-separated list of IndividualSequence.sequence_batch_id. '
-            'Empty for no filtering'],\
-        ("version_ls", 0, ): ["", '', 1, 
-            'comma/dash-separated list of IndividualSequence.version. '
-            'Empty for no filtering'],\
-        ("sequence_max_coverage", 0, float): [None, '', 1, 
-            'max IndividualSequence.coverage. Empty for no filtering'],\
-        ("sequence_min_coverage", 0, float): [None, '', 1, 
-            'min IndividualSequence.coverage. Empty for no filtering'],\
+        
+        #alignment depth related
         ('alignmentDepthIntervalMethodShortName', 0, ): [None, '', 1, 
             'fetch intervals from AlignmentDepthIntervalFile table', ],\
         ('minAlignmentDepthIntervalLength', 0, int): [1000, '', 1, 
@@ -137,6 +141,7 @@ class AbstractNGSWorkflow(ParentClass):
         ('alignmentDepthMinFold', 0, float): [0.1, '', 1, 
             'Restrict intervals whose alignment depth is within a range of '
             '(alignmentDepthMinFold-alignmentDepthMaxFold)*medianDepth', ],\
+        
         ('intervalOverlapSize', 1, int): [300000, 'U', 1, 
             'overlap #bps/#loci between adjacent intervals from one contig/chromosome, '
             'only used for TrioCaller, not for SAMtools/GATK', ],\
@@ -165,7 +170,14 @@ class AbstractNGSWorkflow(ParentClass):
         db_user=None,
         db_passwd=None,
         data_dir=None, local_data_dir=None,
+        
+        excludeContaminant=False,
+        sequence_filtered=None,
+        completedAlignment=None,
+        skipDoneAlignment=False,
+
         ref_ind_seq_id=None,
+
         samtools_path="bin/samtools",
         picard_dir="script/picard/dist",
         gatk_path="bin/GenomeAnalysisTK1_6_9.jar",
@@ -178,20 +190,20 @@ class AbstractNGSWorkflow(ParentClass):
         minContigID=None,
         contigMaxRankBySize=2500,
         contigMinRankBySize=1,
+
         chromosome_type_id=None, 
         ref_genome_tax_id=9606,
         ref_genome_sequence_type_id=1,
         ref_genome_version=15,
         ref_genome_outdated_index=0,
-        completedAlignment=None,
+
         mask_genotype_method_id=None, 
-        skipDoneAlignment=False,
         checkEmptyVCFByReading=False,
+        
         needFastaIndexJob=False,
         needFastaDictJob=False,
-        reduce_reads=None, 
-        excludeContaminant=False,
-        sequence_filtered=None,
+        reduce_reads=None,
+
         site_id_ls="",
         country_id_ls="",
         tax_id_ls="9606",
@@ -210,14 +222,20 @@ class AbstractNGSWorkflow(ParentClass):
         defaultGATKArguments=\
         " --unsafe ALL --validation_strictness SILENT --read_filter BadCigar ",
         
-        site_handler='condor', input_site_handler='condor', cluster_size=30,
-        pegasusFolderName='folder', output_path=None,
-        tmpDir='/tmp/', max_walltime=4320,
-        home_path=None, javaPath=None, 
-        pymodulePath="src/pymodule", thisModulePath=None,
+        site_handler='condor',
+        input_site_handler='condor',
+        cluster_size=30,
+        pegasusFolderName='input',
+        output_path=None,
+        tmpDir='/tmp/',
+        max_walltime=4320,
+        home_path=None,
+        javaPath=None, 
+        pymodulePath="src/pymodule",
+        thisModulePath=None,
         jvmVirtualByPhysicalMemoryRatio=1.2,
-        plinkPath="bin/plink",
-        needSSHDBTunnel=False, commit=False,
+        needSSHDBTunnel=False,
+        commit=False,
         debug=False, report=False):
         """
         """
@@ -231,7 +249,15 @@ class AbstractNGSWorkflow(ParentClass):
         self.db_passwd = db_passwd
         self.data_dir = data_dir
         self.local_data_dir = local_data_dir
+        
+        #to filter ind_seq and ind_aln
+        self.excludeContaminant = excludeContaminant
+        self.sequence_filtered = sequence_filtered
+        self.completedAlignment = completedAlignment
+        self.skipDoneAlignment = skipDoneAlignment
+
         self.ref_ind_seq_id = ref_ind_seq_id
+
         self.samtools_path = samtools_path
         self.picard_dir = picard_dir
         self.gatk_path = gatk_path
@@ -244,20 +270,20 @@ class AbstractNGSWorkflow(ParentClass):
         self.minContigID = minContigID
         self.contigMaxRankBySize = contigMaxRankBySize
         self.contigMinRankBySize = contigMinRankBySize
+
         self.chromosome_type_id = chromosome_type_id 
         self.ref_genome_tax_id = ref_genome_tax_id
         self.ref_genome_sequence_type_id = ref_genome_sequence_type_id
         self.ref_genome_version = ref_genome_version
         self.ref_genome_outdated_index = ref_genome_outdated_index
-        self.completedAlignment = completedAlignment
+
         self.mask_genotype_method_id = mask_genotype_method_id 
-        self.skipDoneAlignment = skipDoneAlignment
         self.checkEmptyVCFByReading = checkEmptyVCFByReading
+
         self.needFastaIndexJob = needFastaIndexJob
         self.needFastaDictJob = needFastaDictJob
-        self.reduce_reads = reduce_reads 
-        self.excludeContaminant = excludeContaminant
-        self.sequence_filtered = sequence_filtered
+        self.reduce_reads = reduce_reads
+
         self.site_id_ls = site_id_ls
         self.country_id_ls = country_id_ls
         self.tax_id_ls = tax_id_ls
@@ -265,6 +291,7 @@ class AbstractNGSWorkflow(ParentClass):
         self.sequencer_id_ls = sequencer_id_ls
         self.sequence_batch_id_ls = sequence_batch_id_ls
         self.version_ls = version_ls
+
         self.sequence_max_coverage = sequence_max_coverage
         self.sequence_min_coverage = sequence_min_coverage
         self.alignmentDepthIntervalMethodShortName = alignmentDepthIntervalMethodShortName
@@ -304,13 +331,12 @@ class AbstractNGSWorkflow(ParentClass):
             javaPath=javaPath,
             pymodulePath=pymodulePath, thisModulePath=thisModulePath,
             jvmVirtualByPhysicalMemoryRatio=jvmVirtualByPhysicalMemoryRatio,
-            plinkPath=plinkPath,
             needSSHDBTunnel=needSSHDBTunnel, commit=commit,
             debug=debug, report=report)
 
         if self.contigMaxRankBySize and self.contigMinRankBySize:
-            #2013.2.6 non-public schema DBs should be connected
-            #  before the main public schema is connected.
+            # Non-public schema DBs should be connected
+            #   before the main public schema is connected.
             self.chr2size = self.connectGenomeDBToGetTopChrs(
                 contigMaxRankBySize=self.contigMaxRankBySize,
                 contigMinRankBySize=self.contigMinRankBySize,
@@ -3424,8 +3450,3 @@ java -jar /home/crocea/script/gatk/dist/GenomeAnalysisTK.jar
             individual_alignment=individual_alignment, data_dir=data_dir, \
             returnFalseIfInexitentFile=returnFalseIfInexitentFile, **keywords)
 
-if __name__ == '__main__':
-    main_class = AbstractNGSWorkflow
-    po = ProcessOptions(sys.argv, main_class.option_default_dict, error_doc=main_class.__doc__)
-    instance = main_class(**po.long_option2value)
-    instance.run()

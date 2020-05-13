@@ -134,13 +134,13 @@ class AbstractVCFWorkflow(ParentClass):
     
     def registerFilesOfInputDir(self, inputDir=None, input_site_handler=None, \
         checkEmptyVCFByReading=False, pegasusFolderName='',\
-        maxContigID=None, minContigID=None, db_vervet=None, needToKnowNoOfLoci=False,
+        maxContigID=None, minContigID=None, db_main=None, needToKnowNoOfLoci=False,
         minNoOfLociInVCF=None, includeIndelVCF=True, notToUseDBToInferVCFNoOfLoci=None):
         """
         2013.07.17 bugfix
         2013.3.1 flip includeIndelVCF to true.
             now indel and SNP vcf files from AlignmentToCall workflows are in separate folders.
-        2012.8.15 add argument db_vervet, needToKnowNoOfLoci, to get noOfLoci by parsing inputFname and find db-entry...
+        2012.8.15 add argument db_main, needToKnowNoOfLoci, to get noOfLoci by parsing inputFname and find db-entry...
             argument minNoOfLociInVCF, only used when it's not None and needToKnowNoOfLoci is True
         2012.8.10 add maxContigID and minContigID to restrict input
         2012.7.27 add attribute file to each object in returnData.jobDataLs
@@ -194,8 +194,8 @@ class AbstractVCFWorkflow(ParentClass):
                     if needToKnowNoOfLoci:
                         if notToUseDBToInferVCFNoOfLoci:	#2013.06.21 do not use db to infer no of loci
                             pass
-                        elif db_vervet:
-                            genotype_file = db_vervet.parseGenotypeFileGivenDBAffiliatedFilename(filename=inputFname)
+                        elif db_main:
+                            genotype_file = db_main.parseGenotypeFileGivenDBAffiliatedFilename(filename=inputFname)
                             if genotype_file and inputFname.find(genotype_file.path)>=0:	#2012.9.6 make sure same file
                                 no_of_loci = genotype_file.no_of_loci
                                 no_of_individuals = genotype_file.no_of_individuals
@@ -1074,7 +1074,7 @@ class AbstractVCFWorkflow(ParentClass):
                 pegasusFolderName=self.pegasusFolderName,\
                 maxContigID=self.maxContigID, \
                 minContigID=self.minContigID,\
-                db_vervet=getattr(self, 'db_vervet', None), \
+                db_main=getattr(self, 'db_main', None), \
                 needToKnowNoOfLoci=getattr(self, 'needToKnowNoOfLoci', True),
                 minNoOfLociInVCF=getattr(self, 'minNoOfLociInVCF', 10))
             if inputData and inputData.jobDataLs:

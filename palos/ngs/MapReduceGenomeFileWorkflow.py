@@ -18,38 +18,165 @@ Examples:
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0])
 from pegaflow.DAX3 import Executable, File, PFN
-from palos import ProcessOptions, PassingData, utils
+from palos import PassingData, utils
 import pegaflow
 from . AbstractNGSWorkflow import AbstractNGSWorkflow
 
 ParentClass = AbstractNGSWorkflow
 class MapReduceGenomeFileWorkflow(ParentClass):
     __doc__ = __doc__
-    option_default_dict = ParentClass.option_default_dict.copy()
-    option_default_dict.update({
-        ('inputDir', 0, ): ['', 'I', 1,
-            'input folder that contains vcf or vcf.gz files', ],
-    })
-    
-    #2013.11.22 default overlap is 5Mb, overlap is 500K
-    option_default_dict[('intervalOverlapSize', 1, int)][0] = 500000
-    option_default_dict[('intervalSize', 1, int)][0] = 5000000
-    option_default_dict[('max_walltime', 1, int)][0] = 1300
-    #under 23 hours
-    option_default_dict[('inputSuffixList', 0, )][0] = None
-    #do not set input suffix
-    
-    def __init__(self,  **keywords):
+    def __init__(self, inputDir=None, inputSuffixList=None, 
+        drivername='postgresql', hostname='localhost',
+        dbname='', schema='public', port=None,
+        db_user=None,
+        db_passwd=None,
+        data_dir=None, local_data_dir=None,
+        
+        ref_ind_seq_id=None,
+        samtools_path="bin/samtools",
+        picard_dir="script/picard/dist",
+        gatk_path="bin/GenomeAnalysisTK1_6_9.jar",
+        gatk2_path="bin/GenomeAnalysisTK.jar",
+        picard_path="script/picard.broad/build/libs/picard.jar",
+        tabixPath="bin/tabix",
+        vcftoolsPath="bin/vcftools/vcftools",
+        ligateVcfPerlPath="bin/ligateVcf.pl",
+        maxContigID=None,
+        minContigID=None,
+        contigMaxRankBySize=2500,
+        contigMinRankBySize=1,
+
+        chromosome_type_id=None, 
+        ref_genome_tax_id=9606,
+        ref_genome_sequence_type_id=1,
+        ref_genome_version=15,
+        ref_genome_outdated_index=0,
+
+        completedAlignment=None,
+        skipDoneAlignment=False,
+        mask_genotype_method_id=None, 
+        checkEmptyVCFByReading=False,
+
+        needFastaIndexJob=False,
+        needFastaDictJob=False,
+        reduce_reads=None, 
+        excludeContaminant=False,
+        sequence_filtered=None,
+
+        site_id_ls="",
+        country_id_ls="",
+        tax_id_ls="9606",
+        sequence_type_id_ls="",
+        sequencer_id_ls="",
+        sequence_batch_id_ls="",
+        version_ls="",
+        sequence_max_coverage=None,
+        sequence_min_coverage=None,
+        alignmentDepthIntervalMethodShortName=None,
+        minAlignmentDepthIntervalLength=1000,
+        alignmentDepthMaxFold=2,
+        alignmentDepthMinFold=0.1,
+        intervalOverlapSize=500000,
+        intervalSize=5000000,
+        defaultGATKArguments=\
+        " --unsafe ALL --validation_strictness SILENT --read_filter BadCigar ",
+        
+        site_handler='condor',
+        input_site_handler='condor',
+        cluster_size=30,
+        pegasusFolderName='input',
+        output_path=None,
+        tmpDir='/tmp/',
+        max_walltime=4320,
+        home_path=None,
+        javaPath=None,
+        pymodulePath="src/pymodule",
+        thisModulePath=None,
+        jvmVirtualByPhysicalMemoryRatio=1.2,
+        needSSHDBTunnel=False,
+        commit=False,
+        debug=False, report=False):
         """
-        2013.11.24
+        Default interval is 5Mb.
+        Default interval overlap is 500K.
         """
+        self.inputDir = inputDir
+        ParentClass.__init__(self, inputSuffixList=None, 
+            drivername=drivername, hostname=hostname,
+            dbname=dbname, schema=schema, port=port,
+            db_user=db_user, db_passwd=db_passwd,
+            data_dir=data_dir, local_data_dir=local_data_dir,
+
+            excludeContaminant=excludeContaminant,
+            sequence_filtered=sequence_filtered,
+            completedAlignment=completedAlignment,
+            skipDoneAlignment=skipDoneAlignment,
+
+            ref_ind_seq_id=ref_ind_seq_id,
+
+            samtools_path=samtools_path,
+            picard_dir=picard_dir,
+            gatk_path=gatk_path,
+            gatk2_path=gatk2_path,
+            picard_path=picard_path,
+            tabixPath=tabixPath,
+            vcftoolsPath=vcftoolsPath,
+            ligateVcfPerlPath=ligateVcfPerlPath,
+            maxContigID=maxContigID,
+            minContigID=minContigID,
+            contigMaxRankBySize=contigMaxRankBySize,
+            contigMinRankBySize=contigMinRankBySize,
+
+            chromosome_type_id=chromosome_type_id, 
+            ref_genome_tax_id=ref_genome_tax_id,
+            ref_genome_sequence_type_id=ref_genome_sequence_type_id,
+            ref_genome_version=ref_genome_version,
+            ref_genome_outdated_index=ref_genome_outdated_index,
+            
+            mask_genotype_method_id=mask_genotype_method_id, 
+            checkEmptyVCFByReading=checkEmptyVCFByReading,
+
+            needFastaIndexJob=needFastaIndexJob,
+            needFastaDictJob=needFastaDictJob,
+            reduce_reads=reduce_reads,
+
+            site_id_ls=site_id_ls,
+            country_id_ls=country_id_ls,
+            tax_id_ls=tax_id_ls,
+            sequence_type_id_ls=sequence_type_id_ls,
+            sequencer_id_ls=sequencer_id_ls,
+            sequence_batch_id_ls=sequence_batch_id_ls,
+            version_ls=version_ls,
+
+            sequence_max_coverage=sequence_max_coverage,
+            sequence_min_coverage=sequence_min_coverage,
+            alignmentDepthIntervalMethodShortName=alignmentDepthIntervalMethodShortName,
+            minAlignmentDepthIntervalLength=minAlignmentDepthIntervalLength,
+            alignmentDepthMaxFold=alignmentDepthMaxFold,
+            alignmentDepthMinFold=alignmentDepthMinFold,
+            intervalOverlapSize=intervalOverlapSize,
+            intervalSize=intervalSize,
+            defaultGATKArguments=defaultGATKArguments,
+
+            site_handler=site_handler,
+            input_site_handler=input_site_handler,
+            cluster_size=cluster_size,
+            pegasusFolderName=pegasusFolderName,
+            output_path=output_path,
+            tmpDir=tmpDir,
+            max_walltime=max_walltime, 
+            home_path=home_path,
+            javaPath=javaPath,
+            pymodulePath=pymodulePath,
+            thisModulePath=thisModulePath,
+            jvmVirtualByPhysicalMemoryRatio=jvmVirtualByPhysicalMemoryRatio,
+            needSSHDBTunnel=needSSHDBTunnel,
+            commit=commit,
+            debug=debug, report=report)
         
         self.needSplitChrIntervalData = True
-        ParentClass.__init__(self, **keywords)
-        self.needSplitChrIntervalData = True
-        
         self.mapReduceType = 1
-        #2013.06.27 type 1: split VCF with fixed number of sites
+        # type 1: split VCF with fixed number of sites
         # type 2: SelectVariants from VCF with fixed-size windows
         # child classes could change its value in the end of their own __init__()
         
@@ -59,8 +186,6 @@ class MapReduceGenomeFileWorkflow(ParentClass):
     
     def connectDB(self):
         """
-        2012.9.24
-            place holder.
         """
         ParentClass.connectDB(self)
         
@@ -499,7 +624,7 @@ class MapReduceGenomeFileWorkflow(ParentClass):
                     self, 'checkEmptyInputByReading', None),\
                 maxContigID=self.maxContigID, \
                 minContigID=self.minContigID,\
-                db_vervet=getattr(self, 'db_vervet', None), \
+                db_main=getattr(self, 'db_main', None), \
                 needToKnowNoOfLoci=getattr(self, 'needToKnowNoOfLoci', True),\
                 minNoOfLociInInput=getattr(self, 'minNoOfLociInInput', 10))
             if inputData and inputData.jobDataLs:
@@ -538,11 +663,4 @@ class MapReduceGenomeFileWorkflow(ParentClass):
             transferOutput=True,)
         
         self.end_run()
-    
 
-if __name__ == '__main__':
-    main_class = MapReduceGenomeFileWorkflow
-    po = ProcessOptions(sys.argv, main_class.option_default_dict,
-        error_doc=main_class.__doc__)
-    instance = main_class(**po.long_option2value)
-    instance.run()

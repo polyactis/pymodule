@@ -150,7 +150,7 @@ class InspectBaseQuality(ParentClass):
 		
 		sys.stderr.write("Done.\n")
 	
-	def saveDataIntoDB(self, db_vervet, ind_sequence_id=None):
+	def saveDataIntoDB(self, db_main, ind_sequence_id=None):
 		"""
 		2011-8-15
 		"""

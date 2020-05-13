@@ -198,7 +198,7 @@ class AddAlignmentFile2DB(ParentClass):
                     db_entry=individual_alignment, data_dir=data_dir)
 
                 ## 2012.7.17 commented out because md5sum is calculated above
-                #db_vervet.updateDBEntryMD5SUM(db_entry=genotypeFile, data_dir=data_dir)
+                #db_main.updateDBEntryMD5SUM(db_entry=genotypeFile, data_dir=data_dir)
                 #copy the bai index file if it exists
                 baiFilename = '%s.bai'%(self.inputFname)
                 if not os.path.isfile(baiFilename):

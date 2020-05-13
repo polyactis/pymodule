@@ -424,11 +424,11 @@ check whether one relative path already exists in db-affliated storage.
     return 0 if not.
 Example:
     # simplest
-    db_vervet.isPathInDBAffiliatedStorage(relativePath=relativePath, data_dir=self.data_dir)
+    db_main.isPathInDBAffiliatedStorage(relativePath=relativePath, data_dir=self.data_dir)
     # this will check if db_entry.path == relativePath, if not, update it in db with relativePath.
-    db_vervet.isPathInDBAffiliatedStorage(db_entry=db_entry, relativePath=relativePath)
+    db_main.isPathInDBAffiliatedStorage(db_entry=db_entry, relativePath=relativePath)
     # 
-    db_vervet.isPathInDBAffiliatedStorage(db_entry=db_entry, \
+    db_main.isPathInDBAffiliatedStorage(db_entry=db_entry, \
         inputFileBasename=inputFileBasename, data_dir=None, \
         constructRelativePathFunction=genotypeFile.constructRelativePath)
         """
@@ -611,7 +611,7 @@ Example:
         2012.12.15 moved from VervetDB. i.e.:
             inputFileBasename = os.path.basename(self.inputFname)
             relativePath = genotypeFile.constructRelativePath(sourceFilename=inputFileBasename)
-            exitCode = self.db_vervet.moveFileIntoDBAffiliatedStorage(
+            exitCode = self.db_main.moveFileIntoDBAffiliatedStorage(
                 db_entry=genotypeFile, filename=inputFileBasename, \
                 inputDir=os.path.split(self.inputFname)[0], 
                 dstFilename=os.path.join(self.data_dir, relativePath), \
@@ -620,7 +620,7 @@ Example:
                 constructRelativePathFunction=genotypeFile.constructRelativePath,
                 data_dir=self.data_dir)
             #same as this
-            exitCode = self.db_vervet.moveFileIntoDBAffiliatedStorage(
+            exitCode = self.db_main.moveFileIntoDBAffiliatedStorage(
                 db_entry=genotypeFile, filename=inputFileBasename, \
                 inputDir=os.path.split(self.inputFname)[0], \
                 outputDir=self.data_dir, \

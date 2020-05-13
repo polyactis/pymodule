@@ -6,7 +6,8 @@ input_path:
 sample_sheet: (map fastq/bam files to individual information).
 
 this program will
-    1. query table individual if the sample is already in db. Create a new entry in db if not.
+    1. query table individual if the sample is already in db.
+        Create a new entry in db if not.
     2. query table individual_sequence if the sample's sequence is already in db.
         Create one new entry if not.
         Update individual_sequence.path if it's none
@@ -19,7 +20,8 @@ Option "--commit" commits the db transaction.
 
 1. The db commandline arguments will be passed to db-interacting jobs.
     Make sure all computing nodes have access to the db.
-2. The workflow must be run on nodes with access to the db and the db-affiliated filesystem.
+2. The workflow must be run on nodes with access to the db and the
+    db-affiliated filesystem.
 
 Examples:
     # run the program on crocea and output a local condor workflow
@@ -30,13 +32,13 @@ Examples:
 
     #2011-8-26	generate a list of all bam file physical paths through find.
     #  (doing this because they are not located on crocea)
-    find NetworkData/vervet/raw_sequence/ -name *.bam  > vervet/raw_sequence/bamFileList.txt
+    find NetworkData/vervet/raw_sequence/ -name *.bam  > raw_sequence/bamFileList.txt
     # run the program on the crocea and output a hoffman2 workflow. (with db commit)
     %s
         -i ~/vervet/raw_sequence/bamFileList.txt
         -e /u/home/eeskin/polyacti/
         -t /u/home/eeskin/polyacti/NetworkData/vervet/db/ -u yh
-        --sample_sheet xfer.genome.wustl.edu/gxfer3/46019922623327/Vervet_12_4X_README.tsv
+        --sample_sheet genome.wustl.edu/gxfer3/46019922623327/Vervet_12_4X_README.tsv
         -z dl324b-1.cmb.usc.edu -l hoffman2
         -o Import2007Monkeys2DB_hoffman2.xml
         --commit 
@@ -55,11 +57,11 @@ Examples:
     #  later manually changed its tissue id to distinguish them from DNA data (below).
     %s -i SIVpilot/by.Charles.Demultiplexed/
         -z localhost -u yh -j hcondor -l hcondor
-        --commit -o dags/AddReads2DB/Import20SouthAfricaSIVmonkeys.xml -y3 --needSSHDBTunnel
+        --commit -o dags/AddReads2DB/Import20SouthAfricaSIVmonkeys.xml -y3
         -D /u/home/eeskin/polyacti/NetworkData/vervet/db/
         -t /u/home/eeskin/polyacti/NetworkData/vervet/db/ -e /u/home/eeskin/polyacti 
         --sample_sheet by.Charles.Demultiplexed/sampleIds.txt
-        --minNoOfReads 4000000
+        --minNoOfReads 4000000 --needSSHDBTunnel
 
     # 20120603 add 24 south-african monkeys DNA read data (-y4),
     #  sequenced by Joe DeYoung's core (from Nam's folder)
@@ -83,15 +85,16 @@ import sys, os
 __doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], \
     sys.argv[0], sys.argv[0])
 
-import copy, re, csv
+import re, csv
+import getpass
+import logging
 import numpy
 import pandas as pd
 from pegaflow.DAX3 import File
-from palos import ProcessOptions, PassingData, utils
+from palos import PassingData, utils
 from palos.io.MatrixFile import MatrixFile
 from palos.pegasus.AbstractWorkflow import AbstractWorkflow
 from palos.db import SunsetDB
-import logging
 
 ParentClass=AbstractWorkflow
 
@@ -102,6 +105,7 @@ class ImportIndividualSequence2DB(ParentClass):
         dbname='', schema='public', port=None,
         db_user=None, db_passwd=None,
         data_dir=None, local_data_dir=None,
+
         SplitReadFileJarPath=None,
         picard_path=None,
         sample_sheet=None,
@@ -113,8 +117,10 @@ class ImportIndividualSequence2DB(ParentClass):
         inputType=None,
         study_id=None,
         site_id=None,
-        pegasusFolderName='folder',
-        site_handler='condor', input_site_handler='condor', cluster_size=30,
+
+        pegasusFolderName='input',
+        site_handler='condor', input_site_handler='condor',
+        cluster_size=30,
         output_path=None,
         tmpDir='/tmp/', max_walltime=4320,
         home_path=None, javaPath=None, 
@@ -123,7 +129,6 @@ class ImportIndividualSequence2DB(ParentClass):
         needSSHDBTunnel=False, commit=False,
         debug=False, report=False):
         """
-        2011-8-3
         """
         # Insert before ParentClass.__init__()
         self.pathToInsertHomePathList.extend(
@@ -149,6 +154,7 @@ class ImportIndividualSequence2DB(ParentClass):
         self.inputType = inputType
         self.study_id = study_id
         self.site_id = site_id
+
         ParentClass.__init__(self, inputSuffixList=None, 
             site_handler=site_handler,
             pegasusFolderName=pegasusFolderName,
@@ -1742,7 +1748,8 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
             sys.exit(3)
         # Write the DAX
         self.end_run()
-        
+
+
 if __name__ == '__main__':
     from argparse import ArgumentParser
     ap = ArgumentParser()
@@ -1847,7 +1854,6 @@ if __name__ == '__main__':
     if not args.db_user:
         args.db_user = getpass.getuser()
     if not args.db_passwd:
-        import getpass
         args.db_passwd = getpass.getpass(f"Password for {args.db_user}:")
     
     instance = ImportIndividualSequence2DB(
