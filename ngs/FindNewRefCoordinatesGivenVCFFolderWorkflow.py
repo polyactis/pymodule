@@ -4,8 +4,8 @@ Examples:
     #2012.10.09 on hoffman condor, no clustering (-C0), always need db connection on hcondor (-H)
     # add -U 0 -Z 3000 if u want to change the partitioning configuration (how many sites in one blast job)
     %s  -I ~/NetworkData/vervet/db/genotype_file/method_42/
-        --oldRefFastaFname ~/NetworkData/vervet/db/individual_sequence/524_superContigsMinSize2000.fasta
-        --newRefFastaFname ~/NetworkData/vervet/db/individual_sequence/3231_6483ContigsVervetRef1.0.3.fasta
+        --oldRefFastaFname individual_sequence/524_superContigsMinSize2000.fasta
+        --newRefFastaFname individual_sequence/3231_6483ContigsVervetRef1.0.3.fasta
         --formatdbPath ~/bin/blast/bin/formatdb --blastallPath ~/bin/blast/bin/blastall
         --maxNoOfMismatches 2 -H -C 0
         -j hcondor -l hcondor -D ~/NetworkData/vervet/db/ -t ~/NetworkData/vervet/db/
@@ -15,8 +15,8 @@ Examples:
     
     #2012.10.18 use bwa to align
     %s -I ~/NetworkData/vervet/db/genotype_file/method_42/ 
-        --oldRefFastaFname ~/NetworkData/vervet/db/individual_sequence/524_superContigsMinSize2000.fasta
-        --newRefFastaFname ~/NetworkData/vervet/db/individual_sequence/3231_6483ContigsVervetRef1.0.3.fasta
+        --oldRefFastaFname db/individual_sequence/524_superContigsMinSize2000.fasta
+        --newRefFastaFname db/individual_sequence/3231_6483ContigsVervetRef1.0.3.fasta
         --maxNoOfMismatches 2 -H -C 4 --no_of_aln_threads 1
         -j hcondor -l hcondor -D ~/NetworkData/vervet/db/ -t ~/NetworkData/vervet/db/
         -u yh -z localhost
@@ -36,7 +36,8 @@ Description:
               -o output.fasta -f flankingLength (=24)
          #. blast them
          #. run FindSNPPositionOnNewRefFromFlankingBlastOutput.py
-             #. where hit length match query length, and no of mismatches <=2 => good => infer new coordinates
+             #. where hit length match query length, and no of mismatches
+             #  <=2 => good => infer new coordinates
          #. output a mapping file between old SNP and new SNP coordinates.
                  #. reduce this thing by combining everything
     #. reduce()
@@ -51,16 +52,16 @@ import pegaflow
 from palos import ProcessOptions, PassingData
 from palos.ngs.AbstractVCFWorkflow import AbstractVCFWorkflow
 from palos.pegasus.BlastWorkflow import BlastWorkflow
-from palos.pegasus.ShortRead2AlignmentWorkflow import ShortRead2AlignmentWorkflow
+from alignment.ShortRead2Alignment import ShortRead2Alignment
 from palos.io.FastaFile import FastaFile
 
 ParentClass = AbstractVCFWorkflow
 
-class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
-    ShortRead2AlignmentWorkflow):
+class FindNewRefCoordinatesGivenVCFFolder(ParentClass, BlastWorkflow, \
+    ShortRead2Alignment):
     __doc__ = __doc__
     option_default_dict = ParentClass.option_default_dict.copy()
-    option_default_dict.update(ShortRead2AlignmentWorkflow.alignment_option_dict.copy())
+    option_default_dict.update(ShortRead2Alignment.alignment_option_dict.copy())
     option_default_dict.update({
         ('oldRefFastaFname', 1, ): ['', '', 1, 
             'path to the old reference sequence file (on which input VCF is based)', ],\
@@ -97,7 +98,8 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
     #2012.9.25 no overlap and make the interval a lot smaller, (for VCF file)
     option_default_dict[('intervalOverlapSize', 1, int)][0] = 0
     option_default_dict[('intervalSize', 1, int)][0] = 10000
-    option_default_dict[('max_walltime', 1, int)][0] = 1320	#under 23 hours
+    option_default_dict[('max_walltime', 1, int)][0] = 1320
+    #under 23 hours
     
     def __init__(self,  **keywords):
         """
@@ -106,35 +108,45 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
         self.pathToInsertHomePathList.extend(['formatdbPath', 'blastallPath'])
         
         ParentClass.__init__(self, **keywords)
-        ShortRead2AlignmentWorkflow.__init__(self, **keywords)
+        ShortRead2Alignment.__init__(self, **keywords)
         
         self.oldRefFastaFname = os.path.abspath(self.oldRefFastaFname)
         self.newRefFastaFname = os.path.abspath(self.newRefFastaFname)
         
-        self.formatdbExecutableFile = self.registerOneExecutableAsFile(path=self.formatdbPath,\
+        self.formatdbExecutableFile = self.registerOneExecutableAsFile(
+            path=self.formatdbPath,
             site_handler=self.input_site_handler)
-        self.blastallExecutableFile = self.registerOneExecutableAsFile(path=self.blastallPath,\
+        self.blastallExecutableFile = self.registerOneExecutableAsFile(
+            path=self.blastallPath,
             site_handler=self.input_site_handler)
         if not self.minAlignmentSpan:
             self.minAlignmentSpan = int(1.8*self.flankingLength)
     
-    def preReduce(self, outputDirPrefix="", passingData=None, transferOutput=True, **keywords):
+    def preReduce(self, outputDirPrefix="", passingData=None,
+        transferOutput=True, **keywords):
         """
         2012.9.17
         """
-        returnData = ParentClass.preReduce(self, outputDirPrefix=outputDirPrefix,\
-            passingData=passingData, transferOutput=transferOutput, **keywords)
+        returnData = ParentClass.preReduce(self,
+            outputDirPrefix=outputDirPrefix,
+            passingData=passingData, transferOutput=transferOutput,
+            **keywords)
         
         self.statDirJob = self.addMkDirJob(outputDir="%sStat"%(outputDirPrefix))
-        self.reduceStatDirJob = self.addMkDirJob(outputDir="%sReduceStat"%(outputDirPrefix))
+        self.reduceStatDirJob = self.addMkDirJob(
+            outputDir="%sReduceStat"%(outputDirPrefix))
         
-        self.liftOverMapDirJob = self.addMkDirJob(outputDir="%sMapLiftOverVCF"%(outputDirPrefix))
-        self.liftOverReduceDirJob = self.addMkDirJob(outputDir="%sReduceLiftOverVCF"%(outputDirPrefix))
-        self.reduceEachVCFDirJob = self.addMkDirJob(outputDir="%sReduceEachVCF"%(outputDirPrefix))
+        self.liftOverMapDirJob = self.addMkDirJob(
+            outputDir="%sMapLiftOverVCF"%(outputDirPrefix))
+        self.liftOverReduceDirJob = self.addMkDirJob(
+            outputDir="%sReduceLiftOverVCF"%(outputDirPrefix))
+        self.reduceEachVCFDirJob = self.addMkDirJob(
+            outputDir="%sReduceEachVCF"%(outputDirPrefix))
         
         self.plotDirJob = self.addMkDirJob(outputDir="%sPlot"%(outputDirPrefix))
         
-        passingData.oldRefFastaFile = self.registerOneInputFile(self.oldRefFastaFname, \
+        passingData.oldRefFastaFile = self.registerOneInputFile(
+            self.oldRefFastaFname,
             folderName=self.pegasusFolderName)
         refIndexJob = None
         if self.alignmentMethodType==1:	#blast
@@ -147,7 +159,8 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
                 #some nt-database index file is missing
                 sys.stderr.write("Adding blast-db-making job ...")
                 refIndexJob = self.addMakeBlastDBJob(executable=self.formatdb,\
-                    inputFile=passingData.newRefFastaFileList[0], transferOutput=True)
+                    inputFile=passingData.newRefFastaFileList[0],
+                    transferOutput=True)
                 #add the index files
                 passingData.newRefFastaFileList = \
                     [passingData.newRefFastaFileList[0]] + refIndexJob.outputList
@@ -157,7 +170,7 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
                 refFastaFname=self.newRefFastaFname, \
                 folderName=self.pegasusFolderName)
             passingData.newRefFastaFileList = registerReferenceData.refFastaFList
-            if registerReferenceData.needBWARefIndexJob:	#2013.3.20
+            if registerReferenceData.needBWARefIndexJob:
                 sys.stderr.write("Adding bwa reference index job ...")
                 refIndexJob = self.addBWAReferenceIndexJob(
                     refFastaFList=passingData.newRefFastaFileList, \
@@ -173,7 +186,8 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
         
         #a stat merge job
         switchPointStatMergeFile = File(os.path.join(
-            self.reduceStatDirJob.folder, 'oldChromosome.Span.SwitchPointStat.tsv'))
+            self.reduceStatDirJob.folder,
+            'oldChromosome.Span.SwitchPointStat.tsv'))
         self.switchPointStatMergeJob = self.addStatMergeJob(
             statMergeProgram=self.ReduceMatrixByChosenColumn, \
             outputF=switchPointStatMergeFile, \
@@ -183,40 +197,45 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
         #sort it by chromosome and position
         
         
-        returnData.jobDataLs.append(PassingData(jobLs=[self.switchPointStatMergeJob], \
+        returnData.jobDataLs.append(PassingData(
+            jobLs=[self.switchPointStatMergeJob],
             fileLs=[self.switchPointStatMergeJob.output]))
         
         #reduce replicate concordance results from after-TrioCaller VCFs 
         outputFile = File(os.path.join(self.reduceStatDirJob.folder, 
             'oldChromosome.SwitchPointBySpan.tsv'))
         switchPointBySpanJob = self.addStatMergeJob(
-            statMergeProgram=self.ReduceMatrixBySumSameKeyColsAndThenDivide, \
+            statMergeProgram=self.ReduceMatrixBySumSameKeyColsAndThenDivide,
             outputF=outputFile, parentJobLs=[self.reduceStatDirJob],\
-            extraArguments='--keyColumnLs 0 --valueColumnLs 1,2', transferOutput=False)
+            extraArguments='--keyColumnLs 0 --valueColumnLs 1,2',
+            transferOutput=False)
         self.addInputToMergeJob(switchPointBySpanJob, \
-                            parentJobLs=[self.switchPointStatMergeJob])
+            parentJobLs=[self.switchPointStatMergeJob])
         
         outputFile = File(os.path.join(self.reduceStatDirJob.folder, 
             'oldChromosome.SwitchPointByNoOfLoci.tsv'))
         switchPointByNoOfLociJob = self.addStatMergeJob(
             statMergeProgram=self.ReduceMatrixBySumSameKeyColsAndThenDivide, \
             outputF=outputFile, parentJobLs=[self.reduceStatDirJob],\
-            extraArguments='--keyColumnLs 0 --valueColumnLs 1,3', transferOutput=False)
+            extraArguments='--keyColumnLs 0 --valueColumnLs 1,3',
+            transferOutput=False)
         self.addInputToMergeJob(switchPointByNoOfLociJob, \
-                            parentJobLs=[self.switchPointStatMergeJob])
+            parentJobLs=[self.switchPointStatMergeJob])
         
         outputFile = File(os.path.join(self.reduceStatDirJob.folder, \
             'oldChromosome.SwitchPoint.Stat.tsv'))
         concatenateSwitchPointBySomethingJob = self.addStatMergeJob(
             statMergeProgram=self.ReduceMatrixByMergeColumnsWithSameKey, \
             outputF=outputFile, parentJobLs=[self.reduceStatDirJob],\
-            extraArguments='--keyColumnLs 0 --valueColumnLs 1,2,3', transferOutput=False)
+            extraArguments='--keyColumnLs 0 --valueColumnLs 1,2,3',
+            transferOutput=False)
         
         self.addInputToMergeJob(concatenateSwitchPointBySomethingJob, \
             parentJobLs=[switchPointBySpanJob])
         self.addInputToMergeJob(concatenateSwitchPointBySomethingJob, \
             parentJobLs=[switchPointByNoOfLociJob])
-        returnData.jobDataLs.append(PassingData(jobLs=[concatenateSwitchPointBySomethingJob], \
+        returnData.jobDataLs.append(PassingData(
+            jobLs=[concatenateSwitchPointBySomethingJob], \
             fileLs=[concatenateSwitchPointBySomethingJob.output]))
         """
         #2014.1.4 reduce jobs for LiftOver mapPvalue
@@ -244,7 +263,8 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
         # However since each column field doesn't contain blank,
         #  it is fine to just use the default separator (non-blank to blank).
         #returnData.jobDataLs.append(self.constructJobDataFromJob(sortProbabilityJob))
-        outputFile = File(os.path.join(self.plotDirJob.output, 'locusLiftOverProbability.png'))
+        outputFile = File(os.path.join(self.plotDirJob.output,
+            'locusLiftOverProbability.png'))
         #2014.1.5 something wrong below, the reference genome is
         #  mismatched with the old reference used in the input.
         # esp. sequence_type_id=self.ref_genome_sequence_type_id,
@@ -252,7 +272,8 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
         self.addPlotGenomeWideDataJob(inputFileList=None, \
             inputFile=self.mergeLocusLiftOverProbabilityJob.output,\
             outputFile=outputFile,\
-            whichColumn=None, whichColumnPlotLabel="mapPvalue", whichColumnHeader="mapPvalue", \
+            whichColumn=None, whichColumnPlotLabel="mapPvalue",
+            whichColumnHeader="mapPvalue", \
             logX=None, logY=2, valueForNonPositiveYValue=-1, \
             xScaleLog=None, yScaleLog=None,\
             missingDataNotation='NA',\
@@ -260,17 +281,20 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
             xtickInterval=0,\
             drawCentromere=True, chrColumnHeader="oldChromosome", \
             minChrLength=None, minNoOfTotal=None, maxNoOfTotal=None, \
-            figureDPI=100, formatString=".", ylim_type=2, samplingRate=1, logCount=False, need_svg=True,\
+            figureDPI=100, formatString=".", ylim_type=2, samplingRate=1,
+            logCount=False, need_svg=True,\
             tax_id=self.ref_genome_tax_id,
             sequence_type_id=self.ref_genome_sequence_type_id, chrOrder=1,\
             inputFileFormat=1, outputFileFormat=None,\
             parentJobLs=[self.mergeLocusLiftOverProbabilityJob], \
             extraDependentInputLs=None, \
             extraArguments=None, extraArgumentList=None, \
-            transferOutput=True, job_max_memory=1000, sshDBTunnel=self.needSSHDBTunnel)
+            transferOutput=True, job_max_memory=1000,
+            sshDBTunnel=self.needSSHDBTunnel)
         #xtickInterval=0 means no ticks on x-axis.
         
-        outputFile = File( os.path.join(self.plotDirJob.output, 'locusLiftOverProbabilityHist.png'))
+        outputFile = File( os.path.join(self.plotDirJob.output, 
+            'locusLiftOverProbabilityHist.png'))
         #no spaces or parenthesis or any other shell-vulnerable letters in
         #  the x or y axis labels (whichColumnPlotLabel, xColumnPlotLabel)
         self.addDrawHistogramJob(executable=self.DrawHistogram,
@@ -284,20 +308,23 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
             figureDPI=100, samplingRate=1,legendType=1, \
             parentJobLs=[self.plotDirJob, self.mergeLocusLiftOverProbabilityJob],
             extraDependentInputLs=None, \
-            extraArguments=None, transferOutput=True,  job_max_memory=8000)
+            extraArguments=None, transferOutput=True,
+            job_max_memory=8000)
         
         outputFile = File(os.path.join(self.reduceStatDirJob.output, \
             'noOfLociChange.s1.AfterLiftOver.stat.tsv'))
         self.noOfLociAfterLiftOverJob = self.addStatMergeJob(
-            statMergeProgram=self.ReduceMatrixByChosenColumn, \
-            outputF=outputFile, transferOutput=True, parentJobLs=[self.reduceStatDirJob],\
+            statMergeProgram=self.ReduceMatrixByChosenColumn,
+            outputF=outputFile, transferOutput=True,
+            parentJobLs=[self.reduceStatDirJob],\
             extraArguments="-k 1 -v 2-4")
         
-        outputFile = File(os.path.join(self.reduceStatDirJob.output, \
+        outputFile = File(os.path.join(self.reduceStatDirJob.output,
             'noOfLociChange.s2.AfterGATKFilterLiftOver.stat.tsv'))
         self.noOfLociAfterGATKFilterLiftOverMergeJob = self.addStatMergeJob(
             statMergeProgram=self.ReduceMatrixByChosenColumn, \
-            outputF=outputFile, transferOutput=True, parentJobLs=[self.reduceStatDirJob],\
+            outputF=outputFile, transferOutput=True,
+            parentJobLs=[self.reduceStatDirJob],\
             extraArguments="-k 1 -v 2-4")
         
         
@@ -306,29 +333,33 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
             'noOfLociPerContig.s2.AfterGATKFilterLiftOver.stat.tsv'))
         self.noOfLociPerContigAfterGATKFilterLiftOverMergeJob = self.addStatMergeJob(
             statMergeProgram=self.ReduceMatrixByChosenColumn, \
-            outputF=outputFile, transferOutput=True, parentJobLs=[self.reduceStatDirJob],\
-            extraArguments="-k 0 -v 2-4")	#index 0 is contig ID, index 1 is fake chromosome length (=1)
+            outputF=outputFile, transferOutput=True,
+            parentJobLs=[self.reduceStatDirJob],\
+            extraArguments="-k 0 -v 2-4")
+            #index 0 is contig ID, index 1 is fake chromosome length (=1)
         
         #divide the number to get reduction fraction
-        outputFile = File(os.path.join(self.reduceStatDirJob.folder, \
+        outputFile = File(os.path.join(self.reduceStatDirJob.folder,
             'reduction.s2.ByFilterLiftoverPerContig.stat.tsv'))
         reductionByFilterLiftoverPerContigMergeJob = self.addStatMergeJob(
-            statMergeProgram=self.ReduceMatrixBySumSameKeyColsAndThenDivide, \
+            statMergeProgram=self.ReduceMatrixBySumSameKeyColsAndThenDivide,
             outputF=outputFile, parentJobLs=[self.reduceStatDirJob],\
-            extraArguments='--keyColumnLs 0 --valueColumnLs 2,1', transferOutput=True)
-        self.addInputToMergeJob(reductionByFilterLiftoverPerContigMergeJob, \
+            extraArguments='--keyColumnLs 0 --valueColumnLs 2,1',
+            transferOutput=True)
+        self.addInputToMergeJob(reductionByFilterLiftoverPerContigMergeJob,
             parentJobLs=[self.noOfLociPerContigAfterGATKFilterLiftOverMergeJob])
         
         #concatenate the number of loci per contig to the swtich point info
         self.addInputToMergeJob(concatenateSwitchPointBySomethingJob, \
-                            parentJobLs=[reductionByFilterLiftoverPerContigMergeJob])
+            parentJobLs=[reductionByFilterLiftoverPerContigMergeJob])
         
         #stats on the change after ClearVCFBasedOnSwitchDensity
         outputFile = File(os.path.join(self.reduceStatDirJob.output, \
             'noOfLociChange.s3.AfterClearVCFBySwitchDensity.stat.tsv'))
         self.noOfLociAfterClearVCFMergeJob = self.addStatMergeJob(
             statMergeProgram=self.ReduceMatrixByChosenColumn, \
-            outputF=outputFile, transferOutput=True, parentJobLs=[self.reduceStatDirJob],\
+            outputF=outputFile, transferOutput=True,
+            parentJobLs=[self.reduceStatDirJob],
             extraArguments="-k 1 -v 2-4")
         #stat on number of loci per contig after clear VCF
         
@@ -336,15 +367,18 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
             'noOfLociPerContig.s3.AfterClearVCFBySwitchDensity.stat.tsv'))
         self.noOfLociPerContigAfterClearVCFMergeJob = self.addStatMergeJob(
             statMergeProgram=self.ReduceMatrixByChosenColumn, \
-            outputF=outputFile, transferOutput=True, parentJobLs=[self.reduceStatDirJob],\
-            extraArguments="-k 0 -v 2-4")	#index 0 is contig ID, index 1 is fake chromosome length (=1)
+            outputF=outputFile, transferOutput=True,
+            parentJobLs=[self.reduceStatDirJob],
+            extraArguments="-k 0 -v 2-4")
+            #index 0 is contig ID, index 1 is fake chromosome length (=1)
         #divide the number to get reduction fraction
         outputFile = File(os.path.join(self.reduceStatDirJob.folder,
             'reduction.s3.ByClearVCFPerContigBySwitchDensity.stat.tsv'))
         reductionByClearVCFPerContigMergeJob = self.addStatMergeJob(
             statMergeProgram=self.ReduceMatrixBySumSameKeyColsAndThenDivide, \
             outputF=outputFile, parentJobLs=[self.reduceStatDirJob],\
-            extraArguments='--keyColumnLs 0 --valueColumnLs 2,1', transferOutput=True)
+            extraArguments='--keyColumnLs 0 --valueColumnLs 2,1',
+            transferOutput=True)
         self.addInputToMergeJob(reductionByClearVCFPerContigMergeJob, \
             parentJobLs=[self.noOfLociPerContigAfterClearVCFMergeJob])
         
@@ -355,15 +389,17 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
             'noOfLociChange.s4.AfterRemoveLocusFromVCFWithLowLiftOverMapPvalue.stat.tsv'))
         self.noOfLociAfterRemoveLocusFromVCFWithLowLiftOverMapPvalueJob = \
             self.addStatMergeJob(statMergeProgram=self.ReduceMatrixByChosenColumn, \
-                outputF=outputFile, transferOutput=True, parentJobLs=[self.reduceStatDirJob],\
+                outputF=outputFile, transferOutput=True,
+                parentJobLs=[self.reduceStatDirJob],
                 extraArguments="-k 1 -v 2-4")
         #stat on number of loci per contig after RemoveLocusFromVCFWithLowLiftOverMapPvalue
         
         outputFile = File(os.path.join(self.reduceStatDirJob.output, 
             'noOfLociPerContig.s4.AfterRemoveLocusFromVCFWithLowLiftOverMapPvalue.stat.tsv'))
         self.noOfLociPerContigAfterRemoveLocusFromVCFWithLowLiftOverMapPvalueMergeJob = \
-            self.addStatMergeJob(statMergeProgram=self.ReduceMatrixByChosenColumn, \
-                outputF=outputFile, transferOutput=True, parentJobLs=[self.reduceStatDirJob],\
+            self.addStatMergeJob(statMergeProgram=self.ReduceMatrixByChosenColumn,
+                outputF=outputFile, transferOutput=True,
+                parentJobLs=[self.reduceStatDirJob],
                 extraArguments="-k 0 -v 2-4")
                 #index 0 is contig ID, index 1 is fake chromosome length (=1)
         #divide the number to get reduction fraction
@@ -371,12 +407,14 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
             'reduction.s4.ByRemoveLocusFromVCFWithLowLiftOverMapPvalue.stat.tsv'))
         reductionByRemoveLocusFromVCFWithLowLiftOverMapPvaluePerContigMergeJob = \
             self.addStatMergeJob(
-                statMergeProgram=self.ReduceMatrixBySumSameKeyColsAndThenDivide, \
+                statMergeProgram=self.ReduceMatrixBySumSameKeyColsAndThenDivide,
                 outputF=outputFile, parentJobLs=[self.reduceStatDirJob],\
-                extraArguments='--keyColumnLs 0 --valueColumnLs 2,1', transferOutput=True)
+                extraArguments='--keyColumnLs 0 --valueColumnLs 2,1',
+                transferOutput=True)
         self.addInputToMergeJob(
-            reductionByRemoveLocusFromVCFWithLowLiftOverMapPvaluePerContigMergeJob, \
-            parentJobLs=[self.noOfLociPerContigAfterRemoveLocusFromVCFWithLowLiftOverMapPvalueMergeJob])
+            reductionByRemoveLocusFromVCFWithLowLiftOverMapPvaluePerContigMergeJob,
+            parentJobLs=[
+                self.noOfLociPerContigAfterRemoveLocusFromVCFWithLowLiftOverMapPvalueMergeJob])
         
         
         #stats on the change after RemoveRedundantLociFromVCF_InReduce
@@ -393,7 +431,8 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
             'noOfLociPerContig.s5.AfterRemoveRedundancyMerge.stat.tsv'))
         self.noOfLociPerContigAfterRemoveRedundancyMergeJob = self.addStatMergeJob(
             statMergeProgram=self.ReduceMatrixByChosenColumn, \
-            outputF=outputFile, transferOutput=True, parentJobLs=[self.reduceStatDirJob],\
+            outputF=outputFile, transferOutput=True,
+            parentJobLs=[self.reduceStatDirJob],
             extraArguments="-k 0 -v 2-4")
             #index 0 is contig ID, index 1 is fake chromosome length (=1)
         #divide the number to get reduction fraction
@@ -402,23 +441,26 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
         reductionByRemoveRedundancyPerContigMergeJob = self.addStatMergeJob(
             statMergeProgram=self.ReduceMatrixBySumSameKeyColsAndThenDivide, \
             outputF=outputFile, parentJobLs=[self.reduceStatDirJob],\
-            extraArguments='--keyColumnLs 0 --valueColumnLs 2,1', transferOutput=True)
+            extraArguments='--keyColumnLs 0 --valueColumnLs 2,1',
+            transferOutput=True)
             # = (#sites after filter) / (#sites before filter)
-        self.addInputToMergeJob(reductionByRemoveRedundancyPerContigMergeJob, \
-                            parentJobLs=[self.noOfLociPerContigAfterRemoveRedundancyMergeJob])
+        self.addInputToMergeJob(reductionByRemoveRedundancyPerContigMergeJob,
+            parentJobLs=[self.noOfLociPerContigAfterRemoveRedundancyMergeJob])
         
-        outputFile = File(os.path.join(self.plotDirJob.folder, 'noOfLoci_vs_noOfSwitchPoints.png'))
+        outputFile = File(os.path.join(self.plotDirJob.folder, \
+            'noOfLoci_vs_noOfSwitchPoints.png'))
         #no spaces or parenthesis or any other shell-vulnerable letters in 
         # the x or y axis labels (whichColumnPlotLabel, xColumnPlotLabel)
         self.addAbstractPlotJob(executable=self.AbstractPlot, \
             inputFileList=[concatenateSwitchPointBySomethingJob.output], \
             outputFile=outputFile, \
-            whichColumn=None, whichColumnHeader="noOfLociWithUniqueHit", whichColumnPlotLabel="noOfLoci",\
-            xColumnHeader="noOfSwitchPoints", xColumnPlotLabel="noOfSwitchPoints", \
+            whichColumn=None, whichColumnHeader="noOfLociWithUniqueHit",
+            whichColumnPlotLabel="noOfLoci",\
+            xColumnHeader="noOfSwitchPoints", xColumnPlotLabel="noOfSwitchPoints",
             xScaleLog=1, yScaleLog=1, \
             minNoOfTotal=1,\
             figureDPI=150, samplingRate=1,legendType=0,\
-            parentJobLs=[self.plotDirJob, concatenateSwitchPointBySomethingJob], \
+            parentJobLs=[self.plotDirJob, concatenateSwitchPointBySomethingJob],
             extraDependentInputLs=None, \
             extraArguments=None, transferOutput=True, job_max_memory=2000)
         
@@ -435,18 +477,20 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
             xScaleLog=1, yScaleLog=1, \
             minNoOfTotal=1,\
             figureDPI=150, samplingRate=1,legendType=0,\
-            parentJobLs=[self.plotDirJob, concatenateSwitchPointBySomethingJob], \
+            parentJobLs=[self.plotDirJob, concatenateSwitchPointBySomethingJob],
             extraDependentInputLs=None, \
             extraArguments=None, transferOutput=True, job_max_memory=2000)
         
         outputFile = File(os.path.join(self.reduceStatDirJob.output, \
             'oldChromosomeAndLociRetainedAtSwitchFrequencyThreshold.tsv'))
         calculateLociGenomeLeftAtThresholdJob = self.addAbstractMapperLikeJob(
-            executable=self.CalculateLociAndGenomeCoveredAtEachSwitchFrequencyThreshold, \
-            inputF=concatenateSwitchPointBySomethingJob.output, outputF=outputFile, \
-            parentJobLs=[self.reduceStatDirJob, concatenateSwitchPointBySomethingJob], \
+            executable=self.CalculateLociAndGenomeCoveredAtEachSwitchFrequencyThreshold,
+            inputF=concatenateSwitchPointBySomethingJob.output,
+            outputF=outputFile, \
+            parentJobLs=[self.reduceStatDirJob, concatenateSwitchPointBySomethingJob],
             transferOutput=True, job_max_memory=2000,\
-            extraArguments=None, extraArgumentList=None, extraDependentInputLs=None)
+            extraArguments=None, extraArgumentList=None,
+            extraDependentInputLs=None)
         
         outputFile = File(os.path.join(self.plotDirJob.folder, \
             'fractionOfGenomeCovered_vs_maxSwitchFrequency.png'))
@@ -457,11 +501,12 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
             outputFile=outputFile, \
             whichColumn=None, whichColumnHeader="genomeCoveredFraction",
             whichColumnPlotLabel="fractionOfGenomeCovered",\
-            xColumnHeader="maxSwitchFrequency", xColumnPlotLabel="maxSwitchFrequency", \
+            xColumnHeader="maxSwitchFrequency",
+            xColumnPlotLabel="maxSwitchFrequency", \
             xScaleLog=0, yScaleLog=0, \
             minNoOfTotal=1,\
             figureDPI=150, samplingRate=1,legendType=0,\
-            parentJobLs=[self.plotDirJob, calculateLociGenomeLeftAtThresholdJob], \
+            parentJobLs=[self.plotDirJob, calculateLociGenomeLeftAtThresholdJob],
             extraDependentInputLs=None, \
             extraArguments=None, transferOutput=True, job_max_memory=2000)
         
@@ -474,7 +519,8 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
             outputFile=outputFile, \
             whichColumn=None, whichColumnHeader="noOfLociFraction",
             whichColumnPlotLabel="fractionOfLociCovered", \
-            xColumnHeader="maxSwitchFrequency", xColumnPlotLabel="maxSwitchFrequency", \
+            xColumnHeader="maxSwitchFrequency",
+            xColumnPlotLabel="maxSwitchFrequency",
             xScaleLog=0, yScaleLog=0, \
             minNoOfTotal=1,\
             figureDPI=150, samplingRate=1,legendType=0,\
@@ -489,9 +535,9 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
         """
         2012.10.18
         """
-        #super(FindNewRefCoordinatesGivenVCFFolderWorkflow, self).registerCustomJars()
+        #super(FindNewRefCoordinatesGivenVCFFolder, self).registerCustomJars()
         ParentClass.registerCustomJars(self)
-        ShortRead2AlignmentWorkflow.registerCustomJars(self)
+        ShortRead2Alignment.registerCustomJars(self)
         BlastWorkflow.registerCustomJars(self)
     
     def registerCustomExecutables(self):
@@ -499,7 +545,7 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
         2011-11-28
         """
         ParentClass.registerCustomExecutables(self)
-        ShortRead2AlignmentWorkflow.registerCustomExecutables(self)
+        ShortRead2Alignment.registerCustomExecutables(self)
         BlastWorkflow.registerCustomExecutables(self)		
 
         self.registerOneExecutable(path=self.javaPath, name='LiftoverVariants',
@@ -507,20 +553,23 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
         self.registerOneExecutable(path=self.javaPath, name='FilterLiftedVariants',
             clusterSizeMultiplier=0.5)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
-            "polymorphism/qc/mapper/RemoveLocusFromVCFWithLowLiftOverMapPvalue.py"), \
-            name='RemoveLocusFromVCFWithLowLiftOverMapPvalue', \
-                clusterSizeMultiplier=1)
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
+            "polymorphism/qc/mapper/RemoveLocusFromVCFWithLowLiftOverMapPvalue.py"),
+            name='RemoveLocusFromVCFWithLowLiftOverMapPvalue',
+            clusterSizeMultiplier=1)
+        self.registerOneExecutable(path=os.path.join(self.pymodulePath,
             "polymorphism/mapper/ComputeLiftOverLocusProbability.py"),
-                name='ComputeLiftOverLocusProbability', \
-                clusterSizeMultiplier=1)
+            name='ComputeLiftOverLocusProbability', \
+            clusterSizeMultiplier=1)
     
-    def addFindNewRefCoordinateJob(self, executable=None, inputFile=None, \
-        maxNoOfMismatches=None, minNoOfIdentities=None, minIdentityFraction=None,\
+    def addFindNewRefCoordinateJob(self, executable=None, inputFile=None,
+        maxNoOfMismatches=None, minNoOfIdentities=None,
+        minIdentityFraction=None,
         minAlignmentSpan=None, outputFile=None, chainFile=None, \
         switchPointFile=None,\
-        parentJobLs=None, extraOutputLs=None, transferOutput=False, job_max_memory=500,\
-        extraArguments=None, extraArgumentList=None, extraDependentInputLs=None):
+        parentJobLs=None, extraOutputLs=None, transferOutput=False,
+        job_max_memory=500,
+        extraArguments=None, extraArgumentList=None,
+        extraDependentInputLs=None):
         """
         2013.07.08 added argument chainFile
         2012.10.14
@@ -567,7 +616,8 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
         2014.01.04 added argument intervalData
         2013.04.08 use VCFJobData
         2012.10.3
-            #. extract flanking sequences from the input VCF (ref sequence file => contig ref sequence)
+            #. extract flanking sequences from the input VCF
+            #  (ref sequence file => contig ref sequence)
             #. blast them
             #. run FindSNPPositionOnNewRefFromFlankingBlastOutput.py
                 #. where hit length match query length, and
@@ -635,7 +685,8 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
             blastJob = self.addBlastWrapperJob(executable=self.BlastWrapper,
                 inputFile=extractFlankSeqJob.output, \
                 outputFile=outputFile, \
-                outputFnamePrefix=blastOutputFnamePrefix, databaseFile=newRefFastaFile,\
+                outputFnamePrefix=blastOutputFnamePrefix,
+                databaseFile=newRefFastaFile,\
                 maxNoOfMismatches=self.maxNoOfMismatches,
                 minNoOfIdentities=self.minNoOfIdentities, \
                 minIdentityPercentage=self.minIdentityFraction,
@@ -648,7 +699,8 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
             # a FindSNPPositionOnNewRefFromFlankingBlastOutput job
             findNewRefCoordinateJob = self.addFindNewRefCoordinateJob(
                 executable=self.FindSNPPositionOnNewRefFromFlankingBlastOutput,
-                inputFile=blastJob.output, outputFile=coordinateMapFile, \
+                inputFile=blastJob.output,
+                outputFile=coordinateMapFile, \
                 chainFile=chainFile, \
                 switchPointFile=switchPointFile,\
                 maxNoOfMismatches=self.maxNoOfMismatches,
@@ -685,7 +737,8 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
             #2012.10.10 individual_alignment is not passed so that ReadGroup
             #  addition job is not added in addAlignmentJob()
             bamIndexJob = self.addAlignmentJob(fileObjectLs=fileObjectLs, \
-                refFastaFList=passingData.newRefFastaFileList, bwa=self.bwa, \
+                refFastaFList=passingData.newRefFastaFileList,
+                bwa=self.bwa, \
                 additionalArguments=self.additionalArguments + bwaAdditionalAlignments,
                 samtools=self.samtools, \
                 refIndexJob=passingData.refIndexJob,
@@ -709,15 +762,18 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
             # a FindSNPPositionOnNewRefFromFlankingBlastOutput job
             findNewRefCoordinateJob = self.addFindNewRefCoordinateJob(
                 executable=self.FindSNPPositionOnNewRefFromFlankingBWAOutput, \
-                inputFile=alignmentJob.output, outputFile=coordinateMapFile, \
+                inputFile=alignmentJob.output,
+                outputFile=coordinateMapFile,
                 chainFile=chainFile, switchPointFile=switchPointFile,\
                 maxNoOfMismatches=self.maxNoOfMismatches, \
                 minNoOfIdentities=self.minNoOfIdentities,
                 minIdentityFraction=self.minIdentityFraction, \
                 minAlignmentSpan=self.minAlignmentSpan,
                 parentJobLs=[alignmentJob, bamIndexJob], \
-                transferOutput=transferOutput, job_max_memory=500, extraArguments=None, \
-                extraArgumentList=None, extraDependentInputLs=[bamIndexJob.output], \
+                transferOutput=transferOutput, job_max_memory=500,
+                extraArguments=None, \
+                extraArgumentList=None,
+                extraDependentInputLs=[bamIndexJob.output],
                 extraOutputLs=None)
         
         self.addInputToMergeJob(self.switchPointStatMergeJob,
@@ -727,20 +783,22 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
         #2014.1.4 add one mapPvalue computing job
         outputFile = File(os.path.join(self.mapDirJob.output, \
             "%s.probability.tsv.gz"%(intervalFileBasenamePrefix)))
-        locusIntervalDeltaOutputFile = File(os.path.join(self.mapDirJob.output,\
+        locusIntervalDeltaOutputFile = File(os.path.join(
+            self.mapDirJob.output,\
             "%s.locusIntervalDelta.tsv.gz"%(intervalFileBasenamePrefix)))
         computeLiftOverLocusProbJob = self.addAbstractMatrixFileWalkerJob(
             executable=self.ComputeLiftOverLocusProbability, \
             inputFileList=None, inputFile=findNewRefCoordinateJob.output,
             outputFile=outputFile,
-            outputFnamePrefix=None, whichColumn=None, whichColumnHeader=None,
+            outputFnamePrefix=None,
+            whichColumn=None, whichColumnHeader=None,
             logY=None, valueForNonPositiveYValue=-1, \
             minNoOfTotal=1, samplingRate=1, \
             inputFileFormat=None, outputFileFormat=None,\
             parentJobLs=[findNewRefCoordinateJob],
             extraOutputLs=[locusIntervalDeltaOutputFile],
             extraDependentInputLs=None, \
-            extraArgumentList=["--locusIntervalDeltaOutputFname", \
+            extraArgumentList=["--locusIntervalDeltaOutputFname",
                 locusIntervalDeltaOutputFile],
             extraArguments=None, transferOutput=transferOutput,
             job_max_memory=2000, sshDBTunnel=False,
@@ -762,10 +820,12 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
             outputFile=outputFile, outputArgumentOption="-o", \
             parentJobLs=[self.liftOverMapDirJob]+ VCFJobData.jobLs, \
             extraDependentInputLs=None, extraOutputLs=None, \
-            frontArgumentList=None, extraArguments=None, extraArgumentList=None, \
+            frontArgumentList=None,
+            extraArguments=None, extraArgumentList=None,
             transferOutput=False, sshDBTunnel=None, \
             key2ObjectForJob=None, objectWithDBArguments=None, \
-            no_of_cpus=None, job_max_memory=job_max_memory/2, walltime=walltime, \
+            no_of_cpus=None, job_max_memory=job_max_memory/2,
+            walltime=walltime,
             max_walltime=None)
         
         unsortedVCFFile = File(os.path.join(self.liftOverMapDirJob.output, \
@@ -775,25 +835,31 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
             inputFile=addInfoDescJob.output, \
             inputArgumentOption="-i", \
             outputFile=unsortedVCFFile, outputArgumentOption="-o", \
-            parentJobLs=[findNewRefCoordinateJob, self.liftOverMapDirJob, addInfoDescJob], \
-            extraDependentInputLs=[findNewRefCoordinateJob.output], extraOutputLs=[], \
+            parentJobLs=[findNewRefCoordinateJob, self.liftOverMapDirJob,
+                addInfoDescJob],
+            extraDependentInputLs=[findNewRefCoordinateJob.output],
+            extraOutputLs=[],
             frontArgumentList=None, extraArguments=None, \
-            extraArgumentList=["--coordinateMapFname", findNewRefCoordinateJob.output], \
+            extraArgumentList=["--coordinateMapFname",
+                findNewRefCoordinateJob.output],
             transferOutput=False, sshDBTunnel=None, \
-            key2ObjectForJob=None, objectWithDBArguments=None, \
-            no_of_cpus=None, job_max_memory=job_max_memory/2, walltime=walltime, \
+            key2ObjectForJob=None, objectWithDBArguments=None,
+            no_of_cpus=None, job_max_memory=job_max_memory/2,
+            walltime=walltime,
             max_walltime=None)
         
         #check how much sites are lost
         outputF = File(os.path.join(self.statDirJob.output, 
             '%s.s2.noOfLociAfterLiftover.tsv'%(intervalFileBasenamePrefix)))
-        self.addVCFBeforeAfterFilterStatJob(chromosome=chromosome, outputF=outputF, \
-            vcf1=addInfoDescJob.output, currentVCFJob=liftoverVariantsJob, \
+        self.addVCFBeforeAfterFilterStatJob(chromosome=chromosome,
+            outputF=outputF,
+            vcf1=addInfoDescJob.output, currentVCFJob=liftoverVariantsJob,
             self.noOfLociAfterLiftOverJob, \
             parentJobLs=[addInfoDescJob, liftoverVariantsJob, self.statDirJob])
     
         """
-        #my $cmd = "java -jar $gatk/dist/GenomeAnalysisTK.jar -T LiftoverVariants -R $oldRef.fasta -V:variant $in
+        #my $cmd = "java -jar $gatk/dist/GenomeAnalysisTK.jar
+        #   -T LiftoverVariants -R $oldRef.fasta -V:variant $in
         #	-o $unsorted_vcf -chain $chain -dict $newRef.dict";
         #	$cmd .= " -recordOriginalLocation";
         unsortedVCFFile = File(os.path.join(self.liftOverMapDirJob.output,
@@ -815,7 +881,8 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
             no_of_cpus=None, job_max_memory=job_max_memory, walltime=walltime, \
             key2ObjectForJob=None)
         """
-        #GATK's code for sorting vcf from https://github.com/broadgsa/gatk/blob/master/public/perl/sortByRef.pl
+        #GATK's code for sorting vcf from
+        #  https://github.com/broadgsa/gatk/blob/master/public/perl/sortByRef.pl
         #$cmd = "grep \"^#\" -v $unsorted_vcf | sort -n -k2 -T $tmp | 
         # $gatk/public/perl/sortByRef.pl --tmp $tmp - $newRef.fasta.fai >> $sorted_vcf";
         #
@@ -857,16 +924,18 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
             extraDependentInputLs=None, \
             parentJobLs=[vcfSorterJob, self.liftOverMapDirJob], \
             transferOutput=False, \
-            no_of_cpus=None, job_max_memory=job_max_memory, walltime=walltime, \
+            no_of_cpus=None, job_max_memory=job_max_memory,
+            walltime=walltime,
             key2ObjectForJob=None)
         
         #check how much sites are lost
         outputF = File(os.path.join(self.statDirJob.output, \
             '%s.s4.noOfLociAfterFilterLiftover.tsv'%(intervalFileBasenamePrefix)))
-        self.addVCFBeforeAfterFilterStatJob(chromosome=chromosome, outputF=outputF, \
-            vcf1=vcfSorterJob.output, currentVCFJob=filterLiftoverVariantsJob, \
+        self.addVCFBeforeAfterFilterStatJob(chromosome=chromosome,
+            outputF=outputF,
+            vcf1=vcfSorterJob.output, currentVCFJob=filterLiftoverVariantsJob,
             statMergeJobLs=[self.noOfLociAfterGATKFilterLiftOverMergeJob,\
-                        self.noOfLociPerContigAfterGATKFilterLiftOverMergeJob], \
+                self.noOfLociPerContigAfterGATKFilterLiftOverMergeJob],
             parentJobLs=[vcfSorterJob, filterLiftoverVariantsJob, self.statDirJob])
     
         #cleanup the vcf if its switch density is > maxSwitchDensity
@@ -874,31 +943,35 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
         outputFile = File(os.path.join(self.liftOverMapDirJob.output, \
             '%s.s5.clearBasedOnSwitchDensity.vcf'%(intervalFileBasenamePrefix)))
         clearVCFBasedOnSwitchDensityJob = self.addGenericJob(
-            executable=self.ClearVCFBasedOnSwitchDensity, \
+            executable=self.ClearVCFBasedOnSwitchDensity,
             inputFile=filterLiftoverVariantsJob.output, \
             inputArgumentOption="-i", \
-            outputFile=outputFile, outputArgumentOption="-o", \
+            outputFile=outputFile, outputArgumentOption="-o",
             parentJobLs=[findNewRefCoordinateJob, self.liftOverMapDirJob, 
                 filterLiftoverVariantsJob],
             extraDependentInputLs=[findNewRefCoordinateJob.switchPointFile],
-            extraOutputLs=[], \
-            frontArgumentList=None, extraArguments=None, \
+            extraOutputLs=[],
+            frontArgumentList=None, extraArguments=None,
             extraArgumentList=["--switchPointFname",
                 findNewRefCoordinateJob.switchPointFile,\
-                "--maxSwitchDensity %s"%(self.maxSwitchDensity)], \
-            transferOutput=False, sshDBTunnel=None, \
-            key2ObjectForJob=None, objectWithDBArguments=None, \
-            no_of_cpus=None, job_max_memory=job_max_memory/2, walltime=walltime, \
+                "--maxSwitchDensity %s"%(self.maxSwitchDensity)],
+            transferOutput=False, sshDBTunnel=None,
+            key2ObjectForJob=None, objectWithDBArguments=None,
+            no_of_cpus=None, job_max_memory=job_max_memory/2,
+            walltime=walltime,
             max_walltime=None)
         #record how many sites are lost
         outputF = File(os.path.join(self.statDirJob.output, \
-            '%s.s5.noOfLociAfterClearBasedOnSwitchDensity.tsv'%(intervalFileBasenamePrefix)))
-        self.addVCFBeforeAfterFilterStatJob(chromosome=chromosome, outputF=outputF, \
+            '%s.s5.noOfLociAfterClearBasedOnSwitchDensity.tsv'%(\
+                intervalFileBasenamePrefix)))
+        self.addVCFBeforeAfterFilterStatJob(chromosome=chromosome,
+            outputF=outputF,
             vcf1=filterLiftoverVariantsJob.output,
             currentVCFJob=clearVCFBasedOnSwitchDensityJob, \
             statMergeJobLs=[self.noOfLociAfterClearVCFMergeJob,\
                         self.noOfLociPerContigAfterClearVCFMergeJob], \
-            parentJobLs=[filterLiftoverVariantsJob, clearVCFBasedOnSwitchDensityJob,
+            parentJobLs=[filterLiftoverVariantsJob,
+                clearVCFBasedOnSwitchDensityJob,
                 self.statDirJob])
         
         
@@ -906,7 +979,7 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
         outputFile = File(os.path.join(self.liftOverMapDirJob.output, \
             '%s.s6.RemoveLociWithLowMapPvalue.vcf'%(intervalFileBasenamePrefix)))
         removeLocusFromVCFWithLowLiftOverMapPvalueJob = self.addGenericJob(
-            executable=self.RemoveLocusFromVCFWithLowLiftOverMapPvalue, \
+            executable=self.RemoveLocusFromVCFWithLowLiftOverMapPvalue,
             inputArgumentOption="-i", \
             inputFile=clearVCFBasedOnSwitchDensityJob.output, \
             outputFile=outputFile, outputArgumentOption="-o", \
@@ -916,30 +989,34 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
             frontArgumentList=None, extraArguments=None, \
             extraArgumentList=["--liftOverLocusMapPvalueFname", 
                 computeLiftOverLocusProbJob.output,\
-                "--minLiftOverMapPvalue %s"%(self.minLiftOverMapPvalue)], \
+                "--minLiftOverMapPvalue %s"%(self.minLiftOverMapPvalue)],
             transferOutput=False, sshDBTunnel=None, \
-            key2ObjectForJob=None, objectWithDBArguments=None, \
-            no_of_cpus=None, job_max_memory=job_max_memory/2, walltime=walltime, \
+            key2ObjectForJob=None, objectWithDBArguments=None,
+            no_of_cpus=None, job_max_memory=job_max_memory/2,
+            walltime=walltime,
             max_walltime=None)
         
         #record how many sites are lost
         outputF = File(os.path.join(self.statDirJob.output, \
             '%s.s6.RemoveLociWithLowMapPvalue.tsv'%(intervalFileBasenamePrefix)))
-        self.addVCFBeforeAfterFilterStatJob(chromosome=chromosome,
+        self.addVCFBeforeAfterFilterStatJob(
+            chromosome=chromosome,
             outputF=outputF,
             vcf1=clearVCFBasedOnSwitchDensityJob.output,
             currentVCFJob=removeLocusFromVCFWithLowLiftOverMapPvalueJob,
             statMergeJobLs=[self.noOfLociAfterRemoveLocusFromVCFWithLowLiftOverMapPvalueJob,\
                 self.noOfLociPerContigAfterRemoveLocusFromVCFWithLowLiftOverMapPvalueMergeJob],
-            parentJobLs=[clearVCFBasedOnSwitchDensityJob, removeLocusFromVCFWithLowLiftOverMapPvalueJob, self.statDirJob])
+            parentJobLs=[clearVCFBasedOnSwitchDensityJob, 
+                removeLocusFromVCFWithLowLiftOverMapPvalueJob, self.statDirJob])
         
         
         returnData.mapJob = removeLocusFromVCFWithLowLiftOverMapPvalueJob
         returnData.findNewRefCoordinateJob = findNewRefCoordinateJob
         return returnData
     
-    def reduceEachVCF(self, chromosome=None, passingData=None, mapEachIntervalDataLs=None,\
-                    transferOutput=True, **keywords):
+    def reduceEachVCF(self, chromosome=None, passingData=None,
+        mapEachIntervalDataLs=None,\
+        transferOutput=True, **keywords):
         """
         2013.07.10
             #. concatenate all the sub-VCFs into one
@@ -951,14 +1028,17 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
         intervalJobLs = [pdata.mapJob for pdata in mapEachIntervalDataLs]
         
         
-        realInputVolume = passingData.jobData.file.noOfIndividuals * passingData.jobData.file.noOfLoci
+        realInputVolume = passingData.jobData.file.noOfIndividuals * \
+            passingData.jobData.file.noOfLoci
         baseInputVolume = 200*20000
-        walltime = self.scaleJobWalltimeOrMemoryBasedOnInput(realInputVolume=realInputVolume, \
-                            baseInputVolume=baseInputVolume, baseJobPropertyValue=60, \
-                            minJobPropertyValue=60, maxJobPropertyValue=500).value
-        job_max_memory = self.scaleJobWalltimeOrMemoryBasedOnInput(realInputVolume=realInputVolume, \
-                            baseInputVolume=baseInputVolume, baseJobPropertyValue=5000, \
-                            minJobPropertyValue=5000, maxJobPropertyValue=10000).value
+        walltime = self.scaleJobWalltimeOrMemoryBasedOnInput(
+            realInputVolume=realInputVolume, \
+            baseInputVolume=baseInputVolume, baseJobPropertyValue=60, \
+            minJobPropertyValue=60, maxJobPropertyValue=500).value
+        job_max_memory = self.scaleJobWalltimeOrMemoryBasedOnInput(
+            realInputVolume=realInputVolume, \
+            baseInputVolume=baseInputVolume, baseJobPropertyValue=5000, \
+            minJobPropertyValue=5000, maxJobPropertyValue=10000).value
         
         concatenateVCFJobData = self.concatenateIntervalsIntoOneVCFSubWorkflow(
             refFastaFList=self.newRegisterReferenceData.refFastaFList, \
@@ -973,35 +1053,39 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
         return returnData
         
     
-    def reduce(self, passingData=None, reduceEachChromosomeDataLs=None, transferOutput=True, **keywords):
+    def reduce(self, passingData=None, reduceEachChromosomeDataLs=None,
+        transferOutput=True, **keywords):
         """
         2012.10.3
-            #. merge all output of input jobs (passingData.mapEachIntervalDataLsLs) into one big one
-        
+            #. merge all output of input jobs
+            #  (passingData.mapEachIntervalDataLsLs) into one big one
         """
         returnData = PassingData(no_of_jobs = 0)
         returnData.jobDataLs = []
         reduceOutputDirJob = passingData.reduceOutputDirJob
         
-        outputFile = File(os.path.join(reduceOutputDirJob.output, 'SNPID2NewCoordinates.tsv'))
+        outputFile = File(os.path.join(reduceOutputDirJob.output, \
+            'SNPID2NewCoordinates.tsv'))
         reduceJob = self.addStatMergeJob(
             statMergeProgram=self.mergeSameHeaderTablesIntoOne,
             outputF=outputFile, \
-            parentJobLs=[reduceOutputDirJob],extraOutputLs=[], \
+            parentJobLs=[reduceOutputDirJob],extraOutputLs=[],
             extraDependentInputLs=[], transferOutput=transferOutput,)
         
         
         #sort the SNPID2NewCoordinates file by chromosome and position (query, not target)
-        sortedSNPID2NewCoordinateFile = File(os.path.join(reduceOutputDirJob.output, \
+        sortedSNPID2NewCoordinateFile = File(os.path.join(reduceOutputDirJob.output,
             'SNPID2NewCoordinates.sorted.tsv'))
-        sortSNPID2NewCoordinatesJob = self.addSortJob(inputFile=reduceJob.output, \
-                        outputFile=sortedSNPID2NewCoordinateFile, noOfHeaderLines=1,\
-                        parentJobLs=[reduceJob], \
-                        extraOutputLs=None, transferOutput=False, \
-                        extraArgumentList=["-k3,3 -k4,4n"], \
-                        sshDBTunnel=None,\
-                        job_max_memory=4000, walltime=120)
-        #2013 Explicit tab delimiter argument for sort is removed as each column field doesn't contain blank.
+        sortSNPID2NewCoordinatesJob = self.addSortJob(
+            inputFile=reduceJob.output, \
+            outputFile=sortedSNPID2NewCoordinateFile, noOfHeaderLines=1,\
+            parentJobLs=[reduceJob], \
+            extraOutputLs=None, transferOutput=False, \
+            extraArgumentList=["-k3,3 -k4,4n"], \
+            sshDBTunnel=None,\
+            job_max_memory=4000, walltime=120)
+        #2013 Explicit tab delimiter argument for sort is removed as 
+        # each column field doesn't contain blank.
         #. it is fine to just use the default separator (non-blank to blank).
         returnData.jobDataLs.append(
             PassingData(jobLs=[sortSNPID2NewCoordinatesJob],
@@ -1012,21 +1096,24 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
         for mapEachIntervalDataLs in passingData.mapEachIntervalDataLsLs:
             for mapEachIntervalData in mapEachIntervalDataLs:
                 self.addInputToMergeJob(reduceJob, \
-                        parentJobLs=[mapEachIntervalData.findNewRefCoordinateJob])
+                    parentJobLs=[mapEachIntervalData.findNewRefCoordinateJob])
                 intervalJobLs.append(mapEachIntervalData.mapJob)
         
         
-        realInputVolume = passingData.jobData.file.noOfIndividuals * passingData.jobData.file.noOfLoci
+        realInputVolume = passingData.jobData.file.noOfIndividuals * \
+            passingData.jobData.file.noOfLoci
         baseInputVolume = 200*20000
-        walltime = self.scaleJobWalltimeOrMemoryBasedOnInput(realInputVolume=realInputVolume, \
-                            baseInputVolume=baseInputVolume, baseJobPropertyValue=60, \
-                            minJobPropertyValue=60, maxJobPropertyValue=500).value
-        job_max_memory = self.scaleJobWalltimeOrMemoryBasedOnInput(realInputVolume=realInputVolume, \
-                            baseInputVolume=baseInputVolume, baseJobPropertyValue=5000, \
-                            minJobPropertyValue=5000, maxJobPropertyValue=10000).value
+        walltime = self.scaleJobWalltimeOrMemoryBasedOnInput(
+            realInputVolume=realInputVolume, \
+            baseInputVolume=baseInputVolume, baseJobPropertyValue=60,
+            minJobPropertyValue=60, maxJobPropertyValue=500).value
+        job_max_memory = self.scaleJobWalltimeOrMemoryBasedOnInput(
+            realInputVolume=realInputVolume,
+            baseInputVolume=baseInputVolume, baseJobPropertyValue=5000,
+            minJobPropertyValue=5000, maxJobPropertyValue=10000).value
         
         concatenateVCFJobData = self.concatenateIntervalsIntoOneVCFSubWorkflow(
-            refFastaFList=self.newRegisterReferenceData.refFastaFList, \
+            refFastaFList=self.newRegisterReferenceData.refFastaFList,
             fileBasenamePrefix='wholeGenome.%s'%(passingData.fileBasenamePrefix),
             passingData=passingData, \
             intervalJobLs=intervalJobLs,\
@@ -1036,15 +1123,18 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
         
         #bgzip and tabix
         gzipVCFFile = File('%s.gz'%(concatenateVCFJobData.file.name))
-        bgzip_tabix_job = self.addBGZIP_tabix_Job(bgzip_tabix=self.bgzip_tabix_in_reduce, \
-                                parentJobLs=concatenateVCFJobData.jobLs, \
-                                inputF=concatenateVCFJobData.file, outputF=gzipVCFFile, transferOutput=True,\
-                                job_max_memory=job_max_memory/4, walltime=walltime/4)
+        bgzip_tabix_job = self.addBGZIP_tabix_Job(
+            bgzip_tabix=self.bgzip_tabix_in_reduce,
+            parentJobLs=concatenateVCFJobData.jobLs, \
+            inputF=concatenateVCFJobData.file, outputF=gzipVCFFile,
+            transferOutput=True,
+            job_max_memory=job_max_memory/4, walltime=walltime/4)
         
         newRefFastaFile = FastaFile(inputFname=self.newRefFastaFname)
         for seqTitle in newRefFastaFile.seqTitleList:
             #select each chromosome job
-            oneChromosomeVCFFile = File(os.path.join(self.liftOverReduceDirJob.output, '%s.vcf'%(seqTitle)))
+            oneChromosomeVCFFile = File(
+                os.path.join(self.liftOverReduceDirJob.output, '%s.vcf'%(seqTitle)))
             selectOneChromosomeVCFJob = self.addSelectVariantsJob(
                 SelectVariantsJava=self.SelectVariantsJavaInReduce, \
                 GenomeAnalysisTKJar=None, \
@@ -1060,19 +1150,21 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
             
             #remove redundant loci (one or all redudant loci result from alignment errors)
             
-            outputFile = File(os.path.join(self.liftOverReduceDirJob.output, '%s.unique.vcf'%(seqTitle)))
+            outputFile = File(os.path.join(self.liftOverReduceDirJob.output,
+                '%s.unique.vcf'%(seqTitle)))
             removeRedundantLociFromVCFJob = self.addGenericJob(
                 executable=self.RemoveRedundantLociFromVCF_InReduce, \
                 inputFile=selectOneChromosomeVCFJob.output, \
                 inputArgumentOption="-i", \
                 outputFile=outputFile, outputArgumentOption="-o", \
-                parentJobLs=[selectOneChromosomeVCFJob, self.liftOverReduceDirJob, ], \
+                parentJobLs=[selectOneChromosomeVCFJob, self.liftOverReduceDirJob, ],
                 extraDependentInputLs=None, extraOutputLs=None, \
                 frontArgumentList=None, extraArguments=None, \
                 extraArgumentList=None, \
                 transferOutput=False, sshDBTunnel=None, \
                 key2ObjectForJob=None, objectWithDBArguments=None, \
-                no_of_cpus=None, job_max_memory=job_max_memory/2, walltime=walltime, \
+                no_of_cpus=None, job_max_memory=job_max_memory/2,
+                walltime=walltime,
                 max_walltime=None)
             
             #record how many sites are lost
@@ -1088,7 +1180,8 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
             
             
             #sort each vcf file
-            sortedVCFFile = File(os.path.join(self.liftOverReduceDirJob.output, '%s.sorted.vcf'%(seqTitle)))
+            sortedVCFFile = File(os.path.join(self.liftOverReduceDirJob.output,
+                '%s.sorted.vcf'%(seqTitle)))
             vcfSorterJob = self.addPipeCommandOutput2FileJob(
                 commandFile=self.vcfsorterExecutableFile, \
                 outputFile=sortedVCFFile, \
@@ -1102,11 +1195,14 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
                 job_max_memory=job_max_memory, walltime=walltime)
             
             #bgzip and tabix
-            gzipVCFFile = File(os.path.join(self.liftOverReduceDirJob.output, '%s.sorted.vcf.gz'%(seqTitle)))
-            bgzip_tabix_job = self.addBGZIP_tabix_Job(bgzip_tabix=self.bgzip_tabix_in_reduce, \
-                                    parentJob=vcfSorterJob, \
-                                    inputF=vcfSorterJob.output, outputF=gzipVCFFile, transferOutput=True,\
-                                    job_max_memory=job_max_memory/4, walltime=walltime/4)
+            gzipVCFFile = File(os.path.join(self.liftOverReduceDirJob.output,
+                '%s.sorted.vcf.gz'%(seqTitle)))
+            bgzip_tabix_job = self.addBGZIP_tabix_Job(
+                bgzip_tabix=self.bgzip_tabix_in_reduce,
+                parentJob=vcfSorterJob, \
+                inputF=vcfSorterJob.output, outputF=gzipVCFFile,
+                transferOutput=True,
+                job_max_memory=job_max_memory/4, walltime=walltime/4)
         return returnData
     
     def setup_run(self):
@@ -1117,22 +1213,25 @@ class FindNewRefCoordinatesGivenVCFFolderWorkflow(ParentClass, BlastWorkflow, \
         pdata = ParentClass.setup_run(self)
         
         self.oldRegisterReferenceData = self.registerRefFastaFile(
-                            refFastaFname=self.oldRefFastaFname, \
-                            registerAffiliateFiles=True, \
-                            checkAffiliateFileExistence=True)
+            refFastaFname=self.oldRefFastaFname, \
+            registerAffiliateFiles=True, \
+            checkAffiliateFileExistence=True)
         
         self.newRegisterReferenceData = self.registerRefFastaFile(
-                            refFastaFname=self.newRefFastaFname, \
-                            registerAffiliateFiles=True, \
-                            checkAffiliateFileExistence=True)
+            refFastaFname=self.newRefFastaFname, \
+            registerAffiliateFiles=True, \
+            checkAffiliateFileExistence=True)
         
-        sys.stderr.write(" %s files related to the old reference %s; %s files related to new reference, %s.\n"%\
-                        (len(self.oldRegisterReferenceData.refFastaFList), self.oldRefFastaFname,
-                        len(self.newRegisterReferenceData.refFastaFList) , self.newRefFastaFname))
+        print(f" {len(self.oldRegisterReferenceData.refFastaFList)} files "
+            f"related to the old reference {self.oldRefFastaFname}; "
+            f"{len(self.newRegisterReferenceData.refFastaFList)} files "
+            f"related to new reference, {self.newRefFastaFname}.",
+            flush=True)
         return self
 
 if __name__ == '__main__':
-    main_class = FindNewRefCoordinatesGivenVCFFolderWorkflow
-    po = ProcessOptions(sys.argv, main_class.option_default_dict, error_doc=main_class.__doc__)
+    main_class = FindNewRefCoordinatesGivenVCFFolder
+    po = ProcessOptions(sys.argv, main_class.option_default_dict,
+        error_doc=main_class.__doc__)
     instance = main_class(**po.long_option2value)
     instance.run()

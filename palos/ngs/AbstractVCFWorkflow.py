@@ -11,45 +11,50 @@ from palos.io.MatrixFile import MatrixFile
 from palos.ngs.io.VCFFile import VCFFile
 from palos import ngs
 import pegaflow
-from . AbstractNGSWorkflow import AbstractNGSWorkflow
-from . MapReduceGenomeFileWorkflow import MapReduceGenomeFileWorkflow as ParentClass
+import logging
+from . MapReduceGenomeFileWorkflow import MapReduceGenomeFileWorkflow
+ParentClass = MapReduceGenomeFileWorkflow
 
-class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
+class AbstractVCFWorkflow(ParentClass):
     __doc__ = __doc__
     option_default_dict = copy.deepcopy(ParentClass.option_default_dict)
     option_default_dict.update({
-        ('minDepth', 0, float): [0, 'm', 1, 'minimum depth for a call to regarded as non-missing', ],\
-        
+        ('minDepth', 0, float): [0, 'm', 1,
+            'minimum depth for a call to regarded as non-missing', ],\
         ("ligateVcfPerlPath", 1, ): ["%s/bin/umake/scripts/ligateVcf.pl", '', 1, 
             'path to ligateVcf.pl'],\
         ("notToKnowNoOfLoci", 0, int): [0, '', 0, 
-            'By default, this program infers the number of loci for each VCF file (for splitting, etc.). '
-            'Either use the first number of filename as db id or read through the file. Toggle this to disable it.'],\
+            'By default, this program infers the number of loci for each VCF '
+            'file (for splitting, etc.). '
+            'Either use the first number of filename as db id or read through '
+            'the file. Toggle this to disable it.'],\
         ("notToUseDBToInferVCFNoOfLoci", 0, int): [0, '', 0, 
             'Assuming --notToKnowNoOfLoci is off, '
             'toggle this to infer the number of loci by strictly reading through the file'],\
-        ('minNoOfLociInVCF', 0, int): [5, '', 1, 'minimum number of loci for an input VCF file to be included.', ],\
+        ('minNoOfLociInVCF', 0, int): [5, '', 1, 
+            'minimum number of loci for an input VCF file to be included.', ],\
         })
     #update these two as they mean the number of loci now, not base pairs
     option_default_dict[('intervalOverlapSize', 1, int)][0] = 100
     option_default_dict[('intervalSize', 1, int)][0] = 10000
-    option_default_dict[('inputSuffixList', 0, )][0] = ".vcf"	#default input suffix is .vcf
-    
+    option_default_dict[('inputSuffixList', 0, )][0] = ".vcf"
+    #default input suffix is .vcf
     
     def __init__(self,  **keywords):
         """
-        2012.1.17
         """
         ParentClass.__init__(self, **keywords)
         if getattr(self, "inputDir", None):
             self.inputDir = os.path.abspath(self.inputDir)
         
         if hasattr(self, 'ligateVcfPerlPath'):
-            self.ligateVcfPerlPath =  self.insertHomePath(self.ligateVcfPerlPath, self.home_path)
+            self.ligateVcfPerlPath = self.insertHomePath(
+                self.ligateVcfPerlPath, self.home_path)
 
-    def addAddVCFFile2DBJob(self, executable=None, inputFile=None, genotypeMethodShortName=None,\
-        logFile=None, format=None, data_dir=None, checkEmptyVCFByReading=None, commit=False, \
-        parentJobLs=None, extraDependentInputLs=None, transferOutput=False, \
+    def addAddVCFFile2DBJob(self, executable=None, inputFile=None,
+        genotypeMethodShortName=None, logFile=None, format=None,
+        data_dir=None, checkEmptyVCFByReading=None, commit=False,
+        parentJobLs=None, extraDependentInputLs=None, transferOutput=False,
         extraArguments=None, job_max_memory=2000, **keywords):
         """
         2012.12.12 use extended argument name
@@ -65,17 +70,21 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
         if checkEmptyVCFByReading:
             extraArgumentList.extend(['--checkEmptyVCFByReading'])
         if genotypeMethodShortName:
-            extraArgumentList.extend(['--genotypeMethodShortName', genotypeMethodShortName, ])
+            extraArgumentList.extend(['--genotypeMethodShortName', \
+                genotypeMethodShortName, ])
         if commit:
             extraArgumentList.append('--commit')
         if extraArguments:
             extraArgumentList.append(extraArguments)
         
-        job= self.addDBJob(executable=executable, inputFile=inputFile, outputFile=None, \
-                        parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
-                        extraOutputLs=[logFile],\
-                        transferOutput=transferOutput, \
-                        extraArgumentList=extraArgumentList, job_max_memory=job_max_memory, **keywords)
+        job= self.addDBJob(executable=executable, inputFile=inputFile,
+            outputFile=None,
+            parentJobLs=parentJobLs,
+            extraDependentInputLs=extraDependentInputLs,
+            extraOutputLs=[logFile],
+            transferOutput=transferOutput, \
+            extraArgumentList=extraArgumentList, job_max_memory=job_max_memory,
+            **keywords)
         return job
     
     def registerExecutables(self):
@@ -1042,33 +1051,37 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
         2013.04.07 wrap all standard pre-run() related functions into this function.
             setting up for run(), called by run()
         """
-        pdata = AbstractNGSWorkflow.setup_run(self)
+        pdata = ParentClass.setup_run(self)
         
         #self.chr2size = {}
         #self.chr2size = set(['Contig149'])	#temporary when testing Contig149
-        #self.chr2size = set(['1MbBAC'])	#temporary when testing the 1Mb-BAC (formerly vervet_path2)
-        if self.needSplitChrIntervalData:	#2013.06.21 defined in ParentClass.__init__()
-            chr2IntervalDataLs = self.getChr2IntervalDataLsBySplitChrSize(chr2size=self.chr2size, \
-                                                    intervalSize=self.intervalSize, \
-                                                    intervalOverlapSize=self.intervalOverlapSize)
+        #self.chr2size = set(['1MbBAC'])
+        # #temporary when testing the 1Mb-BAC (formerly vervet_path2)
+        if self.needSplitChrIntervalData:
+            #2013.06.21 defined in ParentClass.__init__()
+            chr2IntervalDataLs = self.getChr2IntervalDataLsBySplitChrSize(
+                chr2size=self.chr2size,
+                intervalSize=self.intervalSize, \
+                intervalOverlapSize=self.intervalOverlapSize)
         else:
             chr2IntervalDataLs = None
         inputData = None
         firstVCFJobData = None
         if getattr(self, 'inputDir', None):	#2013.05.20 bugfix
-            inputData = self.registerFilesOfInputDir(inputDir=self.inputDir, input_site_handler=self.input_site_handler, \
-                                            checkEmptyVCFByReading=self.checkEmptyVCFByReading,\
-                                            pegasusFolderName=self.pegasusFolderName,\
-                                            maxContigID=self.maxContigID, \
-                                            minContigID=self.minContigID,\
-                                            db_vervet=getattr(self, 'db_vervet', None), \
-                                            needToKnowNoOfLoci=getattr(self, 'needToKnowNoOfLoci', True),\
-                                            minNoOfLociInVCF=getattr(self, 'minNoOfLociInVCF', 10))
+            inputData = self.registerFilesOfInputDir(inputDir=self.inputDir,
+                input_site_handler=self.input_site_handler,
+                checkEmptyVCFByReading=self.checkEmptyVCFByReading,
+                pegasusFolderName=self.pegasusFolderName,\
+                maxContigID=self.maxContigID, \
+                minContigID=self.minContigID,\
+                db_vervet=getattr(self, 'db_vervet', None), \
+                needToKnowNoOfLoci=getattr(self, 'needToKnowNoOfLoci', True),
+                minNoOfLociInVCF=getattr(self, 'minNoOfLociInVCF', 10))
             if inputData and inputData.jobDataLs:
                 firstVCFJobData = inputData.jobDataLs[0]
-                #job=None, jobLs=[], vcfFile=inputF, tbi_F=tbi_F, file=inputF, fileLs=[inputF, tbi_F]
                 firstVCFFile = firstVCFJobData.file
-                sys.stderr.write("\t VCF file %s is chosen as an example VCF for any job that needs a random VCF file.\n"%(firstVCFFile))
+                print(f"\t VCF file {firstVCFFile} is chosen as an example VCF "
+                    "for any job that needs a random VCF file.", flush=True)
         
         registerReferenceData = self.getReferenceSequence()
         
@@ -1086,21 +1099,24 @@ class AbstractVCFWorkflow(ParentClass, AbstractNGSWorkflow):
         pdata = self.setup_run()
         inputData=pdata.inputData
         if len(inputData.jobDataLs)<=0:
-            sys.stderr.write("No VCF files in this folder , %s.\n"%self.inputDir)
+            logging.error(f"No VCF files in this folder, {self.inputDir}.")
             sys.exit(0)
                 
-        self.addAllJobs(inputVCFData=inputData, inputData=inputData, \
-                chr2IntervalDataLs=self.chr2IntervalDataLs, samtools=self.samtools, \
-                GenomeAnalysisTKJar=self.GenomeAnalysisTKJar, \
-                CreateSequenceDictionaryJava=self.CreateSequenceDictionaryJava, \
-                CreateSequenceDictionaryJar=self.CreateSequenceDictionaryJar, \
-                BuildBamIndexFilesJava=self.BuildBamIndexFilesJava, BuildBamIndexJar=self.BuildBamIndexJar,\
-                mv=self.mv, \
-                registerReferenceData=pdata.registerReferenceData,\
-                needFastaIndexJob=getattr(self, 'needFastaIndexJob',False), \
-                needFastaDictJob=getattr(self, 'needFastaDictJob', False), \
+        self.addAllJobs(inputVCFData=inputData, inputData=inputData,
+                chr2IntervalDataLs=self.chr2IntervalDataLs,
+                samtools=self.samtools,
+                GenomeAnalysisTKJar=self.GenomeAnalysisTKJar,
+                CreateSequenceDictionaryJava=self.CreateSequenceDictionaryJava,
+                CreateSequenceDictionaryJar=self.CreateSequenceDictionaryJar,
+                BuildBamIndexFilesJava=self.BuildBamIndexFilesJava,
+                BuildBamIndexJar=self.BuildBamIndexJar,
+                mv=self.mv,
+                registerReferenceData=pdata.registerReferenceData,
+                needFastaIndexJob=getattr(self, 'needFastaIndexJob',False),
+                needFastaDictJob=getattr(self, 'needFastaDictJob', False),
                 data_dir=self.data_dir, no_of_gatk_threads = 1,\
-                intervalSize=self.intervalSize, intervalOverlapSize=self.intervalOverlapSize, \
-                outputDirPrefix=self.pegasusFolderName, transferOutput=True,)
+                intervalSize=self.intervalSize,
+                intervalOverlapSize=self.intervalOverlapSize,
+                outputDirPrefix=self.pegasusFolderName, transferOutput=True)
         
         self.end_run()

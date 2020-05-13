@@ -406,7 +406,7 @@ class AbstractBioinfoWorkflow(ParentClass):
             path=os.path.join(self.pymodulePath, "mapper/extractor/tabixRetrieve.sh"),
             name='tabixRetrieve', clusterSizeMultiplier=1)
 
-        # from palos/polymorphism/FindNewRefCoordinatesGivenVCFFolderWorkflow.py
+        # from palos/polymorphism/FindNewRefCoordinatesGivenVCFFolder.py
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, \
             "polymorphism/mapper/LiftOverVCFBasedOnCoordinateMap.py"), \
             name='LiftOverVCFBasedOnCoordinateMap', clusterSizeMultiplier=1)

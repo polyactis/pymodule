@@ -85,8 +85,8 @@ class AbstractNGSWorkflow(ParentClass):
             'To filter alignments with this field'],\
         ('skipDoneAlignment', 0, int):[0, '', 0, 
             'Skip alignment whose db_entry is complete and affiliated file is valid'
-            '(for ShortRead2AlignmentWorkflow or '
-            'AlignmentReadBaseQualityRecalibrationWorkflow)'],\
+            '(for ShortRead2Alignment or '
+            'AlignmentReadBaseQualityRecalibration)'],\
         ('checkEmptyVCFByReading', 0, int):[0, 'E', 0, 
             'Toggle to check if a vcf file is empty by reading its content'],\
         ("needFastaIndexJob", 0, int): [0, 'A', 0, 
@@ -655,7 +655,8 @@ class AbstractNGSWorkflow(ParentClass):
             extraDependentInputLs=[]
         extraDependentInputLs.extend([inputBamF, self.PicardJar])
 
-        job= self.addGenericJob(executable=BuildBamIndexFilesJava,
+        job= self.addGenericJob(
+            executable=BuildBamIndexFilesJava,
             inputFile=None, outputFile=None,
             outputArgumentOption="-o",
             parentJobLs=parentJobLs,
@@ -1850,7 +1851,7 @@ option:
         walltime=180, needBAMIndexJob=True, **keywords):
         """
         2013.04.09 added argument needBAMIndexJob
-        2013.04.05 moved from ShortRead2AlignmentWorkflow
+        2013.04.05 moved from ShortRead2Alignment
         2012.9.19
         """
         memRequirementData = self.getJVMMemRequirment(
@@ -1902,7 +1903,7 @@ option:
         transferOutput=False, walltime=180, max_walltime=1200, \
         needBAMIndexJob=True, **keywords):
         """
-        2013.04.09 moved from ShortRead2AlignmentWorkflow.py
+        2013.04.09 moved from ShortRead2Alignment.py
             added argument needBAMIndexJob and the bamIndexJob
         2012.9.19 split out of addAlignmentJob()
         """

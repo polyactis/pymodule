@@ -15,7 +15,7 @@ Examples:
 Description:
 	2012.10 child of FindSNPPositionOnNewRefFromFlankingBlastOutput.
 		Its main input is bwa alingment output (.bam file),
-		This program is used as part of workflow inside FindNewRefCoordinatesGivenVCFFolderWorkflow.py.
+		This program is used as part of workflow inside FindNewRefCoordinatesGivenVCFFolder.py.
 		
 		
 """

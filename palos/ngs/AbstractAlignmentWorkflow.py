@@ -4,18 +4,18 @@
 """
 import sys, os, math
 import copy
+import logging
 from pegaflow.DAX3 import Executable, File, PFN, Link, Job
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
 from palos import ngs
 import pegaflow
-from . AbstractNGSWorkflow import AbstractNGSWorkflow
+from . MapReduceGenomeFileWorkflow import MapReduceGenomeFileWorkflow
 
-class AbstractAlignmentWorkflow(AbstractNGSWorkflow):
+ParentClass = MapReduceGenomeFileWorkflow
+class AbstractAlignmentWorkflow(ParentClass):
     __doc__ = __doc__
-    option_default_dict = copy.deepcopy(AbstractNGSWorkflow.option_default_dict)
+    option_default_dict = copy.deepcopy(ParentClass.option_default_dict)
     #option_default_dict.pop(('inputDir', 0, ))
-    option_default_dict.update({
-                        })
     commonAlignmentWorkflowOptionDict = {
         ('ind_seq_id_ls', 0, ): ['', 'i', 1, 
             'a comma/dash-separated list of IndividualSequence.id. alignments come from these', ],\
@@ -26,10 +26,12 @@ class AbstractAlignmentWorkflow(AbstractNGSWorkflow):
         ("alignment_method_id", 0, int): [None, 'G', 1,
             'To filter alignments. None: whatever; integer: AlignmentMethod.id'],\
         ("local_realigned", 0, int): [None, '', 1, 
-        'To filter which input alignments to fetch from db (i.e. AlignmentReadBaseQualityRecalibrationWorkflow.py)'
-        'OR to instruct whether local_realigned should be applied (i.e. ShortRead2AlignmentWorkflow.py)'],\
+        'To filter which input alignments to fetch from db (i.e. '
+        'AlignmentReadBaseQualityRecalibration.py)'
+        'OR to instruct whether local_realigned should be applied (i.e. ShortRead2Alignment.py)'],\
         ('defaultSampleAlignmentDepth', 1, int): [10, '', 1, 
-            "when database doesn't have median_depth info for one alignment, use this number instead.", ],\
+            "when database doesn't have median_depth info for one alignment, "
+            "use this number instead.", ],\
         ('individual_sequence_file_raw_id_type', 1, int): [1, '', 1, 
             "1: only all-library-fused libraries,\n"
             "2: only library-specific alignments,\n"
@@ -37,14 +39,18 @@ class AbstractAlignmentWorkflow(AbstractNGSWorkflow):
         }
     option_default_dict.update(commonAlignmentWorkflowOptionDict)
     partitionWorkflowOptionDict= {
-        ("selectedRegionFname", 0, ): ["", 'R', 1, 'the file is in bed format, tab-delimited, chr start stop. '
+        ("selectedRegionFname", 0, ): ["", 'R', 1, 
+            'the file is in bed format, tab-delimited, chr start stop. '
             'used to restrict SAMtools/GATK to only make calls at this region. '
             'start and stop are 0-based. i.e. start=0, stop=100 means bases from 0-99. '
-            'This overrides the contig/chromosome selection approach defined by --contigMaxRankBySize and --contigMinRankBySize. '
+            'This overrides the contig/chromosome selection approach defined'
+            ' by --contigMaxRankBySize and --contigMinRankBySize. '
             'This file would be split into maxNoOfRegionsPerJob lines.'],\
         ('maxNoOfRegionsPerJob', 1, int): [5000, 'K', 1, 
-            'Given selectedRegionFname, this dictates the maximum number of regions each job would handle. '
-            'The actual number could be lower because the regions are first grouped into chromosomes. '
+            'Given selectedRegionFname, this dictates the maximum number of '
+            'regions each job would handle. '
+            'The actual number could be lower because the regions are first '
+            'grouped into chromosomes. '
             'If one chromosome has <maxNoOfRegionsPerJob, then that job handles less.', ],\
         }
     option_default_dict.update(partitionWorkflowOptionDict)
@@ -54,7 +60,7 @@ class AbstractAlignmentWorkflow(AbstractNGSWorkflow):
         2012.1.17
         """
         #extra__init__() will be executed inside __init__()
-        AbstractNGSWorkflow.__init__(self, **keywords)
+        ParentClass.__init__(self, **keywords)
         listArgumentName_data_type_ls = [('ind_seq_id_ls', int), ("ind_aln_id_ls", int)]
         ProcessOptions.processListArguments(listArgumentName_data_type_ls, 
             emptyContent=[], class_to_have_attr=self)
@@ -80,7 +86,8 @@ class AbstractAlignmentWorkflow(AbstractNGSWorkflow):
                     if parentJob:
                         self.addJobDependency(parentJob=parentJob, childJob=job)
 
-    def addAlignmentAsInputToPlatypusJobLs(self, alignmentDataLs=None, jobLs=[], jobInputOption="--bamFiles"):
+    def addAlignmentAsInputToPlatypusJobLs(self, alignmentDataLs=None, jobLs=[],
+        jobInputOption="--bamFiles"):
         """
         2013.05.21 bugfix: pegasus/condor would truncate long single-argument.
         2013.05.16 different from addAlignmentAsInputToJobLs, that platypus is like this:
@@ -128,9 +135,11 @@ class AbstractAlignmentWorkflow(AbstractNGSWorkflow):
         2011-9-14
             The read-group adding jobs will have a "move" part that overwrites
                  the original bam&bai if site_handler and input_site_handler is same.
-            For those alignment files that don't need to. It doesn't matter. pegasus will transfer/symlink them.
+            For those alignment files that don't need to. It doesn't matter.
+             pegasus will transfer/symlink them.
         """
-        sys.stderr.write("Adding add-read-group2BAM jobs for %s alignments if read group is not detected ..."%(len(alignmentDataLs)))
+        print(f"Adding add-read-group2BAM jobs for {len(alignmentDataLs)} "
+            f"alignments if read group is not detected ...", flush=True)
         job_max_memory = 3500	#in MB
         javaMemRequirement = "-Xms128m -Xmx%sm"%job_max_memory
         indexJobMaxMem=2500
@@ -155,7 +164,7 @@ class AbstractAlignmentWorkflow(AbstractNGSWorkflow):
                 #read_group = '%s_%s_%s_%s_vs_%s'%(alignment.id, alignment.ind_seq_id, 
                 # alignment.individual_sequence.individual.code, \
                 #						sequencer, alignment.ref_ind_seq_id)
-                read_group = alignment.getReadGroup()	##2011-11-02
+                read_group = alignment.getReadGroup()
                 if sequencer=='454':
                     platform_id = 'LS454'
                 elif sequencer=='GA':
@@ -165,16 +174,22 @@ class AbstractAlignmentWorkflow(AbstractNGSWorkflow):
 
                 # the add-read-group job
                 #addRGJob = Job(namespace=namespace, name=addRGExecutable.name, version=version)
-                addRGJob = Job(namespace=self.namespace, name=AddOrReplaceReadGroupsJava.name, version=self.version)
+                addRGJob = Job(namespace=self.namespace,
+                    name=AddOrReplaceReadGroupsJava.name, version=self.version)
                 outputRGSAM = File(os.path.join(addRG2BamDir, os.path.basename(alignment.path)))
 
-                addRGJob.addArguments(javaMemRequirement, '-jar', AddOrReplaceReadGroupsJar, \
+                addRGJob.addArguments(javaMemRequirement,
+                    '-jar', AddOrReplaceReadGroupsJar,
                     "INPUT=", bamF,\
-                    'RGID=%s'%(read_group), 'RGLB=%s'%(platform_id), 'RGPL=%s'%(platform_id), \
-                    'RGPU=%s'%(read_group), 'RGSM=%s'%(read_group),\
-                    'OUTPUT=', outputRGSAM, 'SORT_ORDER=coordinate', "VALIDATION_STRINGENCY=LENIENT")
-                    #(adding the SORT_ORDER doesn't do sorting but it marks the header as sorted so that BuildBamIndexJar won't fail.)
-                self.addJobUse(addRGJob, file=AddOrReplaceReadGroupsJar, transfer=True, register=True, link=Link.INPUT)
+                    'RGID=%s'%(read_group), 'RGLB=%s'%(platform_id),
+                    'RGPL=%s'%(platform_id),
+                    'RGPU=%s'%(read_group), 'RGSM=%s'%(read_group),
+                    'OUTPUT=', outputRGSAM, 'SORT_ORDER=coordinate',
+                    "VALIDATION_STRINGENCY=LENIENT")
+                    #(adding the SORT_ORDER doesn't do sorting but it marks the header
+                    #  as sorted so that BuildBamIndexJar won't fail.)
+                self.addJobUse(addRGJob, file=AddOrReplaceReadGroupsJar,
+                    transfer=True, register=True, link=Link.INPUT)
                 if tmpDir:
                     addRGJob.addArguments("TMP_DIR=%s"%tmpDir)
                 addRGJob.uses(bamF, transfer=True, register=True, link=Link.INPUT)
@@ -187,40 +202,15 @@ class AbstractAlignmentWorkflow(AbstractNGSWorkflow):
                 self.addJob(addRGJob)
 
 
-                index_sam_job = self.addBAMIndexJob(BuildBamIndexFilesJava=self.BuildBamIndexFilesJava,
+                index_sam_job = self.addBAMIndexJob(
+                    BuildBamIndexFilesJava=self.BuildBamIndexFilesJava,
                     BuildBamIndexJar=self.BuildBamIndexJar, \
-                    inputBamF=outputRGSAM, parentJobLs=[addRGJob], transferOutput=True, javaMaxMemory=2000)
+                    inputBamF=outputRGSAM, parentJobLs=[addRGJob],
+                    transferOutput=True, javaMaxMemory=2000)
                 newAlignmentData = PassingData(alignment=alignment)
                 newAlignmentData.jobLs = [index_sam_job, addRGJob]
                 newAlignmentData.bamF = index_sam_job.bamFile
                 newAlignmentData.baiF = index_sam_job.baiFile
-                """
-                # add the index job to the bamF (needs to be re-indexed)
-                index_sam_job = Job(namespace=namespace, name=BuildBamIndexFilesJava.name, version=version)
-
-                if input_site_handler==site_handler:	#on the same site. overwrite the original file without RG
-                    mvJob = Job(namespace=namespace, name=mv.name, version=version)
-                    mvJob.addArguments(outputRGSAM, inputFname)	#watch, it's inputFname, not input. input is in relative path.
-                    #samToBamJob.uses(outputRG, transfer=False, register=True, link=Link.OUTPUT)	#don't register it here
-                    self.addJob(mvJob)
-                    self.depends(parent=addRGJob, child=mvJob)
-                    bai_output = File('%s.bai'%inputFname)	#in absolute path, don't register it to the job
-                else:
-                    ##on different site, input for index should be outputRGSAM and register it as well
-                    mvJob = addRGJob
-                    bamF = outputRGSAM
-                    addRGJob.uses(outputRGSAM, transfer=True, register=True, link=Link.OUTPUT)
-                    bai_output = File('%s.bai'%outputRGSAMFname)
-                    index_sam_job.uses(bai_output, transfer=True, register=False, link=Link.OUTPUT)
-
-                index_sam_job
-
-                pegaflow.setJobResourceRequirement(index_sam_job, job_max_memory=indexJobMaxMem)
-
-                self.addJob(index_sam_job)
-                self.depends(parent=mvJob, child=index_sam_job)
-                alignmentId2RGJobDataLs[alignment.id]= [index_sam_job, inputFile, bai_output]
-                """
                 no_of_rg_jobs += 1
             else:
                 newAlignmentData = alignmentData
@@ -231,7 +221,8 @@ class AbstractAlignmentWorkflow(AbstractNGSWorkflow):
     def preReduce(self, passingData=None, transferOutput=True, **keywords):
         """
         2012.9.17
-            setup additional mkdir folder jobs, before mapEachAlignment, mapEachChromosome, mapReduceOneAlignment
+            setup additional mkdir folder jobs, before mapEachAlignment,
+                mapEachChromosome, mapReduceOneAlignment
         """
         returnData = PassingData(no_of_jobs = 0)
         returnData.jobDataLs = []
@@ -276,7 +267,8 @@ class AbstractAlignmentWorkflow(AbstractNGSWorkflow):
         transferOutput=True, **keywords):
         """
         2012.9.22
-            similar to reduceBeforeEachAlignmentData() but for mapping programs that run on one alignment each.
+            similar to reduceBeforeEachAlignmentData() but
+             for mapping programs that run on one alignment each.
 
             passingData.AlignmentJobAndOutputLs = []
             passingData.bamFnamePrefix = bamFnamePrefix
@@ -307,7 +299,8 @@ class AbstractAlignmentWorkflow(AbstractNGSWorkflow):
         returnData.mapEachIntervalDataLs = mapEachIntervalDataLs
         return returnData
 
-    def reduceBeforeEachAlignment(self, passingData=None, transferOutput=True, **keywords):
+    def reduceBeforeEachAlignment(self, passingData=None,
+        transferOutput=True, **keywords):
         """
         2012.9 setup some reduce jobs before loop over all intervals of one alignment begins.
             these reduce jobs will collect stuff from each map() job.
@@ -317,7 +310,8 @@ class AbstractAlignmentWorkflow(AbstractNGSWorkflow):
         returnData.jobDataLs = []
         return returnData
 
-    def reduceAfterEachAlignment(self, passingData=None, mapEachChromosomeDataLs=None,\
+    def reduceAfterEachAlignment(self, passingData=None,
+        mapEachChromosomeDataLs=None,
         reduceAfterEachChromosomeDataLs=None,\
         transferOutput=True, **keywords):
         """
@@ -338,9 +332,11 @@ class AbstractAlignmentWorkflow(AbstractNGSWorkflow):
         returnData.reduceAfterEachAlignmentDataLs = reduceAfterEachAlignmentDataLs
         return returnData
 
-    def mapReduceOneAlignment(self, alignmentData=None, passingData=None, \
-        chrIDSet=None, chrSizeIDList=None, chr2IntervalDataLs=None, chr2VCFJobData=None, \
-        outputDirPrefix=None, transferOutput=False, skipChromosomeIfVCFMissing=False, **keywords):
+    def mapReduceOneAlignment(self, alignmentData=None, passingData=None,
+        chrIDSet=None, chrSizeIDList=None, chr2IntervalDataLs=None,
+        chr2VCFJobData=None,
+        outputDirPrefix=None, transferOutput=False,
+        skipChromosomeIfVCFMissing=False, **keywords):
         """
         2013.04.11 moved from AbstractAlignmentAndVCFWorkflow.py
         2013.04.08, added skipChromosomeIfVCFMissing
@@ -364,17 +360,17 @@ class AbstractAlignmentWorkflow(AbstractNGSWorkflow):
                 VCFJobData = None
             if VCFJobData is None:
                 if self.report:
-                    sys.stderr.write("WARNING: no VCFJobData for chromosome %s.\n"%(chromosome))
+                    logging.warn(f"No VCFJobData for chromosome {chromosome}.")
                 if skipChromosomeIfVCFMissing:
                     continue
-                VCFJobData = PassingData(job=None, jobLs=[],\
-                                    vcfFile=None, tbi_F=None, file=None, fileLs=[])
+                VCFJobData = PassingData(job=None, jobLs=[],
+                    vcfFile=None, tbi_F=None, file=None, fileLs=[])
                 VCFFile = None
             else:
                 VCFFile = VCFJobData.file
                 if VCFFile is None:
                     if self.report:
-                        sys.stderr.write("WARNING: no VCFFile for chromosome %s.\n"%(chromosome))
+                        logging.warn(f"No VCFFile for chromosome {chromosome}.")
                     if skipChromosomeIfVCFMissing:
                         continue
             passingData.chromosome = chromosome
@@ -403,70 +399,85 @@ class AbstractAlignmentWorkflow(AbstractNGSWorkflow):
                     overlapFileBasenameSignature = intervalData.overlapIntervalFileBasenameSignature
 
                     mapEachIntervalData = self.mapEachInterval(
-                        alignmentData=alignmentData, intervalData=intervalData,\
+                        alignmentData=alignmentData,
+                        intervalData=intervalData,
                         chromosome=chromosome,\
                         VCFJobData=VCFJobData, passingData=passingData,
-                        reduceBeforeEachAlignmentData=reduceBeforeEachAlignmentData,\
+                        reduceBeforeEachAlignmentData=reduceBeforeEachAlignmentData,
                         mapEachAlignmentData=mapEachAlignmentData,\
-                        mapEachChromosomeData=mapEachChromosomeData, transferOutput=False, **keywords)
+                        mapEachChromosomeData=mapEachChromosomeData,
+                        transferOutput=False, **keywords)
                     passingData.mapEachIntervalData = mapEachIntervalData
                     mapEachIntervalDataLs.append(mapEachIntervalData)
 
-                    linkMapToReduceData = self.linkMapToReduce(mapEachIntervalData=mapEachIntervalData, \
-                                        preReduceReturnData=preReduceReturnData, \
-                                        reduceBeforeEachAlignmentData=reduceBeforeEachAlignmentData,\
-                                        mapEachAlignmentData=mapEachAlignmentData,\
-                                        passingData=passingData, \
-                                        **keywords)
+                    linkMapToReduceData = self.linkMapToReduce(
+                        mapEachIntervalData=mapEachIntervalData, \
+                        preReduceReturnData=preReduceReturnData, \
+                        reduceBeforeEachAlignmentData=reduceBeforeEachAlignmentData,
+                        mapEachAlignmentData=mapEachAlignmentData,\
+                        passingData=passingData, \
+                        **keywords)
 
-            reduceAfterEachChromosomeData = self.reduceAfterEachChromosome(chromosome=chromosome, \
-                                passingData=passingData, \
-                                mapEachIntervalDataLs=passingData.mapEachIntervalDataLs,\
-                                transferOutput=False, data_dir=self.data_dir, \
-                                **keywords)
+            reduceAfterEachChromosomeData = self.reduceAfterEachChromosome(
+                chromosome=chromosome, \
+                passingData=passingData, \
+                mapEachIntervalDataLs=passingData.mapEachIntervalDataLs,\
+                transferOutput=False, data_dir=self.data_dir, \
+                **keywords)
             passingData.reduceAfterEachChromosomeData = reduceAfterEachChromosomeData
-            passingData.reduceAfterEachChromosomeDataLs.append(reduceAfterEachChromosomeData)
+            passingData.reduceAfterEachChromosomeDataLs.append(
+                reduceAfterEachChromosomeData)
 
-            gzipReduceAfterEachChromosomeData = self.addGzipSubWorkflow(\
-                    inputData=reduceAfterEachChromosomeData, transferOutput=transferOutput,\
-                    outputDirPrefix="%sreduceAfterEachChromosome"%(outputDirPrefix), \
-                    topOutputDirJob=passingData.gzipReduceAfterEachChromosomeFolderJob, report=False)
-            passingData.gzipReduceAfterEachChromosomeFolderJob = gzipReduceAfterEachChromosomeData.topOutputDirJob
+            gzipReduceAfterEachChromosomeData = self.addGzipSubWorkflow(
+                inputData=reduceAfterEachChromosomeData,
+                transferOutput=transferOutput,
+                outputDirPrefix="%sreduceAfterEachChromosome"%(outputDirPrefix), \
+                topOutputDirJob=passingData.gzipReduceAfterEachChromosomeFolderJob,
+                report=False)
+            passingData.gzipReduceAfterEachChromosomeFolderJob = \
+                gzipReduceAfterEachChromosomeData.topOutputDirJob
         return returnData
 
     def setup(self, chr2IntervalDataLs=None, **keywords):
         """
-        2013.09.02 use self.chr2size to derive chrIDSet. chr2IntervalDataLs is not used
+        2013.09.02 use self.chr2size to derive chrIDSet.
+            chr2IntervalDataLs is not used.
         2013.04.09 added chrSizeIDList in return
         2013.1.25
             chr2VCFJobData is None.
         """
         chrIDSet = set(self.chr2size.keys())
-        chrSizeIDList = [(chromosomeSize, chromosome) for chromosome, chromosomeSize in self.chr2size.items()]
+        chrSizeIDList = [(chromosomeSize, chromosome) for chromosome, 
+            chromosomeSize in self.chr2size.items()]
         chrSizeIDList.sort()
         chrSizeIDList.reverse()	#from big to small
-        return PassingData(chrIDSet=chrIDSet, chr2VCFJobData=None, chrSizeIDList=chrSizeIDList)
+        return PassingData(chrIDSet=chrIDSet, chr2VCFJobData=None,
+            chrSizeIDList=chrSizeIDList)
 
-    def addAllJobs(self, alignmentDataLs=None, chr2IntervalDataLs=None, samtools=None, \
-                GenomeAnalysisTKJar=None, \
-                MergeSamFilesJar=None, \
-                CreateSequenceDictionaryJava=None, CreateSequenceDictionaryJar=None, \
-                BuildBamIndexFilesJava=None, BuildBamIndexJar=None,\
-                mv=None, skipDoneAlignment=False,\
-                registerReferenceData=None, \
-                needFastaIndexJob=False, needFastaDictJob=False, \
-                data_dir=None, no_of_gatk_threads = 1, \
-                outputDirPrefix="", transferOutput=True, **keywords):
+    def addAllJobs(self, alignmentDataLs=None, chr2IntervalDataLs=None,
+        samtools=None,
+        GenomeAnalysisTKJar=None,
+        MergeSamFilesJar=None,
+        CreateSequenceDictionaryJava=None,
+        CreateSequenceDictionaryJar=None,
+        BuildBamIndexFilesJava=None, BuildBamIndexJar=None,\
+        mv=None, skipDoneAlignment=False,\
+        registerReferenceData=None, \
+        needFastaIndexJob=False, needFastaDictJob=False, \
+        data_dir=None, no_of_gatk_threads = 1, \
+        outputDirPrefix="", transferOutput=True, **keywords):
         """
         2012.7.26
         """
-        prePreprocessData = self.setup(chr2IntervalDataLs=chr2IntervalDataLs, **keywords)
+        prePreprocessData = self.setup(chr2IntervalDataLs=chr2IntervalDataLs,
+            **keywords)
         chrIDSet = prePreprocessData.chrIDSet
         chrSizeIDList = prePreprocessData.chrSizeIDList
         chr2VCFJobData = prePreprocessData.chr2VCFJobData
 
-        sys.stderr.write("Adding jobs that work on %s alignments (& possibly VCFs) for %s chromosomes/contigs ..."%\
-                        (len(alignmentDataLs), len(chrIDSet)))
+        print(f"Adding jobs that work on {len(alignmentDataLs)} alignments "
+            f"(& possibly VCFs) for {len(chrIDSet)} chromosomes/contigs ...",
+            flush=True)
         refFastaFList = registerReferenceData.refFastaFList
         refFastaF = refFastaFList[0]
 
@@ -480,15 +491,18 @@ class AbstractAlignmentWorkflow(AbstractNGSWorkflow):
         self.reduceOutputDirJob = reduceOutputDirJob
 
         if needFastaDictJob or registerReferenceData.needPicardFastaDictJob:
-            fastaDictJob = self.addRefFastaDictJob(CreateSequenceDictionaryJava=CreateSequenceDictionaryJava, \
-                CreateSequenceDictionaryJar=CreateSequenceDictionaryJar, refFastaF=refFastaF)
+            fastaDictJob = self.addRefFastaDictJob(
+                CreateSequenceDictionaryJava=CreateSequenceDictionaryJava,
+                CreateSequenceDictionaryJar=CreateSequenceDictionaryJar,
+                refFastaF=refFastaF)
             refFastaDictF = fastaDictJob.refFastaDictF
         else:
             fastaDictJob = None
             refFastaDictF = registerReferenceData.refPicardFastaDictF
 
         if needFastaIndexJob or registerReferenceData.needSAMtoolsFastaIndexJob:
-            fastaIndexJob = self.addRefFastaFaiIndexJob(samtools=samtools, refFastaF=refFastaF)
+            fastaIndexJob = self.addRefFastaFaiIndexJob(samtools=samtools,
+                refFastaF=refFastaF)
             refFastaIndexF = fastaIndexJob.refFastaIndexF
         else:
             fastaIndexJob = None
@@ -507,50 +521,50 @@ class AbstractAlignmentWorkflow(AbstractNGSWorkflow):
         #	mapEachIntervalDataLs is reset right after each chromosome is chosen.
         #	all reduce dataLs never gets reset.
         passingData = PassingData(AlignmentJobAndOutputLs=[], \
-                    alignmentDataLs = alignmentDataLs,\
-                    bamFnamePrefix=None, \
+            alignmentDataLs = alignmentDataLs,\
+            bamFnamePrefix=None, \
 
-                    outputDirPrefix=outputDirPrefix, \
-                    topOutputDirJob=topOutputDirJob,\
-                    plotOutputDirJob=plotOutputDirJob,\
-                    reduceOutputDirJob = reduceOutputDirJob,\
+            outputDirPrefix=outputDirPrefix, \
+            topOutputDirJob=topOutputDirJob,\
+            plotOutputDirJob=plotOutputDirJob,\
+            reduceOutputDirJob = reduceOutputDirJob,\
 
-                    refFastaFList=refFastaFList, \
-                    registerReferenceData= registerReferenceData,\
-                    refFastaF=refFastaFList[0],\
+            refFastaFList=refFastaFList, \
+            registerReferenceData= registerReferenceData,\
+            refFastaF=refFastaFList[0],\
 
-                    fastaDictJob = fastaDictJob,\
-                    refFastaDictF = refFastaDictF,\
-                    fastaIndexJob = fastaIndexJob,\
-                    refFastaIndexF = refFastaIndexF,\
+            fastaDictJob = fastaDictJob,\
+            refFastaDictF = refFastaDictF,\
+            fastaIndexJob = fastaIndexJob,\
+            refFastaIndexF = refFastaIndexF,\
 
-                    chromosome=None,\
-                    chrIDSet=chrIDSet,\
-                    chrSizeIDList = chrSizeIDList,\
-                    chr2IntervalDataLs=chr2IntervalDataLs,\
+            chromosome=None,\
+            chrIDSet=chrIDSet,\
+            chrSizeIDList = chrSizeIDList,\
+            chr2IntervalDataLs=chr2IntervalDataLs,\
 
-                    mapEachAlignmentData = None,\
-                    mapEachChromosomeData=None, \
-                    mapEachIntervalData=None,\
-                    reduceBeforeEachAlignmentData = None, \
-                    reduceAfterEachAlignmentData=None,\
-                    reduceAfterEachChromosomeData=None,\
+            mapEachAlignmentData = None,\
+            mapEachChromosomeData=None, \
+            mapEachIntervalData=None,\
+            reduceBeforeEachAlignmentData = None, \
+            reduceAfterEachAlignmentData=None,\
+            reduceAfterEachChromosomeData=None,\
 
-                    mapEachAlignmentDataLs = [],\
-                    mapEachChromosomeDataLs=[], \
-                    mapEachIntervalDataLs=[],\
-                    reduceBeforeEachAlignmentDataLs = [], \
-                    reduceAfterEachAlignmentDataLs=[],\
-                    reduceAfterEachChromosomeDataLs=[],\
+            mapEachAlignmentDataLs = [],\
+            mapEachChromosomeDataLs=[], \
+            mapEachIntervalDataLs=[],\
+            reduceBeforeEachAlignmentDataLs = [], \
+            reduceAfterEachAlignmentDataLs=[],\
+            reduceAfterEachChromosomeDataLs=[],\
 
-                    gzipReduceAfterEachChromosomeFolderJob=None,\
-                    gzipReduceBeforeEachAlignmentFolderJob = None,\
-                    gzipReduceAfterEachAlignmentFolderJob = None,\
-                    gzipPreReduceFolderJob = None,\
-                    gzipReduceFolderJob=None,\
-                    )
-        preReduceReturnData = self.preReduce(passingData=passingData, transferOutput=False,\
-                                            **keywords)
+            gzipReduceAfterEachChromosomeFolderJob=None,\
+            gzipReduceBeforeEachAlignmentFolderJob = None,\
+            gzipReduceAfterEachAlignmentFolderJob = None,\
+            gzipPreReduceFolderJob = None,\
+            gzipReduceFolderJob=None,\
+            )
+        preReduceReturnData = self.preReduce(passingData=passingData,
+            transferOutput=False, **keywords)
         passingData.preReduceReturnData = preReduceReturnData
         no_of_alignments_worked_on= 0
         for alignmentData in passingData.alignmentDataLs:
@@ -589,7 +603,8 @@ class AbstractAlignmentWorkflow(AbstractNGSWorkflow):
                 alignmentData=alignmentData, \
                 passingData=passingData, \
                 chrIDSet=chrIDSet, chrSizeIDList=chrSizeIDList, \
-                chr2IntervalDataLs=chr2IntervalDataLs, chr2VCFJobData=chr2VCFJobData, \
+                chr2IntervalDataLs=chr2IntervalDataLs,
+                chr2VCFJobData=chr2VCFJobData,
                 outputDirPrefix=outputDirPrefix, transferOutput=transferOutput)
 
             reduceAfterEachAlignmentData = self.reduceAfterEachAlignment(\
@@ -605,14 +620,16 @@ class AbstractAlignmentWorkflow(AbstractNGSWorkflow):
                 inputData=reduceBeforeEachAlignmentData, transferOutput=transferOutput,\
                 outputDirPrefix="%sReduceBeforeEachAlignment"%(outputDirPrefix), \
                 topOutputDirJob=passingData.gzipReduceBeforeEachAlignmentFolderJob, report=False)
-            passingData.gzipReduceBeforeEachAlignmentFolderJob = gzipReduceBeforeEachAlignmentData.topOutputDirJob
+            passingData.gzipReduceBeforeEachAlignmentFolderJob = \
+                gzipReduceBeforeEachAlignmentData.topOutputDirJob
 
             gzipReduceAfterEachAlignmentData = self.addGzipSubWorkflow(\
                 inputData=reduceAfterEachAlignmentData, transferOutput=transferOutput,\
                 outputDirPrefix="%sReduceAfterEachAlignment"%(outputDirPrefix), \
                 topOutputDirJob=passingData.gzipReduceAfterEachAlignmentFolderJob, \
                 report=False)
-            passingData.gzipReduceAfterEachAlignmentFolderJob = gzipReduceAfterEachAlignmentData.topOutputDirJob
+            passingData.gzipReduceAfterEachAlignmentFolderJob = \
+                gzipReduceAfterEachAlignmentData.topOutputDirJob
         reduceReturnData = self.reduce(passingData=passingData, \
             mapEachAlignmentData=passingData.mapEachAlignmentData, \
             reduceAfterEachAlignmentDataLs=passingData.reduceAfterEachAlignmentDataLs,\
@@ -634,14 +651,15 @@ class AbstractAlignmentWorkflow(AbstractNGSWorkflow):
             report=False)
         passingData.gzipReduceFolderJob = newReturnData.topOutputDirJob
 
-        sys.stderr.write("%s alignments to be worked on. %s jobs.\n"%(no_of_alignments_worked_on, self.no_of_jobs))
+        sys.stderr.write("%s alignments to be worked on. %s jobs.\n"%(
+            no_of_alignments_worked_on, self.no_of_jobs))
         return returnData
 
 
     def registerExecutables(self):
         """
         """
-        AbstractNGSWorkflow.registerExecutables(self)
+        ParentClass.registerExecutables(self)
         self.registerOneExecutable(path=self.samtools_path,
             name='samtools', clusterSizeMultiplier=0.2)
         self.samtoolsExecutableFile = self.registerOneExecutableAsFile(
@@ -654,11 +672,11 @@ class AbstractAlignmentWorkflow(AbstractNGSWorkflow):
         2013.04.07 wrap all standard pre-run() related functions into this function.
             setting up for run(), called by run()
         """
-        pdata = AbstractNGSWorkflow.setup_run(self)
+        pdata = ParentClass.setup_run(self)
         workflow = pdata.workflow
 
         if self.needSplitChrIntervalData:
-            #2013.06.21 defined in AbstractNGSWorkflow.__init__()
+            #2013.06.21 defined in ParentClass.__init__()
             if self.alignmentDepthIntervalMethodShortName and self.db_main and \
                 self.db_main.checkAlignmentDepthIntervalMethod(
                     short_name=self.alignmentDepthIntervalMethodShortName):
@@ -666,18 +684,22 @@ class AbstractAlignmentWorkflow(AbstractNGSWorkflow):
                 #make sure it exists in db first
                 chr2IntervalDataLs = self.getChr2IntervalDataLsFromDBAlignmentDepthInterval(
                     db=self.db_main, \
-                    intervalSize=self.intervalSize, intervalOverlapSize=self.intervalOverlapSize,\
-                    alignmentDepthIntervalMethodShortName=self.alignmentDepthIntervalMethodShortName, \
+                    intervalSize=self.intervalSize,
+                    intervalOverlapSize=self.intervalOverlapSize,\
+                    alignmentDepthIntervalMethodShortName=self.alignmentDepthIntervalMethodShortName,
                     alignmentDepthMinFold=self.alignmentDepthMinFold,
                     alignmentDepthMaxFold=self.alignmentDepthMaxFold, \
                     minAlignmentDepthIntervalLength=self.minAlignmentDepthIntervalLength,\
                     maxContigID=self.maxContigID, minContigID=self.minContigID)
             else: #split evenly using chromosome size
-                chr2IntervalDataLs = self.getChr2IntervalDataLsBySplitChrSize(chr2size=self.chr2size, \
+                chr2IntervalDataLs = self.getChr2IntervalDataLsBySplitChrSize(
+                    chr2size=self.chr2size,
                     intervalSize=self.intervalSize, \
                     intervalOverlapSize=self.intervalOverlapSize)
-            # 2012.8.2 if maxContigID/minContigID is not well defined. restrictContigDictionry won't do anything.
-            chr2IntervalDataLs = self.restrictContigDictionry(dc=chr2IntervalDataLs, \
+            # 2012.8.2 if maxContigID/minContigID is not well defined.
+            #  restrictContigDictionry won't do anything.
+            chr2IntervalDataLs = self.restrictContigDictionry(
+                dc=chr2IntervalDataLs,
                 maxContigID=self.maxContigID, minContigID=self.minContigID)
         else:
             chr2IntervalDataLs = None
@@ -701,22 +723,27 @@ class AbstractAlignmentWorkflow(AbstractNGSWorkflow):
 
         pdata = self.setup_run()
         self.addAllJobs(alignmentDataLs=pdata.alignmentDataLs, \
-            chr2IntervalDataLs=pdata.chr2IntervalDataLs, samtools=self.samtools, \
+            chr2IntervalDataLs=pdata.chr2IntervalDataLs,
+            samtools=self.samtools, \
             GenomeAnalysisTKJar=self.GenomeAnalysisTKJar, \
             MergeSamFilesJar=self.MergeSamFilesJar, \
             CreateSequenceDictionaryJava=self.CreateSequenceDictionaryJava, \
             CreateSequenceDictionaryJar=self.CreateSequenceDictionaryJar, \
-            BuildBamIndexFilesJava=self.BuildBamIndexFilesJava, BuildBamIndexJar=self.BuildBamIndexJar,\
+            BuildBamIndexFilesJava=self.BuildBamIndexFilesJava,
+            BuildBamIndexJar=self.BuildBamIndexJar,\
             mv=self.mv, skipDoneAlignment=self.skipDoneAlignment,\
             registerReferenceData=pdata.registerReferenceData,\
-            needFastaIndexJob=self.needFastaIndexJob, needFastaDictJob=self.needFastaDictJob, \
-            data_dir=self.data_dir, no_of_gatk_threads = 1, transferOutput=True,\
+            needFastaIndexJob=self.needFastaIndexJob,
+            needFastaDictJob=self.needFastaDictJob, \
+            data_dir=self.data_dir, no_of_gatk_threads = 1,
+            transferOutput=True,
             outputDirPrefix=self.pegasusFolderName)
 
         self.end_run()
 
 if __name__ == '__main__':
     main_class = AbstractAlignmentWorkflow
-    po = ProcessOptions(sys.argv, main_class.option_default_dict, error_doc=main_class.__doc__)
+    po = ProcessOptions(sys.argv, main_class.option_default_dict,
+        error_doc=main_class.__doc__)
     instance = main_class(**po.long_option2value)
     instance.run()

@@ -3062,7 +3062,7 @@ class SunsetDB(Database):
         reduce_reads=None):
         """
         Examples:
-            in AlignmentReduceReadsWorkflow.py
+            in AlignmentReduceReads.py
             new_individual_alignment = self.db.copyParentIndividualAlignment(
                 parent_individual_alignment_id=individual_alignment.id,\
                 data_dir=self.data_dir,

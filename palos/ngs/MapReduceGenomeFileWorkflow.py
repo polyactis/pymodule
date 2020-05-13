@@ -7,10 +7,11 @@ Description:
     
 Examples:
     #2013.11.24
-    %s --inputDir LiftPolymorphismCoordinates/FindNewRefCoordinates_Method109_vs_3488_BWA_F99.2013.Jul.11T191341/folderReduceLiftOverVCF/
+    %s --inputDir FindNewRefCoordinates_Method109_vs_3488_BWA/folderReduceLiftOverVCF/
         -H -C 10 -j hcondor -l hcondor
-        -D /u/home/p/polyacti/NetworkData/vervet/db/ -t /u/home/p/polyacti/NetworkData/vervet/db/
-        -o dags/SameSiteConcordance/Method109_vs_3488_BWA_F99.sameSiteConcordance.xml
+        -D /u/home/p/polyacti/NetworkData/vervet/db
+        -t /u/home/p/polyacti/NetworkData/vervet/db/
+        -o dags/Method109_vs_3488_BWA_F99.sameSiteConcordance.xml
         --notToUseDBToInferVCFNoOfLoci
         --db_user yh -z localhost
 """
@@ -18,22 +19,25 @@ import sys, os, math
 __doc__ = __doc__%(sys.argv[0])
 from pegaflow.DAX3 import Executable, File, PFN
 from palos import ProcessOptions, PassingData, utils
-from palos.io.FastaFile import FastaFile
 import pegaflow
-from . AbstractNGSWorkflow import AbstractNGSWorkflow as ParentClass
+from . AbstractNGSWorkflow import AbstractNGSWorkflow
 
+ParentClass = AbstractNGSWorkflow
 class MapReduceGenomeFileWorkflow(ParentClass):
     __doc__ = __doc__
     option_default_dict = ParentClass.option_default_dict.copy()
     option_default_dict.update({
-        ('inputDir', 0, ): ['', 'I', 1, 'input folder that contains vcf or vcf.gz files', ],\
-        })
+        ('inputDir', 0, ): ['', 'I', 1,
+            'input folder that contains vcf or vcf.gz files', ],
+    })
     
     #2013.11.22 default overlap is 5Mb, overlap is 500K
     option_default_dict[('intervalOverlapSize', 1, int)][0] = 500000
     option_default_dict[('intervalSize', 1, int)][0] = 5000000
-    option_default_dict[('max_walltime', 1, int)][0] = 1300	#under 23 hours
-    option_default_dict[('inputSuffixList', 0, )][0] = None	#do not set input suffix
+    option_default_dict[('max_walltime', 1, int)][0] = 1300
+    #under 23 hours
+    option_default_dict[('inputSuffixList', 0, )][0] = None
+    #do not set input suffix
     
     def __init__(self,  **keywords):
         """
@@ -63,7 +67,8 @@ class MapReduceGenomeFileWorkflow(ParentClass):
         self.registerReferenceData = None
         self.refFastaFList= None
     
-    def preReduce(self, outputDirPrefix="", passingData=None, transferOutput=True, **keywords):
+    def preReduce(self, outputDirPrefix="", passingData=None,
+        transferOutput=True, **keywords):
         """
         2013.06.14
             move topOutputDirJob from addAllJobs to here. 
@@ -72,7 +77,8 @@ class MapReduceGenomeFileWorkflow(ParentClass):
         returnData = PassingData(no_of_jobs = 0)
         returnData.jobDataLs = []
         
-        self.topOutputDirJob = self.addMkDirJob(outputDir="%sRun"%(outputDirPrefix))
+        self.topOutputDirJob = self.addMkDirJob(
+            outputDir="%sRun"%(outputDirPrefix))
         passingData.topOutputDirJob = self.topOutputDirJob
         
         mapDirJob = self.addMkDirJob(outputDir="%sMap"%(outputDirPrefix))
@@ -80,14 +86,17 @@ class MapReduceGenomeFileWorkflow(ParentClass):
         returnData.mapDirJob = mapDirJob
         self.mapDirJob = mapDirJob
         
-        reduceOutputDirJob = self.addMkDirJob(outputDir="%sReduce"%(outputDirPrefix))
+        reduceOutputDirJob = self.addMkDirJob(
+            outputDir="%sReduce"%(outputDirPrefix))
         passingData.reduceOutputDirJob = reduceOutputDirJob
         returnData.reduceOutputDirJob = reduceOutputDirJob
         
         self.plotDirJob = self.addMkDirJob(outputDir="%sPlot"%(outputDirPrefix))
         self.statDirJob = self.addMkDirJob(outputDir="%sStat"%(outputDirPrefix))
-        self.reduceStatDirJob = self.addMkDirJob(outputDir="%sReduceStat"%(outputDirPrefix))
-        self.reduceEachInputDirJob = self.addMkDirJob(outputDir="%sReduceEachInput"%(outputDirPrefix))
+        self.reduceStatDirJob = self.addMkDirJob(
+            outputDir="%sReduceStat"%(outputDirPrefix))
+        self.reduceEachInputDirJob = self.addMkDirJob(
+            outputDir="%sReduceEachInput"%(outputDirPrefix))
         self.reduceEachChromosomeDirJob = self.addMkDirJob(
             outputDir="%sReduceEachChromosome"%(outputDirPrefix))
         self.reduceOutputDirJob = reduceOutputDirJob
@@ -100,7 +109,8 @@ class MapReduceGenomeFileWorkflow(ParentClass):
         """
         2013.11.24
         """
-        inputSuffix = utils.getRealPrefixSuffixOfFilenameWithVariableSuffix(jobData.file.name)[1]
+        inputSuffix = utils.getRealPrefixSuffixOfFilenameWithVariableSuffix(
+            jobData.file.name)[1]
         outputFile = File(os.path.join(self.mapDirJob.output, \
             '%s_%s%s'%(passingData.fileBasenamePrefix, \
             intervalData.overlapInterval, inputSuffix)))
@@ -108,24 +118,28 @@ class MapReduceGenomeFileWorkflow(ParentClass):
             executable=self.tabixRetrieve, \
             tabixPath=self.tabixPath, \
             inputF=jobData.file, outputF=outputFile, \
-            regionOfInterest=intervalData.overlapInterval, includeHeader=True,\
-            parentJobLs=jobData.jobLs + [self.mapDirJob], job_max_memory=100, \
+            regionOfInterest=intervalData.overlapInterval,
+            includeHeader=True,\
+            parentJobLs=jobData.jobLs + [self.mapDirJob],
+            job_max_memory=100,
             extraDependentInputLs=jobData.fileLs[1:], \
             transferOutput=False)
         return self.constructJobDataFromJob(job=tabixRetrieveJob)
         
 
-    def addAllJobs(self, inputData=None, chr2IntervalDataLs=None, \
-                data_dir=None, \
-                intervalSize=3000, intervalOverlapSize=0, \
-                outputDirPrefix="", passingData=None, \
-                transferOutput=True, job_max_memory=2000, **keywords):
+    def addAllJobs(self, inputData=None, chr2IntervalDataLs=None,
+        data_dir=None,
+        intervalSize=3000, intervalOverlapSize=0,
+        outputDirPrefix="", passingData=None, \
+        transferOutput=True, job_max_memory=2000, **keywords):
         """
-        2013.06.14 bugfix regarding noOfUnits, which was all inferred from one file
+        2013.06.14 bugfix regarding noOfUnits,
+            which was all inferred from one file.
         2012.7.26
             architect of the whole map-reduce framework
         """
-        sys.stderr.write("Adding jobs for %s input genome files... \n"%(len(inputData.jobDataLs)) )
+        print(f"Adding jobs for {len(inputData.jobDataLs)} input "
+            "genome files ..." , flush=True)
         
         returnData = PassingData()
         returnData.jobDataLs = []
@@ -183,9 +197,9 @@ class MapReduceGenomeFileWorkflow(ParentClass):
         # mapEachInputDataLsLs is list of mapEachInputDataLs by each chromosome
         # reduceEachInputDataLsLs is list of reduceEachInputDataLs by each chromosome
         
-        preReduceReturnData = self.preReduce(outputDirPrefix=outputDirPrefix, \
-                                    passingData=passingData, transferOutput=True,\
-                                    **keywords)
+        preReduceReturnData = self.preReduce(outputDirPrefix=outputDirPrefix,
+            passingData=passingData, transferOutput=True,\
+            **keywords)
         passingData.preReduceReturnData = preReduceReturnData
         
         #gzip folder jobs (to avoid repeatedly creating the same folder
@@ -199,8 +213,9 @@ class MapReduceGenomeFileWorkflow(ParentClass):
         
         for chromosome, intervalDataLs in chr2IntervalDataLs.items():
             passingData.chromosome = chromosome
-            mapEachChromosomeData = self.mapEachChromosome(chromosome=chromosome, \
-                passingData=passingData, \
+            mapEachChromosomeData = self.mapEachChromosome(
+                chromosome=chromosome,
+                passingData=passingData,
                 transferOutput=False, **keywords)
             passingData.mapEachChromosomeData = mapEachChromosomeData
             passingData.mapEachChromosomeDataLs.append(mapEachChromosomeData)
@@ -220,7 +235,8 @@ class MapReduceGenomeFileWorkflow(ParentClass):
                 passingData.inputJobData = jobData
                 
                 InputFile = jobData.file
-                commonFileBasenamePrefix = utils.getFileBasenamePrefixFromPath(InputFile.name)
+                commonFileBasenamePrefix = utils.getFileBasenamePrefixFromPath(
+                    InputFile.name)
                 passingData.fileBasenamePrefix = commonFileBasenamePrefix
                 
                 no_of_input_files += 1
@@ -232,45 +248,50 @@ class MapReduceGenomeFileWorkflow(ParentClass):
                         jobData=jobData, chromosome=chromosome,
                         intervalData=intervalData,
                         mapEachChromosomeData=mapEachChromosomeData,
-                        passingData=passingData, transferOutput=firstInterval,\
+                        passingData=passingData,
+                        transferOutput=firstInterval,
                         **keywords)
                     mapEachIntervalData = self.mapEachInterval(
                         inputJobData=jobData,
-                        selectIntervalJobData=selectIntervalJobData, \
-                        chromosome=chromosome,intervalData=intervalData,\
+                        selectIntervalJobData=selectIntervalJobData,
+                        chromosome=chromosome,
+                        intervalData=intervalData,
                         mapEachChromosomeData=mapEachChromosomeData, \
-                        passingData=passingData, transferOutput=firstInterval,
+                        passingData=passingData,
+                        transferOutput=firstInterval,
                         **keywords)
                     
                     passingData.mapEachIntervalData = mapEachIntervalData
                     passingData.mapEachIntervalDataLs.append(mapEachIntervalData)
-                    passingData.chromosome2mapEachIntervalDataLs[chromosome].append(mapEachIntervalData)
+                    passingData.chromosome2mapEachIntervalDataLs[chromosome].append(
+                        mapEachIntervalData)
                     
                     linkMapToReduceData = self.linkMapToReduce(
-                        mapEachIntervalData=mapEachIntervalData, \
-                        preReduceReturnData=preReduceReturnData, \
-                        passingData=passingData, \
+                        mapEachIntervalData=mapEachIntervalData,
+                        preReduceReturnData=preReduceReturnData,
+                        passingData=passingData,
                         **keywords)
                     if firstInterval==True:
                         firstInterval = False
                 reduceEachInputData = self.reduceEachInput(
-                    chromosome=chromosome, passingData=passingData, \
-                    mapEachIntervalDataLs=passingData.mapEachIntervalDataLs,\
+                    chromosome=chromosome, passingData=passingData,
+                    mapEachIntervalDataLs=passingData.mapEachIntervalDataLs,
                     transferOutput=False, data_dir=data_dir, \
                     **keywords)
                 passingData.reduceEachInputData = reduceEachInputData
                 passingData.reduceEachInputDataLs.append(reduceEachInputData)
                 
                 gzipReduceEachInputData = self.addGzipSubWorkflow(\
-                    inputData=reduceEachInputData, transferOutput=transferOutput,\
+                    inputData=reduceEachInputData,
                     outputDirPrefix="%sReduceEachInput"%(outputDirPrefix),
                     topOutputDirJob=gzipReduceEachInputFolderJob, \
+                    transferOutput=transferOutput,
                     report=False)
                 gzipReduceEachInputFolderJob = gzipReduceEachInputData.topOutputDirJob
             reduceEachChromosomeData = self.reduceEachChromosome(
                 chromosome=chromosome, passingData=passingData, \
                 mapEachInputDataLs=passingData.mapEachInputDataLs, \
-                chromosome2mapEachIntervalDataLs=passingData.chromosome2mapEachIntervalDataLs,\
+                chromosome2mapEachIntervalDataLs=passingData.chromosome2mapEachIntervalDataLs,
                 reduceEachInputDataLs=passingData.reduceEachInputDataLs,\
                 transferOutput=False, data_dir=data_dir, \
                 **keywords)
@@ -278,38 +299,43 @@ class MapReduceGenomeFileWorkflow(ParentClass):
             passingData.reduceEachChromosomeDataLs.append(reduceEachChromosomeData)
             
             gzipReduceEachChromosomeData = self.addGzipSubWorkflow(
-                inputData=reduceEachChromosomeData, transferOutput=transferOutput,\
+                inputData=reduceEachChromosomeData,
                 outputDirPrefix="%sReduceEachChromosome"%(outputDirPrefix), \
-                topOutputDirJob=gzipReduceEachChromosomeFolderJob, report=False)
-            gzipReduceEachChromosomeFolderJob = gzipReduceEachChromosomeData.topOutputDirJob
+                topOutputDirJob=gzipReduceEachChromosomeFolderJob,
+                transferOutput=transferOutput,
+                report=False)
+            gzipReduceEachChromosomeFolderJob = \
+                gzipReduceEachChromosomeData.topOutputDirJob
             
-        reduceReturnData = self.reduce(passingData=passingData, transferOutput=False, \
-                            mapEachChromosomeDataLs=passingData.mapEachInputDataLs,\
-                            reduceEachChromosomeDataLs=passingData.reduceEachChromosomeDataLs,\
-                            **keywords)
+        reduceReturnData = self.reduce(passingData=passingData,
+            transferOutput=False,
+            mapEachChromosomeDataLs=passingData.mapEachInputDataLs,\
+            reduceEachChromosomeDataLs=passingData.reduceEachChromosomeDataLs,
+            **keywords)
         passingData.reduceReturnData = reduceReturnData
         
         if self.needGzipPreReduceReturnData:
             gzipPreReduceReturnData = self.addGzipSubWorkflow(
-                inputData=preReduceReturnData, transferOutput=transferOutput,\
+                inputData=preReduceReturnData, transferOutput=transferOutput,
                 outputDirPrefix="%sPreReduce"%(outputDirPrefix), \
                 topOutputDirJob= gzipPreReduceFolderJob, report=False)
             gzipPreReduceFolderJob = gzipPreReduceReturnData.topOutputDirJob
         
         if self.needGzipReduceReturnData:
             gzipReduceReturnData = self.addGzipSubWorkflow(
-                inputData=reduceReturnData, transferOutput=transferOutput,\
+                inputData=reduceReturnData, transferOutput=transferOutput,
                 outputDirPrefix="%sReduce"%(outputDirPrefix), \
                 topOutputDirJob=gzipReduceFolderJob, report=False)
             gzipReduceFolderJob = gzipReduceReturnData.topOutputDirJob
         
-        sys.stderr.write("\n %s%s Input files.\n"%('\x08'*40, no_of_input_files))
-        sys.stderr.write("%s jobs.\n"%(self.no_of_jobs))
+        print(f" {no_of_input_files} Input files.", flush=True)
+        sys.stderr.write(f"{self.no_of_jobs} jobs.\n")
         return reduceReturnData
 
     
     def mapEachChromosome(self, chromosome=None,\
-                VCFJobData=None, jobData=None, passingData=None, transferOutput=True, **keywords):
+        VCFJobData=None, jobData=None, passingData=None,
+        transferOutput=True, **keywords):
         """
         2012.9.17
         """
@@ -317,21 +343,24 @@ class MapReduceGenomeFileWorkflow(ParentClass):
         returnData.jobDataLs = []
         return returnData
     
-    def mapEachInterval(self, inputJobData=None, selectIntervalJobData=None, \
-                    chromosome=None,intervalData=None,\
-                    mapEachChromosomeData=None, \
-                    passingData=None, transferOutput=False, **keywords):
+    def mapEachInterval(self, inputJobData=None, selectIntervalJobData=None,
+        chromosome=None,intervalData=None,\
+        mapEachChromosomeData=None, \
+        passingData=None, transferOutput=False, **keywords):
         """
         2013.04.08 use inputJobData
         2012.10.3
-            #. extract flanking sequences from the input Input (ref sequence file => contig ref sequence)
+            #. extract flanking sequences from the input Input
+            #   (ref sequence file => contig ref sequence)
             #. blast them
             #. run FindSNPPositionOnNewRefFromFlankingBlastOutput.py
-                #. where hit length match query length, and no of mismatches <=2 => good => infer new coordinates
+                #. where hit length match query length, and no of
+                #  mismatches <=2 => good => infer new coordinates
             #. output a mapping file between old SNP and new SNP coordinates.
                 #. reduce this thing by combining everything
             #. make a new Input file based on the input split Input file
-                (replace contig ID , position with the new one's, remove the header part regarding chromosomes or replace it)
+                (replace contig ID , position with the new one's,
+                 remove the header part regarding chromosomes or replace it)
 
         """
         returnData = PassingData(no_of_jobs = 0)
@@ -343,24 +372,29 @@ class MapReduceGenomeFileWorkflow(ParentClass):
         ## 2013.06.19 structures available from passingData, specific to the interval
         passingData.splitInputFile = splitInputFile
         passingData.unitNumber = unitNumber
-        passingData.intervalFileBasenamePrefix = '%s_%s_splitInput_u%s'%(chromosome, commonPrefix, unitNumber)
+        passingData.intervalFileBasenamePrefix = '%s_%s_splitInput_u%s'%(
+            chromosome, commonPrefix, unitNumber)
         passingData.noOfIndividuals = jobData.file.noOfIndividuals
-        passingData.span = self.intervalSize + self.intervalOverlapSize*2 	#2013.06.19 for memory/walltime gauging
+        passingData.span = self.intervalSize + self.intervalOverlapSize*2
+        #2013.06.19 for memory/walltime gauging
         """
         return returnData
 
-    def linkMapToReduce(self, mapEachIntervalData=None, preReduceReturnData=None, passingData=None, transferOutput=True, **keywords):
+    def linkMapToReduce(self, mapEachIntervalData=None,
+        preReduceReturnData=None, passingData=None, transferOutput=True,
+        **keywords):
         """
         """
         returnData = PassingData(no_of_jobs = 0)
         returnData.jobDataLs = []
         return returnData
     
-    def reduceEachChromosome(self, chromosome=None, passingData=None, mapEachInputDataLs=None, \
-                        chromosome2mapEachIntervalDataLs=None,\
-                        reduceEachInputDataLs=None,\
-                        transferOutput=True, \
-                        **keywords):
+    def reduceEachChromosome(self, chromosome=None, passingData=None,
+        mapEachInputDataLs=None, \
+        chromosome2mapEachIntervalDataLs=None,\
+        reduceEachInputDataLs=None,\
+        transferOutput=True, \
+        **keywords):
         """
         """
         returnData = PassingData(no_of_jobs = 0)
@@ -369,8 +403,9 @@ class MapReduceGenomeFileWorkflow(ParentClass):
         returnData.reduceEachInputDataLs = reduceEachInputDataLs
         return returnData
     
-    def reduceEachInput(self, chromosome=None, passingData=None, mapEachIntervalDataLs=None,\
-                    transferOutput=True, **keywords):
+    def reduceEachInput(self, chromosome=None, passingData=None,
+        mapEachIntervalDataLs=None,
+        transferOutput=True, **keywords):
         """
         2013.07.10
             #. concatenate all the sub-Inputs into one
@@ -382,20 +417,22 @@ class MapReduceGenomeFileWorkflow(ParentClass):
         #intervalJobLs = [pdata for pdata in mapEachIntervalDataLs]
         
         """
-        realInputVolume = passingData.jobData.file.noOfIndividuals * passingData.jobData.file.noOfLoci
+        realInputVolume = passingData.jobData.file.noOfIndividuals * \
+            passingData.jobData.file.noOfLoci
         baseInputVolume = 200*20000
-        walltime = self.scaleJobWalltimeOrMemoryBasedOnInput(realInputVolume=realInputVolume, \
-                            baseInputVolume=baseInputVolume, baseJobPropertyValue=60, \
-                            minJobPropertyValue=60, maxJobPropertyValue=500).value
+        walltime = self.scaleJobWalltimeOrMemoryBasedOnInput(
+            realInputVolume=realInputVolume, \
+            baseInputVolume=baseInputVolume, baseJobPropertyValue=60,
+            minJobPropertyValue=60, maxJobPropertyValue=500).value
         job_max_memory = self.scaleJobWalltimeOrMemoryBasedOnInput(
             realInputVolume=realInputVolume, \
-            baseInputVolume=baseInputVolume, baseJobPropertyValue=5000, \
+            baseInputVolume=baseInputVolume, baseJobPropertyValue=5000,
             minJobPropertyValue=5000, maxJobPropertyValue=10000).value
         """
         return returnData
     
     def reduce(self, reduceEachChromosomeDataLs=None, \
-        mapEachChromosomeDataLs=None, passingData=None, transferOutput=True, \
+        mapEachChromosomeDataLs=None, passingData=None, transferOutput=True,
         **keywords):
         """
         2013.07.18 return each processed-Input job data so that
@@ -429,15 +466,18 @@ class MapReduceGenomeFileWorkflow(ParentClass):
     def setup_run(self):
         """
         2013.06.11 added firstInputJobData in return
-            assign all returned data to self, rather than pdata (pdata has become self)
-        2013.04.07 wrap all standard pre-run() related functions into this function.
+            assign all returned data to self, rather than pdata
+            (pdata has become self).
+        2013.04.07 wrap all standard pre-run() related functions into
+            this function.
             setting up for run(), called by run()
         """
         ParentClass.setup_run(self)
         
         #self.chr2size = {}
         #self.chr2size = set(['Contig149'])	#temporary when testing Contig149
-        #self.chr2size = set(['1MbBAC'])	#temporary when testing the 1Mb-BAC (formerly vervet_path2)
+        #self.chr2size = set(['1MbBAC'])
+        # #temporary when testing the 1Mb-BAC (formerly vervet_path2)
         if self.needSplitChrIntervalData:
             #2013.06.21 defined in ParentClass.__init__()
             chr2IntervalDataLs = self.getChr2IntervalDataLsBySplitChrSize(
@@ -449,12 +489,14 @@ class MapReduceGenomeFileWorkflow(ParentClass):
         inputData = None
         firstInputJobData = None
         if getattr(self, 'inputDir', None):
-            inputData = self.registerFilesOfInputDir(inputDir=self.inputDir,
+            inputData = self.registerFilesOfInputDir(
+                inputDir=self.inputDir,
                 input_site_handler=self.input_site_handler, \
                 pegasusFolderName=self.pegasusFolderName,\
                 inputSuffixSet=self.inputSuffixSet,\
                 indexFileSuffixSet=set(['.tbi', '.fai']),\
-                checkEmptyInputByReading=getattr(self, 'checkEmptyInputByReading', None),\
+                checkEmptyInputByReading=getattr(
+                    self, 'checkEmptyInputByReading', None),\
                 maxContigID=self.maxContigID, \
                 minContigID=self.minContigID,\
                 db_vervet=getattr(self, 'db_vervet', None), \
@@ -462,7 +504,6 @@ class MapReduceGenomeFileWorkflow(ParentClass):
                 minNoOfLociInInput=getattr(self, 'minNoOfLociInInput', 10))
             if inputData and inputData.jobDataLs:
                 firstInputJobData = inputData.jobDataLs[0]
-                #job=None, jobLs=[], vcfFile=inputF, tbi_F=tbi_F, file=inputF, fileLs=[inputF, tbi_F]
                 firstInputFile = firstInputJobData.file
                 print(f"\t Input file {firstInputFile} is chosen as an example"
                     f" input for any job that needs a random Input file.",
@@ -485,21 +526,23 @@ class MapReduceGenomeFileWorkflow(ParentClass):
         inputData=pdata.inputData
         
         if len(inputData.jobDataLs)<=0:
-            sys.stderr.write("No VCF files in this folder , %s.\n"%self.inputDir)
+            print(f"No VCF files in this folder, {self.inputDir}.", flush=True)
             sys.exit(0)
                 
-        self.addAllJobs(inputData=inputData, \
-            chr2IntervalDataLs=self.chr2IntervalDataLs, \
-            data_dir=self.data_dir, \
+        self.addAllJobs(inputData=inputData,
+            chr2IntervalDataLs=self.chr2IntervalDataLs,
+            data_dir=self.data_dir,
             intervalSize=self.intervalSize,
-            intervalOverlapSize=self.intervalOverlapSize, \
-            outputDirPrefix=self.pegasusFolderName, transferOutput=True,)
+            intervalOverlapSize=self.intervalOverlapSize,
+            outputDirPrefix=self.pegasusFolderName,
+            transferOutput=True,)
         
         self.end_run()
     
 
 if __name__ == '__main__':
     main_class = MapReduceGenomeFileWorkflow
-    po = ProcessOptions(sys.argv, main_class.option_default_dict, error_doc=main_class.__doc__)
+    po = ProcessOptions(sys.argv, main_class.option_default_dict,
+        error_doc=main_class.__doc__)
     instance = main_class(**po.long_option2value)
     instance.run()
