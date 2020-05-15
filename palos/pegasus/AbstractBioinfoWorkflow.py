@@ -84,9 +84,11 @@ class AbstractBioinfoWorkflow(ParentClass):
                 all other files, with suffix in affiliateFilenameSuffixLs,
                  will be registered (symlinked or copied) as well.
         """
-        returnData = PassingData(refFastaFList = [], needBWARefIndexJob=False,
-            needSAMtoolsFastaIndexJob=False, \
-            needPicardFastaDictJob=False, needStampyRefIndexJob=False,
+        returnData = PassingData(refFastaFList = [],
+            needBWARefIndexJob=False,
+            needSAMtoolsFastaIndexJob=False,
+            needPicardFastaDictJob=False,
+            needStampyRefIndexJob=False,
             needBlastMakeDBJob=False,
             refPicardFastaDictF=None, refSAMtoolsFastaIndexF=None)
         missingSuffixSet = set()

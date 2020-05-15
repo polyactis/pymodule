@@ -1858,7 +1858,7 @@ pipe2File.sh ./bwa aln-pe.2.sam.gz mem -t 1 -M -a 3280.fasta 12457_1.fastq.gz 12
         2011-7-11
         """
 
-        pdata = self.setup_run()
+        self.setup_run()
         chr2IntervalDataLs = self.getChr2IntervalDataLsBySplitChrSize(
             chr2size=self.chr2size,
             intervalSize=self.intervalSize,
@@ -1873,15 +1873,15 @@ pipe2File.sh ./bwa aln-pe.2.sam.gz mem -t 1 -M -a 3280.fasta 12457_1.fastq.gz 12
             ignoreEmptyReadFile=self.ignoreEmptyReadFile)
         isqLs = self.db_main.filterIndividualSequenceList(
             individual_sequence_list=isqLs,
-            min_coverage=self.sequence_min_coverage,\
-            max_coverage=self.sequence_max_coverage, \
+            min_coverage=self.sequence_min_coverage,
+            max_coverage=self.sequence_max_coverage,
             individual_site_id_set=set(self.site_id_ls),
             individual_id_set=None,
-            sequence_type_id_set=set(self.sequence_type_id_ls),\
+            sequence_type_id_set=set(self.sequence_type_id_ls),
             sequencer_id_set=set(self.sequencer_id_ls),
-            sequence_filtered=self.sequence_filtered,\
+            sequence_filtered=self.sequence_filtered,
             sequence_batch_id_set=set(self.sequence_batch_id_ls),
-            parent_individual_sequence_id_set=None, \
+            parent_individual_sequence_id_set=None,
             version_set=set(self.version_ls),\
             country_id_set=set(self.country_id_ls),
             tax_id_set=set(self.tax_id_ls),
@@ -1896,7 +1896,6 @@ pipe2File.sh ./bwa aln-pe.2.sam.gz mem -t 1 -M -a 3280.fasta 12457_1.fastq.gz 12
         registerReferenceData = self.registerRefFastaFile(
             refFastaFname,
             registerAffiliateFiles=True, 
-            input_site_handler=self.input_site_handler,\
             checkAffiliateFileExistence=True)
 
         self.addAllAlignmentJobs(db_main=self.db_main,
