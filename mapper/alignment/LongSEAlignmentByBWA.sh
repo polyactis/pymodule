@@ -9,7 +9,7 @@ then
 	echo "	1. refFastaFname must have been indexed by bwa."
 	echo "	2. This script uses $noOfAlnThreads threads in bwasw by default."
 	echo "Example:"
-	echo "	$0 120_480K_supercontigs.fasta individual_sequence/1_VRC_ref_454/GINC65G04.fastq.gz 1_VRC_ref_454/GINC65G04.sam.gz"
+	echo "	$0 120_480K_supercontigs.fasta 1_VRC_ref_454/GINC65G04.fastq.gz 1_VRC_ref_454/GINC65G04.sam.gz"
 exit
 fi
 

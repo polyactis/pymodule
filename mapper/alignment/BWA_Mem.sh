@@ -8,12 +8,12 @@ then
 	echo "	1. refFastaFname must have been indexed by bwa."
 	echo
 	echo "Example:"
-	echo "	$0 ~/bin/bwa 120_480K_supercontigs.fasta 435_6136_2004030_GA_5/gerald_81GPBABXX_8_CGATGT.sam.gz gerald_81GPBABXX_8_CGATGT_1.fastq.gz gerald_81GPBABXX_8_CGATGT_2.fastq.gz"
+	echo "	$0 ~/bin/bwa 120_480K_supercontigs.fasta 81GPBABXX_8_CGATGT.sam.gz 81GPBABXX_8_CGATGT_1.fastq.gz 81GPBABXX_8_CGATGT_2.fastq.gz"
 	echo
-	echo "	$0 ~/bin/bwa 120_480K_supercontigs.fasta 435_6136_2004030_GA_5/gerald_81GPBABXX_8_CGATGT.sam.gz gerald_81GPBABXX_8_CGATGT_1.fastq.gz gerald_81GPBABXX_8_CGATGT_2.fastq.gz -M -a -t 4"
+	echo "	$0 ~/bin/bwa 120_480K_supercontigs.fasta 81GPBABXX_8_CGATGT.sam.gz 81GPBABXX_8_CGATGT_1.fastq.gz 81GPBABXX_8_CGATGT_2.fastq.gz -M -a -t 4"
 	echo
 	echo "# set the fastqF2 as empty space, single-end read alignment with additional arguments"
-	echo "	$0 ~/bin/bwa 120_480K_supercontigs.fasta 435_6136_2004030_GA_5/gerald_81GPBABXX_8_CGATGT.sam.gz gerald_81GPBABXX_8_CGATGT_1.fastq.gz ' ' -M -a -t 4"
+	echo "	$0 ~/bin/bwa 120_480K_supercontigs.fasta 81GPBABXX_8_CGATGT.sam.gz 81GPBABXX_8_CGATGT_1.fastq.gz ' ' -M -a -t 4"
 	echo
 exit
 fi

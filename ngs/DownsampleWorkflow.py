@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """
 run Accurity in the  workflow
-    ./downsample.py --outputFname dags/runDownsample_median.xml --data_dir /y/Sunset/db/ \
-    --drivername postgresql --hostname pdc --dbname pmdb --db_user DBUSERNAME \
-    --db_passwd SECRET --schema sunset --ref_ind_seq_id 1 -l condor -j condor
+    ./downsample.py --outputFname dags/runDownsample_median.xml
+    --data_dir /y/Sunset/db/ 
+    --drivername postgresql --hostname pdc --dbname pmdb
+    --db_user DBUSERNAME --db_passwd SECRET --schema sunset
+    --ref_ind_seq_id 1 -l condor -j condor
 """
 import sys, os, math
 import copy
@@ -18,19 +20,20 @@ class DownsampleWorkflow(ParentClass):
     option_default_dict = copy.deepcopy(ParentClass.option_default_dict)
     option_default_dict.update(ParentClass.db_option_dict.copy())
     option_default_dict.update({
-        ("thisModulePath", 1,): ["src/Sunset", '', 1, 'path of the module that owns this program. '
- 		'used to add executables from this module.'], \
-        ("AccurityPath", 1,):["src/Sunset/src_o/main.py", '', 1, 'path of the AccurityPath'], \
+        ("thisModulePath", 1,): ["src/Sunset", '', 1, 
+            'path of the module that owns this program. '
+            'used to add executables from this module.'],
+        ("AccurityPath", 1,):["src/Sunset/src_o/main.py", '', 1,
+            'path of the AccurityPath'],
         })
-
 
     def __init__(self,  **keywords):
         self.pathToInsertHomePathList.extend(["thisModulePath", "AccurityPath"])
         ParentClass.__init__(self, **keywords)
 
-
-    def addDownsamplejob(self, data_dir=None, idDict=None, DownSamplePrefix=None, \
-                         downSampleJava=None, downSampleJar=None, transferOutput=False):
+    def addDownsamplejob(self, data_dir=None, idDict=None,
+        DownSamplePrefix=None,
+        downSampleJava=None, downSampleJar=None, transferOutput=False):
         AccurityFolder = "AccurityResult"
         AccurityFolderJob = self.addMkDirJob(outputDir=AccurityFolder)
 
@@ -62,42 +65,47 @@ class DownsampleWorkflow(ParentClass):
             outputNormalFile = File(os.path.join(SampleFolder, str(probNormal) + "_normal_downsample.bam"))
             outputTumorFile = File(os.path.join(SampleFolder, str(probTumor) + "_tumor_downsample.bam"))
             mergeJobAndOutputLs = []
-            normal_down_sample_job = self.addGenericJavaJob(executable=downSampleJava, jarFile=downSampleJar, \
-                                            inputFile=inputNormalBamFile, inputArgumentOption="INPUT=", \
-                                            inputFileList=None,
-                                            argumentForEachFileInInputFileList=None, \
-                                            outputFile=outputNormalFile, outputArgumentOption="OUTPUT=", \
-                                            parentJobLs=[SampleFolderJob], transferOutput=False,
-                                            job_max_memory=job_max_memory, \
-                                            frontArgumentList=['DownsampleSam'], extraArguments=None,
-                                            extraArgumentList=['PROBABILITY=' + str(probNormal), \
-                                                                'RANDOM_SEED=','1' ,\
-                                                                'STRATEGY=','ConstantMemory', \
-                                                                'VALIDATION_STRINGENCY=','LENIENT'
-                                                                ],
-                                            extraOutputLs=None, \
-                                            extraDependentInputLs=None, no_of_cpus=None, walltime=walltime,
-                                            sshDBTunnel=None)
-            mergeJobAndOutputLs.append(PassingData(jobLs=[normal_down_sample_job], file=outputNormalFile))
+            normal_down_sample_job = self.addGenericJavaJob(
+                executable=downSampleJava,
+                jarFile=downSampleJar,
+                inputFile=inputNormalBamFile, inputArgumentOption="INPUT=",
+                inputFileList=None,
+                argumentForEachFileInInputFileList=None,
+                outputFile=outputNormalFile, outputArgumentOption="OUTPUT=",
+                parentJobLs=[SampleFolderJob], transferOutput=False,
+                job_max_memory=job_max_memory,
+                frontArgumentList=['DownsampleSam'], extraArguments=None,
+                extraArgumentList=['PROBABILITY=' + str(probNormal), \
+                                    'RANDOM_SEED=','1' ,\
+                                    'STRATEGY=','ConstantMemory', \
+                                    'VALIDATION_STRINGENCY=','LENIENT'
+                                    ],
+                extraOutputLs=None, \
+                extraDependentInputLs=None, no_of_cpus=None, walltime=walltime,
+                sshDBTunnel=None)
+            mergeJobAndOutputLs.append(PassingData(
+                jobLs=[normal_down_sample_job], file=outputNormalFile))
 
-            tumor_down_sample_job = self.addGenericJavaJob(executable=downSampleJava, jarFile=downSampleJar, \
-                                                            inputFile=inputTumorBamFile, inputArgumentOption="INPUT=", \
-                                                            inputFileList=None,
-                                                            argumentForEachFileInInputFileList=None, \
-                                                            outputFile=outputTumorFile, outputArgumentOption="OUTPUT=", \
-                                                            parentJobLs=[SampleFolderJob],
-                                                            transferOutput=False,
-                                                            job_max_memory=job_max_memory, \
-                                                            frontArgumentList=['DownsampleSam'], extraArguments=None,
-                                                            extraArgumentList=['PROBABILITY=' , str(probTumor), \
-                                                                               'RANDOM_SEED=','1', \
-                                                                               'STRATEGY=', 'ConstantMemory', \
-                                                                               'VALIDATION_STRINGENCY=' ,'LENIENT'
-                                                                               ],
-                                                            extraOutputLs=None, \
-                                                            extraDependentInputLs=None, no_of_cpus=None,
-                                                            walltime=walltime,
-                                                            sshDBTunnel=None)
+            tumor_down_sample_job = self.addGenericJavaJob(
+                executable=downSampleJava,
+                jarFile=downSampleJar,
+                inputFile=inputTumorBamFile, inputArgumentOption="INPUT=",
+                inputFileList=None,
+                argumentForEachFileInInputFileList=None,
+                outputFile=outputTumorFile, outputArgumentOption="OUTPUT=",
+                parentJobLs=[SampleFolderJob],
+                transferOutput=False,
+                job_max_memory=job_max_memory,
+                frontArgumentList=['DownsampleSam'], extraArguments=None,
+                extraArgumentList=['PROBABILITY=' , str(probTumor), \
+                                    'RANDOM_SEED=','1', \
+                                    'STRATEGY=', 'ConstantMemory', \
+                                    'VALIDATION_STRINGENCY=' ,'LENIENT'
+                                    ],
+                extraOutputLs=None, \
+                extraDependentInputLs=None, no_of_cpus=None,
+                walltime=walltime,
+                sshDBTunnel=None)
             mergeJobAndOutputLs.append(PassingData(jobLs=[tumor_down_sample_job], file=outputTumorFile))
 
             puritySampleFolder = "puritySample"
@@ -107,34 +115,33 @@ class DownsampleWorkflow(ParentClass):
             purityFolderJob = self.addMkDirJob(outputDir=os.path.join(puritySampleFolder,purityDir))
             mergedBamFile = File(os.path.join(puritySampleFolder,purityDir, "purity_"+ purity + ".bam"))
             baseCoverage = 4 * 3000000000  # baseline
-            minMergeAlignmentWalltime = 240  # in minutes, 4 hours, when coverage is defaultCoverage
+            minMergeAlignmentWalltime = 240
+            # in minutes, 4 hours, when coverage is defaultCoverage
             maxMergeAlignmentWalltime = 2980  # in minutes, 2 days
-            minMergeAlignmentMaxMemory = 8000  # in MB, when coverage is defaultCoverage
+            minMergeAlignmentMaxMemory = 8000
+            # in MB, when coverage is defaultCoverage
             maxMergeAlignmentMaxMemory = 21000  # in MB
 
             mergeAlignmentWalltime = self.scaleJobWalltimeOrMemoryBasedOnInput(
-                realInputVolume=max(i, 10-i) * 3000000000, \
-                baseInputVolume=baseCoverage, baseJobPropertyValue=minMergeAlignmentWalltime, \
-                minJobPropertyValue=minMergeAlignmentWalltime, maxJobPropertyValue=maxMergeAlignmentWalltime).value
+                realInputVolume=max(i, 10-i) * 3000000000,
+                baseInputVolume=baseCoverage,
+                baseJobPropertyValue=minMergeAlignmentWalltime,
+                minJobPropertyValue=minMergeAlignmentWalltime,
+                maxJobPropertyValue=maxMergeAlignmentWalltime).value
             mergeAlignmentMaxMemory = self.scaleJobWalltimeOrMemoryBasedOnInput(
                 realInputVolume=max(i, 10-i) * 3000000000, \
-                baseInputVolume=baseCoverage, baseJobPropertyValue=minMergeAlignmentMaxMemory, \
-                minJobPropertyValue=minMergeAlignmentMaxMemory, maxJobPropertyValue=maxMergeAlignmentMaxMemory).value
+                baseInputVolume=baseCoverage,
+                baseJobPropertyValue=minMergeAlignmentMaxMemory,
+                minJobPropertyValue=minMergeAlignmentMaxMemory,
+                maxJobPropertyValue=maxMergeAlignmentMaxMemory).value
 
-            MergeJob, bamIndexJob = self.addAlignmentMergeJob(\
-                                                AlignmentJobAndOutputLs=mergeJobAndOutputLs, \
-                                                outputBamFile=mergedBamFile, \
-                                                samtools=self.samtools, java=self.java, \
-                                                MergeSamFilesJava=self.MergeSamFilesJava,
-                                                MergeSamFilesJar=self.MergeSamFilesJar, \
-                                                BuildBamIndexFilesJava=self.IndexMergedBamIndexJava, \
-                                                BuildBamIndexJar=self.BuildBamIndexJar, \
-                                                mv=self.mv, namespace=self.namespace, \
-                                                version=self.version, \
-                                                transferOutput=transferOutput, \
-                                                job_max_memory=mergeAlignmentMaxMemory, \
-                                                walltime=mergeAlignmentWalltime, \
-                                                parentJobLs=[SampleFolderJob, purityFolderJob])
+            MergeJob, bamIndexJob = self.addAlignmentMergeJob(
+                AlignmentJobAndOutputLs=mergeJobAndOutputLs,
+                outputBamFile=mergedBamFile, \
+                transferOutput=transferOutput, \
+                job_max_memory=mergeAlignmentMaxMemory, \
+                walltime=mergeAlignmentWalltime, \
+                parentJobLs=[SampleFolderJob, purityFolderJob])
             normal_part_refer = self.registerOneInputFile(
                 inputFname="/y/Sunset/workflow/real_data/downsample/normal_0.2.bam", 
                 folderName=os.path.join(puritySampleFolder,purityDir))
@@ -142,18 +149,22 @@ class DownsampleWorkflow(ParentClass):
                 inputFname="/y/Sunset/workflow/real_data/downsample/normal_0.2.bam.bai",
                 folderName=os.path.join(puritySampleFolder,purityDir))
             pair_bam_file_list.append([mergedBamFile, normal_part_refer])
-            AccurityJob = self.doAllAccurityAlignmentJob(data_dir=None,  normal_bam_bai=normal_bam_bai,\
-                                                         pair_bam_file_list=pair_bam_file_list,\
-                                                         outputDirPrefix=None, parentJobLs=[MergeJob, bamIndexJob],\
-                                                         AccurityFolder=AccurityFolder, AccurityFolderJob=AccurityFolderJob)
+            AccurityJob = self.doAllAccurityAlignmentJob(data_dir=None,
+                normal_bam_bai=normal_bam_bai,
+                pair_bam_file_list=pair_bam_file_list,\
+                outputDirPrefix=None, parentJobLs=[MergeJob, bamIndexJob],
+                AccurityFolder=AccurityFolder,
+                AccurityFolderJob=AccurityFolderJob)
 
         return jobLs
 
 
-    def doAllAccurityAlignmentJob(self, data_dir=None, normal_bam_bai=None, pair_bam_file_list = None,\
-                               outputDirPrefix=None, parentJobLs=None, AccurityFolder=None, AccurityFolderJob=None):
-        sys.stderr.write("Adding Accurity jobs for %s pair individual sequences ..." % (len(pair_bam_file_list)))
-
+    def doAllAccurityAlignmentJob(self, data_dir=None, normal_bam_bai=None,
+        pair_bam_file_list = None,
+        outputDirPrefix=None, parentJobLs=None,
+        AccurityFolder=None, AccurityFolderJob=None):
+        print("Adding Accurity jobs for %s pair individual sequences ..." % \
+            (len(pair_bam_file_list)), flush=True)
         jobLs = []
         for pair_bam in pair_bam_file_list:
             tumor_bam = pair_bam[0]
@@ -198,26 +209,29 @@ class DownsampleWorkflow(ParentClass):
             inputFileList = [tumor_bam, tumor_bam_bai, normal_bam, normal_bam_bai, configure_file]
 
             job = self.addPurityJobToWorkflow(executable=self.AccurityExecutableFile,\
-                                              argumentList=argumentList, \
-                                              inputFileList=inputFileList, outputFileList=outputList, \
-                                              parentJobLs=[sample_folder_Job], \
-                                              job_max_memory=10000, no_of_cpus=8, walltime=400, sshDBTunnel=0)
+                argumentList=argumentList, \
+                inputFileList=inputFileList, outputFileList=outputList, \
+                parentJobLs=[sample_folder_Job], \
+                job_max_memory=10000, no_of_cpus=8, walltime=400, sshDBTunnel=0)
             jobLs.append(job)
         return jobLs
 
-    def addPurityJobToWorkflow(self, executable=None, argumentList=None, inputFileList=None,\
-                               outputFileList=None, parentJobLs=None, job_max_memory=10000, no_of_cpus=1, \
-                               walltime=400, sshDBTunnel=0):
-        job = self.addGenericJob(executable=executable, inputFile=None, inputArgumentOption=None, \
-                          outputFile=None, outputArgumentOption=None, inputFileList=None,
-                          argumentForEachFileInInputFileList=None, \
-                          parentJob=None, parentJobLs=parentJobLs, extraDependentInputLs=inputFileList,\
-                          extraOutputLs=outputFileList, \
-                          frontArgumentList=argumentList, extraArguments=None, extraArgumentList=None, \
-                          transferOutput=True, sshDBTunnel=sshDBTunnel, \
-                          key2ObjectForJob=None, objectWithDBArguments=None, objectWithDBGenomeArguments=None, \
-                          no_of_cpus=no_of_cpus, job_max_memory=job_max_memory, walltime=walltime, \
-                          max_walltime=None)
+    def addPurityJobToWorkflow(self, executable=None, argumentList=None,
+        inputFileList=None,\
+        outputFileList=None, parentJobLs=None, job_max_memory=10000, no_of_cpus=1, \
+        walltime=400, sshDBTunnel=0):
+        job = self.addGenericJob(executable=executable,
+            inputFile=None, inputArgumentOption=None, \
+            outputFile=None, outputArgumentOption=None, inputFileList=None,
+            argumentForEachFileInInputFileList=None, \
+            parentJob=None, parentJobLs=parentJobLs, extraDependentInputLs=inputFileList,\
+            extraOutputLs=outputFileList, \
+            frontArgumentList=argumentList, extraArguments=None, extraArgumentList=None, \
+            transferOutput=True, sshDBTunnel=sshDBTunnel, \
+            key2ObjectForJob=None, objectWithDBArguments=None,
+            objectWithDBGenomeArguments=None, \
+            no_of_cpus=no_of_cpus, job_max_memory=job_max_memory, walltime=walltime, \
+            max_walltime=None)
         return job
 
 
@@ -233,9 +247,10 @@ class DownsampleWorkflow(ParentClass):
         self.downSampleJava = self.registerOneExecutable( \
             path=self.javaPath, name='sampleDownexecutable', clusterSizeMultiplier=0)
 
-        self.addDownsamplejob(data_dir=self.data_dir, idDict=IDsample, DownSamplePrefix=None, \
-                         downSampleJava=self.downSampleJava, downSampleJar=self.PicardJar, \
-                         transferOutput=False)
+        self.addDownsamplejob(data_dir=self.data_dir, idDict=IDsample,
+            DownSamplePrefix=None, \
+            downSampleJava=self.downSampleJava, downSampleJar=self.PicardJar, \
+            transferOutput=False)
         #AccurityJobs = self.doAllAccurityAlignmentJob(data_dir=self.data_dir, \
         #                              pair_bam_file_list=entry, outputDirPrefix="")
         #self.addReducerJobtoAccurity(lastJob=AccurityJobs, dir="resultReducer", outputFnameLastStep="resultList.txt")

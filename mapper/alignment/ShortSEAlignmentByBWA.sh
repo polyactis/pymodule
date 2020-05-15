@@ -8,7 +8,7 @@ then
 	echo "Note:"
 	echo "	1. refFastaFname must have been indexed by bwa."
 	echo "Example:"
-	echo "	$0 120_480K_supercontigs.fasta individual_sequence/435_6136_2004030_GA_5/gerald_81GPBABXX_8_CGATGT_1.fastq.gz 435_6136_2004030_GA_5/gerald_81GPBABXX_8_CGATGT.sam.gz"
+	echo "	$0 120_480K_supercontigs.fasta 81GPBABXX_8_CGATGT_1.fastq.gz 81GPBABXX_8_CGATGT.sam.gz"
 exit
 fi
 

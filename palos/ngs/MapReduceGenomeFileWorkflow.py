@@ -33,6 +33,12 @@ class MapReduceGenomeFileWorkflow(ParentClass):
         data_dir=None, local_data_dir=None,
         
         ref_ind_seq_id=None,
+
+        excludeContaminant=False,
+        sequence_filtered=None,
+        completedAlignment=None,
+        skipDoneAlignment=False,
+
         samtools_path="bin/samtools",
         picard_dir="script/picard/dist",
         gatk_path="bin/GenomeAnalysisTK1_6_9.jar",
@@ -41,6 +47,7 @@ class MapReduceGenomeFileWorkflow(ParentClass):
         tabixPath="bin/tabix",
         vcftoolsPath="bin/vcftools/vcftools",
         ligateVcfPerlPath="bin/ligateVcf.pl",
+        
         maxContigID=None,
         minContigID=None,
         contigMaxRankBySize=2500,
@@ -51,17 +58,13 @@ class MapReduceGenomeFileWorkflow(ParentClass):
         ref_genome_sequence_type_id=1,
         ref_genome_version=15,
         ref_genome_outdated_index=0,
-
-        completedAlignment=None,
-        skipDoneAlignment=False,
-        mask_genotype_method_id=None, 
+        
+        mask_genotype_method_id=None,
         checkEmptyVCFByReading=False,
 
         needFastaIndexJob=False,
         needFastaDictJob=False,
-        reduce_reads=None, 
-        excludeContaminant=False,
-        sequence_filtered=None,
+        reduce_reads=None,
 
         site_id_ls="",
         country_id_ls="",
@@ -72,12 +75,15 @@ class MapReduceGenomeFileWorkflow(ParentClass):
         version_ls="",
         sequence_max_coverage=None,
         sequence_min_coverage=None,
+
         alignmentDepthIntervalMethodShortName=None,
         minAlignmentDepthIntervalLength=1000,
         alignmentDepthMaxFold=2,
         alignmentDepthMinFold=0.1,
+        
         intervalOverlapSize=500000,
         intervalSize=5000000,
+        
         defaultGATKArguments=\
         " --unsafe ALL --validation_strictness SILENT --read_filter BadCigar ",
         
@@ -107,12 +113,12 @@ class MapReduceGenomeFileWorkflow(ParentClass):
             db_user=db_user, db_passwd=db_passwd,
             data_dir=data_dir, local_data_dir=local_data_dir,
 
+            ref_ind_seq_id=ref_ind_seq_id,
+
             excludeContaminant=excludeContaminant,
             sequence_filtered=sequence_filtered,
             completedAlignment=completedAlignment,
             skipDoneAlignment=skipDoneAlignment,
-
-            ref_ind_seq_id=ref_ind_seq_id,
 
             samtools_path=samtools_path,
             picard_dir=picard_dir,
@@ -154,6 +160,7 @@ class MapReduceGenomeFileWorkflow(ParentClass):
             minAlignmentDepthIntervalLength=minAlignmentDepthIntervalLength,
             alignmentDepthMaxFold=alignmentDepthMaxFold,
             alignmentDepthMinFold=alignmentDepthMinFold,
+
             intervalOverlapSize=intervalOverlapSize,
             intervalSize=intervalSize,
             defaultGATKArguments=defaultGATKArguments,

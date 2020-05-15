@@ -332,7 +332,7 @@ if __name__ == '__main__':
             'non-fastq entries will be discarded.')
     ap.add_argument("--drivername", default="postgresql",
         help='Type of database server (default: %(default)s)')
-    ap.add_argument("--hostname", default="pdc",
+    ap.add_argument('-z', "--hostname", default="pdc",
         help='name/IP of database server (default: %(default)s)')
     ap.add_argument("--port", default=None,
         help="database server port (default: %(default)s)")

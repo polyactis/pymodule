@@ -1758,7 +1758,7 @@ if __name__ == '__main__':
             'If it is a file, every line should be a path to an input file.')
     ap.add_argument("--drivername", default="postgresql",
         help='Type of database server (default: %(default)s)')
-    ap.add_argument("--hostname", default="pdc",
+    ap.add_argument('-z', "--hostname", default="pdc",
         help='name/IP of database server (default: %(default)s)')
     ap.add_argument("--port", default=None,
         help="database server port (default: %(default)s)")

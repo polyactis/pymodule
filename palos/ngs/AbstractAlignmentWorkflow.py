@@ -56,11 +56,14 @@ class AbstractAlignmentWorkflow(ParentClass):
         }
     option_default_dict.update(partitionWorkflowOptionDict)
 
-    def __init__(self, drivername='postgresql', hostname='localhost',
+    def __init__(self,
+        drivername='postgresql', hostname='localhost',
         dbname='', schema='public', port=None,
         db_user=None,
         db_passwd=None,
         data_dir=None, local_data_dir=None,
+
+        ref_ind_seq_id=None,
 
         ind_seq_id_ls=None,
         ind_aln_id_ls=None,
@@ -78,8 +81,6 @@ class AbstractAlignmentWorkflow(ParentClass):
         selectedRegionFname=None,
         maxNoOfRegionsPerJob=5000,
         
-        ref_ind_seq_id=None,
-
         samtools_path="bin/samtools",
         picard_dir="script/picard/dist",
         gatk_path="bin/GenomeAnalysisTK1_6_9.jar",
@@ -113,14 +114,17 @@ class AbstractAlignmentWorkflow(ParentClass):
         sequencer_id_ls="",
         sequence_batch_id_ls="",
         version_ls="",
-        sequence_max_coverage=None,
         sequence_min_coverage=None,
+        sequence_max_coverage=None,
+        
         alignmentDepthIntervalMethodShortName=None,
         minAlignmentDepthIntervalLength=1000,
         alignmentDepthMaxFold=2,
         alignmentDepthMinFold=0.1,
+
         intervalOverlapSize=500000,
         intervalSize=5000000,
+        
         defaultGATKArguments=\
         " --unsafe ALL --validation_strictness SILENT --read_filter BadCigar ",
         
@@ -148,12 +152,12 @@ class AbstractAlignmentWorkflow(ParentClass):
             db_user=db_user, db_passwd=db_passwd,
             data_dir=data_dir, local_data_dir=local_data_dir,
 
+            ref_ind_seq_id=ref_ind_seq_id,
+
             completedAlignment=completedAlignment,
             skipDoneAlignment=skipDoneAlignment,
             excludeContaminant=excludeContaminant,
             sequence_filtered=sequence_filtered,
-
-            ref_ind_seq_id=ref_ind_seq_id,
 
             samtools_path=samtools_path,
             picard_dir=picard_dir,
@@ -163,6 +167,7 @@ class AbstractAlignmentWorkflow(ParentClass):
             tabixPath=tabixPath,
             vcftoolsPath=vcftoolsPath,
             ligateVcfPerlPath=ligateVcfPerlPath,
+
             maxContigID=maxContigID,
             minContigID=minContigID,
             contigMaxRankBySize=contigMaxRankBySize,
@@ -188,15 +193,18 @@ class AbstractAlignmentWorkflow(ParentClass):
             sequencer_id_ls=sequencer_id_ls,
             sequence_batch_id_ls=sequence_batch_id_ls,
             version_ls=version_ls,
-            
-            sequence_max_coverage=sequence_max_coverage,
+
             sequence_min_coverage=sequence_min_coverage,
+            sequence_max_coverage=sequence_max_coverage,
             alignmentDepthIntervalMethodShortName=alignmentDepthIntervalMethodShortName,
             minAlignmentDepthIntervalLength=minAlignmentDepthIntervalLength,
+            
             alignmentDepthMaxFold=alignmentDepthMaxFold,
             alignmentDepthMinFold=alignmentDepthMinFold,
+
             intervalOverlapSize=intervalOverlapSize,
             intervalSize=intervalSize,
+            
             defaultGATKArguments=defaultGATKArguments,
 
             site_handler=site_handler,
@@ -620,14 +628,9 @@ class AbstractAlignmentWorkflow(ParentClass):
         return PassingData(chrIDSet=chrIDSet, chr2VCFJobData=None,
             chrSizeIDList=chrSizeIDList)
 
-    def addAllJobs(self, alignmentDataLs=None, chr2IntervalDataLs=None,
-        samtools=None,
-        GenomeAnalysisTKJar=None,
-        MergeSamFilesJar=None,
-        CreateSequenceDictionaryJava=None,
-        CreateSequenceDictionaryJar=None,
-        BuildBamIndexFilesJava=None, BuildBamIndexJar=None,\
-        mv=None, skipDoneAlignment=False,\
+    def addAllJobs(self,
+        alignmentDataLs=None, chr2IntervalDataLs=None,
+        skipDoneAlignment=False,\
         registerReferenceData=None, \
         needFastaIndexJob=False, needFastaDictJob=False, \
         data_dir=None, no_of_gatk_threads = 1, \
@@ -659,8 +662,6 @@ class AbstractAlignmentWorkflow(ParentClass):
 
         if needFastaDictJob or registerReferenceData.needPicardFastaDictJob:
             fastaDictJob = self.addRefFastaDictJob(
-                CreateSequenceDictionaryJava=CreateSequenceDictionaryJava,
-                CreateSequenceDictionaryJar=CreateSequenceDictionaryJar,
                 refFastaF=refFastaF)
             refFastaDictF = fastaDictJob.refFastaDictF
         else:
@@ -668,20 +669,18 @@ class AbstractAlignmentWorkflow(ParentClass):
             refFastaDictF = registerReferenceData.refPicardFastaDictF
 
         if needFastaIndexJob or registerReferenceData.needSAMtoolsFastaIndexJob:
-            fastaIndexJob = self.addRefFastaFaiIndexJob(samtools=samtools,
-                refFastaF=refFastaF)
+            fastaIndexJob = self.addRefFastaFaiIndexJob(refFastaF=refFastaF)
             refFastaIndexF = fastaIndexJob.refFastaIndexF
         else:
             fastaIndexJob = None
             refFastaIndexF = registerReferenceData.refSAMtoolsFastaIndexF
 
-
-
         returnData = PassingData()
         returnData.jobDataLs = []
 
         #2012.9.22 AlignmentJobAndOutputLs is a relic.
-        #	but it's similar to mapEachIntervalDataLs but designed for addAlignmentMergeJob(),
+        #	but it's similar to mapEachIntervalDataLs but
+        #   designed for addAlignmentMergeJob(),
         #	so AlignmentJobAndOutputLs gets re-set for every alignment.
         # 	mapEachAlignmentDataLs is never reset.
         #	mapEachChromosomeDataLs is reset right after a new alignment is chosen.
@@ -891,14 +890,7 @@ class AbstractAlignmentWorkflow(ParentClass):
         pdata = self.setup_run()
         self.addAllJobs(alignmentDataLs=pdata.alignmentDataLs, \
             chr2IntervalDataLs=pdata.chr2IntervalDataLs,
-            samtools=self.samtools, \
-            GenomeAnalysisTKJar=self.GenomeAnalysisTKJar, \
-            MergeSamFilesJar=self.MergeSamFilesJar, \
-            CreateSequenceDictionaryJava=self.CreateSequenceDictionaryJava, \
-            CreateSequenceDictionaryJar=self.CreateSequenceDictionaryJar, \
-            BuildBamIndexFilesJava=self.BuildBamIndexFilesJava,
-            BuildBamIndexJar=self.BuildBamIndexJar,\
-            mv=self.mv, skipDoneAlignment=self.skipDoneAlignment,\
+            skipDoneAlignment=self.skipDoneAlignment,\
             registerReferenceData=pdata.registerReferenceData,\
             needFastaIndexJob=self.needFastaIndexJob,
             needFastaDictJob=self.needFastaDictJob, \
@@ -908,4 +900,11 @@ class AbstractAlignmentWorkflow(ParentClass):
 
         self.end_run()
 
-
+if __name__ == '__main__':
+    from argparse import ArgumentParser
+    ap = ArgumentParser()
+    ap.add_argument("--completedAlignment", type=int, default=None,
+        help='To filter incomplete alignments: '
+            '--completedAlignment 0 . '
+            '--completedAlignment 1 fetches only the complete alignments. '
+            'Default (%(default)s) has no effect.')

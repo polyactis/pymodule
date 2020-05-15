@@ -249,34 +249,25 @@ class AlignmentReadBaseQualityRecalibration(ParentClass):
                 fileBasenamePrefix = os.path.splitext(alignmentJob.output.name)[0]
                 outputRGBAM = File("%s.isq_RG.bam"%(fileBasenamePrefix))
                 addRGJob = self.addReadGroupInsertionJob(
-                    individual_alignment=new_individual_alignment, \
-                    inputBamFile=alignmentJob.output, \
+                    individual_alignment=new_individual_alignment,
+                    inputBamFile=alignmentJob.output,
                     outputBamFile=outputRGBAM,\
-                    AddOrReplaceReadGroupsJava=self.AddOrReplaceReadGroupsJava, \
-                    AddOrReplaceReadGroupsJar=self.AddOrReplaceReadGroupsJar,\
                     parentJobLs=[alignmentJob, indexAlignmentJob],
-                    extraDependentInputLs=None, \
-                    extraArguments=None, job_max_memory = 2500, transferOutput=False,\
+                    job_max_memory = 2500, transferOutput=False,\
                     walltime=max(180, mergeAlignmentWalltime/20))
                 
                 NewAlignmentJobAndOutputLs.append(PassingData(jobLs=[addRGJob],
                     file=addRGJob.output))
-            #
-            
             
             mergedBamFile = File(os.path.join(reduceOutputDirJob.output, \
                 '%s_recal.bam'%(bamFnamePrefix)))
             alignmentMergeJob, bamIndexJob = self.addAlignmentMergeJob(
                 AlignmentJobAndOutputLs=NewAlignmentJobAndOutputLs, \
                 outputBamFile=mergedBamFile, \
-                samtools=self.samtools, java=self.java, \
-                MergeSamFilesJava=self.MergeSamFilesJava, \
-                MergeSamFilesJar=self.MergeSamFilesJar, \
-                BuildBamIndexFilesJava=self.IndexMergedBamIndexJava,
-                BuildBamIndexJar=self.BuildBamIndexJar, \
-                mv=self.mv, parentJobLs=[reduceOutputDirJob],
+                parentJobLs=[reduceOutputDirJob],
                 walltime=mergeAlignmentWalltime,\
-                job_max_memory=mergeAlignmentMaxMemory, transferOutput=False)
+                job_max_memory=mergeAlignmentMaxMemory,
+                transferOutput=False)
             #2012.9.19 add/copy the alignment file to db-affliated storage
             #add the metric file to AddAlignmentFile2DB.py as well
             #  (to be moved into db-affiliated storage)
@@ -338,9 +329,9 @@ class AlignmentReadBaseQualityRecalibration(ParentClass):
         extraArgumentList = [memRequirementData.memRequirementInStr,
             '-jar', GenomeAnalysisTKJar, "-T BaseRecalibrator",\
             "-I", inputFile, "-R", refFastaFile,\
-            "-L", interval, self.defaultGATKArguments, \
-                        "-knownSites:vcf", VCFFile,\
-                        "--out", outputFile]
+            "-L", interval, self.defaultGATKArguments,
+            "-knownSites:vcf", VCFFile,
+            "--out", outputFile]
         if extraArguments:
             extraArgumentList.append(extraArguments)
         if extraDependentInputLs is None:

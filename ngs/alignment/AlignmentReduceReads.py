@@ -185,10 +185,8 @@ class AlignmentReduceReads(ParentClass):
                     individual_alignment=new_individual_alignment, \
                     inputBamFile=alignmentJob.output, \
                     outputBamFile=outputRGBAM,\
-                    AddOrReplaceReadGroupsJava=self.AddOrReplaceReadGroupsJava, \
-                    AddOrReplaceReadGroupsJar=self.AddOrReplaceReadGroupsJar,\
-                    parentJobLs=[alignmentJob, indexAlignmentJob], extraDependentInputLs=None, \
-                    extraArguments=None, job_max_memory = 2500, transferOutput=False)
+                    parentJobLs=[alignmentJob, indexAlignmentJob],
+                    job_max_memory = 2500, transferOutput=False)
                 
                 NewAlignmentJobAndOutputLs.append(PassingData(jobLs=[addRGJob], file=addRGJob.output))
             #
@@ -196,10 +194,6 @@ class AlignmentReduceReads(ParentClass):
             alignmentMergeJob, bamIndexJob = self.addAlignmentMergeJob(
                 AlignmentJobAndOutputLs=NewAlignmentJobAndOutputLs, \
                 outputBamFile=mergedBamFile, \
-                samtools=self.samtools, java=self.java, \
-                MergeSamFilesJava=self.MergeSamFilesJava, MergeSamFilesJar=self.MergeSamFilesJar, \
-                BuildBamIndexFilesJava=self.IndexMergedBamIndexJava,
-                BuildBamIndexJar=self.BuildBamIndexJar, \
                 mv=self.mv, parentJobLs=[reduceOutputDirJob], \
                 transferOutput=False)
             #2012.9.19 add/copy the alignment file to db-affliated storage

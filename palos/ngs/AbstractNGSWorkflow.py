@@ -26,33 +26,37 @@ class AbstractNGSWorkflow(ParentClass):
     option_default_dict = ParentClass.option_default_dict.copy()
     option_default_dict.update(ParentClass.db_option_dict)
     option_default_dict.update({
+        ('ref_ind_seq_id', 1, int): [None, 'a', 1, 
+            'Select this IndividualSequence.id as the reference.'],
+
          #to filter alignment or individual_sequence
         ("reduce_reads", 0, int): [None, '', 1, 
             'To filter which input alignments to fetch from db'],\
         ('excludeContaminant', 0, int):[0, '', 0, 
-            'Toggle to exclude alignments or sequences from contaminated individuals, '
+            'Toggle to exclude sequences from contaminated individuals, '
             '(IndividualSequence.is_contaminated=1)'],\
         ("sequence_filtered", 0, int): [None, 'Q', 1, 
             'Filter alignments/individual_sequences. '
-            'None: no filter, 0: unfiltered sequences, 1: filtered sequences: 2: ...'],\
+            'None: no filter, 0: unfiltered sequences, 1: filtered sequences: 2: ...'],
         ('completedAlignment', 0, int):[None, '', 1, 
             'To filter incomplete alignments: '
             '--completedAlignment 0 is same as --skipDoneAlignment. '
             '--completedAlignment 1 gets you only the alignments that has been '
-            ' completed. Default (None) has no effect.'],\
+            ' completed. Default (None) has no effect.'],
         ('skipDoneAlignment', 0, int):[0, '', 0, 
             'Skip alignment whose db_entry is complete and affiliated file is valid'
             '(for ShortRead2Alignment or '
-            'AlignmentReadBaseQualityRecalibration)'],\
+            'AlignmentReadBaseQualityRecalibration)'],
+        
         ("site_id_ls", 0, ): ["", 'S', 1,
             'comma/dash-separated list of site IDs. '
-            'individuals must come from these sites.'],\
+            'individuals must come from these sites.'],
         ("country_id_ls", 0, ): ["", '', 1,
             'comma/dash-separated list of country IDs. '
-            'individuals must come from these countries.'],\
+            'individuals must come from these countries.'],
         ("tax_id_ls", 0, ): ["9606", '', 1,
             'comma/dash-separated list of taxonomy IDs. '
-            'individuals must come from these taxonomies.'],\
+            'individuals must come from these taxonomies.'],
         ("sequence_type_id_ls", 0, ): ["", '', 1, 
             'comma/dash-separated list of IndividualSequence.sequence_type_id. '
             'Empty for no filtering'],\
@@ -65,15 +69,11 @@ class AbstractNGSWorkflow(ParentClass):
         ("version_ls", 0, ): ["", '', 1, 
             'comma/dash-separated list of IndividualSequence.version. '
             'Empty for no filtering'],\
-        ("sequence_max_coverage", 0, float): [None, '', 1, 
-            'max IndividualSequence.coverage. Empty for no filtering'],\
         ("sequence_min_coverage", 0, float): [None, '', 1, 
-            'min IndividualSequence.coverage. Empty for no filtering'],\
-        
-        ('ref_ind_seq_id', 1, int): [None, 'a', 1, 
-            'Restrict alignments that using this (IndividualSequence.id) as'
-            ' reference'],
-        
+            'min IndividualSequence.coverage to filter IndividualSequence.'],\
+        ("sequence_max_coverage", 0, float): [None, '', 1, 
+            'max IndividualSequence.coverage to filter IndividualSequence.'],\
+
         ("samtools_path", 1, ): ["bin/samtools", '', 1, 'samtools binary'],
         ("picard_dir", 1, ): ["script/picard/dist", '', 1, 
             'picard folder containing its jar binaries'],
@@ -103,6 +103,7 @@ class AbstractNGSWorkflow(ParentClass):
             'Maximum rank (rank 1=biggest) of a chr to be included in calling'],
         ("contigMinRankBySize", 1, int): [1, 'M', 1, 
             'Minimum rank (rank 1=biggest) of a chr to be included in calling'],
+        
         ('chromosome_type_id', 0, int):[None, '', 1, 
             'What type of chromosomes to be included, '
             'same as table genome.chromosome_type. '
@@ -186,6 +187,7 @@ class AbstractNGSWorkflow(ParentClass):
         tabixPath="bin/tabix",
         vcftoolsPath="bin/vcftools/vcftools",
         ligateVcfPerlPath="bin/ligateVcf.pl",
+        
         maxContigID=None,
         minContigID=None,
         contigMaxRankBySize=2500,
@@ -211,14 +213,17 @@ class AbstractNGSWorkflow(ParentClass):
         sequencer_id_ls="",
         sequence_batch_id_ls="",
         version_ls="",
-        sequence_max_coverage=None,
         sequence_min_coverage=None,
+        sequence_max_coverage=None,
+
         alignmentDepthIntervalMethodShortName=None,
         minAlignmentDepthIntervalLength=1000,
         alignmentDepthMaxFold=2,
         alignmentDepthMinFold=0.1,
+        
         intervalOverlapSize=300000,
         intervalSize=5000000,
+        
         defaultGATKArguments=\
         " --unsafe ALL --validation_strictness SILENT --read_filter BadCigar ",
         
@@ -292,14 +297,17 @@ class AbstractNGSWorkflow(ParentClass):
         self.sequence_batch_id_ls = sequence_batch_id_ls
         self.version_ls = version_ls
 
-        self.sequence_max_coverage = sequence_max_coverage
         self.sequence_min_coverage = sequence_min_coverage
+        self.sequence_max_coverage = sequence_max_coverage
+
         self.alignmentDepthIntervalMethodShortName = alignmentDepthIntervalMethodShortName
         self.minAlignmentDepthIntervalLength = minAlignmentDepthIntervalLength
         self.alignmentDepthMaxFold = alignmentDepthMaxFold
         self.alignmentDepthMinFold = alignmentDepthMinFold
+        
         self.intervalOverlapSize = intervalOverlapSize
         self.intervalSize = intervalSize
+
         self.defaultGATKArguments = defaultGATKArguments
         
         self.chr_pattern = Genome.chr_pattern
@@ -640,8 +648,7 @@ class AbstractNGSWorkflow(ParentClass):
             affiliateFilenameSuffixLs=self.bwaIndexFileSuffixLs,\
             folderName=folderName)
 
-    def addBAMIndexJob(self, BuildBamIndexFilesJava=None,
-        BuildBamIndexJar=None,
+    def addBAMIndexJob(self,
         inputBamF=None,\
         extraArguments=None, parentJobLs=None,
         extraDependentInputLs=None,
@@ -649,7 +656,6 @@ class AbstractNGSWorkflow(ParentClass):
         javaMaxMemory=2500,
         walltime=60, **keywords):
         """
-        2012.10.18 use addGenericJob() instead
         2012.4.12
             remove argument parentJob and stop adding it to parentJobLs, 
                 which causes an insidious bug that accumulates parent jobs 
@@ -663,15 +669,7 @@ class AbstractNGSWorkflow(ParentClass):
         """
         if javaMaxMemory is not None and job_max_memory is None:
             job_max_memory = javaMaxMemory
-        memRequirementData = self.getJVMMemRequirment(
-            job_max_memory=job_max_memory, minMemory=2000)
-        job_max_memory = memRequirementData.memRequirement
-        javaMemRequirement = memRequirementData.memRequirementInStr
         baiFile = File('%s.bai'%inputBamF.name)
-        extraArgumentList = [javaMemRequirement, 
-            '-jar', self.PicardJar, 'BuildBamIndex',\
-            "VALIDATION_STRINGENCY=LENIENT", \
-            "INPUT=", inputBamF, "OUTPUT=", baiFile]
         #not including 'SORT_ORDER=coordinate'
         #(adding the SORT_ORDER doesn't do sorting but it marks
         #  the header as sorted so that BuildBamIndexJar won't fail.)
@@ -679,18 +677,19 @@ class AbstractNGSWorkflow(ParentClass):
             extraArgumentList.append(extraArguments)
         if extraDependentInputLs is None:
             extraDependentInputLs=[]
-        extraDependentInputLs.extend([inputBamF, self.PicardJar])
-
-        job= self.addGenericJob(
-            executable=BuildBamIndexFilesJava,
-            inputFile=None, outputFile=None,
-            outputArgumentOption="-o",
+        extraDependentInputLs.append(self.PicardJar)
+        job = self.addJavaJob(
+            executable=self.BuildBamIndexFilesJava,
+            jarFile=self.PicardJar,
+            inputFile=inputBamF, inputArgumentOption="INPUT=",
+            outputFile=baiFile, outputArgumentOption="OUTPUT=",
             parentJobLs=parentJobLs,
             extraDependentInputLs=extraDependentInputLs,
-            extraOutputLs=[baiFile],\
-            transferOutput=transferOutput, \
-            extraArgumentList=extraArgumentList, \
-            job_max_memory=memRequirementData.memRequirement,
+            extraOutputLs=[baiFile],
+            frontArgumentList=["BuildBamIndex"],
+            extraArgumentList=["VALIDATION_STRINGENCY=LENIENT"],
+            transferOutput=transferOutput,
+            job_max_memory=job_max_memory,
             walltime=walltime, **keywords)
         job.bamFile = inputBamF
         job.baiFile = baiFile
@@ -705,21 +704,19 @@ class AbstractNGSWorkflow(ParentClass):
         ParentClass.registerCustomExecutables(self)
 
 
-    def addRefFastaFaiIndexJob(self, samtools=None, refFastaF=None, \
-            parentJobLs=None, transferOutput=True, job_max_memory=1000,\
-            walltime=300, **keywords):
+    def addRefFastaFaiIndexJob(self, refFastaF=None,
+        parentJobLs=None, transferOutput=True, job_max_memory=1000,
+        walltime=300, **keywords):
         """
-        2013.3.23 use addGenericJob()
-        2011-11-25
-            the *.fai file of refFastaF is required for GATK
+        the *.fai file of refFastaF is required for GATK
         """
         sys.stderr.write("\t Adding SAMtools index fasta job ...")
         # the .fai file is required for GATK
         refFastaIndexFname = '%s.fai'%(refFastaF.name)
         refFastaIndexF = File(refFastaIndexFname)
         frontArgumentList = ["faidx", refFastaF]
-        fastaIndexJob = self.addGenericJob(executable=samtools,
-            inputFile=None,
+        fastaIndexJob = self.addGenericJob(
+            executable=self.samtools,
             outputFile=None, outputArgumentOption=None, \
             parentJobLs=parentJobLs,
             extraDependentInputLs=[refFastaF],
@@ -733,11 +730,9 @@ class AbstractNGSWorkflow(ParentClass):
         sys.stderr.write("\n")
         return fastaIndexJob
 
-    def addRefFastaDictJob(self, CreateSequenceDictionaryJava=None, \
-        CreateSequenceDictionaryJar=None, \
+    def addRefFastaDictJob(self,
         refFastaF=None, parentJobLs=None, transferOutput=True,
-        job_max_memory=1000,
-        walltime=120, **keywords):
+        job_max_memory=1000, walltime=120, **keywords):
         """
         2013.3.23 use addGenericJob()
         2012.9.14 bugfix. add argument CreateSequenceDictionaryJar
@@ -747,13 +742,9 @@ class AbstractNGSWorkflow(ParentClass):
         print("\t Adding picard CreateSequenceDictionaryJar job ...", flush=True)
         refFastaDictFname = '%s.dict'%(os.path.splitext(refFastaF.name)[0])
         refFastaDictF = File(refFastaDictFname)
-        if CreateSequenceDictionaryJar is None:
-            logging.error(f"CreateSequenceDictionaryJar is nothing, "
-                f"{CreateSequenceDictionaryJar} inside addRefFastaDictJob(). "
-                "Quit.")
-            raise
-        fastaDictJob = self.addJavaJob(executable=CreateSequenceDictionaryJava, 
-            jarFile=CreateSequenceDictionaryJar, \
+        fastaDictJob = self.addJavaJob(
+            executable=self.CreateSequenceDictionaryJava, 
+            jarFile=self.CreateSequenceDictionaryJar, \
             inputFile=refFastaF, inputArgumentOption="REFERENCE=", \
             inputFileList=None, argumentForEachFileInInputFileList=None,\
             outputFile=refFastaDictF, outputArgumentOption="OUTPUT=",\
@@ -762,7 +753,8 @@ class AbstractNGSWorkflow(ParentClass):
             frontArgumentList=[],
             extraArguments=None, extraArgumentList=None,
             extraOutputLs=None,
-            extraDependentInputLs=None, no_of_cpus=None, walltime=walltime, 
+            extraDependentInputLs=[self.CreateSequenceDictionaryJar],
+            no_of_cpus=None, walltime=walltime, 
             sshDBTunnel=None, **keywords)
 
         fastaDictJob.refFastaDictF = refFastaDictF
@@ -1578,8 +1570,6 @@ class AbstractNGSWorkflow(ParentClass):
         if needBAMIndexJob:
             # add the index job on the bam file
             bamIndexJob = self.addBAMIndexJob(
-                BuildBamIndexFilesJava=self.BuildBamIndexFilesJava, \
-                BuildBamIndexJar=self.BuildBamIndexJar, \
                 inputBamF=job.output, parentJobLs=[job], \
                 transferOutput=transferOutput, job_max_memory=2500, 
                 walltime=max(50, walltime/2))
@@ -1870,50 +1860,38 @@ option:
         return job
 
     def addSortAlignmentJob(self, inputBamFile=None, \
-        outputBamFile=None,\
-        SortSamFilesJava=None, SortSamJar=None, tmpDir=None,\
-        parentJobLs=None, extraDependentInputLs=None, \
-        extraArguments=None, job_max_memory = 2500, transferOutput=False, \
+        outputBamFile=None, tmpDir=None,
+        extraDependentInputLs=None,
+        parentJobLs=None, 
+        job_max_memory = 2500, transferOutput=False,
         walltime=180, needBAMIndexJob=True, **keywords):
         """
-        2013.04.09 added argument needBAMIndexJob
-        2013.04.05 moved from ShortRead2Alignment
-        2012.9.19
         """
-        memRequirementData = self.getJVMMemRequirment(
-            job_max_memory=job_max_memory, minMemory=2000)
-        job_max_memory = memRequirementData.memRequirement
-        javaMemRequirement = memRequirementData.memRequirementInStr
-
-        extraArgumentList = [memRequirementData.memRequirementInStr, '-jar', 
-            SortSamJar, "SortSam",\
-            "SORT_ORDER=coordinate", "I=", inputBamFile, \
-            "O=", outputBamFile, "VALIDATION_STRINGENCY=LENIENT",
-            "TMP_DIR=%s"%tmpDir]
-            #not including 'SORT_ORDER=coordinate'
-            #(adding the SORT_ORDER doesn't do sorting but it marks the header 
-            #  as sorted so that BuildBamIndexJar won't fail.)
-        if extraArguments:
-            extraArgumentList.append(extraArguments)
         if extraDependentInputLs is None:
-            extraDependentInputLs=[]
-        extraDependentInputLs.extend([inputBamFile, SortSamJar])
-
-        job= self.addGenericJob(executable=SortSamFilesJava, inputFile=None,
-            outputFile=None, outputArgumentOption="-o", \
-            parentJobLs=parentJobLs,
+            extraDependentInputLs = []
+        extraDependentInputLs.append(self.PicardJar)
+        #not including 'SORT_ORDER=coordinate'
+        #(adding the SORT_ORDER doesn't do sorting but it marks the header 
+        #  as sorted so that BuildBamIndexJar won't fail.)
+        job= self.addJavaJob(
+            executable=self.SortSamFilesJava,
+            jarFile=self.PicardJar,
+            frontArgumentList=["SortSam"],
+            inputFile=inputBamFile, inputArgumentOption="INPUT=",
+            outputFile=outputBamFile, outputArgumentOption="OUTPUT=",
+            extraArgumentList=["SORT_ORDER=coordinate",
+                "VALIDATION_STRINGENCY=LENIENT",
+                "TMP_DIR=%s"%tmpDir],
             extraDependentInputLs=extraDependentInputLs,
-            extraOutputLs=[outputBamFile],\
-            transferOutput=transferOutput, \
-            extraArgumentList=extraArgumentList, \
-            job_max_memory=memRequirementData.memRequirement,
+            extraOutputLs=[],
+            parentJobLs=parentJobLs,
+            transferOutput=transferOutput,
+            job_max_memory=job_max_memory,
             walltime=walltime, **keywords)
         if needBAMIndexJob:
             # add the index job on the bam file
             bamIndexJob = self.addBAMIndexJob(
-                BuildBamIndexFilesJava=self.BuildBamIndexFilesJava,
-                BuildBamIndexJar=self.BuildBamIndexJar, \
-                inputBamF=job.output, parentJobLs=[job], \
+                inputBamF=job.output, parentJobLs=[job],
                 transferOutput=transferOutput, job_max_memory=2500, 
                 walltime=max(50, walltime/2))
         else:
@@ -1923,68 +1901,47 @@ option:
 
     def addReadGroupInsertionJob(self, individual_alignment=None,
         inputBamFile=None, outputBamFile=None,
-        AddOrReplaceReadGroupsJava=None, AddOrReplaceReadGroupsJar=None,\
-        parentJobLs=None, extraDependentInputLs=None, \
-        extraArguments=None, job_max_memory = 2500, \
-        transferOutput=False, walltime=180, max_walltime=1200, \
+        parentJobLs=None, transferOutput=False,
+        job_max_memory = 2500,
+        walltime=180, max_walltime=1200, \
         needBAMIndexJob=True, **keywords):
         """
-        2013.04.09 moved from ShortRead2Alignment.py
-            added argument needBAMIndexJob and the bamIndexJob
-        2012.9.19 split out of addAlignmentJob()
         """
-        memRequirementData = self.getJVMMemRequirment(
-            job_max_memory=job_max_memory, minMemory=2000)
-        job_max_memory = memRequirementData.memRequirement
-        javaMemRequirement = memRequirementData.memRequirementInStr
-
         # add RG to this bam
         sequencer = individual_alignment.individual_sequence.sequencer
         read_group = individual_alignment.getReadGroup()
         if sequencer.short_name=='454':
             platform_id = 'LS454'
-        elif sequencer.short_name=='GA':
-            platform_id = 'ILLUMINA'
         else:
             platform_id = 'ILLUMINA'
-        # the add-read-group job
-        extraArgumentList = [memRequirementData.memRequirementInStr, \
-            '-jar', AddOrReplaceReadGroupsJar, "AddOrReplaceReadGroups",\
-            "INPUT=", inputBamFile,\
-            'RGID=%s'%(read_group), 'RGLB=%s'%(platform_id),
-            'RGPL=%s'%(platform_id),
-            'RGPU=%s'%(read_group), 'RGSM=%s'%(read_group),\
-            'OUTPUT=', outputBamFile, "VALIDATION_STRINGENCY=LENIENT"]
-            #not including 'SORT_ORDER=coordinate'
-            #(adding the SORT_ORDER doesn't do sorting but it marks the header
-            #  as sorted so that BuildBamIndexJar won't fail.)
-        if extraArguments:
-            extraArgumentList.append(extraArguments)
-        if extraDependentInputLs is None:
-            extraDependentInputLs=[]
-        extraDependentInputLs.extend([inputBamFile, AddOrReplaceReadGroupsJar])
-
-        job= self.addGenericJob(executable=AddOrReplaceReadGroupsJava,
-            inputFile=None,
-            outputFile=None, outputArgumentOption="-o", \
+        #not including 'SORT_ORDER=coordinate'
+        #(adding the SORT_ORDER doesn't do sorting but it marks the header
+        #  as sorted so that BuildBamIndexJar won't fail.)
+        job= self.addJavaJob(
+            executable=self.AddOrReplaceReadGroupsJava,
+            jarFile=self.PicardJar,
+            frontArgumentList=["AddOrReplaceReadGroups"],
+            inputFile=inputBamFile, inputArgumentOption="INPUT=",
+            outputFile=outputBamFile, outputArgumentOption="OUTPUT=",
             parentJobLs=parentJobLs,
-            extraDependentInputLs=extraDependentInputLs, \
-            extraOutputLs=[outputBamFile],\
+            extraDependentInputLs=[self.PicardJar], \
+            extraOutputLs=None,\
             transferOutput=transferOutput, \
-            extraArgumentList=extraArgumentList, \
-            job_max_memory=memRequirementData.memRequirement, 
-            walltime=walltime, max_walltime=max_walltime,\
+            extraArgumentList=['RGID=%s'%(read_group), 'RGLB=%s'%(platform_id),
+                'RGPL=%s'%(platform_id),
+                'RGPU=%s'%(read_group), 'RGSM=%s'%(read_group),\
+                "VALIDATION_STRINGENCY=LENIENT"],
+            job_max_memory=job_max_memory, 
+            walltime=walltime, max_walltime=max_walltime,
             **keywords)
         if needBAMIndexJob:
             # add the index job on the bam file
             bamIndexJob = self.addBAMIndexJob(
-                BuildBamIndexFilesJava=self.BuildBamIndexFilesJava, \
-                BuildBamIndexJar=self.BuildBamIndexJar, \
-                inputBamF=job.output, parentJobLs=[job], \
+                inputBamF=job.output, parentJobLs=[job],
                 transferOutput=transferOutput, job_max_memory=job_max_memory)
         else:
             bamIndexJob = None
-        job.bamIndexJob = bamIndexJob	#2013.04.09
+        job.bamIndexJob = bamIndexJob
         return job
 
     def addSelectAlignmentJob(self, executable=None, inputFile=None, \
@@ -2018,9 +1975,7 @@ option:
         if needBAMIndexJob:
             # add the index job on the bam file
             bamIndexJob = self.addBAMIndexJob(
-                BuildBamIndexFilesJava=self.BuildBamIndexFilesJava, \
-                BuildBamIndexJar=self.BuildBamIndexJar, \
-                inputBamF=job.output, parentJobLs=[job], \
+                inputBamF=job.output, parentJobLs=[job],
                 transferOutput=transferOutput,
                 job_max_memory=job_max_memory)
         else:
@@ -3259,10 +3214,7 @@ run something like below to extract data from regionOfInterest out of
 
     def addAlignmentMergeJob(self, AlignmentJobAndOutputLs=None,
         outputBamFile=None,
-        MergeSamFilesJava=None, \
-        BuildBamIndexFilesJava=None, \
-        mv=None, parentJobLs=None, namespace=None, version=None,
-        transferOutput=False,
+        parentJobLs=None, transferOutput=False,
         job_max_memory=7000, walltime=680, **keywords):
         """
         not certain, but it looks like MergeSamFilesJar does not require the .bai (bam index) file.
@@ -3282,17 +3234,9 @@ run something like below to extract data from regionOfInterest out of
             merge alignment
             index it
         """
-        if MergeSamFilesJava is None:
-            MergeSamFilesJava = self.MergeSamFilesJava
-        if BuildBamIndexFilesJava is None:
-            BuildBamIndexFilesJava = self.BuildBamIndexFilesJava
-        if mv is None:
-            mv = self.mv
 
-        namespace = getattr('namespace', namespace)
-        version = getattr('version', version)
-
-        memRequirementObject = self.getJVMMemRequirment(job_max_memory=job_max_memory, minMemory=2000)
+        memRequirementObject = self.getJVMMemRequirment(
+            job_max_memory=job_max_memory, minMemory=2000)
         job_max_memory = memRequirementObject.memRequirement
         javaMemRequirement = memRequirementObject.memRequirementInStr
 
@@ -3307,11 +3251,11 @@ run something like below to extract data from regionOfInterest out of
                 alignmentOutput = AlignmentJobAndOutput.file
                 if alignmentOutput:
                     alignmentOutputLs.append(alignmentOutput)
-                        #2013.04.01
-            merge_sam_job = self.addJavaJob(executable=MergeSamFilesJava, 
+            merge_sam_job = self.addJavaJob(
+                executable=self.MergeSamFilesJava, 
                 jarFile=self.PicardJar, \
-                inputFile=None, inputArgumentOption=None, \
-                inputFileList=alignmentOutputLs, argumentForEachFileInInputFileList="INPUT=",\
+                inputFileList=alignmentOutputLs,
+                argumentForEachFileInInputFileList="INPUT=",\
                 outputFile=outputBamFile, outputArgumentOption="OUTPUT=",\
                 parentJobLs=alignmentJobLs, transferOutput=transferOutput, 
                 job_max_memory=job_max_memory,\
@@ -3319,23 +3263,20 @@ run something like below to extract data from regionOfInterest out of
                 extraArgumentList=['SORT_ORDER=coordinate', \
                     'ASSUME_SORTED=true', "VALIDATION_STRINGENCY=LENIENT"], 
                 extraOutputLs=None, \
-                extraDependentInputLs=None, no_of_cpus=None, walltime=walltime, 
-                sshDBTunnel=None, **keywords)
+                extraDependentInputLs=[self.PicardJar],
+                no_of_cpus=None, walltime=walltime)
         elif len(AlignmentJobAndOutputLs)==1:
             #one input file, no samtools merge. use "mv" to rename it instead.
             #  should use "cp", then the input would be cleaned by cleaning job.
             AlignmentJobAndOutput = AlignmentJobAndOutputLs[0]
             alignmentJobLs = AlignmentJobAndOutput.jobLs
             alignmentOutput = AlignmentJobAndOutput.file
-            #2012.7.4
             sys.stderr.write(" copy (instead of merging small alignment files) due to "
                 " only one alignment file, from %s to %s.\n"%\
                 (alignmentOutput.name, outputBamFile.name))
-            #2013.04.01
-            merge_sam_job = self.addGenericJob(executable=mv, 
+            merge_sam_job = self.addGenericJob(executable=self.cp, 
                 inputFile=alignmentOutput, inputArgumentOption=None, \
                 outputFile=outputBamFile, outputArgumentOption=None, \
-                inputFileList=None, argumentForEachFileInInputFileList=None,
                 parentJob=None, parentJobLs=alignmentJobLs,
                 extraDependentInputLs=None,
                 extraOutputLs=None, transferOutput=transferOutput, \
@@ -3357,10 +3298,8 @@ run something like below to extract data from regionOfInterest out of
 
         # add the index job on the merged bam file
         bamIndexJob = self.addBAMIndexJob(
-            BuildBamIndexFilesJava=BuildBamIndexFilesJava,
-            BuildBamIndexJar=self.BuildBamIndexJar, \
-            inputBamF=outputBamFile,\
-            parentJobLs=[merge_sam_job], namespace=namespace, version=version,
+            inputBamF=outputBamFile,
+            parentJobLs=[merge_sam_job],
             transferOutput=transferOutput, job_max_memory=3000, 
             walltime=max(180, int(walltime/3)))
         merge_sam_job.bamIndexJob = bamIndexJob
