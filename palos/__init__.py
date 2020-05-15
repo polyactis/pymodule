@@ -3,7 +3,7 @@ Palos is a Python3 module developed and used by the yfish group, http://www.yfis
 It contains code related to bioinformatics projects focusing on next-generation sequencing data, 
 population genetics, genome-wide association studies, pedigree genetics, etc.
 """
-version='0.1.
+version='0.1.6'
 from . utils import PassingData, PassingDataList, dict_map, importNumericArray, \
 	figureOutDelimiter, get_gene_symbol2gene_id_set, \
 	FigureOutTaxID, getColName2IndexFromHeader, getListOutOfStr, runLocalCommand, \
