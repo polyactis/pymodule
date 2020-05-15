@@ -1965,12 +1965,13 @@ class SunsetDB(Database):
     
     def getAlignment(self, individual_code=None, individual_id=None, 
         individual=None, individual_sequence_id=None, \
-        path_to_original_alignment=None, sequencer_name='GA', sequencer_id=None,
+        path_to_original_alignment=None,
+        sequencer_name='GA', sequencer_id=None,
         sequence_type_name=None, sequence_type_id=None, sequence_format='fastq',
-        ref_individual_sequence_id=10, \
+        ref_individual_sequence_id=10,
+        alignment_method=None,
         alignment_method_name='bwa-short-read', alignment_method_id=None, 
-        alignment_method=None,\
-        alignment_format='bam', subFolder='individual_alignment', \
+        alignment_format='bam', subFolder='individual_alignment',
         createSymbolicLink=False, individual_sequence_filtered=0, 
         read_group_added=None, data_dir=None, \
         outdated_index=0, mask_genotype_method_id=None, 
@@ -1982,7 +1983,7 @@ class SunsetDB(Database):
         i.e.
         individual_alignment = self.db_main.getAlignment(
             individual_sequence_id=self.individual_sequence_id,\
-            path_to_original_alignment=None, sequencer=individual_sequence.sequencer,\
+            sequencer=individual_sequence.sequencer,\
             sequence_type=individual_sequence.sequence_type, 
             sequence_format=individual_sequence.format, \
             ref_individual_sequence_id=self.ref_sequence_id, \
@@ -1997,7 +1998,7 @@ class SunsetDB(Database):
         oneLibraryAlignmentEntry = db_main.getAlignment(
             individual_code=individual_sequence.individual.code, \
             individual_sequence_id=individual_sequence.id,\
-            path_to_original_alignment=None, sequencer_id=individual_sequence.sequencer_id, \
+            sequencer_id=individual_sequence.sequencer_id, \
             sequence_type_id=individual_sequence.sequence_type_id, 
             sequence_format=individual_sequence.format, \
             ref_individual_sequence_id=refSequence.id, \
@@ -2006,23 +2007,11 @@ class SunsetDB(Database):
             data_dir=data_dir, individual_sequence_file_raw_id=minIsqFileRawID,\
             local_realigned=self.local_realigned)
     
-        2013.04.11 added argument reduce_reads
-        2013.04.09 added argument read_group and process it
-        2013.04.05 added argument local_realigned
-        2012.9.19 add argument individual_sequence_file_raw_id, individual_id, individual,
+        argument individual_sequence_file_raw_id, individual_id, individual,
             alignment_method_id, alignment_method, md5sum
-        2012.7.26 add argument mask_genotype_method_id & parent_individual_alignment_id
-        2012.6.13 add argument outdated_index
-        2012.2.24
-            add argument data_dir
-        2011-9-15
-            add argument read_group_added
-        2011-8-30
-            add argument individual_sequence_id
-            use constructRelativePathForIndividualAlignment() to come up path
-        2011-7-11
-            add argument createSymbolicLink. default to False
-                if True, create a symbolic from source file to target, instead of cp
+        use constructRelativePathForIndividualAlignment() to come up path
+        argument createSymbolicLink. default to False
+            if True, create a symbolic from source file to target, instead of cp.
         subFolder is the name of the folder in self.data_dir that is used to 
             hold the alignment files.
         """
@@ -2040,15 +2029,18 @@ class SunsetDB(Database):
                 individual = individual_sequence.individual
         elif individual:
             individual_sequence = self.getIndividualSequence(
-                individual_id=individual.id, sequencer_name=sequencer_name,
-                sequencer_id=sequencer_id, sequence_type_id=sequence_type_id,
+                individual_id=individual.id,
+                sequencer_name=sequencer_name,
+                sequencer_id=sequencer_id,
+                sequence_type_id=sequence_type_id,
                 sequence_type_name=sequence_type_name,\
                 sequence_format=sequence_format,
                 filtered=individual_sequence_filtered)
         else:
             logging.error(f"Not able to get individual_sequence cuz "
                 f"individual_sequence_id={individual_sequence_id}; "
-                f"individual_code={individual_code}; individual_id={individual_id}.")
+                f"individual_code={individual_code}; "
+                f"individual_id={individual_id}.")
             return None
         
         if alignment_method_name:
@@ -2066,22 +2058,24 @@ class SunsetDB(Database):
         
         db_entry = self.checkIndividualAlignment(
             individual_code=None, individual_id=individual.id, 
-            individual_sequence_id=individual_sequence_id, \
-            path_to_original_alignment=path_to_original_alignment, 
-            sequencer_name=sequencer_name, sequencer_id=sequencer_id, \
+            individual_sequence_id=individual_sequence_id,
+            sequencer_name=sequencer_name,
+            sequencer_id=sequencer_id,
             sequence_type_name=sequence_type_name, 
-            sequence_type_id=sequence_type_id, sequence_format=sequence_format,
-            ref_individual_sequence_id=ref_individual_sequence_id, \
-            alignment_method_name=alignment_method_name, 
+            sequence_type_id=sequence_type_id,
+            sequence_format=sequence_format,
+            ref_individual_sequence_id=ref_individual_sequence_id,
+            alignment_method_name=alignment_method_name,
             alignment_method_id=alignment_method_id,
             alignment_method=alignment_method,
-            alignment_format=alignment_format, subFolder=subFolder, \
+            alignment_format=alignment_format,
+            subFolder=subFolder,
             createSymbolicLink=createSymbolicLink,
-            individual_sequence_filtered=individual_sequence_filtered, \
-            read_group_added=read_group_added, data_dir=data_dir, \
+            individual_sequence_filtered=individual_sequence_filtered,
+            read_group_added=read_group_added, data_dir=data_dir,
             outdated_index=outdated_index,
             mask_genotype_method_id=mask_genotype_method_id,
-            parent_individual_alignment_id=parent_individual_alignment_id,\
+            parent_individual_alignment_id=parent_individual_alignment_id,
             individual_sequence_file_raw_id=individual_sequence_file_raw_id,
             md5sum=md5sum,
             local_realigned=local_realigned, reduce_reads=reduce_reads)
@@ -3098,7 +3092,6 @@ class SunsetDB(Database):
             add argument mate_id
         2012.2.14
         """
-        #query first
         query = self.queryTable(IndividualSequenceFileRaw).\
             filter_by(individual_sequence_id=individual_sequence_id)
         if library:
@@ -3106,17 +3099,17 @@ class SunsetDB(Database):
         if md5sum:
             query = query.filter_by(md5sum=md5sum)
         if path:
-            path = os.path.realpath(path)	#get the realpath
+            path = os.path.realpath(path)
             query = query.filter_by(path=path)
         if original_path:
-            original_path = os.path.realpath(original_path)	#get the realpath
+            original_path = os.path.realpath(original_path)
             query = query.filter_by(original_path=original_path)
         
         if mate_id:
             query = query.filter_by(mate_id=mate_id)
         db_entry = query.first()
         if not db_entry:
-            if file_size is None:	#2012.7.12
+            if file_size is None:
                 if path and os.path.isfile(path):
                     file_size = utils.getFileOrFolderSize(path)
                 elif original_path and os.path.isfile(original_path):
@@ -3130,14 +3123,13 @@ class SunsetDB(Database):
             self.session.flush()
         return db_entry
     
-    def registerOriginalSequenceFileToDB(self, original_sequence_filepath=None, 
-        library=None, 
-        individual_sequence_id=None, mate_id=None, md5sum=None):
+    def registerOriginalSequenceFileToDB(self,
+        original_sequence_filepath=None, 
+        library=None, individual_sequence_id=None,
+        mate_id=None, md5sum=None):
         """
         20190206 moved from RegisterIndividualSequence2DB.py
         20130403 original_sequence_filepath passed to original_path
-        2012.4.30
-            add mate_id
         2012.1.27
             1. run md5sum
             2. check if it already exists in db
@@ -3159,7 +3151,8 @@ class SunsetDB(Database):
             db_entry = self.getIndividualSequenceFileRaw(
                 individual_sequence_id=individual_sequence_id,
                 library=library, md5sum=md5sum,
-                original_path=original_sequence_filepath, mate_id=mate_id,
+                original_path=original_sequence_filepath,
+                mate_id=mate_id,
                 file_size=file_size)
         mate_id2split_order_ls = {}
         for individual_sequence_file in db_entry.individual_sequence_file_ls:
@@ -3186,11 +3179,8 @@ class SunsetDB(Database):
         individual_sequence_file_raw_id=None,\
         quality_score_format='Standard'):
         """
-        2012.5.2
-            add all filter_by() straight to self.queryTable(IndividualSequenceFile)
-        2012.2.14
+        add all filter_by() straight to self.queryTable(IndividualSequenceFile)
         """
-        #query first
         query = self.queryTable(IndividualSequenceFile).\
             filter_by(individual_sequence_id=individual_sequence_id).\
             filter_by(library=library).\
@@ -3351,9 +3341,10 @@ class SunsetDB(Database):
         else:
             return None
     
-    def getAlignmentDepthIntervalMethod(self, short_name=None, description=None,
-        ref_ind_seq_id=None, individualAlignmentLs=None, 
-        parent_db_entry=None, parent_id=None, \
+    def getAlignmentDepthIntervalMethod(self,
+        short_name=None, description=None,
+        ref_ind_seq_id=None, individualAlignmentLs=None,
+        parent_db_entry=None, parent_id=None,
         no_of_alignments=None, no_of_intervals=None,
         sum_median_depth=None, sum_mean_depth=None,
         min_segment_length=None, data_dir=None):

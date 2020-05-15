@@ -225,12 +225,12 @@ class AbstractBioinfoWorkflow(ParentClass):
             'mapper/CalculatePairwiseDistanceOutOfSNPXStrainMatrix.py'),
             name='CalculatePairwiseDistanceOutOfSNPXStrainMatrix',
             clusterSizeMultiplier=0.5)
-        #2013.2.3 use samtools to extract consensus from bam files
+        #use samtools to extract consensus from bam files
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, 
             'mapper/alignment/ExtractConsensusSequenceFromAlignment.sh'),
             name='ExtractConsensusSequenceFromAlignment',
             clusterSizeMultiplier=0.5)
-        #2013.2.4, wrapper around psmc's splitfa,
+        #wrapper around psmc's splitfa,
         #  a program that splits fasta files
         self.registerOneExecutable(path=os.path.join(self.pymodulePath,
                 "mapper/splitter/splitfa.sh"), \
