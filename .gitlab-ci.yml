@@ -84,6 +84,7 @@ ShortRead2Alignment:
     - pwd
     - ./ngs/alignment/ShortRead2Alignment.py --ind_seq_id_ls 787-811
       -a 633 -o Alignment_isq_787_811_vs_633.xml -l condor
+      --home_path /y/home/huangyu --pymodulePath `pwd`
       --no_of_aln_threads 8 --tmpDir /y/scratch/tmp/huangyu/
       -z pdc --dbname pmdb --schema sunset
       -u sunset_r -p yfishLabSunset
