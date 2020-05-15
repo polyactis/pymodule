@@ -4837,7 +4837,7 @@ class SunsetDB(Database):
     
 if __name__ == '__main__':
     main_class = SunsetDB
-    po = ProcessOptions(sys.argv, main_class.option_default_dict, 
+    po = ProcessOptions(sys.argv, main_class.option_default_dict,\
         error_doc=main_class.__doc__)
     schema = po.long_option2value["schema"]
     if schema != _schemaname_:
