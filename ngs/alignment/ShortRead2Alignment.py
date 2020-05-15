@@ -6,14 +6,14 @@ Examples:
         -e /u/home/eeskin/polyacti -l hoffman2 --data_dir NetworkData/vervet/db
         --tmpDir /work/ --needSSHDBTunnel --no_of_aln_threads 8
         --needRefIndexJob 
-        -z dl324b-1.cmb.usc.edu -u yh --commit
+        -z dl324b-1.cmb.usc.edu -u huangyu --commit
 
     # 2011-8-30 output a workflow to run alignments on hoffman2's condor pool
     #  (--local_data_dir changes local_data_dir. --data_dir changes data_dir.)
     # 2012.3.20 use /work/ or /u/scratch/p/polyacti/tmp as TMP_DIR for
     #   MarkDuplicates.jar (/tmp is too small for 30X genome)
     # 2012.5.4 cluster 4 alignment jobs (before merging) as a unit
-    #   (--alignmentJobClustersSizeFraction 0.2), skip done alignment
+    #   (--alignmentJobClusterSizeFraction 0.2), skip done alignment
     #   (--skipDoneAlignment)
     # 2012.9.21 add "--alignmentPerLibrary" to align
     #   for each library within one individual_sequence
@@ -28,7 +28,7 @@ Examples:
         -D NetworkData/vervet/db/ -t NetworkData/vervet/db/
         --clusters_size 20 --alignment_method_name bwaShortRead
         --coreAlignmentJobWallTimeMultiplier 0.5
-        --alignmentJobClustersSizeFraction 0.2
+        --alignmentJobClusterSizeFraction 0.2
         --needSSHDBTunnel --needRefIndexJob 
         -u yh --commit --db_passwd secret
         #--alignmentPerLibrary
@@ -102,7 +102,7 @@ Description:
         individual_sequence_file is not empty.
     Empty read files would fail alignment jobs and
         thus no final alignment for a few indivdiuals.
-    Use "--alignmentJobClustersSizeFraction ..." to cluster the alignment jobs,
+    Use "--alignmentJobClusterSizeFraction ..." to cluster the alignment jobs,
         if the input read file is small enough (~1 Million reads for bwa, ~300K for stampy).
     The arguments related to chromosomes/contigs do not matter
         unless local_realigned=1.
@@ -342,7 +342,7 @@ class ShortRead2Alignment(ParentClass):
         self.registerOneExecutable(
             path=os.path.join(self.pymodulePath, "db/import/AddAlignmentFile2DB.py"),
             name="AddAlignmentFile2DB",
-            clusterSizeMultiplier=self.alignmentJobClustersSizeFraction)
+            clusterSizeMultiplier=self.alignmentJobClusterSizeFraction)
         #self.registerOneExecutable(path=self.javaPath,
         #   name='RealignerTargetCreatorJava', 
         #   clusterSizeMultiplier=0.7)
@@ -386,7 +386,7 @@ class ShortRead2Alignment(ParentClass):
             extraOutputLs.append(File(f"{refFastaFile.name}.{suffix}"))
         extraDependentInputLs = refFastaFList
         bwa_index_job = self.addGenericJob(
-            executable=self.bwa, inputFile=None,
+            executable=self.bwa,
             extraArgumentList=extraArgumentList,
             extraDependentInputLs=extraDependentInputLs,
             extraOutputLs=extraOutputLs,\
@@ -1917,8 +1917,6 @@ pipe2File.sh ./bwa aln-pe.2.sam.gz mem -t 1 -M -a 3280.fasta 12457_1.fastq.gz 12
             outputDirPrefix="")
 
         self.end_run()
-
-
 
 if __name__ == '__main__':
     from argparse import ArgumentParser

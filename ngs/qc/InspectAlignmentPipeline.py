@@ -80,20 +80,20 @@ __doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], \
     sys.argv[0], sys.argv[0])
 
 import copy
+import getpass
 import logging
 from pegaflow.DAX3 import File, Link, Job
 from palos import ProcessOptions, utils, PassingData
 from palos.ngs.AbstractAlignmentWorkflow import AbstractAlignmentWorkflow
-from palos.ngs.AbstractNGSWorkflow import AbstractNGSWorkflow
 
 ParentClass = AbstractAlignmentWorkflow
 
-class InspectAlignmentPipeline(ParentClass, AbstractNGSWorkflow):
+class InspectAlignmentPipeline(ParentClass):
     __doc__ = __doc__
-    commonOptionDict = copy.deepcopy(AbstractAlignmentWorkflow.option_default_dict)
+    commonOptionDict = copy.deepcopy(ParentClass.option_default_dict)
     #commonOptionDict.pop(('inputDir', 0, ))
     commonOptionDict.update(
-        AbstractAlignmentWorkflow.commonAlignmentWorkflowOptionDict.copy())
+        ParentClass.commonAlignmentWorkflowOptionDict.copy())
 
     option_default_dict = copy.deepcopy(commonOptionDict)
     option_default_dict.update({
@@ -113,7 +113,6 @@ class InspectAlignmentPipeline(ParentClass, AbstractNGSWorkflow):
     option_default_dict[('completedAlignment', 0, int)][0]=1
 
     getReferenceSequence = AbstractNGSWorkflow.getReferenceSequence
-    connectDB = AbstractNGSWorkflow.connectDB
     
     def __init__(self, **keywords):
         """
@@ -362,7 +361,7 @@ class InspectAlignmentPipeline(ParentClass, AbstractNGSWorkflow):
             #  not working well for realigned and BQSRed alignments
             # use GATK DOC walker
             DOCOutputFnamePrefix = os.path.join(topOutputDirJob.output, '%s_DOC'%(alignment.id))
-            DOCJob = self.addDepthOfCoverageJob(DOCWalkerJava=self.DOCWalkerJava, \
+            DOCJob = self.addDepthOfCoverageJob(DOCWalkerJava=self.DOCWalkerJava,
                 refFastaFList=passingData.refFastaFList, bamF=bamF, baiF=baiF, \
                 DOCOutputFnamePrefix=DOCOutputFnamePrefix,\
                 parentJobLs=parentJobLs + [topOutputDirJob], \
@@ -510,7 +509,8 @@ class InspectAlignmentPipeline(ParentClass, AbstractNGSWorkflow):
         """
         returnData = PassingData(no_of_jobs = 0)
         returnData.jobDataLs = []
-        if not self.needPerContigJob:	#no need for per-contig job
+        if not self.needPerContigJob:
+            #no need for per-contig job
             return returnData
 
         alignment = alignmentData.alignment
@@ -764,13 +764,10 @@ class InspectAlignmentPipeline(ParentClass, AbstractNGSWorkflow):
             f"alignments with flagstat jobs.", flush=True)
         return returnData
 
-    def registerCustomExecutables(self):
+    def registerExecutables(self):
         """
-        2011-11-25
-            split out of run()
         """
-        ParentClass.registerCustomExecutables(self)
-
+        ParentClass.registerExecutables(self)
         self.registerOneExecutable(path=self.javaPath, \
             name='ContigDOCWalkerJava', clusterSizeMultiplier=1)
         self.registerOneExecutable(path=self.javaPath, \
@@ -835,8 +832,116 @@ class InspectAlignmentPipeline(ParentClass, AbstractNGSWorkflow):
 
 
 if __name__ == '__main__':
-    main_class = InspectAlignmentPipeline
-    po = ProcessOptions(sys.argv, main_class.option_default_dict,
-        error_doc=main_class.__doc__)
-    instance = main_class(**po.long_option2value)
+    from argparse import ArgumentParser
+    ap = ArgumentParser()
+    ap.add_argument("--drivername", default="postgresql",
+        help='Type of database server (default: %(default)s)')
+    ap.add_argument('-z', "--hostname", default="pdc",
+        help='name/IP of database server (default: %(default)s)')
+    ap.add_argument("--port", default=None,
+        help="database server port (default: %(default)s)")
+    ap.add_argument("--dbname", default='pmdb',
+        help="database name (default: %(default)s)")
+    ap.add_argument('-k', "--schema", default='sunset', 
+        help="database schema (default: %(default)s)")
+    ap.add_argument("-u", "--db_user", help="Database user")
+    ap.add_argument("-p", "--db_passwd", required=False,
+        help="Password of the database user")
+
+    ap.add_argument('-i', "--ind_seq_id_ls", required=True,
+        help='a comma/dash-separated list of IndividualSequence.id.')
+
+    ap.add_argument('-S', "--site_id_ls",
+        help='a comma/dash-separated list of site IDs to filter individuals.')
+    ap.add_argument("--country_id_ls",
+        help='a comma/dash-separated list of country IDs to filter individuals.')
+    ap.add_argument("--tax_id_ls", default='9606',
+        help='a comma/dash-separated list of taxonomy IDs to filter individuals.')
+    
+    ap.add_argument("-F", "--pegasusFolderName", default='input',
+        help='The path relative to the workflow running root. '
+        'This folder will contain pegasus input & output. '
+        'It will be created during the pegasus staging process. '
+        'It is useful to separate multiple sub-workflows. '
+        'If empty or None, everything is in the pegasus root.')
+    ap.add_argument("-l", "--site_handler", type=str, required=True,
+        help="The name of the computing site where the jobs run and "
+        "executables are stored. "
+        "Check your Pegasus configuration in submit.sh.")
+    ap.add_argument("-j", "--input_site_handler", type=str,
+        help="It is the name of the site that has all the input files."
+        "Possible values can be 'local' or same as site_handler."
+        "If not given, it is asssumed to be the same as site_handler and "
+        "the input files will be symlinked into the running folder."
+        "If input_site_handler=local, the input files will be transferred "
+        "to the computing site by pegasus-transfer.")
+    ap.add_argument("-C", "--cluster_size", type=int, default=30,
+        help="Default: %(default)s. "
+        "This number decides how many of pegasus jobs should be clustered "
+        "into one job. "
+        "Good if your workflow contains many quick jobs. "
+        "It will reduce Pegasus monitor I/O.")
+    ap.add_argument("-o", "--output_path", type=str, required=True,
+        help="The path to the output file that will contain the Pegasus DAG.")
+    
+    ap.add_argument("--home_path",
+        help="Path to your home folder. Default is ~.")
+    ap.add_argument("--javaPath", default='bin/java',
+        help="Path to java. Default is %(default)s.")
+    ap.add_argument("--pymodulePath", type=str, default="src/pymodule",
+        help="Path to the pymodule code folder. "
+        "If relative path, home folder is inserted in the front.")
+    
+    ap.add_argument("--tmpDir", type=str, default='/tmp/',
+        help='Default: %(default)s. '
+        'A local folder for some jobs (MarkDup) to store temp data. '
+        '/tmp/ can be too small for high-coverage sequencing.')
+    ap.add_argument("--max_walltime", type=int, default=4320,
+        help='Default: %(default)s. '
+        'Maximum wall time for any job, in minutes. 4320=3 days. '
+        'Used in addGenericJob(). Most clusters have upper limit for runtime.')
+    ap.add_argument("--needSSHDBTunnel", action='store_true',
+        help="If all DB-interacting jobs need a ssh tunnel to "
+        "access a database that is inaccessible to computing nodes.")
+    ap.add_argument("-c", "--commit", action='store_true',
+        help="Toggle to commit the db transaction (default: %(default)s)")
+    ap.add_argument("--debug", action='store_true',
+        help='Toggle debug mode.')
+    ap.add_argument("--report", action='store_true',
+        help="Toggle verbose mode. Default: %(default)s.")
+    args = ap.parse_args()
+    if not args.db_user:
+        args.db_user = getpass.getuser()
+    if not args.db_passwd:
+        args.db_passwd = getpass.getpass(f"Password for {args.db_user}:")
+    
+    instance = InspectAlignmentPipeline(
+        drivername = args.drivername,
+        hostname = args.hostname,
+        port = args.port,
+        dbname = args.dbname, schema = args.schema,
+        db_user = args.db_user, db_passwd = args.db_passwd,
+
+        ind_seq_id_ls = args.ind_seq_id_ls,
+
+        site_id_ls = args.site_id_ls,
+        country_id_ls = args.country_id_ls,
+        tax_id_ls = args.tax_id_ls,
+
+        site_handler = args.site_handler, 
+        input_site_handler = args.input_site_handler,
+        cluster_size = args.cluster_size,
+        pegasusFolderName = args.pegasusFolderName,
+        output_path = args.output_path,
+        tmpDir = args.tmpDir,
+        max_walltime = args.max_walltime,
+
+        home_path = args.home_path,
+        javaPath = args.javaPath,
+        pymodulePath = args.pymodulePath,
+        thisModulePath = None,
+        needSSHDBTunnel = args.needSSHDBTunnel,
+        commit = args.commit,
+        debug = args.debug,
+        report=args.report)
     instance.run()
