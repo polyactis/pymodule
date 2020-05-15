@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import os, sys
 from . utils import getListOutOfStr
 
@@ -52,7 +53,8 @@ def process_function_arguments(keywords, argument_default_dict, error_doc='',
     ad = {}
     argument_key_ls = argument_default_dict.keys()
     argument_key_ls.sort()
-    argument_key_ls.reverse()	#to keep 'user' appearing in front of 'password'.
+    #to keep 'user' appearing in front of 'password'.
+    argument_key_ls.reverse()
     for argument_key in argument_key_ls:
         if default_value_in_list:
             default_value = argument_default_dict[argument_key][0]
@@ -174,6 +176,7 @@ def process_options(argv_list, option_default_dict, error_doc=''):
         sys.exit(2)
     """
     return opts_dict
+
 
 class ProcessOptions:
     """
@@ -524,9 +527,9 @@ class ProcessOptions:
                     if argument.find('passwd')!=-1 or \
                         argument.find('Passwd')!=-1 or argument.find('password')!=-1:
                         import getpass
-                        default_value = getpass.getpass("%s: "%argument)
+                        default_value = getpass.getpass(f"{argument}:")
                     else:
-                        default_value = input("%s: "%argument)
+                        default_value = input(f"{argument}:")
                 else:
                     if error_doc:
                         sys.stderr.write(error_doc)
