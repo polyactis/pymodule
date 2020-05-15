@@ -4837,7 +4837,8 @@ class SunsetDB(Database):
     
 if __name__ == '__main__':
     main_class = SunsetDB
-    po = ProcessOptions(sys.argv, main_class.option_default_dict, error_doc=main_class.__doc__)
+    po = ProcessOptions(sys.argv, main_class.option_default_dict, 
+        error_doc=main_class.__doc__)
     schema = po.long_option2value["schema"]
     if schema != _schemaname_:
         logging.error("Schema given by commandline argument, %s, is different from the static one, %s."%
