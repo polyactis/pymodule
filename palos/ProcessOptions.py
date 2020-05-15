@@ -149,11 +149,13 @@ def process_options(argv_list, option_default_dict, error_doc=''):
     #handle options
     import getopt, traceback
     opts, args = getopt.getopt(argv_list[1:], short_options_str, long_options_list)
-    opts_dict = {}	#a dictionary 
+    opts_dict = {}
     for opt, arg in opts:
-        if opt[1]=='-':	#it's long option
+        if opt[1]=='-':
+            #it's long option
             long_option = opt[2:]
-        else:	#it's short option
+        else:
+            #it's short option
             short_option = opt[1:]
             long_option = short_option2long_option[short_option]
         if long_option=='help':
@@ -161,7 +163,8 @@ def process_options(argv_list, option_default_dict, error_doc=''):
             sys.exit(0)
         if long_option2has_argument[long_option]:
             opts_dict[long_option] = arg
-        else:	#toggle the bit for options which don't have arguments
+        else:
+            #toggle the bit for options which don't have arguments
             opts_dict[long_option] = 1
     """
     except:
@@ -172,7 +175,7 @@ def process_options(argv_list, option_default_dict, error_doc=''):
     """
     return opts_dict
 
-class ProcessOptions(object):
+class ProcessOptions:
     """
     2008-04-28
         a class to replace process_options(), process_function_arguments(), 
@@ -191,7 +194,8 @@ class ProcessOptions(object):
             self.program_name = argv_list[0]
         else:
             self.program_name = ''
-        self.args = []	#2011-7-13	to store all the remaining arguments
+        #2011-7-13	to store all the remaining arguments
+        self.args = []
     
     def prepare_for_getopt(self, option_default_dict):
         """
@@ -339,7 +343,7 @@ class ProcessOptions(object):
         self.std_option_default_dict = std_option_default_dict
         self.getopt_ready = 1
     
-    #@property	not in 2.3
+    @property
     def program_doc(self):
         """
         2008-05-02
@@ -414,15 +418,9 @@ class ProcessOptions(object):
         program_doc += '\n'
         return program_doc
     
-    program_doc = property(program_doc)
-    
-    #@property
+    @property
     def long_option2value(self):
         """
-        2011-7-14
-            add self.args=args
-        2009
-        #handle options
         """
         if self.getopt_ready==0:
             self.prepare_for_getopt(self.option_default_dict)
@@ -438,11 +436,13 @@ class ProcessOptions(object):
         opts, args = getopt.getopt(self.argv_list[1:], self.short_options_str,\
             self.long_options_list)
         self.args = args
-        opts_dict = {}	#a dictionary 
+        opts_dict = {}
         for opt, arg in opts:
-            if opt[1]=='-':	#it's long option
+            if opt[1]=='-':
+                #it's long option
                 long_option = opt[2:]
-            else:	#it's short option
+            else:
+                #it's short option
                 short_option = opt[1:]
                 long_option = self.short_option2long_option[short_option]
             if long_option=='help':
@@ -450,7 +450,8 @@ class ProcessOptions(object):
                 sys.exit(0)
             if self.long_option2has_argument[long_option]:
                 opts_dict[long_option] = arg
-            else:	#toggle the bit for options which don't have arguments
+            else:
+                #toggle the bit for options which don't have arguments
                 opts_dict[long_option] = 1
         """
         except:
@@ -460,8 +461,8 @@ class ProcessOptions(object):
             sys.exit(2)
         """
         return opts_dict
-    long_option2value = property(long_option2value)
     
+    @property
     def arguments(self):
         """
         2011-7-14
@@ -469,7 +470,6 @@ class ProcessOptions(object):
         """
         self.opts_dict = self.long_option2value
         return self.args
-    arguments = property(arguments)
     
     @classmethod
     def process_function_arguments(cls, keywords, argument_default_dict,
