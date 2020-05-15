@@ -26,7 +26,7 @@ Examples:
         -l hcondor -j hcondor -z localhost --tmpDir /work/
         --home_path /u/home/eeskin/polyacti --no_of_aln_threads 8 --skipDoneAlignment
         -D NetworkData/vervet/db/ -t NetworkData/vervet/db/
-        --clusters_size 20 --alignment_method_name bwaShortRead
+        --cluster_size 20 --alignment_method_name bwaShortRead
         --coreAlignmentJobWallTimeMultiplier 0.5
         --alignmentJobClusterSizeFraction 0.2
         --needSSHDBTunnel --needRefIndexJob 
@@ -75,7 +75,8 @@ Examples:
         --tmpDir /work/ --home_path /u/home/eeskin/polyacti
         --no_of_aln_threads 1 --skipDoneAlignment
         -D /u/home/eeskin/polyacti/NetworkData/vervet/db/
-        -t /u/home/eeskin/polyacti/NetworkData/vervet/db/ --clusters_size 1
+        -t /u/home/eeskin/polyacti/NetworkData/vervet/db/
+        --cluster_size 1
         --alignment_method_name bwaShortReadHighMismatches
         --coreAlignmentJobWallTimeMultiplier 2  --needSSHDBTunnel
         --max_walltime 1440
@@ -88,7 +89,7 @@ Examples:
         -o dags/ShortRead2AlignmentPipeline_Aethiops_vs_$ref\_AlnMethod6.xml
         -l hcondor -j hcondor --tmpDir /tmp/
         -z pdc -u huangyu --commit
-        --no_of_aln_threads 1 --skipDoneAlignment --clusters_size 1
+        --no_of_aln_threads 1 --skipDoneAlignment --cluster_size 1
         --alignment_method_name bwamem
         --coreAlignmentJobWallTimeMultiplier 0.1
         --max_walltime 1440
@@ -1855,15 +1856,11 @@ pipe2File.sh ./bwa aln-pe.2.sam.gz mem -t 1 -M -a 3280.fasta 12457_1.fastq.gz 12
 
     def run(self):
         """
-        2011-7-11
         """
-
         self.setup_run()
-        chr2IntervalDataLs = self.getChr2IntervalDataLsBySplitChrSize(
-            chr2size=self.chr2size,
-            intervalSize=self.intervalSize,
-            intervalOverlapSize=self.intervalOverlapSize)
-
+        #ParentClass.setup_run() sets up self.registerReferenceData & 
+        # self.chr2IntervalDataLs, self.refSequence.
+        
         #individualSequenceID2FilePairLs = 
         # db_main.getIndividualSequenceID2FilePairLs(self.ind_seq_id_ls,
         #  data_dir=self.local_data_dir)
@@ -1888,23 +1885,13 @@ pipe2File.sh ./bwa aln-pe.2.sam.gz mem -t 1 -M -a 3280.fasta 12457_1.fastq.gz 12
             excludeContaminant=self.excludeContaminant,
             report=True)
 
-        refSequence = self.db_main.queryTable(SunsetDB.IndividualSequence).\
-            get(self.ref_ind_seq_id)
-        #2011-11-16 new way of registering reference fasta file.
-        #  but still dont' want to trasnfer 7Gb of data
-        refFastaFname = os.path.join(self.data_dir, refSequence.path)
-        registerReferenceData = self.registerRefFastaFile(
-            refFastaFname,
-            registerAffiliateFiles=True, 
-            checkAffiliateFileExistence=True)
-
         self.addAllAlignmentJobs(db_main=self.db_main,
             individualSequenceID2FilePairLs=None, \
             isqLs = isqLs,\
             data_dir=self.data_dir,\
-            refSequence=refSequence,
-            registerReferenceData=registerReferenceData,
-            chr2IntervalDataLs=chr2IntervalDataLs,\
+            refSequence=self.refSequence,
+            registerReferenceData=self.registerReferenceData,
+            chr2IntervalDataLs=self.chr2IntervalDataLs,
             extraAlignArgs=self.extraAlignArgs,
             tmpDir=self.tmpDir,
             alignment_method_name=self.alignment_method_name,

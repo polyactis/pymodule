@@ -597,24 +597,21 @@ class MapReduceGenomeFileWorkflow(ParentClass):
 
     def setup_run(self):
         """
-        2013.06.11 added firstInputJobData in return
-            assign all returned data to self, rather than pdata
-            (pdata has become self).
-        2013.04.07 wrap all standard pre-run() related functions into
-            this function.
-            setting up for run(), called by run()
+        Wrap all standard pre-run() related functions into this function.
+            Setting up for run(), called by run().
         """
         ParentClass.setup_run(self)
         
         #self.chr2size = {}
-        #self.chr2size = set(['Contig149'])	#temporary when testing Contig149
+        #self.chr2size = set(['Contig149'])
+        # #temporary when testing Contig149
         #self.chr2size = set(['1MbBAC'])
         # #temporary when testing the 1Mb-BAC (formerly vervet_path2)
         if self.needSplitChrIntervalData:
             #2013.06.21 defined in ParentClass.__init__()
             chr2IntervalDataLs = self.getChr2IntervalDataLsBySplitChrSize(
                 chr2size=self.chr2size,
-                intervalSize=self.intervalSize, \
+                intervalSize=self.intervalSize,
                 intervalOverlapSize=self.intervalOverlapSize)
         else:
             chr2IntervalDataLs = None
@@ -641,21 +638,18 @@ class MapReduceGenomeFileWorkflow(ParentClass):
                     f" input for any job that needs a random Input file.",
                     flush=True)
         
-        registerReferenceData = self.getReferenceSequence()
-        
         self.inputData = inputData
         self.chr2IntervalDataLs = chr2IntervalDataLs
-        self.registerReferenceData = registerReferenceData
         self.firstInputJobData = firstInputJobData
         #self.firstInputFile = firstInputFile
+        self.registerReferenceData = self.getReferenceSequence()
         return self
     
     def run(self):
         """
-        2012.9.24
         """
         pdata = self.setup_run()
-        inputData=pdata.inputData
+        inputData = pdata.inputData
         
         if len(inputData.jobDataLs)<=0:
             print(f"No VCF files in this folder, {self.inputDir}.", flush=True)

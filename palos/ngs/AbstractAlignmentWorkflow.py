@@ -394,9 +394,8 @@ class AbstractAlignmentWorkflow(ParentClass):
 
     def preReduce(self, passingData=None, transferOutput=True, **keywords):
         """
-        2012.9.17
-            setup additional mkdir folder jobs, before mapEachAlignment,
-                mapEachChromosome, mapReduceOneAlignment
+        setup additional mkdir folder jobs, before mapEachAlignment,
+            mapEachChromosome, mapReduceOneAlignment
         """
         returnData = PassingData(no_of_jobs = 0)
         returnData.jobDataLs = []
@@ -593,9 +592,9 @@ class AbstractAlignmentWorkflow(ParentClass):
                         **keywords)
 
             reduceAfterEachChromosomeData = self.reduceAfterEachChromosome(
-                chromosome=chromosome, \
-                passingData=passingData, \
-                mapEachIntervalDataLs=passingData.mapEachIntervalDataLs,\
+                chromosome=chromosome,
+                passingData=passingData,
+                mapEachIntervalDataLs=passingData.mapEachIntervalDataLs,
                 transferOutput=False, data_dir=self.data_dir, \
                 **keywords)
             passingData.reduceAfterEachChromosomeData = reduceAfterEachChromosomeData
@@ -605,26 +604,25 @@ class AbstractAlignmentWorkflow(ParentClass):
             gzipReduceAfterEachChromosomeData = self.addGzipSubWorkflow(
                 inputData=reduceAfterEachChromosomeData,
                 transferOutput=transferOutput,
-                outputDirPrefix="%sreduceAfterEachChromosome"%(outputDirPrefix), \
+                outputDirPrefix="%sreduceAfterEachChromosome"%(outputDirPrefix),
                 topOutputDirJob=passingData.gzipReduceAfterEachChromosomeFolderJob,
                 report=False)
             passingData.gzipReduceAfterEachChromosomeFolderJob = \
                 gzipReduceAfterEachChromosomeData.topOutputDirJob
         return returnData
 
-    def setup(self, chr2IntervalDataLs=None, **keywords):
+    def setup_chr(self):
         """
-        2013.09.02 use self.chr2size to derive chrIDSet.
-            chr2IntervalDataLs is not used.
-        2013.04.09 added chrSizeIDList in return
-        2013.1.25
-            chr2VCFJobData is None.
+        Use self.chr2size to derive chrIDSet.
+        Added chrSizeIDList in return
+            set chr2VCFJobData to None.
         """
         chrIDSet = set(self.chr2size.keys())
         chrSizeIDList = [(chromosomeSize, chromosome) for chromosome, 
             chromosomeSize in self.chr2size.items()]
         chrSizeIDList.sort()
-        chrSizeIDList.reverse()	#from big to small
+        chrSizeIDList.reverse()
+        #from big to small
         return PassingData(chrIDSet=chrIDSet, chr2VCFJobData=None,
             chrSizeIDList=chrSizeIDList)
 
@@ -638,9 +636,7 @@ class AbstractAlignmentWorkflow(ParentClass):
         """
         2012.7.26
         """
-        prePreprocessData = self.setup(
-            chr2IntervalDataLs=chr2IntervalDataLs,
-            **keywords)
+        prePreprocessData = self.setup_chr()
         chrIDSet = prePreprocessData.chrIDSet
         chrSizeIDList = prePreprocessData.chrSizeIDList
         chr2VCFJobData = prePreprocessData.chr2VCFJobData
@@ -834,13 +830,13 @@ class AbstractAlignmentWorkflow(ParentClass):
 
     def setup_run(self):
         """
-        2013.06.11 assign all returned data to self, rather than pdata (pdata has become self)
-        2013.04.07 wrap all standard pre-run() related functions into this function.
-            setting up for run(), called by run()
+        Wrap all standard pre-run() related functions into this function.
+            setting up for run(), called by run().
         """
-        pdata = ParentClass.setup_run(self)
-        workflow = pdata.workflow
-
+        ParentClass.setup_run(self)
+        # ParentClass.setup_run() will call getReferenceSequence() to
+        #  setup self.registerReferenceData.
+        
         if self.needSplitChrIntervalData:
             #2013.06.21 defined in ParentClass.__init__()
             if self.alignmentDepthIntervalMethodShortName and self.db_main and \
@@ -849,15 +845,17 @@ class AbstractAlignmentWorkflow(ParentClass):
                 #2013.09.01 fetch intervals from db
                 #make sure it exists in db first
                 chr2IntervalDataLs = self.getChr2IntervalDataLsFromDBAlignmentDepthInterval(
-                    db=self.db_main, \
+                    db=self.db_main,
                     intervalSize=self.intervalSize,
-                    intervalOverlapSize=self.intervalOverlapSize,\
+                    intervalOverlapSize=self.intervalOverlapSize,
                     alignmentDepthIntervalMethodShortName=self.alignmentDepthIntervalMethodShortName,
                     alignmentDepthMinFold=self.alignmentDepthMinFold,
-                    alignmentDepthMaxFold=self.alignmentDepthMaxFold, \
-                    minAlignmentDepthIntervalLength=self.minAlignmentDepthIntervalLength,\
-                    maxContigID=self.maxContigID, minContigID=self.minContigID)
-            else: #split evenly using chromosome size
+                    alignmentDepthMaxFold=self.alignmentDepthMaxFold,
+                    minAlignmentDepthIntervalLength=self.minAlignmentDepthIntervalLength,
+                    minContigID=self.minContigID,
+                    maxContigID=self.maxContigID)
+            else:
+                #split evenly using chromosome size
                 chr2IntervalDataLs = self.getChr2IntervalDataLsBySplitChrSize(
                     chr2size=self.chr2size,
                     intervalSize=self.intervalSize, \
@@ -871,15 +869,11 @@ class AbstractAlignmentWorkflow(ParentClass):
             chr2IntervalDataLs = None
 
         alignmentLs = self.getAlignments()
-
-        registerReferenceData = self.getReferenceSequence()
-
         alignmentDataLs = self.registerAlignmentAndItsIndexFile(
             alignmentLs=alignmentLs, data_dir=self.data_dir)
         self.alignmentLs = alignmentLs
         self.alignmentDataLs = alignmentDataLs
         self.chr2IntervalDataLs = chr2IntervalDataLs
-        self.registerReferenceData = registerReferenceData
         return self
 
     def run(self):
@@ -888,12 +882,12 @@ class AbstractAlignmentWorkflow(ParentClass):
         """
 
         pdata = self.setup_run()
-        self.addAllJobs(alignmentDataLs=pdata.alignmentDataLs, \
+        self.addAllJobs(alignmentDataLs=pdata.alignmentDataLs,
             chr2IntervalDataLs=pdata.chr2IntervalDataLs,
-            skipDoneAlignment=self.skipDoneAlignment,\
-            registerReferenceData=pdata.registerReferenceData,\
+            skipDoneAlignment=self.skipDoneAlignment,
+            registerReferenceData=pdata.registerReferenceData,
             needFastaIndexJob=self.needFastaIndexJob,
-            needFastaDictJob=self.needFastaDictJob, \
+            needFastaDictJob=self.needFastaDictJob,
             data_dir=self.data_dir, no_of_gatk_threads = 1,
             transferOutput=True,
             outputDirPrefix=self.pegasusFolderName)

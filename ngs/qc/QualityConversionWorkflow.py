@@ -84,7 +84,7 @@ def setJobToProperMemoryRequirement(job=None, job_max_memory=500, no_of_cpus=1, 
         job.addProfile(Profile(Namespace.CONDOR, key="request_cpus", value="%s" % (no_of_cpus)))  # for dynamic slots   
 
     if walltime is not None:
-        # 2013.3.21 scale walltime according to clusters_size
+        # 2013.3.21 scale walltime according to cluster_size
         job.addProfile(Profile(Namespace.GLOBUS, key="maxwalltime", value="%s" % (walltime)))
         # TimeToLive is in seconds
         condorJobRequirementLs.append("(Target.TimeToLive>=%s)" % (int(walltime) * 60))

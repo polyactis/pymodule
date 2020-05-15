@@ -22,17 +22,17 @@ Examples:
     #2011-11-25 on hoffman2's condor pool, need ssh tunnel for db (--needSSHDBTunnel)
     %s -a 524 -j hcondor -l hcondor -u yh -z localhost
         --contigMaxRankBySize 7559 -o InspectRefSeq524WholeAlignment.xml
-        --clusters_size 30
+        --cluster_size 30
         -e /u/home/eeskin/polyacti/ -t /u/home/eeskin/polyacti/NetworkData/vervet/db/
         -D /u/home/eeskin/polyacti/NetworkData/vervet/db/
         -J ~/bin/jdk/bin/java --needSSHDBTunnel
 
     #2012.4.3 change tmpDir (--tmpDir) for AddOrReplaceReadGroups,
-    #  no job clustering (--clusters_size 1)
+    #  no job clustering (--cluster_size 1)
     %s -a 524 -j condorpool -l condorpool -u yh -z uclaOffice
         -o workflow/InspectAlignment/InspectAln1_To_661_RefSeq524Alignments.xml
         --ind_aln_id_ls 1-661
-        --tmpDir /Network/Data/vervet/vervetPipeline/tmp/ --clusters_size 1
+        --tmpDir /Network/Data/vervet/vervetPipeline/tmp/ --cluster_size 1
 
     #2012.5.8 do perContig depth estimation (--needPerContigJob) and
     #  skip alignments with stats in db already (--skipAlignmentWithStats)
@@ -45,7 +45,7 @@ Examples:
     # 	from US,Barbados,StKitts,Nevis,Gambia (AND with -S, )
     %s -a 524 -j hcondor -l hcondor -u yh -z localhost --contigMaxRankBySize 7559
         -o workflow/InspectAlignment/InspectAln1_To_1251_RefSeq524Alignments.xml
-        --ind_aln_id_ls 1-1251 --clusters_size 1
+        --ind_aln_id_ls 1-1251 --cluster_size 1
         -e /u/home/eeskin/polyacti/
         -t ~/NetworkData/vervet/db/ -D ~/NetworkData/vervet/db/
         -J ~/bin/jdk/bin/java
@@ -65,7 +65,7 @@ Examples:
         --ref_genome_sequence_type_id 1 --ref_genome_version 1 -j hcondor -l hcondor
         -u yh -z localhost --contigMaxRankBySize 3000
         -o dags/InspectCynosurusAlignment_RefSeq3488MinLength$mLength\_AlnMethod6.xml
-        --clusters_size 1 --data_dir ~/NetworkData/vervet/db/
+        --cluster_size 1 --data_dir ~/NetworkData/vervet/db/
         --local_data_dir ~/NetworkData/vervet/db/
         -J ~/bin/jdk/bin/java --skipAlignmentWithStats
         --needSSHDBTunnel --sequence_filtered 1
@@ -111,8 +111,6 @@ class InspectAlignmentPipeline(ParentClass):
     #	("fractionToSample", 0, float): [0.001, '', 1, 
     # 'fraction of loci to walk through for DepthOfCoverage walker.'],\
     option_default_dict[('completedAlignment', 0, int)][0]=1
-
-    getReferenceSequence = AbstractNGSWorkflow.getReferenceSequence
     
     def __init__(self, **keywords):
         """

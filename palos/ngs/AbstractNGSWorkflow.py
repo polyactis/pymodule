@@ -371,8 +371,6 @@ class AbstractNGSWorkflow(ParentClass):
             self.data_dir = self.db_main.data_dir
         if not self.local_data_dir:
             self.local_data_dir = self.db_main.data_dir
-        # 2013.1.25 moved to run()
-        #self.refFastaFList = self.getReferenceSequence()
 
     def getReferenceSequence(self, **keywords):
         """
@@ -380,22 +378,20 @@ class AbstractNGSWorkflow(ParentClass):
         """
         print(f"Get and register reference sequence files "
             f"(id={self.ref_ind_seq_id})...", flush=True)
-        refSequence = self.db_main.queryTable(SunsetDB.IndividualSequence).\
+        self.refSequence = self.db_main.queryTable(SunsetDB.IndividualSequence).\
             get(self.ref_ind_seq_id)
-        refFastaFname = os.path.join(self.data_dir, refSequence.path)
+        refFastaFname = os.path.join(self.data_dir, self.refSequence.path)
         registerReferenceData = self.registerRefFastaFile(
             refFastaFname=refFastaFname,
             registerAffiliateFiles=True,
             checkAffiliateFileExistence=True)
-
         print(f"{len(registerReferenceData.refFastaFList)} files.",
             flush=True)
         return registerReferenceData
 
     def getAlignments(self, db=None):
         """
-        2013.04.03
-            wrapper so that derivatives could call it easily
+        a wrapper for derivatives to call
         """
         if db is None:
             db = self.db_main
@@ -1570,7 +1566,7 @@ class AbstractNGSWorkflow(ParentClass):
         if needBAMIndexJob:
             # add the index job on the bam file
             bamIndexJob = self.addBAMIndexJob(
-                inputBamF=job.output, parentJobLs=[job], \
+                inputBamF=job.output, parentJobLs=[job],
                 transferOutput=transferOutput, job_max_memory=2500, 
                 walltime=max(50, walltime/2))
         else:
@@ -1578,34 +1574,31 @@ class AbstractNGSWorkflow(ParentClass):
         job.bamIndexJob = bamIndexJob
         return job
 
-    def addVCFBeforeAfterFilterStatJob(self, executable=None, chromosome=None,
-        outputF=None, vcf1=None, vcf2=None,
+    def addVCFBeforeAfterFilterStatJob(self, executable=None,
+        chromosome=None, outputF=None, vcf1=None, vcf2=None,
         lastVCFJob=None, currentVCFJob=None,
         statMergeJobLs=None, parentJobLs=None):
         """
-
         examples:
-            outputF = File(os.path.join(self.statDirJob.output,
-                '%s.noOfLociAfterFilterLiftover.tsv'%(intervalFileBasenamePrefix)))
-            self.addVCFBeforeAfterFilterStatJob(chromosome=chromosome,
-                outputF=outputF,
-                vcf1=vcfSorterJob.output,
-                currentVCFJob=returnData.filterLiftoverVariantsJob, 
-                statMergeJobLs=[self.noOfLociChangeAfterFilterLiftOverMergeJob,
-                    self.noOfLociPerContigAfterFilterLiftOverMergeJob],
-                parentJobLs=[vcfSorterJob, returnData.filterLiftoverVariantsJob,
-                    self.statDirJob])
 
-            self.addVCFBeforeAfterFilterStatJob(chromosome=chromosome,
-                outputF=outputF,
-                currentVCFJob=currentVCFJob, lastVCFJob=lastVCFJob,\
-                filterByMaxSNPMissingRateMergeJob)
+        outputF = File(os.path.join(self.statDirJob.output,
+            '%s.noOfLociAfterFilterLiftover.tsv'%(intervalFileBasenamePrefix)))
+        self.addVCFBeforeAfterFilterStatJob(chromosome=chromosome,
+            outputF=outputF,
+            vcf1=vcfSorterJob.output,
+            currentVCFJob=returnData.filterLiftoverVariantsJob, 
+            statMergeJobLs=[self.noOfLociChangeAfterFilterLiftOverMergeJob,
+                self.noOfLociPerContigAfterFilterLiftOverMergeJob],
+            parentJobLs=[vcfSorterJob, returnData.filterLiftoverVariantsJob,
+                self.statDirJob])
 
-        2013.07.11 added argument statMergeJobLs
-            statMergeJob could be None.
-        2013.06.19 moved from vervet/src/qc/FilterVCFPipeline.py
+        self.addVCFBeforeAfterFilterStatJob(chromosome=chromosome,
+            outputF=outputF,
+            currentVCFJob=currentVCFJob, lastVCFJob=lastVCFJob,\
+            filterByMaxSNPMissingRateMergeJob)
+
+        statMergeJob could be None.
         2013.06.11 renamed old arguments to lastVCFJob, currentVCFJob
-        2012.7.30
         """
         if vcf1 is None and lastVCFJob:
             vcf1 = lastVCFJob.output
@@ -1624,15 +1617,15 @@ class AbstractNGSWorkflow(ParentClass):
         vcfFilterStatJob = self.addCheckTwoVCFOverlapJob(
             executable=executable,
             vcf1=vcf1, vcf2=vcf2,
-            chromosome=chromosome, chrLength=None, \
-            outputFile=outputF, parentJobLs=parentJobLs, \
+            chromosome=chromosome, chrLength=None,
+            outputFile=outputF, parentJobLs=parentJobLs,
             extraDependentInputLs=None, transferOutput=False, 
-            extraArguments=None, job_max_memory=1000, \
+            extraArguments=None, job_max_memory=1000,
             perSampleMismatchFraction=False)
         if statMergeJob:
-            self.addInputToMergeJob(statMergeJob, \
-                            inputF=vcfFilterStatJob.output , \
-                            parentJobLs=[vcfFilterStatJob])
+            self.addInputToMergeJob(statMergeJob,
+                inputF=vcfFilterStatJob.output,
+                parentJobLs=[vcfFilterStatJob])
         for _statMergeJob in statMergeJobLs:
             self.addInputToMergeJob(_statMergeJob,
                 inputF=vcfFilterStatJob.output,
@@ -1846,15 +1839,17 @@ option:
         job = self.addGATKJob(executable=SelectVariantsJava, 
             GenomeAnalysisTKJar=GenomeAnalysisTKJar, \
             GATKAnalysisType="SelectVariants",\
+            frontArgumentList=None,
             inputFile=inputF, inputArgumentOption="--variant:vcf", 
             refFastaFList=refFastaFList, inputFileList=None,\
             argumentForEachFileInInputFileList=None,\
             interval=interval, outputFile=outputF, \
-            parentJobLs=parentJobLs, transferOutput=transferOutput, 
-            job_max_memory=job_max_memory,\
-            frontArgumentList=None, extraArguments=extraArguments, \
-            extraArgumentList=extraArgumentList, extraOutputLs=None, \
-            extraDependentInputLs=extraDependentInputLs, no_of_cpus=None, 
+            extraArguments=extraArguments,
+            extraArgumentList=extraArgumentList,
+            parentJobLs=parentJobLs, transferOutput=transferOutput,
+            extraOutputLs=None,
+            extraDependentInputLs=extraDependentInputLs,
+            no_of_cpus=None, job_max_memory=job_max_memory,
             walltime=walltime,
             key2ObjectForJob=None, **keywords)
         return job
@@ -2063,20 +2058,18 @@ option:
         print(f"{no_of_vcfFiles} files and {no_of_loci} loci.", flush=True)
 
 
-    def addCheckTwoVCFOverlapJob(self, executable=None, vcf1=None, vcf2=None, 
-        chromosome=None, chrLength=None, \
+    def addCheckTwoVCFOverlapJob(self, executable=None,
+        vcf1=None, vcf2=None, 
+        chromosome=None, chrLength=None,
         outputFile=None, perSampleConcordanceOutputFile=None, 
         overlapSiteOutputFile=None, parentJobLs=None, \
         extraDependentInputLs=None, transferOutput=False, 
         extraArguments=None, job_max_memory=1000, \
         **keywords):
         """
-        2013.09.17 deal with CheckTwoVCFOverlapCC
-        2013.09.10 three output files have explicit arguments now.
-        2013.05.20 bugfix
+        can handle CheckTwoVCFOverlapCC CheckTwoVCFOverlap.py
         2012.8.16
             now perSampleMatchFraction output is in a separate output file.
-        2011.12.9
         """
         extraOutputLs = []
         extraArgumentList = []
@@ -2093,7 +2086,8 @@ option:
         if vcf2:
             if executable==self.CheckTwoVCFOverlapCC:
                 extraArgumentList.extend(["-i", vcf2])
-            else:	#the python version CheckTwoVCFOverlap.py
+            else:
+                #the python version CheckTwoVCFOverlap.py
                 extraArgumentList.extend(["-j", vcf2])
             extraDependentInputLs.append(vcf2)
         if chromosome:
@@ -2118,13 +2112,14 @@ option:
         #self.setupMoreOutputAccordingToSuffixAndNameTupleList(
         #   outputFnamePrefix=outputFnamePrefix, \
         #       suffixAndNameTupleList=suffixAndNameTupleList, \
-        #		extraOutputLs=extraOutputLs, key2ObjectForJob=key2ObjectForJob)
-        job= self.addGenericJob(executable=executable, inputFile=vcf1,
-            outputFile=outputFile, \
+        #       extraOutputLs=extraOutputLs, key2ObjectForJob=key2ObjectForJob)
+        job= self.addGenericJob(executable=executable,
+            inputFile=vcf1, inputArgumentOption='-i',
+            outputFile=outputFile, outputArgumentOption='-o',
             parentJobLs=parentJobLs,
             extraDependentInputLs=extraDependentInputLs,
-            extraOutputLs=extraOutputLs,\
-            transferOutput=transferOutput, \
+            extraOutputLs=extraOutputLs,
+            transferOutput=transferOutput,
             extraArgumentList=extraArgumentList,
             job_max_memory=job_max_memory,
             key2ObjectForJob=key2ObjectForJob, **keywords)
@@ -2210,14 +2205,11 @@ option:
         transferOutput=False, \
         extraArguments=None, job_max_memory=2000, **keywords):
         """
-        2012.8.1
-        2012.5.9
-            moved from FilterVCFPipeline.py
-            add argument outputFormat to make "--recode" by default
-                 and also allow other output formats.
-            add argument extraArguments to accept something like "--recode-INFO-all".
+        add argument outputFormat to make "--recode" by default
+                and also allow other output formats.
+        add argument extraArguments to accept something like "--recode-INFO-all".
 
-            this could be just used to output vcf in various formats
+        this could be just used to output vcf in various formats
 
         2011-11-21
             argument vcftools is replaced with a wrapper,
@@ -2558,7 +2550,7 @@ Contig966       3160    50
             if len(suffixNameTuple)==1:
                 suffix = suffixNameTuple[0]
                 #replace dot with underscore.
-                #  as dot is used to access method/attribute of python object
+                # as dot is used to access method/attribute of python object
                 name = suffix[1:].replace('.', '_')
                 # i.e. ".prune.in" is accessible as job.prune_inFile
             elif len(suffixNameTuple)>=2:
@@ -2567,8 +2559,8 @@ Contig966       3160    50
             extraOutputLs.append(outputFile)
             key2ObjectForJob['%sFile'%(name)] = outputFile
 
-        job= self.addGenericJob(executable=vcftoolsWrapper, inputFile=None,
-            outputFile=None, \
+        job= self.addGenericJob(executable=vcftoolsWrapper,
+            inputFile=None, outputFile=None,
             parentJobLs=parentJobLs,
             extraDependentInputLs=extraDependentInputLs,
             extraOutputLs=extraOutputLs,\
@@ -2578,16 +2570,16 @@ Contig966       3160    50
             **keywords)
         return job
 
-    def addCalculateTwoVCFSNPMismatchRateJob(self, executable=None, \
-        vcf1=None, vcf2=None, snpMisMatchStatFile=None, \
-        maxSNPMismatchRate=1.0, parentJobLs=[], \
-        job_max_memory=1000, extraDependentInputLs=[], \
+    def addCalculateTwoVCFSNPMismatchRateJob(self, executable=None,
+        vcf1=None, vcf2=None, snpMisMatchStatFile=None,
+        maxSNPMismatchRate=1.0, parentJobLs=[],
+        job_max_memory=1000, extraDependentInputLs=[],
         transferOutput=False, **keywords):
         """
         2011.12.20
 
         """
-        job = Job(namespace=self.namespace, name=executable.name, \
+        job = Job(namespace=self.namespace, name=executable.name,
             version=self.version)
         job.addArguments("-i", vcf1, "-j", vcf2, \
             "-m %s"%(maxSNPMismatchRate), '-o', snpMisMatchStatFile)
@@ -2604,9 +2596,9 @@ Contig966       3160    50
                 self.depends(parent=parentJob, child=job)
         return job
 
-    def addTabixRetrieveJob(self, executable=None, tabixPath=None, \
-        inputF=None, outputF=None, regionOfInterest=None, includeHeader=True,\
-        parentJobLs=None, job_max_memory=100, extraDependentInputLs=None, \
+    def addTabixRetrieveJob(self, executable=None, tabixPath=None,
+        inputF=None, outputF=None, regionOfInterest=None, includeHeader=True,
+        parentJobLs=None, job_max_memory=100, extraDependentInputLs=None,
         transferOutput=False, **keywords):
         """
         Examples:
@@ -2661,26 +2653,23 @@ run something like below to extract data from regionOfInterest out of
             extraArgumentList.append("-h")
 
         job = self.addGenericJob(executable=executable,
-            frontArgumentList=[tabixPath], \
-            inputFile=inputF, inputArgumentOption=None,\
-            outputFile=outputF, outputArgumentOption=None, \
-            extraDependentInputLs=extraDependentInputLs, \
-            extraOutputLs=[], transferOutput=transferOutput, \
-            extraArgumentList=extraArgumentList, parentJobLs=parentJobLs,\
-            no_of_cpus=None, job_max_memory = job_max_memory,\
+            frontArgumentList=[tabixPath],
+            inputFile=inputF, inputArgumentOption=None,
+            outputFile=outputF, outputArgumentOption=None,
+            extraDependentInputLs=extraDependentInputLs,
+            extraOutputLs=[], transferOutput=transferOutput,
+            extraArgumentList=extraArgumentList, parentJobLs=parentJobLs,
+            no_of_cpus=None, job_max_memory = job_max_memory,
             walltime= 60)
 
         return job
 
     def getContigIDFromFname(self, filename):
         """
-        2012.7.14 copied to pymodule.Genome
-        2011-10-20
-
-            If filename is like .../Contig0.filter_by_vcftools.recode.vcf.gz,
-                It returns "0", excluding the "Contig".
-                If you want "Contig" included, use getChrIDFromFname().
-            If search fails, it returns the prefix in the basename of filename.
+        If filename is like .../Contig0.filter_by_vcftools.recode.vcf.gz,
+            It returns "0", excluding the "Contig".
+            If you want "Contig" included, use getChrIDFromFname().
+        If search fails, it returns the prefix in the basename of filename.
         """
         return Genome.getContigIDFromFname(filename)
 
@@ -2924,8 +2913,6 @@ run something like below to extract data from regionOfInterest out of
     def getChr2IntervalDataLsBySplitChrSize(self, chr2size=None, intervalSize=None, 
         intervalOverlapSize=None):
         """
-        2013.04.09 added interval-span, chromosomeSize in returning data,
-        2012.7.30
         """
         print(f"Splitting {len(chr2size)} references into intervals of "
             f"{intervalSize} bp (overlap={intervalOverlapSize}) ... ",

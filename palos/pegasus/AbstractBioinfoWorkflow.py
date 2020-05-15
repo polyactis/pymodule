@@ -51,7 +51,7 @@ class AbstractBioinfoWorkflow(ParentClass):
         2012.5.23
         """
         return self.registerRefFastaFile(refFastaFname=ntDatabaseFname,
-            registerAffiliateFiles=True, \
+            registerAffiliateFiles=True,
             checkAffiliateFileExistence=True, addPicardDictFile=False,
             affiliateFilenameSuffixLs=['nin', 'nhr', 'nsq'],\
             folderName=folderName)

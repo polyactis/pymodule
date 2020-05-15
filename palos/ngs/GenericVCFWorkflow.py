@@ -1202,7 +1202,6 @@ class GenericVCFWorkflow(ParentClass):
             refFastaFname = os.path.join(self.data_dir, refSequence.path)
             registerReferenceData = self.registerRefFastaFile(refFastaFname,
                 registerAffiliateFiles=True,
-                input_site_handler=self.input_site_handler,\
                 checkAffiliateFileExistence=True)
             self.addMergeVCFReplicateHaplotypesJobs(inputData=inputData, 
                 db_main=self.db_main, transferOutput=True,\

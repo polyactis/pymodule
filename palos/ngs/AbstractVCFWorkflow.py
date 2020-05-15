@@ -1067,7 +1067,7 @@ class AbstractVCFWorkflow(ParentClass):
             chr2IntervalDataLs = None
         inputData = None
         firstVCFJobData = None
-        if getattr(self, 'inputDir', None):	#2013.05.20 bugfix
+        if getattr(self, 'inputDir', None):
             inputData = self.registerFilesOfInputDir(inputDir=self.inputDir,
                 input_site_handler=self.input_site_handler,
                 checkEmptyVCFByReading=self.checkEmptyVCFByReading,
@@ -1083,11 +1083,9 @@ class AbstractVCFWorkflow(ParentClass):
                 print(f"\t VCF file {firstVCFFile} is chosen as an example VCF "
                     "for any job that needs a random VCF file.", flush=True)
         
-        registerReferenceData = self.getReferenceSequence()
         
         self.inputData = inputData
         self.chr2IntervalDataLs = chr2IntervalDataLs
-        self.registerReferenceData = registerReferenceData
         self.firstVCFJobData = firstVCFJobData
         #self.firstVCFFile = firstVCFFile
         return self
