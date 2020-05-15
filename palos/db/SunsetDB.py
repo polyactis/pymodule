@@ -2065,20 +2065,20 @@ class SunsetDB(Database):
             sequence_type_id=sequence_type_id,
             sequence_format=sequence_format,
             ref_individual_sequence_id=ref_individual_sequence_id,
-            alignment_method_name=alignment_method_name,
-            alignment_method_id=alignment_method_id,
             alignment_method=alignment_method,
+            alignment_method_id=alignment_method_id,
+            alignment_method_name=alignment_method_name,
             alignment_format=alignment_format,
-            subFolder=subFolder,
             createSymbolicLink=createSymbolicLink,
             individual_sequence_filtered=individual_sequence_filtered,
-            read_group_added=read_group_added, data_dir=data_dir,
+            read_group_added=read_group_added,
+            data_dir=data_dir,
             outdated_index=outdated_index,
             mask_genotype_method_id=mask_genotype_method_id,
             parent_individual_alignment_id=parent_individual_alignment_id,
             individual_sequence_file_raw_id=individual_sequence_file_raw_id,
-            md5sum=md5sum,
-            local_realigned=local_realigned, reduce_reads=reduce_reads)
+            local_realigned=local_realigned,
+            reduce_reads=reduce_reads)
         if not db_entry:
             db_entry = IndividualAlignment(ind_seq_id=individual_sequence.id,
                 ref_ind_seq_id=ref_individual_sequence_id,
@@ -2748,24 +2748,24 @@ class SunsetDB(Database):
         individual=None,
         individual_code=None,
         individual_id=None,
-        individual_sequence_id:str=None,
+        individual_sequence_id:int=None,
         sequencer_id:int=None,
         sequencer_name:str='GA',
         sequence_type_name:str=None,
         sequence_type_id:int=None,
         sequence_format:str='fastq',
-        alignment_format:str='bam',
-        ref_individual_sequence_id=10, \
+        ref_individual_sequence_id=10,
         alignment_method=None, 
         alignment_method_id:int=None,
         alignment_method_name:str='bwa-short-read',
+        alignment_format:str='bam',
         createSymbolicLink=False,
         individual_sequence_filtered=0,
         read_group_added=None,
         data_dir=None,
         outdated_index=0,
         mask_genotype_method_id=None,
-        parent_individual_alignment_id=None,\
+        parent_individual_alignment_id=None,
         individual_sequence_file_raw_id=None,
         local_realigned=0,
         reduce_reads=None):
@@ -2831,7 +2831,7 @@ class SunsetDB(Database):
         if no_of_entries>1:
             logging.error(f">1 entries ({no_of_entries}) "
                 f"fetched for IndividualAlignment "
-                f"(individual_id={individual_id}, "
+                f"individual_id={individual_id}, "
                 f"ref_individual_sequence_id={ref_individual_sequence_id}, "
                 f"sequencer_id={sequencer_id}, "
                 f"sequence_type_id={sequence_type_id}, "
@@ -2844,7 +2844,7 @@ class SunsetDB(Database):
                 f"individual_sequence_file_raw_id={individual_sequence_file_raw_id}, "
                 f"alignment_format={alignment_format}, "
                 f"local_realigned={local_realigned}, "
-                f"reduce_reads={reduce_reads}), "
+                f"reduce_reads={reduce_reads}, "
                 )
             sys.exit(4)
         db_entry = query.first()
@@ -3083,7 +3083,7 @@ class SunsetDB(Database):
         return individual_alignment
     
     def getIndividualSequenceFileRaw(self, individual_sequence_id=None, 
-        library=None, md5sum=None, path=None, \
+        library=None, md5sum=None, path=None,
         original_path=None, mate_id=None, file_size=None):
         """
         2013.04.03 argument original_path
@@ -3116,7 +3116,7 @@ class SunsetDB(Database):
                     file_size = utils.getFileOrFolderSize(path)
             db_entry = IndividualSequenceFileRaw(
                 individual_sequence_id=individual_sequence_id, 
-                library=library, md5sum=md5sum, \
+                library=library, md5sum=md5sum,
                 path=path, mate_id=mate_id, file_size=file_size,
                 original_path=original_path)
             self.session.add(db_entry)
