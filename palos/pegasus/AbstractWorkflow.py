@@ -90,7 +90,8 @@ class AbstractWorkflow(Workflow):
 
     def __init__(self, inputSuffixList=None, 
         pegasusFolderName='folder',
-        site_handler='condor', input_site_handler='condor', cluster_size=30,
+        site_handler='condor', input_site_handler='condor',
+        cluster_size=30,
         output_path=None,
         tmpDir='/tmp/', max_walltime=4320,
         home_path=None, javaPath=None, 
