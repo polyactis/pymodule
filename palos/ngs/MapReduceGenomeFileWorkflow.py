@@ -17,9 +17,10 @@ Examples:
 """
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0])
+import logging
+import pegaflow
 from pegaflow.DAX3 import Executable, File, PFN
 from palos import PassingData, utils
-import pegaflow
 from . AbstractNGSWorkflow import AbstractNGSWorkflow
 
 ParentClass = AbstractNGSWorkflow
@@ -604,16 +605,17 @@ class MapReduceGenomeFileWorkflow(ParentClass):
         
         #self.chr2size = {}
         #self.chr2size = set(['Contig149'])
-        # #temporary when testing Contig149
-        #self.chr2size = set(['1MbBAC'])
-        # #temporary when testing the 1Mb-BAC (formerly vervet_path2)
+        # #temporarily restricting chr2size to Contig149
         if self.needSplitChrIntervalData:
-            #2013.06.21 defined in ParentClass.__init__()
+            #self.needSplitChrIntervalData is 
+            # defined in __init__().
             chr2IntervalDataLs = self.getChr2IntervalDataLsBySplitChrSize(
                 chr2size=self.chr2size,
                 intervalSize=self.intervalSize,
                 intervalOverlapSize=self.intervalOverlapSize)
         else:
+            logging.warn(f"self.needSplitChrIntervalData="\
+                f"{needSplitChrIntervalData}, set chr2IntervalDataLs=None.")
             chr2IntervalDataLs = None
         inputData = None
         firstInputJobData = None

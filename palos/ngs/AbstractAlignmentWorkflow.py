@@ -866,6 +866,8 @@ class AbstractAlignmentWorkflow(ParentClass):
                 dc=chr2IntervalDataLs,
                 maxContigID=self.maxContigID, minContigID=self.minContigID)
         else:
+            logging.warn(f"self.needSplitChrIntervalData="\
+                f"{needSplitChrIntervalData}, set chr2IntervalDataLs=None.")
             chr2IntervalDataLs = None
 
         alignmentLs = self.getAlignments()

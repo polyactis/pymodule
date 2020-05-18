@@ -3077,7 +3077,7 @@ run something like below to extract data from regionOfInterest out of
         if inputFileList:
             extraDependentInputLs.extend(inputFileList)
         job = self.addData2DBJob(executable=executable, \
-            inputFile=inputFile, inputArgumentOption=inputArgumentOption, \
+            inputFile=inputFile, inputArgumentOption=inputArgumentOption,
             inputFileList=inputFileList, \
             outputFile=outputFile, outputArgumentOption=outputArgumentOption,
             data_dir=None, logFile=logFile, commit=commit,\
