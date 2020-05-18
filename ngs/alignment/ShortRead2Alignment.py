@@ -1559,7 +1559,6 @@ in pipe2File:
                 else:	#default is PE
                     alignment_method = db_main.getAlignmentMethod("bwaShortRead")
                 """
-                alignment_method = db_main.getAlignmentMethod(alignment_method_name)
                 #alignment for the whole individual_sequence
                 individual_alignment = db_main.getAlignment(
                     individual_code=isq.individual.code,
