@@ -296,6 +296,14 @@ class ShortRead2Alignment(ParentClass):
             self.ignoreEmptyReadFile = False
         else:
             self.ignoreEmptyReadFile = True
+        
+        self.needSplitChrIntervalData = False
+        self.mapReduceType = 1
+        # type 1: split VCF with fixed number of sites
+        # type 2: SelectVariants from VCF with fixed-size windows        
+        # child classes can turn it off
+        self.needGzipPreReduceReturnData = False
+        self.needGzipReduceReturnData = False
     
     def registerCustomExecutables(self):
         """
