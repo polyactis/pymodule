@@ -615,7 +615,7 @@ class MapReduceGenomeFileWorkflow(ParentClass):
                 intervalOverlapSize=self.intervalOverlapSize)
         else:
             logging.warn(f"self.needSplitChrIntervalData="\
-                f"{needSplitChrIntervalData}, set chr2IntervalDataLs=None.")
+                f"{self.needSplitChrIntervalData}, set chr2IntervalDataLs=None.")
             chr2IntervalDataLs = None
         inputData = None
         firstInputJobData = None
