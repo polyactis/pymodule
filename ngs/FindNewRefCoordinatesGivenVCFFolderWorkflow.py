@@ -891,19 +891,17 @@ class FindNewRefCoordinatesGivenVCFFolder(ParentClass, BlastWorkflow, \
         #vcfsorter.pl genome.dict myvcf > mynewvcf.file 2>STDERR
         sortedVCFFile = File(os.path.join(self.liftOverMapDirJob.output, \
             '%s.s3.LiftOverSorted.vcf'%(intervalFileBasenamePrefix)))
-        vcfSorterJob = self.addPipeCommandOutput2FileJob(
+        vcfSorterJob = self.addPipe2FileJob(
             executable=self.vcfsorterShellPipe, \
             commandFile=self.vcfsorterExecutableFile, \
             outputFile=sortedVCFFile, \
-            parentJobLs=[liftoverVariantsJob, self.liftOverMapDirJob], \
+            parentJobLs=[liftoverVariantsJob, self.liftOverMapDirJob],
             extraDependentInputLs=[
                 self.newRegisterReferenceData.refPicardFastaDictF,
                 liftoverVariantsJob.output], \
-            extraOutputLs=None, transferOutput=False, \
-            extraArguments=None, \
+            transferOutput=False, \
             extraArgumentList=[self.newRegisterReferenceData.refPicardFastaDictF,
                 liftoverVariantsJob.output], \
-            sshDBTunnel=None,\
             job_max_memory=job_max_memory, walltime=walltime)
         
         #$cmd = "java -jar $gatk/dist/GenomeAnalysisTK.jar -T FilterLiftedVariants
@@ -1182,7 +1180,7 @@ class FindNewRefCoordinatesGivenVCFFolder(ParentClass, BlastWorkflow, \
             #sort each vcf file
             sortedVCFFile = File(os.path.join(self.liftOverReduceDirJob.output,
                 '%s.sorted.vcf'%(seqTitle)))
-            vcfSorterJob = self.addPipeCommandOutput2FileJob(
+            vcfSorterJob = self.addPipe2FileJob(
                 commandFile=self.vcfsorterExecutableFile, \
                 outputFile=sortedVCFFile, \
                 parentJobLs=[removeRedundantLociFromVCFJob, self.liftOverReduceDirJob], \

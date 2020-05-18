@@ -3109,14 +3109,14 @@ run something like below to extract data from regionOfInterest out of
         if extraDependentInputLs is None:
             extraDependentInputLs = []
         extraDependentInputLs.append(inputFile)
-        job = self.addPipeCommandOutput2FileJob(executable=executable,
+        job = self.addPipe2FileJob(executable=executable,
             commandFile=samtoolsExecutableFile, \
             outputFile=outputFile,
             parentJobLs=parentJobLs,
             extraDependentInputLs=extraDependentInputLs,
-            extraOutputLs=None, transferOutput=transferOutput, \
+            transferOutput=transferOutput,
             extraArguments=extraArguments, 
-            extraArgumentList=['flagstat', inputFile], sshDBTunnel=None,
+            extraArgumentList=['flagstat', inputFile],
             job_max_memory=job_max_memory, walltime=walltime)
         return job
 
@@ -3179,8 +3179,8 @@ run something like below to extract data from regionOfInterest out of
 
         if extraArguments:
             extraArgumentList.append(extraArguments)
-        job= self.addGenericJob(executable=executable, inputFile=inputFile,
-            outputFile=None, \
+        job= self.addGenericJob(executable=executable,
+            inputFile=inputFile, inputArgumentOption="-i",
             parentJobLs=parentJobLs,
             extraDependentInputLs=extraDependentInputLs,
             extraOutputLs=extraOutputLs,\

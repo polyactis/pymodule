@@ -812,7 +812,7 @@ pipe2File.sh ./bwa aln-pe.2.sam.gz mem -t 1 -M -a 3280.fasta 12457_1.fastq.gz 12
             extraArgumentList.extend(["-a -M", refFastaFile] + fastqFileList)
             extraDependentInputLs=fastqFileList + refFastaFList
 
-            alignmentJob = self.addPipeCommandOutput2FileJob(
+            alignmentJob = self.addPipe2FileJob(
                 executable=self.BWA_Mem,
                 commandFile=self.bwaExecutableFile,
                 outputFile=alignmentSamF,
@@ -1665,6 +1665,7 @@ pipe2File.sh ./bwa aln-pe.2.sam.gz mem -t 1 -M -a 3280.fasta 12457_1.fastq.gz 12
                                 PassingData(parentJobLs=[addRGJob], file=addRGJob.output))
                     if alignmentPerLibrary and not skipLibraryAlignment and \
                         oneLibraryAlignmentJobAndOutputLs:
+                        ## merge all alignments of one library of one ind_seq
                         baseCoverage = 4*3000000000
                         #baseline
                         minMergeAlignmentWalltime = 240
@@ -1741,7 +1742,6 @@ pipe2File.sh ./bwa aln-pe.2.sam.gz mem -t 1 -M -a 3280.fasta 12457_1.fastq.gz 12
                         alignment2DBJob = self.addAddAlignmentFile2DBJob(
                             executable=self.AddAlignmentFile2DB, \
                             inputFile=preDBAlignmentJob.output, \
-                            otherInputFileList=[], \
                             individual_alignment_id=oneLibraryAlignmentEntry.id, \
                             individual_sequence_file_raw_id=minIsqFileRawID,\
                             format=None, local_realigned=self.local_realigned,\
@@ -1754,6 +1754,7 @@ pipe2File.sh ./bwa aln-pe.2.sam.gz mem -t 1 -M -a 3280.fasta 12457_1.fastq.gz 12
                             sshDBTunnel=self.needSSHDBTunnel, commit=True)
 
                 if AlignmentJobAndOutputLs and not skipIndividualAlignment:
+                    ## merge all alignments of one ind_seq
                     baseCoverage = 4	#baseline
                     actualCoverage = getattr(isq, 'coverage', baseCoverage)
                     minMergeAlignmentWalltime = 240
