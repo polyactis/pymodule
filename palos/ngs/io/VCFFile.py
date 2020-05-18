@@ -480,7 +480,8 @@ class VCFFile(object):
             if not individualName:	#ignore empty column
                 continue
             if individualName[:-4]=='.bam':
-                individualCode = individualName[:-4]	#get rid of .bam
+                individualCode = individualName[:-4]
+                #get rid of .bam
             else:
                 individualCode = individualName
             individual_name2col_index[individualCode] = col_index
