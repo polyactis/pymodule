@@ -188,7 +188,7 @@ class MapReduceGenomeFileWorkflow(ParentClass):
         # type 2: SelectVariants from VCF with fixed-size windows
         # child classes could change its value in the end of their own __init__()
         
-        #2013.07.18 offer child classes option to turn it off
+        # child classes can turn it off
         self.needGzipPreReduceReturnData = True
         self.needGzipReduceReturnData = True
     

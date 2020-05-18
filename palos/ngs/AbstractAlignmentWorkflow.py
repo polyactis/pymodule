@@ -234,9 +234,18 @@ class AbstractAlignmentWorkflow(ParentClass):
         self.selectedRegionFname = selectedRegionFname
         self.maxNoOfRegionsPerJob = maxNoOfRegionsPerJob
 
-        listArgumentName_data_type_ls = [('ind_seq_id_ls', int), ("ind_aln_id_ls", int)]
+        listArgumentName_data_type_ls = [('ind_seq_id_ls', int), 
+            ("ind_aln_id_ls", int)]
         ProcessOptions.processListArguments(listArgumentName_data_type_ls, 
             emptyContent=[], class_to_have_attr=self)
+
+        self.needSplitChrIntervalData = True
+        self.mapReduceType = 1
+        # type 1: split VCF with fixed number of sites
+        # type 2: SelectVariants from VCF with fixed-size windows        
+        # child classes can turn it off
+        self.needGzipPreReduceReturnData = True
+        self.needGzipReduceReturnData = True
 
     def addAlignmentAsInputToJobLs(self, alignmentDataLs=None, jobLs=[],
         jobInputOption=""):
