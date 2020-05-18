@@ -1027,8 +1027,7 @@ class OneGenomeData(PassingData):
         if self._chr_id_ls is None:
             self.chr_id_ls = (tax_id, self.chrOrder, )
         
-        #_chr_id_ls = self.chr_id2size.keys()
-        #_chr_id_ls.sort()
+        #_chr_id_ls = sorted(self.chr_id2size)
         #no more chromosome 0
         first_chr = self.chr_id_ls[0] 
         #chr_id_ls might not be continuous integers. so dictionary is better
@@ -1086,15 +1085,13 @@ class OneGenomeData(PassingData):
         if self._chr_id_ls is None:
             self.chr_id_ls = (tax_id, self.chrOrder, )
         
-        #chr_id_ls = self.chr_id2size.keys()
+        #chr_id_ls = sorted(self.chr_id2size)
         """
         if self.chrOrder==2:
             size_chr_id_ls = [(value, key) for key, value in self.chr_id2size.items()]
             size_chr_id_ls.sort()
             size_chr_id_ls.reverse()
             chr_id_ls = [row[1] for row in size_chr_id_ls]
-        else:
-            chr_id_ls.sort()
         """
         first_chr = self.chr_id_ls[0] 
         self._chr_id2cumu_start = {first_chr:0}
@@ -1140,14 +1137,12 @@ class OneGenomeData(PassingData):
         if self._chr_id_ls is None:
             self.chr_id_ls = (tax_id, self.chrOrder, )
         """
-        chr_id_ls = self.chr_id2size.keys()
+        chr_id_ls = sorted(self.chr_id2size)
         if self.chrOrder==2:
             size_chr_id_ls = [(value, key) for key, value in self.chr_id2size.items()]
             size_chr_id_ls.sort()
             size_chr_id_ls.reverse()
             chr_id_ls = [row[1] for row in size_chr_id_ls]
-        else:
-            chr_id_ls.sort()
         """
         first_chr = self.chr_id_ls[0]
         newChrID = 1

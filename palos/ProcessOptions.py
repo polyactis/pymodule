@@ -51,8 +51,7 @@ def process_function_arguments(keywords, argument_default_dict, error_doc='',
     """
     import sys
     ad = {}
-    argument_key_ls = argument_default_dict.keys()
-    argument_key_ls.sort()
+    argument_key_ls = sorted(argument_default_dict)
     #to keep 'user' appearing in front of 'password'.
     argument_key_ls.reverse()
     for argument_key in argument_key_ls:
@@ -496,9 +495,7 @@ class ProcessOptions:
                 could be non-list, which is plain default_value.
             To be compatible with previous argument_default_dict.
         """
-        argument_key_ls = list(argument_default_dict.keys())
-        argument_key_ls.sort()
-        argument_key_ls.reverse()
+        argument_key_ls = sorted(argument_default_dict, reverse=True)
         #to keep 'user' appearing in front of 'password'.
         ad = {}
         for argument_key in argument_key_ls:
@@ -644,8 +641,7 @@ def generate_program_doc(program_name, option_default_dict):
     """
     usage_str = 'Usage: %s [OPTIONS]'%program_name
     argument_list_str_ls = ['Argument List:']
-    option_key_ls = option_default_dict.keys()
-    option_key_ls.sort()
+    option_key_ls = sorted(option_default_dict)
     for option_key in option_key_ls:
         default_value = option_default_dict[option_key]
         short_option, long_option, has_argument, description_for_option, \

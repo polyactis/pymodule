@@ -752,8 +752,7 @@ def formReadmeObj(argv, ad, READMEClass):
         on the program's sys.argv and argument dictionary
     """
     readme_description_ls = []
-    argument_ls = ad.keys()
-    argument_ls.sort()
+    argument_ls = sorted(ad)
     for argument in argument_ls:
         if argument.find('passwd')!=-1 or argument.find('password')!=-1:
             #password info not into db

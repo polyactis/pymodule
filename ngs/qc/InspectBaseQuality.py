@@ -147,8 +147,7 @@ class InspectBaseQuality(ParentClass):
         diNuc2count = qualityDataStructure.diNuc2count
         diNuc2quality_ls = qualityDataStructure.diNuc2quality_ls
         
-        diNuc_key_ls = diNuc2count.keys()
-        diNuc_key_ls.sort()
+        diNuc_key_ls = sorted(diNuc2count)
         diNuc_count_ls = []
         diNuc_quality_ls_ls = []
         for diNuc in diNuc_key_ls:

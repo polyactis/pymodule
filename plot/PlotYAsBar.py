@@ -49,8 +49,7 @@ class PlotYAsBar(AbstractPlot):
 			get called by the end of fileWalker() for each inputFname.
 		"""
 		xValue2yValue = getattr(pdata, 'xValue2yValue', None)
-		xValue_list = xValue2yValue.keys()
-		xValue_list.sort()
+		xValue_list = sorted(xValue2yValue)
 		yValue_list = [xValue2yValue[item] for item in xValue_list]
 		
 		#width = 0.75/len(yValue_list)	#these are for multi-series of bar charts.

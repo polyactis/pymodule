@@ -270,8 +270,7 @@ class GenotypeCallByCoverage(object):
 					refNameSet=refNameSet, read_group2col_index=read_group2col_index, \
 					locus_id2row_index=locus_id2row_index, outputDelimiter=outputDelimiter)
 		
-		unique_read_group_ls = read_group2col_index.keys()
-		unique_read_group_ls.sort()
+		unique_read_group_ls = sorted(read_group2col_index)
 		cls.reportValueOfDictionaryByKeyLs(read_group2no_of_good_hets, unique_read_group_ls, title="No of good hets")
 		cls.reportValueOfDictionaryByKeyLs(read_group2no_of_good_tris, unique_read_group_ls, title="No of good SNPs with tri-or-more alleles")
 		cls.reportValueOfDictionaryByKeyLs(read_group2no_of_snps_with_trialleles, unique_read_group_ls, title="No of SNPs with tri alleles")

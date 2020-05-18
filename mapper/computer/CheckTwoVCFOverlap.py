@@ -146,8 +146,7 @@ class CheckTwoVCFOverlap(AbstractVCFMapper):
         header_ls_for_no_of_matches = []
         header_ls_for_no_of_non_NA_pairs = []
         header_ls_for_matchFraction = []
-        overlapping_sample_id_list = list(overlapping_sample_id_set)
-        overlapping_sample_id_list.sort()
+        overlapping_sample_id_list = sorted(overlapping_sample_id_set)
         """
         for sample_id in overlapping_sample_id_list:
             header_ls_for_no_of_matches.append('no_of_matches_for_%s'%(sample_id))

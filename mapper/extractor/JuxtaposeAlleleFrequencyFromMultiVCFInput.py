@@ -62,8 +62,7 @@ class JuxtaposeAlleleFrequencyFromMultiVCFInput(AbstractVCFMapper):
 		header = ['locusID'] + inputHeaderLs + ['count']
 		writer.writerow(header)
 		
-		locus_id_list = list(locus_id_set)
-		locus_id_list.sort()
+		locus_id_list = sorted(locus_id_set)
 		
 		for locus_id in locus_id_list:
 			locus_id_str_ls = map(str, locus_id)

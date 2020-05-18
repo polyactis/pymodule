@@ -1572,8 +1572,7 @@ pipe2File.sh ./bwa aln-pe.2.sam.gz mem -t 1 -M -a 3280.fasta 12457_1.fastq.gz 12
                     fileObjectPairLs = pdata.fileObjectPairLs
 
                     oneLibraryAlignmentJobAndOutputLs = []
-                    splitOrderLs = splitOrder2Index.keys()
-                    splitOrderLs.sort()
+                    splitOrderLs = sorted(splitOrder2Index)
                     oneLibraryCumulativeBaseCount = 0
                     #Default: no alignment for each library
                     skipLibraryAlignment = True

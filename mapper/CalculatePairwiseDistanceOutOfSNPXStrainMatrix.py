@@ -123,8 +123,7 @@ class CalculatePairwiseDistanceOutOfSNPXStrainMatrix(object):
 		#2011-4-7 output the pairwise distance as matrix
 		import csv, numpy
 		no_of_rows = len(row_id2pairwise_dist_ls)
-		row_id_ls = row_id2pairwise_dist_ls.keys()
-		row_id_ls.sort()
+		row_id_ls = sorted(row_id2pairwise_dist_ls)
 		row_id2index = {}
 		for row_id in row_id_ls:
 			row_id2index[row_id] = len(row_id2index)

@@ -190,8 +190,7 @@ def movingAverage(listOfList=None, no_of_steps=100, needReorderData=True, reduce
 			valueAtThatList = listOfList[i][j]
 			stepIndex2Data[stepIndex].listOfList[i].append(valueAtThatList)
 	
-	stepIndexList = stepIndex2Data.keys()
-	stepIndexList.sort()
+	stepIndexList = sorted(stepIndex2Data)
 	
 	fractionFunction = lambda ls: sum([a>=minValueForFraction for a in ls])/float(len(ls))
 	reduceType2Function = {1: numpy.median, 2: numpy.mean, 3: fractionFunction}
