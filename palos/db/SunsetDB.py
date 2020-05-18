@@ -4185,7 +4185,8 @@ class SunsetDB(Database):
                             (len(listToReturn), cumulative_coverage))
         return listToReturn
     
-    def getISQDBEntryLsForAlignment(self, individualSequenceIDList=None, data_dir=None, 
+    def getISQDBEntryLsForAlignment(self, individualSequenceIDList=None,
+        data_dir=None, 
         filtered=None, ignoreEmptyReadFile=True, outdated_index=0):
         """
         2013.3.15 added argument outdated_index

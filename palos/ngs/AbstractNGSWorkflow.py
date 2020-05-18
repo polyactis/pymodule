@@ -3093,12 +3093,12 @@ run something like below to extract data from regionOfInterest out of
 
     def addSamtoolsFlagstatJob(self, executable=None,
         samtoolsExecutableFile=None,
-        inputFile=None, outputFile=None, \
+        inputFile=None, outputFile=None,
+        extraArguments=None, 
         parentJobLs=None, extraDependentInputLs=None, transferOutput=False,
-        extraArguments=None, job_max_memory=2000, walltime=120, **keywords):
+        job_max_memory=2000, walltime=120, **keywords):
         """
         2013.03.25 use pipe2File to get output piped into outputF
-        2013.3.24 use addGenericJob()
         2012.4.3
             samtools (sam_stat.c) has been modified so that
              it could take one more optional argument to store the
@@ -3110,7 +3110,7 @@ run something like below to extract data from regionOfInterest out of
             extraDependentInputLs = []
         extraDependentInputLs.append(inputFile)
         job = self.addPipe2FileJob(executable=executable,
-            commandFile=samtoolsExecutableFile, \
+            commandFile=samtoolsExecutableFile,
             outputFile=outputFile,
             parentJobLs=parentJobLs,
             extraDependentInputLs=extraDependentInputLs,
