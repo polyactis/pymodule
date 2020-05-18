@@ -452,7 +452,7 @@ class AbstractAlignmentWorkflow(ParentClass):
             similar to reduceBeforeEachAlignmentData() but
              for mapping programs that run on one alignment each.
 
-            passingData.AlignmentJobAndOutputLs = []
+            passingData.alignmentJobAndOutputLs = []
             passingData.bamFnamePrefix = bamFnamePrefix
             passingData.individual_alignment = alignment
         """
@@ -683,15 +683,15 @@ class AbstractAlignmentWorkflow(ParentClass):
         returnData = PassingData()
         returnData.jobDataLs = []
 
-        #2012.9.22 AlignmentJobAndOutputLs is a relic.
+        #2012.9.22 alignmentJobAndOutputLs is a relic.
         #	but it's similar to mapEachIntervalDataLs but
         #   designed for addAlignmentMergeJob(),
-        #	so AlignmentJobAndOutputLs gets re-set for every alignment.
+        #	so alignmentJobAndOutputLs gets re-set for every alignment.
         # 	mapEachAlignmentDataLs is never reset.
         #	mapEachChromosomeDataLs is reset right after a new alignment is chosen.
         #	mapEachIntervalDataLs is reset right after each chromosome is chosen.
         #	all reduce dataLs never gets reset.
-        passingData = PassingData(AlignmentJobAndOutputLs=[], \
+        passingData = PassingData(alignmentJobAndOutputLs=[], \
             alignmentDataLs = alignmentDataLs,\
             bamFnamePrefix=None, \
 
@@ -746,7 +746,7 @@ class AbstractAlignmentWorkflow(ParentClass):
 
             bamFnamePrefix = alignment.getReadGroup()
 
-            passingData.AlignmentJobAndOutputLs = []
+            passingData.alignmentJobAndOutputLs = []
             passingData.bamFnamePrefix = bamFnamePrefix
             passingData.individual_alignment = alignment
             passingData.alignmentData = alignmentData

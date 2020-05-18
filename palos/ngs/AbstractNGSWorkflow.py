@@ -645,11 +645,12 @@ class AbstractNGSWorkflow(ParentClass):
             folderName=folderName)
 
     def addBAMIndexJob(self,
-        inputBamF=None,\
-        extraArguments=None, parentJobLs=None,
+        inputBamF=None,
+        extraArguments=None,
         extraDependentInputLs=None,
-        transferOutput=True, job_max_memory=None,
-        javaMaxMemory=2500,
+        parentJobLs=None,
+        transferOutput=True,
+        job_max_memory=None, javaMaxMemory=2500,
         walltime=60, **keywords):
         """
         2012.4.12
@@ -689,13 +690,12 @@ class AbstractNGSWorkflow(ParentClass):
             walltime=walltime, **keywords)
         job.bamFile = inputBamF
         job.baiFile = baiFile
-        #job.parentJobLs is where the actual alignment job and its bam/sam output are.
+        #job.parentJobLs is the alignment job and its bam/sam output.
         return job
 
     def registerCustomExecutables(self):
         """
-        2012.1.9
-            abstract function
+        abstract function
         """
         ParentClass.registerCustomExecutables(self)
 
@@ -1894,12 +1894,14 @@ option:
         job.bamIndexJob = bamIndexJob
         return job
 
-    def addReadGroupInsertionJob(self, individual_alignment=None,
+    def addReadGroupInsertionJob(self,
+        individual_alignment=None,
         inputBamFile=None, outputBamFile=None,
+        needBAMIndexJob=True, 
         parentJobLs=None, transferOutput=False,
         job_max_memory = 2500,
         walltime=180, max_walltime=1200, \
-        needBAMIndexJob=True, **keywords):
+        **keywords):
         """
         """
         # add RG to this bam
@@ -1919,9 +1921,9 @@ option:
             inputFile=inputBamFile, inputArgumentOption="INPUT=",
             outputFile=outputBamFile, outputArgumentOption="OUTPUT=",
             parentJobLs=parentJobLs,
-            extraDependentInputLs=[self.PicardJar], \
-            extraOutputLs=None,\
-            transferOutput=transferOutput, \
+            extraDependentInputLs=[self.PicardJar],
+            extraOutputLs=None,
+            transferOutput=transferOutput,
             extraArgumentList=['RGID=%s'%(read_group), 'RGLB=%s'%(platform_id),
                 'RGPL=%s'%(platform_id),
                 'RGPU=%s'%(read_group), 'RGSM=%s'%(read_group),\
@@ -3199,14 +3201,15 @@ run something like below to extract data from regionOfInterest out of
                     job.addArguments(inputFile)
         return job
 
-    def addAlignmentMergeJob(self, AlignmentJobAndOutputLs=None,
+    def addAlignmentMergeJob(self,
+        alignmentJobAndOutputLs=None,
         outputBamFile=None,
         parentJobLs=None, transferOutput=False,
         job_max_memory=7000, walltime=680, **keywords):
         """
-        not certain, but it looks like MergeSamFilesJar does not require the .bai (bam index) file.
+        Not certain, but it looks like MergeSamFilesJar does not require the .bai (bam index) file.
 
-        2013.03.31 AlignmentJobAndOutputLs has changed it cell structure
+        2013.03.31 alignmentJobAndOutputLs has changed it cell structure
         2012.9.17 copied from vervet/src/ShortRead2AlignmentPipeline.py
         2012.7.4 bugfix. add job dependency between alignmentJob and
              merge_sam_job after all have been added to the self.
@@ -3221,57 +3224,54 @@ run something like below to extract data from regionOfInterest out of
             merge alignment
             index it
         """
-
         memRequirementObject = self.getJVMMemRequirment(
             job_max_memory=job_max_memory, minMemory=2000)
         job_max_memory = memRequirementObject.memRequirement
         javaMemRequirement = memRequirementObject.memRequirementInStr
 
-
-        if len(AlignmentJobAndOutputLs)>1:
+        if len(alignmentJobAndOutputLs)>1:
             # 'USE_THREADING=true', threading might be causing process hanging forever (sleep).
             alignmentJobLs = []
             alignmentOutputLs = []
-            for AlignmentJobAndOutput in AlignmentJobAndOutputLs:
-                if AlignmentJobAndOutput.jobLs:
-                    alignmentJobLs.extend(AlignmentJobAndOutput.jobLs)
-                alignmentOutput = AlignmentJobAndOutput.file
-                if alignmentOutput:
-                    alignmentOutputLs.append(alignmentOutput)
+            for alignmentJobAndOutput in alignmentJobAndOutputLs:
+                if alignmentJobAndOutput.jobLs:
+                    alignmentJobLs.extend(alignmentJobAndOutput.jobLs)
+                if alignmentJobAndOutput.file:
+                    alignmentOutputLs.append(alignmentJobAndOutput.file)
             merge_sam_job = self.addJavaJob(
                 executable=self.MergeSamFilesJava, 
                 jarFile=self.PicardJar, \
                 inputFileList=alignmentOutputLs,
                 argumentForEachFileInInputFileList="INPUT=",\
                 outputFile=outputBamFile, outputArgumentOption="OUTPUT=",\
-                parentJobLs=alignmentJobLs, transferOutput=transferOutput, 
-                job_max_memory=job_max_memory,\
                 frontArgumentList=['MergeSamFiles'], extraArguments=None, 
                 extraArgumentList=['SORT_ORDER=coordinate', \
                     'ASSUME_SORTED=true', "VALIDATION_STRINGENCY=LENIENT"], 
-                extraOutputLs=None, \
+                extraOutputLs=None,
                 extraDependentInputLs=[self.PicardJar],
-                no_of_cpus=None, walltime=walltime)
-        elif len(AlignmentJobAndOutputLs)==1:
+                parentJobLs=alignmentJobLs,
+                transferOutput=transferOutput, 
+                job_max_memory=job_max_memory,
+                no_of_cpus=4, walltime=walltime)
+        elif len(alignmentJobAndOutputLs)==1:
             #one input file, no samtools merge. use "mv" to rename it instead.
             #  should use "cp", then the input would be cleaned by cleaning job.
-            AlignmentJobAndOutput = AlignmentJobAndOutputLs[0]
-            alignmentJobLs = AlignmentJobAndOutput.jobLs
-            alignmentOutput = AlignmentJobAndOutput.file
+            alignmentJobAndOutput = alignmentJobAndOutputLs[0]
+            alignmentJobLs = alignmentJobAndOutput.jobLs
+            alignmentOutput = alignmentJobAndOutput.file
             sys.stderr.write(" copy (instead of merging small alignment files) due to "
                 " only one alignment file, from %s to %s.\n"%\
                 (alignmentOutput.name, outputBamFile.name))
             merge_sam_job = self.addGenericJob(executable=self.cp, 
-                inputFile=alignmentOutput, inputArgumentOption=None, \
-                outputFile=outputBamFile, outputArgumentOption=None, \
-                parentJob=None, parentJobLs=alignmentJobLs,
-                extraDependentInputLs=None,
-                extraOutputLs=None, transferOutput=transferOutput, \
-                frontArgumentList=None, extraArguments=None,
+                inputFile=alignmentOutput, inputArgumentOption=None,
+                outputFile=outputBamFile, outputArgumentOption=None,
+                frontArgumentList=None,
                 extraArgumentList=None,
-                job_max_memory=1000,  sshDBTunnel=None, \
-                key2ObjectForJob=None, objectWithDBArguments=None, 
-                no_of_cpus=None, walltime=40)
+                parentJobLs=alignmentJobLs,
+                extraDependentInputLs=None,
+                transferOutput=transferOutput,
+                job_max_memory=1000,
+                no_of_cpus=1, walltime=100)
         else:
             logging.error("no input for MergeSamFilesJar to output %s."%\
                 (outputBamFile))

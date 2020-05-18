@@ -136,7 +136,7 @@ class DownsampleWorkflow(ParentClass):
                 maxJobPropertyValue=maxMergeAlignmentMaxMemory).value
 
             MergeJob, bamIndexJob = self.addAlignmentMergeJob(
-                AlignmentJobAndOutputLs=mergeJobAndOutputLs,
+                alignmentJobAndOutputLs=mergeJobAndOutputLs,
                 outputBamFile=mergedBamFile, \
                 transferOutput=transferOutput, \
                 job_max_memory=mergeAlignmentMaxMemory, \

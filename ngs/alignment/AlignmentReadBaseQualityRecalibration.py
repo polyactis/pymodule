@@ -204,13 +204,13 @@ class AlignmentReadBaseQualityRecalibration(ParentClass):
         """
         returnData = PassingData(no_of_jobs = 0)
         returnData.jobDataLs = []
-        AlignmentJobAndOutputLs = getattr(passingData, 'AlignmentJobAndOutputLs', [])
+        alignmentJobAndOutputLs = getattr(passingData, 'alignmentJobAndOutputLs', [])
         bamFnamePrefix = passingData.bamFnamePrefix
         topOutputDirJob = passingData.topOutputDirJob
         individual_alignment = passingData.individual_alignment
         reduceOutputDirJob = passingData.reduceOutputDirJob
         
-        if len(AlignmentJobAndOutputLs)>0:
+        if len(alignmentJobAndOutputLs)>0:
             #2012.3.29	merge alignment output only when there is something to merge!
             #2013.04.09 create a new child alignment local_realigned =1, etc.
             new_individual_alignment = self.db.copyParentIndividualAlignment(
@@ -229,43 +229,44 @@ class AlignmentReadBaseQualityRecalibration(ParentClass):
             maxMergeAlignmentMaxMemory = 12000	#in MB
             
             mergeAlignmentWalltime = self.scaleJobWalltimeOrMemoryBasedOnInput(
-                realInputVolume=actualCoverage, \
+                realInputVolume=actualCoverage,
                 baseInputVolume=baseCoverage,
                 baseJobPropertyValue=minMergeAlignmentWalltime*2,
                 minJobPropertyValue=minMergeAlignmentWalltime,
                 maxJobPropertyValue=maxMergeAlignmentWalltime).value
             mergeAlignmentMaxMemory = self.scaleJobWalltimeOrMemoryBasedOnInput(
-                realInputVolume=actualCoverage, \
+                realInputVolume=actualCoverage,
                 baseInputVolume=baseCoverage,
                 baseJobPropertyValue=minMergeAlignmentMaxMemory,
                 minJobPropertyValue=minMergeAlignmentMaxMemory, 
                 maxJobPropertyValue=maxMergeAlignmentMaxMemory).value
             
             #2013.04.09 replace read_group with the new one to each alignment job
-            NewAlignmentJobAndOutputLs = []
-            for AlignmentJobAndOutput in AlignmentJobAndOutputLs:
+            newAlignmentJobAndOutputLs = []
+            for alignmentJobAndOutput in alignmentJobAndOutputLs:
                 #2012.9.19 add a AddReadGroup job
-                alignmentJob, indexAlignmentJob = AlignmentJobAndOutput.jobLs[:2]
+                alignmentJob, indexAlignmentJob = alignmentJobAndOutput.jobLs[:2]
                 fileBasenamePrefix = os.path.splitext(alignmentJob.output.name)[0]
                 outputRGBAM = File("%s.isq_RG.bam"%(fileBasenamePrefix))
                 addRGJob = self.addReadGroupInsertionJob(
                     individual_alignment=new_individual_alignment,
                     inputBamFile=alignmentJob.output,
-                    outputBamFile=outputRGBAM,\
+                    outputBamFile=outputRGBAM,
                     parentJobLs=[alignmentJob, indexAlignmentJob],
-                    job_max_memory = 2500, transferOutput=False,\
+                    job_max_memory = 2500, transferOutput=False,
                     walltime=max(180, mergeAlignmentWalltime/20))
                 
-                NewAlignmentJobAndOutputLs.append(PassingData(jobLs=[addRGJob],
+                newAlignmentJobAndOutputLs.append(PassingData(jobLs=[addRGJob,
+                        addRGJob.bamIndexJob],
                     file=addRGJob.output))
             
             mergedBamFile = File(os.path.join(reduceOutputDirJob.output, \
                 '%s_recal.bam'%(bamFnamePrefix)))
             alignmentMergeJob, bamIndexJob = self.addAlignmentMergeJob(
-                AlignmentJobAndOutputLs=NewAlignmentJobAndOutputLs, \
-                outputBamFile=mergedBamFile, \
+                alignmentJobAndOutputLs=newAlignmentJobAndOutputLs,
+                outputBamFile=mergedBamFile,
                 parentJobLs=[reduceOutputDirJob],
-                walltime=mergeAlignmentWalltime,\
+                walltime=mergeAlignmentWalltime,
                 job_max_memory=mergeAlignmentMaxMemory,
                 transferOutput=False)
             #2012.9.19 add/copy the alignment file to db-affliated storage
@@ -274,14 +275,15 @@ class AlignmentReadBaseQualityRecalibration(ParentClass):
             logFile = File(os.path.join(reduceOutputDirJob.output,
                 '%s_2db.log'%(bamFnamePrefix)))
             alignment2DBJob = self.addAddAlignmentFile2DBJob(
-                executable=self.AddAlignmentFile2DB, \
-                inputFile=alignmentMergeJob.output, otherInputFileList=[],\
-                individual_alignment_id=new_individual_alignment.id, \
-                mask_genotype_method_id=self.new_mask_genotype_method_id,\
-                logFile=logFile, data_dir=data_dir, \
-                parentJobLs=[alignmentMergeJob, bamIndexJob], \
-                extraDependentInputLs=[bamIndexJob.output], \
-                extraArguments=None, transferOutput=transferOutput, \
+                executable=self.AddAlignmentFile2DB,
+                inputFile=alignmentMergeJob.output,
+                otherInputFileList=[],
+                individual_alignment_id=new_individual_alignment.id,
+                mask_genotype_method_id=self.new_mask_genotype_method_id,
+                logFile=logFile, data_dir=data_dir,
+                parentJobLs=[alignmentMergeJob, bamIndexJob],
+                extraDependentInputLs=[bamIndexJob.output],
+                extraArguments=None, transferOutput=transferOutput,
                 job_max_memory=2000, sshDBTunnel=self.needSSHDBTunnel,
                 commit=True,
                 walltime=max(180, mergeAlignmentWalltime/2))

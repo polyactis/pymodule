@@ -149,7 +149,7 @@ class AlignmentReduceReads(ParentClass):
             parentJobLs=[reduceReadsJob], \
             transferOutput=False, job_max_memory=3000, \
             walltime=max(120, int(reduceReadsJobWalltime/3)))
-        passingData.AlignmentJobAndOutputLs.append(PassingData(
+        passingData.alignmentJobAndOutputLs.append(PassingData(
             jobLs=[reduceReadsJob, indexBamJob], \
             file=reduceReadsJob.output, fileLs=[reduceReadsJob.output]))
         return returnData
@@ -160,13 +160,13 @@ class AlignmentReduceReads(ParentClass):
         """
         returnData = PassingData(no_of_jobs = 0)
         returnData.jobDataLs = []
-        AlignmentJobAndOutputLs = getattr(passingData, 'AlignmentJobAndOutputLs', [])
+        alignmentJobAndOutputLs = getattr(passingData, 'alignmentJobAndOutputLs', [])
         bamFnamePrefix = passingData.bamFnamePrefix
         topOutputDirJob = passingData.topOutputDirJob
         individual_alignment = passingData.individual_alignment
         reduceOutputDirJob = passingData.reduceOutputDirJob
         
-        if len(AlignmentJobAndOutputLs)>0:
+        if len(alignmentJobAndOutputLs)>0:
             #2012.3.29	merge alignment output only when there is something to merge!
             #2013.04.09 create a new child alignment local_realigned =1, etc.
             new_individual_alignment = self.db.copyParentIndividualAlignment(
@@ -175,10 +175,10 @@ class AlignmentReduceReads(ParentClass):
                 reduce_reads=1)
             
             #2013.04.09 replace read_group with the new one to each alignment job
-            NewAlignmentJobAndOutputLs = []
-            for AlignmentJobAndOutput in AlignmentJobAndOutputLs:
+            newAlignmentJobAndOutputLs = []
+            for alignmentJobAndOutput in alignmentJobAndOutputLs:
                 #2012.9.19 add a AddReadGroup job
-                alignmentJob, indexAlignmentJob = AlignmentJobAndOutput.jobLs[:2]
+                alignmentJob, indexAlignmentJob = alignmentJobAndOutput.jobLs[:2]
                 fileBasenamePrefix = os.path.splitext(alignmentJob.output.name)[0]
                 outputRGBAM = File("%s.isq_RG.bam"%(fileBasenamePrefix))
                 addRGJob = self.addReadGroupInsertionJob(
@@ -188,11 +188,11 @@ class AlignmentReduceReads(ParentClass):
                     parentJobLs=[alignmentJob, indexAlignmentJob],
                     job_max_memory = 2500, transferOutput=False)
                 
-                NewAlignmentJobAndOutputLs.append(PassingData(jobLs=[addRGJob], file=addRGJob.output))
+                newAlignmentJobAndOutputLs.append(PassingData(jobLs=[addRGJob], file=addRGJob.output))
             #
             mergedBamFile = File(os.path.join(reduceOutputDirJob.output, '%s.merged.bam'%(bamFnamePrefix)))
             alignmentMergeJob, bamIndexJob = self.addAlignmentMergeJob(
-                AlignmentJobAndOutputLs=NewAlignmentJobAndOutputLs, \
+                alignmentJobAndOutputLs=newAlignmentJobAndOutputLs, \
                 outputBamFile=mergedBamFile, \
                 mv=self.mv, parentJobLs=[reduceOutputDirJob], \
                 transferOutput=False)

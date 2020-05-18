@@ -738,22 +738,12 @@ class FindNewRefCoordinatesGivenVCFFolder(ParentClass, BlastWorkflow, \
             #  addition job is not added in addAlignmentJob()
             bamIndexJob = self.addAlignmentJob(fileObjectLs=fileObjectLs, \
                 refFastaFList=passingData.newRefFastaFileList,
-                bwa=self.bwa, \
                 additionalArguments=self.additionalArguments + bwaAdditionalAlignments,
-                samtools=self.samtools, \
                 refIndexJob=passingData.refIndexJob,
                 parentJobLs=[mapDirJob, extractFlankSeqJob],
-                alignment_method=alignment_method, \
-                outputDir=mapDirJob.output,\
-                PEAlignmentByBWA=self.PEAlignmentByBWA,
-                ShortSEAlignmentByBWA=self.ShortSEAlignmentByBWA, \
-                LongSEAlignmentByBWA=self.LongSEAlignmentByBWA,\
-                java=self.java, SortSamFilesJava=self.SortSamFilesJava,
-                SortSamJar=self.SortSamJar,\
-                AddOrReplaceReadGroupsJava=self.AddOrReplaceReadGroupsJava, \
-                AddOrReplaceReadGroupsJar=self.AddOrReplaceReadGroupsJar,\
-                no_of_aln_threads=self.no_of_aln_threads,\
-                stampy=self.stampy, \
+                alignment_method=alignment_method,
+                outputDir=mapDirJob.output,
+                no_of_aln_threads=self.no_of_aln_threads,
                 maxMissingAlignmentFraction=self.maxMissingAlignmentFraction,
                 maxNoOfGaps=self.maxNoOfGaps, \
                 addBamIndexJob=True, transferOutput = False)[0]

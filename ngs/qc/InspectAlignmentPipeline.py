@@ -293,7 +293,7 @@ class InspectAlignmentPipeline(ParentClass):
             similar to reduceBeforeEachAlignmentData() but for mapping
              programs that run on one alignment each.
 
-            passingData.AlignmentJobAndOutputLs = []
+            passingData.alignmentJobAndOutputLs = []
             passingData.bamFnamePrefix = bamFnamePrefix
             passingData.individual_alignment = alignment
         """
