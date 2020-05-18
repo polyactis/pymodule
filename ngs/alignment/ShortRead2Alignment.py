@@ -337,7 +337,7 @@ class ShortRead2Alignment(ParentClass):
         self.registerOneExecutable(
             path=os.path.join(self.pymodulePath, 'shell/pipe2File.sh'), \
             name="BWA_Mem", clusterSizeMultiplier=self.alignmentJobClusterSizeFraction)
-        # 2014.04.04 pipe2File need this file dependency
+        # pipe2File for BWA mem needs this file dependency
         self.registerOneExecutableAsFile(pythonVariableName="bwaExecutableFile",
             path=self.bwa_path)
         self.registerOneExecutable(
@@ -554,7 +554,7 @@ class ShortRead2Alignment(ParentClass):
                     self.depends(parent=parentJob, child=alignmentJob)
         return alignmentJob
 
-    def addBWAAlignmentJob(self, executable=None, bwaCommand='aln',
+    def addBWAJob(self, executable=None, bwaCommand='aln',
         refFastaFList=None, fileObject=None, outputFile=None,
         no_of_aln_threads=3,
         maxMissingAlignmentFraction=None, maxNoOfGaps=None,
@@ -588,12 +588,12 @@ class ShortRead2Alignment(ParentClass):
                 childJob=alignmentJob)
         return alignmentJob
 
-    def addBWAAlignmentWrapJob(self, fileObjectLs=None,
+    def AddBWANonMemJob(self, fileObjectLs=None,
         refFastaFList=None, extraAlignArgs=None,
-        alignment_method=None, outputDir=None,
-        maxNoOfGaps=None,
+        alignment_method=None, maxNoOfGaps=None,
         no_of_aln_threads=3, maxMissingAlignmentFraction=None,
-        refIndexJob=None, parentJobLs=None,\
+        outputDir=None,
+        refIndexJob=None, parentJobLs=None,
         transferOutput=False, **keywords):
         """
         each fileObject in fileObjectLs should have 2 attributes
@@ -649,7 +649,7 @@ class ShortRead2Alignment(ParentClass):
                     os.path.basename(relativePath))[0]
                 outputFname = os.path.join(outputDir, '%s.sai'%fileBasenamePrefix)
                 saiOutput = File(outputFname)
-                alignmentJob = self.addBWAAlignmentJob(
+                alignmentJob = self.addBWAJob(
                     executable=self.bwa,
                     bwaCommand=alignment_method.command,
                     refFastaFList=refFastaFList,
@@ -726,7 +726,7 @@ class ShortRead2Alignment(ParentClass):
                 outputFname = os.path.join(outputDir, '%s.sai'%tmp_fname_prefix)
                 saiOutput = File(outputFname)
 
-                alignmentJob = self.addBWAAlignmentJob(
+                alignmentJob = self.addBWAJob(
                     executable=self.bwa, 
                     bwaCommand=alignment_method.command,
                     refFastaFList=refFastaFList,
@@ -747,7 +747,7 @@ class ShortRead2Alignment(ParentClass):
                     inputF=fileObject.fastqF)
             sai2samJob.addArguments(alignmentSamF)
         else:
-            logging.error("addBWAAlignmentWrapJob(): %s (!=1, !=2) file objects (%s)."%\
+            logging.error("AddBWANonMemJob(): %s (!=1, !=2) file objects (%s)."%\
                 (len(fileObjectLs), fileObjectLs))
             raise
 
@@ -756,23 +756,26 @@ class ShortRead2Alignment(ParentClass):
             self.addRefIndexJobAndItsOutputAsParent(refIndexJob, childJob=sai2samJob)
         return sai2samJob
 
-    def addBWAMemAlignmentJob(self, fileObjectLs=None, \
-        refFastaFList=None, extraAlignArgs=None, \
-        refIndexJob=None, parentJobLs=None,\
-        alignment_method=None, outputDir=None,
+    def addBWAMemJob(self, fileObjectLs=None,
+        refFastaFList=None, extraAlignArgs=None,
+        alignment_method=None, maxNoOfGaps=None,
         no_of_aln_threads=3, maxMissingAlignmentFraction=None,
-        maxNoOfGaps=None,
-        extraArgumentList=None, transferOutput=False, **keywords):
+        outputDir=None,
+        extraArgumentList=None, 
+        refIndexJob=None, parentJobLs=None,
+        transferOutput=False, **keywords):
         """
-        2013.04.04
-new alignment method from Heng Li
-raw bwa command:
+        Wrap around bwa mem with pipe2File.
 
-./bwa mem -M -a 3231_VervetRef1.0.3.fasta 12467_2_1_1.fastq.gz >/tmp/aln-pe.2.sam
+raw bwa mem command:
+
+    ./bwa mem -M -a 3231_VervetRef1.0.3.fasta 12467_2_1_1.fastq.gz
+        >/tmp/aln-pe.2.sam
 
 in pipe2File:
 
-pipe2File.sh ./bwa aln-pe.2.sam.gz mem -t 1 -M -a 3280.fasta 12457_1.fastq.gz 12457_2.fastq.gz
+    pipe2File.sh ./bwa aln-pe.2.sam.gz mem -t 1 -M -a 3280.fasta
+        12457_1.fastq.gz 12457_2.fastq.gz
         """
         if extraArgumentList is None:
             extraArgumentList = []
@@ -812,6 +815,7 @@ pipe2File.sh ./bwa aln-pe.2.sam.gz mem -t 1 -M -a 3280.fasta 12457_1.fastq.gz 12
             extraArgumentList.extend(["-a -M", refFastaFile] + fastqFileList)
             extraDependentInputLs=fastqFileList + refFastaFList
 
+            #self.BWA_Mem is pipe2File, not mapper/alignment/
             alignmentJob = self.addPipe2FileJob(
                 executable=self.BWA_Mem,
                 commandFile=self.bwaExecutableFile,
@@ -825,7 +829,7 @@ pipe2File.sh ./bwa aln-pe.2.sam.gz mem -t 1 -M -a 3280.fasta 12457_1.fastq.gz 12
                 **keywords)
             alignmentJob.fileBasenamePrefix = fileBasenamePrefix
         else:
-            logging.error("addBWAMemAlignmentJob(): %s (!=1, !=2) file objects (%s)."%\
+            logging.error("addBWAMemJob(): %s (!=1, !=2) file objects (%s)."%\
                 (len(fileObjectLs), fileObjectLs))
             raise
 
@@ -837,7 +841,7 @@ pipe2File.sh ./bwa aln-pe.2.sam.gz mem -t 1 -M -a 3280.fasta 12457_1.fastq.gz 12
         individual_alignment=None,
         refFastaFList=None, extraAlignArgs=None,
         alignment_method=None, outputDir=None,
-        no_of_aln_threads=3, tmpDir=None,\
+        no_of_aln_threads=3, tmpDir=None,
         maxMissingAlignmentFraction=None, maxNoOfGaps=None,
         refIndexJob=None, parentJobLs=None,
         addBamIndexJob=False,
@@ -848,14 +852,14 @@ pipe2File.sh ./bwa aln-pe.2.sam.gz mem -t 1 -M -a 3280.fasta 12457_1.fastq.gz 12
         #2012.9.19 individual_alignment is passed as None so that
         #  ReadGroup addition job is not added in addAlignmentJob()
         alignmentJob, alignmentOutput = self.addAlignmentJob(
-            fileObjectLs=newFileObjLs, \
-            individual_alignment=None, \
-            data_dir=data_dir, refFastaFList=refFastaFList, bwa=bwa, \
-            extraAlignArgs=extraAlignArgs, samtools=samtools, \
-            refIndexJob=refIndexJob, parentJobLs=[refIndexJob, mkdirJob],
-            alignment_method=alignment_method, \
+            fileObjectLs=newFileObjLs,
+            individual_alignment=None,
+            data_dir=data_dir, refFastaFList=refFastaFList, bwa=bwa,
+            extraAlignArgs=extraAlignArgs, samtools=samtools,
+            alignment_method=alignment_method,
             outputDir=tmpOutputDir,
-            no_of_aln_threads=no_of_aln_threads)
+            no_of_aln_threads=no_of_aln_threads,
+            refIndexJob=refIndexJob, parentJobLs=[refIndexJob, mkdirJob])
 
         not necessary to add refIndexJob into parentJobLs,
             because it'll be added as parent job.
@@ -874,7 +878,7 @@ pipe2File.sh ./bwa aln-pe.2.sam.gz mem -t 1 -M -a 3280.fasta 12457_1.fastq.gz 12
         2012.4.5
             choose which alignment program to use based on alignment_method.short_name
         2012.2.23
-            split the BWA alignment part to addBWAAlignmentWrapJob()
+            split the BWA alignment part to AddBWANonMemJob()
         2011-9-9
             two steps:
                 1. aln doesn't use pipe, outputs to sai files.
@@ -892,8 +896,7 @@ pipe2File.sh ./bwa aln-pe.2.sam.gz mem -t 1 -M -a 3280.fasta 12457_1.fastq.gz 12
                 no_of_aln_threads=no_of_aln_threads,
                 transferOutput=transferOutput)
         elif alignment_method.short_name.find('bwamem')==0:
-            #2013.04.27 used to be 'mem', now is 'bwamem'
-            alignmentJob = self.addBWAMemAlignmentJob(
+            alignmentJob = self.addBWAMemJob(
                 fileObjectLs=fileObjectLs,
                 refFastaFList=refFastaFList,
                 alignment_method=alignment_method,
@@ -904,7 +907,7 @@ pipe2File.sh ./bwa aln-pe.2.sam.gz mem -t 1 -M -a 3280.fasta 12457_1.fastq.gz 12
                 refIndexJob=refIndexJob, parentJobLs=parentJobLs,
                 maxNoOfGaps=maxNoOfGaps, transferOutput=transferOutput)
         elif alignment_method.short_name.find('bwa')==0:
-            alignmentJob = self.addBWAAlignmentWrapJob(
+            alignmentJob = self.AddBWANonMemJob(
                 fileObjectLs=fileObjectLs,
                 refFastaFList=refFastaFList,
                 alignment_method=alignment_method,
@@ -1473,10 +1476,10 @@ pipe2File.sh ./bwa aln-pe.2.sam.gz mem -t 1 -M -a 3280.fasta 12457_1.fastq.gz 12
         return returnData
     
     def addAllAlignmentJobs(self, db_main=None,
-        individualSequenceID2FilePairLs=None, \
-        data_dir=None, isqLs=None,
-        refSequence=None, registerReferenceData=None, \
-        chr2IntervalDataLs=None,\
+        isqLs=None,
+        data_dir=None, 
+        refSequence=None, registerReferenceData=None,
+        chr2IntervalDataLs=None,
         extraAlignArgs=None,
         tmpDir='/tmp',
         alignment_method_name='bwaShortRead', alignment_format='bam',
@@ -1496,11 +1499,9 @@ pipe2File.sh ./bwa aln-pe.2.sam.gz mem -t 1 -M -a 3280.fasta 12457_1.fastq.gz 12
 
         alignmentFolder = "%sAlignment"%(outputDirPrefix)
         alignmentFolderJob = self.addMkDirJob(outputDir=alignmentFolder)
-
         oneLibraryAlignmentFolder = "%sOneLibAlignment"%(outputDirPrefix)
         oneLibraryAlignmentFolderJob = self.addMkDirJob(
             outputDir=oneLibraryAlignmentFolder)
-
         refFastaFList = registerReferenceData.refFastaFList
         refIndexJob = None
         if self.needRefIndexJob or registerReferenceData.needBWARefIndexJob or \
@@ -1517,24 +1518,32 @@ pipe2File.sh ./bwa aln-pe.2.sam.gz mem -t 1 -M -a 3280.fasta 12457_1.fastq.gz 12
                     parentJobLs=None, job_max_memory=3000,
                     walltime = 200,
                     transferOutput=True)
-
         for isq in isqLs:
-            if isq is not None and \
-                    isq.format=='fastq':
+            if isq is not None and isq.format=='fastq':
                 if isq.base_count is not None and isq.read_count is not None:
                     read_length = isq.base_count/isq.read_count
                 else:
                     read_length = None
                 AlignmentJobAndOutputLs = []
                 # fetch or insert one alignment method if non-existent
-                if read_length is None:
-                    alignment_method = db_main.getAlignmentMethod(alignment_method_name)
-                elif read_length>=70:
-                    alignment_method = db_main.getAlignmentMethod("bwamem")
-                elif read_length<70:
-                    alignment_method = db_main.getAlignmentMethod("bwaShortRead")
+                if isq.sequence_type.short_name=='RNASeq':
+                    logging.warn(f"isq {isq.id} is "
+                        f"{isq.sequence_type.short_name} and is skipped.")
+                    continue
+                elif isq.sequence_type_id in [4,5,6,8]:
+                    #DNA
+                    if read_length is None:
+                        alignment_method = db_main.getAlignmentMethod(alignment_method_name)
+                    elif read_length>=70:
+                        alignment_method = db_main.getAlignmentMethod("bwamem")
+                    elif read_length<70:
+                        alignment_method = db_main.getAlignmentMethod("bwaShortRead")
+                    else:
+                        alignment_method = db_main.getAlignmentMethod(alignment_method_name)
                 else:
-                    alignment_method = db_main.getAlignmentMethod(alignment_method_name)
+                    logging.warn(f"isq {isq.id} is "
+                        f"{isq.sequence_type.short_name} and is skipped.")
+                    continue
                 """
                 #2012.4.5 commented out
                 if isq.sequence_type.paired_end==0:	#single-end
@@ -1833,17 +1842,16 @@ pipe2File.sh ./bwa aln-pe.2.sam.gz mem -t 1 -M -a 3280.fasta 12457_1.fastq.gz 12
                     logFile = File(os.path.join(alignmentFolder, \
                         '%s_2db.log'%(fileBasenamePrefix)))
                     alignment2DBJob = self.addAddAlignmentFile2DBJob(
-                        executable=self.AddAlignmentFile2DB, \
-                        inputFile=preDBAlignmentJob.output, \
+                        executable=self.AddAlignmentFile2DB,
+                        inputFile=preDBAlignmentJob.output,
                         otherInputFileList=[],\
-                        individual_alignment_id=individual_alignment.id, \
+                        individual_alignment_id=individual_alignment.id,
                         format=None,
-                        local_realigned=self.local_realigned,\
+                        local_realigned=self.local_realigned,
                         logFile=logFile,
-                        data_dir=data_dir, \
+                        data_dir=data_dir,
                         parentJobLs=[preDBAlignmentJob, preDBAlignmentIndexJob],
                         extraDependentInputLs=[preDBAlignmentIndexJob.output],
-                        extraArguments=None,
                         job_max_memory=2000,
                         walltime=max(180, markDuplicateWalltime/2),
                         transferOutput=transferOutput,
@@ -1858,7 +1866,7 @@ pipe2File.sh ./bwa aln-pe.2.sam.gz mem -t 1 -M -a 3280.fasta 12457_1.fastq.gz 12
         """
         """
         self.setup_run()
-        #ParentClass.setup_run() sets up self.registerReferenceData & 
+        #ParentClass.setup_run() will set up self.registerReferenceData & 
         # self.chr2IntervalDataLs, self.refSequence.
         
         #individualSequenceID2FilePairLs = 
@@ -1879,16 +1887,14 @@ pipe2File.sh ./bwa aln-pe.2.sam.gz mem -t 1 -M -a 3280.fasta 12457_1.fastq.gz 12
             sequence_filtered=self.sequence_filtered,
             sequence_batch_id_set=set(self.sequence_batch_id_ls),
             parent_individual_sequence_id_set=None,
-            version_set=set(self.version_ls),\
+            version_set=set(self.version_ls),
             country_id_set=set(self.country_id_ls),
             tax_id_set=set(self.tax_id_ls),
             excludeContaminant=self.excludeContaminant,
             report=True)
-
         self.addAllAlignmentJobs(db_main=self.db_main,
-            individualSequenceID2FilePairLs=None, \
-            isqLs = isqLs,\
-            data_dir=self.data_dir,\
+            isqLs = isqLs,
+            data_dir=self.data_dir,
             refSequence=self.refSequence,
             registerReferenceData=self.registerReferenceData,
             chr2IntervalDataLs=self.chr2IntervalDataLs,
