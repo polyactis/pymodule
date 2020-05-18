@@ -1049,7 +1049,7 @@ pipe2File.sh ./bwa aln-pe.2.sam.gz mem -t 1 -M -a 3280.fasta 12457_1.fastq.gz 12
             parentJobLs=parentJobLs, transferOutput=transferOutput, 
             job_max_memory=job_max_memory,
             extraOutputLs=[markDupOutputMetricF],
-            extraDependentInputLs=[inputBaiF. self.PicardJar],
+            extraDependentInputLs=[inputBaiF, self.PicardJar],
             no_of_cpus=no_of_cpus, walltime=walltime)
         # add the index job on the bam file
         bamIndexJob = self.addBAMIndexJob(
