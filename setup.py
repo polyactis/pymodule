@@ -47,7 +47,7 @@ def find_package_data(dirname):
 
 setup_args = dict(
     name="Palos",
-    version="0.1.11",
+    version="0.1.12",
     author="Yu S. Huang",
     author_email="polyactis@gmail.com",
     description="Misc Python modules developed and used by the yfish group",
