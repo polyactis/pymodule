@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Examples:
-    %s  -i  OneLibAlignment/2278_634_vs_524_by_2_r4043_sequence_628C2AAXX_6_dupMarked.bam
+    %s  -i OneLibAlignment/2278_634_vs_524_by_2_r4043_sequence_628C2AAXX_6_dupMarked.bam
         --logFilename OneLibAlignment/2278_634_vs_524_by_2_r4043_sequence_628C2AAXX_6_2db.log
         --individual_alignment_id 2278
         --data_dir /u/home/eeskin/polyacti/NetworkData/vervet/db/
@@ -39,27 +39,27 @@ class AddAlignmentFile2DB(ParentClass):
     option_default_dict.pop(('outputFnamePrefix', 0, ))
     option_default_dict.update({
         ('individual_alignment_id', 0, int):[None, '', 1, \
-            'fetch the db individual_alignment based on this ID'],\
+            'fetch the db individual_alignment based on this ID'],
         ('individual_sequence_id', 0, int):[None, '', 1, 
-            'used to construct individual_alignment'],\
+            'used to construct individual_alignment'],
         ('ref_sequence_id', 0, int):[None, '', 1, 
-            'used to construct individual_alignment'],\
+            'used to construct individual_alignment'],
         ('alignment_method_id', 0, int):[None, '', 1, 
-            'used to construct individual_alignment'],\
+            'used to construct individual_alignment'],
         ('parent_individual_alignment_id', 0, int):[None, '', 1, 
             'the parent ID of individual_alignment.'
             'if given, an individual_alignment db entry will be created as a '
-            'copy of this one.'],\
+            'copy of this one.'],
         ('mask_genotype_method_id', 0, int):[None, '', 1, 
-            'for alignments coming out of base quality recalibration'],\
+            'for alignments coming out of base quality recalibration'],
         ('individual_sequence_file_raw_id', 0, int):[None, '', 1, 
-            'for library specific alignment'],\
+            'for library specific alignment'],
         ('local_realigned', 0, int):[0, '', 1, 
-            'value for IndividualAlignment.local_realigned'],\
+            'value for IndividualAlignment.local_realigned'],
         ('read_group', 0, ):[None, '', 1, 
             'value for IndividualAlignment.read_group. if not given, '
-            'it calls IndividualAlignment.getReadGroup()'],\
-        ('format', 0, ):[None, 'f', 1, 'format for GenotypeFile entry'],\
+            'it calls IndividualAlignment.getReadGroup()'],
+        ('format', 0, ):[None, 'f', 1, 'format for GenotypeFile entry'],
         })
     def __init__(self, inputFnameLs=None, **keywords):
         """
@@ -98,14 +98,14 @@ class AddAlignmentFile2DB(ParentClass):
                 individual_sequence = self.db_main.queryTable(
                     SunsetDB.IndividualSequence).get(self.individual_sequence_id)
                 individual_alignment = self.db_main.getAlignment(
-                    individual_sequence_id=self.individual_sequence_id,\
+                    individual_sequence_id=self.individual_sequence_id,
                     path_to_original_alignment=None,
-                    sequencer_name=individual_sequence.sequencer.short_name,\
+                    sequencer_name=individual_sequence.sequencer.short_name,
                     sequence_type_name=individual_sequence.sequence_type.short_name,
-                    sequence_format=individual_sequence.format, \
-                    ref_individual_sequence_id=self.ref_sequence_id, \
+                    sequence_format=individual_sequence.format,
+                    ref_individual_sequence_id=self.ref_sequence_id,
                     alignment_method_id=self.alignment_method_id,
-                    alignment_format=self.format,\
+                    alignment_format=self.format,
                     individual_sequence_filtered=individual_sequence.filtered,
                     read_group_added=1,
                     data_dir=data_dir,
@@ -137,7 +137,7 @@ class AddAlignmentFile2DB(ParentClass):
             try:
                 md5sum = utils.get_md5sum(inputFileRealPath)
             except:
-                sys.stderr.write('Except type: %s\n'%repr(sys.exc_info()))
+                logging.error(f'Except type: {repr(sys.exc_info())}')
                 import traceback
                 traceback.print_exc()
                 self.cleanUpAndExitOnFailure(exitCode=4)
@@ -152,8 +152,8 @@ class AddAlignmentFile2DB(ParentClass):
                 self.sessionRollback(session)
                 self.cleanUpAndExitOnFailure(exitCode=3)
 
-
-            if individual_alignment.md5sum is None or individual_alignment.md5sum!=md5sum:
+            if individual_alignment.md5sum is None or \
+                    individual_alignment.md5sum!=md5sum:
                 individual_alignment.md5sum = md5sum
                 session.add(individual_alignment)
                 session.flush()
@@ -161,37 +161,42 @@ class AddAlignmentFile2DB(ParentClass):
                 #move the file and update the db_entry's path as well
                 exitCode = self.db_main.moveFileIntoDBAffiliatedStorage(
                     db_entry=individual_alignment,
-                    filename=os.path.basename(inputFileRealPath), \
+                    filename=os.path.basename(inputFileRealPath),
                     inputDir=os.path.split(inputFileRealPath)[0], 
                     dstFilename=os.path.join(self.data_dir, individual_alignment.path),
-                    relativeOutputDir=None, shellCommand='cp -rL', \
-                    srcFilenameLs=self.srcFilenameLs, dstFilenameLs=self.dstFilenameLs,\
+                    relativeOutputDir=None,
+                    shellCommand='cp -rL',
+                    srcFilenameLs=self.srcFilenameLs,
+                    dstFilenameLs=self.dstFilenameLs,
                     constructRelativePathFunction=\
                         individual_alignment.constructRelativePath)
             except:
-                logging.error('Except in copying %s to db-storage with except info: %s'%(
-                    inputFileRealPath, repr(sys.exc_info())))
+                logging.error(f'Except in copying {inputFileRealPath} to '
+                    f'db-storage with except info: {repr(sys.exc_info())}.')
                 import traceback
                 traceback.print_exc()
                 self.sessionRollback(session)
                 self.cleanUpAndExitOnFailure(exitCode=5)
 
             if exitCode!=0:
-                logging.error("moveFileIntoDBAffiliatedStorage() exits with code=%s."%(exitCode))
+                logging.error(f"moveFileIntoDBAffiliatedStorage() exits with "
+                    f"code={exitCode}.")
                 self.sessionRollback(session)
                 self.cleanUpAndExitOnFailure(exitCode=exitCode)
             try:
-                #make sure these files are stored in self.dstFilenameLs and self.srcFilenameLs
-                #copy further files if there are
+                #make sure these files are stored in self.dstFilenameLs
+                #   and self.srcFilenameLs
                 if self.inputFnameLs:
+                    #copy other files 
                     for inputFname in self.inputFnameLs:
                         if inputFname!=self.inputFname:
                             #2013.3.18 make sure it has not been copied.
                             logMessage = self.db_main.copyFileWithAnotherFilePrefix(
-                                inputFname=inputFname, \
-                                filenameWithPrefix=individual_alignment.path, \
-                                outputDir=self.data_dir,\
-                                logMessage=logMessage, srcFilenameLs=self.srcFilenameLs, \
+                                inputFname=inputFname,
+                                filenameWithPrefix=individual_alignment.path,
+                                outputDir=self.data_dir,
+                                logMessage=logMessage,
+                                srcFilenameLs=self.srcFilenameLs,
                                 dstFilenameLs=self.dstFilenameLs)
 
                 self.db_main.updateDBEntryPathFileSize(
@@ -200,13 +205,13 @@ class AddAlignmentFile2DB(ParentClass):
                 ## 2012.7.17 commented out because md5sum is calculated above
                 #db_main.updateDBEntryMD5SUM(db_entry=genotypeFile, data_dir=data_dir)
                 #copy the bai index file if it exists
-                baiFilename = '%s.bai'%(self.inputFname)
-                if not os.path.isfile(baiFilename):
-                    sys.stderr.write("")
+                baiFilePath = f'{self.inputFname}.bai'
+                if not os.path.isfile(baiFilePath):
+                    logging.error(f"The bam index file {baiFilePath} does not exist!")
                     self.sessionRollback(session)
                     self.cleanUpAndExitOnFailure(exitCode=5)
-                if os.path.isfile(baiFilename):
-                    srcFilename = baiFilename
+                if os.path.isfile(baiFilePath):
+                    srcFilename = baiFilePath
                     dstFilename = os.path.join(self.data_dir, \
                         '%s.bai'%(individual_alignment.path))
                     utils.copyFile(srcFilename=srcFilename, dstFilename=dstFilename)
@@ -215,7 +220,7 @@ class AddAlignmentFile2DB(ParentClass):
                     self.srcFilenameLs.append(srcFilename)
                     self.dstFilenameLs.append(dstFilename)
             except:
-                sys.stderr.write('Except type: %s\n'%repr(sys.exc_info()))
+                logging.error(f'Except type: {repr(sys.exc_info())}')
                 import traceback
                 traceback.print_exc()
                 self.sessionRollback(session)
@@ -228,9 +233,9 @@ class AddAlignmentFile2DB(ParentClass):
             try:
                 session.flush()
                 session.commit()
-                print
+                print(f"Commit() successful.", flush=True)
             except:
-                print(f'Except type: {repr(sys.exc_info())}', flush=True)
+                logging.error(f'Except type: {repr(sys.exc_info())}')
                 import traceback
                 traceback.print_exc()
                 self.cleanUpAndExitOnFailure(exitCode=3)
