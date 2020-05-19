@@ -1861,9 +1861,10 @@ option:
     def addSortAlignmentJob(self, inputBamFile=None, \
         outputBamFile=None, tmpDir=None,
         extraDependentInputLs=None,
-        parentJobLs=None, 
-        job_max_memory = 2500, transferOutput=False,
-        walltime=180, needBAMIndexJob=True, **keywords):
+        needBAMIndexJob=True, 
+        parentJobLs=None,
+        job_max_memory = 2500, walltime=180,
+        transferOutput=False):
         """
         """
         if extraDependentInputLs is None:
@@ -1886,7 +1887,7 @@ option:
             parentJobLs=parentJobLs,
             transferOutput=transferOutput,
             job_max_memory=job_max_memory,
-            walltime=walltime, **keywords)
+            walltime=walltime)
         if needBAMIndexJob:
             # add the index job on the bam file
             bamIndexJob = self.addBAMIndexJob(
@@ -1904,8 +1905,7 @@ option:
         needBAMIndexJob=True, 
         parentJobLs=None, transferOutput=False,
         job_max_memory = 2500,
-        walltime=180, max_walltime=1200,
-        **keywords):
+        walltime=180, max_walltime=1200):
         """
         """
         # add RG to the input bam
@@ -1935,8 +1935,8 @@ option:
                 'RGSM=%s'%(read_group),
                 "VALIDATION_STRINGENCY=LENIENT"],
             job_max_memory=job_max_memory, 
-            walltime=walltime, max_walltime=max_walltime,
-            **keywords)
+            walltime=walltime, max_walltime=max_walltime
+            )
         if needBAMIndexJob:
             # add the index job on the bam file
             bamIndexJob = self.addBAMIndexJob(

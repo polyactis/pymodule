@@ -853,8 +853,8 @@ in pipe2File:
         outputDir=None,
         no_of_aln_threads=3, tmpDir=None,
         maxMissingAlignmentFraction=None, maxNoOfGaps=None,
+        needBAMIndexJob=False,
         refIndexJob=None, parentJobLs=None,
-        addBamIndexJob=False,
         transferOutput=False, **keywords):
         """
         Examples:
@@ -957,12 +957,12 @@ in pipe2File:
         sortAlignmentJob = self.addSortAlignmentJob(
             inputBamFile=sortAlnParentJob.output,
             outputBamFile=sortBamF, tmpDir=tmpDir,
-            needBAMIndexJob=addBamIndexJob,
+            needBAMIndexJob=needBAMIndexJob,
             parentJobLs=[sortAlnParentJob],
             job_max_memory = 2500, walltime=80,
             transferOutput=transferOutput)
 
-        if addBamIndexJob:
+        if needBAMIndexJob:
             #bamIndexJob.parentJobLs[0] is sortAlignmentJob.
             returnJob = sortAlignmentJob.bamIndexJob
         else:
@@ -1647,9 +1647,9 @@ in pipe2File:
                             outputDir=tmpOutputDir,
                             no_of_aln_threads=no_of_aln_threads,
                             tmpDir=tmpDir,
+                            needBAMIndexJob=True,
                             refIndexJob=refIndexJob,
                             parentJobLs=[refIndexJob, mkdirJob],
-                            addBamIndexJob=True,
                             transferOutput=False)
                         no_of_alignment_jobs += 1
 

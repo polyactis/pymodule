@@ -746,7 +746,7 @@ class FindNewRefCoordinatesGivenVCFFolder(ParentClass, BlastWorkflow, \
                 no_of_aln_threads=self.no_of_aln_threads,
                 maxMissingAlignmentFraction=self.maxMissingAlignmentFraction,
                 maxNoOfGaps=self.maxNoOfGaps, \
-                addBamIndexJob=True, transferOutput = False)[0]
+                needBAMIndexJob=True, transferOutput = False)[0]
             
             alignmentJob = bamIndexJob.parentJobLs[0]
             # a FindSNPPositionOnNewRefFromFlankingBlastOutput job
