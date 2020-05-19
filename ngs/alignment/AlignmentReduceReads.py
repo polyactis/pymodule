@@ -171,30 +171,35 @@ class AlignmentReduceReads(ParentClass):
             #2013.04.09 create a new child alignment local_realigned =1, etc.
             new_individual_alignment = self.db.copyParentIndividualAlignment(
                 parent_individual_alignment_id=individual_alignment.id,\
-                data_dir=self.data_dir, local_realigned=individual_alignment.local_realigned,\
+                data_dir=self.data_dir,
+                local_realigned=individual_alignment.local_realigned,\
                 reduce_reads=1)
             
-            #2013.04.09 replace read_group with the new one to each alignment job
+            # replace read_group with the new one to each alignment job
             newAlignmentJobAndOutputLs = []
             for alignmentJobAndOutput in alignmentJobAndOutputLs:
-                #2012.9.19 add a AddReadGroup job
+                # add a AddReadGroup job
                 alignmentJob, indexAlignmentJob = alignmentJobAndOutput.jobLs[:2]
                 fileBasenamePrefix = os.path.splitext(alignmentJob.output.name)[0]
                 outputRGBAM = File("%s.isq_RG.bam"%(fileBasenamePrefix))
+                # needBAMIndexJob=False because addAlignmentMergeJob()
+                # does not need .bai.
                 addRGJob = self.addReadGroupInsertionJob(
-                    individual_alignment=new_individual_alignment, \
-                    inputBamFile=alignmentJob.output, \
-                    outputBamFile=outputRGBAM,\
+                    individual_alignment=new_individual_alignment,
+                    inputBamFile=alignmentJob.output,
+                    outputBamFile=outputRGBAM,
+                    needBAMIndexJob=False,
                     parentJobLs=[alignmentJob, indexAlignmentJob],
                     job_max_memory = 2500, transferOutput=False)
                 
-                newAlignmentJobAndOutputLs.append(PassingData(jobLs=[addRGJob], file=addRGJob.output))
-            #
-            mergedBamFile = File(os.path.join(reduceOutputDirJob.output, '%s.merged.bam'%(bamFnamePrefix)))
+                newAlignmentJobAndOutputLs.append(PassingData(jobLs=[addRGJob],
+                    file=addRGJob.output))
+            mergedBamFile = File(os.path.join(reduceOutputDirJob.output,
+                '%s.merged.bam'%(bamFnamePrefix)))
             alignmentMergeJob, bamIndexJob = self.addAlignmentMergeJob(
-                alignmentJobAndOutputLs=newAlignmentJobAndOutputLs, \
+                alignmentJobAndOutputLs=newAlignmentJobAndOutputLs,
                 outputBamFile=mergedBamFile, \
-                mv=self.mv, parentJobLs=[reduceOutputDirJob], \
+                parentJobLs=[reduceOutputDirJob], \
                 transferOutput=False)
             #2012.9.19 add/copy the alignment file to db-affliated storage
             #add the metric file to AddAlignmentFile2DB.py as well
@@ -202,13 +207,14 @@ class AlignmentReduceReads(ParentClass):
             logFile = File(os.path.join(reduceOutputDirJob.output, '%s_2db.log'%(bamFnamePrefix)))
             alignment2DBJob = self.addAddAlignmentFile2DBJob(
                 executable=self.AddAlignmentFile2DB, \
-                inputFile=alignmentMergeJob.output, otherInputFileList=[],\
+                inputFile=alignmentMergeJob.output,
                 individual_alignment_id=new_individual_alignment.id, \
                 logFile=logFile, data_dir=data_dir, \
                 parentJobLs=[alignmentMergeJob, bamIndexJob], \
                 extraDependentInputLs=[bamIndexJob.output], \
-                extraArguments=None, transferOutput=transferOutput, \
-                job_max_memory=2000, sshDBTunnel=self.needSSHDBTunnel, commit=True)
+                transferOutput=transferOutput,
+                job_max_memory=2000, sshDBTunnel=self.needSSHDBTunnel,
+                commit=True)
             self.no_of_jobs += 1
             returnData.jobDataLs.append(PassingData(jobLs=[alignment2DBJob],
                 file=alignment2DBJob.logFile, \

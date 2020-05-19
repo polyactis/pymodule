@@ -241,23 +241,25 @@ class AlignmentReadBaseQualityRecalibration(ParentClass):
                 minJobPropertyValue=minMergeAlignmentMaxMemory, 
                 maxJobPropertyValue=maxMergeAlignmentMaxMemory).value
             
-            #2013.04.09 replace read_group with the new one to each alignment job
+            # replace read_group with the new one to each alignment job
             newAlignmentJobAndOutputLs = []
             for alignmentJobAndOutput in alignmentJobAndOutputLs:
-                #2012.9.19 add a AddReadGroup job
+                # add a AddReadGroup job
                 alignmentJob, indexAlignmentJob = alignmentJobAndOutput.jobLs[:2]
                 fileBasenamePrefix = os.path.splitext(alignmentJob.output.name)[0]
                 outputRGBAM = File("%s.isq_RG.bam"%(fileBasenamePrefix))
+                # needBAMIndexJob=False because addAlignmentMergeJob()
+                # does not need .bai.
                 addRGJob = self.addReadGroupInsertionJob(
                     individual_alignment=new_individual_alignment,
                     inputBamFile=alignmentJob.output,
                     outputBamFile=outputRGBAM,
+                    needBAMIndexJob=False,
                     parentJobLs=[alignmentJob, indexAlignmentJob],
                     job_max_memory = 2500, transferOutput=False,
                     walltime=max(180, mergeAlignmentWalltime/20))
                 
-                newAlignmentJobAndOutputLs.append(PassingData(jobLs=[addRGJob,
-                        addRGJob.bamIndexJob],
+                newAlignmentJobAndOutputLs.append(PassingData(jobLs=[addRGJob],
                     file=addRGJob.output))
             
             mergedBamFile = File(os.path.join(reduceOutputDirJob.output, \

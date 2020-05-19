@@ -515,7 +515,7 @@ class GenericVCFWorkflow(ParentClass):
             
             if returnMode==4:
                 returnData.jobDataLs.append(PassingData(jobLs=[modifyTPEDJob], file=modifyTPEDJob.output, \
-                                            fileLs=modifyTPEDJob.outputLs))
+                    fileLs=modifyTPEDJob.outputLs))
             elif returnMode==2 or returnMode==3:
                 #convert single plink tped file into binary bed file
                 #add it to 

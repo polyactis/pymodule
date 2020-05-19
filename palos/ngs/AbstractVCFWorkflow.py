@@ -459,28 +459,36 @@ class AbstractVCFWorkflow(ParentClass):
         #intervalDataLs = passingData.intervalDataLs	#2013.06.20 new data structure available used to split/select VCF
         outputFnamePrefix = os.path.join(topOutputDirJob.output, '%s_splitVCF'%fileBasenamePrefix)
         
-        splitVCFJob = self.addSplitVCFFileJob(executable=self.SplitVCFFile, inputFile=VCFFile, \
-                                            outputFnamePrefix=outputFnamePrefix, \
-                noOfOverlappingSites=intervalOverlapSize, noOfSitesPerUnit=intervalSize, \
-                noOfTotalSites=getattr(VCFFile, 'noOfLoci', None), \
-                parentJobLs=jobData.jobLs+[topOutputDirJob], \
-                extraDependentInputLs=[jobData.tbi_F], \
-                extraArguments=None, transferOutput=transferOutput, job_max_memory=2000)
+        splitVCFJob = self.addSplitVCFFileJob(executable=self.SplitVCFFile,
+            inputFile=VCFFile,
+            outputFnamePrefix=outputFnamePrefix,
+            noOfOverlappingSites=intervalOverlapSize,
+            noOfSitesPerUnit=intervalSize,
+            noOfTotalSites=getattr(VCFFile, 'noOfLoci', None),
+            parentJobLs=jobData.jobLs+[topOutputDirJob],
+            extraDependentInputLs=[jobData.tbi_F],
+            extraArguments=None, transferOutput=transferOutput,
+            job_max_memory=2000)
         self.no_of_jobs +=1
-        returnData.jobDataLs.append(PassingData(jobLs=[splitVCFJob], file=splitVCFJob.output, \
-                                            fileLs=splitVCFJob.outputLs))
+        returnData.jobDataLs.append(PassingData(jobLs=[splitVCFJob],
+            file=splitVCFJob.output,
+            fileLs=splitVCFJob.outputLs))
         returnData.splitVCFJob = splitVCFJob
         
         return returnData
     
-    def hierarchicalCombineIntervalJobIntoOneChromosome(self, unionJob=None, refFastaFList=None, fileBasenamePrefix=None,\
-                    passingData=None, intervalJobLs=None, maxNoOfIntervalJobsInOneUnion=500,\
-                    outputDirJob=None,
-                    transferOutput=False, job_max_memory=None, walltime=None, needBGzipAndTabixJob=False, **keywords):
+    def hierarchicalCombineIntervalJobIntoOneChromosome(self, unionJob=None,
+        refFastaFList=None, fileBasenamePrefix=None,
+        passingData=None, intervalJobLs=None,
+        maxNoOfIntervalJobsInOneUnion=500,
+        outputDirJob=None,
+        needBGzipAndTabixJob=False, 
+        transferOutput=False, job_max_memory=None, walltime=None,
+        **keywords):
         """
-            #. Given a unionJob, a two-step VCF concatenation function
-                #. 1st-step, concatenate a continuous string of intervals into big-intervals
-                #. 2nd-step, add the big-interval jobs into the final union job.
+        #. Given a unionJob, a two-step VCF concatenation function
+            #. 1st-step, concatenate a continuous string of intervals into big-intervals
+            #. 2nd-step, add the big-interval jobs into the final union job.
         e.g.
             #combine intervals hierarchically, to avoid open file number limit on cluster
             self.hierarchicalCombineIntervalJobIntoOneChromosome(unionJob=combineChromosomeJobData.callUnionJob, \
@@ -547,47 +555,55 @@ class AbstractVCFWorkflow(ParentClass):
         else:
             transferConcatOutput = transferOutput
         concatJob = self.addLigateVcfJob(executable=self.ligateVcf, \
-                                    ligateVcfExecutableFile=self.ligateVcfExecutableFile, \
-                                    outputFile=concatVCFFile, \
-                                    parentJobLs=[outputDirJob], \
-                                    extraDependentInputLs=None, transferOutput=transferConcatOutput, \
-                                    extraArguments=None, job_max_memory=job_max_memory, walltime=walltime/2)
+            ligateVcfExecutableFile=self.ligateVcfExecutableFile, \
+            outputFile=concatVCFFile, \
+            parentJobLs=[outputDirJob], \
+            extraDependentInputLs=None, transferOutput=transferConcatOutput, \
+            extraArguments=None, job_max_memory=job_max_memory,
+            walltime=walltime/2)
         
         for intervalJob in intervalJobLs:
             #add this output to the union job
             # 2012.6.1 done it through addInputToMergeJob()
-            self.addInputToMergeJob(concatJob, inputF=intervalJob.output, \
-                            parentJobLs=[intervalJob], extraDependentInputLs=intervalJob.outputLs[1:])
+            self.addInputToMergeJob(concatJob, inputF=intervalJob.output,
+                parentJobLs=[intervalJob],
+                extraDependentInputLs=intervalJob.outputLs[1:])
         
         if needBGzipAndTabixJob:
             #bgzip and tabix the trio caller output
             gzipVCFFile = File("%s.gz"%concatVCFFilename)
-            bgzip_tabix_job = self.addBGZIP_tabix_Job(bgzip_tabix=self.bgzip_tabix_in_reduce, \
-                                    parentJob=concatJob, \
-                                    inputF=concatJob.output, outputF=gzipVCFFile, transferOutput=transferOutput,\
-                                    job_max_memory=job_max_memory/4, walltime=walltime/4)
+            bgzip_tabix_job = self.addBGZIP_tabix_Job(
+                bgzip_tabix=self.bgzip_tabix_in_reduce,
+                parentJob=concatJob, \
+                inputF=concatJob.output, outputF=gzipVCFFile,
+                transferOutput=transferOutput,
+                job_max_memory=job_max_memory/4, walltime=walltime/4)
             
-            returnData = PassingData(file=bgzip_tabix_job.output, vcfFile=bgzip_tabix_job.output, \
-                    fileLs=[bgzip_tabix_job.output, bgzip_tabix_job.tbi_F], \
-                    job=bgzip_tabix_job, jobLs=[bgzip_tabix_job], tbi_F=bgzip_tabix_job.tbi_F)
+            returnData = PassingData(file=bgzip_tabix_job.output,
+                vcfFile=bgzip_tabix_job.output, \
+                fileLs=[bgzip_tabix_job.output, bgzip_tabix_job.tbi_F], \
+                job=bgzip_tabix_job, jobLs=[bgzip_tabix_job],
+                tbi_F=bgzip_tabix_job.tbi_F)
         else:
-            returnData = PassingData(file=concatJob.output, vcfFile=concatJob.output, \
-                    fileLs=concatJob.outputLs, \
-                    job=concatJob, jobLs=[concatJob], tbi_F=None)
+            returnData = PassingData(file=concatJob.output,
+                vcfFile=concatJob.output,
+                fileLs=concatJob.outputLs,
+                job=concatJob, jobLs=[concatJob], tbi_F=None)
         return returnData
     
-    def concatenateIntervalsIntoOneVCFSubWorkflow(self, executable=None, refFastaFList=None, fileBasenamePrefix=None, \
-                    passingData=None, intervalJobLs=None,\
-                    outputDirJob=None,needBGzipAndTabixJob=True,\
-                    transferOutput=True, job_max_memory=None, walltime=None, \
-                    **keywords):
+    def concatenateIntervalsIntoOneVCFSubWorkflow(self, executable=None,
+        refFastaFList=None, fileBasenamePrefix=None,
+        passingData=None, intervalJobLs=None,\
+        outputDirJob=None,needBGzipAndTabixJob=True,\
+        transferOutput=True, job_max_memory=None, walltime=None, \
+        **keywords):
         """
         e.g.:
-            concatenateVCFJobData = self.concatenateIntervalsIntoOneVCFSubWorkflow(refFastaFList=self.newRegisterReferenceData.refFastaFList, \
-                fileBasenamePrefix='wholeGenome.%s'%(passingData.fileBasenamePrefix), passingData=passingData, \
-                intervalJobLs=intervalJobLs,\
-                outputDirJob=self.reduceOutputDirJob,
-                transferOutput=False, job_max_memory=job_max_memory, walltime=walltime, needBGzipAndTabixJob=False)
+        concatenateVCFJobData = self.concatenateIntervalsIntoOneVCFSubWorkflow(refFastaFList=self.newRegisterReferenceData.refFastaFList, \
+            fileBasenamePrefix='wholeGenome.%s'%(passingData.fileBasenamePrefix), passingData=passingData, \
+            intervalJobLs=intervalJobLs,\
+            outputDirJob=self.reduceOutputDirJob,
+            transferOutput=False, job_max_memory=job_max_memory, walltime=walltime, needBGzipAndTabixJob=False)
         
         
         2013.07.08
@@ -612,35 +628,45 @@ class AbstractVCFWorkflow(ParentClass):
             transferConcatOutput=False
         else:
             transferConcatOutput = transferOutput
-        concatJob = self.addGATKCombineVariantsJob(executable=executable, GenomeAnalysisTKJar=None, \
-                            refFastaFList=refFastaFList, inputFileList=None, argumentForEachFileInInputFileList="--variant",\
-                            outputFile=concatVCFFile, genotypeMergeOptions='UNSORTED', \
-                    parentJobLs=[outputDirJob], transferOutput=transferConcatOutput, job_max_memory=job_max_memory,\
-                    walltime=walltime,\
-                    extraArguments=None, extraArgumentList=['--assumeIdenticalSamples'], extraDependentInputLs=None)
+        concatJob = self.addGATKCombineVariantsJob(executable=executable,
+            GenomeAnalysisTKJar=None,
+            refFastaFList=refFastaFList, inputFileList=None,
+            argumentForEachFileInInputFileList="--variant",
+            outputFile=concatVCFFile, genotypeMergeOptions='UNSORTED', \
+            extraArguments=None, extraArgumentList=['--assumeIdenticalSamples'],
+            extraDependentInputLs=None,
+            parentJobLs=[outputDirJob], transferOutput=transferConcatOutput,
+            job_max_memory=job_max_memory,
+            walltime=walltime)
         
         for intervalJob in intervalJobLs:
-            self.addInputToMergeJob(concatJob, inputF=intervalJob.output, inputArgumentOption="--variant",\
-                            parentJobLs=[intervalJob], extraDependentInputLs=intervalJob.outputLs[1:])
+            self.addInputToMergeJob(concatJob, inputF=intervalJob.output,
+                inputArgumentOption="--variant",\
+                parentJobLs=[intervalJob],
+                extraDependentInputLs=intervalJob.outputLs[1:])
         
         
         if needBGzipAndTabixJob:
             
             #bgzip and tabix the trio caller output
             gzipVCFFile = File("%s.gz"%concatVCFFilename)
-            bgzip_tabix_job = self.addBGZIP_tabix_Job(bgzip_tabix=self.bgzip_tabix_in_reduce, \
-                                    parentJob=concatJob, \
-                                    inputF=concatJob.output, outputF=gzipVCFFile, transferOutput=transferOutput,\
-                                    job_max_memory=job_max_memory/4, walltime=walltime/4)
+            bgzip_tabix_job = self.addBGZIP_tabix_Job(
+                bgzip_tabix=self.bgzip_tabix_in_reduce, \
+                parentJob=concatJob, \
+                inputF=concatJob.output, outputF=gzipVCFFile,
+                transferOutput=transferOutput,\
+                job_max_memory=job_max_memory/4, walltime=walltime/4)
             
             returnData = self.constructJobDataFromJob(bgzip_tabix_job)
         else:
             returnData = self.constructJobDataFromJob(concatJob)
         return returnData
     
-    def reduceManySmallIntervalVCFIntoBigIntervalVCF(self, executable=None, registerReferenceData=None, fileBasenamePrefix=None, \
-                    intervalJobLs=None, outputDirJob=None, bigIntervalSize=10000000,
-                    transferOutput=False, job_max_memory=None, walltime=None, needBGzipAndTabixJob=False,\
+    def reduceManySmallIntervalVCFIntoBigIntervalVCF(self, executable=None,
+        registerReferenceData=None, fileBasenamePrefix=None, \
+        intervalJobLs=None, outputDirJob=None, bigIntervalSize=10000000,
+        transferOutput=False, job_max_memory=None, walltime=None,
+        needBGzipAndTabixJob=False,\
                     **keywords):
         """
             #. this function reduces many small intervals into big intervals (capped by bigIntervalSize or chromosome boundary)
@@ -673,45 +699,49 @@ class AbstractVCFWorkflow(ParentClass):
                 if fileBasenamePrefix:
                     _filenamePartLs.append(fileBasenamePrefix)
                 _filenamePartLs.extend([startIntervalData.chromosome, \
-                                        startIntervalData.overlapStart, startIntervalData.overlapStop])
+                    startIntervalData.overlapStart, startIntervalData.overlapStop])
                 _filenamePartLs = map(str, _filenamePartLs)
                 _fileBasenamePrefix = "_".join(_filenamePartLs)
-                concateJobData = self.concatenateIntervalsIntoOneVCFSubWorkflow(executable=executable, \
-                        refFastaFList=registerReferenceData.refFastaFList, \
-                        fileBasenamePrefix=_fileBasenamePrefix, \
-                        passingData=None, intervalJobLs=_intervalJobLs,\
-                        outputDirJob=outputDirJob,
-                        needBGzipAndTabixJob=needBGzipAndTabixJob,\
-                        transferOutput=transferOutput, \
-                        job_max_memory=job_max_memory, walltime=walltime)
+                concateJobData = self.concatenateIntervalsIntoOneVCFSubWorkflow(
+                    executable=executable, \
+                    refFastaFList=registerReferenceData.refFastaFList, \
+                    fileBasenamePrefix=_fileBasenamePrefix, \
+                    passingData=None, intervalJobLs=_intervalJobLs,\
+                    outputDirJob=outputDirJob,
+                    needBGzipAndTabixJob=needBGzipAndTabixJob,\
+                    transferOutput=transferOutput, \
+                    job_max_memory=job_max_memory, walltime=walltime)
                 concateJobData.intervalData = startIntervalData
                 returnData.jobDataLs.append(concateJobData)
                 
                 #reset
                 _intervalJobLs = [intervalJob]
-                startIntervalData = copy.deepcopy(intervalData)	#not interfering original data
+                startIntervalData = copy.deepcopy(intervalData)
+                #not interfering original data
             else:
                 _intervalJobLs.append(intervalJob)
                 startIntervalData.unionOneIntervalData(intervalData)
         if _intervalJobLs:	#last remaining intervals jobs
             _fileBasenamePrefix = "%s_%s_%s_%s"%(fileBasenamePrefix, startIntervalData.chromosome, \
-                                                    startIntervalData.overlapStart, startIntervalData.overlapStop)
-            concateJobData = self.concatenateIntervalsIntoOneVCFSubWorkflow(executable=executable, \
-                                    refFastaFList=registerReferenceData.refFastaFList, \
-                    fileBasenamePrefix=_fileBasenamePrefix, \
-                    passingData=None, intervalJobLs=_intervalJobLs,\
-                    outputDirJob=outputDirJob,
-                    needBGzipAndTabixJob=needBGzipAndTabixJob,\
-                    transferOutput=transferOutput, job_max_memory=job_max_memory, walltime=walltime)
+                startIntervalData.overlapStart, startIntervalData.overlapStop)
+            concateJobData = self.concatenateIntervalsIntoOneVCFSubWorkflow(
+                executable=executable, \
+                refFastaFList=registerReferenceData.refFastaFList, \
+                fileBasenamePrefix=_fileBasenamePrefix, \
+                passingData=None, intervalJobLs=_intervalJobLs,\
+                outputDirJob=outputDirJob,
+                needBGzipAndTabixJob=needBGzipAndTabixJob,\
+                transferOutput=transferOutput, job_max_memory=job_max_memory, walltime=walltime)
             concateJobData.intervalData = startIntervalData
             returnData.jobDataLs.append(concateJobData)
         sys.stderr.write(" reduced to %s jobs, current job count=%s.\n"%\
-                        (len(returnData.jobDataLs), self.no_of_jobs))
+            (len(returnData.jobDataLs), self.no_of_jobs))
         return returnData
     
-    def reduceEachChromosome(self, chromosome=None, passingData=None, mapEachVCFDataLs=None, reduceEachVCFDataLs=None,\
-                        transferOutput=True, \
-                        **keywords):
+    def reduceEachChromosome(self, chromosome=None, passingData=None, 
+        mapEachVCFDataLs=None, reduceEachVCFDataLs=None,\
+        transferOutput=True, \
+        **keywords):
         """
         """
         returnData = PassingData(no_of_jobs = 0)
@@ -720,17 +750,19 @@ class AbstractVCFWorkflow(ParentClass):
         returnData.reduceEachVCFDataLs = reduceEachVCFDataLs
         return returnData
         
-    def reduceEachVCF(self, chromosome=None, passingData=None, mapEachIntervalDataLs=None,\
-                    transferOutput=True, **keywords):
+    def reduceEachVCF(self, chromosome=None, passingData=None,
+        mapEachIntervalDataLs=None,\
+        transferOutput=True, **keywords):
         """
         """
         return ParentClass.reduceEachInput(self, chromosome=chromosome, \
-                        passingData=passingData, mapEachIntervalDataLs=mapEachIntervalDataLs, transferOutput=transferOutput,\
-                        **keywords)
+            passingData=passingData, mapEachIntervalDataLs=mapEachIntervalDataLs,
+            transferOutput=transferOutput,\
+            **keywords)
 
     def reduce(self, reduceEachChromosomeDataLs=None, \
-            mapEachChromosomeDataLs=None, passingData=None, transferOutput=True, \
-            **keywords):
+        mapEachChromosomeDataLs=None, passingData=None, transferOutput=True, \
+        **keywords):
         """
         2013.07.18 return each processed-Input job data so that followup workflows could carry out map-reduce
         2012.9.17
@@ -749,8 +781,9 @@ class AbstractVCFWorkflow(ParentClass):
         """
         return returnData
     
-    def addSplitVCFSubWorkflow(self, inputVCFData=None, intervalSize=1000000, chr2size=None,
-                            registerReferenceData=None, outputDirJob=None):
+    def addSplitVCFSubWorkflow(self, inputVCFData=None, intervalSize=1000000,
+        chr2size=None,
+        registerReferenceData=None, outputDirJob=None):
         """
         Examples:
             self.addSplitVCFSubWorkflow(inputVCFData=None, intervalSize=1000000, outputDirJob=None)
@@ -766,8 +799,9 @@ class AbstractVCFWorkflow(ParentClass):
         returnData = PassingData(jobDataLs=[])
         for jobData in inputVCFData.jobDataLs:
             filenameParseData = Genome.parseChrStartStopFromFilename(filename=jobData.file.name, chr2size=chr2size)
-            noOfIntervals = max(1, utils.getNoOfUnitsNeededToCoverN(N=filenameParseData.stop-filenameParseData.start+1, \
-                                                                s=intervalSize, o=0)-1)
+            noOfIntervals = max(1, utils.getNoOfUnitsNeededToCoverN(
+                N=filenameParseData.stop-filenameParseData.start+1, \
+                s=intervalSize, o=0)-1)
             if noOfIntervals==1:	#no splitting
                 returnData.jobDataLs.append(jobData)
             else:
@@ -779,27 +813,29 @@ class AbstractVCFWorkflow(ParentClass):
                         _stop = min(_start + intervalSize-1, filenameParseData.stop)
                     fileBasenamePrefix = "%s"%(utils.getFileBasenamePrefixFromPath(jobData.file.name))
                     outputF = File(os.path.join(outputDirJob.output, "%s_%s_%s_%s.vcf"%(fileBasenamePrefix, filenameParseData.chromosome, _start, _stop)))
-                    selectVCFJob = self.addSelectVariantsJob(SelectVariantsJava=self.SelectVariantsJava, \
-                                    inputF=jobData.file, outputF=outputF, \
-                                    interval="%s:%s-%s"%(filenameParseData.chromosome, _start, _stop),\
-                                    refFastaFList=registerReferenceData.refFastaFList, \
-                                    parentJobLs=[outputDirJob] + jobData.jobLs, extraDependentInputLs=jobData.fileLs[1:], transferOutput=False, \
-                                    extraArguments=None, extraArgumentList=None, job_max_memory=2000, walltime=None)
+                    selectVCFJob = self.addSelectVariantsJob(
+                        SelectVariantsJava=self.SelectVariantsJava, \
+                        inputF=jobData.file, outputF=outputF, \
+                        interval="%s:%s-%s"%(filenameParseData.chromosome, _start, _stop),\
+                        refFastaFList=registerReferenceData.refFastaFList, \
+                        parentJobLs=[outputDirJob] + jobData.jobLs,
+                        extraDependentInputLs=jobData.fileLs[1:], transferOutput=False, \
+                        extraArguments=None, extraArgumentList=None, job_max_memory=2000, walltime=None)
                     returnData.jobDataLs.append(self.constructJobDataFromJob(selectVCFJob))
         sys.stderr.write("jobCount=%s.\n"%(self.no_of_jobs))
         return returnData
     
     def addAllJobs(self, inputVCFData=None, chr2IntervalDataLs=None, \
-                GenomeAnalysisTKJar=None, samtools=None, \
-                CreateSequenceDictionaryJava=None, CreateSequenceDictionaryJar=None, \
-                BuildBamIndexFilesJava=None, BuildBamIndexJar=None,\
-                mv=None, \
-                registerReferenceData=None, \
-                needFastaIndexJob=False, needFastaDictJob=False, \
-                data_dir=None, no_of_gatk_threads = 1, \
-                intervalSize=3000, intervalOverlapSize=0, \
-                outputDirPrefix="", passingData=None, \
-                transferOutput=True, job_max_memory=2000, **keywords):
+        GenomeAnalysisTKJar=None, samtools=None, \
+        CreateSequenceDictionaryJava=None, CreateSequenceDictionaryJar=None, \
+        BuildBamIndexFilesJava=None, BuildBamIndexJar=None,\
+        mv=None, \
+        registerReferenceData=None, \
+        needFastaIndexJob=False, needFastaDictJob=False, \
+        data_dir=None, no_of_gatk_threads = 1, \
+        intervalSize=3000, intervalOverlapSize=0, \
+        outputDirPrefix="", passingData=None, \
+        transferOutput=True, job_max_memory=2000, **keywords):
         """
         2013.06.14 bugfix regarding noOfUnits, which was all inferred from one file
         2012.7.26
@@ -824,8 +860,8 @@ class AbstractVCFWorkflow(ParentClass):
         
         if needFastaDictJob or getattr(registerReferenceData, 'needPicardFastaDictJob', None):
             fastaDictJob = self.addRefFastaDictJob(CreateSequenceDictionaryJava=CreateSequenceDictionaryJava, \
-                                                CreateSequenceDictionaryJar=self.CreateSequenceDictionaryJar,\
-                                                refFastaF=refFastaF)
+                CreateSequenceDictionaryJar=self.CreateSequenceDictionaryJar,\
+                refFastaF=refFastaF)
             refFastaDictF = fastaDictJob.refFastaDictF
         else:
             fastaDictJob = None
