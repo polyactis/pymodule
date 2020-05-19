@@ -938,7 +938,7 @@ in pipe2File:
                 "%s.RG.bam"%(fileBasenamePrefix)))
             # needBAMIndexJob=False because addSortAlignmentJob()
                 # does not need .bai.
-            addRGJob = self.addReadGroupInsertionJob(
+            addRGJob = self.addReadGroupJob(
                 individual_alignment=individual_alignment,
                 inputBamFile=sam_convert_job.output,
                 outputBamFile=outputRGBAM,
@@ -1635,8 +1635,13 @@ in pipe2File:
                             mkdirJob = self.addMkDirJob(outputDir=tmpOutputDir)
                         newFileObjLs = self.registerISQFileObjLsToWorkflow(
                             fileObjectLs=fileObjectLs)
-                        #2012.9.19 individual_alignment is passed as None so
-                        #  that ReadGroup addition job is not added in addAlignmentJob()
+                        #individual_alignment is passed as None so
+                        #   that ReadGroup addition job is not added in addAlignmentJob()
+                        #ReadGroup will be added differently
+                        #   pending skipLibraryAlignment.
+                        #If needBAMIndexJob=True, alignmentJob is the bam index job.
+                        #needBAMIndexJob=False, because RG adding job does not
+                        #   need the .bai file.
                         alignmentJob = self.addAlignmentJob(
                             alignment_method=alignment_method,
                             fileObjectLs=newFileObjLs,
@@ -1647,12 +1652,11 @@ in pipe2File:
                             outputDir=tmpOutputDir,
                             no_of_aln_threads=no_of_aln_threads,
                             tmpDir=tmpDir,
-                            needBAMIndexJob=True,
+                            needBAMIndexJob=False,
                             refIndexJob=refIndexJob,
                             parentJobLs=[refIndexJob, mkdirJob],
                             transferOutput=False)
                         no_of_alignment_jobs += 1
-
                         fileBasenamePrefix = utils.getRealPrefixSuffixOfFilenameWithVariableSuffix(
                             os.path.basename(alignmentJob.output.name))[0]
                         if not skipIndividualAlignment:
@@ -1661,12 +1665,13 @@ in pipe2File:
                                 "%s.isq_RG.bam"%(fileBasenamePrefix)))
                             # needBAMIndexJob=False because addAlignmentMergeJob()
                             # does not need .bai.
-                            addRGJob = self.addReadGroupInsertionJob(
+                            addRGJob = self.addReadGroupJob(
                                 individual_alignment=individual_alignment,
                                 inputBamFile=alignmentJob.output,
                                 outputBamFile=outputRGBAM,
                                 needBAMIndexJob=False,
                                 parentJobLs=[alignmentJob, mkdirJob],
+                                extraDependentInputLs=alignmentJob.outputLs[1:],
                                 job_max_memory = 2500,
                                 transferOutput=False)
                             alignmentJobAndOutputLs.append(
@@ -1676,12 +1681,13 @@ in pipe2File:
                             # add a AddReadGroup job for the library bam file
                             outputRGBAM = File(os.path.join(tmpOutputDir, \
                                 "%s.isq_library_%s_RG.bam"%(fileBasenamePrefix, library)))
-                            addRGJob = self.addReadGroupInsertionJob(
+                            addRGJob = self.addReadGroupJob(
                                 individual_alignment=oneLibraryAlignmentEntry,
                                 inputBamFile=alignmentJob.output,
                                 outputBamFile=outputRGBAM,
                                 needBAMIndexJob=False,
                                 parentJobLs=[alignmentJob, mkdirJob],
+                                extraDependentInputLs=alignmentJob.outputLs[1:],
                                 job_max_memory = 2500,
                                 transferOutput=False)
                             oneLibraryAlignmentJobAndOutputLs.append(
@@ -1764,7 +1770,7 @@ in pipe2File:
                         #  (to be moved into db-affiliated storage)
                         logFile = File(os.path.join(oneLibAlignOutputDir,
                             '%s_%s_2db.log'%(fileBasenamePrefix, library)))
-                        alignment2DBJob = self.addAddAlignmentFile2DBJob(
+                        alignment2DBJob = self.addAlignmentFile2DBJob(
                             executable=self.AddAlignmentFile2DB, \
                             inputFile=preDBAlignmentJob.output, \
                             individual_alignment_id=oneLibraryAlignmentEntry.id, \
@@ -1857,7 +1863,7 @@ in pipe2File:
                     #  (to be moved into db-affiliated storage)
                     logFile = File(os.path.join(alignmentOutputDir, \
                         '%s_2db.log'%(fileBasenamePrefix)))
-                    alignment2DBJob = self.addAddAlignmentFile2DBJob(
+                    alignment2DBJob = self.addAlignmentFile2DBJob(
                         executable=self.AddAlignmentFile2DB,
                         inputFile=preDBAlignmentJob.output,
                         otherInputFileList=[],\
