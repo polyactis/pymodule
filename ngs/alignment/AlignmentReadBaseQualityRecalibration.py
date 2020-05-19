@@ -277,7 +277,7 @@ class AlignmentReadBaseQualityRecalibration(ParentClass):
             #  (to be moved into db-affiliated storage)
             logFile = File(os.path.join(reduceOutputDirJob.output,
                 '%s_2db.log'%(bamFnamePrefix)))
-            alignment2DBJob = self.addAddAlignmentFile2DBJob(
+            alignment2DBJob = self.addAlignmentFile2DBJob(
                 executable=self.AddAlignmentFile2DB,
                 inputFile=alignmentMergeJob.output,
                 otherInputFileList=[],

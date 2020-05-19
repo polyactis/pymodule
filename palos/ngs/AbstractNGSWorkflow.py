@@ -3136,7 +3136,7 @@ run something like below to extract data from regionOfInterest out of
             job_max_memory=job_max_memory, walltime=walltime)
         return job
 
-    def addAddAlignmentFile2DBJob(self, executable=None, inputFile=None,
+    def addAlignmentFile2DBJob(self, executable=None, inputFile=None,
         otherInputFileList=None,\
         individual_alignment_id=None, individual_sequence_id=None,\
         ref_sequence_id=None, \
