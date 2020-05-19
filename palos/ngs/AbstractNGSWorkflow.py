@@ -1899,11 +1899,13 @@ option:
         job.bamIndexJob = bamIndexJob
         return job
 
-    def addReadGroupInsertionJob(self,
+    def addReadGroupJob(self,
         individual_alignment=None,
         inputBamFile=None, outputBamFile=None,
         needBAMIndexJob=True, 
-        parentJobLs=None, transferOutput=False,
+        parentJobLs=None,
+        extraDependentInputLs=None,
+        transferOutput=False,
         job_max_memory = 2500,
         walltime=180, max_walltime=1200):
         """
@@ -1915,6 +1917,9 @@ option:
             platform_id = 'LS454'
         else:
             platform_id = 'ILLUMINA'
+        if extraDependentInputLs is None:
+            extraDependentInputLs = []
+        extraDependentInputLs.append(self.PicardJar)
         #not including 'SORT_ORDER=coordinate'
         #(adding the SORT_ORDER doesn't do sorting but it marks the header
         #  as sorted so that BuildBamIndexJar won't fail.)
@@ -1925,7 +1930,7 @@ option:
             inputFile=inputBamFile, inputArgumentOption="INPUT=",
             outputFile=outputBamFile, outputArgumentOption="OUTPUT=",
             parentJobLs=parentJobLs,
-            extraDependentInputLs=[self.PicardJar],
+            extraDependentInputLs=extraDependentInputLs,
             transferOutput=transferOutput,
             extraArgumentList=[
                 'RGID=%s'%(read_group),

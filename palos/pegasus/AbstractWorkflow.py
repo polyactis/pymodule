@@ -227,8 +227,7 @@ class AbstractWorkflow(Workflow):
         extraArguments=None, extraArgumentList=None,\
         key2ObjectForJob=None, job_max_memory=1000, **keywords):
         """
-        2011-11-28
-            moved from CalculateVCFStatPipeline.py
+        moved from CalculateVCFStatPipeline.py
         """
         if extraDependentInputLs is None:
             extraDependentInputLs = []

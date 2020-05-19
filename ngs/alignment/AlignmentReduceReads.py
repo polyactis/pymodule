@@ -184,12 +184,13 @@ class AlignmentReduceReads(ParentClass):
                 outputRGBAM = File("%s.isq_RG.bam"%(fileBasenamePrefix))
                 # needBAMIndexJob=False because addAlignmentMergeJob()
                 # does not need .bai.
-                addRGJob = self.addReadGroupInsertionJob(
+                addRGJob = self.addReadGroupJob(
                     individual_alignment=new_individual_alignment,
                     inputBamFile=alignmentJob.output,
                     outputBamFile=outputRGBAM,
                     needBAMIndexJob=False,
                     parentJobLs=[alignmentJob, indexAlignmentJob],
+                    extraDependentInputLs=alignmentJob.outputLs[1:],
                     job_max_memory = 2500, transferOutput=False)
                 
                 newAlignmentJobAndOutputLs.append(PassingData(jobLs=[addRGJob],
