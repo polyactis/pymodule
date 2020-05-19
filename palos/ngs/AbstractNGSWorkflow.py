@@ -654,22 +654,21 @@ class AbstractNGSWorkflow(ParentClass):
         walltime=60, **keywords):
         """
         2012.4.12
-            remove argument parentJob and stop adding it to parentJobLs, 
-                which causes an insidious bug that accumulates parent jobs 
-                from multiple calls of addBAMIndexJob() into parentJobLs
-                (they all become parents of this bam index job.)
+        remove argument parentJob and stop adding it to parentJobLs, 
+            which causes an insidious bug that accumulates parent jobs 
+            from multiple calls of addBAMIndexJob() into parentJobLs
+            (they all become parents of this bam index job.)
         2012.3.22
             bugfix, change argument parentJobLs's default value from [] to None.
-             [] would make every run have the same parentJobLs
-            proper transfer/register setup
-        2011-11-20
+             [] would make every run have the same parentJobLs.
         """
         if javaMaxMemory is not None and job_max_memory is None:
             job_max_memory = javaMaxMemory
-        baiFile = File('%s.bai'%inputBamF.name)
+        baiFile = File(f'{inputBamF.name}.bai')
         #not including 'SORT_ORDER=coordinate'
         #(adding the SORT_ORDER doesn't do sorting but it marks
         #  the header as sorted so that BuildBamIndexJar won't fail.)
+        extraArgumentList = ["VALIDATION_STRINGENCY=LENIENT"]
         if extraArguments:
             extraArgumentList.append(extraArguments)
         if extraDependentInputLs is None:
@@ -678,16 +677,22 @@ class AbstractNGSWorkflow(ParentClass):
         job = self.addJavaJob(
             executable=self.BuildBamIndexFilesJava,
             jarFile=self.PicardJar,
+            frontArgumentList=["BuildBamIndex"],
             inputFile=inputBamF, inputArgumentOption="INPUT=",
             outputFile=baiFile, outputArgumentOption="OUTPUT=",
-            parentJobLs=parentJobLs,
+            extraArgumentList=extraArgumentList,
             extraDependentInputLs=extraDependentInputLs,
-            extraOutputLs=[baiFile],
-            frontArgumentList=["BuildBamIndex"],
-            extraArgumentList=["VALIDATION_STRINGENCY=LENIENT"],
+            extraOutputLs=None,
+            parentJobLs=parentJobLs,
             transferOutput=transferOutput,
             job_max_memory=job_max_memory,
             walltime=walltime, **keywords)
+        # Change job.output so that this job can exchange with the
+        #   bam-generating parent job as a parent of others jobs.
+        #   The downstream jobs can invoke .output as its input bam,
+        #       regardless of which job is its parent.
+        job.output = inputBamF
+        job.outputLs = [inputBamF, baiFile]
         job.bamFile = inputBamF
         job.baiFile = baiFile
         #job.parentJobLs is the alignment job and its bam/sam output.
@@ -1525,7 +1530,7 @@ class AbstractNGSWorkflow(ParentClass):
         GenomeAnalysisTKJar=None, GATKAnalysisType=None, \
         refFastaFList=None, inputFile=None, inputArgumentOption="-I", \
         inputFileList=None, argumentForEachFileInInputFileList=None,\
-        outputFile=None, interval=None, \
+        interval=None, outputFile=None, \
         extraArguments=None, extraArgumentList=None,
         extraDependentInputLs=None,
         extraOutputLs=None,\
@@ -1733,8 +1738,9 @@ class AbstractNGSWorkflow(ParentClass):
         folderNameLs = vcfDir.split('/')
         vcf1Name=None
         for i in range(1, len(folderNameLs)+1):
-            if folderNameLs[-i]:	#start from the end to find the non-empty folder name
-                #the trailing "/" on self.vcf1Dir could mean  an empty string
+            if folderNameLs[-i]:
+                #start from the end to find the non-empty folder name
+                #the trailing "/" on self.vcf1Dir could mean an empty string
                 vcf1Name = folderNameLs[-i]
                 break
         if not vcf1Name:
@@ -1747,10 +1753,9 @@ class AbstractNGSWorkflow(ParentClass):
         interval=None,\
         refFastaFList=None, sampleIDKeepFile=None, snpIDKeepFile=None, 
         sampleIDExcludeFile=None, \
+        extraArguments=None, extraArgumentList=None, 
         parentJobLs=None, extraDependentInputLs=None, transferOutput=True,
-        extraArguments=None, extraArgumentList=None, job_max_memory=2000, 
-        walltime=None,\
-        **keywords):
+        job_max_memory=2000, walltime=None, **keywords):
         """
         if some samples in sampleIDKeepFile or sampleIDExcludeFile are not in inputF,
             then this option should be passed:
@@ -1841,8 +1846,7 @@ option:
             GATKAnalysisType="SelectVariants",\
             frontArgumentList=None,
             inputFile=inputF, inputArgumentOption="--variant:vcf", 
-            refFastaFList=refFastaFList, inputFileList=None,\
-            argumentForEachFileInInputFileList=None,\
+            refFastaFList=refFastaFList,
             interval=interval, outputFile=outputF, \
             extraArguments=extraArguments,
             extraArgumentList=extraArgumentList,
@@ -1851,7 +1855,7 @@ option:
             extraDependentInputLs=extraDependentInputLs,
             no_of_cpus=None, job_max_memory=job_max_memory,
             walltime=walltime,
-            key2ObjectForJob=None, **keywords)
+            **keywords)
         return job
 
     def addSortAlignmentJob(self, inputBamFile=None, \
@@ -1900,11 +1904,11 @@ option:
         needBAMIndexJob=True, 
         parentJobLs=None, transferOutput=False,
         job_max_memory = 2500,
-        walltime=180, max_walltime=1200, \
+        walltime=180, max_walltime=1200,
         **keywords):
         """
         """
-        # add RG to this bam
+        # add RG to the input bam
         sequencer = individual_alignment.individual_sequence.sequencer
         read_group = individual_alignment.getReadGroup()
         if sequencer.short_name=='454':
@@ -1922,11 +1926,13 @@ option:
             outputFile=outputBamFile, outputArgumentOption="OUTPUT=",
             parentJobLs=parentJobLs,
             extraDependentInputLs=[self.PicardJar],
-            extraOutputLs=None,
             transferOutput=transferOutput,
-            extraArgumentList=['RGID=%s'%(read_group), 'RGLB=%s'%(platform_id),
+            extraArgumentList=[
+                'RGID=%s'%(read_group),
+                'RGLB=%s'%(platform_id),
                 'RGPL=%s'%(platform_id),
-                'RGPU=%s'%(read_group), 'RGSM=%s'%(read_group),\
+                'RGPU=%s'%(read_group),
+                'RGSM=%s'%(read_group),
                 "VALIDATION_STRINGENCY=LENIENT"],
             job_max_memory=job_max_memory, 
             walltime=walltime, max_walltime=max_walltime,
@@ -1936,16 +1942,19 @@ option:
             bamIndexJob = self.addBAMIndexJob(
                 inputBamF=job.output, parentJobLs=[job],
                 transferOutput=transferOutput, job_max_memory=job_max_memory)
+            job.bamIndexJob = bamIndexJob
+            #access the bamFile as bamIndexJob.bamFile
+            return bamIndexJob
         else:
-            bamIndexJob = None
-        job.bamIndexJob = bamIndexJob
-        return job
+            job.bamIndexJob = None
+            return job
 
     def addSelectAlignmentJob(self, executable=None, inputFile=None, \
-        outputFile=None, region=None, \
+        outputFile=None, region=None, extraArguments=None,
+        needBAMIndexJob=True,
         parentJobLs=None, extraDependentInputLs=None,
         transferOutput=False,
-        extraArguments=None, job_max_memory=2000, needBAMIndexJob=True,
+        job_max_memory=2000,
         **keywords):
         """
         """
