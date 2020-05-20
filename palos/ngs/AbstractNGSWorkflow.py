@@ -687,12 +687,6 @@ class AbstractNGSWorkflow(ParentClass):
             transferOutput=transferOutput,
             job_max_memory=job_max_memory,
             walltime=walltime, **keywords)
-        # Change job.output so that this job can exchange with the
-        #   bam-generating parent job as a parent of others jobs.
-        #   The downstream jobs can invoke .output as its input bam,
-        #       regardless of which job is its parent.
-        job.output = inputBamF
-        job.outputLs = [inputBamF, baiFile]
         job.bamFile = inputBamF
         job.baiFile = baiFile
         #job.parentJobLs is the alignment job and its bam/sam output.
@@ -3226,25 +3220,21 @@ run something like below to extract data from regionOfInterest out of
     def addAlignmentMergeJob(self,
         alignmentJobAndOutputLs=None,
         outputBamFile=None,
+        needBAMIndexJob=False,
         parentJobLs=None, transferOutput=False,
         job_max_memory=7000, walltime=680, **keywords):
         """
-        Not certain, but it looks like MergeSamFilesJar does not require the .bai (bam index) file.
+        MergeSamFilesJar does not require the .bai (bam index) file.
 
-        2013.03.31 alignmentJobAndOutputLs has changed it cell structure
-        2012.9.17 copied from vervet/src/ShortRead2AlignmentPipeline.py
         2012.7.4 bugfix. add job dependency between alignmentJob and
              merge_sam_job after all have been added to the self.
         2012.3.29
-            no more threads (only 2 threads at maximum and increase only 20% performance anyway).
-            Some nodes' kernels can't handle threads properly and it leads to process hanging forever.
-        2011-11-15
-            MarkDuplicates will be run after this step. So outputBamFile no longer needs to be transferred out.
-        2011-9-4
-            add argument transferOutput, default=False, which means leave the output files where they are
-        2011-8-28
-            merge alignment
-            index it
+            no more threads (only 2 threads at maximum and
+                increase only 20% performance anyway).
+            Some nodes' kernels can't handle threads properly and
+                it leads to process hanging forever.
+        MarkDuplicates will be run after this step.
+            So outputBamFile no longer needs to be transferred out.
         """
         memRequirementObject = self.getJVMMemRequirment(
             job_max_memory=job_max_memory, minMemory=2000)
@@ -3263,10 +3253,12 @@ run something like below to extract data from regionOfInterest out of
             merge_sam_job = self.addJavaJob(
                 executable=self.MergeSamFilesJava, 
                 jarFile=self.PicardJar, \
+                frontArgumentList=['MergeSamFiles'],
                 inputFileList=alignmentOutputLs,
                 argumentForEachFileInInputFileList="INPUT=",\
-                outputFile=outputBamFile, outputArgumentOption="OUTPUT=",\
-                frontArgumentList=['MergeSamFiles'], extraArguments=None, 
+                outputFile=outputBamFile,
+                outputArgumentOption="OUTPUT=",\
+                extraArguments=None, 
                 extraArgumentList=['SORT_ORDER=coordinate', \
                     'ASSUME_SORTED=true', "VALIDATION_STRINGENCY=LENIENT"], 
                 extraOutputLs=None,
@@ -3281,13 +3273,15 @@ run something like below to extract data from regionOfInterest out of
             alignmentJobAndOutput = alignmentJobAndOutputLs[0]
             alignmentJobLs = alignmentJobAndOutput.jobLs
             alignmentOutput = alignmentJobAndOutput.file
-            sys.stderr.write(" copy (instead of merging small alignment files) due to "
-                " only one alignment file, from %s to %s.\n"%\
-                (alignmentOutput.name, outputBamFile.name))
-            merge_sam_job = self.addGenericJob(executable=self.cp, 
+            print(" Copy (instead of merging small alignment files) due to "
+                " only one alignment file, from %s to %s."%\
+                (alignmentOutput.name, outputBamFile.name),
+                flush=True)
+            merge_sam_job = self.addGenericJob(
+                executable=self.cp, 
+                frontArgumentList=None,
                 inputFile=alignmentOutput, inputArgumentOption=None,
                 outputFile=outputBamFile, outputArgumentOption=None,
-                frontArgumentList=None,
                 extraArgumentList=None,
                 parentJobLs=alignmentJobLs,
                 extraDependentInputLs=None,
@@ -3300,30 +3294,36 @@ run something like below to extract data from regionOfInterest out of
             raise
         #assign output
         merge_sam_job.output = outputBamFile
-        #2012.9.21
         if parentJobLs:
             for parentJob in parentJobLs:
                 self.depends(parent=parentJob, child=merge_sam_job)
 
-        # add the index job on the merged bam file
-        bamIndexJob = self.addBAMIndexJob(
-            inputBamF=outputBamFile,
-            parentJobLs=[merge_sam_job],
-            transferOutput=transferOutput, job_max_memory=3000, 
-            walltime=max(180, int(walltime/3)))
+        bamIndexJob = None
+        if needBAMIndexJob:
+            # add the index job on the merged bam file
+            bamIndexJob = self.addBAMIndexJob(
+                inputBamF=outputBamFile,
+                parentJobLs=[merge_sam_job],
+                transferOutput=transferOutput, job_max_memory=3000, 
+                walltime=max(180, int(walltime/3)))
+        
         merge_sam_job.bamIndexJob = bamIndexJob
         return merge_sam_job, bamIndexJob
 
 
     def addMergeVCFReplicateGenotypeColumnsJob(self, executable=None, 
         GenomeAnalysisTKJar=None, \
-        inputF=None, outputF=None, replicateIndividualTag=None, \
-        debugHaplotypeDistanceFile=None, \
-        debugMajoritySupportFile=None,\
-        refFastaFList=None, parentJobLs=None, extraDependentInputLs=None, 
-        transferOutput=False, \
-        extraArguments=None, job_max_memory=2000, 
         analysis_type='MergeVCFReplicateHaplotypes',\
+        inputF=None, outputF=None,
+        replicateIndividualTag=None, \
+        debugHaplotypeDistanceFile=None,
+        debugMajoritySupportFile=None,\
+        refFastaFList=None,
+        extraArguments=None, 
+        parentJobLs=None,
+        extraDependentInputLs=None, 
+        transferOutput=False,
+        job_max_memory=2000, 
         walltime=None, **keywords):
         """
         2013.06.21 use addGATKJob() instead
@@ -3359,17 +3359,19 @@ java -jar /home/crocea/script/gatk/dist/GenomeAnalysisTK.jar
         job = self.addGATKJob(executable=executable, 
             GenomeAnalysisTKJar=GenomeAnalysisTKJar, \
             GATKAnalysisType=analysis_type,\
+            frontArgumentList=None,
             inputFile=inputF, inputArgumentOption="--variant:VCF", \
-            refFastaFList=refFastaFList, inputFileList=None,\
+            refFastaFList=refFastaFList,
+            inputFileList=None,\
             argumentForEachFileInInputFileList=None,\
-            interval=None, outputFile=outputF, \
+            interval=None, outputFile=outputF,
+            extraArguments=extraArguments, 
+            extraArgumentList=extraArgumentList,
+            extraOutputLs=None,
+            extraDependentInputLs=extraDependentInputLs,
             parentJobLs=parentJobLs, transferOutput=transferOutput, 
-            job_max_memory=job_max_memory,\
-            frontArgumentList=None, extraArguments=extraArguments, 
-            extraArgumentList=extraArgumentList, \
-            extraOutputLs=None, \
-            extraDependentInputLs=extraDependentInputLs, no_of_cpus=None, 
-            walltime=walltime)
+            job_max_memory=job_max_memory,
+            no_of_cpus=None, walltime=walltime)
 
         return job
 
