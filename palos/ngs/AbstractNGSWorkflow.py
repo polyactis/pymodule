@@ -3071,7 +3071,7 @@ run something like below to extract data from regionOfInterest out of
         inputFile=None, inputArgumentOption="-i",
         inputFileList=None,
         outputFile=None, outputArgumentOption="-o",
-        logFile=None, commit=False, \
+        logFile=None, commit=False,
         extraArguments=None, extraArgumentList=None,
         parentJobLs=None, extraDependentInputLs=None,
         transferOutput=True,
@@ -3084,13 +3084,14 @@ run something like below to extract data from regionOfInterest out of
 
         if inputFileList:
             extraDependentInputLs.extend(inputFileList)
-        job = self.addData2DBJob(executable=executable, \
+        job = self.addData2DBJob(
+            executable=executable,
             inputFile=inputFile,
             inputArgumentOption=inputArgumentOption,
             inputFileList=inputFileList,
             outputFile=outputFile,
             outputArgumentOption=outputArgumentOption,
-            data_dir=None, logFile=logFile, commit=commit,\
+            data_dir=None, logFile=logFile, commit=commit,
             extraArguments=extraArguments,
             extraArgumentList=extraArgumentList,
             parentJobLs=parentJobLs,
