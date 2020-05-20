@@ -852,7 +852,8 @@ in pipe2File:
         refFastaFList=None, extraAlignArgs=None,
         outputDir=None,
         no_of_aln_threads=3, tmpDir=None,
-        maxMissingAlignmentFraction=None, maxNoOfGaps=None,
+        maxMissingAlignmentFraction=None,
+        maxNoOfGaps=None,
         needBAMIndexJob=False,
         refIndexJob=None, parentJobLs=None,
         transferOutput=False, **keywords):
@@ -962,12 +963,9 @@ in pipe2File:
             job_max_memory = 2500, walltime=80,
             transferOutput=transferOutput)
 
-        if needBAMIndexJob:
-            #bamIndexJob.parentJobLs[0] is sortAlignmentJob.
-            returnJob = sortAlignmentJob.bamIndexJob
-        else:
-            returnJob = sortAlignmentJob
-        return returnJob
+        # bamIndexJob.parentJobLs[0] is sortAlignmentJob.
+        # sortAlignmentJob.bamIndexJob
+        return sortAlignmentJob
 
     def addSAM2BAMJob(self, inputFile=None, outputFile=None,
         parentJobLs=None, job_max_memory = 2500, transferOutput=False, 
@@ -987,7 +985,7 @@ in pipe2File:
             job_max_memory=job_max_memory, walltime=walltime)
         return job
 
-    def addAlignmentMergeBySAMtoolsJob(self, alignmentJobAndOutputLs=[],
+    def addAlignmentMergeBySAMtoolsJob(self, alignmentJobAndOutputLs=None,
         outputBamFile=None,
         transferOutput=False, job_max_memory=2500, **keywords):
         """
@@ -1035,9 +1033,12 @@ in pipe2File:
             walltime=180)
         return merge_sam_job, bamIndexJob
 
-    def addMarkDupJob(self, inputBamF=None, inputBaiF=None,
-        outputBamFile=None, parentJobLs=[],
-        tmpDir=None, transferOutput=True,
+    def addMarkDupJob(self,
+        inputBamF=None,
+        outputBamFile=None,
+        tmpDir=None,
+        parentJobLs=None,
+        transferOutput=True,
         job_max_memory=4000, walltime=600, no_of_cpus=1):
         """
         set no_of_cpus=1 (was 2) to avoid thread problem 
@@ -1059,7 +1060,7 @@ in pipe2File:
             parentJobLs=parentJobLs, transferOutput=transferOutput, 
             job_max_memory=job_max_memory,
             extraOutputLs=[markDupOutputMetricF],
-            extraDependentInputLs=[inputBaiF, self.PicardJar],
+            extraDependentInputLs=[self.PicardJar],
             no_of_cpus=no_of_cpus, walltime=walltime)
         # add the index job on the bam file
         bamIndexJob = self.addBAMIndexJob(
@@ -1188,7 +1189,8 @@ in pipe2File:
             '%s_realigned.bam'%(bamFnamePrefix)))
         alignmentMergeJob, bamIndexJob = self.addAlignmentMergeJob(
             alignmentJobAndOutputLs=alignmentJobAndOutputLs,
-            outputBamFile=mergedBamFile, \
+            outputBamFile=mergedBamFile,
+            needBAMIndexJob=True,
             parentJobLs=[topOutputDirJob],
             transferOutput=False)
 
@@ -1412,12 +1414,12 @@ in pipe2File:
                 VCFFile=SNPVCFFile, interval=mpileupInterval,
                 outputFile=recalFile,
                 refFastaFList=passingData.refFastaFList,
+                extraArguments=None,
                 parentJobLs=[topOutputDirJob] + countCovariatesParentJobLs + \
                     SNPVCFJobLs, 
                 extraDependentInputLs=[SNPVCFFile.tbi_F] + \
                     countCovariatesJobExtraDependentInputLs,
                 transferOutput=False, \
-                extraArguments=None,
                 job_max_memory=max(2500, indelRealignmentJobMaxMemory/3),
                 walltime=indelRealignmentJobWalltime/2)
         if span>self.intervalSize and self.candidateCountCovariatesJob is None:
@@ -1439,10 +1441,10 @@ in pipe2File:
                 recalFile=countCovariatesJob.recalFile,
                 interval=mpileupInterval, outputFile=recalBamFile,
                 refFastaFList=passingData.refFastaFList,
+                extraArguments="--filter_bases_not_stored", \
                 parentJobLs=[countCovariatesJob,],
                 extraDependentInputLs=[baiF], extraOutputLs=[recalBaiFile],
                 transferOutput=False,
-                extraArguments="--filter_bases_not_stored", \
                 job_max_memory=max(3000, indelRealignmentJobMaxMemory*2/3),
                 needBAMIndexJob=True, walltime=indelRealignmentJobWalltime/2)
         #"--filter_bases_not_stored" has to be added because in bwa-mem
@@ -1635,8 +1637,8 @@ in pipe2File:
                             mkdirJob = self.addMkDirJob(outputDir=tmpOutputDir)
                         newFileObjLs = self.registerISQFileObjLsToWorkflow(
                             fileObjectLs=fileObjectLs)
-                        #individual_alignment is passed as None so
-                        #   that ReadGroup addition job is not added in addAlignmentJob()
+                        #individual_alignment is passed as None so that
+                        #   the ReadGroup addition job is not added in addAlignmentJob()
                         #ReadGroup will be added differently
                         #   pending skipLibraryAlignment.
                         #If needBAMIndexJob=True, alignmentJob is the bam index job.
@@ -1724,9 +1726,11 @@ in pipe2File:
                             os.path.basename(oneLibraryAlignmentEntry.constructRelativePath()))[0]
                         mergedBamFile = File(os.path.join(oneLibAlignOutputDir,
                             '%s_%s_merged.bam'%(fileBasenamePrefix, library)))
+                        #MarkDup job does not need .bai.
                         alignmentMergeJob, bamIndexJob = self.addAlignmentMergeJob(
                             alignmentJobAndOutputLs=oneLibraryAlignmentJobAndOutputLs,
                             outputBamFile=mergedBamFile,
+                            needBAMIndexJob=False,
                             transferOutput=False,
                             job_max_memory=mergeAlignmentMaxMemory,
                             walltime=mergeAlignmentWalltime,
@@ -1735,9 +1739,8 @@ in pipe2File:
                         finalBamFile = File(os.path.join(oneLibAlignOutputDir,
                             '%s_%s_dupMarked.bam'%(fileBasenamePrefix, library)))
                         markDupJob, markDupBamIndexJob = self.addMarkDupJob(
-                            parentJobLs=[alignmentMergeJob, bamIndexJob],
+                            parentJobLs=[alignmentMergeJob],
                             inputBamF=alignmentMergeJob.output,
-                            inputBaiF=bamIndexJob.output,
                             outputBamFile=finalBamFile,
                             tmpDir=tmpDir,
                             job_max_memory=markDuplicateMaxMemory,
@@ -1819,9 +1822,11 @@ in pipe2File:
                         os.path.basename(individual_alignment.constructRelativePath()))[0]
                     mergedBamFile = File(os.path.join(alignmentOutputDir, \
                         '%s_merged.bam'%(fileBasenamePrefix)))
+                    #MarkDup job does not need .bai.
                     alignmentMergeJob, bamIndexJob = self.addAlignmentMergeJob(
                         alignmentJobAndOutputLs=alignmentJobAndOutputLs,
                         outputBamFile=mergedBamFile,
+                        needBAMIndexJob=False,
                         parentJobLs=[alignmentOutputDirJob],
                         transferOutput=False,
                         job_max_memory=mergeAlignmentMaxMemory,
@@ -1831,9 +1836,8 @@ in pipe2File:
                         '%s_dupMarked.bam'%(fileBasenamePrefix)))
                     
                     markDupJob, markDupBamIndexJob = self.addMarkDupJob(
-                        parentJobLs=[alignmentMergeJob, bamIndexJob],
+                        parentJobLs=[alignmentMergeJob],
                         inputBamF=alignmentMergeJob.output,
-                        inputBaiF=bamIndexJob.output,
                         outputBamFile=finalBamFile,
                         tmpDir=tmpDir,
                         job_max_memory=markDuplicateMaxMemory,
