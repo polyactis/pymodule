@@ -207,17 +207,20 @@ class AlignmentReduceReads(ParentClass):
             #  (to be moved into db-affiliated storage)
             logFile = File(os.path.join(reduceOutputDirJob.output, '%s_2db.log'%(bamFnamePrefix)))
             alignment2DBJob = self.addAlignmentFile2DBJob(
-                executable=self.AddAlignmentFile2DB, \
+                executable=self.AddAlignmentFile2DB,
                 inputFile=alignmentMergeJob.output,
-                individual_alignment_id=new_individual_alignment.id, \
-                logFile=logFile, data_dir=data_dir, \
-                parentJobLs=[alignmentMergeJob, bamIndexJob], \
-                extraDependentInputLs=[bamIndexJob.output], \
+                baiFile=bamIndexJob.baiFile,
+                individual_alignment_id=new_individual_alignment.id,
+                logFile=logFile, data_dir=data_dir,
+                otherInputFileList=None,
+                parentJobLs=[alignmentMergeJob, bamIndexJob],
                 transferOutput=transferOutput,
-                job_max_memory=2000, sshDBTunnel=self.needSSHDBTunnel,
+                job_max_memory=2000,
+                sshDBTunnel=self.needSSHDBTunnel,
                 commit=True)
             self.no_of_jobs += 1
-            returnData.jobDataLs.append(PassingData(jobLs=[alignment2DBJob],
+            returnData.jobDataLs.append(
+                PassingData(jobLs=[alignment2DBJob],
                 file=alignment2DBJob.logFile, \
                 fileLs=[alignment2DBJob.logFile]))
         return returnData

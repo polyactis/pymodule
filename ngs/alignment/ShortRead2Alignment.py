@@ -1736,7 +1736,7 @@ in pipe2File:
                             '%s_%s_dupMarked.bam'%(fileBasenamePrefix, library)))
                         markDupJob, markDupBamIndexJob = self.addMarkDupJob(
                             parentJobLs=[alignmentMergeJob, bamIndexJob],
-                            inputBamF=alignmentMergeJob.output, \
+                            inputBamF=alignmentMergeJob.output,
                             inputBaiF=bamIndexJob.output,
                             outputBamFile=finalBamFile,
                             tmpDir=tmpDir,
@@ -1744,7 +1744,7 @@ in pipe2File:
                             walltime=markDuplicateWalltime,
                             transferOutput=False)
                         no_of_merging_jobs += 1
-
+                        otherFileToDBList = []
                         if self.local_realigned:
                             alignmentData = PassingData(
                                 jobLs=[markDupJob, markDupBamIndexJob],
@@ -1765,22 +1765,24 @@ in pipe2File:
                         else:
                             preDBAlignmentJob = markDupJob
                             preDBAlignmentIndexJob = markDupBamIndexJob
+                            otherFileToDBList = markDupJob.outputLs[1:]
                         #add/copy the alignment file to db-affliated storage
                         #add the metric file to AddAlignmentFile2DB.py as well
                         #  (to be moved into db-affiliated storage)
                         logFile = File(os.path.join(oneLibAlignOutputDir,
                             '%s_%s_2db.log'%(fileBasenamePrefix, library)))
                         alignment2DBJob = self.addAlignmentFile2DBJob(
-                            executable=self.AddAlignmentFile2DB, \
-                            inputFile=preDBAlignmentJob.output, \
-                            individual_alignment_id=oneLibraryAlignmentEntry.id, \
-                            individual_sequence_file_raw_id=minIsqFileRawID,\
-                            format=None,
-                            local_realigned=self.local_realigned,\
-                            logFile=logFile, data_dir=data_dir, \
-                            parentJobLs=[preDBAlignmentJob, preDBAlignmentIndexJob], \
-                            extraDependentInputLs=[preDBAlignmentIndexJob.output,], \
-                            transferOutput=transferOutput, \
+                            executable=self.AddAlignmentFile2DB,
+                            inputFile=preDBAlignmentJob.output,
+                            baiFile=preDBAlignmentIndexJob.baiFile,
+                            individual_alignment_id=oneLibraryAlignmentEntry.id,
+                            individual_sequence_file_raw_id=minIsqFileRawID,
+                            local_realigned=self.local_realigned,
+                            logFile=logFile,
+                            data_dir=data_dir,
+                            otherInputFileList=otherFileToDBList,
+                            parentJobLs=[preDBAlignmentJob, preDBAlignmentIndexJob],
+                            transferOutput=transferOutput,
                             job_max_memory=2000,
                             walltime=max(180, markDuplicateWalltime/2),
                             sshDBTunnel=self.needSSHDBTunnel, commit=True)
@@ -1818,9 +1820,9 @@ in pipe2File:
                     mergedBamFile = File(os.path.join(alignmentOutputDir, \
                         '%s_merged.bam'%(fileBasenamePrefix)))
                     alignmentMergeJob, bamIndexJob = self.addAlignmentMergeJob(
-                        alignmentJobAndOutputLs=alignmentJobAndOutputLs, \
-                        outputBamFile=mergedBamFile, \
-                        parentJobLs=[alignmentOutputDirJob],\
+                        alignmentJobAndOutputLs=alignmentJobAndOutputLs,
+                        outputBamFile=mergedBamFile,
+                        parentJobLs=[alignmentOutputDirJob],
                         transferOutput=False,
                         job_max_memory=mergeAlignmentMaxMemory,
                         walltime=mergeAlignmentWalltime)
@@ -1838,10 +1840,11 @@ in pipe2File:
                         walltime=markDuplicateWalltime,
                         transferOutput=False)
                     no_of_merging_jobs += 1
+                    otherFileToDBList = []
 
                     if self.local_realigned:
-                        alignmentData = PassingData(jobLs=[markDupJob,
-                                markDupBamIndexJob],
+                        alignmentData = PassingData(
+                            jobLs=[markDupJob, markDupBamIndexJob],
                             bamF=markDupJob.output,
                             baiF=markDupBamIndexJob.output,
                             alignment=individual_alignment)
@@ -1858,22 +1861,22 @@ in pipe2File:
                     else:
                         preDBAlignmentJob = markDupJob
                         preDBAlignmentIndexJob = markDupBamIndexJob
-                    #2012.9.19 add/copy the alignment file to db-affliated storage
-                    #add the metric file to AddAlignmentFile2DB.py as well
-                    #  (to be moved into db-affiliated storage)
+                        otherFileToDBList = markDupJob.outputLs[1:]
+                    # add/copy the alignment file to db-affliated storage
+                    # add the metric file to AddAlignmentFile2DB.py as well
+                    #  (to be moved into db-affiliated storage).
                     logFile = File(os.path.join(alignmentOutputDir, \
                         '%s_2db.log'%(fileBasenamePrefix)))
                     alignment2DBJob = self.addAlignmentFile2DBJob(
                         executable=self.AddAlignmentFile2DB,
                         inputFile=preDBAlignmentJob.output,
-                        otherInputFileList=[],\
+                        baiFile=preDBAlignmentIndexJob.baiFile,
                         individual_alignment_id=individual_alignment.id,
-                        format=None,
                         local_realigned=self.local_realigned,
                         logFile=logFile,
                         data_dir=data_dir,
+                        otherInputFileList=otherFileToDBList,
                         parentJobLs=[preDBAlignmentJob, preDBAlignmentIndexJob],
-                        extraDependentInputLs=[preDBAlignmentIndexJob.output],
                         job_max_memory=2000,
                         walltime=max(180, markDuplicateWalltime/2),
                         transferOutput=transferOutput,

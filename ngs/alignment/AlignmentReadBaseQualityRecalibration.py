@@ -280,15 +280,17 @@ class AlignmentReadBaseQualityRecalibration(ParentClass):
             alignment2DBJob = self.addAlignmentFile2DBJob(
                 executable=self.AddAlignmentFile2DB,
                 inputFile=alignmentMergeJob.output,
-                otherInputFileList=[],
+                baiFile=bamIndexJob.baiFile,
                 individual_alignment_id=new_individual_alignment.id,
                 mask_genotype_method_id=self.new_mask_genotype_method_id,
-                logFile=logFile, data_dir=data_dir,
+                logFile=logFile,
+                data_dir=data_dir,
+                otherInputFileList=None,
                 parentJobLs=[alignmentMergeJob, bamIndexJob],
-                extraDependentInputLs=[bamIndexJob.output],
-                extraArguments=None, transferOutput=transferOutput,
-                job_max_memory=2000, sshDBTunnel=self.needSSHDBTunnel,
+                transferOutput=transferOutput,
+                sshDBTunnel=self.needSSHDBTunnel,
                 commit=True,
+                job_max_memory=2000,
                 walltime=max(180, mergeAlignmentWalltime/2))
             self.no_of_jobs += 1
             returnData.jobDataLs.append(PassingData(jobLs=[alignment2DBJob],
