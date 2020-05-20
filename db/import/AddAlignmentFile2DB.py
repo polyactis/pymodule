@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
 """
 Examples:
-    %s  -i OneLibAlignment/2278_634_vs_524_by_2_r4043_sequence_628C2AAXX_6_dupMarked.bam
-        --logFilename OneLibAlignment/2278_634_vs_524_by_2_r4043_sequence_628C2AAXX_6_2db.log
-        --individual_alignment_id 2278
-        --data_dir /u/home/eeskin/polyacti/NetworkData/vervet/db/
-        --drivername postgresql --hostname localhost --dbname vervetdb --db_user yh
-        --schema public
-        OneLibAlignment/2278_634_vs_524_by_2_r4043_sequence_628C2AAXX_6_dupMarked.metric
+    %s
+    -i 2278_634_vs_524_by_2_r4043_sequence_dupMarked.bam
+    --baiFile 2278_634_vs_524_by_2_r4043_sequence_dupMarked.bam.bai
+    --logFilename 2278_634_vs_524_by_2_r4043_sequence_628C2AAXX_6_2db.log
+    --individual_alignment_id 2278
+    --data_dir /u/home/eeskin/polyacti/NetworkData/vervet/db/
+    --drivername postgresql --hostname localhost --dbname vervetdb
+    --schema public --db_user yh
+    2278_634_vs_524_by_2_r4043_sequence_628C2AAXX_6_dupMarked.metric
 
 Description:
-    2012.9.21
-        Add the alignment file into database
+    Add the alignment file into database
         1. register an alignment entry in db
             a. if individual_alignment_id is not None
             b. if parent_individual_alignment_id is not None:
@@ -38,6 +39,8 @@ class AddAlignmentFile2DB(ParentClass):
     option_default_dict.pop(('outputFname', 0, ))
     option_default_dict.pop(('outputFnamePrefix', 0, ))
     option_default_dict.update({
+        ('baiFile', 1, ):[None, '', 1,
+            'the bai index file'],
         ('individual_alignment_id', 0, int):[None, '', 1, \
             'fetch the db individual_alignment based on this ID'],
         ('individual_sequence_id', 0, int):[None, '', 1, 
@@ -66,10 +69,8 @@ class AddAlignmentFile2DB(ParentClass):
         """
         ParentClass.__init__(self, inputFnameLs=inputFnameLs, **keywords)
 
-
     def run(self):
         """
-        2012.7.13
         """
         if self.debug:
             import pdb
@@ -82,22 +83,25 @@ class AddAlignmentFile2DB(ParentClass):
         data_dir = self.data_dir
 
         inputFileRealPath = os.path.realpath(self.inputFname)
-        logMessage = "Adding file %s to db .\n"%(self.inputFname)
+        logMessage = f"Adding file {self.inputFname} to db."
+        print(f'{logMessage}', flush=True)
+        self.outputLogMessage(f'{logMessage}\n')
 
         if os.path.isfile(inputFileRealPath):
             if self.individual_alignment_id:
-                individual_alignment = self.db_main.queryTable(
+                ind_aln = self.db_main.queryTable(
                     SunsetDB.IndividualAlignment).get(self.individual_alignment_id)
             elif self.parent_individual_alignment_id:
-                individual_alignment = self.db_main.copyParentIndividualAlignment(
+                ind_aln = self.db_main.copyParentIndividualAlignment(
                     parent_individual_alignment_id=self.parent_individual_alignment_id,
                     mask_genotype_method_id=self.mask_genotype_method_id,\
-                    data_dir=self.data_dir, local_realigned=self.local_realigned)
+                    data_dir=self.data_dir,
+                    local_realigned=self.local_realigned)
             else:
                 #alignment for this library of the individual_sequence
                 individual_sequence = self.db_main.queryTable(
                     SunsetDB.IndividualSequence).get(self.individual_sequence_id)
-                individual_alignment = self.db_main.getAlignment(
+                ind_aln = self.db_main.getAlignment(
                     individual_sequence_id=self.individual_sequence_id,
                     path_to_original_alignment=None,
                     sequencer_name=individual_sequence.sequencer.short_name,
@@ -115,23 +119,23 @@ class AddAlignmentFile2DB(ParentClass):
                     local_realigned=self.local_realigned,
                     read_group=self.read_group)
             needSessionFlush = False
-            if not individual_alignment.path:
-                individual_alignment.path = individual_alignment.constructRelativePath()
+            if not ind_aln.path:
+                ind_aln.path = ind_aln.constructRelativePath()
                 needSessionFlush = True
 
             if self.mask_genotype_method_id and \
-                    individual_alignment.mask_genotype_method_id!=self.mask_genotype_method_id:
-                individual_alignment.mask_genotype_method_id = self.mask_genotype_method_id
+                    ind_aln.mask_genotype_method_id!=self.mask_genotype_method_id:
+                ind_aln.mask_genotype_method_id = self.mask_genotype_method_id
                 needSessionFlush = True
             if self.individual_sequence_file_raw_id and \
-                    individual_alignment.individual_sequence_file_raw_id !=\
+                    ind_aln.individual_sequence_file_raw_id !=\
                         self.individual_sequence_file_raw_id:
-                individual_alignment.individual_sequence_file_raw_id = \
+                ind_aln.individual_sequence_file_raw_id = \
                     self.individual_sequence_file_raw_id
                 needSessionFlush = True
 
             if needSessionFlush:
-                session.add(individual_alignment)
+                session.add(ind_aln)
                 session.flush()
 
             try:
@@ -144,7 +148,7 @@ class AddAlignmentFile2DB(ParentClass):
 
             db_entry = self.db_main.queryTable(SunsetDB.IndividualAlignment).\
                 filter_by(md5sum=md5sum).first()
-            if db_entry and db_entry.id!=individual_alignment.id and \
+            if db_entry and db_entry.id!=ind_aln.id and \
                 db_entry.path and os.path.isfile(os.path.join(data_dir, db_entry.path)):
                 logging.warn(f"Another file {db_entry.path} with the identical"
                     f" md5sum {md5sum} as this file {inputFileRealPath}, is "
@@ -152,24 +156,24 @@ class AddAlignmentFile2DB(ParentClass):
                 self.sessionRollback(session)
                 self.cleanUpAndExitOnFailure(exitCode=3)
 
-            if individual_alignment.md5sum is None or \
-                    individual_alignment.md5sum!=md5sum:
-                individual_alignment.md5sum = md5sum
-                session.add(individual_alignment)
+            if ind_aln.md5sum is None or \
+                    ind_aln.md5sum!=md5sum:
+                ind_aln.md5sum = md5sum
+                session.add(ind_aln)
                 session.flush()
             try:
                 #move the file and update the db_entry's path as well
                 exitCode = self.db_main.moveFileIntoDBAffiliatedStorage(
-                    db_entry=individual_alignment,
+                    db_entry=ind_aln,
                     filename=os.path.basename(inputFileRealPath),
                     inputDir=os.path.split(inputFileRealPath)[0], 
-                    dstFilename=os.path.join(self.data_dir, individual_alignment.path),
+                    dstFilename=os.path.join(self.data_dir, ind_aln.path),
                     relativeOutputDir=None,
                     shellCommand='cp -rL',
                     srcFilenameLs=self.srcFilenameLs,
                     dstFilenameLs=self.dstFilenameLs,
                     constructRelativePathFunction=\
-                        individual_alignment.constructRelativePath)
+                        ind_aln.constructRelativePath)
             except:
                 logging.error(f'Except in copying {inputFileRealPath} to '
                     f'db-storage with except info: {repr(sys.exc_info())}.')
@@ -184,39 +188,40 @@ class AddAlignmentFile2DB(ParentClass):
                 self.sessionRollback(session)
                 self.cleanUpAndExitOnFailure(exitCode=exitCode)
             try:
-                #make sure these files are stored in self.dstFilenameLs
-                #   and self.srcFilenameLs
                 if self.inputFnameLs:
                     #copy other files 
                     for inputFname in self.inputFnameLs:
                         if inputFname!=self.inputFname:
-                            #2013.3.18 make sure it has not been copied.
+                            # make sure it has not been copied.
                             logMessage = self.db_main.copyFileWithAnotherFilePrefix(
                                 inputFname=inputFname,
-                                filenameWithPrefix=individual_alignment.path,
+                                filenameWithPrefix=ind_aln.path,
                                 outputDir=self.data_dir,
-                                logMessage=logMessage,
                                 srcFilenameLs=self.srcFilenameLs,
                                 dstFilenameLs=self.dstFilenameLs)
+                            print(f'{logMessage}', flush=True)
+                            self.outputLogMessage(f'{logMessage}\n')
 
                 self.db_main.updateDBEntryPathFileSize(
-                    db_entry=individual_alignment, data_dir=data_dir)
+                    db_entry=ind_aln, data_dir=data_dir)
 
                 ## 2012.7.17 commented out because md5sum is calculated above
                 #db_main.updateDBEntryMD5SUM(db_entry=genotypeFile, data_dir=data_dir)
                 #copy the bai index file if it exists
-                baiFilePath = f'{self.inputFname}.bai'
-                if not os.path.isfile(baiFilePath):
-                    logging.error(f"The bam index file {baiFilePath} does not exist!")
+                #baiFile = f'{self.inputFname}.bai'
+                if not os.path.isfile(self.baiFile):
+                    logging.error(f"The bam index file {self.baiFile} does not exist!")
                     self.sessionRollback(session)
                     self.cleanUpAndExitOnFailure(exitCode=5)
-                if os.path.isfile(baiFilePath):
-                    srcFilename = baiFilePath
+                else:
+                    srcFilename = self.baiFile
                     dstFilename = os.path.join(self.data_dir, \
-                        '%s.bai'%(individual_alignment.path))
+                        f'{ind_aln.path}.bai')
                     utils.copyFile(srcFilename=srcFilename, dstFilename=dstFilename)
-                    logMessage += "bai file %s has been copied to %s.\n"%(\
-                        srcFilename, dstFilename)
+                    logMessage += f"bai file {srcFilename} has been copied "\
+                        f"to {dstFilename}.\n"
+                    print(f'{logMessage}', flush=True)
+                    self.outputLogMessage(f'{logMessage}\n')
                     self.srcFilenameLs.append(srcFilename)
                     self.dstFilenameLs.append(dstFilename)
             except:
@@ -226,8 +231,9 @@ class AddAlignmentFile2DB(ParentClass):
                 self.sessionRollback(session)
                 self.cleanUpAndExitOnFailure(exitCode=5)
         else:
-            logMessage += "%s doesn't exist.\n"%(inputFileRealPath)
-        self.outputLogMessage(logMessage)
+            logMessage = f"{inputFileRealPath} doesn't exist."
+            print(f'{logMessage}', flush=True)
+            self.outputLogMessage(f'{logMessage}\n')
 
         if self.commit:
             try:
@@ -243,7 +249,6 @@ class AddAlignmentFile2DB(ParentClass):
             #delete all target files but exit gracefully (exit 0)
             self.sessionRollback(session)
             self.cleanUpAndExitOnFailure(exitCode=0)
-
 
 
 if __name__ == '__main__':

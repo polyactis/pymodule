@@ -547,18 +547,15 @@ Example:
     def copyFileWithAnotherFilePrefix(self, inputFname=None, \
         filenameWithPrefix=None, \
         outputDir=None, outputFileRelativePath=None, \
-        logMessage=None, srcFilenameLs=None, dstFilenameLs=None):
+        srcFilenameLs=None, dstFilenameLs=None):
         """
-        2013.08.08 added argument outputFileRelativePath
-        2013.3.18 bugfix in filename. there was extra . between prefix and suffix.
-            moved from vervet/src/VervetDB.py
-        2012.9.20
+        Bugfix in filename. there was extra . between prefix and suffix.
         """
         srcFilename = inputFname
         if outputFileRelativePath is None and filenameWithPrefix:
             prefix, suffix = os.path.splitext(os.path.basename(inputFname))
             newPrefix = os.path.splitext(filenameWithPrefix)[0]
-            outputFileRelativePath = '%s%s'%(newPrefix, suffix)
+            outputFileRelativePath = f'{newPrefix}{suffix}'
         
         dstFilename = os.path.join(outputDir, outputFileRelativePath)
         returnCode = utils.copyFile(srcFilename=srcFilename, dstFilename=dstFilename)
@@ -567,12 +564,11 @@ Example:
                 "check stderr message just ahead of this.\n")
             raise Exception("ERROR during utils.copyFile. "\
                 "check stderr message just ahead of this.")
-        if logMessage:
-            logMessage += "file %s has been copied to %s.\n"%(srcFilename, dstFilename)
         if srcFilenameLs:
             srcFilenameLs.append(srcFilename)
         if dstFilenameLs:
             dstFilenameLs.append(dstFilename)
+        logMessage = f"file {srcFilename} has been copied to {dstFilename}."
         return logMessage
     
     def moveFileIntoDBAffiliatedStorage(self, db_entry=None, \

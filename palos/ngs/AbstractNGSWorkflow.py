@@ -3136,26 +3136,30 @@ run something like below to extract data from regionOfInterest out of
             job_max_memory=job_max_memory, walltime=walltime)
         return job
 
-    def addAlignmentFile2DBJob(self, executable=None, inputFile=None,
-        otherInputFileList=None,\
-        individual_alignment_id=None, individual_sequence_id=None,\
-        ref_sequence_id=None, \
-        alignment_method_id=None,\
-        parent_individual_alignment_id=None, \
-        mask_genotype_method_id=None,\
-        individual_sequence_file_raw_id=None,\
-        format=None, local_realigned=0,\
-        logFile=False, data_dir=None, \
-        parentJobLs=None, \
-        extraDependentInputLs=None, \
-        extraArguments=None, transferOutput=True, \
-        job_max_memory=2000, walltime=180, sshDBTunnel=False, commit=True,
-        **keywords):
+    def addAlignmentFile2DBJob(self,
+        executable=None,
+        inputFile=None,
+        baiFile=None,
+        individual_alignment_id=None,
+        individual_sequence_id=None,
+        ref_sequence_id=None,
+        alignment_method_id=None,
+        parent_individual_alignment_id=None,
+        mask_genotype_method_id=None,
+        individual_sequence_file_raw_id=None,
+        format=None, local_realigned=0,
+        logFile=False, data_dir=None,
+        otherInputFileList=None,
+        extraArguments=None,
+        parentJobLs=None,
+        extraDependentInputLs=None,
+        transferOutput=True,
+        job_max_memory=2000, walltime=180,
+        sshDBTunnel=False, commit=True):
         """
-        2013.04.05 added argument local_realigned
-        2012.9.20
-    To specify individual_alignment:
-        either individual_alignment_id or
+        To specify an individual_alignment:
+        
+        Either individual_alignment_id or
             (parent_individual_alignment_id + mask_genotype_method_id)
         or others
         """
@@ -3164,8 +3168,11 @@ run something like below to extract data from regionOfInterest out of
         extraArgumentList = []
         extraOutputLs = []
         key2ObjectForJob = {}
+
         if otherInputFileList:
             extraDependentInputLs.extend(otherInputFileList)
+        extraArgumentList.extend(['--baiFile', baiFile])
+        extraDependentInputLs.append(baiFile)
         if logFile:
             extraArgumentList.extend(['--logFilename', logFile])
             extraOutputLs.append(logFile)
@@ -3198,17 +3205,20 @@ run something like below to extract data from regionOfInterest out of
         job= self.addGenericJob(executable=executable,
             inputFile=inputFile, inputArgumentOption="-i",
             parentJobLs=parentJobLs,
+            extraArgumentList=extraArgumentList, 
             extraDependentInputLs=extraDependentInputLs,
             extraOutputLs=extraOutputLs,\
-            transferOutput=transferOutput, \
-            extraArgumentList=extraArgumentList, 
-            key2ObjectForJob=key2ObjectForJob, job_max_memory=job_max_memory,
-            sshDBTunnel=sshDBTunnel, walltime=walltime, **keywords)
+            transferOutput=transferOutput,
+            key2ObjectForJob=key2ObjectForJob,
+            sshDBTunnel=sshDBTunnel,
+            job_max_memory=job_max_memory,
+            walltime=walltime)
         job.logFile = logFile
         self.addDBArgumentsToOneJob(job=job, objectWithDBArguments=self)
 
-        #add all input files to the last (after db arguments,) otherwise,
-        #  it'll mask others (cuz these don't have options).
+        # add all input files to the last (after db arguments,) 
+        #   otherwise, it'll mask other arguments 
+        #   (cuz these files don't have options).
         if otherInputFileList:
             for inputFile in otherInputFileList:
                 if inputFile:
