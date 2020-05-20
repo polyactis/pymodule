@@ -734,9 +734,10 @@ class FindNewRefCoordinatesGivenVCFFolder(ParentClass, BlastWorkflow, \
                 alignment_method = PassingData(short_name='bwaShortRead', command='aln')
             
             
-            #2012.10.10 individual_alignment is not passed so that ReadGroup
-            #  addition job is not added in addAlignmentJob()
-            bamIndexJob = self.addAlignmentJob(fileObjectLs=fileObjectLs, \
+            #individual_alignment is not passed along so that
+            #  the ReadGroup job is not added in addAlignmentJob()
+            alignmentJob = self.addAlignmentJob(
+                fileObjectLs=fileObjectLs,
                 refFastaFList=passingData.newRefFastaFileList,
                 additionalArguments=self.additionalArguments + bwaAdditionalAlignments,
                 refIndexJob=passingData.refIndexJob,
@@ -745,23 +746,22 @@ class FindNewRefCoordinatesGivenVCFFolder(ParentClass, BlastWorkflow, \
                 outputDir=mapDirJob.output,
                 no_of_aln_threads=self.no_of_aln_threads,
                 maxMissingAlignmentFraction=self.maxMissingAlignmentFraction,
-                maxNoOfGaps=self.maxNoOfGaps, \
-                needBAMIndexJob=True, transferOutput = False)[0]
+                maxNoOfGaps=self.maxNoOfGaps,
+                needBAMIndexJob=True, transferOutput = False)
             
-            alignmentJob = bamIndexJob.parentJobLs[0]
+            bamIndexJob = alignmentJob.bamIndexJob
             # a FindSNPPositionOnNewRefFromFlankingBlastOutput job
             findNewRefCoordinateJob = self.addFindNewRefCoordinateJob(
-                executable=self.FindSNPPositionOnNewRefFromFlankingBWAOutput, \
+                executable=self.FindSNPPositionOnNewRefFromFlankingBWAOutput,
                 inputFile=alignmentJob.output,
                 outputFile=coordinateMapFile,
-                chainFile=chainFile, switchPointFile=switchPointFile,\
-                maxNoOfMismatches=self.maxNoOfMismatches, \
+                chainFile=chainFile, switchPointFile=switchPointFile,
+                maxNoOfMismatches=self.maxNoOfMismatches,
                 minNoOfIdentities=self.minNoOfIdentities,
-                minIdentityFraction=self.minIdentityFraction, \
+                minIdentityFraction=self.minIdentityFraction,
                 minAlignmentSpan=self.minAlignmentSpan,
-                parentJobLs=[alignmentJob, bamIndexJob], \
+                parentJobLs=[alignmentJob, bamIndexJob],
                 transferOutput=transferOutput, job_max_memory=500,
-                extraArguments=None, \
                 extraArgumentList=None,
                 extraDependentInputLs=[bamIndexJob.output],
                 extraOutputLs=None)
@@ -777,25 +777,26 @@ class FindNewRefCoordinatesGivenVCFFolder(ParentClass, BlastWorkflow, \
             self.mapDirJob.output,\
             "%s.locusIntervalDelta.tsv.gz"%(intervalFileBasenamePrefix)))
         computeLiftOverLocusProbJob = self.addAbstractMatrixFileWalkerJob(
-            executable=self.ComputeLiftOverLocusProbability, \
-            inputFileList=None, inputFile=findNewRefCoordinateJob.output,
+            executable=self.ComputeLiftOverLocusProbability,
+            inputFile=findNewRefCoordinateJob.output,
             outputFile=outputFile,
             outputFnamePrefix=None,
             whichColumn=None, whichColumnHeader=None,
-            logY=None, valueForNonPositiveYValue=-1, \
-            minNoOfTotal=1, samplingRate=1, \
-            inputFileFormat=None, outputFileFormat=None,\
-            parentJobLs=[findNewRefCoordinateJob],
-            extraOutputLs=[locusIntervalDeltaOutputFile],
-            extraDependentInputLs=None, \
+            logY=None,
+            valueForNonPositiveYValue=-1,
+            minNoOfTotal=1, samplingRate=1,
             extraArgumentList=["--locusIntervalDeltaOutputFname",
                 locusIntervalDeltaOutputFile],
-            extraArguments=None, transferOutput=transferOutput,
+            extraArguments=None,
+            parentJobLs=[findNewRefCoordinateJob],
+            extraOutputLs=[locusIntervalDeltaOutputFile],
+            extraDependentInputLs=None,
+            transferOutput=transferOutput,
             job_max_memory=2000, sshDBTunnel=False,
             objectWithDBArguments=None)
         self.addInputToMergeJob(
             self.mergeLocusLiftOverProbabilityJob,
-            inputF=computeLiftOverLocusProbJob.output, \
+            inputF=computeLiftOverLocusProbJob.output,
             parentJobLs=[computeLiftOverLocusProbJob])
         
         """

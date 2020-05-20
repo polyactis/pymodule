@@ -199,8 +199,9 @@ class AlignmentReduceReads(ParentClass):
                 '%s.merged.bam'%(bamFnamePrefix)))
             alignmentMergeJob, bamIndexJob = self.addAlignmentMergeJob(
                 alignmentJobAndOutputLs=newAlignmentJobAndOutputLs,
-                outputBamFile=mergedBamFile, \
-                parentJobLs=[reduceOutputDirJob], \
+                outputBamFile=mergedBamFile,
+                needBAMIndexJob=True,
+                parentJobLs=[reduceOutputDirJob],
                 transferOutput=False)
             #2012.9.19 add/copy the alignment file to db-affliated storage
             #add the metric file to AddAlignmentFile2DB.py as well

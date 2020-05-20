@@ -268,6 +268,7 @@ class AlignmentReadBaseQualityRecalibration(ParentClass):
             alignmentMergeJob, bamIndexJob = self.addAlignmentMergeJob(
                 alignmentJobAndOutputLs=newAlignmentJobAndOutputLs,
                 outputBamFile=mergedBamFile,
+                needBAMIndexJob=True,
                 parentJobLs=[reduceOutputDirJob],
                 walltime=mergeAlignmentWalltime,
                 job_max_memory=mergeAlignmentMaxMemory,
@@ -404,13 +405,15 @@ class AlignmentReadBaseQualityRecalibration(ParentClass):
             + refFastaFList)
         extraOutputLs.insert(0, outputFile)
         #2013.04.30 shuld be ahead of any other output
-        job= self.addGenericJob(executable=executable, inputFile=None,
+        job= self.addGenericJob(
+            executable=executable, inputFile=None,
             outputFile=None, \
+            extraArgumentList=extraArgumentList,
             parentJobLs=parentJobLs,
             extraDependentInputLs=extraDependentInputLs,
             extraOutputLs=extraOutputLs,\
             transferOutput=transferOutput, \
-            extraArgumentList=extraArgumentList, job_max_memory=job_max_memory,
+            job_max_memory=job_max_memory,
             walltime=walltime,\
             **keywords)
         if needBAMIndexJob:

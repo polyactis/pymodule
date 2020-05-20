@@ -137,11 +137,12 @@ class DownsampleWorkflow(ParentClass):
 
             MergeJob, bamIndexJob = self.addAlignmentMergeJob(
                 alignmentJobAndOutputLs=mergeJobAndOutputLs,
-                outputBamFile=mergedBamFile, \
-                transferOutput=transferOutput, \
-                job_max_memory=mergeAlignmentMaxMemory, \
-                walltime=mergeAlignmentWalltime, \
-                parentJobLs=[SampleFolderJob, purityFolderJob])
+                outputBamFile=mergedBamFile,
+                needBAMIndexJob=True,
+                parentJobLs=[SampleFolderJob, purityFolderJob],
+                transferOutput=transferOutput,
+                job_max_memory=mergeAlignmentMaxMemory,
+                walltime=mergeAlignmentWalltime)
             normal_part_refer = self.registerOneInputFile(
                 inputFname="/y/Sunset/workflow/real_data/downsample/normal_0.2.bam", 
                 folderName=os.path.join(puritySampleFolder,purityDir))
