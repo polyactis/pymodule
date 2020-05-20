@@ -1042,7 +1042,7 @@ in pipe2File:
         """
         set no_of_cpus=1 (was 2) to avoid thread problem 
             in some linux kernels.
-        #2011-11-10 duplicate-marking job
+        duplicate-marking job
         """
         bamFnamePrefix = os.path.splitext(outputBamFile.name)[0]
         markDupOutputMetricF = File('%s.metric'%(bamFnamePrefix))
@@ -1744,7 +1744,6 @@ in pipe2File:
                             walltime=markDuplicateWalltime,
                             transferOutput=False)
                         no_of_merging_jobs += 1
-                        otherFileToDBList = []
                         if self.local_realigned:
                             alignmentData = PassingData(
                                 jobLs=[markDupJob, markDupBamIndexJob],
@@ -1762,6 +1761,7 @@ in pipe2File:
                                     outputDirPrefix='%s_%s_localRealignment'%(
                                         fileBasenamePrefix, library),
                                     transferOutput=False)
+                            otherFileToDBList = []
                         else:
                             preDBAlignmentJob = markDupJob
                             preDBAlignmentIndexJob = markDupBamIndexJob
@@ -1840,8 +1840,6 @@ in pipe2File:
                         walltime=markDuplicateWalltime,
                         transferOutput=False)
                     no_of_merging_jobs += 1
-                    otherFileToDBList = []
-
                     if self.local_realigned:
                         alignmentData = PassingData(
                             jobLs=[markDupJob, markDupBamIndexJob],
@@ -1858,6 +1856,7 @@ in pipe2File:
                                 parentJobLs=[markDupJob, markDupBamIndexJob],
                                 outputDirPrefix='%s_localRealignment'%(fileBasenamePrefix),
                                 transferOutput=False)
+                        otherFileToDBList = []
                     else:
                         preDBAlignmentJob = markDupJob
                         preDBAlignmentIndexJob = markDupBamIndexJob

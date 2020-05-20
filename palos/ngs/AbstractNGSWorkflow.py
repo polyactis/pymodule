@@ -3067,43 +3067,40 @@ run something like below to extract data from regionOfInterest out of
         print(f"{counter} intervals.", flush=True)
         return chr2IntervalDataLs
 
-    def addPutStuffIntoDBJob(self, executable=None, \
-        inputFile=None, inputArgumentOption="-i", \
-        inputFileList=None, \
-        outputFile=None, outputArgumentOption="-o",\
+    def addPutStuffIntoDBJob(self, executable=None,
+        inputFile=None, inputArgumentOption="-i",
+        inputFileList=None,
+        outputFile=None, outputArgumentOption="-o",
         logFile=None, commit=False, \
-        parentJobLs=None, extraDependentInputLs=None, transferOutput=True, \
-        extraArguments=None, extraArgumentList=None,\
+        extraArguments=None, extraArgumentList=None,
+        parentJobLs=None, extraDependentInputLs=None,
+        transferOutput=True,
         job_max_memory=10, sshDBTunnel=0, **keywords):
         """
-        2013.08.06 added extraArgumentList
-        2013.3.24 use addData2DBJob()
-        2012.5.8 add sshDBTunnel
-        2012.4.3
         """
         if extraDependentInputLs is None:
             extraDependentInputLs = []
-
-        if extraArgumentList is None:
-            extraArgumentList = []
         key2ObjectForJob = {}
 
-        if extraArguments:
-            extraArgumentList.append(extraArguments)
         if inputFileList:
             extraDependentInputLs.extend(inputFileList)
         job = self.addData2DBJob(executable=executable, \
-            inputFile=inputFile, inputArgumentOption=inputArgumentOption,
-            inputFileList=inputFileList, \
-            outputFile=outputFile, outputArgumentOption=outputArgumentOption,
+            inputFile=inputFile,
+            inputArgumentOption=inputArgumentOption,
+            inputFileList=inputFileList,
+            outputFile=outputFile,
+            outputArgumentOption=outputArgumentOption,
             data_dir=None, logFile=logFile, commit=commit,\
+            extraArguments=extraArguments,
+            extraArgumentList=extraArgumentList,
             parentJobLs=parentJobLs,
-            extraDependentInputLs=extraDependentInputLs, extraOutputLs=None,
-            transferOutput=transferOutput, \
-            extraArguments=None, extraArgumentList=extraArgumentList,
-            job_max_memory=job_max_memory, \
-            sshDBTunnel=sshDBTunnel, \
-            key2ObjectForJob=key2ObjectForJob, objectWithDBArguments=self,
+            extraDependentInputLs=extraDependentInputLs,
+            extraOutputLs=None,
+            transferOutput=transferOutput,
+            job_max_memory=job_max_memory,
+            sshDBTunnel=sshDBTunnel,
+            key2ObjectForJob=key2ObjectForJob,
+            objectWithDBArguments=self,
             **keywords)
         return job
 
