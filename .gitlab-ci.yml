@@ -100,8 +100,11 @@ InspectAlignmentPipeline:
   script:
     - echo "Output a InspectAlignmentPipeline DAG ... "
     - pwd
-    #InspectAlignmentPipeline needs a compiled GADA
+    #InspectAlignmentPipeline needs some compiled binaries
     - pushd GADA && make && popd
+    - pushd io && make all && popd
+    - pushd mapper && make all && popd
+    - pushd reducer && make all && popd
     - ./ngs/qc/InspectAlignmentPipeline.py -i 2112-2132 -l condor -z pdc
       --dbname pmdb --schema sunset -u sunset_r -p yfishLabSunset
       --home_path /y/home/huangyu --pymodulePath `pwd`
@@ -123,7 +126,7 @@ compile:
   script:
     - echo "Compile other C++ programs and modules ... "
     - pwd
-    - pushd io && make && popd
-    - pushd mapper && make && popd
-    - pushd polymorphism && make && popd
-    - pushd reducer && make && popd
+    - pushd io && make all && popd
+    - pushd mapper && make all && popd
+    - pushd polymorphism && make all && popd
+    - pushd reducer && make all && popd
