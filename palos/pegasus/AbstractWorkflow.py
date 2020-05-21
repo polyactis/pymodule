@@ -297,8 +297,10 @@ class AbstractWorkflow(Workflow):
         #  need to be added before them.
         job = self.addGenericJob(executable=self.convertImage, \
             inputFile=inputFile, \
-            inputArgumentOption=inputArgumentOption, outputFile=outputFile, \
-            outputArgumentOption=outputArgumentOption, inputFileList=None, 
+            inputArgumentOption=inputArgumentOption,
+            outputFile=outputFile, \
+            outputArgumentOption=outputArgumentOption,
+            inputFileList=None, 
             frontArgumentList=frontArgumentList,
             extraArguments=extraArguments, 
             extraArgumentList=extraArgumentList,
@@ -306,14 +308,16 @@ class AbstractWorkflow(Workflow):
             extraDependentInputLs=extraDependentInputLs,
             extraOutputLs=extraOutputLs,
             transferOutput=transferOutput,
-            job_max_memory=job_max_memory, key2ObjectForJob=key2ObjectForJob,\
+            job_max_memory=job_max_memory,
+            key2ObjectForJob=key2ObjectForJob,
             **keywords)
         return job
     
     def addCalculateDepthMeanMedianModeJob(self, executable=None, \
         inputFile=None, outputFile=None, alignmentID=None,
         fractionToSample=0.001,
-        whichColumn=None, maxNumberOfSamplings=1E7, inputStatName=None,
+        whichColumn=None, maxNumberOfSamplings=1E7,
+        inputStatName=None,
         extraArguments=None,
         parentJobLs=None, job_max_memory = 500,
         transferOutput=False, **keywords):
@@ -338,12 +342,14 @@ class AbstractWorkflow(Workflow):
         if extraArguments:
             extraArgumentList.append(extraArguments)
         job= self.addGenericJob(executable=executable,
-            inputFile=inputFile, outputFile=outputFile,
+            inputFile=inputFile,
+            inputArgumentOption='-i',
+            outputFile=outputFile,
+            outputArgumentOption='-o',
             extraArgumentList=extraArgumentList,
-            parentJobLs=parentJobLs, extraDependentInputLs=None,
-            extraOutputLs=None, transferOutput=transferOutput,
-            key2ObjectForJob=None,
-            sshDBTunnel=None, job_max_memory=job_max_memory, **keywords)
+            parentJobLs=parentJobLs,
+            transferOutput=transferOutput,
+            job_max_memory=job_max_memory, **keywords)
         return job
 
     def addDBGenomeArgumentsToOneJob(self, job=None, objectWithDBArguments=None):

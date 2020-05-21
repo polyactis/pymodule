@@ -74,6 +74,8 @@ class InspectAlignmentPipeline(ParentClass):
         db_passwd=None,
         data_dir=None, local_data_dir=None,
 
+        ref_ind_seq_id=None,
+
         ind_aln_id_ls=None,
         ind_seq_id_ls=None,
         alignment_method_id=None,
@@ -125,6 +127,8 @@ class InspectAlignmentPipeline(ParentClass):
             dbname=dbname, schema=schema, port=port,
             db_user=db_user, db_passwd=db_passwd,
             data_dir=data_dir, local_data_dir=local_data_dir,
+
+            ref_ind_seq_id=ref_ind_seq_id,
 
             ind_aln_id_ls=ind_aln_id_ls,
             completedAlignment=1,
@@ -275,25 +279,22 @@ class InspectAlignmentPipeline(ParentClass):
         transferOutput=False,
         extraArguments=None, job_max_memory=2000, walltime=20, **keywords):
         """
-        2013.3.24 use addGenericJob()
-        2012.4.3
-            input is output of "samtools flagstat"
+        input is output of "samtools flagstat"
         """
         job= self.addGenericJob(executable=executable, \
             inputFile=inputF, inputArgumentOption='-i',\
             outputFile=outputF, outputArgumentOption='-o',\
+            extraArguments=extraArguments, \
             parentJobLs=parentJobLs,
             extraDependentInputLs=extraDependentInputLs,
-            extraOutputLs=None, extraArguments=extraArguments, \
             transferOutput=transferOutput, \
             extraArgumentList=['-a %s'%(alignmentID)], \
-            key2ObjectForJob=None, job_max_memory=job_max_memory, \
-            sshDBTunnel=None, walltime=walltime, **keywords)
+            job_max_memory=job_max_memory, \
+            walltime=walltime, **keywords)
         return job
 
     def preReduce(self, passingData=None, transferOutput=True, **keywords):
         """
-        2012.9.17
         setup additional mkdir folder jobs, 
             before mapEachAlignment, mapEachChromosome, mapReduceOneAlignment
         """
@@ -357,8 +358,6 @@ class InspectAlignmentPipeline(ParentClass):
 
         topOutputDirJob = passingData.topOutputDirJob
         flagStatMapFolderJob = passingData.flagStatMapFolderJob
-
-        refFastaF = passingData.refFastaFList[0]
 
         alignment = alignmentData.alignment
         parentJobLs = alignmentData.jobLs + [passingData.fastaDictJob, \
@@ -429,8 +428,8 @@ class InspectAlignmentPipeline(ParentClass):
                 executable=self.CalculateMedianMeanOfInputColumn, \
                 inputFile=depthOutputFile, outputFile=meanMedianModeDepthFile, 
                 alignmentID=alignment.id, \
-                parentJobLs=[topOutputDirJob, DOCJob], job_max_memory = 500, 
                 extraArguments="--inputFileFormat=2", \
+                parentJobLs=[topOutputDirJob, DOCJob], job_max_memory = 500, 
                 transferOutput=False)
 
             self.addInputToMergeJob(
@@ -475,7 +474,7 @@ class InspectAlignmentPipeline(ParentClass):
                 inputFile=bamF, outputFile=oneFlagStatOutputF, \
                 parentJobLs=parentJobLs + [flagStatMapFolderJob], \
                 extraDependentInputLs=[baiF], transferOutput=False, \
-                extraArguments=None, job_max_memory=jobMaxMemory/2, \
+                job_max_memory=jobMaxMemory/2, \
                 walltime=jobWalltime/2)
             self.addRefFastaJobDependency(job=samtoolsFlagStatJob, \
                 refFastaF=passingData.refFastaF, \
@@ -490,9 +489,8 @@ class InspectAlignmentPipeline(ParentClass):
                 inputF=oneFlagStatOutputF, alignmentID=alignment.id, 
                 outputF=reformatFlagStatOutputF, \
                 parentJobLs=[flagStatMapFolderJob, samtoolsFlagStatJob],
-                extraDependentInputLs=[], \
-                transferOutput=False, \
-                extraArguments=None, job_max_memory=20, walltime=30)
+                transferOutput=False,
+                job_max_memory=20, walltime=30)
             self.addInputToMergeJob(passingData.flagStatOutputMergeJob, \
                 inputF=reformatFlagStatOutputJob.output, \
                 parentJobLs=[reformatFlagStatOutputJob])
@@ -503,42 +501,42 @@ class InspectAlignmentPipeline(ParentClass):
             depthOutputFile = File(os.path.join(topOutputDirJob.output, \
                 '%s_depth.tsv.gz'%(alignment.id)))
             #use jobMaxMemory to reduce the number of running jobs and IO load
-            samtoolsDepthJob = self.addSAMtoolsDepthJob(samtoolsDepth=self.samtoolsDepth, \
-                samtools_path=self.samtools_path,\
-                bamF=bamF, outputFile=depthOutputFile, baiF=baiF, \
+            samtoolsDepthJob = self.addSAMtoolsDepthJob(
+                samtoolsDepth=self.samtoolsDepth,
+                samtools_path=self.samtools_path,
+                bamF=bamF, outputFile=depthOutputFile, baiF=baiF,
                 parentJobLs=[topOutputDirJob] + alignmentData.jobLs, 
-                job_max_memory = jobMaxMemory/2, \
-                extraArguments=None, \
+                job_max_memory = jobMaxMemory/2,
                 transferOutput=False)
-            self.addRefFastaJobDependency(job=samtoolsDepthJob, \
-                refFastaF=passingData.refFastaF, \
+            self.addRefFastaJobDependency(job=samtoolsDepthJob,
+                refFastaF=passingData.refFastaF,
                 fastaDictJob=passingData.fastaDictJob, 
                 refFastaDictF=passingData.refFastaDictF,\
-                fastaIndexJob = passingData.fastaIndexJob, \
+                fastaIndexJob = passingData.fastaIndexJob,
                 refFastaIndexF=passingData.refFastaIndexF)
 
             logFile = File(os.path.join(passingData.reduceOutputDirJob.output, \
                 "%s_depth_file_2DB.log"%(alignment.id)))
             outputFileRelativePath = "%s_depth.tsv.gz"%(os.path.splitext(alignment.path)[0])
-            extraArgumentList = ["--db_entry_id %s"%(alignment.id), \
+            extraArgumentList = ["--db_entry_id %s"%(alignment.id),
                 "--tableClassName IndividualAlignment", \
                 "--filePathColumnName path_to_depth_file",\
                 "--fileSizeColumnName depth_file_size", \
-                "--outputFileRelativePath %s"%(outputFileRelativePath), \
+                "--outputFileRelativePath %s"%(outputFileRelativePath),
                 "--data_dir %s"%(self.data_dir)]
             depthFile2DBJob = self.addPutStuffIntoDBJob(
-                executable=self.AffiliateFile2DBEntry, \
-                inputFile=samtoolsDepthJob.output, inputArgumentOption='-i',\
-                logFile=logFile, commit=True, \
-                parentJobLs=[samtoolsDepthJob, passingData.reduceOutputDirJob], \
-                extraDependentInputLs=None, transferOutput=True, extraArguments=None, \
-                extraArgumentList=extraArgumentList,\
+                executable=self.AffiliateFile2DBEntry,
+                inputFile=samtoolsDepthJob.output, inputArgumentOption='-i',
+                logFile=logFile, commit=True,
+                extraArgumentList=extraArgumentList,
+                parentJobLs=[samtoolsDepthJob, passingData.reduceOutputDirJob],
+                extraDependentInputLs=None, transferOutput=True,
                 job_max_memory=10, sshDBTunnel=self.needSSHDBTunnel)
             pdata = self.constructJobDataFromJob(samtoolsDepthJob)
         else:
             alignmentDepthFile = self.registerOneInputFile(
-                os.path.join(self.data_dir, alignment.path_to_depth_file), \
-                input_site_handler=None, folderName=self.pegasusFolderName, \
+                os.path.join(self.data_dir, alignment.path_to_depth_file),
+                input_site_handler=None, folderName=self.pegasusFolderName,
                 useAbsolutePathAsPegasusFileName=False,\
                 pegasusFileName=None, checkFileExistence=True)
             pdata = PassingData(job=None, jobLs=[], file=alignmentDepthFile, \
@@ -546,36 +544,30 @@ class InspectAlignmentPipeline(ParentClass):
         pdata.alignment = alignment
         self.alignmentDepthJobDataList.append(pdata)
 
-        if self.needPerContigJob:	#need for per-contig job
+        if self.needPerContigJob:
             statOutputDir = 'perContigStatOfAlignment%s'%(alignment.id)
-            passingData.statOutputDirJob = self.addMkDirJob(outputDir=statOutputDir)
+            passingData.statOutputDirJob = self.addMkDirJob(
+                outputDir=statOutputDir)
         else:
             passingData.statOutputDirJob = None
 
         return returnData
 
     def mapEachChromosome(self, alignmentData=None, chromosome=None,\
-        VCFJobData=None, passingData=None, reduceBeforeEachAlignmentData=None, \
+        VCFJobData=None, passingData=None, reduceBeforeEachAlignmentData=None,
         transferOutput=True, **keywords):
         """
-        2012.9.17
         """
         returnData = PassingData(no_of_jobs = 0)
         returnData.jobDataLs = []
         if not self.needPerContigJob:
-            #no need for per-contig job
             return returnData
-
         alignment = alignmentData.alignment
-
         parentJobLs = alignmentData.jobLs
         bamF = alignmentData.bamF
         baiF = alignmentData.baiF
-
         bamFnamePrefix = alignment.getReadGroup()
-
         statOutputDirJob = passingData.statOutputDirJob
-
         depthOutputFile = File(os.path.join(statOutputDirJob.output,
             '%s_%s_DOC.tsv.gz'%(alignment.id, chromosome)))
         samtoolsDepthJob = self.addSAMtoolsDepthJob(
@@ -583,7 +575,7 @@ class InspectAlignmentPipeline(ParentClass):
             samtools_path=self.samtools_path,\
             bamF=bamF, outputFile=depthOutputFile, baiF=baiF,
             parentJobLs=[statOutputDirJob]+alignmentData.jobLs,
-            job_max_memory = 500, extraArguments=None,
+            job_max_memory = 500,
             transferOutput=False)
         self.addRefFastaJobDependency(job=samtoolsDepthJob,
             refFastaF=passingData.refFastaF,
@@ -595,10 +587,11 @@ class InspectAlignmentPipeline(ParentClass):
             "%s_%s_meanMedianModeDepth.tsv"%(alignment.id, chromosome)))
         meanMedianModeDepthJob = self.addCalculateDepthMeanMedianModeJob(
             executable=self.CalculateMedianMeanOfInputColumn, \
-            inputFile=depthOutputFile, outputFile=meanMedianModeDepthFile, 
+            inputFile=depthOutputFile,
+            outputFile=meanMedianModeDepthFile,
             alignmentID="%s-%s"%(alignment.id, chromosome), \
-            parentJobLs=[samtoolsDepthJob], job_max_memory = 500,
             extraArguments="-r %s"%(chromosome),
+            parentJobLs=[samtoolsDepthJob], job_max_memory = 500,
             transferOutput=False)
 
         self.addInputToMergeJob(
@@ -639,15 +632,13 @@ class InspectAlignmentPipeline(ParentClass):
         return returnData
 
     def reduce(self, passingData=None, reduceAfterEachAlignmentDataLs=None,
-            transferOutput=True, **keywords):
+        transferOutput=True, **keywords):
         """
-        2013.08.14 add 2DB jobs only when their input is not empty
-        2012.9.17
+        add 2DB jobs only when their input is not empty
         """
         returnData = PassingData(no_of_jobs = 0)
         returnData.jobDataLs = []
         returnData.reduceAfterEachAlignmentDataLs = reduceAfterEachAlignmentDataLs
-
         reduceOutputDirJob = passingData.reduceOutputDirJob
 
         if passingData.flagStatOutputMergeJob.inputLs:
@@ -659,8 +650,7 @@ class InspectAlignmentPipeline(ParentClass):
                 inputFileList=[passingData.flagStatOutputMergeJob.output], \
                 logFile=flagStat2DBLogFile, commit=True, \
                 parentJobLs=[reduceOutputDirJob, passingData.flagStatOutputMergeJob],
-                extraDependentInputLs=[], transferOutput=True,
-                extraArguments=None, \
+                transferOutput=True,
                 job_max_memory=10, sshDBTunnel=self.needSSHDBTunnel)
         if passingData.depthOfCoverageOutputMergeJob.inputLs:
             DOC2DBLogFile = File(os.path.join(reduceOutputDirJob.output, "DOC2DB.log"))
@@ -670,8 +660,7 @@ class InspectAlignmentPipeline(ParentClass):
                 logFile=DOC2DBLogFile, commit=True, \
                 parentJobLs=[reduceOutputDirJob, \
                     passingData.depthOfCoverageOutputMergeJob],
-                extraDependentInputLs=[], transferOutput=True,
-                extraArguments=None,
+                transferOutput=True,
                 job_max_memory=10, sshDBTunnel=self.needSSHDBTunnel)
         if self.alignmentDepthJobDataList and \
             self.alignmentDepthIntervalMethodShortName:
@@ -687,16 +676,13 @@ class InspectAlignmentPipeline(ParentClass):
                 'AddAlignmentDepthIntervalMethod2DB.log'))
             addMethod2DBJob = self.addData2DBJob(
                 executable=self.AddAlignmentDepthIntervalMethod2DB,
-                inputFile=None, inputArgumentOption="-i", \
-                outputFile=None, outputArgumentOption="-o", \
                 data_dir=self.data_dir, logFile=logFile, commit=True,
-                parentJobLs=[self.logOutputDirJob], \
-                extraDependentInputLs=None, extraOutputLs=None,
-                transferOutput=True, extraArguments=None, \
                 extraArgumentList=["--methodShortName %s"%(
                     self.alignmentDepthIntervalMethodShortName),
                     "--alignmentIDList %s"%(alignmentIDListInStr),
                     "--min_segment_length %s"%(self.min_segment_length)],
+                parentJobLs=[self.logOutputDirJob], \
+                transferOutput=True,
                 job_max_memory=2000, walltime=30,
                 sshDBTunnel=self.needSSHDBTunnel)
 
@@ -705,11 +691,10 @@ class InspectAlignmentPipeline(ParentClass):
             updateMethodNoOfIntervalsJob = self.addData2DBJob(
                 executable=self.UpdateAlignmentDepthIntervalMethodNoOfIntervals,
                 data_dir=self.data_dir, logFile=logFile, commit=True,\
-                parentJobLs=[self.logOutputDirJob],
-                extraDependentInputLs=None, extraOutputLs=None,
-                transferOutput=True, extraArguments=None, \
                 extraArgumentList=["--methodShortName %s"%\
                     (self.alignmentDepthIntervalMethodShortName) ],
+                parentJobLs=[self.logOutputDirJob],
+                transferOutput=True,
                 job_max_memory=2000, walltime=30,
                 sshDBTunnel=self.needSSHDBTunnel)
 
@@ -720,14 +705,12 @@ class InspectAlignmentPipeline(ParentClass):
                         len(self.alignmentDepthJobDataList), chromosome)))
                 reduceSameChromosomeAlignmentDepthFilesJob = self.addGenericJob(
                     executable=self.ReduceSameChromosomeAlignmentDepthFiles, \
-                    inputFile=None, outputFile=outputFile, \
-                    parentJobLs=[reduceOutputDirJob],
-                    extraDependentInputLs=None, \
+                    outputFile=outputFile, outputArgumentOption='-o',\
                     extraArgumentList=[f"-w 2 --chromosomePositionColumnIndex 1",
                         f" --chromosomeSize {chromosomeSize}"],
-                    extraOutputLs=None,
-                    transferOutput=False, \
-                    key2ObjectForJob=None, job_max_memory=2000, walltime=60)
+                    parentJobLs=[reduceOutputDirJob],
+                    transferOutput=False,
+                    job_max_memory=2000, walltime=60)
                 for alignmentDepthJobData in self.alignmentDepthJobDataList:
                     #add a chromosome selection job
                     outputFile = File(os.path.join(passingData.topOutputDirJob.output,
@@ -736,21 +719,20 @@ class InspectAlignmentPipeline(ParentClass):
                     selectRowsFromMatrixCCJob = self.addGenericJob(
                         executable=self.SelectRowsFromMatrixCC,
                         inputFile=alignmentDepthJobData.file,
+                        inputArgumentOption='-i',
                         outputFile=outputFile,
-                        parentJobLs=alignmentDepthJobData.jobLs + \
-                            [passingData.topOutputDirJob],
-                        extraDependentInputLs=None, \
+                        outputArgumentOption='-o',
                         extraArgumentList=["--inputFileSortMode 1 -w 0",
                             " --whichColumnValue %s"%(chromosome)],
-                        extraOutputLs=None,\
+                        parentJobLs=alignmentDepthJobData.jobLs + \
+                            [passingData.topOutputDirJob],
                         transferOutput=False,
-                        key2ObjectForJob=None, job_max_memory=1000, walltime=60)
+                        job_max_memory=1000, walltime=60)
                     self.addInputToMergeJob(
                         reduceSameChromosomeAlignmentDepthFilesJob,
                         inputF=selectRowsFromMatrixCCJob.output, \
                         inputArgumentOption="-i",
-                        parentJobLs=[selectRowsFromMatrixCCJob], \
-                        extraDependentInputLs=None)
+                        parentJobLs=[selectRowsFromMatrixCCJob])
                 #add GADA job
                 # add segmentation jobs to figure out intervals at similar
                 outputFile = File(os.path.join(reduceOutputDirJob.output, \
@@ -761,24 +743,23 @@ class InspectAlignmentPipeline(ParentClass):
                 realInputVolume = chromosomeSize
                 jobWalltime = self.scaleJobWalltimeOrMemoryBasedOnInput(
                     realInputVolume=realInputVolume, \
-                    baseInputVolume=60000000, baseJobPropertyValue=600, \
+                    baseInputVolume=60000000, baseJobPropertyValue=600,
                     minJobPropertyValue=60, maxJobPropertyValue=2400).value
                 #base is 135M, => 21G
                 jobMaxMemory = self.scaleJobWalltimeOrMemoryBasedOnInput(
                     realInputVolume=realInputVolume, \
-                    baseInputVolume=135000000, baseJobPropertyValue=25000, \
+                    baseInputVolume=135000000, baseJobPropertyValue=25000,
                     minJobPropertyValue=11000, maxJobPropertyValue=29000).value
-                GADAJob = self.addGenericJob(executable=self.GADA, \
+                GADAJob = self.addGenericJob(executable=self.GADA,
                     inputFile=reduceSameChromosomeAlignmentDepthFilesJob.output, 
-                    outputFile=outputFile, \
+                    outputFile=outputFile,
+                    extraArgumentList=[f"--MinSegLen {self.min_segment_length}",
+                        '--debug -T 10 -a 0.5'],
                     parentJobLs=[reduceOutputDirJob, \
                         reduceSameChromosomeAlignmentDepthFilesJob], 
-                    extraDependentInputLs=None, \
-                    extraArgumentList=[f"--MinSegLen {self.min_segment_length}",
-                        '--debug -T 10 -a 0.5'], extraOutputLs=None,\
-                    transferOutput=False, \
-                    key2ObjectForJob=None, job_max_memory=jobMaxMemory,
-                        walltime=jobWalltime)
+                    transferOutput=False,
+                    job_max_memory=jobMaxMemory,
+                    walltime=jobWalltime)
                 """
                 GADAJob = self.addGenericJob(executable=self.GADA, \
                     inputFile=reduceSameChromosomeAlignmentDepthFilesJob.output, 
@@ -798,19 +779,16 @@ class InspectAlignmentPipeline(ParentClass):
                     executable=self.AddAlignmentDepthIntervalFile2DB, \
                     inputFile=GADAJob.output, \
                     inputArgumentOption="-i", \
-                    inputFileList=None, argumentForEachFileInInputFileList=None,\
-                    outputFile=None, outputArgumentOption="-o", \
                     data_dir=self.data_dir, logFile=logFile, commit=True,\
-                    parentJobLs=[GADAJob, addMethod2DBJob, self.logOutputDirJob],
-                    extraDependentInputLs=None, extraOutputLs=None,
-                    transferOutput=True,
-                    extraArguments=None,
                     extraArgumentList=[
                         "--methodShortName %s"%(self.alignmentDepthIntervalMethodShortName),
                         "--alignmentIDList %s"%(alignmentIDListInStr), 
                         '--chromosome %s'%(chromosome),\
-                        "--format tsv"], \
-                    job_max_memory=2000, walltime=30, sshDBTunnel=self.needSSHDBTunnel)
+                        "--format tsv"],
+                    parentJobLs=[GADAJob, addMethod2DBJob, self.logOutputDirJob],
+                    transferOutput=True,
+                    job_max_memory=2000, walltime=30,
+                    sshDBTunnel=self.needSSHDBTunnel)
                 self.depends(parent=addFile2DBJob, child=updateMethodNoOfIntervalsJob)
         print(f" {self.no_of_jobs} jobs, {self.no_of_alns_with_depth_jobs}"
             f" alignments with depth jobs, {self.no_of_alns_with_flagstat_jobs} "
@@ -900,6 +878,9 @@ if __name__ == '__main__':
     ap.add_argument("-u", "--db_user", help="Database user")
     ap.add_argument("-p", "--db_passwd", required=False,
         help="Password of the database user")
+
+    ap.add_argument('-a', "--ref_ind_seq_id", type=int, required=True,
+        help="Select this (IndividualSequence.id) as the reference")
 
     ap.add_argument('-i', "--ind_aln_id_ls", required=True,
         help='a comma/dash-separated list of IndividualAlignment.id.')
@@ -994,6 +975,7 @@ if __name__ == '__main__':
         dbname = args.dbname, schema = args.schema,
         db_user = args.db_user, db_passwd = args.db_passwd,
 
+        ref_ind_seq_id = args.ref_ind_seq_id,
         ind_aln_id_ls = args.ind_aln_id_ls,
         ind_seq_id_ls = args.ind_seq_id_ls,
         alignment_method_id = args.alignment_method_id,

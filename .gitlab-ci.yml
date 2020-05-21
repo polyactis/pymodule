@@ -105,7 +105,7 @@ InspectAlignmentPipeline:
     - pushd io && make all; popd
     - pushd mapper && make all; popd
     - pushd reducer && make all; popd
-    - ./ngs/qc/InspectAlignmentPipeline.py -i 2112-2132 -l condor -z pdc
+    - ./ngs/qc/InspectAlignmentPipeline.py -a 633 -i 2112-2132 -l condor -z pdc
       --dbname pmdb --schema sunset -u sunset_r -p yfishLabSunset
       --home_path /y/home/huangyu --pymodulePath `pwd`
       --tmpDir /y/scratch/tmp/huangyu/

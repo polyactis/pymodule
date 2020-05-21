@@ -3120,11 +3120,11 @@ run something like below to extract data from regionOfInterest out of
         job = self.addPipe2FileJob(executable=executable,
             commandFile=samtoolsExecutableFile,
             outputFile=outputFile,
+            extraArguments=extraArguments, 
+            extraArgumentList=['flagstat', inputFile],
             parentJobLs=parentJobLs,
             extraDependentInputLs=extraDependentInputLs,
             transferOutput=transferOutput,
-            extraArguments=extraArguments, 
-            extraArgumentList=['flagstat', inputFile],
             job_max_memory=job_max_memory, walltime=walltime)
         return job
 
