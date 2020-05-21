@@ -644,7 +644,10 @@ class MapReduceGenomeFileWorkflow(ParentClass):
         self.chr2IntervalDataLs = chr2IntervalDataLs
         self.firstInputJobData = firstInputJobData
         #self.firstInputFile = firstInputFile
-        self.registerReferenceData = self.getReferenceSequence()
+        if self.ref_ind_seq_id:
+            self.registerReferenceData = self.getReferenceSequence()
+        else:
+            self.registerReferenceData = None
         return self
     
     def run(self):
