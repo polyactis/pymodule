@@ -26,3 +26,4 @@ mapper/CalculateColCorBetweenTwoHDF5
 mapper/CalculateMedianMeanOfInputColumn
 reducer/ReduceSameChromosomeAlignmentDepthFiles
 
+mapper/FindMaxLDBetweenPeakAndEachLocus
