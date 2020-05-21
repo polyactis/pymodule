@@ -13,7 +13,6 @@ stages:
   - output_help
   - test_run
   - uninstall
-  - compile
 
 install:
   stage: install
@@ -101,10 +100,7 @@ InspectAlignmentPipeline:
     - echo "Output a InspectAlignmentPipeline DAG ... "
     - pwd
     #InspectAlignmentPipeline needs some compiled binaries
-    - pushd GADA && make; popd
-    - pushd io && make all; popd
-    - pushd mapper && make all; popd
-    - pushd reducer && make all; popd
+    - make all
     - ./ngs/qc/InspectAlignmentPipeline.py -a 633 -i 2112-2132 -l condor -z pdc
       --dbname pmdb --schema sunset -u sunset_r -p yfishLabSunset
       --home_path /y/home/huangyu --pymodulePath `pwd`
@@ -120,10 +116,3 @@ uninstall:
   stage: uninstall
   script:
     - pip3 uninstall -y palos
-
-compile:
-  stage: compile
-  script:
-    - echo "Compile other C++ programs and modules ... "
-    - pwd
-    - make all
