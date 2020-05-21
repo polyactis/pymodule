@@ -3,50 +3,50 @@
 Examples:
     # A workflow with 454 long-read and short-read PE. need a ref index job.
     %s --ind_seq_id_ls 165-167 -a 9 -o ShortRead2Alignment_isq_id_165_167_vs_9.xml
-        -e /u/home/eeskin/polyacti -l hoffman2 --data_dir NetworkData/vervet/db
+        --home_path /u/home/eeskin/polyacti -l hoffman2
         --tmpDir /work/ --needSSHDBTunnel --no_of_aln_threads 8
         --needRefIndexJob 
         -z dl324b-1.cmb.usc.edu -u huangyu --commit
 
-    # 2011-8-30 output a workflow to run alignments on hoffman2's condor pool
+    #output a workflow to run alignments on hoffman2's condor pool
     #  (--local_data_dir changes local_data_dir. --data_dir changes data_dir.)
-    # 2012.3.20 use /work/ or /u/scratch/p/polyacti/tmp as TMP_DIR for
+    #use /work/ or /u/scratch/p/polyacti/tmp as TMP_DIR for
     #   MarkDuplicates.jar (/tmp is too small for 30X genome)
-    # 2012.5.4 cluster 4 alignment jobs (before merging) as a unit
+    #cluster 4 alignment jobs (before merging) as a unit
     #   (--alignmentJobClusterSizeFraction 0.2), skip done alignment
     #   (--skipDoneAlignment)
-    # 2012.9.21 add "--alignmentPerLibrary" to align
+    #"--alignmentPerLibrary" to align
     #   for each library within one individual_sequence
-    # 2013.3.15 add "--coreAlignmentJobWallTimeMultiplier 0.5" to
+    #"--coreAlignmentJobWallTimeMultiplier 0.5" to
     #  reduce wall time for core-alignment (bwa/stampy) jobs by half
-    ref=3280; %s --ind_seq_id_ls 632-3230
+    ref=3280; %s -a $ref --ind_seq_id_ls 632-3230
         --sequence_min_coverage 15 --sequence_max_coverage 80
-        --site_id_ls 447 --sequence_filtered 1 --excludeContaminant -a $ref
+        --site_id_ls 447 --sequence_filtered 1 --excludeContaminant
         -o dags/ShortRead2AlignmentPipeline_VRCPart1_vs_$ref\_AlnMethod2.xml
-        -l hcondor -j hcondor -z localhost --tmpDir /work/
-        --home_path /u/home/eeskin/polyacti --no_of_aln_threads 8 --skipDoneAlignment
-        -D NetworkData/vervet/db/ -t NetworkData/vervet/db/
+        -l hcondor --tmpDir /work/
+        --home_path /u/home/eeskin/polyacti --no_of_aln_threads 8
+        --skipDoneAlignment
         --cluster_size 20 --alignment_method_name bwaShortRead
         --coreAlignmentJobWallTimeMultiplier 0.5
         --alignmentJobClusterSizeFraction 0.2
-        --needSSHDBTunnel --needRefIndexJob 
-        -u yh --commit --db_passwd secret
+        --needSSHDBTunnel --needRefIndexJob
+        -z localhost -u yh --commit --db_passwd secret
         #--alignmentPerLibrary
 
-    # 2011-8-30 a workflow to run on uschpc, Need ref index job
+    #A workflow to run on uschpc, Need ref index job
     #  (--needRefIndexJob), and 4 threads for each alignment job
     # Note the site_handler, input_site_handler and "--data_dir ..."
     #  to enable symlink
     %s -a 9 --ind_seq_id_ls 391-397,456,473,493
         -o ShortRead2Alignment_4DeepVRC_6LowCovVRC_392_397_vs_9.xml
-        -j uschpc -l uschpc --needRefIndexJob
+        -l uschpc --needRefIndexJob
         --no_of_aln_threads 4 --needSSHDBTunnel
         -e /home/cmb-03/mn/yuhuang
         -z 10.8.0.10 -u yh -p secret --commit
         --data_dir /home/cmb-03/mn/yuhuang/NetworkData/vervet/db/
         --javaPath /home/cmb-03/mn/yuhuang/bin/jdk/bin/java
 
-    # 2011-11-16 a workflow to run on uschpc, Need ref index job 
+    # a workflow to run on uschpc, Need ref index job 
     #  (--needRefIndexJob), and 4 threads for each alignment job.
     # Note the site_handler, input_site_handler. this will stage in all
     #    input and output (--noStageOutFinalOutput).
@@ -58,24 +58,21 @@ Examples:
         --javaPath /home/cmb-03/mn/yuhuang/bin/jdk/bin/java
         --needSSHDBTunnel
 
-    # 2011-8-31 output the same workflow above but for condor
+    # output the same workflow above but for condor pool
     %s -a 9 --ind_seq_id_ls 391-397,456,473,493
         -o dags/ShortRead2Alignment_4DeepVRC_6LowCovVRC_392_397_vs_9.xml
-        -j condor -l condor --needRefIndexJob
+        -l condor --needRefIndexJob
         -z 10.8.0.10 -u yh -p secret --commit --alignmentPerLibrary
 
-    # 2013.2.28 use the new alignment-method: bwaShortReadHighMismatches
-    #double the core alignment (bwa aln) job walltime (=23 hrs)
+    # Use the new alignment-method: bwaShortReadHighMismatches.
+    # Double the core alignment (bwa aln) job walltime (=23 hrs),
     #  (--coreAlignmentJobWallTimeMultiplier) because it takes much longer.
-    # set max walltime for any job to be 1 day (--max_walltime 1440)
+    # set max walltime for any job to be 1 day (--max_walltime 1440).
     ref=3231; %s -a $ref --ind_seq_id_ls 638
         -o dags/ShortRead2AlignmentPipeline_Aethiops_vs_$ref\_AlnMethod5.xml
-        -l hcondor -j hcondor
-        -z localhost -u yh --commit
+        -j hcondor -z localhost -u yh --commit
         --tmpDir /work/ --home_path /u/home/eeskin/polyacti
         --no_of_aln_threads 1 --skipDoneAlignment
-        -D /u/home/eeskin/polyacti/NetworkData/vervet/db/
-        -t /u/home/eeskin/polyacti/NetworkData/vervet/db/
         --cluster_size 1
         --alignment_method_name bwaShortReadHighMismatches
         --coreAlignmentJobWallTimeMultiplier 2  --needSSHDBTunnel
@@ -87,8 +84,7 @@ Examples:
     ref=1;
     %s -a $ref --ind_seq_id_ls 87
         -o dags/ShortRead2AlignmentPipeline_Aethiops_vs_$ref\_AlnMethod6.xml
-        -l hcondor -j hcondor --tmpDir /tmp/
-        -z pdc -u huangyu --commit
+        -j hcondor --tmpDir /tmp/ -z pdc -u huangyu --commit
         --no_of_aln_threads 1 --skipDoneAlignment --cluster_size 1
         --alignment_method_name bwamem
         --coreAlignmentJobWallTimeMultiplier 0.1
@@ -187,9 +183,6 @@ class ShortRead2Alignment(ParentClass):
         intervalOverlapSize=500000,
         intervalSize=5000000,
 
-        defaultGATKArguments=\
-        " --unsafe ALL --validation_strictness SILENT --read_filter BadCigar ",
-        
         site_handler='condor',
         input_site_handler='condor',
         cluster_size=30,
@@ -257,8 +250,6 @@ class ShortRead2Alignment(ParentClass):
             
             intervalOverlapSize=intervalOverlapSize,
             intervalSize=intervalSize,
-
-            defaultGATKArguments=defaultGATKArguments,
 
             site_handler=site_handler,
             input_site_handler=input_site_handler,
