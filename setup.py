@@ -18,7 +18,6 @@ def create_manifest_file():
     f = None
     try:
         f = open('MANIFEST.in', 'w')
-        f.write('include *.py\n')
         f.write('global-exclude *.py[cod]\n')
     finally:
         if f:
@@ -47,7 +46,7 @@ def find_package_data(dirname):
 
 setup_args = dict(
     name="Palos",
-    version="0.1.14",
+    version="0.1.15",
     author="Yu S. Huang",
     author_email="polyactis@gmail.com",
     description="Misc Python modules developed and used by the yfish group",
