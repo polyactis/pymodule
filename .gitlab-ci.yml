@@ -126,7 +126,4 @@ compile:
   script:
     - echo "Compile other C++ programs and modules ... "
     - pwd
-    - pushd io && make all; popd
-    - pushd mapper && make all; popd
-    - pushd polymorphism && make all; popd
-    - pushd reducer && make all; popd
+    - make all

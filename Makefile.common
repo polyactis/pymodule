@@ -1,17 +1,18 @@
 
-.SUFFIXES:	.i .cc .c .so .o _wrap.o .py
-.PHONY:	swig clean_subdirs subdirs $(SUBDIRS)
+.SUFFIXES: .i .cc .c .so .o _wrap.o .py
+.PHONY: swig clean_subdirs subdirs $(SUBDIRS)
 
-IncludeDirs = -I`readlink -f .`  -I ~/script/vcflib/ -I /usr/include/hdf5/serial/ -I ~/script/vcflib/tabixpp/ -I ~/script/vcflib/tabixpp/htslib/
-BoostLib  = -lboost_program_options -lboost_iostreams
-HDF5Lib  = -lhdf5_cpp -lhdf5 
+IncludeDirs = -I`readlink -f .` -I /usr/include/hdf5/serial/ \
+	-I ~/script/vcflib/ -I ~/script/vcflib/tabixpp/ -I ~/script/vcflib/tabixpp/htslib/
+BoostLib = -lboost_program_options -lboost_iostreams
+HDF5Lib = -lhdf5_cpp -lhdf5_serial
 
 ## CXXTARGETS, CXXLDFLAGS, CTARGETS, CLDFLAGS, ExtraTargets will be defined in child Makefiles 
 #CXXTARGETS	= 
-#CXXStaticTargets	=
-StaticStartFlags	= -Wl,--no-as-needed -Wl,-Bstatic -static-libgcc -static-libstdc++ 
-StaticEndFlags	= -Wl,-Bdynamic -lz -lpthread -ldl
-CXXFLAGS	= -fPIC -O3 -std=c++11 -std=gnu++11 -Wl,--no-as-needed
+#CXXStaticTargets =
+StaticStartFlags = -Wl,--no-as-needed -Wl,-Bstatic -static-libgcc -static-libstdc++ 
+StaticEndFlags = -Wl,-Bdynamic -lz -lpthread -ldl
+CXXFLAGS = -fPIC -O3 -std=c++11 -std=gnu++11 -Wl,--no-as-needed
 # -std=c++0x 
 # -std=c++11
 # -std=gnu++11
@@ -31,7 +32,8 @@ SharedLibFlags	= -shared -fPIC
 #ExtraTargets
 #SRCS
 
-all:  depend subdirs $(CXXStaticTargets) $(CXXTARGETS) $(CTARGETS) $(SharedLibTargets) $(StaticLibTargets) $(ExtraTargets)
+all:  depend subdirs $(CXXStaticTargets) $(CXXTARGETS) $(CTARGETS) \
+	$(SharedLibTargets) $(StaticLibTargets) $(ExtraTargets)
 
 
 $(StaticLibTargets):	%.a:	%.o
@@ -47,7 +49,7 @@ $(CXXTARGETS):	%:	%.o
 	$(CXXCOMPILER) $< $(CXXFLAGS) -o $@ $(CXXLDFLAGS)
 
 $(CXXStaticTargets):	%:	%.o
-	$(CXXCOMPILER) $< $(CXXFLAGS) -o $@ $(StaticStartFlags) $(CXXLDFLAGS) $(StaticEndFlags)
+	$(CXXCOMPILER) $< $(CXXFLAGS) -o $@ $(StaticStartFlags) $(StaticEndFlags) $(CXXLDFLAGS)
 
 .cc.o:
 	$(CXXCOMPILER) $< $(CXXFLAGS) $(IncludeDirs) -c -o $@
@@ -61,7 +63,8 @@ $(CTARGETS):	%:	%.o
 #.c:	$(wildcard ~/src/pymodule/include/*.h)
 #.cc:	$(wildcard ~/src/pymodule/include/*.h)
 
-### 2013.08.21 generate auto-dependency for each source code file through "gcc -MM". so that change of .h files would trigger re-compilation as well.
+#### 2013.08.21 generate auto-dependency for each source code file through
+## "gcc -MM". so that change of .h files would trigger re-compilation as well.
 
 depend: .depend
 

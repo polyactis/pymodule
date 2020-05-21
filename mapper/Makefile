@@ -1,18 +1,20 @@
-SUBDIRS 	= extractor
-CXXStaticTargets	= CalculateColCorBetweenTwoHDF5 FindMaxLDBetweenPeakAndEachLocus
-CXXLDFLAGS 	= $(HDF5Lib)
-CTARGETS	= 
+SUBDIRS = extractor
+CXXStaticTargets = FindMaxLDBetweenPeakAndEachLocus CalculateColCorBetweenTwoHDF5
+CXXLDFLAGS = $(HDF5Lib)
+CTARGETS = 
 
-IncludeDirs	= -I`readlink -f ..`
-ExtraTargets	= CalculateMedianMeanOfInputColumn
+ExtraTargets = CalculateMedianMeanOfInputColumn
 
+#2015.03.13 use dynamic armadillo library in ubuntu. No static armadillo
 CalculateMedianMeanOfInputColumn:	%:	%.o
-	-$(CXXCOMPILER) $< $(CXXFLAGS) -o $@ $(StaticStartFlags) -lboost_program_options -lboost_iostreams $(StaticEndFlags) -larmadillo
-#2015.03.13 didn't find static armadillo in ubuntu libraries
+	-$(CXXCOMPILER) $< $(CXXFLAGS) -o $@ $(StaticStartFlags) \
+	-lboost_program_options -lboost_iostreams $(StaticEndFlags) -larmadillo
 
-SRCS	= CalculateColCorBetweenTwoHDF5.cc FindMaxLDBetweenPeakAndEachLocus.cc CalculateMedianMeanOfInputColumn.cc
+SRCS = CalculateColCorBetweenTwoHDF5.cc FindMaxLDBetweenPeakAndEachLocus.cc \
+	CalculateMedianMeanOfInputColumn.cc
 
 include ../Makefile.common
 #all:	$(CXXTARGETS) $(CTARGETS) CalculateColCorBetweenTwoHDF5
 #overwrite Makefile.common
-IncludeDirs	= -I`readlink -f ..`
+IncludeDirs = -I`readlink -f ..` -I /usr/include/hdf5/serial/
+
