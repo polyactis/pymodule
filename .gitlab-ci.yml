@@ -85,15 +85,31 @@ ShortRead2Alignment:
     - ./ngs/alignment/ShortRead2Alignment.py --ind_seq_id_ls 787-811
       -a 633 -o Alignment_isq_787_811_vs_633.xml -l condor
       --home_path /y/home/huangyu --pymodulePath `pwd`
-      --no_of_aln_threads 8 --tmpDir /y/scratch/tmp/huangyu/
+      --tmpDir /y/scratch/tmp/huangyu/
+      --no_of_aln_threads 8
       -z pdc --dbname pmdb --schema sunset
       -u sunset_r -p yfishLabSunset
-
   artifacts:
     name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}_${CI_BUILD_ID}"
     expire_in: 3 mos
     paths:
     - Alignment_isq_787_811_vs_633.xml
+
+InspectAlignmentPipeline:
+  stage: test_run
+  script:
+    - echo "Output a InspectAlignmentPipeline DAG ... "
+    - pwd
+    - ./ngs/qc/InspectAlignmentPipeline.py -i 2112-2132 -l condor -z pdc
+      --dbname pmdb --schema sunset -u sunset_r -p yfishLabSunset
+      --home_path /y/home/huangyu --pymodulePath `pwd`
+      --tmpDir /y/scratch/tmp/huangyu/
+      -o Inspect_Aln_2112_2132.xml
+  artifacts:
+    name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}_${CI_BUILD_ID}"
+    expire_in: 3 mos
+    paths:
+    - Inspect_Aln_2112_2132.xml
 
 uninstall:
   stage: uninstall

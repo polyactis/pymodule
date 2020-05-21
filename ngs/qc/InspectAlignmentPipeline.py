@@ -1,40 +1,14 @@
 #!/usr/bin/env python3
 """
 Examples:
-    #2011-11-5 run it on hoffman2, need ssh tunnel for db (--needSSHDBTunnel)
-    %s -a 524 -j hoffman2 -l hoffman2 -u yh -z uclaOffice
-        -o MarkDupAlnID552_661Pipeline_hoffman2.xml
-        --ind_aln_id_ls 552-661 -e /u/home/eeskin/polyacti/
-        --tmpDir /u/home/eeskin/polyacti/NetworkData/
-        -J /u/local/apps/java/jre1.6.0_23/bin/java
-        -t /u/home/eeskin/polyacti/NetworkData/vervet/db
-        -D /Network/Data/vervet/db/
-        --needSSHDBTunnel
-
-    #2011-11-5 run on uschpc (input data is on uschpc), for each top contig as well
-    %s -a 524 -j uschpc -l uschpc -u yh -z uclaOffice
-        -o MarkDupAlnID552_661Pipeline_uschpc.xml
-        --ind_aln_id_ls 552-661 --needPerContigJob -e /home/cmb-03/mn/yuhuang/
-         --tmpDir /home/cmb-03/mn/yuhuang/tmp/
-        -J /usr/usc/jdk/default/bin/java
-        -t /home/cmb-03/mn/yuhuang/NetworkData/vervet/db/ -D /Network/Data/vervet/db/
-
-    #2011-11-25 on hoffman2's condor pool, need ssh tunnel for db (--needSSHDBTunnel)
-    %s -a 524 -j hcondor -l hcondor -u yh -z localhost
-        --contigMaxRankBySize 7559 -o InspectRefSeq524WholeAlignment.xml
-        --cluster_size 30
-        -e /u/home/eeskin/polyacti/ -t /u/home/eeskin/polyacti/NetworkData/vervet/db/
-        -D /u/home/eeskin/polyacti/NetworkData/vervet/db/
-        -J ~/bin/jdk/bin/java --needSSHDBTunnel
-
-    #2012.4.3 change tmpDir (--tmpDir) for AddOrReplaceReadGroups,
+    #Change tmpDir (--tmpDir) for AddOrReplaceReadGroups,
     #  no job clustering (--cluster_size 1)
     %s -a 524 -j condorpool -l condorpool -u yh -z uclaOffice
-        -o workflow/InspectAlignment/InspectAln1_To_661_RefSeq524Alignments.xml
+        -o dags/InspectAln1_To_661_RefSeq524Alignments.xml
         --ind_aln_id_ls 1-661
         --tmpDir /Network/Data/vervet/vervetPipeline/tmp/ --cluster_size 1
 
-    #2012.5.8 do perContig depth estimation (--needPerContigJob) and
+    #Do perContig depth estimation (--needPerContigJob) and
     #  skip alignments with stats in db already (--skipAlignmentWithStats)
     # need ssh tunnel for db (--needSSHDBTunnel)
     # add --individual_sequence_file_raw_id_type 2 (library-specific alignments,
@@ -43,41 +17,42 @@ Examples:
     # 	 (both all-library-fused and library-specific alignments)
     # add "--country_id_ls 135,136,144,148,151" to limit individuals 
     # 	from US,Barbados,StKitts,Nevis,Gambia (AND with -S, )
-    %s -a 524 -j hcondor -l hcondor -u yh -z localhost --contigMaxRankBySize 7559
-        -o workflow/InspectAlignment/InspectAln1_To_1251_RefSeq524Alignments.xml
+    %s -a 524 -l hcondor -u yh -z localhost --contigMaxRankBySize 7559
+        -o dags/InspectAln1_To_1251_RefSeq524Alignments.xml
         --ind_aln_id_ls 1-1251 --cluster_size 1
-        -e /u/home/eeskin/polyacti/
-        -t ~/NetworkData/vervet/db/ -D ~/NetworkData/vervet/db/
+        --home_path /u/home/eeskin/polyacti/
         -J ~/bin/jdk/bin/java
         --needPerContigJob --skipAlignmentWithStats --needSSHDBTunnel
         #--individual_sequence_file_raw_id_type 2 
         # --country_id_ls 135,136,144,148,151 --tax_id_ls 60711 #sabaeus
         #--ind_seq_id_ls 632-3230 --site_id_ls 447 --sequence_filtered 1
-        #  --excludeContaminant	#VRC sequences
+        #--excludeContaminant	#VRC sequences
         #--sequence_filtered 1 --alignment_method_id  2
 
-    #2013.10.03
+    #--min_segment_length
     mLength=100;
-    %s --country_id_ls 1,129,130,131,132,133,134,136,144,148,151,152 --tax_id_ls 460675
+    %s
         --alignmentDepthIntervalMethodShortName 16CynosurusRef3488MinLength$mLength
-        --sequence_filtered 1 --local_realigned 1 --reduce_reads 0 --completedAlignment 1
-        --excludeContaminant --ind_seq_id_ls 632-5000 -a 3488 --ref_genome_tax_id 60711
-        --ref_genome_sequence_type_id 1 --ref_genome_version 1 -j hcondor -l hcondor
-        -u yh -z localhost --contigMaxRankBySize 3000
-        -o dags/InspectCynosurusAlignment_RefSeq3488MinLength$mLength\_AlnMethod6.xml
-        --cluster_size 1 --data_dir ~/NetworkData/vervet/db/
-        --local_data_dir ~/NetworkData/vervet/db/
-        -J ~/bin/jdk/bin/java --skipAlignmentWithStats
-        --needSSHDBTunnel --sequence_filtered 1
-        --alignment_method_id 6 --completedAlignment 1 --min_segment_length $mLength
+        -a 3488 --ref_genome_tax_id 60711
+        --ref_genome_sequence_type_id 1 --ref_genome_version 1
+        --contigMaxRankBySize 3000
+        --ind_seq_id_ls 632-5000 --excludeContaminant
+        --alignment_method_id 6 --sequence_filtered 1
+        --tax_id_ls 460675
+        --country_id_ls 1,129,130,131,132,133,134,136,144,148,151,152
+        --skipAlignmentWithStats
+        --min_segment_length $mLength
+        -l hcondor -z localhost -u yh
+        -o dags/InspectAlignment_RefSeq3488MinLength$mLength\_AlnMethod6.xml
+        --cluster_size 1 -J ~/bin/jdk/bin/java
+        --needSSHDBTunnel
 
 Description:
-    A pegasus workflow that inspects no-of-reads-aligned, inferred insert size and etc.
+    A pegasus workflow that inspects no-of-reads-aligned, infers insert size and etc.
     Use samtools flagstat.
 """
 import sys, os, math
-__doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], \
-    sys.argv[0], sys.argv[0])
+__doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0])
 
 import copy
 import getpass
@@ -90,49 +65,129 @@ ParentClass = AbstractAlignmentWorkflow
 
 class InspectAlignmentPipeline(ParentClass):
     __doc__ = __doc__
-    commonOptionDict = copy.deepcopy(ParentClass.option_default_dict)
-    #commonOptionDict.pop(('inputDir', 0, ))
-    commonOptionDict.update(
-        ParentClass.commonAlignmentWorkflowOptionDict.copy())
-
-    option_default_dict = copy.deepcopy(commonOptionDict)
-    option_default_dict.update({
-        ('min_segment_length', 0, int): [100, '', 1, \
-            'a parameter of segmentation algorithm used in segmenting the depth file', ],\
-        ("needPerContigJob", 0, int): [0, 'P', 0, \
-            'toggle to add DepthOfCoverage and VariousReadCount jobs for each contig.'],\
-        ("skipAlignmentWithStats", 0, int): [0, 's', 0, \
-            'If an alignment has depth stats filled, not DOC job will be run. similar for flagstat job.'],\
-        ("alignmentDepthIntervalMethodShortName", 0, ): [None, '', 1, \
-            'AlignmentDepthIntervalMethod.short_name, '
-            'used to store segmented depth intervals from all alignments into db. '
-            'This portion of workflow will not run if this is not given.'],\
-        })
     #	("fractionToSample", 0, float): [0.001, '', 1, 
     # 'fraction of loci to walk through for DepthOfCoverage walker.'],\
-    option_default_dict[('completedAlignment', 0, int)][0]=1
-    
-    def __init__(self, **keywords):
+    def __init__(self, 
+        drivername='postgresql', hostname='localhost',
+        dbname='', schema='public', port=None,
+        db_user=None,
+        db_passwd=None,
+        data_dir=None, local_data_dir=None,
+
+        ind_aln_id_ls=None,
+        ind_seq_id_ls=None,
+        alignment_method_id=None,
+        excludeContaminant=False,
+        sequence_filtered=None,
+
+        min_segment_length=100,
+        needPerContigJob=False,
+        skipAlignmentWithStats=False,
+        alignmentDepthIntervalMethodShortName=None,
+        
+        samtools_path="bin/samtools",
+        picard_dir="script/picard/dist",
+        gatk_path="bin/GenomeAnalysisTK1_6_9.jar",
+        gatk2_path="bin/GenomeAnalysisTK.jar",
+        picard_path="script/picard.broad/build/libs/picard.jar",
+
+        contigMaxRankBySize=None,
+        contigMinRankBySize=None,
+
+        chromosome_type_id=None, 
+        ref_genome_tax_id=9606,
+        ref_genome_sequence_type_id=1,
+        ref_genome_version=15,
+        ref_genome_outdated_index=0,
+
+        pegasusFolderName='input',
+        site_handler='condor',
+        input_site_handler='condor',
+        cluster_size=30,
+        output_path=None,
+        tmpDir='/tmp/',
+        max_walltime=4320,
+        
+        home_path=None,
+        javaPath=None,
+        pymodulePath="src/pymodule",
+
+        jvmVirtualByPhysicalMemoryRatio=1.2,
+
+        needSSHDBTunnel=False,
+        commit=False,
+        debug=False,
+        report=False):
         """
-        2011-11-4
         """
-        ParentClass.__init__(self, **keywords)
+        ParentClass.__init__(self, 
+            drivername=drivername, hostname=hostname,
+            dbname=dbname, schema=schema, port=port,
+            db_user=db_user, db_passwd=db_passwd,
+            data_dir=data_dir, local_data_dir=local_data_dir,
+
+            ind_aln_id_ls=ind_aln_id_ls,
+            completedAlignment=1,
+            ind_seq_id_ls=ind_seq_id_ls,
+            alignment_method_id=alignment_method_id,
+            excludeContaminant=excludeContaminant,
+            sequence_filtered=sequence_filtered,
+
+            samtools_path=samtools_path,
+            picard_dir=picard_dir,
+            gatk_path=gatk_path,
+            gatk2_path=gatk2_path,
+            picard_path=picard_path,
+
+            contigMaxRankBySize=contigMaxRankBySize,
+            contigMinRankBySize=contigMinRankBySize,
+
+            chromosome_type_id=chromosome_type_id, 
+            ref_genome_tax_id=ref_genome_tax_id,
+            ref_genome_sequence_type_id=ref_genome_sequence_type_id,
+            ref_genome_version=ref_genome_version,
+            ref_genome_outdated_index=ref_genome_outdated_index,
+
+            pegasusFolderName=pegasusFolderName,
+            site_handler=site_handler,
+            input_site_handler=input_site_handler,
+            cluster_size=cluster_size,
+            output_path=output_path,
+            tmpDir=tmpDir,
+            max_walltime=max_walltime, 
+            
+            home_path=home_path,
+            javaPath=javaPath,
+            pymodulePath=pymodulePath,
+            
+            jvmVirtualByPhysicalMemoryRatio=jvmVirtualByPhysicalMemoryRatio,
+            needSSHDBTunnel=needSSHDBTunnel,
+            commit=commit,
+            debug=debug, report=report)
+        
+        self.min_segment_length = min_segment_length
+        self.needPerContigJob = needPerContigJob
+        self.skipAlignmentWithStats = skipAlignmentWithStats
+        self.alignmentDepthIntervalMethodShortName = \
+            alignmentDepthIntervalMethodShortName
+        
         self.no_of_alns_with_depth_jobs = 0
         self.no_of_alns_with_flagstat_jobs = 0
 
         self.alignmentDepthJobDataList=[]
         self.needSplitChrIntervalData = False
     
-    def addDepthOfCoverageJob(self, DOCWalkerJava=None, GenomeAnalysisTKJar=None,\
-        refFastaFList=None, bamF=None, baiF=None, DOCOutputFnamePrefix=None,\
-        fractionToSample=None, minMappingQuality=20, minBaseQuality=20, \
-        parentJobLs=None, extraArguments="", \
-        transferOutput=False, \
+    def addDepthOfCoverageJob(self,
+        DOCWalkerJava=None, GenomeAnalysisTKJar=None,
+        refFastaFList=None, bamF=None, baiF=None, DOCOutputFnamePrefix=None,
+        fractionToSample=None, minMappingQuality=20, minBaseQuality=20,
+        extraArguments="",
+        parentJobLs=None, transferOutput=False,
         job_max_memory = 1000, walltime=None, **keywords):
         """
         2013.06.12
-            bugfix, instead of --minBaseQuality, it was --maxBaseQuality passed to GATK.
-            set minMappingQuality (was 30) to 20.
+        Bugfix, instead of --minBaseQuality, it was --maxBaseQuality passed to GATK.
+        Set minMappingQuality (was 30) to 20.
         2013.06.09
             .sample_statistics is new GATK DOC output file,
              (replacing the .sample_interval_summary file).
@@ -846,16 +901,34 @@ if __name__ == '__main__':
     ap.add_argument("-p", "--db_passwd", required=False,
         help="Password of the database user")
 
-    ap.add_argument('-i', "--ind_seq_id_ls", required=True,
+    ap.add_argument('-i', "--ind_aln_id_ls", required=True,
+        help='a comma/dash-separated list of IndividualAlignment.id.')
+    ap.add_argument("--ind_seq_id_ls",
         help='a comma/dash-separated list of IndividualSequence.id.')
-
-    ap.add_argument('-S', "--site_id_ls",
-        help='a comma/dash-separated list of site IDs to filter individuals.')
-    ap.add_argument("--country_id_ls",
-        help='a comma/dash-separated list of country IDs to filter individuals.')
-    ap.add_argument("--tax_id_ls", default='9606',
-        help='a comma/dash-separated list of taxonomy IDs to filter individuals.')
+    ap.add_argument("--alignment_method_id", type=int, 
+        help='AlignmentMethod.id, to filter alignments.')
+    ap.add_argument("--excludeContaminant", action='store_true',
+        help='Toggle to exclude sequences from contaminated individuals, '
+            '(IndividualSequence.is_contaminated=1)')
+    ap.add_argument("--sequence_filtered", action='store_true',
+        help='Filter alignments/individual_sequences. '
+            'None: no filter, 0: unfiltered sequences, '
+            '1: filtered sequences: 2: ...')
     
+    ap.add_argument("--min_segment_length", type=int, default=100,
+        help='minimal length in segmenting the alignment depth data.')
+    ap.add_argument("--needPerContigJob", action='store_true',
+        help='Toggle to add DepthOfCoverage and VariousReadCount jobs '
+        'for each contig')
+    ap.add_argument("--skipAlignmentWithStats", action='store_true',
+        help='If an alignment has depth stats filled, no DOC job will be run. '
+        'Similar for flagstat job.')
+    ap.add_argument("--alignmentDepthIntervalMethodShortName",
+        action='store_true',
+        help='AlignmentDepthIntervalMethod.short_name, '
+        'to store segmented depth intervals from all alignments into db. '
+        'This will trigger depth-per-segment jobs.')
+
     ap.add_argument("-F", "--pegasusFolderName", default='input',
         help='The path relative to the workflow running root. '
         'This folder will contain pegasus input & output. '
@@ -882,14 +955,6 @@ if __name__ == '__main__':
     ap.add_argument("-o", "--output_path", type=str, required=True,
         help="The path to the output file that will contain the Pegasus DAG.")
     
-    ap.add_argument("--home_path",
-        help="Path to your home folder. Default is ~.")
-    ap.add_argument("--javaPath", default='bin/java',
-        help="Path to java. Default is %(default)s.")
-    ap.add_argument("--pymodulePath", type=str, default="src/pymodule",
-        help="Path to the pymodule code folder. "
-        "If relative path, home folder is inserted in the front.")
-    
     ap.add_argument("--tmpDir", type=str, default='/tmp/',
         help='Default: %(default)s. '
         'A local folder for some jobs (MarkDup) to store temp data. '
@@ -898,6 +963,15 @@ if __name__ == '__main__':
         help='Default: %(default)s. '
         'Maximum wall time for any job, in minutes. 4320=3 days. '
         'Used in addGenericJob(). Most clusters have upper limit for runtime.')
+    
+    ap.add_argument("--home_path",
+        help="Path to your home folder. Default is ~.")
+    ap.add_argument("--javaPath", default='bin/java',
+        help="Path to java. Default is %(default)s.")
+    ap.add_argument("--pymodulePath", type=str, default="src/pymodule",
+        help="Path to the pymodule code folder. "
+        "If relative path, home folder is inserted in the front.")
+    
     ap.add_argument("--needSSHDBTunnel", action='store_true',
         help="If all DB-interacting jobs need a ssh tunnel to "
         "access a database that is inaccessible to computing nodes.")
@@ -920,16 +994,22 @@ if __name__ == '__main__':
         dbname = args.dbname, schema = args.schema,
         db_user = args.db_user, db_passwd = args.db_passwd,
 
+        ind_aln_id_ls = args.ind_aln_id_ls,
         ind_seq_id_ls = args.ind_seq_id_ls,
+        alignment_method_id = args.alignment_method_id,
+        excludeContaminant = args.excludeContaminant,
+        sequence_filtered = args.sequence_filtered,
 
-        site_id_ls = args.site_id_ls,
-        country_id_ls = args.country_id_ls,
-        tax_id_ls = args.tax_id_ls,
-
+        min_segment_length = args.min_segment_length,
+        needPerContigJob = args.needPerContigJob,
+        skipAlignmentWithStats = args.skipAlignmentWithStats,
+        alignmentDepthIntervalMethodShortName = \
+            args.alignmentDepthIntervalMethodShortName,
+        
+        pegasusFolderName = args.pegasusFolderName,
         site_handler = args.site_handler, 
         input_site_handler = args.input_site_handler,
         cluster_size = args.cluster_size,
-        pegasusFolderName = args.pegasusFolderName,
         output_path = args.output_path,
         tmpDir = args.tmpDir,
         max_walltime = args.max_walltime,
@@ -937,7 +1017,6 @@ if __name__ == '__main__':
         home_path = args.home_path,
         javaPath = args.javaPath,
         pymodulePath = args.pymodulePath,
-        thisModulePath = None,
         needSSHDBTunnel = args.needSSHDBTunnel,
         commit = args.commit,
         debug = args.debug,
