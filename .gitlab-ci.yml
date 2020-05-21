@@ -100,6 +100,8 @@ InspectAlignmentPipeline:
   script:
     - echo "Output a InspectAlignmentPipeline DAG ... "
     - pwd
+    #InspectAlignmentPipeline needs a compiled GADA
+    - pushd GADA && make && popd
     - ./ngs/qc/InspectAlignmentPipeline.py -i 2112-2132 -l condor -z pdc
       --dbname pmdb --schema sunset -u sunset_r -p yfishLabSunset
       --home_path /y/home/huangyu --pymodulePath `pwd`
