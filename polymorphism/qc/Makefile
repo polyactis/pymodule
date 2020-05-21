@@ -4,9 +4,9 @@ CXXLDFLAGS 	= $(BoostLib)
 CTARGETS	= 
 
 #ExtraTargets	= CheckTwoVCFOverlapCC
-SharedLibTargets	= ../../io/AbstractMatrixFileWalkerCC.so 
-#CheckTwoVCFOverlapCC:	%:	%.o $(SharedLibTargets)
-#	-$(CXXCOMPILER) $< ~/script/vcflib/libvcf.a $(SharedLibTargets) $(CXXFLAGS) -o $@ $(CXXLDFLAGS)
+ParentObj = `readlink -f ../../io/AbstractMatrixFileWalkerCC.so`
+#CheckTwoVCFOverlapCC:	%:	%.o
+#	-$(CXXCOMPILER) $< ~/script/vcflib/libvcf.a $(ParentObj) $(CXXFLAGS) -o $@ $(CXXLDFLAGS)
 #SRCS	= CheckTwoVCFOverlapCC.cc
 include ../../Makefile.common
 #all:	$(CXXTARGETS) $(CTARGETS) CalculateColCorBetweenTwoHDF5

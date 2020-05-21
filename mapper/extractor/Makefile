@@ -4,12 +4,12 @@ CXXLDFLAGS	= $(BoostLib)
 CTARGETS	= 
 
 ExtraTargets	= SelectRowsFromMatrixCC
-SharedLibTargets  = ../../io/AbstractMatrixFileWalkerCC.so
+ParentObj = `readlink -f ../../io/AbstractMatrixFileWalkerCC.so`
 
 SRCS	= SelectRowsFromMatrixCC.cc
 
-SelectRowsFromMatrixCC:	%:	%.o $(SharedLibTargets)
-	-$(CXXCOMPILER) $< $(SharedLibTargets) $(CXXFLAGS) $(CXXLDFLAGS) -o $@
+SelectRowsFromMatrixCC:	%:	%.o
+	-$(CXXCOMPILER) $< $(ParentObj) $(CXXFLAGS) $(CXXLDFLAGS) -o $@
 
 
 include ../../Makefile.common

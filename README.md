@@ -14,7 +14,31 @@ It contains code related to bioinformatics projects focusing on next-generation 
 [ngs/](ngs/) contains programs analyzing next-generation sequencing data.
 
 # Prerequisites
-The `palos` module is universally used by many programs and must be installed before running the standalone programs.
+The `palos` module is universally used by many programs and must be installed before running any program in pymodule.
+
+## Optional prerequisites
+
+Following pakcages are optional, only needed for some functions.
+
+1. python-mysqldb
+1. python-psycopg2 http://initd.org/psycopg/
+1. matplotlib basemap toolkit http://matplotlib.sourceforge.net/basemap/doc/html/
+1. python imaging library http://www.pythonware.com/products/pil/
+1. python-scientific http://www.scipy.org/
+1. biopython
+1. python-rpy
+1. networkx https://networkx.lanl.gov/wiki
+1. hcluster
+1. python-h5py
+1. python-tables
+
+## Optional C++ libraries
+
+Required if you plan to compile all binaries in pymodule by typeing 'make all'.
+
+apt-get install libhdf5-dev libhdf5-serial-dev libhdf5-cpp-100 hdf5-tools \
+       libarmadillo-dev libboost-program-options-dev libboost-iostreams-dev \
+       libboost-python-dev python-dev
 
 ## Install palos
 
@@ -24,7 +48,7 @@ pip3 install --upgrade palos
 
 # Usage
 
-
 ```sh
 ./ngs/DownsampleWorkflow.py  -h
 ```
+

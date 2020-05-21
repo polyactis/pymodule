@@ -36,12 +36,6 @@ double sumOfReciprocals(int n){
 	return sum;
 }
 
-#endif
-
-
-
-#ifndef __JOIN_H
-#define __JOIN_H
 /*
  * 2013.09.11 copied from Erik Garrison's file
  */

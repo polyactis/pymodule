@@ -3,11 +3,13 @@
 .PHONY: swig clean_subdirs subdirs $(SUBDIRS)
 
 IncludeDirs = -I`readlink -f .` -I /usr/include/hdf5/serial/ \
-	-I ~/script/vcflib/ -I ~/script/vcflib/tabixpp/ -I ~/script/vcflib/tabixpp/htslib/
+	-I ~/script/vcflib/ -I ~/script/vcflib/tabixpp/ \
+	-I ~/script/vcflib/tabixpp/htslib/
 BoostLib = -lboost_program_options -lboost_iostreams
 HDF5Lib = -lhdf5_cpp -lhdf5_serial
 
-## CXXTARGETS, CXXLDFLAGS, CTARGETS, CLDFLAGS, ExtraTargets will be defined in child Makefiles 
+## CXXTARGETS, CXXLDFLAGS, CTARGETS, CLDFLAGS, ExtraTargets
+# will be defined in child Makefiles 
 #CXXTARGETS	= 
 #CXXStaticTargets =
 StaticStartFlags = -Wl,--no-as-needed -Wl,-Bstatic -static-libgcc -static-libstdc++ 
@@ -64,7 +66,8 @@ $(CTARGETS):	%:	%.o
 #.cc:	$(wildcard ~/src/pymodule/include/*.h)
 
 #### 2013.08.21 generate auto-dependency for each source code file through
-## "gcc -MM". so that change of .h files would trigger re-compilation as well.
+## "gcc -MM". so that change of .h files would trigger
+# re-compilation as well.
 
 depend: .depend
 
