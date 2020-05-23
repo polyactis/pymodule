@@ -82,7 +82,7 @@ class ReformatFlagstatOutput(ParentClass):
         writer.writerow(header)
         
         #float total_no_of_reads now so that no "float" upon division
-        total_no_of_reads = float(self.getNumberOutOfFlagStatLine(line=inf.readline() , \
+        total_no_of_reads = float(self.getNumberOutOfFlagStatLine(line=inf.readline().decode('utf-8') , \
             grabPattern=re.compile(r'^(\d+) \+ (\d+) in total')))
         no_of_secondary = self.getNumberOutOfFlagStatLine(line=inf.readline() ,\
             grabPattern=re.compile(r'^(\d+) \+ (\d+) secondary'))
