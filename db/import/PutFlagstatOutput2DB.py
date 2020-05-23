@@ -53,7 +53,7 @@ class PutFlagstatOutput2DB(ParentClass):
 		no_of_total_lines = 0
 		for inputFname in self.inputFnameLs:
 			reader = csv.reader(open(inputFname), delimiter=figureOutDelimiter(inputFname))
-			header = reader.next()
+			header = next(reader)
 			colName2Index = utils.getColName2IndexFromHeader(header, skipEmptyColumn=True)
 			alignment_id_index = colName2Index.get('alignmentID')
 			total_no_of_reads_index = colName2Index.get('total_no_of_reads')
