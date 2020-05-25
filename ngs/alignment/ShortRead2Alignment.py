@@ -853,7 +853,6 @@ in pipe2File:
         extraDependentInputLs = []
         if extraArgumentList is None:
             extraArgumentList = []
-        extraArgumentList.append(alignment_method.command)
         extraAlignArgs = extraAlignArgs.strip()
         if extraAlignArgs:
             extraArgumentList.append(extraAlignArgs)
