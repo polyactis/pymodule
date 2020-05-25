@@ -138,6 +138,7 @@ class ShortRead2Alignment(ParentClass):
         noCheckEmptyReadFile=False,
         alignment_method_name='bwamem',
         bwa_path='bin/bwa',
+        hisat2_path="/y/home/liufei/downloads/hisat2-2.1.0/hisat2",
         no_of_aln_threads=1,
         extraAlignArgs="",
         alignmentJobClusterSizeFraction=0.01,
@@ -328,6 +329,9 @@ class ShortRead2Alignment(ParentClass):
             clusterSizeMultiplier=self.alignmentJobClusterSizeFraction)
         self.registerOneExecutable(path=self.javaPath, \
             name="SAM2BAMJava",
+            clusterSizeMultiplier=self.alignmentJobClusterSizeFraction)
+        self.registerOneExecutable(path=self.hisat2_path, \
+            name="HISAT2",
             clusterSizeMultiplier=self.alignmentJobClusterSizeFraction)
         #self.registerOneExecutable(
         #	path=os.path.join(self.pymodulePath, 'pegasus/mapper/alignment/BWA_Mem.sh'), \
@@ -836,6 +840,59 @@ in pipe2File:
             self.addRefIndexJobAndItsOutputAsParent(refIndexJob, childJob=alignmentJob)
         return alignmentJob
 
+    def addHisat2Job(self, fileObjectLs=None,
+        refFastaFList=None, extraAlignArgs=None,
+        alignment_method=None, maxNoOfGaps=None,
+        no_of_aln_threads=3, maxMissingAlignmentFraction=None,
+        outputDir=None,
+        extraArgumentList=None, 
+        refIndexJob=None, parentJobLs=None,
+        transferOutput=False, **keywords):
+        
+        extraDependentInputLs = []
+        if extraArgumentList is None:
+            extraArgumentList = []
+        extraArgumentList.append(alignment_method.command)
+        extraAlignArgs = extraAlignArgs.strip()
+        if extraAlignArgs:
+            extraArgumentList.append(extraAlignArgs)
+        if no_of_aln_threads:
+            extraArgumentList.append("-p %s"%no_of_aln_threads)
+
+        fileObject0 = fileObjectLs[0]
+        fastqF = fileObject0.fastqF
+        relativePath = fastqF.name
+        read_count = fileObject0.db_entry.read_count
+
+        fileBasenamePrefix = utils.getRealPrefixSuffixOfFilenameWithVariableSuffix(
+            os.path.basename(relativePath))[0]
+        alignmentSamF = File('%s.sam'%(os.path.join(outputDir, fileBasenamePrefix)))
+
+        if len(fileObjectLs)==1:
+            #single end
+            extraArgumentList.extend(["-U", fastqF])
+            extraDependentInputLs.append(fastqF)
+        elif len(fileObjectLs)==2:
+            #paired end	
+            extraArgumentList.extend(["-1", fastqF])
+            extraArgumentList.extend(["-2", fileObjectLs[1].fastqF])
+            extraDependentInputLs.extend([fastqF, fileObjectLs[1].fastqF])
+           
+        else:
+            logging.error(f"{fileObjectLs} neither single-end nor paired-ends.")
+        #hisat2 index:http://daehwankimlab.github.io/hisat2/download/
+        extraArgumentList.extend(["-x", "/y/home/liufei/downloads/hisat2_index/hg38/genome"])
+        hisat2Job = self.addGenericJob(
+            executable=self.HISAT2,
+            outputFile=alignmentSamF, outputArgumentOption="-S",
+            extraArgumentList=extraArgumentList,
+            extraDependentInputLs=extraDependentInputLs,
+            transferOutput=transferOutput,
+            parentJobLs=parentJobLs, job_max_memory=8000,
+            no_of_cpus=no_of_aln_threads,
+            )
+        return hisat2Job
+
     def addAlignmentJob(self,
         alignment_method=None,
         fileObjectLs=None,
@@ -901,6 +958,18 @@ in pipe2File:
                 maxNoOfGaps=maxNoOfGaps, transferOutput=transferOutput)
         elif alignment_method.short_name.find('bwa')==0:
             alignmentJob = self.AddBWANonMemJob(
+                fileObjectLs=fileObjectLs,
+                refFastaFList=refFastaFList,
+                alignment_method=alignment_method,
+                extraAlignArgs=extraAlignArgs,
+                outputDir=outputDir,
+                no_of_aln_threads=no_of_aln_threads,  
+                maxMissingAlignmentFraction=maxMissingAlignmentFraction, 
+                maxNoOfGaps=maxNoOfGaps, transferOutput=transferOutput,
+                refIndexJob=refIndexJob, parentJobLs=parentJobLs,
+                )
+        elif alignment_method.short_name.find('hisat2')==0:
+            alignmentJob = self.addHisat2Job(
                 fileObjectLs=fileObjectLs,
                 refFastaFList=refFastaFList,
                 alignment_method=alignment_method,
@@ -1528,9 +1597,10 @@ in pipe2File:
                 alignmentJobAndOutputLs = []
                 # fetch or insert one alignment method if non-existent
                 if isq.sequence_type.short_name=='RNASeq':
-                    logging.warn(f"isq {isq.id} is "
-                        f"{isq.sequence_type.short_name} and is skipped.")
-                    continue
+                    alignment_method = db_main.getAlignmentMethod("hisat2")
+                    # logging.warn(f"isq {isq.id} is "
+                    #     f"{isq.sequence_type.short_name} and is skipped.")
+                    # continue
                 elif isq.sequence_type_id in [4,5,6,8]:
                     #DNA
                     if read_length is None:
@@ -1976,6 +2046,8 @@ if __name__ == '__main__':
             'It may add a new alignment_method entry if non-existent in db.')
     ap.add_argument("--bwa_path", default="bin/bwa",
         help='Path to bwa. Default: %(default)s')
+    ap.add_argument("--hisat2_path",default="/y/home/liufei/downloads/hisat2-2.1.0/hisat2",
+        help='Path to hisat2. Default: %(default)s')
     ap.add_argument("--no_of_aln_threads", type=int, default=4,
         help="The number of threads for each alignment job."
             "Default: %(default)s")
@@ -2101,6 +2173,7 @@ if __name__ == '__main__':
         noCheckEmptyReadFile = args.noCheckEmptyReadFile,
         alignment_method_name = args.alignment_method_name,
         bwa_path = args.bwa_path,
+        hisat2_path=args.hisat2_path,
         no_of_aln_threads = args.no_of_aln_threads,
         extraAlignArgs = args.extraAlignArgs,
         alignmentJobClusterSizeFraction = args.alignmentJobClusterSizeFraction,
