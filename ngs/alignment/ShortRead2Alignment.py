@@ -271,6 +271,7 @@ class ShortRead2Alignment(ParentClass):
         self.noCheckEmptyReadFile = noCheckEmptyReadFile
         self.alignment_method_name = alignment_method_name
         self.bwa_path = self.insertHomePath(bwa_path, self.home_path)
+        self.hisat2_path = hisat2_path
         self.no_of_aln_threads = no_of_aln_threads
         self.extraAlignArgs = extraAlignArgs
         self.alignmentJobClusterSizeFraction = alignmentJobClusterSizeFraction
