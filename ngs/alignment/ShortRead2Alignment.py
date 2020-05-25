@@ -891,6 +891,7 @@ in pipe2File:
             parentJobLs=parentJobLs, job_max_memory=8000,
             no_of_cpus=no_of_aln_threads,
             )
+        hisat2Job.fileBasenamePrefix = fileBasenamePrefix
         return hisat2Job
 
     def addAlignmentJob(self,
