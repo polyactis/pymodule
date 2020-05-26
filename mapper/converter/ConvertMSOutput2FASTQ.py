@@ -189,7 +189,7 @@ class ConvertMSOutput2FASTQ(AbstractMapper):
 		
 		inf = utils.openGzipFile(self.inputFname, 'r')
 		
-		outf = utils.openGzipFile(self.outputFname, openMode='w')
+		outf = utils.openGzipFile(self.outputFname, mode='w')
 		self.convertFuncDict[self.inputFileFormat](inf=inf, outf=outf, \
 							noOfHaplotypesDefault=self.noOfHaplotypesDefault,\
 							chromosomeLengthToSimulate=self.chromosomeLengthToSimulate)

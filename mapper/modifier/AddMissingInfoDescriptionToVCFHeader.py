@@ -82,7 +82,7 @@ class AddMissingInfoDescriptionToVCFHeader(ParentClass):
 		
 		self.reader = VCFFile(inputFname=self.inputFname)
 		
-		self.writer = VCFFile(outputFname=self.outputFname, openMode='w')
+		self.writer = VCFFile(outputFname=self.outputFname, mode='w')
 		self.writer.metaInfoLs = self.reader.metaInfoLs
 		for info_tag, description in self.knownInfoTag2DescriptionLine.items():
 			self.writer.metaInfoLs.append(description)

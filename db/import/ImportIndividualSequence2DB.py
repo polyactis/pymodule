@@ -751,7 +751,7 @@ D1HYNACXX	2	UNGC Human Sample 1	S1	AS001A	ATTACTCG	TruSeq DNA PCR Free beta kit	
         """
         print(f"Getting sample_id2data from {sample_sheet} ...", flush=True)
         sample_id2data = {}
-        reader = MatrixFile(sample_sheet, openMode='r', delimiter=',')
+        reader = MatrixFile(sample_sheet, mode='r', delimiter=',')
         reader.constructColName2IndexFromHeader()
         sampleIDIndex = reader.getColIndexGivenColHeader("sample ID")
         sampleNameIndex = reader.getColIndexGivenColHeader("sample name")

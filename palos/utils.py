@@ -932,31 +932,29 @@ def getDateStampedFilename(filename):
         lastModDatetime.month, lastModDatetime.day, suffix)
     return newFilename
 
-def openGzipFile(inputFname, openMode='r'):
+def openGzipFile(inputFname, mode='r'):
     """
     Pass encoding='utf-8' to gzip.open().
-    support openMode 'r', 'a', 'w'.
+    support mode 'r', 'a', 'w'.
     If suffix is .gz, use gzip to open it
     """
     fname_suffix = os.path.splitext(inputFname)[1]
     if fname_suffix=='.gz':
         import gzip
-        """
-        if openMode=='r':
-            mode='rb'
-        elif openMode=='w':
-            mode='wb'
-        elif openMode=="a":
-            mode = 'ab'
-        else:
-            mode='rb'
-        """
-        # encoding='utf-8' only supported in non-binary mode.
+        # encoding='utf-8' only supported in text mode.
         # binary mode returns bytes object.
-        inf = gzip.open(inputFname, openMode, encoding='utf-8')
+        if mode=='r':
+            mode='rt'
+        elif mode=='w':
+            mode='wt'
+        elif mode=="a":
+            mode = 'at'
+        else:
+            mode='rt'
+        inf = gzip.open(inputFname, mode, encoding='utf-8')
         inf.is_gzip = True
     else:
-        inf = open(inputFname, openMode)
+        inf = open(inputFname, mode)
         inf.is_gzip = False
     return inf
 

@@ -12,17 +12,17 @@
 
 Example:
 
-	reader = MatrixFile(path='/tmp/input.txt', openMode='r')
-	reader = MatrixFile('/tmp/input.txt', openMode='r')
+	reader = MatrixFile(path='/tmp/input.txt', mode='r')
+	reader = MatrixFile('/tmp/input.txt', mode='r')
 	reader.constructColName2IndexFromHeader()
 	for row in reader:
 		row[reader.getColName2IndexFromHeader('KID')]
 	
-	inf = utils.openGzipFile(path, openMode='r')
+	inf = utils.openGzipFile(path, mode='r')
 	reader = MatrixFile(file_handle=inf)
 	
 	#2013.2.1 writing
-	writer = MatrixFile('/tmp/output.txt', openMode='w', delimiter='\t')
+	writer = MatrixFile('/tmp/output.txt', mode='w', delimiter='\t')
 	writer.writeHeader(...)
 	writer.writerow(row)
 	writer.close()	

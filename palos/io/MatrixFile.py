@@ -3,17 +3,17 @@
 2012.3.1 a matrix file API like csv.reader, it can deal with any delimiter: coma, tab, space or multi-space.
 Example:
 
-	reader = MatrixFile(path='/tmp/input.txt', openMode='r')
-	reader = MatrixFile('/tmp/input.txt', openMode='r')
+	reader = MatrixFile(path='/tmp/input.txt', mode='r')
+	reader = MatrixFile('/tmp/input.txt', mode='r')
 	reader.constructColName2IndexFromHeader()
 	for row in reader:
 		row[reader.getColName2IndexFromHeader('KID')]
 	
-	inf = utils.openGzipFile(path, openMode='r')
+	inf = utils.openGzipFile(path, mode='r')
 	reader = MatrixFile(file_handle=inf)
 	
 	#2013.2.1 writing
-	writer = MatrixFile('/tmp/output.txt', openMode='w', delimiter='\t')
+	writer = MatrixFile('/tmp/output.txt', mode='w', delimiter='\t')
 	writer.writeHeader(...)
 	writer.writerow(row)
 	writer.close()
@@ -31,9 +31,9 @@ class MatrixFile(object):
 	option_default_dict = {
 		('path', 0, ): [None, 'i', 1, 'Path to the input file.'],\
 		('file_handle', 0, ): [None, '', 1, 'A opened input file handler'],\
-		('openMode', 1, ): ['r', '', 1, 'mode to open the path if file_handle is not presented.'],\
+		('mode', 1, ): ['r', '', 1, 'mode to open the path if file_handle is not presented.'],\
 		('delimiter', 0, ): [None, '', 1, ''],\
-		('header', 0, ): [None, '', 1, 'the header to be in output file, openMode=w'],\
+		('header', 0, ): [None, '', 1, 'the header to be in output file, mode=w'],\
 		('debug', 0, int):[0, 'b', 0, 'toggle debug mode'],\
 		('report', 0, int):[0, 'r', 0, 'toggle report, more verbose stdout/stderr.']
 		}
@@ -44,13 +44,13 @@ class MatrixFile(object):
 			self.path = path
 		
 		if self.path and self.file_handle is None:
-			self.file_handle = utils.openGzipFile(self.path, openMode=self.openMode)
+			self.file_handle = utils.openGzipFile(self.path, mode=self.mode)
 		
 		#2013.05.03 for easy access
 		self.filename = self.path		
 		self.csvFile = None
 		self.isRealCSV = False
-		if self.openMode=='r':	#reading mode
+		if self.mode=='r':	#reading mode
 			if self.delimiter is None:
 				self.delimiter = figureOutDelimiter(self.file_handle)
 			

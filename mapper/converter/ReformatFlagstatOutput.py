@@ -73,8 +73,8 @@ class ReformatFlagstatOutput(ParentClass):
 
         """
         
-        inf = utils.openGzipFile(self.inputFname, openMode='r')
-        writer = csv.writer(utils.openGzipFile(self.outputFname, openMode='w'), delimiter='\t')
+        inf = utils.openGzipFile(self.inputFname, mode='r')
+        writer = csv.writer(utils.openGzipFile(self.outputFname, mode='w'), delimiter='\t')
         header = ['alignmentID', 'total_no_of_reads', 'perc_secondary', 'perc_supplementary', \
                 'perc_reads_mapped', 'perc_duplicates', 'perc_paired', 'perc_properly_paired', \
                 'perc_both_mates_mapped', 'perc_singletons',\

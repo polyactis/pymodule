@@ -26,22 +26,22 @@ class AssociationPeakTableFile(YHFile):
 	"""
 	usage examples:
 	
-		peakFile = AssociationPeakTableFile(self.outputFname, openMode='w')
+		peakFile = AssociationPeakTableFile(self.outputFname, mode='w')
 		peakFile.addAttributeDict(attributeDict)
 		peakFile.appendAssociationPeak(association_peak_ls=association_peak_ls)
 		
 		#for read-only
-		peakFile = AssociationPeakTableFile(inputFname, openMode='r', peakPadding=0)
+		peakFile = AssociationPeakTableFile(inputFname, mode='r', peakPadding=0)
 		rbDict = peakFile.associationPeakRBDict
 	"""
-	def __init__(self, inputFname=None, openMode='r', \
+	def __init__(self, inputFname=None, mode='r', \
 				tableName='association_peak', groupNamePrefix='group', tableNamePrefix='table',\
 				filters=None, peakPadding=0, expectedrows=50000, autoRead=True, autoWrite=True, \
 				**keywords):
 		
 		self.peakPadding = peakPadding
 		self.associationPeakRBDict = None
-		YHFile.__init__(self, path=inputFname, openMode=openMode, \
+		YHFile.__init__(self, path=inputFname, mode=mode, \
 				tableName=tableName, groupNamePrefix=groupNamePrefix, tableNamePrefix=tableNamePrefix,\
 				rowDefinition=AssociationPeakTable, filters=filters, expectedrows=expectedrows,\
 				autoRead=autoRead, autoWrite=autoWrite,\

@@ -45,7 +45,7 @@ class ConvertYuSNPFormat2VCF(AbstractMapper):
 		if self.min_MAF and self.min_MAF>0:
 			snpData = SNPData.removeColsByMAF(snpData,min_MAF=self.min_MAF, NA_set=set([]))
 		
-		self.writer = VCFFile(outputFname=self.outputFname, openMode='w')
+		self.writer = VCFFile(outputFname=self.outputFname, mode='w')
 		self.writer.makeupHeaderFromSampleIDList(sampleIDList=snpData.row_id_ls)
 		self.writer.writeMetaAndHeader()
 		

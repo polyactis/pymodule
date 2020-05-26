@@ -4,8 +4,8 @@ Description:
 	2012.11.15 a matrix stored in HDF5.
 		This HDF5 file is composed of groups. At least one group, group0.
 	i.e.
-		reader = HDF5MatrixFile(inputFname=filename, openMode='r')
-		reader = HDF5MatrixFile(filename, openMode='r')
+		reader = HDF5MatrixFile(inputFname=filename, mode='r')
+		reader = HDF5MatrixFile(filename, mode='r')
 		for row in reader:
 			...
 		tableObject = reader.getTableObject(tableName=tableName)
@@ -17,14 +17,14 @@ Description:
 		headerList = [row[0] for row in rowDefinition]
 		dtype = numpy.dtype(rowDefinition)
 		
-		writer = HDF5MatrixFile(inputFname=filename, openMode='w', dtype=dtype)
-		writer = HDF5MatrixFile(filename, openMode='w', dtype=dtype)
+		writer = HDF5MatrixFile(inputFname=filename, mode='w', dtype=dtype)
+		writer = HDF5MatrixFile(filename, mode='w', dtype=dtype)
 		
 		if writer:
 			tableObject = writer.createNewTable(tableName=tableName, dtype=dtype)
 			tableObject.setColIDList(headerList)
 		elif outputFname:
-			writer = HDF5MatrixFile(outputFname, openMode='w', dtype=dtype, tableName=tableName)
+			writer = HDF5MatrixFile(outputFname, mode='w', dtype=dtype, tableName=tableName)
 			writer.writeHeader(headerList)
 			tableObject = writer.getTableObject(tableName=tableName)
 		cellList = []
@@ -41,7 +41,7 @@ Description:
 		rowDefinition = [('locus_id','i8'),('chromosome', HDF5MatrixFile.varLenStrType), ('start','i8'), ('stop', 'i8'), \
 					('score', 'f8'), ('MAC', 'i8'), ('MAF', 'f8')]
 		if writer is None and filename:
-			writer = HDF5MatrixFile(filename, openMode='w', rowDefinition=rowDefinition, tableName=tableName)
+			writer = HDF5MatrixFile(filename, mode='w', rowDefinition=rowDefinition, tableName=tableName)
 			tableObject = writer.getTableObject(tableName=tableName)
 		elif writer:
 			tableObject = writer.createNewTable(tableName=tableName, rowDefinition=rowDefinition)
@@ -412,13 +412,13 @@ class HDF5MatrixFile(MatrixFile):
 		self.combinedColIDList = None	#same as header
 		self.combinedColID2ColIndex = None
 		
-		self.hdf5File = h5py.File(self.inputFname, self.openMode)
+		self.hdf5File = h5py.File(self.inputFname, self.mode)
 		self.tableObjectList = []
 		self.tablePath2Index = {}
 		
-		if self.openMode=='r':
+		if self.mode=='r':
 			self._readInData()
-		elif self.openMode=='w':
+		elif self.mode=='w':
 			self.createNewTable(tableName=self.tableName, dtype=self.dtype, rowDefinition=self.rowDefinition)
 		
 		self.rowIndexCursor = 0	#2012.11.16 for iteration

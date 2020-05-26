@@ -69,13 +69,13 @@ class ReduceMatrixByMergeColumnsWithSameKey(AbstractReducer):
     def outputFinalData(self, outputFname, key2dataLs=None, delimiter=None, header=None):
         """
         2013.07.18 header output is not dependent on key2dataLs anymore 
-        2013.3.3 bugfix , added openMode='w' for MatrixFile()
+        2013.3.3 bugfix , added mode='w' for MatrixFile()
         2013.2.12 replace csv.writer with MatrixFile
         2012.7.30
             open the outputFname regardless whether there is data or not.
         2012.1.9
         """
-        writer = MatrixFile(path=outputFname, delimiter=delimiter, openMode='w')
+        writer = MatrixFile(path=outputFname, delimiter=delimiter, mode='w')
         if header and delimiter:
             writer.writerow(header)
         if key2dataLs and delimiter:

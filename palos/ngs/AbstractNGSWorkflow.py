@@ -2053,7 +2053,7 @@ option:
             inputVCFFolder, outputFname), flush=True)
         no_of_vcfFiles = 0
         no_of_loci = 0
-        outputF = MatrixFile(path=outputFname, openMode='w', delimiter='\t')
+        outputF = MatrixFile(path=outputFname, mode='w', delimiter='\t')
         for inputFname in os.listdir(inputVCFFolder):
             inputAbsPath = os.path.join(os.path.abspath(inputVCFFolder), inputFname)
             if ngs.isFileNameVCF(inputFname, includeIndelVCF=False):

@@ -312,7 +312,7 @@ class chromosome_fasta2db(AbstractDBJob):
         use the firstline (header) of the fasta file to extract which chromosome.
         using filename is unreliable.
         """
-        inf = utils.openGzipFile(filename, openMode='r')
+        inf = utils.openGzipFile(filename, mode='r')
         
         line = inf.readline()
         #'line' is not enough to stop the 'while' loop. after the file reading is

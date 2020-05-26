@@ -73,7 +73,7 @@ class CalculateSameSiteConcordanceInVCF(ParentClass):
         
         snp_pos2genotypeVectorLs =self.readInSNPID2GenotypeVectorLs(self.inputFname).snp_pos2returnData
         
-        writer = MatrixFile(self.outputFname, openMode='w', delimiter='\t')
+        writer = MatrixFile(self.outputFname, mode='w', delimiter='\t')
         header = ['chromosome', 'position', 'noOfMatches', 'noOfTotal', 'concordance']
         writer.writeHeader(header)
         

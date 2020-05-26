@@ -356,10 +356,10 @@ class VCFRecord(object):
     
 class VCFFile(object):
     """
-    self.reader = VCFFile(inputFname=self.originalVCFFname, openMode='r')
+    self.reader = VCFFile(inputFname=self.originalVCFFname, mode='r')
     
     
-    self.writer = VCFFile(outputFname=self.outputFname, openMode='w')
+    self.writer = VCFFile(outputFname=self.outputFname, mode='w')
     self.writer.metaInfoLs = self.reader.metaInfoLs
     self.writer.header = self.reader.header
     self.writer.writeMetaAndHeader()
@@ -373,7 +373,7 @@ class VCFFile(object):
         self.writer.writeVCFRecord(vcfRecord)
     
     
-    self.writer = VCFFile(outputFname=self.outputFname, openMode='w')
+    self.writer = VCFFile(outputFname=self.outputFname, mode='w')
     self.writer.makeupHeaderFromSampleIDList(sampleIDList=snpData.row_id_ls)
     self.writer.writeMetaAndHeader()
     """
@@ -382,7 +382,7 @@ class VCFFile(object):
     option_default_dict = {
         ('inputFname', 0, ): [None, 'i', 1, 'a VCF input file to read in the VCF content.'],\
         ('outputFname', 0, ): [None, 'o', 1, 'a VCF output file to hold the the VCF content.'],\
-        ('openMode', 1, ): ['rb', '', 1, 'rb: bam file. r: sam file.'],\
+        ('mode', 1, ): ['rb', '', 1, 'rb: bam file. r: sam file.'],\
         ('minorAlleleDepthLowerBoundCoeff', 1, float): [1/4., 'M', 1, 'minimum read depth multiplier for an allele to be called (heterozygous or homozygous)', ],\
         ('minorAlleleDepthUpperBoundCoeff', 1, float): [3/4., 'A', 1, 'maximum read depth multiplier for the minor allele of a heterozygous call', ],\
         ('majorAlleleDepthUpperBoundCoeff', 1, float): [7/8., 'a', 1, 'maximum read depth multiplier for the major allele of het call'],\
@@ -435,8 +435,8 @@ class VCFFile(object):
         2012.5.10
             split out of __init__()
         """
-        if inputFname and self.openMode[0]=='r':
-            self.inf = utils.openGzipFile(inputFname, openMode='r')
+        if inputFname and self.mode[0]=='r':
+            self.inf = utils.openGzipFile(inputFname, mode='r')
             """
             if inputFname[-3:]=='.gz':
                 import gzip

@@ -29,14 +29,14 @@ class AssociationLandscapeTableFile(AssociationTableFile):
 	2012.12.18 usage examples:
 		
 		#for writing
-		landscapeFile = AssociationLandscapePyTable(self.outputFname, openMode='w')
+		landscapeFile = AssociationLandscapePyTable(self.outputFname, mode='w')
 		landscapeFile.addAttributeDict(attributeDict)
 		landscapeFile.appendAssociationLandscapeBridgeList(bridge_ls=landscapeData.bridge_ls)
 		
 		#for read-only,
-		landscapeTable = AssociationLandscapePyTable(self.path, openMode='r')
+		landscapeTable = AssociationLandscapePyTable(self.path, mode='r')
 	"""
-	def __init__(self, path=None, openMode='r', \
+	def __init__(self, path=None, mode='r', \
 				tableName='association_landscape', groupNamePrefix='group', tableNamePrefix='table',\
 				filters=None, autoRead=True, autoWrite=True, \
 				min_MAF=0.1, associationTableName='association', **keywords):
@@ -47,7 +47,7 @@ class AssociationLandscapeTableFile(AssociationTableFile):
 		self.bridge_ls = None
 		self.locusLandscapeNeighborGraph = None
 		
-		YHFile.__init__(self, path=path, openMode=openMode, \
+		YHFile.__init__(self, path=path, mode=mode, \
 				tableName=tableName, groupNamePrefix=groupNamePrefix, tableNamePrefix=tableNamePrefix,\
 				rowDefinition=None, filters=filters, \
 				debug=0, report=0, autoRead=False, autoWrite=False)
@@ -56,11 +56,11 @@ class AssociationLandscapeTableFile(AssociationTableFile):
 		self.autoRead = autoRead
 		self.autoWrite = autoWrite
 		
-		if self.autoRead and (self.openMode=='r' or self.openMode=='a'):
+		if self.autoRead and (self.mode=='r' or self.mode=='a'):
 			self.associationLandscapeTable = self.getTableObject(tableName=self.tableName)
 			self.associationTable = self.getTableObject(tableName=self.associationTableName)
 			self._readInData(tableName=self.tableName, tableObject=self.associationLandscapeTable)
-		if self.autoWrite and self.openMode=='w':
+		if self.autoWrite and self.mode=='w':
 			self.associationLandscapeTable = self.createNewTable(tableName=self.tableName, rowDefinition=AssociationLandscapeTable,\
 														expectedrows=50000)
 			self.associationTable = self.createNewTable(tableName=self.associationTableName, rowDefinition=AssociationTable,\

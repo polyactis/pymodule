@@ -95,12 +95,12 @@ class MarkGenotypeMissingByAlignmentQuality(ParentClass):
 		
 		alignmentFile = pysam.Samfile(self.alignmentFilename, "rb")
 		
-		writer = VCFFile(outputFname=self.outputFname, openMode='w')
+		writer = VCFFile(outputFname=self.outputFname, mode='w')
 		writer.metaInfoLs = reader.metaInfoLs
 		writer.header = reader.header
 		writer.writeMetaAndHeader()
 		
-		statWriter = MatrixFile(self.missingStatFname, openMode='w', delimiter='\t')
+		statWriter = MatrixFile(self.missingStatFname, mode='w', delimiter='\t')
 		header = ["sampleID", "locusID", 'chromosome', 'start', 'stop', 'occurrence', 'missingReason', \
 				'fractionOfGoodRead', 'medianMapQ', 'totalNoOfReads']
 		statWriter.writeHeader(header)

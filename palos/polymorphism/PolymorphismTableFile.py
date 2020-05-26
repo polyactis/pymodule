@@ -120,13 +120,13 @@ class PolymorphismTableFile(YHFile):
 	"""
 	2013.3.6 usage examples:
 	#for writing
-	landscapeFile = AssociationLandscapePyTable(self.outputFname, openMode='w', isPhased=1, ploidy=2)
+	landscapeFile = AssociationLandscapePyTable(self.outputFname, mode='w', isPhased=1, ploidy=2)
 	landscapeFile.addAttributeDict(attributeDict)
 	
 	#for read-only,
-	landscapeTable = AssociationLandscapePyTable(self.path, openMode='r')
+	landscapeTable = AssociationLandscapePyTable(self.path, mode='r')
 	"""
-	def __init__(self, path=None, openMode='r', \
+	def __init__(self, path=None, mode='r', \
 		tableName='polymorphism', groupNamePrefix='group', tableNamePrefix='table',\
 		filters=None, autoRead=True, autoWrite=True, \
 		isPhased=None, ploidy=None, constructSNPData=True, **keywords):
@@ -135,7 +135,7 @@ class PolymorphismTableFile(YHFile):
 		self.bridge_ls = None
 		self.locusLandscapeNeighborGraph = None
 		
-		YHFile.__init__(self, path=path, openMode=openMode, \
+		YHFile.__init__(self, path=path, mode=mode, \
 				tableName=tableName, groupNamePrefix=groupNamePrefix, tableNamePrefix=tableNamePrefix,\
 				rowDefinition=None, filters=filters, \
 				debug=0, report=0, autoRead=False, autoWrite=False)
@@ -157,7 +157,7 @@ class PolymorphismTableFile(YHFile):
 		
 		self.snpData = None	#the SNPData structure that holds all polymorphism, locus, individual info
 		
-		if self.autoRead and (self.openMode=='r' or self.openMode=='a'):
+		if self.autoRead and (self.mode=='r' or self.mode=='a'):
 			self.speciesTable = self.getTableObject(tableName=self.speciesTableName)
 			self.populationTable = self.getTableObject(tableName=self.populationTableName)
 			self.individualTable = self.getTableObject(tableName=self.individualTableName)
@@ -171,7 +171,7 @@ class PolymorphismTableFile(YHFile):
 			self.ploidy = self.polymorphismTable.getAttribute(name='ploidy', defaultValue=2)
 			
 			self._readInData(tableName=self.tableName, tableObject=self.associationLandscapeTable)
-		if self.autoWrite and self.openMode=='w':
+		if self.autoWrite and self.mode=='w':
 			self.speciesTable = self.createNewTable(tableName=self.speciesTableName, rowDefinition=SpeciesTable,\
 													expectedrows=500)
 			self.populationTable = self.createNewTable(tableName=self.populationTableName, rowDefinition=PopulationTable,\

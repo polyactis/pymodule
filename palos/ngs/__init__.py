@@ -12,7 +12,7 @@ def getReadBaseCount(inputFname, ignore_set = set(['>', '+', '@']),
     """
     inputFname could be fastq or fasta
     """
-    inf = utils.openGzipFile(inputFname, openMode='r')
+    inf = utils.openGzipFile(inputFname, mode='r')
     read_count = 0
     base_count = 0
     

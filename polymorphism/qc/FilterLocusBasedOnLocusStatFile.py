@@ -74,7 +74,7 @@ class FilterLocusBasedOnLocusStatFile(ParentClass):
         locusID2Stat = self.getLocusID2StatFunctionDict[self.runType](self.statFname)
         
         reader = VCFFile(inputFname=self.inputFname)
-        writer = VCFFile(outputFname=self.outputFname, openMode='w')
+        writer = VCFFile(outputFname=self.outputFname, mode='w')
         writer.metaInfoLs = reader.metaInfoLs
         writer.header = reader.header
         writer.writeMetaAndHeader()
