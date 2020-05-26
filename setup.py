@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 
 src_dir = os.path.dirname(__file__)
 
-install_requires = ["sqlalchemy", "pegaflow", "numpy", 'matplotlib']
+install_requires = ["sqlalchemy", "pegaflow", "numpy", 'matplotlib', 'scipy']
 
 with open(os.path.join(src_dir, 'README.md')) as readme_file:
     README = readme_file.read()
