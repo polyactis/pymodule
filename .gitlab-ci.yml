@@ -134,7 +134,7 @@ InspectBaseQuality:
     - echo "Run a InspectBaseQuality.py ... "
     - pwd
     - mkdir input
-    - ln -s individual_sequence/660_indID570_codeEC008_sequencer10000_seqType5_tissueID62_filtered0_batch1_version1/38130_660_WGC090564D_combined_R1_1_12.fastq.gz
+    - ln -s /y/Sunset/db/individual_sequence/660_indID570_codeEC008_sequencer10000_seqType5_tissueID62_filtered0_batch1_version1/38130_660_WGC090564D_combined_R1_1_12.fastq.gz
       ./input
     - ./ngs/qc/InspectBaseQuality.py --drivername postgresql --hostname pdc
       --schema sunset --dbname pmdb
