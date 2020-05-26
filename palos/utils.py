@@ -942,6 +942,7 @@ def openGzipFile(inputFname, openMode='r'):
     fname_suffix = os.path.splitext(inputFname)[1]
     if fname_suffix=='.gz':
         import gzip
+        """
         if openMode=='r':
             mode='rb'
         elif openMode=='w':
@@ -950,6 +951,9 @@ def openGzipFile(inputFname, openMode='r'):
             mode = 'ab'
         else:
             mode='rb'
+        """
+        # encoding='utf-8' only supported in non-binary mode.
+        # binary mode returns bytes object.
         inf = gzip.open(inputFname, mode=mode, encoding='utf-8')
         inf.is_gzip = True
     else:
