@@ -303,29 +303,23 @@ class AbstractAlignmentWorkflow(ParentClass):
             #else:
             job.addArguments(','.join(fileArgumentLs))
 
-    def addAddRG2BamJobsAsNeeded(self, alignmentDataLs=None, site_handler=None,
-        input_site_handler=None, \
-        AddOrReplaceReadGroupsJava=None, AddOrReplaceReadGroupsJar=None, \
-        BuildBamIndexFilesJava=None, BuildBamIndexJar=None, \
-        mv=None, \
-        data_dir=None, tmpDir="/tmp", **keywords):
+    def addAddRG2BamJobsAsNeeded(self, alignmentDataLs=None,
+        tmpDir="/tmp"):
         """
-        2012.4.5
-            fix some bugs here
         2011-9-15
             add a read group only when the alignment doesn't have it according to db record
             DBVervet.pokeBamReadGroupPresence() from misc.py helps to fill in db records if it's unclear.
         2011-9-14
             The read-group adding jobs will have a "move" part that overwrites
-                 the original bam&bai if site_handler and input_site_handler is same.
+                the original bam&bai if site_handler and input_site_handler is same.
             For those alignment files that don't need to. It doesn't matter.
              pegasus will transfer/symlink them.
         """
         print(f"Adding add-read-group2BAM jobs for {len(alignmentDataLs)} "
-            f"alignments if read group is not detected ...", flush=True)
+            f"alignments if read group is not detected ... ", flush=True)
         job_max_memory = 3500	#in MB
         javaMemRequirement = "-Xms128m -Xmx%sm"%job_max_memory
-        indexJobMaxMem=2500
+        indexJobMaxMem = 2500
 
         addRG2BamDir = None
         addRG2BamDirJob = None
@@ -341,12 +335,8 @@ class AbstractAlignmentWorkflow(ParentClass):
                 if addRG2BamDir is None:
                     addRG2BamDir = "addRG2Bam"
                     addRG2BamDirJob = self.addMkDirJob(outputDir=addRG2BamDir)
-
                 # add RG to this bam
                 sequencer = alignment.individual_sequence.sequencer
-                #read_group = '%s_%s_%s_%s_vs_%s'%(alignment.id, alignment.ind_seq_id, 
-                # alignment.individual_sequence.individual.code, \
-                #						sequencer, alignment.ref_ind_seq_id)
                 read_group = alignment.getReadGroup()
                 if sequencer=='454':
                     platform_id = 'LS454'
@@ -354,16 +344,15 @@ class AbstractAlignmentWorkflow(ParentClass):
                     platform_id = 'ILLUMINA'
                 else:
                     platform_id = 'ILLUMINA'
-
-                # the add-read-group job
-                #addRGJob = Job(namespace=namespace, name=addRGExecutable.name, version=version)
                 addRGJob = Job(namespace=self.namespace,
-                    name=AddOrReplaceReadGroupsJava.name, version=self.version)
-                outputRGSAM = File(os.path.join(addRG2BamDir, os.path.basename(alignment.path)))
+                    name=self.AddOrReplaceReadGroupsJava.name,
+                    version=self.version)
+                outputRGSAM = File(os.path.join(addRG2BamDir,\
+                    os.path.basename(alignment.path)))
 
                 addRGJob.addArguments(javaMemRequirement,
-                    '-jar', AddOrReplaceReadGroupsJar,
-                    "INPUT=", bamF,\
+                    '-jar', self.AddOrReplaceReadGroupsJar,
+                    "INPUT=", bamF,
                     'RGID=%s'%(read_group), 'RGLB=%s'%(platform_id),
                     'RGPL=%s'%(platform_id),
                     'RGPU=%s'%(read_group), 'RGSM=%s'%(read_group),
@@ -371,14 +360,15 @@ class AbstractAlignmentWorkflow(ParentClass):
                     "VALIDATION_STRINGENCY=LENIENT")
                     #(adding the SORT_ORDER doesn't do sorting but it marks the header
                     #  as sorted so that BuildBamIndexJar won't fail.)
-                self.addJobUse(addRGJob, file=AddOrReplaceReadGroupsJar,
+                self.addJobUse(addRGJob, file=self.AddOrReplaceReadGroupsJar,
                     transfer=True, register=True, link=Link.INPUT)
-                if tmpDir:
-                    addRGJob.addArguments("TMP_DIR=%s"%tmpDir)
+                if self.tmpDir:
+                    addRGJob.addArguments("TMP_DIR=%s"%self.tmpDir)
                 addRGJob.uses(bamF, transfer=True, register=True, link=Link.INPUT)
                 addRGJob.uses(baiF, transfer=True, register=True, link=Link.INPUT)
                 addRGJob.uses(outputRGSAM, transfer=True, register=True, link=Link.OUTPUT)
-                pegaflow.setJobResourceRequirement(addRGJob, job_max_memory=job_max_memory)
+                pegaflow.setJobResourceRequirement(addRGJob,
+                    job_max_memory=job_max_memory)
                 for parentJob in parentJobLs:
                     if parentJob:
                         self.depends(parent=parentJob, child=addRGJob)
@@ -386,8 +376,6 @@ class AbstractAlignmentWorkflow(ParentClass):
 
 
                 index_sam_job = self.addBAMIndexJob(
-                    BuildBamIndexFilesJava=self.BuildBamIndexFilesJava,
-                    BuildBamIndexJar=self.BuildBamIndexJar, \
                     inputBamF=outputRGSAM, parentJobLs=[addRGJob],
                     transferOutput=True, javaMaxMemory=2000)
                 newAlignmentData = PassingData(alignment=alignment)
@@ -398,7 +386,8 @@ class AbstractAlignmentWorkflow(ParentClass):
             else:
                 newAlignmentData = alignmentData
             returnData.append(newAlignmentData)
-        sys.stderr.write(" %s alignments need read-group addition. Done\n"%(no_of_rg_jobs))
+        print(f"{no_of_rg_jobs} alignments need read-group addition.",
+            flush=True)
         return returnData
 
     def preReduce(self, passingData=None, transferOutput=True, **keywords):

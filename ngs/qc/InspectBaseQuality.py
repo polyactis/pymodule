@@ -7,7 +7,7 @@ Five types of figures will be generated.
     diNuc_count.png
     diNuc_quality.png
 
-2011-8-17 the db saving part is not implemented, you can supply any random password.
+The db connection is un-used, you can supply any random password.
 
 Examples:
     %s -i gerald_62FGFAAXX_3_1.fastq.gz -u yh -read_sampling_rate 0.0001
@@ -61,22 +61,16 @@ class InspectBaseQuality(ParentClass):
         diNuc2count = {}
         diNuc2quality_ls = {}
         
-        fname_prefix, fname_suffix = os.path.splitext(inputFname)
-        if fname_suffix=='.gz':
-            #the input file is gzipped. get the new prefix
-            import gzip
-            inf = gzip.open(inputFname, 'rb')
-        else:
-            inf = open(inputFname, 'r')
+        inf = utils.openGzipFile(inputFname, 'r')
         counter = 0
         real_counter = 0
         for line in inf:
             if line[0]=='@':
                 counter += 1
                 coin_toss = random.random()
-                base_string = inf.next().strip()
-                inf.next()
-                quality_string = inf.next().strip()
+                base_string = inf.readline().strip()
+                inf.readline()
+                quality_string = inf.readline().strip()
                 if coin_toss<=read_sampling_rate:
                     real_counter += 1
                     read_length = len(base_string)
@@ -190,10 +184,10 @@ class InspectBaseQuality(ParentClass):
         session.begin()
         #no transaction for input node as there is no data insertion
         
-        qualityDataStructure = self.getQualityData(self.inputFname,
-            read_sampling_rate=self.read_sampling_rate,\
+        qualityDataStructure = self.getQualityData(
+            self.inputFname,
+            read_sampling_rate=self.read_sampling_rate,
             quality_score_format=self.quality_score_format)
-        
         sequence_id = os.path.split(self.outputFnamePrefix)[1]
         #to be part of title in each figure
         self.drawQualityData(qualityDataStructure, self.outputFnamePrefix,
@@ -201,6 +195,8 @@ class InspectBaseQuality(ParentClass):
         
         self.saveDataIntoDB(self.db_main, ind_sequence_id=self.ind_sequence_id)
         
+        self.outputLogMessage('Inspect Done.\n')
+
         if self.commit:
             session.flush()
             session.commit()
