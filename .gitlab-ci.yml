@@ -138,7 +138,7 @@ InspectBaseQuality:
       ./input
     - ./ngs/qc/InspectBaseQuality.py --drivername postgresql --hostname pdc
       --schema sunset --dbname pmdb
-      --db_user sunset_r -p yfishLabSunset
+      --db_user sunset_r --db_passwd yfishLabSunset
       -i input/38130_660_WGC090564D_combined_R1_1_12.fastq.gz
       --logFilename input/38130_660_WGC090564D_combined_R1_1_12.log
       --read_sampling_rate 0.005 --quality_score_format Standard
