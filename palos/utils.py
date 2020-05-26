@@ -935,8 +935,7 @@ def getDateStampedFilename(filename):
 def openGzipFile(inputFname, openMode='r'):
     """
     Pass encoding='utf-8' to gzip.open().
-    support openMode 'a'.
-    support openMode 'w'.
+    support openMode 'r', 'a', 'w'.
     If suffix is .gz, use gzip to open it
     """
     fname_suffix = os.path.splitext(inputFname)[1]
@@ -954,7 +953,7 @@ def openGzipFile(inputFname, openMode='r'):
         """
         # encoding='utf-8' only supported in non-binary mode.
         # binary mode returns bytes object.
-        inf = gzip.open(inputFname, mode=mode, encoding='utf-8')
+        inf = gzip.open(inputFname, openMode, encoding='utf-8')
         inf.is_gzip = True
     else:
         inf = open(inputFname, openMode)
