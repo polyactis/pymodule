@@ -3939,19 +3939,12 @@ class SunsetDB(Database):
     def getIndividualSequenceID2FilePairLs(self, individualSequenceIDList=None,
         data_dir=None, needPair=True, checkOldPath=False):
         """
-        2013.3.14 replace SR, PE with individual_sequence.sequence_type
-        2012.2.10
-        add argument checkOldPath.
+        argument checkOldPath.
             True: find files in IndividualSequence.path[:-6],
                 (=path without the trailing '_split').
                 This is the old format.
             False: find files in IndividualSequence.path 
-        2011-8-30
-            filename in individualSequenceID2FilePairLs is path relative to data_dir
-        2011-8-28
-            add argument needPair
-            copied from MpiBaseCount.py
-        2011-8-5
+        filename in individualSequenceID2FilePairLs is path relative to data_dir
         """
         sys.stderr.write("Getting individualSequenceID2FilePairLs ...")
         individualSequenceID2FilePairLs = {}
@@ -4016,17 +4009,12 @@ class SunsetDB(Database):
         data_dir=None, filtered=None, \
         ignoreEmptyReadFile=True, is_contaminated=0, outdated_index=0):
         """
-        2013.04.05 added argument is_contaminated, outdated_index
-        2012.3.19
-            add argument, ignoreEmptyReadFile
-        2012.2.24
-            filtered=None means "no filtering based on this field.".
+        filtered=None means "no filtering based on this field.".
             
-        2012.2.10
-            If for one (isq_id, librarySplitOrder), there is only one mate (single-end).
-                The isq_id2LibrarySplitOrder2FileLs only stores one file object
-                 (FileLs is of length 1).
-            Length of FileLs is commesurate with the number of ends.
+        If for one (isq_id, librarySplitOrder), there is only one mate (single-end).
+            The isq_id2LibrarySplitOrder2FileLs only stores one file object
+                (FileLs is of length 1).
+        Length of FileLs is commesurate with the number of ends.
         """
         logging.warn(f"Getting isq_id2LibrarySplitOrder2FileLs for "
             f"{len(individualSequenceIDList)} isq entries ...")
@@ -4038,7 +4026,7 @@ class SunsetDB(Database):
         for individualSequenceID in individualSequenceIDList:
             individual_sequence = self.queryTable(IndividualSequence).\
                 get(individualSequenceID)
-            if not individual_sequence:	#not present in db, ignore
+            if not individual_sequence:
                 continue
             if is_contaminated is not None:
                 if individual_sequence.is_contaminated!=is_contaminated:
@@ -4048,18 +4036,20 @@ class SunsetDB(Database):
                     continue
             if outdated_index is not None:
                 if individual_sequence.outdated_index!=outdated_index:
-                    logging.warn(" individual_sequence %s 's outdated_index=%s (!=%s). ignore.\n"%\
-                        (individual_sequence.id, individual_sequence.outdated_index, outdated_index))
+                    logging.warn(f"individual_sequence {individual_sequence.id}'s"
+                        f" outdated_index={individual_sequence.outdated_index} "
+                        f"(!={outdated_index}). ignore.")
                     continue
             for individual_sequence_file in individual_sequence.individual_sequence_file_ls:
                 path = os.path.join(data_dir, individual_sequence_file.path)
                 if filtered is not None and individual_sequence_file.filtered!=filtered:
-                    #skip entries that don't matched the filtered argument
+                    #skip entries that do not match the filtered argument.
                     continue
-                if ignoreEmptyReadFile:	#2012.3.19	ignore empty read files.
+                if ignoreEmptyReadFile:
+                    # ignore empty read files.
                     if individual_sequence_file.read_count is None:
                         #calculate it on the fly
-                        baseCountData = ngs.getReadBaseCount(path, \
+                        baseCountData = ngs.getReadBaseCount(path,
                             onlyForEmptyCheck=True)
                         read_count = baseCountData.read_count
                     else:

@@ -32,22 +32,18 @@ def getReadBaseCount(inputFname, ignore_set = set(['>', '+', '@']),
         if onlyForEmptyCheck:
             #2012.3.19 one read is enough.
             break
-    
     del inf
     return PassingData(read_count=read_count, base_count=base_count)
 
-def getPEInputFiles(input_dir, isPE=True):
+def getPEInputFiles(input_dir, isPE=True, verbose=False):
     """
-    2011-8-28
-        copied from MpiBWA.py
-    2011-8-5
-        add argument isPE, which flags whether input_dir contains PE or single-end reads
-        become a classmethod
-    2011-2-7
-        for paired-end files, sequence_628BWAAXX_1_1.fastq.gz and sequence_628BWAAXX_1_2.fastq.gz
-            are regarded as one pair of two files.
+    Argument isPE, which flags whether input_dir contains PE or single-end reads.
+    
+    for paired-end files, sequence_628BWAAXX_1_1.fastq.gz and sequence_628BWAAXX_1_2.fastq.gz
+        are regarded as one pair of two files.
     """
-    sys.stderr.write("Pair input files from %s ..."%input_dir)
+    if verbose:
+        print(f"Getting paired input files from {input_dir}...", flush=True)
     pairedEndPrefix2FileLs = {}
     files = os.listdir(input_dir)
     no_of_fastq_files = 0
@@ -61,10 +57,8 @@ def getPEInputFiles(input_dir, isPE=True):
         if isPE==True:
             pairedEndPrefix = fname_prefix[:-2]
             pairedEndOrder = fname_prefix[-2:]
-            
             if pairedEndPrefix not in pairedEndPrefix2FileLs:
                 pairedEndPrefix2FileLs[pairedEndPrefix] = ['', '']
-            
             if pairedEndOrder=='_1':
                 #the first file
                 pairedEndPrefix2FileLs[pairedEndPrefix][0] = fname
@@ -79,8 +73,10 @@ def getPEInputFiles(input_dir, isPE=True):
         avg_no_of_files_per_prefix = no_of_fastq_files/float(no_of_pairedEndPrefix)
     else:
         avg_no_of_files_per_prefix = 0.0
-    sys.stderr.write("%.2f files per one pairedEnd prefix. %s fastq files. %s total files. Done.\n"%\
-                    (avg_no_of_files_per_prefix, no_of_fastq_files, no_of_files))
+    if verbose:
+        print("%.2f files per one pairedEnd prefix. %s fastq files. %s total files."%\
+            (avg_no_of_files_per_prefix, no_of_fastq_files, no_of_files),
+            flush=True)
     return pairedEndPrefix2FileLs
 
 def isFileNameVCF(inputFname, includeIndelVCF=False):
