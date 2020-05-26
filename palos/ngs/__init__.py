@@ -17,11 +17,6 @@ def getReadBaseCount(inputFname, ignore_set = set(['>', '+', '@']),
     base_count = 0
     
     for line in inf:
-        if inf.is_gzip:
-            # gzip file is opened in 'rb' mode.
-            # line is a bytes object.
-            # Need to convert it to string.
-            line = line.decode('utf-8')
         if line[0] in ignore_set:
             if line[0]=='+':
                 #skip the quality-score line right after this "+" line
