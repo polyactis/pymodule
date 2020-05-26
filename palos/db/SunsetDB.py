@@ -4775,7 +4775,7 @@ class SunsetDB(Database):
             itemAbsPath = os.path.join(topFolder, item)
             
             if os.path.isfile(itemAbsPath) and \
-                utils.getRealPrefixSuffixOfFilenameWithVariableSuffix(itemAbsPath)[1]=='.bam':
+                utils.getRealPrefixSuffix(itemAbsPath)[1]=='.bam':
                 #make sure the suffix is bam. loads of .bai files are not recorded in db.
                 isqPath = os.path.join(subFolder, item)
                 if isqPath not in dbPath2dbEntry:

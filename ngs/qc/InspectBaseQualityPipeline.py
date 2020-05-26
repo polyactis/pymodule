@@ -3,17 +3,16 @@
 A pegasus workflow to run InspectBaseQuality.py over a list of individual sequences
 
 Examples:
-    # 2011-8-16 on condorpool
+    # on condorpool
     %s -o inspectBaseQuality.xml -u yh -i 1-8,15-130
     
-    # 2011-8-16 use hoffman2 site_handler
+    # use hoffman2 site_handler
     %s -o inspectBaseQuality.xml -u yh -i 1-8,15-130 
         -l hoffman2 -e /u/home/eeskin/polyacti -t ~/NetworkData/vervet/db
 
 """
 import sys, os, copy
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
 import getpass
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
 from palos.db import SunsetDB
@@ -22,29 +21,111 @@ from palos.ngs.AbstractNGSWorkflow import AbstractNGSWorkflow
 class InspectBaseQualityPipeline(AbstractNGSWorkflow):
     __doc__ = __doc__
     
-    commonOptionDict = copy.deepcopy(AbstractNGSWorkflow.option_default_dict)
-    #commonOptionDict.pop(('inputDir', 0, ))
+    def __init__(self,
+        drivername='postgresql', hostname='localhost',
+        dbname='', schema='public', port=None,
+        db_user=None,
+        db_passwd=None,
+        data_dir=None, local_data_dir=None,
 
-    option_default_dict = copy.deepcopy(commonOptionDict)
-    option_default_dict.update({
-        ('ind_seq_id_ls', 1, ): ['', 'i', 1, \
-            'a comma/dash-separated list of IndividualSequence.id. '
-            'Non-fastq entries will be discarded.', ],\
-        })
+        ref_ind_seq_id=None,
 
-    def __init__(self, **keywords):
+        ind_seq_id_ls=None,
+        excludeContaminant=False,
+        sequence_filtered=None,
+
+        min_segment_length=100,
+        needPerContigJob=False,
+        skipAlignmentWithStats=False,
+        alignmentDepthIntervalMethodShortName=None,
+        
+        samtools_path="bin/samtools",
+        picard_dir="script/picard/dist",
+        gatk_path="bin/GenomeAnalysisTK1_6_9.jar",
+        gatk2_path="bin/GenomeAnalysisTK.jar",
+        picard_path="script/picard.broad/build/libs/picard.jar",
+
+        contigMaxRankBySize=None,
+        contigMinRankBySize=None,
+
+        chromosome_type_id=None, 
+        ref_genome_tax_id=9606,
+        ref_genome_sequence_type_id=1,
+        ref_genome_version=15,
+        ref_genome_outdated_index=0,
+
+        pegasusFolderName='input',
+        site_handler='condor',
+        input_site_handler='condor',
+        cluster_size=30,
+        output_path=None,
+        tmpDir='/tmp/',
+        max_walltime=4320,
+        
+        home_path=None,
+        javaPath=None,
+        pymodulePath="src/pymodule",
+
+        jvmVirtualByPhysicalMemoryRatio=1.2,
+
+        needSSHDBTunnel=False,
+        commit=False,
+        debug=False,
+        report=False):
         """
         """
-        AbstractNGSWorkflow.__init__(self, **keywords)
-        if self.ind_seq_id_ls:
-            self.ind_seq_id_ls = getListOutOfStr(self.ind_seq_id_ls, data_type=int)
+        AbstractNGSWorkflow.__init__(self,
+            drivername=drivername, hostname=hostname,
+            dbname=dbname, schema=schema, port=port,
+            db_user=db_user, db_passwd=db_passwd,
+            data_dir=data_dir, local_data_dir=local_data_dir,
+
+            ref_ind_seq_id=ref_ind_seq_id,
+
+            excludeContaminant=excludeContaminant,
+            sequence_filtered=sequence_filtered,
+
+            samtools_path=samtools_path,
+            picard_dir=picard_dir,
+            gatk_path=gatk_path,
+            gatk2_path=gatk2_path,
+            picard_path=picard_path,
+
+            contigMaxRankBySize=contigMaxRankBySize,
+            contigMinRankBySize=contigMinRankBySize,
+
+            chromosome_type_id=chromosome_type_id, 
+            ref_genome_tax_id=ref_genome_tax_id,
+            ref_genome_sequence_type_id=ref_genome_sequence_type_id,
+            ref_genome_version=ref_genome_version,
+            ref_genome_outdated_index=ref_genome_outdated_index,
+
+            pegasusFolderName=pegasusFolderName,
+            site_handler=site_handler,
+            input_site_handler=input_site_handler,
+            cluster_size=cluster_size,
+            output_path=output_path,
+            tmpDir=tmpDir,
+            max_walltime=max_walltime, 
+            
+            home_path=home_path,
+            javaPath=javaPath,
+            pymodulePath=pymodulePath,
+            
+            jvmVirtualByPhysicalMemoryRatio=jvmVirtualByPhysicalMemoryRatio,
+            needSSHDBTunnel=needSSHDBTunnel,
+            commit=commit,
+            debug=debug, report=report)
+        
+        self.ind_seq_id_ls = getListOutOfStr(ind_seq_id_ls, data_type=int)
+        self.needSplitChrIntervalData = False
 
     def registerExecutables(self):
         """
         """
         AbstractNGSWorkflow.registerExecutables(self)
         self.registerOneExecutable(
-            path=os.path.join(self.pymodulePath, 'mapper/InspectBaseQuality.py'),
+            path=os.path.join(self.pymodulePath, 'ngs/qc/InspectBaseQuality.py'),
             name='InspectBaseQuality', clusterSizeMultiplier=1)
         
     def run(self):
@@ -78,9 +159,8 @@ class InspectBaseQualityPipeline(AbstractNGSWorkflow):
                 #create jobs
                 for filepath in inputFilepathLs:
                     prefix, suffix = utils.\
-                        getRealPrefixSuffixOfFilenameWithVariableSuffix(filepath)
+                        getRealPrefixSuffix(filepath)
                     if suffix=='.fastq':
-                        #sometimes other files get in the way
                         inspectBaseQuality_job = self.addDBJob(
                             executable=self.InspectBaseQuality,
                             extraArgumentList=['-i', filepath, \

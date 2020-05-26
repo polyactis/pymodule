@@ -242,7 +242,7 @@ class MapReduceGenomeFileWorkflow(ParentClass):
         """
         2013.11.24
         """
-        inputSuffix = utils.getRealPrefixSuffixOfFilenameWithVariableSuffix(
+        inputSuffix = utils.getRealPrefixSuffix(
             jobData.file.name)[1]
         outputFile = File(os.path.join(self.mapDirJob.output, \
             '%s_%s%s'%(passingData.fileBasenamePrefix, \

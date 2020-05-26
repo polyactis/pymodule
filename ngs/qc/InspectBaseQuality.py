@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 """
-2011-8-15 Five types of figures will be generated.
+Five types of figures will be generated.
     qualityHist.png
     quality_per_position.png
     no_of_bases_per_position.png
     diNuc_count.png
     diNuc_quality.png
+
 2011-8-17 the db saving part is not implemented, you can supply any random password.
 
 Examples:
-    %s -i ../3_Barbados_GA/gerald_62FGFAAXX_3_1.fastq.gz -u yh -read_sampling_rate 0.0001
+    %s -i gerald_62FGFAAXX_3_1.fastq.gz -u yh -read_sampling_rate 0.0001
 
 """
 
@@ -21,8 +22,9 @@ import random
 import matplotlib; matplotlib.use("Agg")
 from palos import PassingData, ProcessOptions, utils
 from palos.plot import yh_matplotlib
-from palos.mapper.AbstractSunsetMapper import AbstractSunsetMapper as ParentClass
+from palos.mapper.AbstractSunsetMapper import AbstractSunsetMapper
 
+ParentClass = AbstractSunsetMapper
 class InspectBaseQuality(ParentClass):
     __doc__ = __doc__
     option_default_dict = copy.deepcopy(ParentClass.option_default_dict)
@@ -41,25 +43,23 @@ class InspectBaseQuality(ParentClass):
 
     def __init__(self,  inputFnameLs=None, **keywords):
         """
-        2011-7-11
         """
         ParentClass.__init__(self, inputFnameLs, **keywords)
         
         if not self.outputFnamePrefix:
-            self.outputFnamePrefix = utils.getRealPrefixSuffixOfFilenameWithVariableSuffix(self.inputFname)[0]
+            self.outputFnamePrefix = utils.getRealPrefixSuffix(
+                self.inputFname)[0]
     
-    def getQualityData(self, inputFname, read_sampling_rate=0.05, quality_score_format='Sanger'):
+    def getQualityData(self, inputFname, read_sampling_rate=0.05,
+        quality_score_format='Sanger'):
         """
-        2011-8-15
         """
-        sys.stderr.write("Getting base quality data from %s ...\n"%(inputFname))
-        
+        print(f"Getting base quality data from {inputFname} ...", flush=True)
         quality_ls_per_position = []
         quality_ls = []
         no_of_bases_per_position = []
         diNuc2count = {}
         diNuc2quality_ls = {}
-        
         
         fname_prefix, fname_suffix = os.path.splitext(inputFname)
         if fname_suffix=='.gz':
@@ -71,7 +71,7 @@ class InspectBaseQuality(ParentClass):
         counter = 0
         real_counter = 0
         for line in inf:
-            if line[0]=='@':	#a new read
+            if line[0]=='@':
                 counter += 1
                 coin_toss = random.random()
                 base_string = inf.next().strip()
@@ -91,7 +91,7 @@ class InspectBaseQuality(ParentClass):
                         base = base_string[i]
                         base_quality = quality_string[i]
                         if quality_score_format=='Illumina1.3':
-                            phredScore = utils.getPhredScoreOutOfSolexaScore(base_quality)
+                            phredScore = utils.converSolexaScoreToPhred(base_quality)
                         else:
                             phredScore = ord(base_quality)-33
                         quality_ls_per_position[i].append(phredScore)
@@ -113,33 +113,38 @@ class InspectBaseQuality(ParentClass):
             #if baseCount>10000:	#temporary, for testing
             #	break
         del inf
-        sys.stderr.write("%s/%s reads selected. Done.\n"%(real_counter, counter))
-        return PassingData(quality_ls_per_position=quality_ls_per_position, 
+        print(f"{real_counter}/{counter} reads selected.", flush=True)
+        return PassingData(
+            quality_ls_per_position=quality_ls_per_position, 
             quality_ls=quality_ls, \
             no_of_bases_per_position=no_of_bases_per_position,
-            diNuc2quality_ls=diNuc2quality_ls, diNuc2count=diNuc2count)
+            diNuc2quality_ls=diNuc2quality_ls,
+            diNuc2count=diNuc2count)
     
-    def drawQualityData(self, qualityDataStructure, outputFnamePrefix, sequence_id=''):
+    def drawQualityData(self, qualityDataStructure, outputFnamePrefix,
+        sequence_id=''):
         """
-        2011-8-15
         """
-        sys.stderr.write("Making plots on quality data ...")
+        print("Making plots on quality data ...", flush=True)
         
         yh_matplotlib.drawHist(qualityDataStructure.quality_ls, 
-            title='histogram of phredScore from %s'%(sequence_id), xlabel_1D=None,
-            outputFname='%s_qualityHist.png'%(outputFnamePrefix), \
+            title='histogram of phredScore from %s'%(sequence_id),
+            xlabel_1D=None,
+            outputFname='%s_qualityHist.png'%(outputFnamePrefix),
             min_no_of_data_points=50, needLog=False, dpi=200)
         
         yh_matplotlib.drawBoxPlot(qualityDataStructure.quality_ls_per_position,
             title='quality box plot from %s'%(sequence_id),
-            xlabel_1D='base position in read', xticks=None,
+            xlabel_1D='base position in read',
+            xticks=None,
             outputFname='%s_quality_per_position.png'%(outputFnamePrefix),
             dpi=200)
         
         no_of_bases_per_position = qualityDataStructure.no_of_bases_per_position
         readLength = len(no_of_bases_per_position)
-        yh_matplotlib.drawBarChart(range(1, readLength+1), no_of_bases_per_position,
-            title='no of base calls from %s'%(sequence_id),\
+        yh_matplotlib.drawBarChart(range(1, readLength+1),
+            no_of_bases_per_position,
+            title='no of base calls from %s'%(sequence_id),
             xlabel_1D='base position in read', xticks=None,
             outputFname='%s_no_of_bases_per_position.png'%(outputFnamePrefix),
             bottom=0, needLog=False, dpi=200)
@@ -154,8 +159,9 @@ class InspectBaseQuality(ParentClass):
             diNuc_count_ls.append(diNuc2count.get(diNuc))
             diNuc_quality_ls_ls.append(diNuc2quality_ls.get(diNuc))
         
-        yh_matplotlib.drawBarChart(range(1, len(diNuc_count_ls)+1), diNuc_count_ls,
-            title='di-nucleotide counts from %s'%(sequence_id),\
+        yh_matplotlib.drawBarChart(range(1, len(diNuc_count_ls)+1),
+            diNuc_count_ls,
+            title='di-nucleotide counts from %s'%(sequence_id),
             xlabel_1D=None, xticks=diNuc_key_ls,
             outputFname='%s_diNuc_count.png'%(outputFnamePrefix),
             bottom=0, needLog=False, dpi=200)
@@ -166,24 +172,19 @@ class InspectBaseQuality(ParentClass):
             outputFname='%s_diNuc_quality.png'%(outputFnamePrefix),
             dpi=200)
         
-        sys.stderr.write("Done.\n")
+        print("Done.", flush=True)
     
     def saveDataIntoDB(self, db_main, ind_sequence_id=None):
         """
-        2011-8-15
         """
         pass
     
     def run(self):
         """
-        2011-7-11
         """
         if self.debug:
             import pdb
             pdb.set_trace()
-            debug = True
-        else:
-            debug =False
         
         session = self.db_main.session
         session.begin()
@@ -199,7 +200,7 @@ class InspectBaseQuality(ParentClass):
             sequence_id=sequence_id)
         
         self.saveDataIntoDB(self.db_main, ind_sequence_id=self.ind_sequence_id)
-            
+        
         if self.commit:
             session.flush()
             session.commit()

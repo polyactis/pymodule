@@ -816,7 +816,7 @@ def sshTunnel(serverHostname="dl324b-1.cmb.usc.edu", port="5432",
     #runLocalCommand(commandline, report_stderr=True, report_stdout=True)
     return os.system(commandline)
 
-def getPhredScoreOutOfSolexaScore(solexaChar):
+def converSolexaScoreToPhred(solexaChar):
     """
     2011-8-15
     main doc: http://en.wikipedia.org/wiki/FASTQ_format
@@ -844,16 +844,16 @@ def getFileBasenamePrefixFromPath(path=None,
         
         getFileBasenamePrefixFromPath(path) == "input"
     
-    2013.11.24 call getRealPrefixSuffixOfFilenameWithVariableSuffix() for actual work
+    2013.11.24 call getRealPrefixSuffix() for actual work
     2013.06.21 convenient function
     """
     fileBasename = os.path.basename(path)
-    return getRealPrefixSuffixOfFilenameWithVariableSuffix(fileBasename,
+    return getRealPrefixSuffix(fileBasename,
         fakeSuffixSet=fakeSuffixSet)[0]
     
     
 
-def getRealPrefixSuffixOfFilenameWithVariableSuffix(path, fakeSuffix='.gz',
+def getRealPrefixSuffix(path, fakeSuffix='.gz',
     fakeSuffixSet = set(['.gz', '.zip', '.bz2', '.bz'])):
     """
     The purpose of this function is to get the prefix, suffix of a 

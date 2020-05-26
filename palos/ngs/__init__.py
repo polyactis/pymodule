@@ -53,7 +53,7 @@ def getPEInputFiles(input_dir, isPE=True):
     no_of_fastq_files = 0
     for fname in files:
         fname_prefix, fname_suffix = utils.\
-            getRealPrefixSuffixOfFilenameWithVariableSuffix(fname)
+            getRealPrefixSuffix(fname)
         if fname_suffix!='.fastq':
             #skip non-fastq files
             continue
