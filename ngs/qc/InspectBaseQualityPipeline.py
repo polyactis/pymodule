@@ -137,34 +137,32 @@ class InspectBaseQualityPipeline(AbstractNGSWorkflow):
         for ind_seq_id, FilePairLs in individualSequenceID2FilePairLs.items():
             individual_sequence = self.db_main.queryTable(
                 SunsetDB.IndividualSequence).get(ind_seq_id)
-            if individual_sequence is not None and individual_sequence.format=='fastq':
-                #start to collect all files affiliated with
-                #  this individual_sequence record 
-                for filePair in FilePairLs:
-                    for fileRecord in filePair:
-                        relativePath = fileRecord[0]
-                        prefix, suffix = utils.getRealPrefixSuffix(relativePath)
-                        if suffix=='.fastq':
-                            filepath = os.path.join(self.data_dir, relativePath)
-                            fastqF = self.registerOneInputFile(input_path=filepath,
-                                pegasusFileName=relativePath)
-                            logFile = File(f'{prefix}.log')
-                            job = self.addDBJob(
-                                executable=self.InspectBaseQuality,
-                                inputArgumentOption="-i",
-                                inputFile=fastqF,
-                                outputArgumentOption="--logFilename",
-                                outputFile=logFile,
-                                extraArgumentList=[
-                                    '--read_sampling_rate', '0.005',
-                                    '--quality_score_format',
-                                    individual_sequence.quality_score_format,
-                                    ],
-                                parentJobLs=None,
-                                transferOutput=True,
-                                objectWithDBArguments=self,
-                                job_max_memory=20000,
-                                walltime=120)
+            if individual_sequence is None or individual_sequence.format!='fastq':
+                continue
+            for filePair in FilePairLs:
+                for fileRecord in filePair:
+                    relativePath = fileRecord[0]
+                    prefix, suffix = utils.getRealPrefixSuffix(relativePath)
+                    if suffix=='.fastq':
+                        filepath = os.path.join(self.data_dir, relativePath)
+                        #Do not register the input fastq because InspectBaseQuality
+                        #  will output directly into self.data_dir.
+                        logFile = File(f'{prefix}.log')
+                        job = self.addDBJob(
+                            executable=self.InspectBaseQuality,
+                            outputArgumentOption="--logFilename",
+                            outputFile=logFile,
+                            extraArgumentList=[
+                                '-i', filepath,
+                                '--read_sampling_rate', '0.005',
+                                '--quality_score_format',
+                                individual_sequence.quality_score_format,
+                                ],
+                            parentJobLs=None,
+                            transferOutput=True,
+                            objectWithDBArguments=self,
+                            job_max_memory=20000,
+                            walltime=120)
         
         self.end_run()
     
