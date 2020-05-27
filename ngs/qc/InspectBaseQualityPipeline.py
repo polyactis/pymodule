@@ -129,9 +129,8 @@ class InspectBaseQualityPipeline(AbstractNGSWorkflow):
         """
         self.setup_run()
         
-        #must use db_main.data_dir.
-        # If self.data_dir differs from db_main.data_dir, 
-        # this program (must be run on submission host) won't find files.
+        logDir = "Log"
+        logDirJob = self.addMkDirJob(outputDir=logDir)
         individualSequenceID2FilePairLs = self.db_main.getIndividualSequenceID2FilePairLs(
             self.ind_seq_id_ls, data_dir=self.data_dir)
         for ind_seq_id, FilePairLs in individualSequenceID2FilePairLs.items():
@@ -142,12 +141,13 @@ class InspectBaseQualityPipeline(AbstractNGSWorkflow):
             for filePair in FilePairLs:
                 for fileRecord in filePair:
                     relativePath = fileRecord[0]
-                    prefix, suffix = utils.getRealPrefixSuffix(relativePath)
+                    prefix, suffix = utils.getRealPrefixSuffix(
+                        os.path.basename(relativePath))
                     if suffix=='.fastq':
                         filepath = os.path.join(self.data_dir, relativePath)
                         #Do not register the input fastq because InspectBaseQuality
                         #  will output directly into self.data_dir.
-                        logFile = File(f'{prefix}.log')
+                        logFile = File(os.path.join(logDir, f'{prefix}.log'))
                         job = self.addDBJob(
                             executable=self.InspectBaseQuality,
                             outputArgumentOption="--logFilename",
@@ -158,7 +158,7 @@ class InspectBaseQualityPipeline(AbstractNGSWorkflow):
                                 '--quality_score_format',
                                 individual_sequence.quality_score_format,
                                 ],
-                            parentJobLs=None,
+                            parentJobLs=[logDirJob],
                             transferOutput=True,
                             objectWithDBArguments=self,
                             job_max_memory=20000,
