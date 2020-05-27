@@ -154,7 +154,7 @@ class InspectBaseQualityPipeline(AbstractNGSWorkflow):
                             outputFile=logFile,
                             extraArgumentList=[
                                 '-i', filepath,
-                                '--read_sampling_rate', '0.005',
+                                '--read_sampling_rate', '0.01',
                                 '--quality_score_format',
                                 individual_sequence.quality_score_format,
                                 ],
