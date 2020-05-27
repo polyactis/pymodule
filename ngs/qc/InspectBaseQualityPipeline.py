@@ -161,7 +161,7 @@ class InspectBaseQualityPipeline(AbstractNGSWorkflow):
                             parentJobLs=[logDirJob],
                             transferOutput=True,
                             objectWithDBArguments=self,
-                            job_max_memory=20000,
+                            job_max_memory=5000,
                             walltime=120)
         
         self.end_run()
