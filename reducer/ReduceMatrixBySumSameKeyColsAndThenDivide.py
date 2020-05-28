@@ -14,7 +14,7 @@ import sys, os, math
 __doc__ = __doc__%(sys.argv[0])
 
 from palos import ProcessOptions, PassingData
-from . ReduceMatrixByChosenColumn import ReduceMatrixByChosenColumn
+from ReduceMatrixByChosenColumn import ReduceMatrixByChosenColumn
 
 class ReduceMatrixBySumSameKeyColsAndThenDivide(ReduceMatrixByChosenColumn):
     __doc__ = __doc__
