@@ -159,7 +159,7 @@ if given, use this to fetch a map between querySNPID & positionInFlank.', ],\
         
         sys.stderr.write("Finding blast reference coordinates for SNPs from %s ... \n"%(blastHitResultFname))
         reader = csv.reader(open(blastHitResultFname), delimiter='\t')
-        header =reader.next()
+        header = next(reader)
         col_name2index = getColName2IndexFromHeader(header)
         
         #every coordinate in blastHitResultFname is 1-based.
@@ -468,7 +468,7 @@ Sample  Geno    SNP
         """
         inf = utils.openGzipFile(querySNPDataFname)
         reader = csv.reader(inf, delimiter=figureOutDelimiter(inf))
-        col_name2index = getColName2IndexFromHeader(reader.next())
+        col_name2index = getColName2IndexFromHeader(next(reader))
         
         sampleIndex = col_name2index.get("Sample")
         genotypeIndex = col_name2index.get("Geno")

@@ -126,7 +126,6 @@ class ModifyTPED(AbstractMapper):
 		locus_id2individual_index_ls = {}
 		#inf = utils.openGzipFile(mendelErrorFname, 'r')
 		reader = MatrixFile(path=mendelErrorFname)
-		#header = reader.next()
 		reader.constructColName2IndexFromHeader()
 		counter = 0
 		for row in reader:

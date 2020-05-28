@@ -24,8 +24,9 @@ diploidGenotypePattern = re.compile(r'([\d.])[|/]([\d.])')
     #".|.", "0|1" for phased
     #"./.", "0/1" for unphased
 
-def parseOneVCFRow(row, col_name2index, col_index_individual_name_ls, sample_id2index, minDepth=1,\
-                dataEntryType=1):
+def parseOneVCFRow(row, col_name2index, col_index_individual_name_ls,
+    sample_id2index, minDepth=1,\
+    dataEntryType=1):
     """
     2014.01.08 fix a bug that skips calls and shortens data_row. 
     2012.9.6 turn pos into integer
@@ -51,7 +52,8 @@ def parseOneVCFRow(row, col_name2index, col_index_individual_name_ls, sample_id2
         try:
             tag, value = info_entry.split('=')
         except:
-            #sys.stderr.write("Error in splitting %s by =.\n"%info)	###Error in splitting DS by =.
+            #sys.stderr.write("Error in splitting %s by =.\n"%info)
+            # ###Error in splitting DS by =.
             continue
         info_tag2value[tag] = value
     
@@ -59,7 +61,8 @@ def parseOneVCFRow(row, col_name2index, col_index_individual_name_ls, sample_id2
     refBase = row[col_name2index['REF']]
     altBase = row[col_name2index['ALT']]
     
-    altBaseLs = altBase.split(',')	#altBase could be just "C" or "C,G" (multi-nucleotide)
+    altBaseLs = altBase.split(',')
+    #altBase could be just "C" or "C,G" (multi-nucleotide)
     alleleLs = [refBase] + altBaseLs
     alleleNumber2Base = {'.':'NA'}
     for i in range(len(alleleLs)):
@@ -92,14 +95,17 @@ def parseOneVCFRow(row, col_name2index, col_index_individual_name_ls, sample_id2
         #GL_index = format_column_name2index.get('GL')
         genotypeCallInBase = 'NA'
         if genotype_call_index is not None and len(genotype_data_ls)>0:
-            # or (genotype_call_index is not None and len(genotype_data_ls)<=genotype_call_index):	#<len(format_column_name2index):	#this genotype call is probably empty "./." due to no reads
+            # or (genotype_call_index is not None and len(genotype_data_ls)<=genotype_call_index):
+            # 	#<len(format_column_name2index):
+            # #this genotype call is probably empty "./." due to no reads
             #genotype_quality = genotype_data_ls[genotype_quality_index]
             if genotype_call_index is not None and len(genotype_data_ls)>genotype_call_index:
                 genotype_call = genotype_data_ls[genotype_call_index]
             else:
                 genotype_call = './.'	#missing
             callData = {}
-            if genotype_call!='./.' and genotype_call!='.' and genotype_call!='.|.':	#missing data
+            if genotype_call!='./.' and genotype_call!='.' and genotype_call!='.|.':
+                #missing data
                 patternSearchResult = diploidGenotypePattern.search(genotype_call)
                 if patternSearchResult:
                     allele1 = alleleNumber2Base[patternSearchResult.group(1)]
@@ -115,14 +121,17 @@ def parseOneVCFRow(row, col_name2index, col_index_individual_name_ls, sample_id2
                         depth = 0
                     else:
                         depth = int(depth)
-                    if minDepth>0 and depth<minDepth:	#no read. samtools would still assign ref/ref to this individual
+                    if minDepth>0 and depth<minDepth:
+                        #no read. samtools would still assign ref/ref to this individual
                         genotypeCallInBase = 'NA'	#set it to missing
-                    #if depth>maxNoOfReads*coverage or depth<minNoOfReads*coverage:	#2011-3-29 skip. coverage too high or too low
+                    #if depth>maxNoOfReads*coverage or depth<minNoOfReads*coverage:
+                    # #2011-3-29 skip. coverage too high or too low
                     #	continue
                     callData['DP'] = depth
 
         """
-        if genotype_call=='0/1' or genotype_call =='1/0':	#heterozygous, the latter notation is never used though.
+        if genotype_call=='0/1' or genotype_call =='1/0':
+            #heterozygous, the latter notation is never used though.
             allele = '%s%s'%(refBase, altBase)
             GL_list = genotype_data_ls[GL_index]
             GL_list = GL_list.split(',')
@@ -159,31 +168,37 @@ def parseOneVCFRow(row, col_name2index, col_index_individual_name_ls, sample_id2
             if genotypeCallInBase not in genotypeCall2Count:
                 genotypeCall2Count[genotypeCallInBase] = 0
             genotypeCall2Count[genotypeCallInBase] += 1
-    return PassingData(chr=chromosome, chromosome=chromosome, pos=pos, position=pos, locus_id=locus_id, quality=quality, \
-                    info_tag2value=info_tag2value, \
-                    refBase=refBase, altBase=altBase, \
-                    alleleLs=alleleLs, alleleNumber2Base=alleleNumber2Base, genotypeCall2Count=genotypeCall2Count, data_row=data_row,\
-                    info=info, format=format, filter=filter, vcf_locus_id=vcf_locus_id, \
-                    format_column_name2index=format_column_name2index, format_column_ls=format_column_ls)
+    return PassingData(chr=chromosome, chromosome=chromosome, pos=pos,
+        position=pos, locus_id=locus_id, quality=quality,
+        info_tag2value=info_tag2value,
+        refBase=refBase, altBase=altBase,
+        alleleLs=alleleLs, alleleNumber2Base=alleleNumber2Base,
+        genotypeCall2Count=genotypeCall2Count, data_row=data_row,
+        info=info, format=format, filter=filter, vcf_locus_id=vcf_locus_id,
+        format_column_name2index=format_column_name2index,
+        format_column_ls=format_column_ls)
 
 class VCFRecord(object):
     """
     2011-10-20
         
     """
-    def __init__(self, row=None, col_name2index=None, individual_name2col_index=None, sample_id2index=None,\
-                col_index_individual_name_ls=None, minDepth=1, sampleStartingColumn=9, ploidy=2, **keywords):
+    def __init__(self, row=None, col_name2index=None,
+        individual_name2col_index=None, sample_id2index=None,
+        col_index_individual_name_ls=None, minDepth=1,
+        sampleStartingColumn=9, ploidy=2, **keywords):
         """
-        2012.1.17
-            add argument minDepth
+        add argument minDepth
         """
-        self.dataEntryType = 2	#2013.05.06 controls whether each genotype data in self.data_row is just genotype (string) or dictionary
+        self.dataEntryType = 2
+        # controls whether each genotype data in self.data_row is just genotype (string) or dictionary
         
         self.row = row
         self.col_name2index = col_name2index
         self.individual_name2col_index = individual_name2col_index
         self.sample_id2index = sample_id2index
-        self.col_index_individual_name_ls = col_index_individual_name_ls	#list of [column-index, sample-id], column-index >=9
+        self.col_index_individual_name_ls = col_index_individual_name_ls
+        #list of [column-index, sample-id], column-index >=9
         self.minDepth = minDepth
         self.sampleStartingColumn = sampleStartingColumn
         self.ploidy = ploidy
@@ -203,8 +218,9 @@ class VCFRecord(object):
         2012.5.2
             add refBase, altBase to self
         """
-        returnData = parseOneVCFRow(row, self.col_name2index, self.col_index_individual_name_ls, self.sample_id2index, \
-                    minDepth=self.minDepth, dataEntryType=self.dataEntryType)
+        returnData = parseOneVCFRow(row, self.col_name2index,
+            self.col_index_individual_name_ls, self.sample_id2index,
+            minDepth=self.minDepth, dataEntryType=self.dataEntryType)
         
         self.chr = returnData.chromosome
         self.chromosome = returnData.chromosome
@@ -213,7 +229,8 @@ class VCFRecord(object):
         self.locus_id = returnData.locus_id
         self.vcf_locus_id = returnData.vcf_locus_id
         self.info_tag2value = returnData.info_tag2value
-        self.data_row = returnData.data_row	#a list of dictionary {'GT': base-call, 'DP': depth}, including one extra sample, the ref
+        self.data_row = returnData.data_row
+        #a list of dictionary {'GT': base-call, 'DP': depth}, including one extra sample, the ref
         self.alleleNumber2Base = returnData.alleleNumber2Base
         self.alleleLs = returnData.alleleLs
         
@@ -224,14 +241,11 @@ class VCFRecord(object):
         self.info = returnData.info
         self.format = returnData.format
         self.format_column_name2index = returnData.format_column_name2index
-        self.format_column_ls = returnData.format_column_ls	#2013.09.15
+        self.format_column_ls = returnData.format_column_ls
     
     def getAAF(self, useMax=True, defaultValue=0):
         """
-        2012.10.5
-            add argument useMax, which determines to return max or min when there are >1 alternative alleles.
-            add argument defaultValue
-        2011.12.16
+        argument useMax, which determines to return max or min when there are >1 alternative alleles.
         """
         frequencyLs = self.info_tag2value.get("AF", self.info_tag2value.get("AF1", None))
         if frequencyLs is not None:
@@ -291,8 +305,10 @@ class VCFRecord(object):
         2913.06.05
         argument genotype should be in VCF format. 'A/G' for unphased;  'A|G' for phased; './.' or '.|.' for missing
         argument convertGLToPL is so far only  for platypus.
-            ##FORMAT=<ID=PL,Number=G,Type=Integer,Description="Normalized, Phred-scaled likelihoods for genotypes as defined in the VCF specification">
-            ##FORMAT=<ID=GL,Number=.,Type=Float,Description="Genotype log10-likelihoods for AA,AB and BB genotypes, where A = ref and B = variant. Only applicable for bi-allelic sites">
+            ##FORMAT=<ID=PL,Number=G,Type=Integer,Description="Normalized, 
+            #   Phred-scaled likelihoods for genotypes as defined in the VCF specification">
+            ##FORMAT=<ID=GL,Number=.,Type=Float,Description="Genotype log10-likelihoods
+            #    for AA,AB and BB genotypes, where A = ref and B = variant. Only applicable for bi-allelic sites">
             
             PL = -10*GL
             
@@ -316,11 +332,13 @@ class VCFRecord(object):
             genotypeFieldDataList = genotypeFieldData.split(':')
         GT_index = self.format_column_name2index.get('GT')
         PL_index = self.format_column_name2index.get('PL')
-        ###FORMAT=<ID=PL,Number=G,Type=Integer,Description="Normalized, Phred-scaled likelihoods for genotypes as defined in the VCF specification">
+        ###FORMAT=<ID=PL,Number=G,Type=Integer,Description="Normalized, 
+        #   Phred-scaled likelihoods for genotypes as defined in the VCF specification">
         if PL_index is None:
             GL_index = self.format_column_name2index.get('GL')	#from Platypus
             if GL_index is not None:
-                ##FORMAT=<ID=GL,Number=.,Type=Float,Description="Genotype log10-likelihoods for AA,AB and BB genotypes, where A = ref and B = variant. Only applicable for bi-allelic sites">
+                ##FORMAT=<ID=GL,Number=.,Type=Float,Description="Genotype log10-likelihoods
+                #   for AA,AB and BB genotypes, where A = ref and B = variant. Only applicable for bi-allelic sites">
                 if convertGLToPL:	# so far only  for platypus
                     GL = genotypeFieldDataList[GL_index]
                     GL_list = map(float, GL.split(','))
@@ -368,7 +386,8 @@ class VCFFile(object):
         for sampleID, sample_index in vcfRecord.sample_id2index.items():
             beagleFile = self.sampleID2BeagleFile.get(sampleID)
             beagleGenotype = beagleFile.getGenotypeOfOneSampleOneLocus(sampleID=sampleID, locusID=None)
-            vcfRecord.setGenotypeCallForOneSample(sampleID=sampleID, genotype='%s|%s'%(beagleGenotype[0], beagleGenotype[1]))
+            vcfRecord.setGenotypeCallForOneSample(sampleID=sampleID,
+                genotype='%s|%s'%(beagleGenotype[0], beagleGenotype[1]))
             counter += 1
         self.writer.writeVCFRecord(vcfRecord)
     
@@ -383,20 +402,30 @@ class VCFFile(object):
         ('inputFname', 0, ): [None, 'i', 1, 'a VCF input file to read in the VCF content.'],\
         ('outputFname', 0, ): [None, 'o', 1, 'a VCF output file to hold the the VCF content.'],\
         ('mode', 1, ): ['rb', '', 1, 'rb: bam file. r: sam file.'],\
-        ('minorAlleleDepthLowerBoundCoeff', 1, float): [1/4., 'M', 1, 'minimum read depth multiplier for an allele to be called (heterozygous or homozygous)', ],\
-        ('minorAlleleDepthUpperBoundCoeff', 1, float): [3/4., 'A', 1, 'maximum read depth multiplier for the minor allele of a heterozygous call', ],\
-        ('majorAlleleDepthUpperBoundCoeff', 1, float): [7/8., 'a', 1, 'maximum read depth multiplier for the major allele of het call'],\
-        ('maxNoOfReadsForGenotypingError', 1, float): [1, 'x', 1, 'if read depth for one allele is below or equal to this number, regarded as genotyping error ', ],\
-        ('depthUpperBoundCoeff', 1, float): [2, 'm', 1, 'depthUpperBoundCoeff*coverage = maximum read depth for one base'],\
-        ('depthLowerBoundCoeff', 1, float): [1/4., 'O', 1, 'depthLowerBoundCoeff*coverage = minimum read depth multiplier for one base'],\
-        ('depthUpperBoundMultiSampleCoeff', 1, float): [3, 'N', 1, 'across n samples, ignore bases where read depth > coverageSum*depthUpperBoundCoeff*multiplier.'],\
-        ('seqCoverageFname', 0, ): ['', 'q', 1, 'The sequence coverage file. tab/comma-delimited: individual_sequence.id coverage'],\
+        ('minorAlleleDepthLowerBoundCoeff', 1, float): [1/4., 'M', 1, 
+            'minimum read depth multiplier for an allele to be called (heterozygous or homozygous)', ],\
+        ('minorAlleleDepthUpperBoundCoeff', 1, float): [3/4., 'A', 1,
+            'maximum read depth multiplier for the minor allele of a heterozygous call', ],\
+        ('majorAlleleDepthUpperBoundCoeff', 1, float): [7/8., 'a', 1,
+            'maximum read depth multiplier for the major allele of het call'],\
+        ('maxNoOfReadsForGenotypingError', 1, float): [1, 'x', 1, 
+            'if read depth for one allele is below or equal to this number, regarded as genotyping error ', ],\
+        ('depthUpperBoundCoeff', 1, float): [2, 'm', 1,
+            'depthUpperBoundCoeff*coverage = maximum read depth for one base'],\
+        ('depthLowerBoundCoeff', 1, float): [1/4., 'O', 1,
+            'depthLowerBoundCoeff*coverage = minimum read depth multiplier for one base'],\
+        ('depthUpperBoundMultiSampleCoeff', 1, float): [3, 'N', 1, 
+            'across n samples, ignore bases where read depth > coverageSum*depthUpperBoundCoeff*multiplier.'],\
+        ('seqCoverageFname', 0, ): ['', 'q', 1,
+            'The sequence coverage file. tab/comma-delimited: individual_sequence.id coverage'],\
         ('minDepth', 0, float): [0, '', 1, 'minimum depth for a call to regarded as non-missing', ],\
         ('ploidy', 0, int): [2, '', 1, 'ploidy of the organism from which the genotype is from', ],\
-        ('defaultCoverage', 1, float): [5, 'd', 1, 'default coverage when coverage is not available for a read group'],\
+        ('defaultCoverage', 1, float): [5, 'd', 1,
+            'default coverage when coverage is not available for a read group'],\
         ("site_type", 1, int): [1, 's', 1, '1: all sites, 2: variants only'],\
         ('debug', 0, int):[0, 'b', 0, 'toggle debug mode'],\
-        ("sampleStartingColumn", 1, int): [9, '', 1, 'The column index (starting from 0) of the 1st sample genotype'],\
+        ("sampleStartingColumn", 1, int): [9, '', 1,
+            'The column index (starting from 0) of the 1st sample genotype'],\
         ('report', 0, int):[0, 'r', 0, 'toggle report, more verbose stdout/stderr.']
         }
     
@@ -405,22 +434,29 @@ class VCFFile(object):
         2012.9.5 set default minDepth=0
         2011-9-27
         """
-        self.ad = ProcessOptions.process_function_arguments(keywords, self.option_default_dict, error_doc=self.__doc__, \
-                                                        class_to_have_attr=self)
+        self.ad = ProcessOptions.process_function_arguments(keywords,
+            self.option_default_dict, error_doc=self.__doc__, \
+            class_to_have_attr=self)
         
-        self.header = None	#2012.5.10 the list of column headers (the header line starting by #CHROM)
-        self.headerWithoutHash = None	#2012.5.10 same as self.header except, instead of "#CHROM", it is "CHROM".
+        self.header = None
+        # the list of column headers (the header line starting by #CHROM)
+        self.headerWithoutHash = None
+        # same as self.header except, instead of "#CHROM", it is "CHROM".
         self.sample_id_ls = []
-        self.sample_id2index = {}	#the index is the index of its column in the genotype_call_matrix
+        self.sample_id2index = {}
+        #the index is the index of its column in the genotype_call_matrix
         self.locus_id_ls = []
         self.locus_id2row_index = {}
         self.locus_id2data = {}
         self.genotype_call_matrix = []
         self.col_name2index = {}	#column index in file
         self.col_index_individual_name_ls = None
-        self.individual_name2col_index = {}	#not the matrix column, the column in input file
-        self.metaInfoLs = []	#2012.3.28 anything before the "#CHROM" line. each entry is a raw line content, including '\n'
-        self.sampleIDHeader = []	#2012.3.20 a list of sample column headers (from sampleStartingColumn)
+        self.individual_name2col_index = {}
+        #not the matrix column, the column in input file
+        self.metaInfoLs = []
+        # anything before the "#CHROM" line. each entry is a raw line content, including '\n'
+        self.sampleIDHeader = []
+        # a list of sample column headers (from sampleStartingColumn)
         
         self.inf = None
         self.reader = None
@@ -432,8 +468,6 @@ class VCFFile(object):
     
     def _initializeInput(self, inputFname=None):
         """
-        2012.5.10
-            split out of __init__()
         """
         if inputFname and self.mode[0]=='r':
             self.inf = utils.openGzipFile(inputFname, mode='r')
@@ -449,9 +483,7 @@ class VCFFile(object):
     
     def _initializeOutput(self, outputFname=None):
         """
-        2012.9.6 handle gzipped file as well.
-        2012.5.10
-            split out of __init__()
+        handle gzipped file as well.
         """
         if outputFname:
             if outputFname[-3:]=='.gz':
@@ -470,7 +502,8 @@ class VCFFile(object):
         if self.report:
             sys.stderr.write("\t Finding all individuals ...")
         no_of_cols = len(header)
-        individual_name2col_index = {}	#individual's column name -> an opened file handler to store genetic data
+        individual_name2col_index = {}
+        #individual's column name -> an opened file handler to store genetic data
         col_index_individual_name_ls = []
         
         counter = 0
@@ -557,8 +590,9 @@ class VCFFile(object):
         
         for row in self.reader:
             counter += 1
-            returnData = parseOneVCFRow(row, self.col_name2index, self.col_index_individual_name_ls, self.sample_id2index, \
-                    minDepth=self.minDepth, dataEntryType=1)
+            returnData = parseOneVCFRow(row, self.col_name2index,
+                self.col_index_individual_name_ls, self.sample_id2index, \
+                minDepth=self.minDepth, dataEntryType=1)
             
             genotypeCall2Count = returnData.genotypeCall2Count
             data_row = returnData.data_row
@@ -569,11 +603,12 @@ class VCFFile(object):
                 self.locus_id2data[current_locus]['REF'] = returnData.refBase
                 self.locus_id2data[current_locus]['ALT'] = returnData.altBase
             
-            if len(genotypeCall2Count)>self.site_type-1:	#whether polymorphic across samples or all sites in vcf
+            if len(genotypeCall2Count)>self.site_type-1:
+                #whether polymorphic across samples or all sites in vcf
                 real_counter += 1
-                if current_locus in locus_id2row_index:	#2012.8.8 bug fix, same locus appearing >1 times
+                if current_locus in locus_id2row_index:
                     sys.stderr.write("WARNING: Locus %s at line %s already in locus_id2row_index with row_index = %s. Skip\n"%\
-                                    (repr(current_locus), counter, locus_id2row_index.get(current_locus)))
+                        (repr(current_locus), counter, locus_id2row_index.get(current_locus)))
                 else:
                     locus_id2row_index[current_locus] = len(locus_id2row_index)
                     self.locus_id_ls.append(current_locus)
@@ -586,17 +621,17 @@ class VCFFile(object):
     
     def _parseHeader(self):
         """
-        2013.07.17 bugfix, do not reset self.sample_id_ls in the beginning
-        2012.3.28
-            add all header content into self.metaInfoLs
-                except the last header line, which goes into self.sampleIDHeader
-        2011-11-2
-            this function is run inside __init__()
+        add all header content into self.metaInfoLs
+            except the last header line, which goes into self.sampleIDHeader
+        this function is run inside __init__().
         """
-        self.metaInfoLs = []	#2012.3.28 anything before the "#CHROM" line. each entry is a raw line content, including '\n'
-        self.sampleIDHeader = []	#2012.3.20 a list of column headers (#CHROM)
+        self.metaInfoLs = []
+        # anything before the "#CHROM" line. each entry is a raw line content, including '\n'
+        self.sampleIDHeader = []
+        # a list of column headers (#CHROM)
         
-        self.sample_id2index['ref'] = 0	#ref is at column 0. "ref" must not be equal to any read_group.
+        self.sample_id2index['ref'] = 0
+        #ref is at column 0. "ref" must not be equal to any read_group.
         self.sample_id_ls.append('ref')
         
         """
@@ -621,15 +656,17 @@ class VCFFile(object):
                 self.header = row[:]
                 self.headerWithoutHash= row[:]
                 self.headerWithoutHash[0] = 'CHROM'	#discard the #
-                self.col_name2index = getColName2IndexFromHeader(self.headerWithoutHash, skipEmptyColumn=True)
-                self.col_index_individual_name_ls = self._getIndividual2ColIndex(self.headerWithoutHash, self.col_name2index)
+                self.col_name2index = getColName2IndexFromHeader(
+                    self.headerWithoutHash, skipEmptyColumn=True)
+                self.col_index_individual_name_ls = self._getIndividual2ColIndex(
+                    self.headerWithoutHash, self.col_name2index)
                 for individual_col_index, individual_name in self.col_index_individual_name_ls:
                     read_group = individual_name.strip()
                     if read_group not in self.sample_id2index:
                         self.sample_id2index[read_group] = len(self.sample_id2index)
                         self.sample_id_ls.append(read_group)
                 break	# "#CHROM" is the last line of the self.headerWithoutHash
-            elif line[0]=='#':	#2011-3-4
+            elif line[0]=='#':
                 self.metaInfoLs.append(line)
                 #continue
             else:	#leave everything for parseFile or parseIter
@@ -656,10 +693,12 @@ class VCFFile(object):
         """
         for row in self.reader:
             vcfRecord = VCFRecord(row, col_name2index=self.col_name2index, \
-                        individual_name2col_index=self.individual_name2col_index, sample_id2index=self.sample_id2index,\
-                        col_index_individual_name_ls=self.col_index_individual_name_ls,\
-                        minDepth=self.minDepth, sampleStartingColumn=self.sampleStartingColumn,\
-                        ploidy=self.ploidy)
+                individual_name2col_index=self.individual_name2col_index,
+                sample_id2index=self.sample_id2index,\
+                col_index_individual_name_ls=self.col_index_individual_name_ls,\
+                minDepth=self.minDepth,
+                sampleStartingColumn=self.sampleStartingColumn,
+                ploidy=self.ploidy)
             yield vcfRecord
     
     def __iter__(self):
@@ -673,14 +712,16 @@ class VCFFile(object):
         2012.8.25 make itself an iterator
         """
         try:
-            row = self.reader.next()
+            row = next(self.reader)
             if row is None or row==[] or row=="":
                 raise StopIteration
-            vcfRecord = VCFRecord(row, col_name2index=self.col_name2index, \
-                        individual_name2col_index=self.individual_name2col_index, sample_id2index=self.sample_id2index,\
-                        col_index_individual_name_ls=self.col_index_individual_name_ls,\
-                        minDepth=self.minDepth, sampleStartingColumn=self.sampleStartingColumn,\
-                        ploidy=self.ploidy)
+            vcfRecord = VCFRecord(row, col_name2index=self.col_name2index,
+                individual_name2col_index=self.individual_name2col_index,
+                sample_id2index=self.sample_id2index,
+                col_index_individual_name_ls=self.col_index_individual_name_ls,
+                minDepth=self.minDepth,
+                sampleStartingColumn=self.sampleStartingColumn,
+                ploidy=self.ploidy)
             return vcfRecord
         except StopIteration:
             raise StopIteration
@@ -697,7 +738,8 @@ class VCFFile(object):
             
         """
         sys.stderr.write("Count the number of homozygous-ref/alt & het.\n")
-        sampleID2data = {}	#key is sampleID, value is a list of 3 numbers. 'NoOfHomoRef', 'NoOfHomoAlt', 'NoOfHet'
+        sampleID2data = {}
+        #key is sampleID, value is a list of 3 numbers. 'NoOfHomoRef', 'NoOfHomoAlt', 'NoOfHet'
         
         no_of_total = 0.
         minStart = None
@@ -744,7 +786,8 @@ class VCFFile(object):
         """
         2013.07.17 get data from self.header, not from self.sample_id_ls anymore
         2012.7.18
-            self.sample_id_ls includes a "ref" in index=0 cell. this function helps to reduce confusion by returning
+            self.sample_id_ls includes a "ref" in index=0 cell.
+                this function helps to reduce confusion by returning
             a list of sample IDs without "ref"
         """
         return self.header[self.sampleStartingColumn:]
@@ -768,9 +811,8 @@ class VCFFile(object):
     
     def _resetInput(self):
         """
-        2012.10.5
-            run only to reset this VCFFile object and the read cursor is at the beginning of all VCF records.
-            split out of getNoOfLoci()
+        run only to reset this VCFFile object and the read cursor is at the beginning of all VCF records.
+        split out of getNoOfLoci()
         """
         #reset the inf
         self.inf.seek(0)
@@ -840,13 +882,11 @@ class VCFFile(object):
     
     def writerow(self, data_row):
         """
-        2013.07.03
         """
         self.writer.writerow(data_row)
     
     def close(self,):
         """
-        2012.5.10
         """
         if self.inf:
             del self.inf, self.reader
@@ -855,8 +895,7 @@ class VCFFile(object):
     
     def getLocus2AlternativeAlleleFrequency(self):
         """
-        2012.10.5
-            adapted from VariantDiscovery.getContig2Locus2Frequency()
+        adapted from VariantDiscovery.getContig2Locus2Frequency()
         """
         locus2frequency = {}
         for vcfRecord in self:

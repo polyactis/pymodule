@@ -41,7 +41,7 @@ class ReduceDepthOfCoverage(object):
             inputFile = utils.openGzipFile(inputFname)
             delimiter = figureOutDelimiter(inputFile)
             reader = csv.reader(inputFile, delimiter=delimiter)
-            header = reader.next()
+            header = next(reader)
             col_name2index = getColName2IndexFromHeader(header)
             
             intervalIDIndex = col_name2index.get("Target")

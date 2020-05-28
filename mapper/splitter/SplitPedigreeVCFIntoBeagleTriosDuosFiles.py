@@ -200,7 +200,7 @@ class SplitPedigreeVCFIntoBeagleTriosDuosFiles(AbstractVCFMapper):
         familySize2SampleIDList = pedigreeFamilyData.familySize2SampleIDList
         
         for vcfRecord in vcfFile:
-            oneLocus = beagleLikelihoodFile.next()
+            oneLocus = next(beagleLikelihoodFile)
             counter += 1
             familySize2CallList = {}
             genotypeLikelihoodList = oneLocus.genotypeLikelihoodList

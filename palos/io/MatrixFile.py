@@ -81,14 +81,12 @@ class MatrixFile(object):
     
     def _resetInput(self):
         """
-        2013.07.19
         """
         #reset the inf
         self.file_handle.seek(0)
     
     def writeHeader(self,header=None):
         """
-        2012.11.16
         """
         if header is None:
             header = self.header
@@ -101,7 +99,7 @@ class MatrixFile(object):
     def constructColName2IndexFromHeader(self):
         """
         """
-        self.header = self.next()
+        self.header = next(self)
         self.col_name2index = utils.getColName2IndexFromHeader(self.header)
         return self.col_name2index
     
@@ -111,18 +109,19 @@ class MatrixFile(object):
             If an input file does not have a header,
                 this function over-reads by one line (stored in self._row)
             so need to process the last self._row before further reading
-        2013.08.30 read the header, while ignoring lines fitting the comment pattern
-            and construct col_name2index when a line matching headerPattern is encountered
+        Read the header, while ignoring lines fitting the comment pattern.
+        Construct col_name2index when a line matching headerPattern is encountered
         
         """
         if headerPattern is None:
             headerPattern = self.headerPattern
         if commentPattern is None:
             commentPattern = self.commentPattern
-        row = self.next()
-        while commentPattern.search(row[0]):	#passing all comments
+        row = next(self)
+        while commentPattern.search(row[0]):
+            #passing all comments
             self.comment_row_list.append(row)
-            row = self.next()
+            row = next(self)
         if headerPattern.search(row[0]):
             self.header = row
             self.col_name2index = utils.getColName2IndexFromHeader(self.header)
@@ -140,16 +139,18 @@ class MatrixFile(object):
         """
         """
         if self.col_name2index is None:
-            return None	#no header
+            #no header
+            return None
         else:
             return self.col_name2index.get(colHeader)
     
     def __iter__(self):
         return self
     
-    def next(self):
+    next = __next__
+    def __next__(self):
         try:
-            row = self.csvFile.next()
+            row = next(self.csvFile)
         except:
             raise StopIteration
         if not self.isRealCSV:
@@ -161,11 +162,8 @@ class MatrixFile(object):
         del self.csvFile
         self.file_handle.close()
     
-    def writeRow(self, row=None):
-        """
-        2014.03.11 same as writerow(), for API naming consistency.
-        """
-        self.writerow(row)
+    writeRow = writerow
+    #same as writerow(), for API consistency.
     
     def writerow(self, row=None):
         """

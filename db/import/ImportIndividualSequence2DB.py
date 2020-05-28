@@ -200,7 +200,7 @@ Example ("Library" and "Bam Path" are required):
         sys.stderr.write("Getting bamBaseFname2SampleID dictionary ...")
         bamBaseFname2SampleID = {}
         reader = csv.reader(open(sample_sheet), delimiter='\t')
-        header = reader.next()
+        header = next(reader)
         col_name2index = utils.getColName2IndexFromHeader(header,
             skipEmptyColumn=True)
         sampleIDIndex = col_name2index.get("Library")
@@ -1211,7 +1211,7 @@ HI.0628.001.D701.VGA00010_R2.fastq.gz  HI.0628.004.D703.VWP00384_R2.fastq.gz  HI
         """
         sys.stderr.write("Parsing TCGA tissue source sites from %s... \n"%input_path)
         reader = MatrixFile(path=input_path, delimiter="\t")
-        header = reader.next()
+        header = next(reader)
         tssCode2dbEntry = {}
         for row in reader:
             tss_code, source_site_name, study_name, bcr_code = row[:4]

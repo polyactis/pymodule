@@ -555,7 +555,7 @@ def read_data(inputFname, input_alphabet=0, turn_into_integer=1, double_header=0
         delimiter = figureOutDelimiter(inputFname)
     reader = csv.reader(openGzipFile(inputFname), delimiter=delimiter)
     
-    header = reader.next()
+    header = next(reader)
     # 2010-3-31 pick the columns according to col_id_key_set
     col_id_ls = header[data_starting_col:]
     no_of_cols = len(col_id_ls)
@@ -574,13 +574,13 @@ def read_data(inputFname, input_alphabet=0, turn_into_integer=1, double_header=0
                 new_col_index_ls.append(i)
         col_id_ls = new_col_id_ls
         col_index_ls = new_col_index_ls
-        sys.stderr.write("%s columns out of %s in col_id_key_set (%s items) are retained."%(len(col_index_ls), \
-                                                                                        no_of_cols, \
-                                                                                        len(col_id_key_set) ))
+        sys.stderr.write("%s columns out of %s in col_id_key_set (%s items) are retained."%(
+            len(col_index_ls), \
+            no_of_cols, len(col_id_key_set) ))
     # 2010-3-31 adjust the header
     header = header[:data_starting_col] + col_id_ls
     if double_header:
-        second_header = reader.next()
+        second_header = next(reader)
         second_header = second_header[:data_starting_col] + [second_header[i+data_starting_col] for i in col_index_ls]
         header = zip(second_header,header)
     
@@ -588,7 +588,8 @@ def read_data(inputFname, input_alphabet=0, turn_into_integer=1, double_header=0
     strain_acc_list = []
     category_list = []
     import re
-    p_char = re.compile(r'[a-df-zA-DF-Z\-]$')	#no 'e' or 'E', used in scientific number, add '-' and append '$'
+    p_char = re.compile(r'[a-df-zA-DF-Z\-]$')
+    #no 'e' or 'E', used in scientific number, add '-' and append '$'
     i = 0
     no_of_data_points = 0	#2010-4-26
     try:
@@ -608,12 +609,14 @@ def read_data(inputFname, input_alphabet=0, turn_into_integer=1, double_header=0
             strain_acc_list.append(row[0])
             category_list.append(row[1])
             original_data_row = row[data_starting_col:]
-            if col_id_key_set is not None:	# 2010-3-31 only pick a few rows
+            if col_id_key_set is not None:
+                # 2010-3-31 only pick a few rows
                 original_data_row = [original_data_row[i] for i in col_index_ls]
             
             data_row = original_data_row
             no_of_snps = len(data_row)
-            p_char_used = 0	#whether p_char is used depends on condition below (nucleotides were transformed into integers).
+            p_char_used = 0
+            #whether p_char is used depends on condition below (nucleotides were transformed into integers).
             if p_char.search(data_row[0]) and turn_into_integer==1 and matrix_data_type==int:
                 data_row = dict_map(nt2number_mapper, data_row)
                 p_char_used = 1
@@ -623,7 +626,8 @@ def read_data(inputFname, input_alphabet=0, turn_into_integer=1, double_header=0
                     data_row = original_data_row	#back to original data_row
                     p_char_used = 0
             
-            if turn_into_integer and not p_char_used:	#if p_char_used ==1, it's already integer.
+            if turn_into_integer and not p_char_used:
+                #if p_char_used ==1, it's already integer.
                 new_data_row = []
                 for data_point in data_row:
                     if data_point=='NA' or data_point=='':
@@ -632,7 +636,8 @@ def read_data(inputFname, input_alphabet=0, turn_into_integer=1, double_header=0
                         new_data_row.append(matrix_data_type(data_point))
                 #data_row = map(matrix_data_type, data_row)
                 data_row = new_data_row
-                if ignore_het:	#2009-5-20 for data that is already in number format, use this function to remove hets
+                if ignore_het:
+                    #2009-5-20 for data that is already in number format, use this function to remove hets
                     data_row = map(ignore_het_func, data_row)
             no_of_data_points += len(data_row)
             data_matrix.append(data_row)
@@ -653,36 +658,38 @@ def read_data(inputFname, input_alphabet=0, turn_into_integer=1, double_header=0
     return header, strain_acc_list, category_list, data_matrix
 
 
-def readAdjacencyListDataIntoMatrix(inputFname=None, rowIDHeader=None, colIDHeader=None, rowIDIndex=None, colIDIndex=None, \
-                                dataHeader=None, dataIndex=None, hasHeader=True, defaultValue=None, dataConvertDictionary=None,\
-                                matrixDefaultDataType=None, asymmetric=False):
+def readAdjacencyListDataIntoMatrix(inputFname=None, rowIDHeader=None,
+    colIDHeader=None, rowIDIndex=None, colIDIndex=None,
+    dataHeader=None, dataIndex=None, hasHeader=True, defaultValue=None,
+    dataConvertDictionary=None,
+    matrixDefaultDataType=None, asymmetric=False):
     """
-    2012.8.24
-        add argument asymmetric,  matrixDefaultDataType, dataConvertDictionary
+    
+    similar to readAdjacencyListDataIntoMatrix() but now the M[i,j]!=M[j,i].
+    return a SNPData
+    
+    i.e.
+        from palos import SNP
+        import numpy
+        snpData = SNP.readAdjacencyListDataIntoMatrix(inputFname=inputFname,
+            rowIDHeader='Sample', colIDHeader='SNP', \
+            rowIDIndex=None, colIDIndex=None, \
+            dataHeader='Geno', dataIndex=None, hasHeader=True, defaultValue=0, \
+            dataConvertDictionary=SNP.nt2number, matrixDefaultDataType=numpy.int, asymmetric=True)
+        snpData.tofile(outputFname)
         
-        similar to readAdjacencyListDataIntoMatrix() but now the M[i,j]!=M[j,i].
-        return a SNPData
+        #read in the IBD check result
+        self.ibdData = SNP.readAdjacencyListDataIntoMatrix(inputFname=self.plinkIBDCheckOutputFname, \
+                            rowIDHeader="IID1", colIDHeader="IID2", \
+                            rowIDIndex=None, colIDIndex=None, \
+                            dataHeader="PI_HAT", dataIndex=None, hasHeader=True)
         
-        i.e.
-            from palos import SNP
-            import numpy
-            snpData = SNP.readAdjacencyListDataIntoMatrix(inputFname=inputFname, rowIDHeader='Sample', colIDHeader='SNP', \
-                                    rowIDIndex=None, colIDIndex=None, \
-                                    dataHeader='Geno', dataIndex=None, hasHeader=True, defaultValue=0, \
-                                    dataConvertDictionary=SNP.nt2number, matrixDefaultDataType=numpy.int, asymmetric=True)
-            snpData.tofile(outputFname)
-            
-            #read in the IBD check result
-            self.ibdData = SNP.readAdjacencyListDataIntoMatrix(inputFname=self.plinkIBDCheckOutputFname, \
-                                rowIDHeader="IID1", colIDHeader="IID2", \
-                                rowIDIndex=None, colIDIndex=None, \
-                                dataHeader="PI_HAT", dataIndex=None, hasHeader=True)
-            
-            #read in kinship
-            self.ibdData = SNP.readAdjacencyListDataIntoMatrix(inputFname=self.pedigreeKinshipFilePath, \
-                                rowIDHeader=None, colIDHeader=None, \
-                                rowIDIndex=0, colIDIndex=1, \
-                                dataHeader=None, dataIndex=2, hasHeader=False)
+        #read in kinship
+        self.ibdData = SNP.readAdjacencyListDataIntoMatrix(
+            inputFname=self.pedigreeKinshipFilePath, \
+                            rowIDHeader=None, colIDHeader=None, \
+                            rowIDIndex=0, colIDIndex=1, \
+                            dataHeader=None, dataIndex=2, hasHeader=False)
         
     """
     sys.stderr.write("Reading a matrix out of an adjacency-list based file %s ..."%(inputFname))
@@ -693,7 +700,7 @@ def readAdjacencyListDataIntoMatrix(inputFname=None, rowIDHeader=None, colIDHead
     
     reader = MatrixFile(path=inputFname)
     if hasHeader:
-        header = reader.next()
+        header = next(reader)
         col_name2index = getColName2IndexFromHeader(header)
         if rowIDIndex is None and rowIDHeader:
             rowIDIndex = col_name2index.get(rowIDHeader)
@@ -724,7 +731,8 @@ def readAdjacencyListDataIntoMatrix(inputFname=None, rowIDHeader=None, colIDHead
             col_id2index[colID] = len(col_id2index)
             col_id_ls.append(colID)
         data = row[dataIndex]
-        if dataConvertDictionary:	#2012.8.24 supply a dictionary here to map
+        if dataConvertDictionary:
+            #2012.8.24 supply a dictionary here to map
             data = dataConvertDictionary[data]
         idPair = (rowID, colID)
         if idPair in idPair2data:
@@ -756,8 +764,9 @@ def readAdjacencyListDataIntoMatrix(inputFname=None, rowIDHeader=None, colIDHead
     maskedMatrix = numpy.ma.array(dataMatrix, mask=numpy.isnan(dataMatrix))
     return SNPData(row_id_ls=row_id_ls, col_id_ls=col_id_ls, data_matrix=maskedMatrix)
 
-def getKey2ValueFromMatrixLikeFile(inputFname=None, keyHeaderLs=None, valueHeaderLs=None, keyIndexLs=None, valueIndexLs=None, \
-                                hasHeader=True, valueDataType=None):
+def getKey2ValueFromMatrixLikeFile(inputFname=None, keyHeaderLs=None,
+    valueHeaderLs=None, keyIndexLs=None, valueIndexLs=None, \
+    hasHeader=True, valueDataType=None):
     """
     2012.8.22
         return a dictionary. key is a tuple of keyHeaderLs. value is conent of valueHeaderLs
@@ -767,7 +776,7 @@ def getKey2ValueFromMatrixLikeFile(inputFname=None, keyHeaderLs=None, valueHeade
     
     reader = MatrixFile(path=inputFname)
     if hasHeader:
-        header = reader.next()
+        header = next(reader)
         col_name2index = getColName2IndexFromHeader(header)
         if keyIndexLs is None and keyHeaderLs:
             keyIndexLs = []

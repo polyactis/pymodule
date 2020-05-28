@@ -983,7 +983,7 @@ class GenericVCFWorkflow(ParentClass):
         #first get the set of monkeys to keep from the file
         reader = csv.reader(open(individualUCLAIDFname), 
             delimiter=figureOutDelimiter(individualUCLAIDFname))
-        header = reader.next()
+        header = next(reader)
         colName2Index = getColName2IndexFromHeader(header)
         UCLAID_col_index = colName2Index.get('UCLAID')
         individualUCLAIDSet = set()

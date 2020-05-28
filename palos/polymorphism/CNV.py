@@ -881,7 +881,7 @@ def getProbeIntensityDataFromProbeXArray(input_fname, data_type=numpy.float32, \
         sys.stderr.write('stderr of %s: %s \n'%(commandline, stderr_content))
     no_of_rows = int(stdout_content.split()[0])-1
     
-    header = reader.next()
+    header = next(reader)
     intensity_col_index_ls = []
     type_of_given_array_id = type(array_id)
     for i in range(len(header)):
@@ -945,27 +945,30 @@ def getProbeIntensityDataFromArrayXProbe(input_fname, data_type=numpy.float32, \
             sys.stderr.write('stderr of %s: %s \n'%(commandline, stderr_content))
         no_of_arrays = int(stdout_content.split()[0])-3
     
-    header = reader.next()
+    header = next(reader)
     probe_id_ls = header[2:]
-    chr_ls = reader.next()[2:]
-    pos_ls = reader.next()[2:]
+    chr_ls = next(reader)[2:]
+    pos_ls = next(reader)[2:]
     chr_pos_ls = zip(chr_ls, pos_ls)
     
     no_of_probes = len(header)-2
     data_matrix = numpy.zeros([no_of_probes, no_of_arrays], data_type)
     array_id_ls = []
     i=0
-    type_of_given_array_id = type(array_id)#2010-7-28
+    type_of_given_array_id = type(array_id)
     line_number = 0
     for row in reader:
         line_number += 1
         sys.stderr.write('%s%s'%("\x08"*80, line_number))
         
-        if array_id is not None and len(array_id_ls)>0:	#2010-8-6 already got the array, jump out.
+        if array_id is not None and len(array_id_ls)>0:
+            #2010-8-6 already got the array, jump out.
             break
         
-        _array_id = type_of_given_array_id(row[0])	#2010-7-28 cast to whatever type array_id is of.
-        if array_id is not None and _array_id!=array_id:	#2010-6-28	skip this row
+        _array_id = type_of_given_array_id(row[0])
+        #2010-7-28 cast to whatever type array_id is of.
+        if array_id is not None and _array_id!=array_id:
+            #2010-6-28	skip this row
             continue
         ecotype_id = row[1]
         
@@ -986,13 +989,12 @@ def getProbeIntensityDataFromArrayXProbe(input_fname, data_type=numpy.float32, \
     return data_matrix, probe_id_ls, chr_pos_ls, header
 
 def getProbeIntensityData(input_fname, data_type=numpy.float32, \
-                        nonIntensityColumnLabelSet = set(['probes_id', 'chromosome', 'position']),\
-                        array_id = None):
+    nonIntensityColumnLabelSet = set(['probes_id', 'chromosome', 'position']),\
+    array_id = None):
     """
-    2010-6-28
-        add argument array_id to get intensity only for that array.
-    2010-5-30
-        use header[0] to guess the orientation, and call getProbeIntensityDataFromArrayXProbe() or getProbeIntensityDataFromProbeXArray()
+    add argument array_id to get intensity only for that array.
+    use header[0] to guess the orientation, and 
+        call getProbeIntensityDataFromArrayXProbe() or getProbeIntensityDataFromProbeXArray()
     2010-5-23
         add argument nonIntensityColumnLabelSet to find out which columns harbor intensity data.
         Non-intensity columns (probes_id, chromosome, position) are not bound to any particular column.
@@ -1010,14 +1012,14 @@ def getProbeIntensityData(input_fname, data_type=numpy.float32, \
     sys.stderr.write("Testing which type of intensity data ... ")
     import csv, subprocess
     reader = csv.reader(open(input_fname), delimiter=figureOutDelimiter(input_fname))
-    header = reader.next()
+    header = next(reader)
     del reader
     if header[0]=='':
         # nothing there. it's Array X Probe format
         return getProbeIntensityDataFromArrayXProbe(input_fname, data_type=data_type, array_id=array_id)
     else:
         return getProbeIntensityDataFromProbeXArray(input_fname, data_type=data_type, \
-                        nonIntensityColumnLabelSet = nonIntensityColumnLabelSet, array_id=array_id)
+            nonIntensityColumnLabelSet = nonIntensityColumnLabelSet, array_id=array_id)
 
 class TilingProbeIntensityData(object):
     """
@@ -1034,12 +1036,14 @@ class TilingProbeIntensityData(object):
         self.probe_id_ls = None
         self.chr_pos_ls = None
     
-    def getIntensityForOneArrayInGWRGivenRBDict(self, array_id, rbDict=None, additionalTitle=None, isDataDiscrete=True):
+    def getIntensityForOneArrayInGWRGivenRBDict(self, array_id, rbDict=None,
+        additionalTitle=None, isDataDiscrete=True):
         """
         2010-7-28
         """
         if array_id not in self.array_id2index:	#first check if it's fetched already.		
-            data_matrix, probe_id_ls, chr_pos_ls, header = getProbeIntensityData(self.input_fname, array_id=array_id)
+            data_matrix, probe_id_ls, chr_pos_ls, header = getProbeIntensityData(
+                self.input_fname, array_id=array_id)
             
             array_id_ls = header[1:-2]
             array_id_ls = map(int, array_id_ls)
@@ -1087,8 +1091,9 @@ class TilingProbeIntensityData(object):
         sys.stderr.write(" %s probes. Done.\n"%(len(gwr.data_obj_ls)))
         return gwr
 
-def fetchIntensityInGWAWithinRBDictGivenArrayIDFromTilingIntensity(tilingIntensityData, array_id, rbDict, gwr_name=None,\
-                                                                min_reciprocal_overlap=0.6, isDataDiscrete=True):
+def fetchIntensityInGWAWithinRBDictGivenArrayIDFromTilingIntensity(
+    tilingIntensityData, array_id, rbDict, gwr_name=None,\
+    min_reciprocal_overlap=0.6, isDataDiscrete=True):
     """
     2010-3-18
         tilingIntensityData is of type SNPData.
@@ -1114,12 +1119,15 @@ def fetchIntensityInGWAWithinRBDictGivenArrayIDFromTilingIntensity(tilingIntensi
     for i in range(no_of_rows):
         chr_pos = tilingIntensityData.row_id_ls[i]
         chromosome, pos = map(int, chr_pos)
-        cnvSegmentKey = CNVSegmentBinarySearchTreeKey(chromosome=chromosome, span_ls=[pos],\
-                                                    min_reciprocal_overlap=min_reciprocal_overlap,\
-                                                    isDataDiscrete=isDataDiscrete)
+        cnvSegmentKey = CNVSegmentBinarySearchTreeKey(
+            chromosome=chromosome,
+            span_ls=[pos],
+            min_reciprocal_overlap=min_reciprocal_overlap,
+            isDataDiscrete=isDataDiscrete)
         if cnvSegmentKey in rbDict:
             probeIntensity = tilingIntensityData.data_matrix[i][col_index]
-            data_obj = DataObject(chromosome=chromosome, position=pos, value=probeIntensity)
+            data_obj = DataObject(chromosome=chromosome,
+                position=pos, value=probeIntensity)
             data_obj.comment = ''
             data_obj.genome_wide_result_name = gwr_name
             data_obj.genome_wide_result_id = genome_wide_result_id
@@ -1140,16 +1148,17 @@ class ArrayXProbeFileWrapper(object):
         self.input_fname = input_fname
         import csv
         from palos import figureOutDelimiter
-        self.reader = csv.reader(open(self.input_fname), delimiter=figureOutDelimiter(self.input_fname))
+        self.reader = csv.reader(open(self.input_fname),
+            delimiter=figureOutDelimiter(self.input_fname))
         self.probe_id_ls, self.chr_pos_ls = self.getHeader(self.reader)
     
     @classmethod
     def getHeader(cls, reader):
         sys.stderr.write("Getting probe id, chromosome, pos info ...")
-        probe_id_ls = reader.next()[2:]
+        probe_id_ls = next(reader)[2:]
         probe_id_ls = map(int, probe_id_ls)
-        chr_ls = reader.next()[2:]
-        pos_ls = reader.next()[2:]
+        chr_ls = next(reader)[2:]
+        pos_ls = next(reader)[2:]
         chr_pos_ls = zip(chr_ls, pos_ls)
         sys.stderr.write(".\n")
         return probe_id_ls, chr_pos_ls
@@ -1175,15 +1184,15 @@ def get_chr2start_stop_index(chr_pos_ls):
     sys.stderr.write("Done.\n")
     return chr2start_stop_index
 
-def readQuanLongPECoverageIntoGWR(input_fname, additionalTitle=None, windowSize=100, chr=None, start=None, stop=None):
+def readQuanLongPECoverageIntoGWR(input_fname, additionalTitle=None,
+    windowSize=100, chr=None, start=None, stop=None):
     """
-    2010-11-23
-        This function reads 100bp coverage data from files given by Quan and turns it into instance of GenomeWideResult.
-            example file: "variation/data/CNV/QuanLongPE/coverage4Yu/algustrum.8230.Chr1.coverage"
-            format is two-column, tab-delimited. First column is position/100. 2nd column is coverage.:
-                1       0.0
-                2       0.0
-                3       2.84
+    This function reads 100bp coverage data from files given by Quan and turns it into instance of GenomeWideResult.
+        example file: "variation/data/CNV/QuanLongPE/coverage4Yu/algustrum.8230.Chr1.coverage"
+        format is two-column, tab-delimited. First column is position/100. 2nd column is coverage.:
+            1       0.0
+            2       0.0
+            3       2.84
         
         the coverage data is split into different chromosomes. so argument chr is not used here.
     """
@@ -1207,7 +1216,8 @@ def readQuanLongPECoverageIntoGWR(input_fname, additionalTitle=None, windowSize=
     
     for row in reader:
         position, coverage = row[:2]
-        position = int(position)*windowSize-windowSize/2	#coverage is caculated in 100-base window.
+        position = int(position)*windowSize-windowSize/2
+        #coverage is caculated in 100-base window.
         if start is not None and position<start:
             continue
         if stop is not None and position>stop:
@@ -1233,16 +1243,19 @@ def findCorrespondenceBetweenTwoCNVRBDict(rbDict1=None, rbDict2=None, isDataDisc
     dc1Length = len(rbDict1)
     dc2Length = len(rbDict2)
     sys.stderr.write("Finding correspondence between two CNV RB dictionaries, %s and %s nodes in input1, input2 respectively ... "%\
-                    (dc1Length, dc2Length))
-    nodePairList = []	#each cell is a tuple of (node1, node2, overlap)
-    compareIns = CNVCompare(min_reciprocal_overlap=0.0000001)	#to detect any overlap
+        (dc1Length, dc2Length))
+    nodePairList = []
+    #each cell is a tuple of (node1, node2, overlap)
+    compareIns = CNVCompare(min_reciprocal_overlap=0.0000001)
+    #to detect any overlap
     setOfMatchedNodesInRBDict2 = set()
     for input1Node in rbDict1:
         targetNodeLs = []
         rbDict2.findNodes(input1Node.key, node_ls=targetNodeLs, compareIns=compareIns)
         if targetNodeLs:
             for input2Node in targetNodeLs:
-                overlapData = get_overlap_ratio(input1Node.key.span_ls, input2Node.key.span_ls, isDataDiscrete=isDataDiscrete)
+                overlapData = get_overlap_ratio(input1Node.key.span_ls,
+                    input2Node.key.span_ls, isDataDiscrete=isDataDiscrete)
                 overlapFraction = overlapData.overlapFraction
                 nodePairList.append((input1Node, input2Node, overlapFraction))
                 setOfMatchedNodesInRBDict2.add(input2Node)
@@ -1257,17 +1270,18 @@ def findCorrespondenceBetweenTwoCNVRBDict(rbDict1=None, rbDict2=None, isDataDisc
             rbDict1.findNodes(input2Node.key, node_ls=targetNodeLs, compareIns=compareIns)
             if targetNodeLs:	#this should not happen
                 sys.stderr.write("Warning: after first scan node from rbDict2, key=%s, value=%s, still has hits from rbDict1.\n"%\
-                                (str(input2Node.key), str(input2Node.value[0])))
+                    (str(input2Node.key), str(input2Node.value[0])))
                 no_of_unmatched_input2_nodes_matched_to_input1 += 1
                 
                 for input1Node in targetNodeLs:
-                    overlapData = get_overlap_ratio(input1Node.key.span_ls, input2Node.key.span_ls, isDataDiscrete=isDataDiscrete)
+                    overlapData = get_overlap_ratio(input1Node.key.span_ls,
+                        input2Node.key.span_ls, isDataDiscrete=isDataDiscrete)
                     overlapFraction = overlapData.overlapFraction
                     nodePairList.append((input1Node, input2Node, overlapFraction))
             else:
                 nodePairList.append((None, input2Node, None))
     sys.stderr.write(" %s un-matched input2 nodes have matches from input1. found %s corresponding pairs.\n"%\
-                    (no_of_unmatched_input2_nodes_matched_to_input1, len(nodePairList)))
+        (no_of_unmatched_input2_nodes_matched_to_input1, len(nodePairList)))
     return nodePairList
 
 
@@ -1275,7 +1289,8 @@ def findCorrespondenceBetweenTwoCNVRBDict(rbDict1=None, rbDict2=None, isDataDisc
 if __name__ == "__main__":
     import os, sys, math
     
-    if len(sys.argv)>=2 and sys.argv[1]=='-b':	# 2010-6-17 enter debug mode "CNV.py -b"
+    if len(sys.argv)>=2 and sys.argv[1]=='-b':
+        # 2010-6-17 enter debug mode "CNV.py -b"
         import pdb
         pdb.set_trace()
         debug = True
@@ -1288,23 +1303,28 @@ if __name__ == "__main__":
     
     #from BinarySearchTree import binary_tree
     #tree = binary_tree()
-    from palos.algorithm.RBTree import RBDict	#2010-1-26 binary_tree and RBDict are swappable. but RBDict is more efficient (balanced).
-    tree = RBDict(cmpfn=leftWithinRightAlsoEqualCmp)	# 2010-1-28 use the custom cmpfn if you want the case that left within right is regarded as equal as well.  
+    from palos.algorithm.RBTree import RBDict
+    #2010-1-26 binary_tree and RBDict are swappable. but RBDict is more efficient (balanced).
+    tree = RBDict(cmpfn=leftWithinRightAlsoEqualCmp)
+    # 2010-1-28 use the custom cmpfn if you want the case that left within right is regarded as equal as well.  
     tree = RBDict(cmpfn=rightWithinLeftAlsoEqualCmp)
     
     for cnv in cnv_ls:
-        segmentKey = CNVSegmentBinarySearchTreeKey(chromosome=cnv[0], span_ls=cnv[1], min_reciprocal_overlap=min_reciprocal_overlap)
+        segmentKey = CNVSegmentBinarySearchTreeKey(chromosome=cnv[0],
+            span_ls=cnv[1], min_reciprocal_overlap=min_reciprocal_overlap)
         tree[segmentKey] = cnv
     
     print("Binary Tree Test\n")
     print("Node Count: %d" % len(tree))
     print("Depth: %d" % tree.depth())
-    print("Optimum Depth: %f (%d) (%f%% depth efficiency)" % (tree.optimumdepth(), math.ceil(tree.optimumdepth()),
-                                                      math.ceil(tree.optimumdepth()) / tree.depth()))
+    print("Optimum Depth: %f (%d) (%f%% depth efficiency)" % (
+        tree.optimumdepth(), math.ceil(tree.optimumdepth()),
+        math.ceil(tree.optimumdepth()) / tree.depth()))
     
-    print("Efficiency: %f%% (total possible used: %d, total wasted: %d)" % (tree.efficiency() * 100,
-                                                      len(tree) / tree.efficiency(),
-                                                      (len(tree) / tree.efficiency()) - len(tree)))
+    print("Efficiency: %f%% (total possible used: %d, total wasted: %d)" % (
+        tree.efficiency() * 100,
+        len(tree) / tree.efficiency(),
+        (len(tree) / tree.efficiency()) - len(tree)))
     """
     print("Min: %s" % repr(tree.min()))
     print("Max: %s" % repr(tree.max()))
@@ -1318,10 +1338,11 @@ if __name__ == "__main__":
     print("Formatted Tree:\n" + tree.formattree() + "\n")
     print("Formatted Tree (Root in Middle):\n" + tree.formattreemiddle() + "\n")
     """
-    test_cnv_ls = [	[2,(50000,)], [3,(43214,43219)], [3,(43214,78788)], [5, (43242,)], [5,(144,566)], [5, (144, 1000)], [5, (50000, 70000)]]
+    test_cnv_ls = [	[2,(50000,)], [3,(43214,43219)], [3,(43214,78788)], \
+        [5, (43242,)], [5,(144,566)], [5, (144, 1000)], [5, (50000, 70000)]]
     for test_cnv in test_cnv_ls:
         segmentKey = CNVSegmentBinarySearchTreeKey(chromosome=test_cnv[0], span_ls=test_cnv[1], \
-                                                min_reciprocal_overlap=min_reciprocal_overlap)
+            min_reciprocal_overlap=min_reciprocal_overlap)
         print("segmentKey", segmentKey)
         if segmentKey in tree:
             targetSegment = tree.get(segmentKey)

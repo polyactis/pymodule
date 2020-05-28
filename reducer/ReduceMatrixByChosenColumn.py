@@ -81,7 +81,7 @@ class ReduceMatrixByChosenColumn(ReduceMatrixByMergeColumnsWithSameKey):
                 traceback.print_exc()
             
             try:
-                header = reader.next()
+                header = next(reader)
                 self.handleNewHeader(header, newHeader, self.keyColumnLs,
                     self.valueColumnLs, keyColumnSet=self.keyColumnSet)
                 if self.noHeader:

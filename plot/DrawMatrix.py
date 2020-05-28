@@ -333,7 +333,7 @@ def drawMatrix(matrix, matrix_value2color, left_label_ls=[], top_label_ls=[], ri
 def display_snp_matrix(input_fname, output_fname=None, need_sort=0, need_savefig=0, xlabel='', ylabel=''):
     import csv, numpy, pylab
     reader = csv.reader(open(input_fname), delimiter='\t')
-    header = reader.next()
+    header = next(reader)
     data_matrix = []
     for row in reader:
         data_row = row[2:]
@@ -401,7 +401,7 @@ def display_matrix_of_component(input_fname, ecotypeid_ls, ecotypeid2pos, output
         ecotypeid2row_index[ecotypeid] = i
         ytick_label_ls.append('%s (%.2f, %.2f)'%(ecotypeid, ecotypeid2pos[ecotypeid][0], ecotypeid2pos[ecotypeid][1]))
     reader = csv.reader(open(input_fname), delimiter='\t')
-    header = reader.next()
+    header = next(reader)
     data_matrix = [0]*cc_size
     for row in reader:
         ecotypeid = int(row[0])

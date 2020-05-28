@@ -142,7 +142,7 @@ class ReduceMatrixByMergeColumnsWithSameKey(AbstractReducer):
             
             valueColumnLs = []
             try:
-                header = reader.next()
+                header = next(reader)
                 self.handleNewHeader(header, newHeader, self.keyColumnLs,
                     valueColumnLs, keyColumnSet=self.keyColumnSet)
                 if self.noHeader:
