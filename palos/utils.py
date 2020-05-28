@@ -816,7 +816,7 @@ def sshTunnel(serverHostname="dl324b-1.cmb.usc.edu", port="5432",
     #runLocalCommand(commandline, report_stderr=True, report_stdout=True)
     return os.system(commandline)
 
-def getPhredScoreOutOfSolexaScore(solexaChar):
+def converSolexaScoreToPhred(solexaChar):
     """
     2011-8-15
     main doc: http://en.wikipedia.org/wiki/FASTQ_format
@@ -844,16 +844,16 @@ def getFileBasenamePrefixFromPath(path=None,
         
         getFileBasenamePrefixFromPath(path) == "input"
     
-    2013.11.24 call getRealPrefixSuffixOfFilenameWithVariableSuffix() for actual work
+    2013.11.24 call getRealPrefixSuffix() for actual work
     2013.06.21 convenient function
     """
     fileBasename = os.path.basename(path)
-    return getRealPrefixSuffixOfFilenameWithVariableSuffix(fileBasename,
+    return getRealPrefixSuffix(fileBasename,
         fakeSuffixSet=fakeSuffixSet)[0]
     
     
 
-def getRealPrefixSuffixOfFilenameWithVariableSuffix(path, fakeSuffix='.gz',
+def getRealPrefixSuffix(path, fakeSuffix='.gz',
     fakeSuffixSet = set(['.gz', '.zip', '.bz2', '.bz'])):
     """
     The purpose of this function is to get the prefix, suffix of a 
@@ -932,46 +932,45 @@ def getDateStampedFilename(filename):
         lastModDatetime.month, lastModDatetime.day, suffix)
     return newFilename
 
-def openGzipFile(inputFname, openMode='r'):
+def openGzipFile(inputFname, mode='r'):
     """
-    2014.05.21 support 'a' mode
-    2013.2.1 support openMode='w'
-    if suffix is .gz, use gzip to open it
+    Pass encoding='utf-8' to gzip.open().
+    support mode 'r', 'a', 'w'.
+    If suffix is .gz, use gzip to open it
     """
-    fname_prefix, fname_suffix = os.path.splitext(inputFname)
+    fname_suffix = os.path.splitext(inputFname)[1]
     if fname_suffix=='.gz':
         import gzip
-        if openMode=='r':
-            mode='rb'
-        elif openMode=='w':
-            mode='wb'
-        elif openMode=="a":
-            mode = 'ab'
+        # encoding='utf-8' only supported in text mode.
+        # binary mode returns bytes object.
+        if mode=='r':
+            mode='rt'
+        elif mode=='w':
+            mode='wt'
+        elif mode=="a":
+            mode = 'at'
         else:
-            mode='rb'
-        inf = gzip.open(inputFname, mode=mode)
+            mode='rt'
+        inf = gzip.open(inputFname, mode, encoding='utf-8')
         inf.is_gzip = True
     else:
-        inf = open(inputFname, openMode)
+        inf = open(inputFname, mode)
         inf.is_gzip = False
     return inf
 
 def comeUpSplitFilename(outputFnamePrefix=None, suffixLength=3, fileOrder=0,
     filenameSuffix=""):
     """
-    2012.5.24
     '%0*d'%(suffixLength, fileOrder) is same as str(fileOrder).zfill(suffixLength).
     If fileOrder's length is beyond suffixLength,
         then it's just fileOrder itself without truncation.
-    like 001, 002, 999, 1234.
+    Like 001, 002, 999, 1234.
     """
-    
     return '%s%0*d%s'%(outputFnamePrefix, suffixLength, fileOrder, filenameSuffix)
 
 def findFilesWithOneSuffixRecursively(inputDir='./', suffix='.bam'):
     """
-    2012.7.11
-        if suffix is empty string, it'll get all files.
+    If suffix is empty string, it'll get all files.
     """
     import fnmatch
     
@@ -984,7 +983,6 @@ def findFilesWithOneSuffixRecursively(inputDir='./', suffix='.bam'):
 
 def getFolderSize(inputDir = '.'):
     """
-    2012.7.13
     """
     total_size = 0
     for dirpath, dirnames, filenames in os.walk(inputDir):
@@ -995,7 +993,6 @@ def getFolderSize(inputDir = '.'):
 
 def getFileOrFolderSize(path='.'):
     """
-    2012.7.13
     """
     file_size = None
     if path:
@@ -1028,7 +1025,6 @@ def getNoOfLinesInOneFileByOpen(inputFname=None):
     """
     2012.7.30
         open the file and count
-
     """
     counter = 0
     inf = openGzipFile(inputFname)

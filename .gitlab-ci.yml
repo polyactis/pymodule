@@ -60,7 +60,7 @@ GADA:
     paths:
     - GADA/output.tsv
 
-CountReadsWorkflow:
+DAG_CountReadsWorkflow:
   stage: test_run
   script:
     - echo "Output a CountReadsWorkflow DAG ... "
@@ -76,7 +76,7 @@ CountReadsWorkflow:
     - CountReads.ISQ790-800.xml
 
 
-ShortRead2Alignment:
+DAG_ShortRead2Alignment:
   stage: test_run
   script:
     - echo "Output a ShortRead2Alignment DAG ... "
@@ -94,7 +94,7 @@ ShortRead2Alignment:
     paths:
     - Alignment_isq_787_811_vs_633.xml
 
-InspectAlignmentPipeline:
+DAG_InspectAlignment:
   stage: test_run
   script:
     - echo "Output a InspectAlignmentPipeline DAG ... "
@@ -105,12 +105,50 @@ InspectAlignmentPipeline:
       --dbname pmdb --schema sunset -u sunset_r -p yfishLabSunset
       --home_path /y/home/huangyu --pymodulePath `pwd`
       --tmpDir /y/scratch/tmp/huangyu/
-      -o Inspect_Aln_2112_2132.xml
+      -o InspectAln_2112_2132.xml
   artifacts:
     name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}_${CI_BUILD_ID}"
     expire_in: 3 mos
     paths:
-    - Inspect_Aln_2112_2132.xml
+    - InspectAln_2112_2132.xml
+
+DAG_InspectBaseQuality:
+  stage: test_run
+  script:
+    - echo "Output a InspectBaseQualityPipeline DAG ... "
+    - pwd
+    - ./ngs/qc/InspectBaseQualityPipeline.py -a 633 -i 650-850 -l condor -z pdc
+      --dbname pmdb --schema sunset -u sunset_r -p yfishLabSunset
+      --home_path /y/home/huangyu --pymodulePath `pwd`
+      --tmpDir /y/scratch/tmp/huangyu/
+      -o InspectBaseQuality_650_850.xml
+  artifacts:
+    name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}_${CI_BUILD_ID}"
+    expire_in: 3 mos
+    paths:
+    - InspectBaseQuality_650_850.xml
+
+InspectBaseQuality:
+  stage: test_run
+  script:
+    - echo "Run a InspectBaseQuality.py ... "
+    - pwd
+    - mkdir input
+    - ln -s /y/Sunset/db/individual_sequence/660_indID570_codeEC008_sequencer10000_seqType5_tissueID62_filtered0_batch1_version1/38130_660_WGC090564D_combined_R1_1_12.fastq.gz
+      ./input
+    - ./ngs/qc/InspectBaseQuality.py --drivername postgresql --hostname pdc
+      --schema sunset --dbname pmdb
+      --db_user sunset_r --db_passwd yfishLabSunset
+      -i input/38130_660_WGC090564D_combined_R1_1_12.fastq.gz
+      --logFilename input/38130_660_WGC090564D_combined_R1_1_12.log
+      --read_sampling_rate 0.005 --quality_score_format Standard
+    - rm input/38130_660_WGC090564D_combined_R1_1_12.fastq.gz
+    - mv input output
+  artifacts:
+    name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}_${CI_BUILD_ID}"
+    expire_in: 3 mos
+    paths:
+    - output
 
 uninstall:
   stage: uninstall

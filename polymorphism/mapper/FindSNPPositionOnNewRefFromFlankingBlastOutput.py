@@ -429,7 +429,7 @@ queryID queryStart      queryEnd        queryLength     targetChr       targetSt
         
         
         sys.stderr.write("Outputting switch points of %s old chromosomes ..."%(len(oldChromosome2SwitchData)))
-        statFile = MatrixFile(path=outputFname, openMode='w', delimiter='\t')
+        statFile = MatrixFile(path=outputFname, mode='w', delimiter='\t')
         header = ['oldChromosome', "noOfSwitchPoints", "regionSpan", "noOfLociWithUniqueHit", "noOfSwitchesPerLocus", "noOfLoci"]
         statFile.writeHeader(header)
         noOfTotalSwitchPoints = 0

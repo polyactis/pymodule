@@ -54,7 +54,7 @@ class CalculateMedianModeFromSAMtoolsDepthOutput(ParentClass):
 			import pdb
 			pdb.set_trace()
 		
-		inf = utils.openGzipFile(self.inputFname, openMode='r')
+		inf = utils.openGzipFile(self.inputFname, mode='r')
 		
 		reader = csv.reader(inf, delimiter=figureOutDelimiter(inf))
 		header = None
@@ -69,7 +69,7 @@ class CalculateMedianModeFromSAMtoolsDepthOutput(ParentClass):
 		newHeader = ['alignmentID', 'total_base_count', 'sampled_base_count', 'meanDepth', 'medianDepth', 'modeDepth']
 		inputStatLs = []
 		
-		writer = csv.writer(utils.openGzipFile(self.outputFname, openMode='w'), delimiter='\t')
+		writer = csv.writer(utils.openGzipFile(self.outputFname, mode='w'), delimiter='\t')
 		writer.writerow(newHeader)
 		counter = 0
 		real_counter = 0

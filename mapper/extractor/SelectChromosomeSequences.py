@@ -41,11 +41,11 @@ class SelectChromosomeSequences(AbstractMapper):
 		
 		if not self.inputFileFormat:	#0 or None or ''
 			#use 1: to exclude the '.' in suffix
-			self.inputFileFormat = utils.getRealPrefixSuffixOfFilenameWithVariableSuffix(self.inputFname)[1][1:]
+			self.inputFileFormat = utils.getRealPrefixSuffix(self.inputFname)[1][1:]
 		else:
 			self.inputFileFormat = self.fileFormatDict.get(self.inputFileFormat)
 		if not self.outputFileFormat:	#0 or None or ''
-			self.outputFileFormat = utils.getRealPrefixSuffixOfFilenameWithVariableSuffix(self.outputFname)[1][1:]			
+			self.outputFileFormat = utils.getRealPrefixSuffix(self.outputFname)[1][1:]			
 		else:
 			self.outputFileFormat = self.fileFormatDict.get(self.outputFileFormat)
 	

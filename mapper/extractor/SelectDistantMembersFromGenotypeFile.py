@@ -99,7 +99,7 @@ class SelectDistantMembersFromGenotypeFile(AbstractMatrixFileWalker):
 			run before anything is run
 		"""
 		AbstractMatrixFileWalker.setup(self, **keywords)
-		#self.writer = BeagleGenotypeFile(path=self.outputFname, openMode='w')
+		#self.writer = BeagleGenotypeFile(path=self.outputFname, mode='w')
 		
 		#read in the IBD check result
 		self.ibdData = SNP.readAdjacencyListDataIntoMatrix(inputFname=self.pedigreeKinshipFilePath, \

@@ -89,7 +89,7 @@ class CalculateMendelErrorRateGivenPlinkOutput(ParentClass):
 		zeroParentFamilyCountData = self.getNoOfFamiliesAndKidsGivenParentSetSize(noOfParents2FamilyData=familyStructureData.noOfParents2FamilyData, \
 																		parentSetSize=0)
 		
-		writer = MatrixFile(self.outputFname, openMode='w', delimiter='\t')
+		writer = MatrixFile(self.outputFname, mode='w', delimiter='\t')
 		header = ["ID", "noOfTotalLoci", \
 				"noOfTwoParentFamilies", "noOfParentsInTwoParentFamilies", "noOfKidsInTwoParentFamilies", "noOfIndividualsInTwoParentFamilies", \
 				"noOfSingleParentFamilies", "noOfParentsInSingleParentFamilies", "noOfKidsInSingleParentFamilies",  "noOfIndividualsInSingleParentFamilies", \

@@ -123,7 +123,7 @@ class AbstractMatrixFileWalker(AbstractMapper):
 						rowDefinition = []
 						for colID in header:
 							rowDefinition.append((colID, 's2000'))
-					writer = YHFile(self.outputFname, openMode='w', rowDefinition=rowDefinition)
+					writer = YHFile(self.outputFname, mode='w', rowDefinition=rowDefinition)
 					self.invariantPData.writer = writer
 				else:	#for HDF5MatrixFile
 					if not rowDefinition and header:	#generate a rowDefinition based on header
@@ -132,7 +132,7 @@ class AbstractMatrixFileWalker(AbstractMapper):
 							rowDefinition.append((colID, HDF5MatrixFile.varLenStrType))
 					#rowDefinition = [('locus_id','i8'),('chromosome', HDF5MatrixFile.varLenStrType), ('start','i8'), ('stop', 'i8'), \
 					#	('score', 'f8'), ('MAC', 'i8'), ('MAF', 'f8')]
-					writer = HDF5MatrixFile(self.outputFname, openMode='w', rowDefinition=rowDefinition)
+					writer = HDF5MatrixFile(self.outputFname, mode='w', rowDefinition=rowDefinition)
 					self.invariantPData.writer = writer
 			else:
 				sys.stderr.write("\t Either self.writer %s, or self.invariantPData.writer %s already exists.\n"%\
@@ -196,9 +196,9 @@ class AbstractMatrixFileWalker(AbstractMapper):
 		2013.09.05 split out of fileWalker() , added VCFFile
 		"""
 		if self.inputFileFormat==2:	#2012.12.20
-			reader = YHFile(inputFname, openMode='r', tableName=self.h5TableName)
+			reader = YHFile(inputFname, mode='r', tableName=self.h5TableName)
 		elif self.inputFileFormat==3:	#2012.11.22
-			reader = HDF5MatrixFile(inputFname, openMode='r')
+			reader = HDF5MatrixFile(inputFname, mode='r')
 		elif self.inputFileFormat==4:
 			reader = VCFFile(inputFname=inputFname)
 		else:
@@ -272,7 +272,7 @@ class AbstractMatrixFileWalker(AbstractMapper):
 		if self.outputFileFormat in [1,4]:
 			suffix = os.path.splitext(self.outputFname)[1]
 			if self.outputFname and suffix!='.png':
-				writer = MatrixFile(self.outputFname, openMode='w', delimiter='\t')
+				writer = MatrixFile(self.outputFname, mode='w', delimiter='\t')
 				#writer = csv.writer(open(self.outputFname, 'w'), delimiter='\t')
 		else:	#HDF5MatrixFile
 			#can't generate HDF5MatrixFile, because it needs dtypeList

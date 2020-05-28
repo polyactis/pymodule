@@ -34,17 +34,17 @@ class AssociationTableFile(YHFile):
 	"""
 	example usage:
 		for read (but not read in the whole data):
-			associationTableFile = AssociationTableFile(absPath, openMode='r', autoRead=False)
+			associationTableFile = AssociationTableFile(absPath, mode='r', autoRead=False)
 			self.no_of_loci = associationTableFile.nrows
 			associationTableFile.close()
 		
 		for write:
-			associationTableFile = AssociationTableFile(output_fname, openMode='w')
+			associationTableFile = AssociationTableFile(output_fname, mode='w')
 			attributeDict = None
 			writer = gwr.outputInHDF5MatrixFile(tableObject=associationTableFile.associationTable, attributeDict=attributeDict)
 			associationTableFile.close()
 	"""
-	def __init__(self, inputFname=None, openMode='r', \
+	def __init__(self, inputFname=None, mode='r', \
 				tableName='association', groupNamePrefix='group', tableNamePrefix='table',\
 				filters=None, expectedrows=300000, autoRead=True, autoWrite=True, \
 				min_MAF=None, do_log10_transformation=False, **keywords):
@@ -53,7 +53,7 @@ class AssociationTableFile(YHFile):
 		self.associationTable = None
 		self.do_log10_transformation = do_log10_transformation
 		
-		YHFile.__init__(self, path=inputFname, openMode=openMode, \
+		YHFile.__init__(self, path=inputFname, mode=mode, \
 			tableName=tableName, groupNamePrefix=groupNamePrefix, tableNamePrefix=tableNamePrefix,\
 			rowDefinition=AssociationTable, filters=filters, expectedrows=expectedrows,\
 			autoRead=autoRead, autoWrite=autoWrite,\
@@ -61,10 +61,10 @@ class AssociationTableFile(YHFile):
 		
 
 		"""
-		if openMode=='r' and self.readInData:
+		if mode=='r' and self.readInData:
 			self.associationTable = self.getTableObject(tableName=self.tableName)
 			self._readInGWR(min_MAF=self.min_MAF, tableObject=self.associationTable)
-		elif openMode=='w':
+		elif mode=='w':
 			self.associationTable = self.createNewTable(tableName=self.tableName, rowDefinition=AssociationTable, \
 											expectedrows=300000)
 		"""
@@ -104,31 +104,31 @@ class LocusMapTableFile(YHFile):
 	"""
 	usage examples:
 	
-		locusMapTableFile = LocusMapTableFile(self.outputFname, openMode='w')
+		locusMapTableFile = LocusMapTableFile(self.outputFname, mode='w')
 		locusMapTableFile.addAttributeDict(attributeDict)
 		locusMapTableFile.appendOneRow(pdata, cellType=2)
 		
 		#for read-only
-		locusMapTableFile = LocusMapTableFile(inputFname, openMode='r')
+		locusMapTableFile = LocusMapTableFile(inputFname, mode='r')
 		locus_id2chr_pos = locusMapTableFile.locus_id2chr_pos
 	"""
-	def __init__(self, inputFname=None, openMode='r', \
+	def __init__(self, inputFname=None, mode='r', \
 				tableName='locus_map', groupNamePrefix='group', tableNamePrefix='table',\
 				filters=None, expectedrows=500000, autoRead=True, autoWrite=True, \
 				**keywords):
 		
 		self.locus_id2chr_pos = None
-		YHFile.__init__(self, path=inputFname, openMode=openMode, \
+		YHFile.__init__(self, path=inputFname, mode=mode, \
 				tableName=tableName, groupNamePrefix=groupNamePrefix, tableNamePrefix=tableNamePrefix,\
 				rowDefinition=LocusMapTable, filters=filters, expectedrows=expectedrows,\
 				autoRead=autoRead, autoWrite=autoWrite,\
 				debug=0, report=0, **keywords)
 		
 		
-		#if (openMode=='r' or openMode == 'a')  and self.readInData:
+		#if (mode=='r' or mode == 'a')  and self.readInData:
 		#	self.locusMapTable = self.getTableObject(tableName=self.tableName)
 		#	self._readInMap(tableObject=self.locusMapTable)
-		#elif openMode == 'w':
+		#elif mode == 'w':
 		#	self.locusMapTable = self.createNewTable(tableName=self.tableName, rowDefinition=LocusMapTable,\
 		#										expectedrows=500000)
 		self.locusMapTable = self.getTableObject(tableName=self.tableName)
@@ -209,7 +209,7 @@ def getAssociationLandscapeDataFromHDF5File(inputFname=None, associationTableNam
 	current_obj = None
 	bridge_ls = []
 	locusLandscapeNeighborGraph = nx.Graph()
-	reader = HDF5MatrixFile(inputFname, openMode='r')
+	reader = HDF5MatrixFile(inputFname, mode='r')
 	landscapeTableObject = reader.getTableObject(tableName=landscapeTableName)
 	returnData.HDF5AttributeNameLs = []
 	for attributeName, value in landscapeTableObject.getAttributes().items():
@@ -256,7 +256,7 @@ def outputAssociationLandscapeInHDF5(bridge_ls=None, outputFname=None, writer=No
 	if writer:
 		tableObject = writer.createNewTable(tableName=tableName, rowDefinition=rowDefinition)
 	elif outputFname:
-		writer = HDF5MatrixFile(outputFname, openMode='w', rowDefinition=rowDefinition, tableName=tableName)
+		writer = HDF5MatrixFile(outputFname, mode='w', rowDefinition=rowDefinition, tableName=tableName)
 		tableObject = writer.getTableObject(tableName=tableName)
 	else:
 		sys.stderr.write("Error: no writer(%s) or filename(%s) to dump.\n"%(writer, outputFname))
@@ -286,7 +286,7 @@ def constructAssociationPeakRBDictFromHDF5File(inputFname=None, peakPadding=1000
 	from palos.polymorphism.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey, get_overlap_ratio
 	
 	sys.stderr.write("Constructing association-peak RBDict from HDF5 file %s, (peakPadding=%s) ..."%(inputFname, peakPadding))
-	reader = HDF5MatrixFile(inputFname, openMode='r')
+	reader = HDF5MatrixFile(inputFname, mode='r')
 	associationPeakRBDict = RBDict()
 	associationPeakRBDict.result_id = None	#2012.6.22
 	associationPeakRBDict.peakPadding = peakPadding
@@ -328,7 +328,7 @@ def outputAssociationPeakInHDF5(association_peak_ls=None, filename=None, writer=
 				('start_locus_id','i8'), ('stop_locus_id','i8'), \
 				('no_of_loci', 'i8'), ('peak_locus_id', 'i8'), ('peak_score', 'f8')]
 	if writer is None and filename:
-		writer = HDF5MatrixFile(filename, openMode='w', rowDefinition=rowDefinition, tableName=tableName)
+		writer = HDF5MatrixFile(filename, mode='w', rowDefinition=rowDefinition, tableName=tableName)
 		tableObject = writer.getTableObject(tableName=tableName)
 	elif writer:
 		tableObject = writer.createNewTable(tableName=tableName, rowDefinition=rowDefinition)
@@ -366,7 +366,7 @@ def constructAssociationLocusRBDictFromHDF5File(inputFname=None, locusPadding=0,
 	from palos.polymorphism.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey, get_overlap_ratio
 	
 	sys.stderr.write("Constructing association-locus RBDict from HDF5 file %s, (locusPadding=%s) ..."%(inputFname, locusPadding))
-	reader = HDF5MatrixFile(inputFname, openMode='r')
+	reader = HDF5MatrixFile(inputFname, mode='r')
 	associationLocusRBDict = RBDict()
 	associationLocusRBDict.locusPadding = locusPadding
 	associationLocusRBDict.HDF5AttributeNameLs = []
@@ -417,7 +417,7 @@ def outputAssociationLociInHDF5(associationLocusList=None, filename=None, writer
 				('start','i8'), ('stop', 'i8'), \
 				('no_of_peaks', 'i8'), ('connectivity', 'f8'), ('no_of_results', 'i8')]
 	if writer is None and filename:
-		writer = HDF5MatrixFile(filename, openMode='w', rowDefinition=rowDefinition, tableName=tableName)
+		writer = HDF5MatrixFile(filename, mode='w', rowDefinition=rowDefinition, tableName=tableName)
 		tableObject = writer.getTableObject(tableName=tableName)
 	elif writer:
 		tableObject = writer.createNewTable(tableName=tableName, rowDefinition=rowDefinition)

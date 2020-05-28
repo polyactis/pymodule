@@ -42,7 +42,7 @@ class RemoveRedundantLociFromVCF(ParentClass):
 		
 		reader = VCFFile(inputFname=self.inputFname)
 		
-		writer = VCFFile(outputFname=self.outputFname, openMode='w')
+		writer = VCFFile(outputFname=self.outputFname, mode='w')
 		writer.metaInfoLs = reader.metaInfoLs
 		writer.header = reader.header
 		writer.writeMetaAndHeader()

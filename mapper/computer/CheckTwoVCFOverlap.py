@@ -47,7 +47,7 @@ class CheckTwoVCFOverlap(AbstractVCFMapper):
         sys.stderr.write("Outputting overlap %s sites ..."%(len(overlapping_sites_set)))
         header = ['chromosome', 'position', 'random']
         overlapping_sites_list = list(overlapping_sites_set)
-        writer = MatrixFile(outputFname, openMode='w', delimiter='\t')
+        writer = MatrixFile(outputFname, mode='w', delimiter='\t')
         writer.writerow(header)
         overlapping_sites_list.sort()
         for chromosome, pos in overlapping_sites_list:
@@ -59,7 +59,7 @@ class CheckTwoVCFOverlap(AbstractVCFMapper):
         """
         2013.07.17 vcf files are no longer pre-loaded. read in locus ids first. 
         """
-        writer = MatrixFile(outputFname, openMode='w', delimiter='\t')
+        writer = MatrixFile(outputFname, mode='w', delimiter='\t')
         header = ['#chromosome', 'length', '#sitesInInput1', '#sitesInInput2', '#overlapping', 'overlappingOverTotal', \
                 'overlappingOverInput1', 'overlappingOverInput2', '#segregatingSitesNormalized', ]
         
@@ -131,7 +131,7 @@ class CheckTwoVCFOverlap(AbstractVCFMapper):
         2012.8.16
         """
         sys.stderr.write("Finding matches for each sample at overlapping sites ...")
-        writer = MatrixFile(outputFname, openMode='w', delimiter='\t')
+        writer = MatrixFile(outputFname, mode='w', delimiter='\t')
         header = ['sample_id', 'no_of_matches', 'no_of_non_NA_pairs', 'matchFraction']
         no_of_samples_to_compare = len(overlapping_sample_id_set)
         

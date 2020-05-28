@@ -2,8 +2,8 @@
 """
 2012.12.15 table-data stored in pytables.
 i.e.
-	reader = PyTablesMatrixFile(path=filename, openMode='r')
-	reader = PyTablesMatrixFile(filename, openMode='r')
+	reader = PyTablesMatrixFile(path=filename, mode='r')
+	reader = PyTablesMatrixFile(filename, mode='r')
 	for row in reader:
 		...
 	tableObject = reader.getTableObject(tableName=tableName)
@@ -15,14 +15,14 @@ i.e.
 	headerList = [row[0] for row in dtypeList]
 	dtype = numpy.dtype(dtypeList)
 	
-	writer = PyTablesMatrixFile(path=filename, openMode='w', dtype=dtype)
-	writer = PyTablesMatrixFile(filename, openMode='w', dtype=dtype)
+	writer = PyTablesMatrixFile(path=filename, mode='w', dtype=dtype)
+	writer = PyTablesMatrixFile(filename, mode='w', dtype=dtype)
 	
 	if writer:
 		tableObject = writer.createNewTable(tableName=tableName, dtype=dtype)
 		tableObject.setColIDList(headerList)
 	elif outputFname:
-		writer = PyTablesMatrixFile(outputFname, openMode='w', dtype=dtype, tableName=tableName)
+		writer = PyTablesMatrixFile(outputFname, mode='w', dtype=dtype, tableName=tableName)
 		writer.writeHeader(headerList)
 		tableObject = writer.getTableObject(tableName=tableName)
 	cellList = []
@@ -38,7 +38,7 @@ i.e.
 	dtypeList = [('locus_id','i8'),('chromosome', HDF5MatrixFile.varLenStrType), ('start','i8'), ('stop', 'i8'), \
 				('score', 'f8'), ('MAC', 'i8'), ('MAF', 'f8')]
 	if writer is None and filename:
-		writer = PyTablesMatrixFile(filename, openMode='w', dtypeList=dtypeList, tableName=tableName)
+		writer = PyTablesMatrixFile(filename, mode='w', dtypeList=dtypeList, tableName=tableName)
 		tableObject = writer.getTableObject(tableName=tableName)
 	elif writer:
 		tableObject = writer.createNewTable(tableName=tableName, dtypeList=dtypeList)
@@ -91,7 +91,7 @@ class YHTable(tables.Table, YHTableInHDF5Group):
 			filters = tables.Filters(complib="blosc", complevel=5, shuffle=True)
 		
 		#YHTableInHDF5Group.__init__(self, newGroup=0)
-		#if self.openMode=='w':
+		#if self.mode=='w':
 		tables.Table.__init__(self, self.parentNode, tableName,
 						description=description, title=title,
 						filters=filters,
@@ -271,7 +271,7 @@ class YHSingleTableFile(YHTable):
 	2012.12.16 adapted from http://pytables.github.com/cookbook/simple_table.html
 	"""
 	#mimics the sqlalchemy	
-	def __init__(self, path=None, openMode='r', \
+	def __init__(self, path=None, mode='r', \
 				groupName=None, tableName=None,\
 				description=None,
 				title='', filters=None, rowDefinition=None,\
@@ -280,11 +280,11 @@ class YHSingleTableFile(YHTable):
 		rowDefinition is backup of description, to make it compatible with HDF5MatrixFile
 		"""
 		self.path = path
-		self.openMode = openMode
+		self.mode = mode
 		self.groupName = groupName
 		self.tableName = tableName
 		
-		self.hdf5File = tables.openFile(path, openMode)
+		self.hdf5File = tables.openFile(path, mode)
 		self.uservars = None
 		
 		if groupName is None:
@@ -385,34 +385,34 @@ class YHFile(tables.File, HDF5MatrixFile):
 	i.e.
 	
 	#open a file with a defined table structure
-	writer = YHFile(self.outputFname, openMode='w', rowDefinition=CountAssociationLocusTable)
+	writer = YHFile(self.outputFname, mode='w', rowDefinition=CountAssociationLocusTable)
 	...
 	
 	#read a file
-	reader = YHFile(path, openMode='r')
+	reader = YHFile(path, mode='r')
 	...
 	
 	#open a file without passing the table structure.
-	writer = YHFile(self.outputFname, openMode='w')
+	writer = YHFile(self.outputFname, mode='w')
 	# create a table with proper structure
 	writer.createNewTable(rowDefinition=CountAssociationLocusTable)
 	...
 	"""
-	def __init__(self, path=None, openMode='r', \
+	def __init__(self, path=None, mode='r', \
 				tableName=None, groupNamePrefix='group', tableNamePrefix='table',\
 				rowDefinition=None, filters=None, expectedrows=500000, \
 				autoRead=True, autoWrite=True, \
 				debug=0, report=0, **keywords):
 		self.path = path
 		self.header = None
-		self.openMode = openMode
+		self.mode = mode
 		self.tableName = tableName
 		self.groupNamePrefix = groupNamePrefix
 		self.tableNamePrefix = tableNamePrefix
 		self.rowDefinition = rowDefinition
 		self.expectedrows = expectedrows
-		self.autoRead = autoRead	#whether to automatically read in data if openMode is in reading mode
-		self.autoWrite = autoWrite	#whether to automatically create table objects if openMode is in writing mode
+		self.autoRead = autoRead	#whether to automatically read in data if mode is in reading mode
+		self.autoWrite = autoWrite	#whether to automatically create table objects if mode is in writing mode
 		
 		self.debug = debug
 		self.report = report
@@ -424,20 +424,20 @@ class YHFile(tables.File, HDF5MatrixFile):
 		self.tableObjectList = []
 		self.tablePath2Index = {}
 		
-		#self.hdf5File = tables.openFile(self.path, self.openMode)
+		#self.hdf5File = tables.openFile(self.path, self.mode)
 		#self.root = self.hdf5File.root
 		if filters is None:
 			filters = tables.Filters(complib="blosc", complevel=5, shuffle=True)
 		
-		tables.File.__init__(self, self.path, mode=self.openMode, title='', rootUEP='/', filters=filters,\
+		tables.File.__init__(self, self.path, mode=self.mode, title='', rootUEP='/', filters=filters,\
 							**keywords)
 		
-		if self.openMode=='r' or self.openMode=='a':
+		if self.mode=='r' or self.mode=='a':
 			self._setupCombinedColumnIDMapper()
 			if self.autoRead:
 				self._readInData(tableName=self.tableName)
 		
-		if self.autoWrite and self.openMode=='w' and self.rowDefinition is not None:
+		if self.autoWrite and self.mode=='w' and self.rowDefinition is not None:
 			self.createNewTable(tableName=self.tableName, rowDefinition=self.rowDefinition, expectedrows=self.expectedrows)
 		
 		self._c_classId = self.__class__.__name__

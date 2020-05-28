@@ -97,7 +97,7 @@ class LiftOverVCFBasedOnCoordinateMap(ParentClass):
 		
 		self.reader = VCFFile(inputFname=self.inputFname)
 		
-		self.writer = VCFFile(outputFname=self.outputFname, openMode='w')
+		self.writer = VCFFile(outputFname=self.outputFname, mode='w')
 		self.writer.metaInfoLs = self.reader.metaInfoLs
 		self.writer.header = self.reader.header
 		self.writer.writeMetaAndHeader()

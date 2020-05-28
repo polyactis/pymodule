@@ -11,18 +11,18 @@ from pysam import AlignedRead
 class BamFile(pysam.Samfile):
 	"""
 	path: the path to a bam file.
-	openMode: 'rb: bam file. r: sam file.
+	mode: 'rb: bam file. r: sam file.
 	2011-7-11 A class wrapper for SAM/BAM file. 
 		It is an extension of pysam.Samfile:
 		http://wwwfgu.anat.ox.ac.uk/~andreas/documentation/samtools/api.html#pysam.Samfile
 	"""
-	def __init__(self, path, openMode, **keywords):
+	def __init__(self, path, mode, **keywords):
 		"""
 		2011-7-11
 		"""
-		pysam.Samfile.__init__(self, path, openMode, **keywords)
+		pysam.Samfile.__init__(self, path, mode, **keywords)
 		self.path = path
-		self.openMode = openMode
+		self.mode = mode
 	
 	def traverseBamByRead(self, processor=None):
 		"""

@@ -73,8 +73,8 @@ class ReformatFlagstatOutput(ParentClass):
 
         """
         
-        inf = utils.openGzipFile(self.inputFname, openMode='r')
-        writer = csv.writer(utils.openGzipFile(self.outputFname, openMode='w'), delimiter='\t')
+        inf = utils.openGzipFile(self.inputFname, mode='r')
+        writer = csv.writer(utils.openGzipFile(self.outputFname, mode='w'), delimiter='\t')
         header = ['alignmentID', 'total_no_of_reads', 'perc_secondary', 'perc_supplementary', \
                 'perc_reads_mapped', 'perc_duplicates', 'perc_paired', 'perc_properly_paired', \
                 'perc_both_mates_mapped', 'perc_singletons',\
@@ -82,31 +82,31 @@ class ReformatFlagstatOutput(ParentClass):
         writer.writerow(header)
         
         #float total_no_of_reads now so that no "float" upon division
-        total_no_of_reads = float(self.getNumberOutOfFlagStatLine(line=inf.readline().decode('utf-8') , \
+        total_no_of_reads = float(self.getNumberOutOfFlagStatLine(line=inf.readline(),
             grabPattern=re.compile(r'^(\d+) \+ (\d+) in total')))
-        no_of_secondary = self.getNumberOutOfFlagStatLine(line=inf.readline().decode('utf-8') ,\
+        no_of_secondary = self.getNumberOutOfFlagStatLine(line=inf.readline(),
             grabPattern=re.compile(r'^(\d+) \+ (\d+) secondary'))
-        no_of_supplementary = self.getNumberOutOfFlagStatLine(line=inf.readline().decode('utf-8') ,\
+        no_of_supplementary = self.getNumberOutOfFlagStatLine(line=inf.readline(),
             grabPattern=re.compile(r'^(\d+) \+ (\d+) supplementary'))
-        no_of_duplicates = self.getNumberOutOfFlagStatLine(line=inf.readline().decode('utf-8') ,\
+        no_of_duplicates = self.getNumberOutOfFlagStatLine(line=inf.readline(),
             grabPattern=re.compile(r'^(\d+) \+ (\d+) duplicates'))
-        no_of_mapped = self.getNumberOutOfFlagStatLine(line=inf.readline().decode('utf-8') ,\
+        no_of_mapped = self.getNumberOutOfFlagStatLine(line=inf.readline(),
             grabPattern=re.compile(r'^(\d+) \+ (\d+) mapped'))
-        no_of_paired = self.getNumberOutOfFlagStatLine(line=inf.readline().decode('utf-8') ,\
+        no_of_paired = self.getNumberOutOfFlagStatLine(line=inf.readline(),
             grabPattern=re.compile(r'^(\d+) \+ (\d+) paired in sequencing'))
-        no_of_read1 = self.getNumberOutOfFlagStatLine(line=inf.readline().decode('utf-8') ,\
+        no_of_read1 = self.getNumberOutOfFlagStatLine(line=inf.readline(),
             grabPattern=re.compile(r'^(\d+) \+ (\d+) read1'))
-        no_of_read2 = self.getNumberOutOfFlagStatLine(line=inf.readline().decode('utf-8') ,\
+        no_of_read2 = self.getNumberOutOfFlagStatLine(line=inf.readline(),
             grabPattern=re.compile(r'^(\d+) \+ (\d+) read2'))
-        no_of_properly_paired = self.getNumberOutOfFlagStatLine(line=inf.readline().decode('utf-8') ,\
+        no_of_properly_paired = self.getNumberOutOfFlagStatLine(line=inf.readline(),
             grabPattern=re.compile(r'^(\d+) \+ (\d+) properly paired'))
-        no_of_both_mates_mapped = self.getNumberOutOfFlagStatLine(line=inf.readline().decode('utf-8') ,\
+        no_of_both_mates_mapped = self.getNumberOutOfFlagStatLine(line=inf.readline(),
             grabPattern=re.compile(r'^(\d+) \+ (\d+) with itself and mate mapped'))
-        no_of_singletons = self.getNumberOutOfFlagStatLine(line=inf.readline().decode('utf-8') ,\
+        no_of_singletons = self.getNumberOutOfFlagStatLine(line=inf.readline(),
             grabPattern=re.compile(r'^(\d+) \+ (\d+) singletons'))
-        no_of_mates_mapped_to_diff_chrs = self.getNumberOutOfFlagStatLine(line=inf.readline().decode('utf-8') ,\
+        no_of_mates_mapped_to_diff_chrs = self.getNumberOutOfFlagStatLine(line=inf.readline(),
             grabPattern=re.compile(r'^(\d+) \+ (\d+) with mate mapped to a different chr\n'))
-        no_of_mates_mapped_to_diff_chrs_mapQAbove5 = self.getNumberOutOfFlagStatLine(line=inf.readline().decode('utf-8') ,\
+        no_of_mates_mapped_to_diff_chrs_mapQAbove5 = self.getNumberOutOfFlagStatLine(line=inf.readline(),
             grabPattern=re.compile(r'^(\d+) \+ (\d+) with mate mapped to a different chr \(mapQ>=5\)'))
         #
         del inf

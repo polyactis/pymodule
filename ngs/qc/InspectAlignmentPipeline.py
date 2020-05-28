@@ -243,17 +243,14 @@ class InspectAlignmentPipeline(ParentClass):
         job.sample_statistics_file = sample_statistics_file
         return job
 
-    def addSAMtoolsDepthJob(self, samtoolsDepth=None, samtools_path=None,\
-        bamF=None, outputFile=None, baiF=None, \
-        parentJobLs=None, extraOutputLs=None, job_max_memory = 500, \
-        extraArguments=None, \
-        transferOutput=False, minMappingQuality=None, minBaseQuality=None, \
-        walltime=120, **keywords):
+    def addSAMtoolsDepthJob(self, samtoolsDepth=None, samtools_path=None,
+        bamF=None, outputFile=None, baiF=None,
+        minMappingQuality=None, minBaseQuality=None,
+        extraArguments=None,
+        parentJobLs=None, extraOutputLs=None, transferOutput=False,
+        job_max_memory = 500, walltime=120, **keywords):
         """
-        2013.08.27 default minMappingQuality and minBaseQuality are set to None
-        2013.3.24 use addGenericJob()
-        2012.5.7
-
+        Default minMappingQuality and minBaseQuality are set to None
         """
         extraArgumentList = []
         if minMappingQuality is not None:
@@ -263,33 +260,35 @@ class InspectAlignmentPipeline(ParentClass):
         job= self.addGenericJob(executable=samtoolsDepth, \
             frontArgumentList=[samtools_path],\
             inputFile=bamF, inputArgumentOption=None,\
-            outputFile=outputFile, outputArgumentOption=None,\
-            parentJobLs=parentJobLs, extraDependentInputLs=[baiF], \
-            extraOutputLs=extraOutputLs, extraArguments=extraArguments, \
-            transferOutput=transferOutput, \
-            extraArgumentList=extraArgumentList, \
-            key2ObjectForJob=None, job_max_memory=job_max_memory, \
-            sshDBTunnel=None, walltime=walltime, **keywords)
+            outputFile=outputFile, outputArgumentOption=None,
+            extraArgumentList=extraArgumentList,
+            extraArguments=extraArguments,
+            parentJobLs=parentJobLs,
+            extraDependentInputLs=[baiF],
+            extraOutputLs=extraOutputLs,
+            transferOutput=transferOutput,
+            job_max_memory=job_max_memory,
+            walltime=walltime, **keywords)
         return job
 
 
     def addReformatFlagstatOutputJob(self, executable=None, inputF=None,
-        alignmentID=None, outputF=None, \
+        alignmentID=None, outputF=None, extraArguments=None,
         parentJobLs=None, extraDependentInputLs=None,
         transferOutput=False,
-        extraArguments=None, job_max_memory=2000, walltime=20, **keywords):
+        job_max_memory=2000, walltime=20, **keywords):
         """
         input is output of "samtools flagstat"
         """
         job= self.addGenericJob(executable=executable, \
             inputFile=inputF, inputArgumentOption='-i',\
-            outputFile=outputF, outputArgumentOption='-o',\
-            extraArguments=extraArguments, \
+            outputFile=outputF, outputArgumentOption='-o',
+            extraArguments=extraArguments,
+            extraArgumentList=['-a %s'%(alignmentID)],
             parentJobLs=parentJobLs,
             extraDependentInputLs=extraDependentInputLs,
-            transferOutput=transferOutput, \
-            extraArgumentList=['-a %s'%(alignmentID)], \
-            job_max_memory=job_max_memory, \
+            transferOutput=transferOutput,
+            job_max_memory=job_max_memory,
             walltime=walltime, **keywords)
         return job
 
@@ -308,7 +307,7 @@ class InspectAlignmentPipeline(ParentClass):
         depthOfCoverageOutputF = File(os.path.join(reduceOutputDirJob.output,
             'DepthOfCoverage.tsv'))
         passingData.depthOfCoverageOutputMergeJob = self.addStatMergeJob(
-            statMergeProgram=self.mergeSameHeaderTablesIntoOne, \
+            statMergeProgram=self.mergeSameHeaderTablesIntoOne,
             outputF=depthOfCoverageOutputF, parentJobLs=[reduceOutputDirJob],
             transferOutput=True)
 
@@ -316,7 +315,7 @@ class InspectAlignmentPipeline(ParentClass):
             depthOfCoveragePerChrOutputF = File(\
                 os.path.join(reduceOutputDirJob.output, 'DepthOfCoveragePerChr.tsv'))
             passingData.depthOfCoveragePerChrOutputMergeJob = self.addStatMergeJob(\
-                statMergeProgram=self.mergeSameHeaderTablesIntoOne, \
+                statMergeProgram=self.mergeSameHeaderTablesIntoOne,
                 outputF=depthOfCoveragePerChrOutputF, 
                 parentJobLs=[reduceOutputDirJob], transferOutput=True)
         else:
@@ -324,18 +323,12 @@ class InspectAlignmentPipeline(ParentClass):
 
         flagStatOutputF = File(os.path.join(reduceOutputDirJob.output, 'FlagStat.tsv'))
         passingData.flagStatOutputMergeJob = self.addStatMergeJob(
-            statMergeProgram=self.mergeSameHeaderTablesIntoOne, \
+            statMergeProgram=self.mergeSameHeaderTablesIntoOne,
             outputF=flagStatOutputF,
             parentJobLs=[reduceOutputDirJob], transferOutput=True)
 
         passingData.alignmentDataLs = self.addAddRG2BamJobsAsNeeded(
-            alignmentDataLs=passingData.alignmentDataLs,
-            site_handler=self.site_handler, \
-            input_site_handler=self.input_site_handler, \
-            AddOrReplaceReadGroupsJar=self.AddOrReplaceReadGroupsJar, \
-            BuildBamIndexFilesJava=self.BuildBamIndexFilesJava, 
-            BuildBamIndexJar=self.BuildBamIndexJar, \
-            mv=self.mv, data_dir=self.data_dir, tmpDir=self.tmpDir)
+            alignmentDataLs=passingData.alignmentDataLs)
 
         passingData.flagStatMapFolderJob = self.addMkDirJob(\
             outputDir="%sFlagStatMap"%(passingData.outputDirPrefix))

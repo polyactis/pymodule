@@ -66,7 +66,7 @@ class MatrixFile
 	 *
 	 */
 	string filename;
-	string openMode;
+	string mode;
 	string delimiter;
 	int debug;
 	int isFileGzipped;
@@ -92,15 +92,15 @@ public:
 
 	MatrixFile():delimiter("\t"), debug(0){
 		filename="";
-		openMode="";
+		mode="";
 		isClosed=true;
 	}
 	MatrixFile(string _filename, string _openMode, int _debug, string _delimiter): filename(_filename),
-		openMode(_openMode), delimiter(_delimiter), debug(_debug){
-		if (openMode.find("r")==0){
+		mode(_openMode), delimiter(_delimiter), debug(_debug){
+		if (mode.find("r")==0){
 			openOneInputFile(filename, inputFilterStreamBuffer, inputFileStream);
 		}
-		else if (openMode.find("w")==0){
+		else if (mode.find("w")==0){
 			openOneOutputFile(filename, outputStream);
 
 		}
@@ -108,13 +108,13 @@ public:
 	}
 	void open(char* _filename, string _openMode, int _debug, string _delimiter){
 		filename = _filename;
-		openMode = _openMode;
+		mode = _openMode;
 		delimiter = _delimiter;
 		debug = _debug;
-		if (openMode.find("r")==0){
+		if (mode.find("r")==0){
 			openOneInputFile(filename, inputFilterStreamBuffer, inputFileStream);
 		}
-		else if (openMode.find("w")==0){
+		else if (mode.find("w")==0){
 			openOneOutputFile(filename, outputStream);
 
 		}
@@ -324,10 +324,10 @@ public:
 	}
 
 	void* flush(){
-		if (openMode.find("r")==0){
+		if (mode.find("r")==0){
 			return 0;
 		}
-		else if (openMode.find("w")==0){
+		else if (mode.find("w")==0){
 			return outputStream.flush();
 		}
 		else{

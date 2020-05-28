@@ -80,7 +80,7 @@ class ComputeLiftOverLocusProbability(ParentClass):
         self.invariantPData.headerOutputted = True	#avoid double header output
         
         #open the other writer and write header
-        self.sideOutput = MatrixFile(self.locusIntervalDeltaOutputFname, openMode='w', delimiter='\t')
+        self.sideOutput = MatrixFile(self.locusIntervalDeltaOutputFname, mode='w', delimiter='\t')
         header = ['oldChromosome', 'oldStart', 'oldStop', 'oldStrand', 'newChromosome', 'newStart', 'newStop', 'intervalDelta']
         self.sideOutput.writeHeader(header)
         

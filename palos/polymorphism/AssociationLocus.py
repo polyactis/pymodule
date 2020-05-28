@@ -38,18 +38,18 @@ class AssociationLocusTableFile(YHFile):
 
 	"""
 	Examples:
-		associationLocusTableFile = AssociationLocusTableFile(self.outputFname, openMode='w')
+		associationLocusTableFile = AssociationLocusTableFile(self.outputFname, mode='w')
 		associationLocusTableFile.addAttributeDict(attributeDict)
 		associationLocusTableFile.appendAssociationPeak(association_peak_ls=association_peak_ls)
 		
 		#for read-only
-		associationLocusTableFile = AssociationLocusTableFile(path, openMode='r')
+		associationLocusTableFile = AssociationLocusTableFile(path, mode='r')
 		rbDict = associationLocusTableFile.associationLocusRBDict
 		
-		associationLocusTableFile = AssociationLocusTableFile(path, openMode='r', constructLocusRBDict=False)	#don't need it
+		associationLocusTableFile = AssociationLocusTableFile(path, mode='r', constructLocusRBDict=False)	#don't need it
 		call_method_id_ls = associationLocusTableFile.getAttribute('call_method_id_ls')
 	"""
-	def __init__(self, path=None, openMode='r', \
+	def __init__(self, path=None, mode='r', \
 				tableName='association_locus', groupNamePrefix='group', tableNamePrefix='table',\
 				filters=None, autoRead=True, autoWrite=True, \
 				locus2PeakTableName='association_locus2peak', locusPadding=0, constructLocusRBDict=True,\
@@ -60,7 +60,7 @@ class AssociationLocusTableFile(YHFile):
 		self.locusPadding = locusPadding
 		self.associationLocusRBDict = None
 		
-		YHFile.__init__(self, path=path, openMode=openMode, \
+		YHFile.__init__(self, path=path, mode=mode, \
 				tableName=tableName, groupNamePrefix=groupNamePrefix, tableNamePrefix=tableNamePrefix,\
 				rowDefinition=None, filters=filters, debug=0, report=0,\
 				autoRead=False, autoWrite=False)
@@ -69,12 +69,12 @@ class AssociationLocusTableFile(YHFile):
 		self.autoRead = autoRead
 		self.autoWrite = autoWrite
 		
-		if self.autoRead and (self.openMode=='r' or self.openMode=='a'):
+		if self.autoRead and (self.mode=='r' or self.mode=='a'):
 			self.associationLocusTable = self.getTableObject(tableName=self.tableName)
 			self.associationLocus2PeakTable = self.getTableObject(tableName=self.locus2PeakTableName)
 			if self.constructLocusRBDict:
 				self.associationLocusRBDict = self._readInData(tableName=self.tableName, tableObject=self.associationLocusTable)
-		elif openMode == 'w':
+		elif mode == 'w':
 			self.associationLocusTable = self.createNewTable(tableName=self.tableName, rowDefinition=AssociationLocusTable,\
 													expectedrows=50000)
 			self.associationLocus2PeakTable = self.createNewTable(tableName=self.locus2PeakTableName, \

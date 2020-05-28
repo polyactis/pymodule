@@ -3,95 +3,165 @@
 A pegasus workflow to run InspectBaseQuality.py over a list of individual sequences
 
 Examples:
-    # 2011-8-16 on condorpool
+    # on condorpool
     %s -o inspectBaseQuality.xml -u yh -i 1-8,15-130
     
-    # 2011-8-16 use hoffman2 site_handler
+    # use hoffman2 site_handler
     %s -o inspectBaseQuality.xml -u yh -i 1-8,15-130 
-        -l hoffman2 -e /u/home/eeskin/polyacti -t ~/NetworkData/vervet/db
+        -l hoffman2 --home_path /u/home/eeskin/polyacti
+        -t ~/NetworkData/vervet/db
 
 """
 import sys, os, copy
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
-
 import getpass
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
 from palos.db import SunsetDB
 from palos.ngs.AbstractNGSWorkflow import AbstractNGSWorkflow
+from pegaflow.DAX3 import File, PFN
 
 class InspectBaseQualityPipeline(AbstractNGSWorkflow):
     __doc__ = __doc__
     
-    commonOptionDict = copy.deepcopy(AbstractNGSWorkflow.option_default_dict)
-    #commonOptionDict.pop(('inputDir', 0, ))
+    def __init__(self,
+        drivername='postgresql', hostname='localhost',
+        dbname='', schema='public', port=None,
+        db_user=None, db_passwd=None,
 
-    option_default_dict = copy.deepcopy(commonOptionDict)
-    option_default_dict.update({
-        ('ind_seq_id_ls', 1, ): ['', 'i', 1, \
-            'a comma/dash-separated list of IndividualSequence.id. '
-            'Non-fastq entries will be discarded.', ],\
-        })
+        data_dir=None, local_data_dir=None,
 
-    def __init__(self, **keywords):
+        ref_ind_seq_id=None,
+
+        ind_seq_id_ls=None,
+        excludeContaminant=False,
+        sequence_filtered=None,
+
+        samtools_path="bin/samtools",
+        picard_dir="script/picard/dist",
+        gatk_path="bin/GenomeAnalysisTK1_6_9.jar",
+        gatk2_path="bin/GenomeAnalysisTK.jar",
+        picard_path="script/picard.broad/build/libs/picard.jar",
+
+        chromosome_type_id=None, 
+        ref_genome_tax_id=9606,
+        ref_genome_sequence_type_id=1,
+        ref_genome_version=15,
+        ref_genome_outdated_index=0,
+
+        pegasusFolderName='input',
+        site_handler='condor',
+        input_site_handler='condor',
+        cluster_size=30,
+        output_path=None,
+        tmpDir='/tmp/',
+        max_walltime=4320,
+        
+        home_path=None,
+        javaPath=None,
+        pymodulePath="src/pymodule",
+
+        jvmVirtualByPhysicalMemoryRatio=1.2,
+
+        needSSHDBTunnel=False,
+        commit=False,
+        debug=False,
+        report=False):
         """
         """
-        AbstractNGSWorkflow.__init__(self, **keywords)
-        if self.ind_seq_id_ls:
-            self.ind_seq_id_ls = getListOutOfStr(self.ind_seq_id_ls, data_type=int)
+        AbstractNGSWorkflow.__init__(self,
+            drivername=drivername, hostname=hostname,
+            dbname=dbname, schema=schema, port=port,
+            db_user=db_user, db_passwd=db_passwd,
+
+            data_dir=data_dir, local_data_dir=local_data_dir,
+
+            ref_ind_seq_id=ref_ind_seq_id,
+
+            excludeContaminant=excludeContaminant,
+            sequence_filtered=sequence_filtered,
+
+            samtools_path=samtools_path,
+            picard_dir=picard_dir,
+            gatk_path=gatk_path,
+            gatk2_path=gatk2_path,
+            picard_path=picard_path,
+
+            contigMaxRankBySize=None,
+            contigMinRankBySize=None,
+
+            chromosome_type_id=chromosome_type_id, 
+            ref_genome_tax_id=ref_genome_tax_id,
+            ref_genome_sequence_type_id=ref_genome_sequence_type_id,
+            ref_genome_version=ref_genome_version,
+            ref_genome_outdated_index=ref_genome_outdated_index,
+
+            pegasusFolderName=pegasusFolderName,
+            site_handler=site_handler,
+            input_site_handler=input_site_handler,
+            cluster_size=cluster_size,
+            output_path=output_path,
+            tmpDir=tmpDir,
+            max_walltime=max_walltime, 
+            
+            home_path=home_path,
+            javaPath=javaPath,
+            pymodulePath=pymodulePath,
+            
+            jvmVirtualByPhysicalMemoryRatio=jvmVirtualByPhysicalMemoryRatio,
+
+            needSSHDBTunnel=needSSHDBTunnel,
+            commit=commit,
+            debug=debug, report=report)
+        
+        self.ind_seq_id_ls = getListOutOfStr(ind_seq_id_ls, data_type=int)
+        self.needSplitChrIntervalData = False
 
     def registerExecutables(self):
         """
         """
         AbstractNGSWorkflow.registerExecutables(self)
         self.registerOneExecutable(
-            path=os.path.join(self.pymodulePath, 'mapper/InspectBaseQuality.py'),
+            path=os.path.join(self.pymodulePath, 'ngs/qc/InspectBaseQuality.py'),
             name='InspectBaseQuality', clusterSizeMultiplier=1)
         
     def run(self):
         """
         """
-        if self.debug:
-            import pdb
-            pdb.set_trace()
-        
         self.setup_run()
         
-        #must use db_main.data_dir.
-        # If self.data_dir differs from db_main.data_dir, 
-        # this program (must be run on submission host) won't find files.
-        individualSequenceID2FilePairLs = db_main.getIndividualSequenceID2FilePairLs(
+        logDir = "Log"
+        logDirJob = self.addMkDirJob(outputDir=logDir)
+        individualSequenceID2FilePairLs = self.db_main.getIndividualSequenceID2FilePairLs(
             self.ind_seq_id_ls, data_dir=self.data_dir)
-        
         for ind_seq_id, FilePairLs in individualSequenceID2FilePairLs.items():
-            individual_sequence = db_main.queryTable(
+            individual_sequence = self.db_main.queryTable(
                 SunsetDB.IndividualSequence).get(ind_seq_id)
-            if individual_sequence is not None and individual_sequence.format=='fastq':
-                #start to collect all files affiliated with
-                #  this individual_sequence record 
-                inputFilepathLs = []
-                for filePair in FilePairLs:
-                    for fileRecord in filePair:
-                        relativePath, format, sequence_type = fileRecord[:3]
-                        filepath = os.path.join(self.data_dir, relativePath)
-                        inputFilepathLs.append(filepath)
-                
-                #create jobs
-                for filepath in inputFilepathLs:
-                    prefix, suffix = utils.\
-                        getRealPrefixSuffixOfFilenameWithVariableSuffix(filepath)
+            if individual_sequence is None or individual_sequence.format!='fastq':
+                continue
+            for filePair in FilePairLs:
+                for fileRecord in filePair:
+                    relativePath = fileRecord[0]
+                    prefix, suffix = utils.getRealPrefixSuffix(
+                        os.path.basename(relativePath))
                     if suffix=='.fastq':
-                        #sometimes other files get in the way
-                        inspectBaseQuality_job = self.addDBJob(
+                        filepath = os.path.join(self.data_dir, relativePath)
+                        #Do not register the input fastq because InspectBaseQuality
+                        #  will output directly into self.data_dir.
+                        logFile = File(os.path.join(logDir, f'{prefix}.log'))
+                        job = self.addDBJob(
                             executable=self.InspectBaseQuality,
-                            extraArgumentList=['-i', filepath, \
-                                '--read_sampling_rate', '0.005', \
-                                '--quality_score_format', \
-                                individual_sequence.quality_score_format],
-                            parentJobLs=None,
-                            extraDependentInputLs=None,
-                            transferOutput=False,
-                            objectWithDBArguments=self,\
-                            job_max_memory=20000, \
+                            outputArgumentOption="--logFilename",
+                            outputFile=logFile,
+                            extraArgumentList=[
+                                '-i', filepath,
+                                '--read_sampling_rate', '0.01',
+                                '--quality_score_format',
+                                individual_sequence.quality_score_format,
+                                ],
+                            parentJobLs=[logDirJob],
+                            transferOutput=True,
+                            objectWithDBArguments=self,
+                            job_max_memory=5000,
                             walltime=120)
         
         self.end_run()
@@ -118,80 +188,12 @@ if __name__ == '__main__':
 
     ap.add_argument('-i', "--ind_seq_id_ls", required=True,
         help='a comma/dash-separated list of IndividualSequence.id.')
-    ap.add_argument("--local_realigned", type=int, default=0,
-        help='Set it to 1 to enable local realignment. '
-            "Default: %(default)s")
     ap.add_argument("--excludeContaminant", action='store_true',
         help='Toggle to exclude sequences from contaminated individuals, '
             '(IndividualSequence.is_contaminated=1).')
     ap.add_argument("--sequence_filtered", type=int, default=None,
         help='Filter with individual_sequence.filtered=THIS_VALUE. '
             'None: everything; 0: unfiltered sequences; 1: filtered sequences.')
-    ap.add_argument("--skipDoneAlignment", action='store_true',
-        help='Skip alignment whose db_entry is complete and its alignment file '
-            'is valid. Default: %(default)s.')
-
-    ap.add_argument("--noCheckEmptyReadFile", action='store_true',
-        help="Toggle to NOT check if each read file is empty and skip them. "
-            "If IndividualSequenceFile.read_count is null, "
-            "it'll try to count them on the fly (may take lots of time). "
-            "Only toggle it if you are certain every input "
-                "individual_sequence_file is not empty. "
-            "Empty read file will fail alignment jobs.")
-    ap.add_argument("--alignment_method_name", default='bwamem', 
-        help='The default alignment method if unable to choose based on read_length. '
-            'It may add a new alignment_method entry if non-existent in db.')
-    ap.add_argument("--bwa_path", default="bin/bwa",
-        help='Path to bwa. Default: %(default)s')
-    ap.add_argument("--no_of_aln_threads", type=int, default=4,
-        help="The number of threads for each alignment job."
-            "Default: %(default)s")
-    ap.add_argument("--extraAlignArgs", default='',
-        help='Additional arguments passed to an alignment command, '
-            'not bwasw, add double quote if empty space. i.e. "-q 20"'
-            'Default: %(default)s')
-    ap.add_argument("--alignmentJobClusterSizeFraction", type=float, default=0.01,
-        help="alignment job cluster size relative to self.cluster_size, "
-            "for bwa, PEAlignmentByBWA, LongSEAlignmentByBWA, "
-            "AddOrReplaceReadGroupsJava/SortSamFilesJava/samtools jobs. "
-            "Default: %(default)s")
-    ap.add_argument("--coreAlignmentJobWallTimeMultiplier", type=float, default=0.2,
-        help='The usual wall time is decided by --max_wall_time. '
-            'This option controls alignment job walltime by multiplying '
-            'max_wall_time with this number.'
-            "Default: %(default)s")
-    ap.add_argument("--needRefIndexJob", action='store_true',
-        help="Toggle to add a reference index job by bwa before alignment"
-            "Default: %(default)s")
-    ap.add_argument("--noStageOutFinalOutput", action='store_true',
-        help="Toggle to not stage out final output (bam + bam.bai)"
-            "Default: %(default)s")
-    ap.add_argument("--alignmentPerLibrary", action='store_true',
-        help="Toggle to run alignment for each library of an individual_sequence."
-            "Default: %(default)s")
-    
-    ap.add_argument('-S', "--site_id_ls",
-        help='a comma/dash-separated list of site IDs to filter individuals.')
-    ap.add_argument("--country_id_ls",
-        help='a comma/dash-separated list of country IDs to filter individuals.')
-    ap.add_argument("--tax_id_ls", default='9606',
-        help='a comma/dash-separated list of taxonomy IDs to filter individuals.')
-    ap.add_argument("--sequence_type_id_ls",
-        help='a comma/dash-separated list of IndividualSequence.sequence_type_id '
-            'to filter IndividualSequence.')
-    ap.add_argument("--sequencer_id_ls",
-        help='a comma/dash-separated list of IndividualSequence.sequencer_id '
-            'to filter IndividualSequence.')
-    ap.add_argument("--sequence_batch_id_ls",
-        help='a comma/dash-separated list of IndividualSequence.sequence_batch_id '
-            'to filter IndividualSequence.')
-    ap.add_argument("--version_ls",
-        help='a comma/dash-separated list of IndividualSequence.version '
-            'to filter IndividualSequence.')
-    ap.add_argument("--sequence_min_coverage", type=float,
-        help='min IndividualSequence.coverage to filter IndividualSequence.')
-    ap.add_argument("--sequence_max_coverage", type=float,
-        help='max IndividualSequence.coverage to filter IndividualSequence.')
     
     ap.add_argument("-F", "--pegasusFolderName", default='input',
         help='The path relative to the workflow running root. '
@@ -260,31 +262,8 @@ if __name__ == '__main__':
         ref_ind_seq_id = args.ref_ind_seq_id,
 
         ind_seq_id_ls = args.ind_seq_id_ls,
-        local_realigned = args.local_realigned,
         excludeContaminant = args.excludeContaminant,
         sequence_filtered = args.sequence_filtered,
-        skipDoneAlignment = args.skipDoneAlignment,
-
-        noCheckEmptyReadFile = args.noCheckEmptyReadFile,
-        alignment_method_name = args.alignment_method_name,
-        bwa_path = args.bwa_path,
-        no_of_aln_threads = args.no_of_aln_threads,
-        extraAlignArgs = args.extraAlignArgs,
-        alignmentJobClusterSizeFraction = args.alignmentJobClusterSizeFraction,
-        coreAlignmentJobWallTimeMultiplier = args.coreAlignmentJobWallTimeMultiplier,
-        needRefIndexJob = args.needRefIndexJob,
-        noStageOutFinalOutput = args.noStageOutFinalOutput,
-        alignmentPerLibrary = args.alignmentPerLibrary,
-
-        site_id_ls = args.site_id_ls,
-        country_id_ls = args.country_id_ls,
-        tax_id_ls = args.tax_id_ls,
-        sequence_type_id_ls = args.sequence_type_id_ls,
-        sequencer_id_ls = args.sequencer_id_ls,
-        sequence_batch_id_ls = args.sequence_batch_id_ls,
-        version_ls = args.version_ls,
-        sequence_min_coverage = args.sequence_min_coverage,
-        sequence_max_coverage = args.sequence_max_coverage,
 
         site_handler = args.site_handler, 
         input_site_handler = args.input_site_handler,
@@ -297,7 +276,7 @@ if __name__ == '__main__':
         home_path = args.home_path,
         javaPath = args.javaPath,
         pymodulePath = args.pymodulePath,
-        thisModulePath = None,
+        
         needSSHDBTunnel = args.needSSHDBTunnel,
         commit = args.commit,
         debug = args.debug,

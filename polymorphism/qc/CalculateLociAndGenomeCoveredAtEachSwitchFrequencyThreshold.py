@@ -68,7 +68,7 @@ class CalculateLociAndGenomeCoveredAtEachSwitchFrequencyThreshold(ParentClass):
 		switchPointData = self.readInStats(inputFname=self.inputFname)
 		
 		sys.stderr.write("Processing data ...")
-		writer = MatrixFile(self.outputFname, openMode='w')
+		writer = MatrixFile(self.outputFname, mode='w')
 		header = ["maxSwitchFrequency", "genomeCovered", 'genomeCoveredFraction', "noOfLoci", 'noOfLociFraction']
 		writer.writeHeader(header)
 		

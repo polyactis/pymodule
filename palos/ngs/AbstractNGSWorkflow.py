@@ -1443,7 +1443,7 @@ class AbstractNGSWorkflow(ParentClass):
         gatkVCFIndexOutput = None
         if outputFile:	#2013.06.09 bugfix
             outputFnameSuffix = utils.\
-                getRealPrefixSuffixOfFilenameWithVariableSuffix(outputFile.name)
+                getRealPrefixSuffix(outputFile.name)
             if outputFnameSuffix=='.vcf':
                 #2013.2.26 GATK will generate an index file along with the VCF output
                 gatkVCFIndexOutputFname = '%s.idx'%(outputFile.name)
@@ -1454,7 +1454,7 @@ class AbstractNGSWorkflow(ParentClass):
             #2013.05.04 this could be None in some cases
             #  (addGATKCombineVariantsJob, inputFile is added in later)
             inputFnameSuffix = utils.\
-                getRealPrefixSuffixOfFilenameWithVariableSuffix(inputFile.name)
+                getRealPrefixSuffix(inputFile.name)
             if inputFnameSuffix=='.vcf':
                 #2013.04.16 GATK will generate an index file along with the VCF input
                 inputGATKVCFIndexFname = '%s.idx'%(inputFile.name)
@@ -2053,7 +2053,7 @@ option:
             inputVCFFolder, outputFname), flush=True)
         no_of_vcfFiles = 0
         no_of_loci = 0
-        outputF = MatrixFile(path=outputFname, openMode='w', delimiter='\t')
+        outputF = MatrixFile(path=outputFname, mode='w', delimiter='\t')
         for inputFname in os.listdir(inputVCFFolder):
             inputAbsPath = os.path.join(os.path.abspath(inputVCFFolder), inputFname)
             if ngs.isFileNameVCF(inputFname, includeIndelVCF=False):

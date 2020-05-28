@@ -175,7 +175,7 @@ class ModifyTPED(AbstractMapper):
 		2013.07.24
 		"""
 		if outputFname and individual_index2no_of_genotype_marked_missing is not None:
-			writer = MatrixFile(path=outputFname, openMode='w', delimiter='\t')
+			writer = MatrixFile(path=outputFname, mode='w', delimiter='\t')
 			header = ["individualID", "noOfGenotypesMarkedMissing"]
 			writer.writeHeader(header)
 			for individual_index, no_of_genotype_marked_missing in individual_index2no_of_genotype_marked_missing.items():

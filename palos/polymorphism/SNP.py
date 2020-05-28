@@ -1070,7 +1070,7 @@ class SNPData(object):
             #import csv
             #writer = csv.writer(open(outputFname, 'w'), delimiter='\t')
             from palos.io import MatrixFile
-            writer = MatrixFile(outputFname, openMode='w', delimiter='\t')
+            writer = MatrixFile(outputFname, mode='w', delimiter='\t')
 
 
             header = ['rowID|string', 'DummyTime|string']
@@ -2733,7 +2733,7 @@ class GenomeWideResult(object):
             OutputFileClass = HDF5MatrixFile
         if tableObject is None:
             if writer is None and filename:
-                writer = OutputFileClass(filename, openMode='w', rowDefinition=rowDefinition, tableName=tableName)
+                writer = OutputFileClass(filename, mode='w', rowDefinition=rowDefinition, tableName=tableName)
                 tableObject = writer.getTableObject(tableName=tableName)
             elif writer:
                 tableObject = writer.createNewTable(tableName=tableName, rowDefinition=rowDefinition)
@@ -3296,10 +3296,10 @@ def getGenomeWideResultFromHDF5MatrixFile(inputFname=None, reader=None, \
         if reader is None:
             if inputFileType==1:
                 from palos.polymorphism.Association import AssociationTableFile
-                reader = AssociationTableFile(inputFname, openMode='r', autoRead=False)
+                reader = AssociationTableFile(inputFname, mode='r', autoRead=False)
             else:
                 from palos.io.HDF5MatrixFile import HDF5MatrixFile
-                reader = HDF5MatrixFile(inputFname, openMode='r')
+                reader = HDF5MatrixFile(inputFname, mode='r')
         associationTableObject = reader.getTableObject(tableName=tableName)
     
     for attributeName, value in associationTableObject.getAttributes().items():

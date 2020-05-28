@@ -242,7 +242,7 @@ class SFS_CODE_Output2PolymorphismTableFile(AbstractMapper):
 			sys.exit(3)
 			
 		inputFile = utils.openGzipFile(self.inputFname, 'r')
-		outputPolymorphismFile = PolymorphismTableFile(self.outputFname, openMode='w', isPhased=1, \
+		outputPolymorphismFile = PolymorphismTableFile(self.outputFname, mode='w', isPhased=1, \
 														ploidy=self.ploidy)
 		outputChromosomeSequenceFile = open(self.outputChromosomeSequenceFname, "w")
 		

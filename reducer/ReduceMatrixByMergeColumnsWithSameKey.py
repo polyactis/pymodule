@@ -1,20 +1,23 @@
 #!/usr/bin/env python3
 """
-2011-12-21
-    This program merge lines keyed by keyColumnLs. The non-key columns are appended next to each other.
-    If one input misses lines for some keys, those lines will have empty data over there.
+This program merge lines keyed by keyColumnLs.
+    The value columns are merged to a list and outputted by a custom delimiter.
+If one input file misses some key combinations,
+    those key combinations will have empty data.
     
-    All input files must have the keys at the same column(s).
+All input files must have the keys at the same column(s).
 
 Examples:
-    #testing merge three identical genotype files
-    %s -o /tmp/ccc.tsv --inputDelimiter tab /tmp/call_1.tsv /tmp/call_1.tsv /tmp/call_1.tsv
+    #test-merge three identical genotype files
+    %s -o /tmp/ccc.tsv --inputDelimiter tab
+        /tmp/call_1.tsv /tmp/call_1.tsv /tmp/call_1.tsv
     
 """
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0])
 
 import copy
+import logging
 from palos import ProcessOptions, figureOutDelimiter, utils, PassingData
 from palos.io.MatrixFile import MatrixFile
 from palos.reducer.AbstractReducer import AbstractReducer
@@ -23,18 +26,23 @@ class ReduceMatrixByMergeColumnsWithSameKey(AbstractReducer):
     __doc__ = __doc__
     option_default_dict = copy.deepcopy(AbstractReducer.option_default_dict)
     option_default_dict.update({
-                        ("keyColumnLs", 1, ): [0, 'k', 1, 'index(es) of the key in each input file. must be same. comma/dash-separated. i.e. 0-2,4 '],\
-                        ("keyHeaderLs", 0, ): [0, '', 1, 'header(s) of the key. comma-separated'],\
-                        ('valueColumnLs', 1, ):["1", 'v', 1, 'comma/tab-separated list, specifying columns from which to aggregate total value by key'],\
-                        })
+        ("keyColumnLs", 1, ): [0, 'k', 1, 
+            'index(es) of the key in each input file. '
+            'Must be same. comma/dash-separated. i.e. 0-2,4 '],
+        ("keyHeaderLs", 0, ): [0, '', 1, 
+            'header(s) of the key. comma-separated'],
+        ('valueColumnLs', 1, ):["1", 'v', 1, 
+            'comma/tab-separated list, specifying columns '
+            'from which to aggregate total value by key'],
+        })
 
     def __init__(self, inputFnameLs=None, **keywords):
         """
-        2011-7-12
         """
         AbstractReducer.__init__(self, inputFnameLs=inputFnameLs, **keywords)
         if self.keyColumnLs:
-            self.keyColumnLs = utils.getListOutOfStr(self.keyColumnLs, data_type=int)
+            self.keyColumnLs = utils.getListOutOfStr(self.keyColumnLs,
+                data_type=int)
         else:
             self.keyColumnLs = []
         if self.keyHeaderLs:
@@ -44,9 +52,9 @@ class ReduceMatrixByMergeColumnsWithSameKey(AbstractReducer):
         
         self.keyColumnSet = set(self.keyColumnLs)
     
-    def appendSelectedCellIntoGivenList(self, givenLs=[], inputLs=[], indexLs=[]):
+    def appendSelectedCellIntoGivenList(self, givenLs=[], inputLs=[],
+        indexLs=[]):
         """
-        2012.1.9
         """
         for columnIndex in indexLs:
             if columnIndex<len(inputLs):
@@ -55,9 +63,7 @@ class ReduceMatrixByMergeColumnsWithSameKey(AbstractReducer):
     
     def generateKey(self, row, keyColumnLs):
         """
-        2012.1.17
-            make sure columnIndex is >=0
-        2012.1.9
+        make sure columnIndex is >=0
         """
         keyLs = []
         for columnIndex in keyColumnLs:
@@ -66,16 +72,12 @@ class ReduceMatrixByMergeColumnsWithSameKey(AbstractReducer):
         key = tuple(keyLs)
         return key
     
-    def outputFinalData(self, outputFname, key2dataLs=None, delimiter=None, header=None):
+    def outputFinalData(self, outputFname, key2dataLs=None, delimiter=None,
+        header=None):
         """
-        2013.07.18 header output is not dependent on key2dataLs anymore 
-        2013.3.3 bugfix , added openMode='w' for MatrixFile()
-        2013.2.12 replace csv.writer with MatrixFile
-        2012.7.30
-            open the outputFname regardless whether there is data or not.
-        2012.1.9
+        header output is not dependent on key2dataLs anymore 
         """
-        writer = MatrixFile(path=outputFname, delimiter=delimiter, openMode='w')
+        writer = MatrixFile(path=outputFname, delimiter=delimiter, mode='w')
         if header and delimiter:
             writer.writerow(header)
         if key2dataLs and delimiter:
@@ -85,9 +87,9 @@ class ReduceMatrixByMergeColumnsWithSameKey(AbstractReducer):
                 writer.writerow(list(key) + dataLs)
         writer.close()
     
-    def handleNewHeader(self, oldHeader=None, newHeader=None, keyColumnLs=None, valueColumnLs=None, keyColumnSet=None):
+    def handleNewHeader(self, oldHeader=None, newHeader=None, keyColumnLs=None,
+        valueColumnLs=None, keyColumnSet=None):
         """
-        2012.1.9
         """
         originalHeaderLength = len(oldHeader)
         if len(newHeader)==0:	#add the key columns into the new header
@@ -98,10 +100,10 @@ class ReduceMatrixByMergeColumnsWithSameKey(AbstractReducer):
         self.appendSelectedCellIntoGivenList(newHeader, oldHeader, valueColumnLs)
         return newHeader
     
-    def handleValueColumns(self, row, key2dataLs=None, keyColumnLs=[], valueColumnLs=[], noOfDataColumnsFromPriorFiles=None, \
-                        visitedKeySet=None):
+    def handleValueColumns(self, row, key2dataLs=None, keyColumnLs=[],
+        valueColumnLs=[], noOfDataColumnsFromPriorFiles=None,
+        visitedKeySet=None):
         """
-        2012.1.9
         """
         key = self.generateKey(row, keyColumnLs)
         if key not in key2dataLs:
@@ -113,15 +115,16 @@ class ReduceMatrixByMergeColumnsWithSameKey(AbstractReducer):
 
     def traverse(self):
         """
-        self.noHeader:	#2012.8.10
-        2012.1.9
         """
         newHeader = []
-        key2dataLs = {}	#key is the keyColumn, dataLs corresponds to the sum of each column from valueColumnLs 
+        key2dataLs = {}
+        #key is the keyColumn,
+        #  dataLs corresponds to the sum of each column from valueColumnLs 
         noOfDataColumnsFromPriorFiles = 0
         for inputFname in self.inputFnameLs:
             if not os.path.isfile(inputFname):
                 if self.exitNonZeroIfAnyInputFileInexistent:
+                    logging.error(f'{inputFname} does not exist.')
                     sys.exit(3)
                 else:
                     continue
@@ -130,21 +133,25 @@ class ReduceMatrixByMergeColumnsWithSameKey(AbstractReducer):
                 inputFile = utils.openGzipFile(inputFname)
                 if self.inputDelimiter is None or self.inputDelimiter=='':
                     self.inputDelimiter = figureOutDelimiter(inputFile)
-                reader = MatrixFile(file_handle=inputFile, delimiter=self.inputDelimiter)
+                reader = MatrixFile(file_handle=inputFile,
+                    delimiter=self.inputDelimiter)
             except:
-                sys.stderr.write('Except type: %s\n'%repr(sys.exc_info()))
+                logging.error(f'Except type: {sys.exc_info()}')
                 import traceback
                 traceback.print_exc()
             
             valueColumnLs = []
             try:
                 header = reader.next()
-                self.handleNewHeader(header, newHeader, self.keyColumnLs, valueColumnLs, keyColumnSet=self.keyColumnSet)
-                if self.noHeader:	#2012.8.10
+                self.handleNewHeader(header, newHeader, self.keyColumnLs,
+                    valueColumnLs, keyColumnSet=self.keyColumnSet)
+                if self.noHeader:
                     inputFile.seek(0)
-                    reader = MatrixFile(file_handle=inputFile, delimiter=self.inputDelimiter)
-            except:	#in case something wrong (i.e. file is empty)
-                sys.stderr.write('Except type: %s\n'%repr(sys.exc_info()))
+                    reader = MatrixFile(file_handle=inputFile,
+                        delimiter=self.inputDelimiter)
+            except:
+                #in case something wrong (i.e. file is empty)
+                logging.error(f'Except type: {sys.exc_info()}')
                 import traceback
                 traceback.print_exc()
             
@@ -152,25 +159,28 @@ class ReduceMatrixByMergeColumnsWithSameKey(AbstractReducer):
                 visitedKeySet = set()
                 for row in reader:
                     try:
-                        self.handleValueColumns(row, key2dataLs=key2dataLs, keyColumnLs=self.keyColumnLs, \
-                                valueColumnLs=valueColumnLs, noOfDataColumnsFromPriorFiles=noOfDataColumnsFromPriorFiles, \
-                                visitedKeySet=visitedKeySet)
-                    except:	#in case something wrong (i.e. file is empty)
-                        sys.stderr.write('Ignore this row: %s.\n'%repr(row))
-                        sys.stderr.write('Except type: %s\n'%repr(sys.exc_info()))
+                        self.handleValueColumns(row, key2dataLs=key2dataLs,
+                            keyColumnLs=self.keyColumnLs,
+                            valueColumnLs=valueColumnLs,
+                            noOfDataColumnsFromPriorFiles=noOfDataColumnsFromPriorFiles,
+                            visitedKeySet=visitedKeySet)
+                    except:
+                        logging.error(f'Ignore this row: {row}.')
+                        logging.error(f'Except type: {sys.exc_info()}')
                         import traceback
                         traceback.print_exc()
                 del reader
-                #append empty data to keys who are not present in this current "reader" file
+                #append empty data to keys who are missing in the current file.
                 totalKeySet = set(key2dataLs.keys())
                 unvisitedKeySet = totalKeySet - visitedKeySet
                 for key in unvisitedKeySet:
                     for i in valueColumnLs:
                         key2dataLs[key].append('')
             noOfDataColumnsFromPriorFiles += len(valueColumnLs)
-        if self.noHeader:	#2012.8.10
+        if self.noHeader:
             newHeader = None
-        returnData = PassingData(key2dataLs=key2dataLs, delimiter=self.inputDelimiter, header=newHeader)
+        returnData = PassingData(key2dataLs=key2dataLs,
+            delimiter=self.inputDelimiter, header=newHeader)
         return returnData
     
     def run(self):
@@ -181,10 +191,11 @@ class ReduceMatrixByMergeColumnsWithSameKey(AbstractReducer):
         
         returnData = self.traverse()
         self.outputFinalData(self.outputFname, key2dataLs=returnData.key2dataLs, 
-                            delimiter=returnData.delimiter, header=returnData.header)
+            delimiter=returnData.delimiter, header=returnData.header)
 
 if __name__ == '__main__':
     main_class = ReduceMatrixByMergeColumnsWithSameKey
-    po = ProcessOptions(sys.argv, main_class.option_default_dict, error_doc=main_class.__doc__)
+    po = ProcessOptions(sys.argv, main_class.option_default_dict,
+        error_doc=main_class.__doc__)
     instance = main_class(po.arguments, **po.long_option2value)
     instance.run()

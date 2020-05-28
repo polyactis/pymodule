@@ -507,7 +507,7 @@ class ShortRead2Alignment(ParentClass):
 
         fastqF = firstFileObject.fastqF
         relativePath = fastqF.name
-        fileBasenamePrefix = utils.getRealPrefixSuffixOfFilenameWithVariableSuffix(
+        fileBasenamePrefix = utils.getRealPrefixSuffix(
             os.path.basename(relativePath))[0]
         outputSamFile = File('%s.sam'%(os.path.join(outputDir, fileBasenamePrefix)))
 
@@ -649,7 +649,7 @@ class ShortRead2Alignment(ParentClass):
             if alignment_method.command.find('aln')>=0 and \
                 sequencer.short_name!='454':
                 #short single-end read
-                fileBasenamePrefix = utils.getRealPrefixSuffixOfFilenameWithVariableSuffix(
+                fileBasenamePrefix = utils.getRealPrefixSuffix(
                     os.path.basename(relativePath))[0]
                 outputFname = os.path.join(outputDir, '%s.sai'%fileBasenamePrefix)
                 saiOutput = File(outputFname)
@@ -680,7 +680,7 @@ class ShortRead2Alignment(ParentClass):
             elif alignment_method.command.find('bwasw')>=0 or \
                 sequencer.short_name=='454':
                 #long single-end read
-                fileBasenamePrefix = utils.getRealPrefixSuffixOfFilenameWithVariableSuffix(
+                fileBasenamePrefix = utils.getRealPrefixSuffix(
                     os.path.basename(relativePath))[0]
                 alignmentSamF = File('%s.sam.gz'%(os.path.join(outputDir, fileBasenamePrefix)))
                 alignmentJob = self.addGenericJob(
@@ -707,7 +707,7 @@ class ShortRead2Alignment(ParentClass):
                 minJobPropertyValue=baseAlnJobWalltime*2/3, 
                 maxJobPropertyValue=baseAlnJobWalltime*5).value
 
-            fileBasenamePrefix = utils.getRealPrefixSuffixOfFilenameWithVariableSuffix(
+            fileBasenamePrefix = utils.getRealPrefixSuffix(
                 os.path.basename(relativePath))[0]
             # Stop discarding the last two characters of filename prefix
             #fileBasenamePrefix = fileBasenamePrefix[:-2]
@@ -725,7 +725,7 @@ class ShortRead2Alignment(ParentClass):
                 fastqF = fileObject.fastqF
                 relativePath = fastqF.name
                 sequence_type = fileObject.db_entry.individual_sequence.sequence_type
-                tmp_fname_prefix = utils.getRealPrefixSuffixOfFilenameWithVariableSuffix(
+                tmp_fname_prefix = utils.getRealPrefixSuffix(
                     os.path.basename(relativePath))[0]
                 outputFname = os.path.join(outputDir, '%s.sai'%tmp_fname_prefix)
                 saiOutput = File(outputFname)
@@ -811,7 +811,7 @@ in pipe2File:
                 minJobPropertyValue=baseAlnJobWalltime*2/3, 
                 maxJobPropertyValue=baseAlnJobWalltime*5).value
 
-            fileBasenamePrefix = utils.getRealPrefixSuffixOfFilenameWithVariableSuffix(
+            fileBasenamePrefix = utils.getRealPrefixSuffix(
                 os.path.basename(relativePath))[0]
             alignmentSamF = File('%s.sam.gz'%(os.path.join(outputDir, fileBasenamePrefix)))
 
@@ -864,7 +864,7 @@ in pipe2File:
         relativePath = fastqF.name
         read_count = fileObject0.db_entry.read_count
 
-        fileBasenamePrefix = utils.getRealPrefixSuffixOfFilenameWithVariableSuffix(
+        fileBasenamePrefix = utils.getRealPrefixSuffix(
             os.path.basename(relativePath))[0]
         alignmentSamF = File('%s.sam'%(os.path.join(outputDir, fileBasenamePrefix)))
 
@@ -1721,7 +1721,7 @@ in pipe2File:
                             parentJobLs=[refIndexJob, mkdirJob],
                             transferOutput=False)
                         no_of_alignment_jobs += 1
-                        fileBasenamePrefix = utils.getRealPrefixSuffixOfFilenameWithVariableSuffix(
+                        fileBasenamePrefix = utils.getRealPrefixSuffix(
                             os.path.basename(alignmentJob.output.name))[0]
                         if not skipIndividualAlignment:
                             #add a AddReadGroup job
@@ -1784,7 +1784,7 @@ in pipe2File:
                             maxJobPropertyValue=maxMergeAlignmentMaxMemory).value
                         markDuplicateWalltime= mergeAlignmentWalltime
                         markDuplicateMaxMemory = mergeAlignmentMaxMemory
-                        fileBasenamePrefix = utils.getRealPrefixSuffixOfFilenameWithVariableSuffix(
+                        fileBasenamePrefix = utils.getRealPrefixSuffix(
                             os.path.basename(oneLibraryAlignmentEntry.constructRelativePath()))[0]
                         mergedBamFile = File(os.path.join(oneLibAlignOutputDir,
                             '%s_%s_merged.bam'%(fileBasenamePrefix, library)))
@@ -1880,7 +1880,7 @@ in pipe2File:
                     markDuplicateMaxMemory = mergeAlignmentMaxMemory
 
                     #merge alignment output only when there is something to merge!
-                    fileBasenamePrefix = utils.getRealPrefixSuffixOfFilenameWithVariableSuffix(\
+                    fileBasenamePrefix = utils.getRealPrefixSuffix(\
                         os.path.basename(individual_alignment.constructRelativePath()))[0]
                     mergedBamFile = File(os.path.join(alignmentOutputDir, \
                         '%s_merged.bam'%(fileBasenamePrefix)))

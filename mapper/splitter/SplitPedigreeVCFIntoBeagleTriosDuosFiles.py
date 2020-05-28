@@ -139,7 +139,7 @@ class SplitPedigreeVCFIntoBeagleTriosDuosFiles(AbstractVCFMapper):
         for familySize, sampleIDList in familySize2SampleIDList.items():
             if familySize not in familySize2BeagleFileHandler:
                 tmpOutputFnamePrefix = '%s_familySize%s'%(outputFnamePrefix, familySize)
-                writer = MatrixFile(path='%s.bgl'%(tmpOutputFnamePrefix), openMode='w', delimiter=' ')
+                writer = MatrixFile(path='%s.bgl'%(tmpOutputFnamePrefix), mode='w', delimiter=' ')
                 familySize2BeagleFileHandler[familySize] = writer
                 if familySize==1:
                     headerRow = ['marker', 'alleleA', 'alleleB']
@@ -153,7 +153,7 @@ class SplitPedigreeVCFIntoBeagleTriosDuosFiles(AbstractVCFMapper):
                         headerRow.extend([sampleID]*2)
                 writer.writeHeader(headerRow)
                 counter += 1
-        markersFile = MatrixFile(path='%s.markers'%(outputFnamePrefix), openMode='w', delimiter=' ')
+        markersFile = MatrixFile(path='%s.markers'%(outputFnamePrefix), mode='w', delimiter=' ')
         
         counter += 1
         sys.stderr.write("%s files outputted.\n"%(counter))

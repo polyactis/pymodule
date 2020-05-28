@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 from palos import utils
 from palos.io import MatrixFile
-reader = MatrixFile(path=inputFname, openMode='r', delimiter='\t')
+reader = MatrixFile(path=inputFname, mode='r', delimiter='\t')
 span=0
 
 for row in reader:

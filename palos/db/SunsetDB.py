@@ -1912,7 +1912,8 @@ class SunsetDB(Database):
     def isThisAlignmentComplete(self, individual_alignment=None, \
         data_dir=None, returnFalseIfInexitentFile=False):
         """
-        whether os.path.isfile(alignmentAbsPath) is true or not is not mandatory anymore.
+        whether os.path.isfile(alignmentAbsPath) is true or not
+            is not mandatory anymore.
             Will give a warning though. 
         2013.04.10 bugfix. individual_alignment.path could be None.
         2013.03.28
@@ -1928,14 +1929,14 @@ class SunsetDB(Database):
                 individual_alignment.file_size>0:
             if not os.path.isfile(alignmentAbsPath):
                 if returnFalseIfInexitentFile:
-                    sys.stderr.write("Warning: Skip alignment file for id=%s, %s "
-                        "does not exist but file_size is recorded in DB.\n"%(
-                            individual_alignment.id, alignmentAbsPath))
+                    print("Warning: Skip alignment file for id=%s, %s "
+                        "does not exist but file_size is recorded in DB."%(
+                        individual_alignment.id, alignmentAbsPath), flush=True)
                     return False
                 else:
-                    sys.stderr.write("Warning: Alignment file for id=%s, %s "
+                    print("Warning: Alignment file for id=%s, %s "
                         "does not exist but file_size is recorded in DB.\n"%(
-                            individual_alignment.id, alignmentAbsPath))
+                        individual_alignment.id, alignmentAbsPath), flush=True)
             return True
         else:
             return False
@@ -2196,27 +2197,27 @@ class SunsetDB(Database):
         TableClass = IndividualAlignment
         query = self.queryTable(TableClass)
         if ind_aln_id_ls:
-            sys.stderr.write("Adding filter via %s alignment IDs ... \n"%(
-                len(ind_aln_id_ls)) )
+            print("Adding filter via %s alignment IDs ... \n"%(
+                len(ind_aln_id_ls)), flush=True)
             query = query.filter(TableClass.id.in_(ind_aln_id_ls))
         if ind_seq_id_ls:
-            sys.stderr.write("Adding filter via %s sequence IDs  ... \n"%(
-                len(ind_seq_id_ls)))
+            print("Adding filter via %s sequence IDs  ... \n"%(
+                len(ind_seq_id_ls)), flush=True)
             query = query.filter(TableClass.ind_seq_id.in_(ind_seq_id_ls))
         if ref_ind_seq_id:
-            sys.stderr.write("Adding filter reference sequence ID %s ... \n"%(
-                ref_ind_seq_id))
+            print("Adding filter reference sequence ID %s ... \n"%(
+                ref_ind_seq_id), flush=True)
             query = query.filter_by(ref_ind_seq_id=ref_ind_seq_id)
         if alignment_method_id:
-            sys.stderr.write("Adding filter alignment_method_id=%s ... \n"%(
-                alignment_method_id))
+            print("Adding filter alignment_method_id=%s ... \n"%(
+                alignment_method_id), flush=True)
             query = query.filter_by(alignment_method_id=alignment_method_id)
         
         if country_id_ls:
             #2012.9.23 not sure whether it'll work
-            sys.stderr.write("Adding filter %s countries: %s ... \n"%(
+            print("Adding filter %s countries: %s ... \n"%(
                 getattr(country_id_ls, '__len__', returnZeroFunc)(), 
-                repr(country_id_ls)))
+                repr(country_id_ls)), flush=True)
             individual_id_ls_query = self.queryTable(Individual).filter(
                 Individual.site.has(Site.country_id.in_(country_id_ls)))
             individual_id_ls = [row.id for row in individual_id_ls_query]
@@ -2239,23 +2240,25 @@ class SunsetDB(Database):
         
         if individual_sequence_file_raw_id_type==1:
             #only all-library-fused alignments
-            sys.stderr.write("Adding filter individual_sequence_file_raw_id_type=%s ... \n"%(
-                individual_sequence_file_raw_id_type))
+            print("Adding filter individual_sequence_file_raw_id_type=%s ... "%(
+                individual_sequence_file_raw_id_type), flush=True)
             query = query.filter(TableClass.individual_sequence_file_raw_id==None)
         elif individual_sequence_file_raw_id_type==2:
             #only library-specific alignments
-            sys.stderr.write("Adding filter individual_sequence_file_raw_id_type=%s ... \n"%(
-                individual_sequence_file_raw_id_type))
+            print("Adding filter individual_sequence_file_raw_id_type=%s ... "%(
+                individual_sequence_file_raw_id_type), flush=True)
             query = query.filter(TableClass.individual_sequence_file_raw_id!=None)
         else:
             #2012.9.22 do nothing = include both 
             pass
         
         if local_realigned is not None:
-            sys.stderr.write("Adding filter local_realigned=%s ... \n"%(local_realigned))
+            print("Adding filter local_realigned=%s ... "%(local_realigned),
+                flush=True)
             query = query.filter_by(local_realigned=local_realigned)
         if reduce_reads is not None:
-            sys.stderr.write("Adding filter reduce_reads=%s ... \n"%(reduce_reads))
+            print("Adding filter reduce_reads=%s ... "%(reduce_reads),
+                flush=True)
             query = query.filter_by(reduce_reads=reduce_reads)
         #order by TableClass.id is important because this is the order that
         #  gatk&samtools take input bams.
@@ -2268,8 +2271,8 @@ class SunsetDB(Database):
                 flush=True)
             query = query.filter_by(outdated_index=outdated_index)
         if mask_genotype_method_id is not None and mask_genotype_method_id!='':
-            sys.stderr.write("Adding filter mask_genotype_method_id=%s ... \n"%(
-                mask_genotype_method_id))
+            print("Adding filter mask_genotype_method_id=%s ... "%(
+                mask_genotype_method_id), flush=True)
             if mask_genotype_method_id==0 or mask_genotype_method_id=='0':
                 #only null
                 query = query.filter_by(mask_genotype_method_id=None)
@@ -2358,14 +2361,15 @@ class SunsetDB(Database):
         no_of_samples = 0
         if sampleIDList:
             no_of_samples = len(sampleIDList)
-        sys.stderr.write("Getting alignments from %s samples ...\n"%(no_of_samples))
+        print("Getting alignments from %s samples ..."%(no_of_samples),
+            flush=True)
         alignmentLs = []
         if sampleIDList:
             for read_group in sampleIDList:
                 individualAlignment = self.parseAlignmentReadGroup(read_group).individualAlignment
                 individualAlignment.sampleID = read_group
                 alignmentLs.append(individualAlignment)
-        sys.stderr.write("%s alignments.\n"%(len(alignmentLs)))
+        print("%s alignments."%(len(alignmentLs)), flush=True)
         return alignmentLs
     
     def getAlignmentsFromAlignmentIDList(self, alignmentIDList=None):
@@ -2375,15 +2379,15 @@ class SunsetDB(Database):
         no_of_samples = 0
         if alignmentIDList:
             no_of_samples = len(alignmentIDList)
-        sys.stderr.write("Getting alignments from %s samples ...\n"%(\
-            no_of_samples))
+        print("Getting alignments from %s samples ..."%(\
+            no_of_samples), flush=True)
         alignmentLs = []
         if alignmentIDList:
             for alignmentID in  alignmentIDList:
                 individualAlignment = self.checkIfEntryInTable(
                     TableClass=IndividualAlignment, entry_id=int(alignmentID))
                 alignmentLs.append(individualAlignment)
-        sys.stderr.write("%s alignments.\n"%(len(alignmentLs)))
+        print("%s alignments."%(len(alignmentLs)), flush=True)
         return alignmentLs
     
     def getAlignmentsFromVCFFile(self, inputFname=None):
@@ -2586,8 +2590,8 @@ class SunsetDB(Database):
         """
         2012.8.7
         """
-        logging.warn("Getting cumulative median depth of %s alignments ..."%(\
-            len(alignmentLs)))
+        print("Getting cumulative median depth of %s alignments ..."%\
+            (len(alignmentLs)), flush=True)
         cumulativeDepth = 0
         for alignment in alignmentLs:
             if alignment and alignment.median_depth is not None:
@@ -2595,7 +2599,7 @@ class SunsetDB(Database):
             else:
                 medianDepth = defaultSampleAlignmentDepth
             cumulativeDepth += medianDepth
-        sys.stderr.write("=%s.\n"%(cumulativeDepth))
+        print("=%s."%(cumulativeDepth), flush=True)
         return cumulativeDepth
     
     def getAlleleType(self, allele_type_name):
@@ -3356,7 +3360,7 @@ class SunsetDB(Database):
             individualAlignmentLs=individualAlignmentLs)
         """
         if not short_name:
-            sys.stderr.write("Error: short_name (%s) is empty.\n"%(short_name))
+            logging.error(f"short_name ({short_name}) is empty.")
             return None
         
         if ref_ind_seq_id is None and individualAlignmentLs:
@@ -3506,7 +3510,8 @@ class SunsetDB(Database):
             individualAlignmentLs=individualAlignmentLs)
         """
         if not short_name:
-            sys.stderr.write("Error: short_name (%s) is empty.\n"%(short_name))
+            print("Error: short_name (%s) is empty."%(short_name),
+                flush=True)
             return None
         
         if ref_ind_seq_id is None and individualAlignmentLs:
@@ -3939,21 +3944,15 @@ class SunsetDB(Database):
     def getIndividualSequenceID2FilePairLs(self, individualSequenceIDList=None,
         data_dir=None, needPair=True, checkOldPath=False):
         """
-        2013.3.14 replace SR, PE with individual_sequence.sequence_type
-        2012.2.10
-        add argument checkOldPath.
+        argument checkOldPath.
             True: find files in IndividualSequence.path[:-6],
                 (=path without the trailing '_split').
                 This is the old format.
             False: find files in IndividualSequence.path 
-        2011-8-30
-            filename in individualSequenceID2FilePairLs is path relative to data_dir
-        2011-8-28
-            add argument needPair
-            copied from MpiBaseCount.py
-        2011-8-5
+        filename in individualSequenceID2FilePairLs is path relative to data_dir
         """
-        sys.stderr.write("Getting individualSequenceID2FilePairLs ...")
+        print(f"Getting individualSequenceID2FilePairLs ...",
+            flush=True)
         individualSequenceID2FilePairLs = {}
         if not data_dir:
             data_dir = self.data_dir
@@ -4008,25 +4007,20 @@ class SunsetDB(Database):
                                     #"SR" means it's single-end
                                     individualSequenceID2FilePairLs[individual_sequence.id].\
                                         append([fileRecord])
-        sys.stderr.write("%s individual sequences. Done.\n"%(
-            len(individualSequenceID2FilePairLs)))
+        print(f"{len(individualSequenceID2FilePairLs)} individual sequences.",
+            flush=True)
         return individualSequenceID2FilePairLs
     
     def getISQ_ID2LibrarySplitOrder2FileLs(self, individualSequenceIDList=None,
         data_dir=None, filtered=None, \
         ignoreEmptyReadFile=True, is_contaminated=0, outdated_index=0):
         """
-        2013.04.05 added argument is_contaminated, outdated_index
-        2012.3.19
-            add argument, ignoreEmptyReadFile
-        2012.2.24
-            filtered=None means "no filtering based on this field.".
+        filtered=None means "no filtering based on this field.".
             
-        2012.2.10
-            If for one (isq_id, librarySplitOrder), there is only one mate (single-end).
-                The isq_id2LibrarySplitOrder2FileLs only stores one file object
-                 (FileLs is of length 1).
-            Length of FileLs is commesurate with the number of ends.
+        If for one (isq_id, librarySplitOrder), there is only one mate (single-end).
+            The isq_id2LibrarySplitOrder2FileLs only stores one file object
+                (FileLs is of length 1).
+        Length of FileLs is commesurate with the number of ends.
         """
         logging.warn(f"Getting isq_id2LibrarySplitOrder2FileLs for "
             f"{len(individualSequenceIDList)} isq entries ...")
@@ -4038,7 +4032,7 @@ class SunsetDB(Database):
         for individualSequenceID in individualSequenceIDList:
             individual_sequence = self.queryTable(IndividualSequence).\
                 get(individualSequenceID)
-            if not individual_sequence:	#not present in db, ignore
+            if not individual_sequence:
                 continue
             if is_contaminated is not None:
                 if individual_sequence.is_contaminated!=is_contaminated:
@@ -4048,18 +4042,20 @@ class SunsetDB(Database):
                     continue
             if outdated_index is not None:
                 if individual_sequence.outdated_index!=outdated_index:
-                    logging.warn(" individual_sequence %s 's outdated_index=%s (!=%s). ignore.\n"%\
-                        (individual_sequence.id, individual_sequence.outdated_index, outdated_index))
+                    logging.warn(f"individual_sequence {individual_sequence.id}'s"
+                        f" outdated_index={individual_sequence.outdated_index} "
+                        f"(!={outdated_index}). ignore.")
                     continue
             for individual_sequence_file in individual_sequence.individual_sequence_file_ls:
                 path = os.path.join(data_dir, individual_sequence_file.path)
                 if filtered is not None and individual_sequence_file.filtered!=filtered:
-                    #skip entries that don't matched the filtered argument
+                    #skip entries that do not match the filtered argument.
                     continue
-                if ignoreEmptyReadFile:	#2012.3.19	ignore empty read files.
+                if ignoreEmptyReadFile:
+                    # ignore empty read files.
                     if individual_sequence_file.read_count is None:
                         #calculate it on the fly
-                        baseCountData = ngs.getReadBaseCount(path, \
+                        baseCountData = ngs.getReadBaseCount(path,
                             onlyForEmptyCheck=True)
                         read_count = baseCountData.read_count
                     else:
@@ -4086,7 +4082,7 @@ class SunsetDB(Database):
                     path=path)
                 LibrarySplitOrder2FileLs[key][mate_id-1] = isq_file_obj
         
-        logging.warn("%s individual sequence files from %s isq entries.\n"%(
+        logging.warn("%s individual sequence files from %s isq entries."%(
             counter, len(isq_id2LibrarySplitOrder2FileLs)))
         return isq_id2LibrarySplitOrder2FileLs
     
@@ -4106,11 +4102,12 @@ class SunsetDB(Database):
             instead of individual_sequence.individual.is_contaminated
         """
         if report:
-            sys.stderr.write("Filter %s individual_sequence entries to select %s=<coverage <=%s "
+            print("Filter %s individual_sequence entries to select %s=<coverage <=%s "
                 "& site-id=%s & sequence_filtered=%s & from %s sites, "
-                "%s countries, %s taxonomies, %s individuals, %s sequence types, %s sequencers, "
-                "%s sequence batches, %s parent isqs, "
-                "%s versions; excludeContaminant=%s, outdated_index=%s, %s tissues to be excluded,..."%(
+                "%s countries, %s taxonomies, %s individuals, %s sequence types, "
+                "%s sequencers, %s sequence batches, %s parent isqs, "
+                "%s versions; excludeContaminant=%s, outdated_index=%s, "
+                "%s tissues to be excluded,..."%(
                 len(individual_sequence_list), min_coverage, max_coverage, individual_site_id, 
                 sequence_filtered, \
                 getattr(individual_site_id_set, '__len__', returnZeroFunc)(),\
@@ -4124,7 +4121,7 @@ class SunsetDB(Database):
                 getattr(version_set, '__len__', returnZeroFunc)(),\
                 excludeContaminant, outdated_index,\
                 getattr(excludeTissueIDSet, '__len__', returnZeroFunc)(),\
-                ))
+                ), flush=True)
         listToReturn = []
         cumulative_coverage = 0
         for individual_sequence in individual_sequence_list:
@@ -4134,44 +4131,51 @@ class SunsetDB(Database):
                 continue
             if max_coverage is not None and individual_sequence.coverage>max_coverage:
                 continue
-            if individual_site_id is not None and individual_sequence.individual.site_id!=individual_site_id:
+            if individual_site_id is not None and \
+                    individual_sequence.individual.site_id!=individual_site_id:
                 continue
-            if sequence_filtered is not None and individual_sequence.filtered!=sequence_filtered:
+            if sequence_filtered is not None and \
+                    individual_sequence.filtered!=sequence_filtered:
                 continue
-            if individual_site_id_set and individual_sequence.individual.site_id not in individual_site_id_set:
-                #2012.4.13
+            if individual_site_id_set and individual_sequence.individual.site_id \
+                    not in individual_site_id_set:
                 continue
-            if individual_id_set and individual_sequence.individual_id not in individual_id_set:
+            if individual_id_set and individual_sequence.individual_id \
+                    not in individual_id_set:
                 continue
-            if sequence_type_id_set and individual_sequence.sequence_type_id not in sequence_type_id_set:
+            if sequence_type_id_set and individual_sequence.sequence_type_id \
+                    not in sequence_type_id_set:
                 continue
-            if sequencer_id_set and individual_sequence.sequencer_id not in sequencer_id_set:
+            if sequencer_id_set and individual_sequence.sequencer_id \
+                    not in sequencer_id_set:
                 continue
-            if sequence_batch_id_set and individual_sequence.sequence_batch_id not in sequence_batch_id_set:
+            if sequence_batch_id_set and individual_sequence.sequence_batch_id \
+                    not in sequence_batch_id_set:
                 continue
             if parent_individual_sequence_id_set and \
-                individual_sequence.parent_individual_sequence_id not in parent_individual_sequence_id_set:
+                individual_sequence.parent_individual_sequence_id not in \
+                    parent_individual_sequence_id_set:
                 continue
             if version_set and individual_sequence.version not in version_set:
                 continue
             if country_id_set:
                 if individual_sequence.individual.site is None:
-                    sys.stderr.write("Warning: isq (id=%s, path=%s, %s) has no site.\n"%(
+                    logging.warn("isq (id=%s, path=%s, %s) has no site."%(
                         individual_sequence.id, individual_sequence.path,\
                         individual_sequence.individual.code))
                     continue
                 elif (individual_sequence.individual.site is None or \
-                                    individual_sequence.individual.site.country_id not in country_id_set):
+                        individual_sequence.individual.site.country_id not in country_id_set):
                     continue
             if tax_id_set:
                 if individual_sequence.individual.tax_id is None:
-                    sys.stderr.write("Warning: alignment (id=%s, path=%s, %s) has no tax_id.\n"%
+                    logging.warn("alignment (id=%s, path=%s, %s) has no tax_id.\n"%
                         (individual_sequence.id, individual_sequence.path,\
                         individual_sequence.individual.code))
                     continue
                 elif individual_sequence.individual.tax_id not in tax_id_set:
                     continue
-            if excludeContaminant and individual_sequence.is_contaminated:	#2012.9.27
+            if excludeContaminant and individual_sequence.is_contaminated:
                 continue
             if outdated_index is not None and individual_sequence.outdated_index!=outdated_index:
                 continue
@@ -4181,16 +4185,15 @@ class SunsetDB(Database):
             if individual_sequence.coverage is not None:
                 cumulative_coverage += individual_sequence.coverage
         if report:
-            sys.stderr.write(" kept %s individual_sequence entries, cumulative_coverage=%s.\n"%\
-                            (len(listToReturn), cumulative_coverage))
+            print(" kept %s individual_sequence entries, cumulative_coverage=%s."%\
+                (len(listToReturn), cumulative_coverage), flush=True)
         return listToReturn
     
     def getISQDBEntryLsForAlignment(self, individualSequenceIDList=None,
         data_dir=None, 
         filtered=None, ignoreEmptyReadFile=True, outdated_index=0):
         """
-        2013.3.15 added argument outdated_index
-        2012.9.19 similar to getISQ_ID2LibrarySplitOrder2FileLs()
+        Similar to getISQ_ID2LibrarySplitOrder2FileLs().
         isqLs
             library2Data
                 isqFileRawID2Index
@@ -4370,10 +4373,10 @@ class SunsetDB(Database):
             DG.node[node]["noOfChildren"] = len(DG.successors(node))
         """
         import networkx
-        sys.stderr.write("%s nodes. %s edges. %s connected components.\n"%(
+        print("%s nodes. %s edges. %s connected components."%(
             DG.number_of_nodes(), DG.number_of_edges(), \
-            networkx.number_connected_components(DG.to_undirected())
-            ))
+            networkx.number_connected_components(DG.to_undirected())),
+            flush=True)
         return DG
     
     def accumulatePredecessorAttributeRecursively(self, DG=None, source=None, \
@@ -4418,19 +4421,18 @@ class SunsetDB(Database):
             self.accumulatePredecessorAttributeRecursively(DG, source=node, 
                 attributeName=attributeName)
     
-    def calculateCumulativeAttributeForEachNodeInPedigree(self, DG=None, \
+    def calculateCumulativeAttributeForEachNodeInPedigree(self, DG=None,
         attributeName='noOfDescendant'):
         """
-        2012.6.19
-            the algorithm starts from the bottom (leaves) of the graph and do a reverse BFS
+        the algorithm starts from the bottom (leaves) of the graph and do a reverse BFS
         """
         leafNodeList = []
         for node in DG:
             if len(DG.successors(node))==0:
                 leafNodeList.append(node)
-        sys.stderr.write("%s leaf nodes.\n"%(len(leafNodeList)))
+        print("%s leaf nodes."%(len(leafNodeList)), flush=True)
         for leafNode in leafNodeList:
-            self.accumulatePredecessorAttributeRecursively(DG, source=leafNode, \
+            self.accumulatePredecessorAttributeRecursively(DG, source=leafNode,
                 attributeName=attributeName)
         
     
@@ -4479,7 +4481,8 @@ class SunsetDB(Database):
             use a reverse pedigree DG
         2012.6.19
             descendantList is treated as descendantSet.
-            similar to getNoOfDescendant() (which is wrong) but return a set of descendant nodes
+            similar to getNoOfDescendant() (which is wrong) but
+                return a set of descendant nodes.
         """
         if not getattr(self, 'pedigreeReverseDG', None):
             self.pedigreeReverseDG = self.constructPedigree(directionType=2)
@@ -4494,11 +4497,13 @@ class SunsetDB(Database):
                 self.pedigreeReverseDG, attributeName=attributeName)
         return self.pedigreeReverseDG.node[individual_id][attributeName]
     
-    def getPedigreeSplitStructure(self, pedigreeGraph=None, removeFamilyFromGraph=True):
+    def getPedigreeSplitStructure(self, pedigreeGraph=None,
+        removeFamilyFromGraph=True):
         """
         This function splits a pedigree into list of trios, duos, singletons.
         argument removeFamilyFromGraph decides whether
-            1. there will be overlap (removeFamilyFromGraph=False) among the trios/duos/singletons
+            1. there will be overlap (removeFamilyFromGraph=False)
+                among the trios/duos/singletons.
             2. or not (removeFamilyFromGraph=True).
             "Overlap" means when nuclear families or half-siblings exist in the pedigree,
                 whether parents should be replicated in order for them 
@@ -4546,9 +4551,11 @@ class SunsetDB(Database):
             2. if a node's incoming degree is same as familySize-1,
                 then a family of given size is found.
         """
-        sys.stderr.write("Finding families of size %s .."%(familySize))
+        print("Finding families of size %s .."%(familySize),
+            flush=True)
         familyLs = []
-        #each element of this list is either [singleton] or [parent, child] or [father, mother, child]
+        #each element of this list is either [singleton] or
+        #    [parent, child] or [father, mother, child]
         allNodes = DG.nodes()
         out_degree_node_ls = []
         for node in allNodes:
@@ -4570,9 +4577,9 @@ class SunsetDB(Database):
                     if removeFamilyFromGraph:
                         DG.remove_nodes_from(family)
                 elif noOfIncomingEdges>familySize-1:
-                    logging.warn("noOfIncomingEdges for node %s is %s (family size =%s).\n"%(
+                    logging.warn("noOfIncomingEdges for node %s is %s (family size =%s)."%(
                         node, noOfIncomingEdges, noOfIncomingEdges+1))
-        sys.stderr.write(" found %s.\n"%(len(familyLs)))
+        print(" found %s."%(len(familyLs)), flush=True)
         return familyLs
     
     @classmethod
@@ -4591,7 +4598,7 @@ class SunsetDB(Database):
         ind_seq_id = int(split_id_ls[1])
         individual_id = int(split_id_ls[2])
         individual_code = split_id_ls[3]
-        return PassingData(individual_alignment_id=individual_alignment_id, \
+        return PassingData(individual_alignment_id=individual_alignment_id,
             individual_sequence_id=ind_seq_id,\
             individual_id=individual_id, individual_code=individual_code)
     
@@ -4622,12 +4629,12 @@ class SunsetDB(Database):
             ref_ind_seq_id = int(split_id_ls[5])	#index 4 is "vs"
             individual_id = None
         except:
-            sys.stderr.write('Except type: %s\n'%repr(sys.exc_info()))
+            logging.error('Except type: %s'%repr(sys.exc_info()))
             import traceback
             traceback.print_exc()
             
             
-        return PassingData(individual_alignment_id=individual_alignment_id, \
+        return PassingData(individual_alignment_id=individual_alignment_id,
             individual_sequence_id=ind_seq_id,\
             individual_id=individual_id, individual_code=individual_code, 
             ref_ind_seq_id=ref_ind_seq_id,\
@@ -4648,7 +4655,7 @@ class SunsetDB(Database):
         try:
             individual_alignment_id = int(split_id_ls[0])
         except:	#only catch the string error, not catching the db error,
-            sys.stderr.write('Except type: %s\n'%repr(sys.exc_info()))
+            logging.error('Except type: %s'%repr(sys.exc_info()))
             import traceback
             traceback.print_exc()
             individualAlignment = None
@@ -4658,13 +4665,14 @@ class SunsetDB(Database):
             sequencer = None
             ref_ind_seq_id = None
             individual_id = None
-            return PassingData(individual_alignment_id=individual_alignment_id, \
+            return PassingData(individual_alignment_id=individual_alignment_id,
                 individual_sequence_id=ind_seq_id,\
-                individual_id=individual_id, individual_code=individual_code, \
+                individual_id=individual_id, individual_code=individual_code,
                 ref_ind_seq_id=ref_ind_seq_id,\
                 sequencer=sequencer, individualAlignment=individualAlignment)
         
-        individualAlignment = self.queryTable(IndividualAlignment).get(individual_alignment_id)
+        individualAlignment = self.queryTable(IndividualAlignment).\
+            get(individual_alignment_id)
         ind_seq_id = individualAlignment.individual_sequence.id
         individual_code = individualAlignment.individual_sequence.individual.code
         sequencer = individualAlignment.individual_sequence.sequencer
@@ -4672,7 +4680,7 @@ class SunsetDB(Database):
         individual_id = individualAlignment.individual_sequence.individual.id
         """
         except:
-            sys.stderr.write('Except type: %s\n'%repr(sys.exc_info()))
+            logging.error('Except type: %s'%repr(sys.exc_info()))
             import traceback
             traceback.print_exc()
             individualAlignment = None
@@ -4683,24 +4691,28 @@ class SunsetDB(Database):
             ref_ind_seq_id = None
             individual_id = None
         """
-        return PassingData(individual_alignment_id=individual_alignment_id, \
-            individual_sequence_id=ind_seq_id,\
-            individual_id=individual_id, individual_code=individual_code, 
-            ref_ind_seq_id=ref_ind_seq_id,\
-            sequencer=sequencer.short_name, individualAlignment=individualAlignment)
+        return PassingData(individual_alignment_id=individual_alignment_id,
+            individual_sequence_id=ind_seq_id,
+            individual_id=individual_id,
+            individual_code=individual_code,
+            ref_ind_seq_id=ref_ind_seq_id,
+            sequencer=sequencer.short_name,
+            individualAlignment=individualAlignment)
     
-    def parseDBEntryGivenDBAffiliatedFilename(self, filename=None, TableClass=None):
+    def parseDBEntryGivenDBAffiliatedFilename(self, filename=None,
+        TableClass=None):
         """
-        2012.8.15
-            almost all db-affliated filenames are beginned with the db_entry's primary ID, separated by _.
-            this is a generic function, to be called by others with different TableClass
+        almost all db-affliated filenames are beginned with
+            the db_entry's primary ID, separated by _.
+        this is a generic function, to be called by others
+            with different TableClass.
         """
         baseFilename = os.path.basename(filename)
         try:
             dbID = int(baseFilename.split('_')[0])
             db_entry = self.queryTable(TableClass).get(dbID)
         except:
-            sys.stderr.write("Warning: could not parse dbID from %s.\n"%(baseFilename))
+            logging.warn("Could not parse dbID from %s."%(baseFilename))
             db_entry = None
         return db_entry
     
@@ -4731,12 +4743,14 @@ class SunsetDB(Database):
                 data_dir='/u/home/eeskin2/polyacti/NetworkData/vervet/db/', \
                 subFolder='individual_sequence',)
         """
-        sys.stderr.write("Finding individual_sequence folders that are not in db (orphaned)... ")
+        print("Finding individual_sequence folders that are not in db (orphaned)... ",
+            flush=True)
         dbPath2dbEntry = {}
         for row in self.queryTable(IndividualSequence):
             if row.path and row.path not in dbPath2dbEntry:
                 dbPath2dbEntry[row.path] = row
-        sys.stderr.write("%s items in db.\n"%(len(dbPath2dbEntry)))
+        print("%s items in db."%(len(dbPath2dbEntry)),
+            flush=True)
         
         if not data_dir:
             data_dir = self.data_dir
@@ -4749,22 +4763,26 @@ class SunsetDB(Database):
                 isqPath = os.path.join(subFolder, item)
                 if isqPath not in dbPath2dbEntry:
                     orphanPathList.append(itemAbsPath)
-        sys.stderr.write(" %s found.\n"%(len(orphanPathList)))
+        print(" %s found."%(len(orphanPathList)), flush=True)
         return orphanPathList
     
-    def findAlignmentFileNotInDB(self, data_dir=None, subFolder='individual_alignment',):
+    def findAlignmentFileNotInDB(self, data_dir=None,
+        subFolder='individual_alignment'):
         """
         Scan the individual_alignment folder to see which file is not in individual_alignment.path
         i.e.
-        orphanPathList = db_main.findAlignmentFileNotInDB(data_dir=None, subFolder='individual_alignment',)
+        orphanPathList = db_main.findAlignmentFileNotInDB(data_dir=None,
+            subFolder='individual_alignment',)
         """
-        sys.stderr.write("Finding individual_alignment folders that are not in db (orphaned)... ")
+        print("Finding individual_alignment folders that are not in db (orphaned)... ",
+            flush=True)
         dbPath2dbEntry = {}
         for row in self.queryTable(IndividualAlignment):
             if row.path and row.path not in dbPath2dbEntry:
                 dbPath2dbEntry[row.path] = row
         
-        sys.stderr.write("%s items in db.\n"%(len(dbPath2dbEntry)))
+        print("%s items in db."%(len(dbPath2dbEntry)),
+            flush=True)
         
         if not data_dir:
             data_dir = self.data_dir
@@ -4775,15 +4793,16 @@ class SunsetDB(Database):
             itemAbsPath = os.path.join(topFolder, item)
             
             if os.path.isfile(itemAbsPath) and \
-                utils.getRealPrefixSuffixOfFilenameWithVariableSuffix(itemAbsPath)[1]=='.bam':
+                utils.getRealPrefixSuffix(itemAbsPath)[1]=='.bam':
                 #make sure the suffix is bam. loads of .bai files are not recorded in db.
                 isqPath = os.path.join(subFolder, item)
                 if isqPath not in dbPath2dbEntry:
                     orphanPathList.append(itemAbsPath)
-        sys.stderr.write(" %s found.\n"%(len(orphanPathList)))
+        print(" %s found."%(len(orphanPathList)), flush=True)
         return orphanPathList
         
-    def updateGenotypeMethodNoOfLoci(self, db_entry=None, format=None, no_of_chromosomes=None):
+    def updateGenotypeMethodNoOfLoci(self, db_entry=None, format=None,
+        no_of_chromosomes=None):
         """
         add argument format and aggregate the number of loci according to format
         """
@@ -4806,7 +4825,7 @@ class SunsetDB(Database):
         self.session.add(db_entry)
         self.session.flush()
         
-    def updateOneEntryByReducingItsAffiliatedTables(self, db_entry=None, \
+    def updateOneEntryByReducingItsAffiliatedTables(self, db_entry=None,
         affiliate_table_query=None, \
         affiliate_table_field_name='no_of_loci', \
         db_entry_field_name='no_of_loci', ):
@@ -4815,25 +4834,27 @@ class SunsetDB(Database):
         """
         reduce_value = 0
         for affiliate_table_entry in affiliate_table_query:
-            reduce_value += getattr(affiliate_table_entry, affiliate_table_field_name, 0)
+            reduce_value += getattr(affiliate_table_entry, \
+                affiliate_table_field_name, 0)
         setattr(db_entry, db_entry_field_name, reduce_value)
         self.session.add(db_entry)
         self.session.flush()
 
-    def updateAlignmentDepthIntervalMethodNoOfIntervals(self, db_entry=None, format=None, \
+    def updateAlignmentDepthIntervalMethodNoOfIntervals(self, db_entry=None,
+        format=None,
         no_of_chromosomes=None):
         """
-        2013.08.23
         """
         query = self.queryTable(AlignmentDepthIntervalFile).\
             filter_by(alignment_depth_interval_method_id=db_entry.id)
         if format:
             query = query.filter_by(format=format)
-        if no_of_chromosomes:	#2012.8.30
+        if no_of_chromosomes:
             query = query.filter_by(no_of_chromosomes = no_of_chromosomes)
-        self.updateOneEntryByReducingItsAffiliatedTables(db_entry=db_entry, \
+        self.updateOneEntryByReducingItsAffiliatedTables(db_entry=db_entry,
             affiliate_table_query=query,\
-            affiliate_table_field_name='no_of_intervals', db_entry_field_name='no_of_intervals')
+            affiliate_table_field_name='no_of_intervals',
+            db_entry_field_name='no_of_intervals')
         
     
 if __name__ == '__main__':
@@ -4842,12 +4863,12 @@ if __name__ == '__main__':
         error_doc=main_class.__doc__)
     schema = po.long_option2value["schema"]
     if schema != _schemaname_:
-        logging.error("Schema given by commandline argument, %s, is different from the static one, %s."%
-            (schema, _schemaname_))
+        logging.error(f"Schema given by commandline argument, {schema}, "
+            f"is different from the static one, {_schemaname_}.")
         sys.exit(2)
     instance = main_class(**po.long_option2value)
     instance.setup(create_tables=True, Base=Base)
-    sys.stderr.write("data_dir is %s.\n"%(instance.data_dir))
+    print("data_dir is %s."%(instance.data_dir), flush=True)
 
     import pdb
     pdb.set_trace()
