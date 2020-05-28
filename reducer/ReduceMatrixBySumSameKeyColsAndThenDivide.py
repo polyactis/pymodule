@@ -23,21 +23,22 @@ class ReduceMatrixBySumSameKeyColsAndThenDivide(ReduceMatrixByChosenColumn):
         ("operatorType", 1, int): [1, 'p', 1, 
             'For the last column, 1: firstColumnValue/2ndColumnValue;\n'
             '2: 1stColumnValue - 2ndColumnValue; 3: divide each column in '
-            '--valueColumnLs .. with a fixed value (--fixedValueDenominator ..).'],\
+            '--valueColumnLs .. with a fixed value (--fixedValueDenominator ..).'],
         ("fixedValueDenominator", 0, float): [1, '', 1,
-            'The denominator used in operatorType 3.'],\
+            'The denominator used in operatorType 3.'],
         })
     def __init__(self, inputFnameLs, **keywords):
         """
         """
         ReduceMatrixByChosenColumn.__init__(self, inputFnameLs, **keywords)
     
-    def divideTwoColumnsInKey2DataLs(self, key2dataLs, no_of_key_columns=1, header=[]):
+    def divideTwoColumnsInKey2DataLs(self, key2dataLs, no_of_key_columns=1,
+        header=[]):
         """
         1. generate a new column by dividing the values from 1st two cells in dataLs,
         2. modify newHeader to reflect that
         """
-        sys.stderr.write("Averaging key2dataLs (%s entries ) ..."%(len(key2dataLs)))
+        print(f"Averaging key2dataLs ({len(key2dataLs)} entries) ...", flush=True)
         if self.noHeader==0:
             keyColHeader = header[:no_of_key_columns]
             valueColHeader = header[no_of_key_columns:]
@@ -48,7 +49,6 @@ class ReduceMatrixBySumSameKeyColsAndThenDivide(ReduceMatrixByChosenColumn):
                 if len(valueColHeader)>1:
                     if self.operatorType==2:
                         header.append("%s_subtract_%s"%(valueColHeader[0], valueColHeader[1]))
-                    
                     else:
                         header.append('%s_by_%s'%(valueColHeader[0], valueColHeader[1]))
             
@@ -73,8 +73,8 @@ class ReduceMatrixBySumSameKeyColsAndThenDivide(ReduceMatrixByChosenColumn):
                         else:
                             ratio = -1
                     key2dataLs[key].append(ratio)
-        sys.stderr.write("Done.\n")
-        return PassingData(key2dataLs= key2dataLs, header=header)
+        print("Done.", flush=True)
+        return PassingData(key2dataLs=key2dataLs, header=header)
     
     def run(self):
         
