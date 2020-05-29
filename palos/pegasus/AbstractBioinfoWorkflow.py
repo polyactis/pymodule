@@ -244,10 +244,6 @@ class AbstractBioinfoWorkflow(ParentClass):
         self.registerOneExecutable(path=os.path.join(self.pymodulePath,
                 'mapper/extractor/SelectChromosomeSequences.py'),
             name='SelectChromosomeSequences', clusterSizeMultiplier=0.5)
-        #2013.2.11 moved from vervet/src/reduce to pymodule/reducer
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath,
-                'reducer/MergeGenotypeMatrix.py'),
-            name='MergeGenotypeMatrix', clusterSizeMultiplier=0.2)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath,
                 'plot/PlotGenomeWideData.py'),
             name='PlotGenomeWideData', clusterSizeMultiplier=1)
