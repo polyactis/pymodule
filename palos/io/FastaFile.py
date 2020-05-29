@@ -50,16 +50,16 @@ class FastaFile(object):
             
     def __iter__(self):
         """
-        2012.10.8 make itself an iterator
+        make itself an iterator
         """
-        return self 	#or should it be SeqIO.parse(self.inf, "fasta") ?
+        #or should it be SeqIO.parse(self.inf, "fasta") ?
+        return self
     
-    next = __next__
     def __next__(self):
         """
         """
         try:
-            return SeqIO.parse(self.inf, "fasta").next()
+            return next(SeqIO.parse(self.inf, "fasta"))
         except:
             raise StopIteration
     

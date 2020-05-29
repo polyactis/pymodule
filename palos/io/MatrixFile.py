@@ -147,7 +147,7 @@ class MatrixFile(object):
     def __iter__(self):
         return self
     
-    next = __next__
+    
     def __next__(self):
         try:
             row = next(self.csvFile)

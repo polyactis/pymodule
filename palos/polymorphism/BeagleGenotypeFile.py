@@ -161,7 +161,6 @@ class BeagleGenotypeFile(MatrixFile):
             sampleIndexList.append(i)
         return self.snpData.data_matrix[locusIndex, sampleIndexList]
     
-    next = __next__
     def __next__(self):
         try:
             row = next(self.csvFile)

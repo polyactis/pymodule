@@ -40,22 +40,18 @@ ParentClass = BeagleGenotypeFile
 class BeagleLikelihoodFile(ParentClass):
     __doc__ = __doc__
     option_default_dict = copy.deepcopy(ParentClass.option_default_dict)
-    option_default_dict.update({
-                        #('delimiter', 0, ): [' ', '', 1, 'delimiter for Beagle likelihood format is single-space'],\
-                        })
     def __init__(self, path=None, **keywords):
         ParentClass.__init__(self, path=path, **keywords)
     
     def constructColName2IndexFromHeader(self):
         """
-        2013.05.03
-            First three column is for marker, alleleA, alleleB.
-            one sample (diploid) occupies three columns.
+        First three column is for marker, alleleA, alleleB.
+        one sample (diploid) occupies three columns.
             
-        marker alleleA alleleB 1000_709_1996093_GA_vs_524 1000_709_1996093_GA_vs_524 1000_709_1996093_GA_vs_524 1001_710_1995025_GA_vs_524 1001_710_1995025_GA_vs_524 1001_710_1995025_GA_vs_524 1002_711_2001039_GA_vs_524
-        Contig791:1086 C A 1 0 0 0.9997 0.0003 0 0
-        Contig791:1649 G C 1 0 0 1 0 0 0
-        Contig791:4084 A C 1 0 0 1 0 0 0
+marker alleleA alleleB 1000_709_1996093_GA_vs_524 1000_709_1996093_GA_vs_524 1000_709_1996093_GA_vs_524 1001_710_1995025_GA_vs_524 1001_710_1995025_GA_vs_524 1001_710_1995025_GA_vs_524 1002_711_2001039_GA_vs_524
+Contig791:1086 C A 1 0 0 0.9997 0.0003 0 0
+Contig791:1649 G C 1 0 0 1 0 0 0
+Contig791:4084 A C 1 0 0 1 0 0 0
         """
         self.header = next(self).genotypeLikelihoodList
         self.col_name2index = {}
@@ -63,14 +59,14 @@ class BeagleLikelihoodFile(ParentClass):
             sampleID = self.header[i]
             if sampleID not in self.col_name2index:
                 self.col_name2index[sampleID] = []
-            self.col_name2index[sampleID].append(i)	#the index corresponds to genotypeLikelihoodList in next().
-                #so it starts from 0
+            self.col_name2index[sampleID].append(i)
+            #the index corresponds to genotypeLikelihoodList in next().
+            #so it starts from 0
         return self.col_name2index
     
     def getLikelihoodListOfOneGenotypeOneSample(self, oneLocus=None, sampleID=None):
         """
-        2013.05.06
-            oneLocus is output of next()
+        oneLocus is output of next()
         """
         try:
             sampleStartIndex = self.getColIndexGivenColHeader(sampleID)[0]
@@ -83,7 +79,6 @@ class BeagleLikelihoodFile(ParentClass):
         tripleLikelihood = oneLocus.genotypeLikelihoodList[sampleStartIndex:sampleStartIndex+3]
         return tripleLikelihood
     
-    next = __next__
     def __next__(self):
         try:
             row = next(self.csvFile)
@@ -92,7 +87,8 @@ class BeagleLikelihoodFile(ParentClass):
         if not self.isRealCSV:
             row = row.strip().split()
         markerID, alleleA, alleleB = row[0:3]
-        return PassingData(markerID=markerID, alleleA=alleleA, alleleB=alleleB, genotypeLikelihoodList=row[3:])
+        return PassingData(markerID=markerID, alleleA=alleleA, alleleB=alleleB,
+            genotypeLikelihoodList=row[3:])
 
 if __name__ == '__main__':
     main_class = BeagleLikelihoodFile
