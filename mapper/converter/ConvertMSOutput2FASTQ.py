@@ -29,16 +29,21 @@ class ConvertMSOutput2FASTQ(AbstractMapper):
         ('defaultBase', 1, ): ["A", '', 1, "corresponding to allele 0",],\
         ('alternativeBase', 1, ): ["G", '', 1, "corresponding to allele 1",],\
         
-        ('defaultBaseQuality', 1, ): ["z", '', 1, "base quality to be assigned to each base.\n\
-Assuming Sanger format. z is ascii no. 122, corresponding to quality 87 ",],\
-        ('ploidy', 1, int): [2, '', 1, "1: haploid, one sample, one individual; \
-2: diploid, take every two consecutive samples as one individual. Other ploids are not supported yet.", ],\
-        ('inputFileFormat', 1, int): [1, '', 1, "1: input is ms/msHOT output (no good, non-polymorphic sites ignored); 2: in Heng Li output", ],\
-        ('noOfHaplotypesDefault', 1, int): [2, '', 1, "default number of haplotypes in input simulation, used only\
-when the number of segregating sites is 0."],\
+        ('defaultBaseQuality', 1, ): ["z", '', 1, "base quality to be assigned to each base.\n"
+            "Assuming Sanger format. z is ascii no. 122, corresponding to quality 87 ",],\
+        ('ploidy', 1, int): [2, '', 1, "1: haploid, one sample, one individual; "
+            "2: diploid, take every two consecutive samples as one individual. "
+            "Other ploids are not supported yet.", ],\
+        ('inputFileFormat', 1, int): [1, '', 1, 
+            "1: input is ms/msHOT output (no good, non-polymorphic sites ignored); "
+            "2: in Heng Li output", ],
+        ('noOfHaplotypesDefault', 1, int): [2, '', 1, 
+            "default number of haplotypes in input simulation, used only"
+            "when the number of segregating sites is 0."],
         
-        ('chromosomeLengthToSimulate', 1, int): [20000000, '', 1, "default chromosome length in input simulation used only\
-when the number of segregating sites is 0."],\
+        ('chromosomeLengthToSimulate', 1, int): [20000000, '', 1, 
+            "default chromosome length in input simulation used only"
+            "when the number of segregating sites is 0."],
                             })
     def __init__(self,  **keywords):
         """
@@ -68,7 +73,8 @@ when the number of segregating sites is 0."],\
                     nextSampleContent = next(inf).strip()
                     for i in range(len(content)):
                         individualAlleleList.append('%s%s'%(content[i], nextSampleContent[i]))
-                else:	#haploid
+                else:
+                    #haploid
                     for i in range(len(content)):
                         individualAlleleList.append(content[i])
                 outputBaseList = []
@@ -91,30 +97,31 @@ when the number of segregating sites is 0."],\
                 outf.write("%s\n"%(self.defaultBaseQuality*len(outputBaseList)))
                 chromosomeNumber += 1
         
-    def convertMSHOTLiteOutput(self, inf=None, outf=None, noOfHaplotypesDefault=2, chromosomeLengthToSimulate=20000000):
+    def convertMSHOTLiteOutput(self, inf=None, outf=None, noOfHaplotypesDefault=2,
+        chromosomeLengthToSimulate=20000000):
         """
         2013.05.09
         added argument noOfHaplotypesDefault, chromosomeLengthToSimulate
             used when the number of segregating sites is 0.
             
         2013.2.11
-        ./msHOT-lite 2 1 -t 84989.8346003745 -r 34490.1412746802 30000000 -l -en 0.0013 1 0.0670 -en 0.0022 1 0.3866 -en 0.0032 1 0.3446 -en 0.0044 1 0.21
-                79 -en 0.0059 1 0.1513 -en 0.0076 1 0.1144 -en 0.0096 1 0.0910 -en 0.0121 1 0.0757 -en 0.0150 1 0.0662 -en 0.0184 1 0.0609 -en 0.0226 1 0.0583 -en
-                 0.0275 1 0.0572 -en 0.0333 1 0.0571 -en 0.0402 1 0.0577 -en 0.0485 1 0.0589 -en 0.0583 1 0.0603 -en 0.0700 1 0.0615 -en 0.0839 1 0.0624 -en 0.100
-                5 1 0.0632 -en 0.1202 1 0.0641 -en 0.1437 1 0.0651 -en 0.1716 1 0.0663 -en 0.2048 1 0.0678 -en 0.2444 1 0.0696 -en 0.2914 1 0.0719 -en 0.3475 1 0.
-                0752 -en 0.4935 1 0.0794 
-                //
-                @begin 6422
-                30000000
-                1100    01
-                6074    10
-                
-                29966899        10
-                29971027        01
-                29973740        01
-                29982767        01
-                29985696        10
-                @end
+./msHOT-lite 2 1 -t 84989.8346003745 -r 34490.1412746802 30000000 -l -en 0.0013 1 0.0670 -en 0.0022 1 0.3866 -en 0.0032 1 0.3446 -en 0.0044 1 0.21
+        79 -en 0.0059 1 0.1513 -en 0.0076 1 0.1144 -en 0.0096 1 0.0910 -en 0.0121 1 0.0757 -en 0.0150 1 0.0662 -en 0.0184 1 0.0609 -en 0.0226 1 0.0583 -en
+            0.0275 1 0.0572 -en 0.0333 1 0.0571 -en 0.0402 1 0.0577 -en 0.0485 1 0.0589 -en 0.0583 1 0.0603 -en 0.0700 1 0.0615 -en 0.0839 1 0.0624 -en 0.100
+        5 1 0.0632 -en 0.1202 1 0.0641 -en 0.1437 1 0.0651 -en 0.1716 1 0.0663 -en 0.2048 1 0.0678 -en 0.2444 1 0.0696 -en 0.2914 1 0.0719 -en 0.3475 1 0.
+        0752 -en 0.4935 1 0.0794 
+        //
+        @begin 6422
+        30000000
+        1100    01
+        6074    10
+        
+        29966899        10
+        29971027        01
+        29973740        01
+        29982767        01
+        29985696        10
+        @end
         """
         isSampleBegun =False	#True when the sample data is up in the next line
         chromosomeNumber = 1
@@ -126,7 +133,8 @@ when the number of segregating sites is 0."],\
             if content=="//":
                 segsitesLineContent = inf.next().strip()
                 no_of_segsites = int(segsitesLineContent.split()[-1])
-                if no_of_segsites==0:	#2013.05.09 no segregating sites, fill it with reference bases.
+                if no_of_segsites==0:
+                    #no segregating sites, fill it with reference bases.
                     for i in range(0, noOfHaplotypesDefault, self.ploidy):
                         #go through each indivdiual at a time
                         individualByGenotypeMatrix.append([])
@@ -193,8 +201,8 @@ when the number of segregating sites is 0."],\
         
         outf = utils.openGzipFile(self.outputFname, mode='w')
         self.convertFuncDict[self.inputFileFormat](inf=inf, outf=outf, \
-                            noOfHaplotypesDefault=self.noOfHaplotypesDefault,\
-                            chromosomeLengthToSimulate=self.chromosomeLengthToSimulate)
+            noOfHaplotypesDefault=self.noOfHaplotypesDefault,\
+            chromosomeLengthToSimulate=self.chromosomeLengthToSimulate)
         
         inf.close()
         outf.close()
