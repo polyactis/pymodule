@@ -5,7 +5,7 @@ This program sums individual columns from all input files based on keys from the
 Examples:
     #testing merge three identical genotype files
     %s -k 0 -v 4,5 -o /tmp/test.tsv trio_inconsistency_summary_hist_homo_het.tsv
-        
+    
 """
 import sys, os
 __doc__ = __doc__%(sys.argv[0])
@@ -50,7 +50,7 @@ class ReduceMatrixByChosenColumn(ReduceMatrixByMergeColumnsWithSameKey):
             columnIndex = valueColumnLs[i]
             if columnIndex<len(row):
                 if len(key2dataLs[key])<=i:
-                    #2012.1.17 extend it upon request.
+                    #extend it upon request.
                     key2dataLs[key] += [0]*(i+1-len(key2dataLs[key]))
                 value = float(row[columnIndex])
                 key2dataLs[key][i] = key2dataLs[key][i] + value
@@ -96,7 +96,8 @@ class ReduceMatrixByChosenColumn(ReduceMatrixByMergeColumnsWithSameKey):
                 for row in reader:
                     try:
                         self.handleValueColumns(row, key2dataLs=key2dataLs,
-                            keyColumnLs=self.keyColumnLs, valueColumnLs=self.valueColumnLs)
+                            keyColumnLs=self.keyColumnLs,
+                            valueColumnLs=self.valueColumnLs)
                     except:
                         #in case something wrong (i.e. file is empty)
                         logging.error(f'Ignore this row: {row}.')
