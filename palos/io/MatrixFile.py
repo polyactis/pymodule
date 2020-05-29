@@ -162,9 +162,6 @@ class MatrixFile(object):
         del self.csvFile
         self.file_handle.close()
     
-    writeRow = writerow
-    #same as writerow(), for API consistency.
-    
     def writerow(self, row=None):
         """
         mimic csv's writerow()
@@ -175,6 +172,9 @@ class MatrixFile(object):
             else:
                 self.csvFile.write("%s\n"%(self.delimiter.join(row)))
     
+    writeRow = writerow
+    #same as writerow(), for API consistency.
+
     def constructDictionary(self, keyColumnIndexList=None,
         valueColumnIndexList=None, keyUniqueInInputFile=False,
         keyDataType=None, valueDataType=None):
