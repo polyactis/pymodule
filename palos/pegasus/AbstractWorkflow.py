@@ -88,9 +88,12 @@ class AbstractWorkflow(Workflow):
 
     pathToInsertHomePathList = ['javaPath', 'pymodulePath', 'plinkPath', "thisModulePath"]
 
-    def __init__(self, inputSuffixList=None, 
+    def __init__(self,
+        input_path=None,
+        inputSuffixList=None, 
         pegasusFolderName='folder',
         output_path=None,
+
         tmpDir='/tmp/', max_walltime=4320,
 
         home_path=None,
@@ -109,10 +112,12 @@ class AbstractWorkflow(Workflow):
             home_path = os.path.expanduser("~")
         self.pymodulePath = pymodulePath
         self.thisModulePath = thisModulePath
-        Workflow.__init__(self, inputSuffixList=inputSuffixList,
+        Workflow.__init__(self,
+            input_path=input_path,
+            inputSuffixList=inputSuffixList,
             pegasusFolderName=pegasusFolderName,
-            
             output_path=output_path,
+
             tmpDir=tmpDir, max_walltime=max_walltime, 
             
             home_path=home_path,
@@ -1220,6 +1225,8 @@ inputFileFormat   1: csv-like plain text file; 2: YHPyTables.YHFile; 3: HDF5Matr
 if __name__ == '__main__':
     from argparse import ArgumentParser
     ap = ArgumentParser()
+    ap.add_argument("-i", "--input_path", type=str, required=True,
+        help="the path to the input folder or file.")
     ap.add_argument("--inputSuffixList", type=str,
         help='Coma-separated list of input file suffices. Used to exclude input files.'
         'If None, no exclusion. The dot is part of the suffix, .tsv not tsv.'
@@ -1230,6 +1237,21 @@ if __name__ == '__main__':
         'It will be created during the pegasus staging process. '
         'It is useful to separate multiple sub-workflows. '
         'If empty or None, everything is in the pegasus root.')
+    
+    ap.add_argument("-o", "--output_path", type=str, required=True,
+        help="The path to the output file that will contain the Pegasus DAG.")
+    
+    ap.add_argument("--tmpDir", type=str, default='/tmp/',
+        help='Default: %(default)s. A local folder for some jobs (MarkDup) to store temp data.'
+        '/tmp/ can be too small sometimes.')
+    ap.add_argument("--max_walltime", type=int, default=4320,
+        help='Default: %(default)s. Maximum wall time for any job, in minutes. 4320=3 days.'
+        'Used in addGenericJob(). Most clusters have upper limit for runtime.')
+    ap.add_argument("--jvmVirtualByPhysicalMemoryRatio", type=float, default=1.2,
+        help='Default: %(default)s. '
+        'If a job virtual memory (usually 1.2X of JVM resident memory) exceeds request, '
+        "it will be killed on some clusters. "
+        "This will make sure your job requests enough memory.")
     
     ap.add_argument("-l", "--site_handler", required=True,
         help="The name of the computing site where the jobs run and executables are stored. "
@@ -1246,20 +1268,7 @@ if __name__ == '__main__':
         "This number decides how many of pegasus jobs should be clustered into one job. "
         "Good if your workflow contains many quick jobs. "
         "It will reduce Pegasus monitor I/O.")
-    ap.add_argument("-o", "--output_path", type=str, required=True,
-        help="The path to the output file that will contain the Pegasus DAG.")
     
-    ap.add_argument("--tmpDir", type=str, default='/tmp/',
-        help='Default: %(default)s. A local folder for some jobs (MarkDup) to store temp data.'
-        '/tmp/ can be too small sometimes.')
-    ap.add_argument("--max_walltime", type=int, default=4320,
-        help='Default: %(default)s. Maximum wall time for any job, in minutes. 4320=3 days.'
-        'Used in addGenericJob(). Most clusters have upper limit for runtime.')
-    ap.add_argument("--jvmVirtualByPhysicalMemoryRatio", type=float, default=1.2,
-        help='Default: %(default)s. '
-        'If a job virtual memory (usually 1.2X of JVM resident memory) exceeds request, '
-        "it will be killed on some clusters. "
-        "This will make sure your job requests enough memory.")
     ap.add_argument("--debug", action='store_true',
         help='Toggle debug mode.')
     ap.add_argument("--report", action='store_true',
@@ -1269,9 +1278,11 @@ if __name__ == '__main__':
         "access a database that is inaccessible to computing nodes.")
     args = ap.parse_args()
     instance = AbstractWorkflow(
+        input_path=args.input_path,
         inputSuffixList=args.inputSuffixList, 
         pegasusFolderName=args.pegasusFolderName,
         output_path=args.output_path,
+        
         tmpDir=args.tmpDir,
         max_walltime=args.max_walltime,
         jvmVirtualByPhysicalMemoryRatio=args.jvmVirtualByPhysicalMemoryRatio,

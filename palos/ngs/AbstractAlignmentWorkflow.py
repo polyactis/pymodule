@@ -14,7 +14,6 @@ ParentClass = MapReduceGenomeFileWorkflow
 class AbstractAlignmentWorkflow(ParentClass):
     __doc__ = __doc__
     option_default_dict = copy.deepcopy(ParentClass.option_default_dict)
-    #option_default_dict.pop(('inputDir', 0, ))
     commonAlignmentWorkflowOptionDict = {
         ('ind_seq_id_ls', 0, ): ['', 'i', 1, 
             'a comma/dash-separated list of IndividualSequence.id.'],\
@@ -57,6 +56,9 @@ class AbstractAlignmentWorkflow(ParentClass):
     option_default_dict.update(partitionWorkflowOptionDict)
 
     def __init__(self,
+        pegasusFolderName='input',
+        output_path=None,
+
         drivername='postgresql', hostname='localhost',
         dbname='', schema='public', port=None,
         db_user=None,
@@ -128,25 +130,28 @@ class AbstractAlignmentWorkflow(ParentClass):
         defaultGATKArguments=\
         " --unsafe ALL --validation_strictness SILENT --read_filter BadCigar ",
         
-        site_handler='condor',
-        input_site_handler='condor',
-        cluster_size=30,
-        pegasusFolderName='input',
-        output_path=None,
         tmpDir='/tmp/',
         max_walltime=4320,
+        
         home_path=None,
         javaPath=None,
         pymodulePath="src/pymodule",
         thisModulePath=None,
         jvmVirtualByPhysicalMemoryRatio=1.2,
+        
+        site_handler='condor',
+        input_site_handler='condor',
+        cluster_size=30,
+
         needSSHDBTunnel=False,
         commit=False,
         debug=False, report=False):
         """
-        2012.1.17
         """
-        ParentClass.__init__(self, inputSuffixList=None, 
+        ParentClass.__init__(self,
+            pegasusFolderName=pegasusFolderName,
+            output_path=output_path,
+            
             drivername=drivername, hostname=hostname,
             dbname=dbname, schema=schema, port=port,
             db_user=db_user, db_passwd=db_passwd,
@@ -207,11 +212,6 @@ class AbstractAlignmentWorkflow(ParentClass):
             
             defaultGATKArguments=defaultGATKArguments,
 
-            site_handler=site_handler,
-            input_site_handler=input_site_handler,
-            cluster_size=cluster_size,
-            pegasusFolderName=pegasusFolderName,
-            output_path=output_path,
             tmpDir=tmpDir,
             max_walltime=max_walltime, 
             home_path=home_path,
@@ -219,6 +219,11 @@ class AbstractAlignmentWorkflow(ParentClass):
             pymodulePath=pymodulePath,
             thisModulePath=thisModulePath,
             jvmVirtualByPhysicalMemoryRatio=jvmVirtualByPhysicalMemoryRatio,
+            
+            site_handler=site_handler,
+            input_site_handler=input_site_handler,
+            cluster_size=cluster_size,
+
             needSSHDBTunnel=needSSHDBTunnel,
             commit=commit,
             debug=debug, report=report)

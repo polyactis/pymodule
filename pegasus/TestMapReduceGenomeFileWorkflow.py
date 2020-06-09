@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-2013.11.24 a generic workflow that map-reduces inputs of one or multiple genomic files (i.e. multi-chromosome, tabix-indexed )
+A generic workflow that map-reduces inputs of one or multiple genomic files (i.e. multi-chromosome, tabix-indexed )
     parent class is AbstractNGSWorkflow.
 
 Examples:
@@ -15,10 +15,10 @@ Examples:
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0])
 
+import pegaflow
 from pegaflow.DAX3 import Executable, File, PFN
 from palos import ProcessOptions, PassingData, utils
 from palos.io.FastaFile import FastaFile
-import pegaflow
 from palos.pegasus.MapReduceGenomeFileWorkflow import MapReduceGenomeFileWorkflow
 
 ParentClass = MapReduceGenomeFileWorkflow
@@ -26,10 +26,8 @@ ParentClass = MapReduceGenomeFileWorkflow
 class TestMapReduceGenomeFileWorkflow(ParentClass):
     __doc__ = __doc__
     option_default_dict = ParentClass.option_default_dict.copy()
-    option_default_dict.update({
-                        })
     
-    #2013.11.22 default overlap is 5Mb, overlap is 500K
+    # default overlap is 5Mb, overlap is 500K
     option_default_dict[('intervalOverlapSize', 1, int)][0] = 1000000
     option_default_dict[('intervalSize', 1, int)][0] = 5000000
     option_default_dict[('max_walltime', 1, int)][0] = 1300	#under 23 hours
@@ -37,14 +35,12 @@ class TestMapReduceGenomeFileWorkflow(ParentClass):
     
     def __init__(self,  **keywords):
         """
-        2013.11.24
         """
-        
         self.needSplitChrIntervalData = True
         ParentClass.__init__(self, **keywords)
         self.needSplitChrIntervalData = True
     
-        #2013.11.25 output is already gzipped
+        # output is already gzipped
         self.needGzipPreReduceReturnData = True
         self.needGzipReduceReturnData = False
         

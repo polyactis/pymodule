@@ -7,7 +7,7 @@ Description:
     
 Examples:
     #2013.11.24
-    %s --inputDir FindNewRefCoordinates_Method109_vs_3488_BWA/folderReduceLiftOverVCF/
+    %s --input_path FindNewRefCoordinates_Method109_vs_3488_BWA/folderReduceLiftOverVCF/
         -H -C 10 -j hcondor -l hcondor
         -D /u/home/p/polyacti/NetworkData/vervet/db
         -t /u/home/p/polyacti/NetworkData/vervet/db/
@@ -26,7 +26,12 @@ from . AbstractNGSWorkflow import AbstractNGSWorkflow
 ParentClass = AbstractNGSWorkflow
 class MapReduceGenomeFileWorkflow(ParentClass):
     __doc__ = __doc__
-    def __init__(self, inputDir=None, inputSuffixList=None, 
+    def __init__(self,
+        input_path=None,
+        inputSuffixList=None,
+        pegasusFolderName='input',
+        output_path=None,
+
         drivername='postgresql', hostname='localhost',
         dbname='', schema='public', port=None,
         db_user=None,
@@ -87,12 +92,7 @@ class MapReduceGenomeFileWorkflow(ParentClass):
         
         defaultGATKArguments=\
         " --unsafe ALL --validation_strictness SILENT --read_filter BadCigar ",
-        
-        site_handler='condor',
-        input_site_handler='condor',
-        cluster_size=30,
-        pegasusFolderName='input',
-        output_path=None,
+                
         tmpDir='/tmp/',
         max_walltime=4320,
         home_path=None,
@@ -100,6 +100,11 @@ class MapReduceGenomeFileWorkflow(ParentClass):
         pymodulePath="src/pymodule",
         thisModulePath=None,
         jvmVirtualByPhysicalMemoryRatio=1.2,
+        
+        site_handler='condor',
+        input_site_handler='condor',
+        cluster_size=30,
+
         needSSHDBTunnel=False,
         commit=False,
         debug=False, report=False):
@@ -107,8 +112,12 @@ class MapReduceGenomeFileWorkflow(ParentClass):
         Default interval is 5Mb.
         Default interval overlap is 500K.
         """
-        self.inputDir = inputDir
-        ParentClass.__init__(self, inputSuffixList=None, 
+        ParentClass.__init__(self,
+            input_path=input_path,
+            inputSuffixList=None,
+            pegasusFolderName=pegasusFolderName,
+            output_path=output_path,
+
             drivername=drivername, hostname=hostname,
             dbname=dbname, schema=schema, port=port,
             db_user=db_user, db_passwd=db_passwd,
@@ -166,11 +175,6 @@ class MapReduceGenomeFileWorkflow(ParentClass):
             intervalSize=intervalSize,
             defaultGATKArguments=defaultGATKArguments,
 
-            site_handler=site_handler,
-            input_site_handler=input_site_handler,
-            cluster_size=cluster_size,
-            pegasusFolderName=pegasusFolderName,
-            output_path=output_path,
             tmpDir=tmpDir,
             max_walltime=max_walltime, 
             home_path=home_path,
@@ -178,6 +182,11 @@ class MapReduceGenomeFileWorkflow(ParentClass):
             pymodulePath=pymodulePath,
             thisModulePath=thisModulePath,
             jvmVirtualByPhysicalMemoryRatio=jvmVirtualByPhysicalMemoryRatio,
+            
+            site_handler=site_handler,
+            input_site_handler=input_site_handler,
+            cluster_size=cluster_size,
+
             needSSHDBTunnel=needSSHDBTunnel,
             commit=commit,
             debug=debug, report=report)
@@ -619,9 +628,9 @@ class MapReduceGenomeFileWorkflow(ParentClass):
             chr2IntervalDataLs = None
         inputData = None
         firstInputJobData = None
-        if getattr(self, 'inputDir', None):
+        if getattr(self, 'input_path', None):
             inputData = self.registerFilesOfInputDir(
-                inputDir=self.inputDir,
+                inputDir=self.input_path,
                 input_site_handler=self.input_site_handler, \
                 pegasusFolderName=self.pegasusFolderName,\
                 inputSuffixSet=self.inputSuffixSet,\
@@ -657,7 +666,7 @@ class MapReduceGenomeFileWorkflow(ParentClass):
         inputData = pdata.inputData
         
         if len(inputData.jobDataLs)<=0:
-            print(f"No VCF files in this folder, {self.inputDir}.", flush=True)
+            print(f"No VCF files in this folder, {self.input_path}.", flush=True)
             sys.exit(0)
                 
         self.addAllJobs(inputData=inputData,

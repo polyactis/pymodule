@@ -13,7 +13,8 @@ Examples:
         -D /u/home/eeskin/polyacti/NetworkData/vervet/db/ 
     
     # 2012.5.10 subset + convert-2-plink.
-    # run on hoffman2 condor, minMAC=1 (-n 1), minMAF=0.1 (-f 0.1), maxSNPMissingRate=0 (-L 0)   (turn on checkEmptyVCFByReading, --checkEmptyVCFByReading)
+    # run on hoffman2 condor, minMAC=1 (-n 1), minMAF=0.1 (-f 0.1), maxSNPMissingRate=0 (-L 0)
+    #    (turn on checkEmptyVCFByReading, --checkEmptyVCFByReading)
     %s -I FilterVCF_VRC_SK_Nevis_FilteredSeq_top1000Contigs.2012.5.6_trioCaller.2012.5.8T21.42/trioCaller_vcftoolsFilter/
         -o dags/SubsetTo36RNASamplesAndPlink_FilterVCF_VRC_SK_Nevis_FilteredSeq_top1000Contigs.2012.5.6_trioCaller.2012.5.8.xml
         -i ~/script/vervet/data/RNADevelopment_eQTL/36monkeys.phenotypes.txt
@@ -974,7 +975,6 @@ class GenericVCFWorkflow(ParentClass):
         db_main=None, individualUCLAIDFname=None,
         vcfSampleIDFname=None, oneSampleVCFFname=None):
         """
-        2012.5.9
             
         """
         sys.stderr.write("Generating vcfSampleIDFname %s from individualUCLAIDFname %s ..."%(\

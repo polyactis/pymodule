@@ -17,38 +17,44 @@ class AbstractBioinfoWorkflow(ParentClass):
         ("plinkPath", 1, ): ["bin/plink", '', 1, 
             'path to plink, http://pngu.mgh.harvard.edu/~purcell/plink/index.shtml'],
         })
-    def __init__(self, inputSuffixList=None, 
-        site_handler='condor', input_site_handler='condor', cluster_size=30,
+    def __init__(self,
+        input_path=None,
+        inputSuffixList=None, 
         pegasusFolderName='folder', output_path=None,
+        
         tmpDir='/tmp/', max_walltime=4320,
         home_path=None, javaPath=None, 
         pymodulePath="src/pymodule", thisModulePath=None,
         jvmVirtualByPhysicalMemoryRatio=1.2,
+
+        site_handler='condor', input_site_handler='condor', cluster_size=30,
         needSSHDBTunnel=False, commit=False,
         debug=False, report=False):
         """
         20200129
         """
-        ParentClass.__init__(self, 
+        ParentClass.__init__(self,
+            input_path=input_path,
             inputSuffixList=inputSuffixList,
             pegasusFolderName=pegasusFolderName,
             output_path=output_path,
-            site_handler=site_handler,
-            input_site_handler=input_site_handler,
-            cluster_size=cluster_size,
+            
             tmpDir=tmpDir, max_walltime=max_walltime, 
             home_path=home_path,
             javaPath=javaPath,
             pymodulePath=pymodulePath, thisModulePath=thisModulePath,
             jvmVirtualByPhysicalMemoryRatio=jvmVirtualByPhysicalMemoryRatio,
+            
+            site_handler=site_handler,
+            input_site_handler=input_site_handler,
+            cluster_size=cluster_size,
+
             needSSHDBTunnel=needSSHDBTunnel, commit=commit,
             debug=debug, report=report)
     
     def registerBlastNucleotideDatabaseFile(self, ntDatabaseFname=None,  folderName=""):
         """
-        2012.10.8
-            moved from BlastWorkflow.py
-        2012.5.23
+        moved from BlastWorkflow.py
         """
         return self.registerRefFastaFile(refFastaFname=ntDatabaseFname,
             registerAffiliateFiles=True,
@@ -71,14 +77,13 @@ class AbstractBioinfoWorkflow(ParentClass):
         argument folderName
         argument "addPicardDictFile" to offer user option to exclude this file 
             (i.e. in registerBlastNucleotideDatabaseFile).
-        2012.2.24
-            dict is via picard, also required for GATK
+        
+        .dict is output by picard, also required for GATK.
             fai is via "samtools faidx" (index reference). also required for GATK
             amb', 'ann', 'bwt', 'pac', 'sa', 'rbwt', 'rpac', 'rsa' are all bwa index.
             stidx is stampy index.
             sthash is stampy hash.
-        2012.2.23
-            add two suffixes, stidx (stampy index) and sthash (stampy hash)
+        stidx (stampy index) and sthash (stampy hash)
         2011-11-11
             if needAffiliatedFiles,
                 all other files, with suffix in affiliateFilenameSuffixLs,
@@ -251,6 +256,8 @@ class AbstractBioinfoWorkflow(ParentClass):
 if __name__ == '__main__':
     from argparse import ArgumentParser
     ap = ArgumentParser()
+    ap.add_argument("-i", "--input_path", type=str, required=True,
+        help="the path to the input folder or file.")
     ap.add_argument("--inputSuffixList", type=str,
         help='Coma-separated list of input file suffices. Used to exclude input files.'
         'If None, no exclusion. The dot is part of the suffix, .tsv not tsv.'
@@ -261,21 +268,7 @@ if __name__ == '__main__':
         'It will be created during the pegasus staging process. '
         'It is useful to separate multiple sub-workflows. '
         'If empty or None, everything is in the pegasus root.')
-    ap.add_argument("-l", "--site_handler", type=str, required=True,
-        help="The name of the computing site where the jobs run and executables are stored. "
-        "Check your Pegasus configuration in submit.sh.")
-    ap.add_argument("-j", "--input_site_handler", type=str,
-        help="It is the name of the site that has all the input files."
-        "Possible values can be 'local' or same as site_handler."
-        "If not given, it is asssumed to be the same as site_handler and "
-        "the input files will be symlinked into the running folder."
-        "If input_site_handler=local, the input files will be transferred "
-        "to the computing site by pegasus-transfer.")
-    ap.add_argument("-C", "--cluster_size", type=int, default=30,
-        help="Default: %(default)s. "
-        "This number decides how many of pegasus jobs should be clustered into one job. "
-        "Good if your workflow contains many quick jobs. "
-        "It will reduce Pegasus monitor I/O.")
+    
     ap.add_argument("-o", "--output_path", type=str, required=True,
         help="The path to the output file that will contain the Pegasus DAG.")
     
@@ -309,6 +302,23 @@ if __name__ == '__main__':
         'If a job virtual memory (~1.2X of JVM resident memory) exceeds request, '
         "it will be killed on some clusters. "
         "This will make sure your job has enough memory.")
+    
+    ap.add_argument("-l", "--site_handler", type=str, required=True,
+        help="The name of the computing site where the jobs run and executables are stored. "
+        "Check your Pegasus configuration in submit.sh.")
+    ap.add_argument("-j", "--input_site_handler", type=str,
+        help="It is the name of the site that has all the input files."
+        "Possible values can be 'local' or same as site_handler."
+        "If not given, it is asssumed to be the same as site_handler and "
+        "the input files will be symlinked into the running folder."
+        "If input_site_handler=local, the input files will be transferred "
+        "to the computing site by pegasus-transfer.")
+    ap.add_argument("-C", "--cluster_size", type=int, default=30,
+        help="Default: %(default)s. "
+        "This number decides how many of pegasus jobs should be clustered into one job. "
+        "Good if your workflow contains many quick jobs. "
+        "It will reduce Pegasus monitor I/O.")
+    
     ap.add_argument("--debug", action='store_true',
         help='Toggle debug mode.')
     ap.add_argument("--report", action='store_true',
@@ -318,11 +328,9 @@ if __name__ == '__main__':
         "access a database that is inaccessible to computing nodes.")
     args = ap.parse_args()
     instance = AbstractBioinfoWorkflow(
+        input_path=args.input_path,
         inputSuffixList=args.inputSuffixList, 
         pegasusFolderName=args.pegasusFolderName,
-        site_handler=args.site_handler, 
-        input_site_handler=args.input_site_handler,
-        cluster_size=args.cluster_size,
         output_path=args.output_path,
 
         home_path=args.home_path,
@@ -333,6 +341,11 @@ if __name__ == '__main__':
         tmpDir=args.tmpDir,
         max_walltime=args.max_walltime,
         jvmVirtualByPhysicalMemoryRatio=args.jvmVirtualByPhysicalMemoryRatio,
+        
+        site_handler=args.site_handler, 
+        input_site_handler=args.input_site_handler,
+        cluster_size=args.cluster_size,
+
         needSSHDBTunnel=args.needSSHDBTunnel,
         debug=args.debug,
         report=args.report)

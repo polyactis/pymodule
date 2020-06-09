@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-20111122
-    a pegasus workflow class for analyzing NGS (next-gen sequencing) data
+a pegasus workflow class for analyzing NGS (next-gen sequencing) data
 """
 import sys, os, math
 import logging
@@ -165,7 +164,12 @@ class AbstractNGSWorkflow(ParentClass):
 
     """
 
-    def __init__(self, inputSuffixList=None, 
+    def __init__(self,
+        input_path=None,
+        inputSuffixList=None,
+        pegasusFolderName='input',
+        output_path=None,
+
         drivername='postgresql', hostname='localhost',
         dbname='', schema='public', port=None,
         db_user=None,
@@ -227,11 +231,6 @@ class AbstractNGSWorkflow(ParentClass):
         defaultGATKArguments=\
         " --unsafe ALL --validation_strictness SILENT --read_filter BadCigar ",
         
-        site_handler='condor',
-        input_site_handler='condor',
-        cluster_size=30,
-        pegasusFolderName='input',
-        output_path=None,
         tmpDir='/tmp/',
         max_walltime=4320,
         home_path=None,
@@ -239,6 +238,11 @@ class AbstractNGSWorkflow(ParentClass):
         pymodulePath="src/pymodule",
         thisModulePath=None,
         jvmVirtualByPhysicalMemoryRatio=1.2,
+        
+        site_handler='condor',
+        input_site_handler='condor',
+        cluster_size=30,
+
         needSSHDBTunnel=False,
         commit=False,
         debug=False, report=False):
@@ -328,17 +332,21 @@ class AbstractNGSWorkflow(ParentClass):
         ProcessOptions.processListArguments(listArgumentName_data_type_ls, 
             emptyContent=[], class_to_have_attr=self)
         ParentClass.__init__(self,
+            input_path=input_path,
             inputSuffixList=inputSuffixList,
             pegasusFolderName=pegasusFolderName,
             output_path=output_path,
-            site_handler=site_handler,
-            input_site_handler=input_site_handler,
-            cluster_size=cluster_size,
+            
             tmpDir=tmpDir, max_walltime=max_walltime, 
             home_path=home_path,
             javaPath=javaPath,
             pymodulePath=pymodulePath, thisModulePath=thisModulePath,
             jvmVirtualByPhysicalMemoryRatio=jvmVirtualByPhysicalMemoryRatio,
+            
+            site_handler=site_handler,
+            input_site_handler=input_site_handler,
+            cluster_size=cluster_size,
+
             needSSHDBTunnel=needSSHDBTunnel, commit=commit,
             debug=debug, report=report)
 

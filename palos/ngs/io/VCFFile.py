@@ -496,8 +496,7 @@ class VCFFile(object):
     def _getIndividual2ColIndex(self, header, col_name2index=None, sampleStartingColumn=9):
         """
         2012.10.5 add "_" in front of the function name
-        2011-9-27
-            called by other function, not meant for public
+        called by other function, not meant for public
         """
         if self.report:
             sys.stderr.write("\t Finding all individuals ...")
@@ -650,7 +649,8 @@ class VCFFile(object):
         
         for line in self.inf:
             if line[:6]=='#CHROM':
-                line = line.strip()	#get rid of the trailing \n
+                line = line.strip()
+                #get rid of the trailing \n
                 row = line.split('\t')
                 self.sampleIDHeader = row[self.sampleStartingColumn:]
                 self.header = row[:]
