@@ -90,13 +90,16 @@ class AbstractWorkflow(Workflow):
 
     def __init__(self, inputSuffixList=None, 
         pegasusFolderName='folder',
-        site_handler='condor', input_site_handler='condor',
-        cluster_size=30,
         output_path=None,
         tmpDir='/tmp/', max_walltime=4320,
-        home_path=None, javaPath=None, 
+
+        home_path=None,
         pymodulePath="src/pymodule", thisModulePath=None,
+        javaPath=None, 
         jvmVirtualByPhysicalMemoryRatio=1.2,
+        
+        site_handler='condor', input_site_handler='condor',
+        cluster_size=30,
         needSSHDBTunnel=False, commit=False,
         debug=False, report=False):
         """
@@ -108,21 +111,24 @@ class AbstractWorkflow(Workflow):
         self.thisModulePath = thisModulePath
         Workflow.__init__(self, inputSuffixList=inputSuffixList,
             pegasusFolderName=pegasusFolderName,
-            site_handler=site_handler,
-            input_site_handler=input_site_handler,
-            cluster_size=cluster_size,
+            
             output_path=output_path,
             tmpDir=tmpDir, max_walltime=max_walltime, 
+            
             home_path=home_path,
             javaPath=javaPath,
             jvmVirtualByPhysicalMemoryRatio=jvmVirtualByPhysicalMemoryRatio,
+            
+            site_handler=site_handler,
+            input_site_handler=input_site_handler,
+            cluster_size=cluster_size,
+
             needSSHDBTunnel=needSSHDBTunnel, commit=commit,
             debug=debug, report=report)
 
     def constructJobDataFromJob(self, job=None):
         """
-        2013.09.05 added vcfFile and tbi_F in structure
-        2013.07.18
+        added vcfFile and tbi_F in structure
         """
         if hasattr(job, 'output') and job.output.name.find('.vcf')>=0:
             vcfFile = job.output
@@ -135,7 +141,6 @@ class AbstractWorkflow(Workflow):
 
     def registerExecutables(self):
         """
-        2012.1.9
         """
         Workflow.registerExecutables(self)
         
@@ -203,7 +208,7 @@ class AbstractWorkflow(Workflow):
             # this works because in most of my cases, vanilla universe and
             #    local universe share the same underlying filesystem.
             cleanupExecutable = self.registerOneExecutable(
-                path=self.pegasusCleanupPath, name='cleanup', \
+                path=self.pegasusCleanupPath, name='cleanup',
                 clusterSizeMultiplier=0, noVersion=True)
             condorUniverseProfile = Profile(Namespace.CONDOR, key="universe",
                 value="local")
@@ -212,7 +217,7 @@ class AbstractWorkflow(Workflow):
             cleanupExecutable.addProfile(condorUniverseProfile)
 
             transferExecutable = self.registerOneExecutable(
-                path=self.pegasusTransferPath, name='transfer', \
+                path=self.pegasusTransferPath, name='transfer',
                 clusterSizeMultiplier=0, noVersion=True)
             condorUniverseProfile = Profile(Namespace.CONDOR, key="universe",
                 value="local")
@@ -221,10 +226,10 @@ class AbstractWorkflow(Workflow):
             transferExecutable.addProfile(condorUniverseProfile)
         """
 
-    def addStatMergeJob(self, statMergeProgram=None, outputF=None, \
-        extraArguments=None, extraArgumentList=None,\
-        parentJobLs=None, extraOutputLs=None,\
-        extraDependentInputLs=None, transferOutput=True, \
+    def addStatMergeJob(self, statMergeProgram=None, outputF=None,
+        extraArguments=None, extraArgumentList=None,
+        parentJobLs=None, extraOutputLs=None,
+        extraDependentInputLs=None, transferOutput=True,
         key2ObjectForJob=None, job_max_memory=1000, **keywords):
         """
         moved from CalculateVCFStatPipeline.py
@@ -251,12 +256,13 @@ class AbstractWorkflow(Workflow):
 
     def addConvertImageJob(self, inputFile=None, inputArgumentOption=None,
         outputFile=None, outputArgumentOption=None, density=None,
-        resizeDimension=None, \
+        resizeDimension=None,
         frontArgumentList=None,
         extraArguments=None, extraArgumentList=None,
-        parentJobLs=None, extraDependentInputLs=None, extraOutputLs=None,
-        transferOutput=False, \
-        job_max_memory=200,\
+        parentJobLs=None,
+        extraDependentInputLs=None, extraOutputLs=None,
+        transferOutput=False,
+        job_max_memory=200,
         key2ObjectForJob=None, **keywords):
         """
         2013.2.7 use imagemagick's convert to convert images. examples:
@@ -295,10 +301,10 @@ class AbstractWorkflow(Workflow):
             frontArgumentList.append("-resize %s"%(resizeDimension))
         #do not pass the inputFileList to addGenericJob() because db arguments
         #  need to be added before them.
-        job = self.addGenericJob(executable=self.convertImage, \
-            inputFile=inputFile, \
+        job = self.addGenericJob(executable=self.convertImage,
+            inputFile=inputFile,
             inputArgumentOption=inputArgumentOption,
-            outputFile=outputFile, \
+            outputFile=outputFile,
             outputArgumentOption=outputArgumentOption,
             inputFileList=None, 
             frontArgumentList=frontArgumentList,
@@ -313,7 +319,7 @@ class AbstractWorkflow(Workflow):
             **keywords)
         return job
     
-    def addCalculateDepthMeanMedianModeJob(self, executable=None, \
+    def addCalculateDepthMeanMedianModeJob(self, executable=None,
         inputFile=None, outputFile=None, alignmentID=None,
         fractionToSample=0.001,
         whichColumn=None, maxNumberOfSamplings=1E7,
@@ -322,11 +328,8 @@ class AbstractWorkflow(Workflow):
         parentJobLs=None, job_max_memory = 500,
         transferOutput=False, **keywords):
         """
-        2013.1.8 moved from vervet.src.alignment.InspectAlignmentPipeline and
-            use addGenericJob().
         2012.6.15 turn maxNumberOfSamplings into integer when passing it to the job
-        2012.5.7
-            a job to take input of samtoolsDepth
+        input is output of samtoolsDepth.
         """
         extraArgumentList = []
         if alignmentID is not None:
@@ -403,17 +406,19 @@ class AbstractWorkflow(Workflow):
                         extraArgumentList = []
                         #make sure set inputArgumentOption&outputArgumentOption to None, \
                         # otherwise addGenericJob will add "-i" and "-o" in front of it
-                        job= self.addGenericJob(executable=self.gzip, inputFile=inputF,
-                            inputArgumentOption=None, outputArgumentOption=None,\
-                            outputFile=outputF, \
+                        job= self.addGenericJob(executable=self.gzip,
+                            inputArgumentOption=None,
+                            inputFile=inputF,
+                            outputArgumentOption=None,
+                            outputFile=outputF,
                             extraArgumentList=extraArgumentList,
                             parentJobLs=[topOutputDirJob]+jobData.jobLs,
-                            extraDependentInputLs=None, \
-                            extraOutputLs=[],\
-                            transferOutput=transferOutput, \
-                            key2ObjectForJob=key2ObjectForJob, \
+                            extraDependentInputLs=None,
+                            extraOutputLs=None,
+                            transferOutput=transferOutput,
+                            key2ObjectForJob=key2ObjectForJob,
                             job_max_memory=200, **keywords)
-                        returnData.jobDataLs.append(PassingData(jobLs=[job], \
+                        returnData.jobDataLs.append(PassingData(jobLs=[job],
                             vcfFile=None, file=outputF, fileLs=[outputF]))
         sys.stderr.write("no_of_jobs = %s.\n"%(self.no_of_jobs))
         return returnData
@@ -445,21 +450,22 @@ class AbstractWorkflow(Workflow):
             sshDBTunnel=sshDBTunnel, job_max_memory=job_max_memory, **keywords)
         return job
 
-    def addSelectLineBlockFromFileJob(self, executable=None, inputFile=None, \
-        outputFile=None,\
-        startLineNumber=None, stopLineNumber=None, parentJobLs=None, \
+    def addSelectLineBlockFromFileJob(self,
+        executable=None,
+        inputFile=None, outputFile=None,
+        startLineNumber=None, stopLineNumber=None,
         extraArguments=None,
-        extraDependentInputLs=None, \
-        transferOutput=False, \
+        parentJobLs=None,
+        extraDependentInputLs=None,
+        transferOutput=False,
         job_max_memory=200, **keywords):
         """
-        2012.7.30
         """
         extraArgumentList = ['-s %s'%(startLineNumber), '-t %s'%(stopLineNumber)]
         if extraArguments:
             extraArgumentList.append(extraArguments)
 
-        job= self.addGenericJob(executable=executable, inputFile=inputFile, \
+        job= self.addGenericJob(executable=executable, inputFile=inputFile,
             outputFile=outputFile, \
             extraArgumentList=extraArgumentList,
             parentJobLs=parentJobLs,
@@ -470,7 +476,8 @@ class AbstractWorkflow(Workflow):
             **keywords)
         return job
 
-    def addPlotLDJob(self, executable=None, inputFile=None, inputFileList=None, \
+    def addPlotLDJob(self, executable=None,
+        inputFile=None, inputFileList=None, \
         outputFile=None, outputFnamePrefix=None,
         whichColumn=None, whichColumnHeader=None, whichColumnPlotLabel=None, \
         title=None, logY=None, valueForNonPositiveYValue=-1, \
@@ -487,12 +494,6 @@ class AbstractWorkflow(Workflow):
         transferOutput=True,
         job_max_memory=200, **keywords):
         """
-        2012.10.25
-            expose argument missingDataNotation, minDist, maxDist
-        2012.8.18
-            use addAbstractPlotJob()
-        2012.8.2 moved from vervet/src/CalculateVCFStatPipeline.py
-        2012.8.1
 ('outputFname', 1, ): [None, 'o', 1, 'output file for the figure.'],\
 ('minNoOfTotal', 1, int): [100, 'i', 1, 
     'minimum no of total variants (denominator of inconsistent rate)'],\
@@ -545,17 +546,18 @@ class AbstractWorkflow(Workflow):
 
         return self.addAbstractPlotJob(executable=executable,
             inputFileList=inputFileList, \
-            inputFile=inputFile, outputFile=outputFile, 
-            outputFnamePrefix=outputFnamePrefix, whichColumn=whichColumn, \
+            inputFile=inputFile,
+            outputFile=outputFile, outputFnamePrefix=outputFnamePrefix,
+            whichColumn=whichColumn,
             whichColumnHeader=whichColumnHeader,
             whichColumnPlotLabel=whichColumnPlotLabel,
-            logY=logY, valueForNonPositiveYValue=valueForNonPositiveYValue, \
-            missingDataNotation=missingDataNotation,\
+            logY=logY, valueForNonPositiveYValue=valueForNonPositiveYValue,
+            missingDataNotation=missingDataNotation,
             xColumnHeader=xColumnHeader, xColumnPlotLabel=xColumnPlotLabel,
             title=title,
-            minNoOfTotal=minNoOfTotal, \
+            minNoOfTotal=minNoOfTotal,
             figureDPI=figureDPI, formatString=formatString, ylim_type=ylim_type, 
-            samplingRate=samplingRate, need_svg=need_svg, \
+            samplingRate=samplingRate, need_svg=need_svg,
             extraArgumentList=extraArgumentList, extraArguments=extraArguments,
             parentJobLs=parentJobLs,
             extraDependentInputLs=extraDependentInputLs,
@@ -563,33 +565,37 @@ class AbstractWorkflow(Workflow):
             job_max_memory=job_max_memory, \
             **keywords)
 
-    def addPlotVCFtoolsStatJob(self, executable=None, inputFileList=None, 
-        outputFnamePrefix=None, \
+    def addPlotVCFtoolsStatJob(self,
+        executable=None, inputFileList=None, 
+        outputFnamePrefix=None,
         whichColumn=None, whichColumnHeader=None, whichColumnPlotLabel=None, 
-        need_svg=False, logY=0, valueForNonPositiveYValue=-1, \
+        need_svg=False, logY=0, valueForNonPositiveYValue=-1,
         xColumnPlotLabel=None, xColumnHeader=None, chrLengthColumnHeader=None, 
-        chrColumnHeader=None, \
-        minChrLength=1000000, minNoOfTotal=100,\
-        figureDPI=300, ylim_type=2, samplingRate=0.0001, logCount=False,\
-        tax_id=60711, sequence_type_id=1, chrOrder=None,\
+        chrColumnHeader=None,
+        minChrLength=1000000, minNoOfTotal=100,
+        figureDPI=300, ylim_type=2, samplingRate=0.0001, logCount=False,
+        tax_id=60711, sequence_type_id=1, chrOrder=None,
         extraArguments=None,
-        parentJobLs=None, \
-        extraDependentInputLs=None, \
+        parentJobLs=None,
+        extraDependentInputLs=None,
         transferOutput=True, job_max_memory=200,
         sshDBTunnel=False, **keywords):
         """
         Examples
 
     outputFnamePrefix = os.path.join(plotOutputDir, 'noOfMendelErrors_along_chromosome')
-    self.addPlotVCFtoolsStatJob(executable=self.PlotVCFtoolsStat, \
-        inputFileList=[splitPlinkLMendelFileSNPIDIntoChrPositionJob.output], \
-        outputFnamePrefix=outputFnamePrefix, \
-        whichColumn=None, whichColumnHeader="N", whichColumnPlotLabel="noOfMendelErrors", need_svg=False, \
-        logY=0, valueForNonPositiveYValue=-1, \
-        xColumnPlotLabel="genomePosition", chrLengthColumnHeader=None, chrColumnHeader="Chromosome", \
+    self.addPlotVCFtoolsStatJob(executable=self.PlotVCFtoolsStat,
+        inputFileList=[splitPlinkLMendelFileSNPIDIntoChrPositionJob.output],
+        outputFnamePrefix=outputFnamePrefix,
+        whichColumn=None, whichColumnHeader="N", whichColumnPlotLabel="noOfMendelErrors",
+        need_svg=False,
+        logY=0, valueForNonPositiveYValue=-1,
+        xColumnPlotLabel="genomePosition",
+        chrLengthColumnHeader=None, chrColumnHeader="Chromosome", \
         minChrLength=100000, xColumnHeader="Start", minNoOfTotal=50,\
         figureDPI=100, ylim_type=2, samplingRate=1,\
-        tax_id=self.ref_genome_tax_id, sequence_type_id=self.ref_genome_sequence_type_id, chrOrder=1,\
+        tax_id=self.ref_genome_tax_id,
+        sequence_type_id=self.ref_genome_sequence_type_id, chrOrder=1,\
         parentJobLs=[splitPlinkLMendelFileSNPIDIntoChrPositionJob, plotOutputDirJob], \
         extraDependentInputLs=None, \
         extraArguments=None, transferOutput=True, sshDBTunnel=self.needSSHDBTunnel)
@@ -686,18 +692,19 @@ class AbstractWorkflow(Workflow):
             sshDBTunnel=sshDBTunnel, objectWithDBArguments=self, **keywords)
         return job
 
-    def addPlotGenomeWideDataJob(self, executable=None, inputFileList=None, \
-        inputFile=None,\
-        outputFnamePrefix=None, outputFile=None,\
-        whichColumn=None, whichColumnHeader=None, whichColumnPlotLabel=None, \
-        logX=None, logY=None, valueForNonPositiveYValue=-1, \
-        xScaleLog=None, yScaleLog=None,\
-        missingDataNotation='NA',\
-        xColumnPlotLabel=None, xColumnHeader=None, \
-        xtickInterval=None,\
-        drawCentromere=None, chrColumnHeader=None, \
-        minChrLength=100000, minNoOfTotal=100, maxNoOfTotal=None, \
-        figureDPI=300, formatString=".", ylim_type=2, samplingRate=1, \
+    def addPlotGenomeWideDataJob(self, executable=None,
+        inputFileList=None,
+        inputFile=None,
+        outputFnamePrefix=None, outputFile=None,
+        whichColumn=None, whichColumnHeader=None, whichColumnPlotLabel=None,
+        logX=None, logY=None, valueForNonPositiveYValue=-1,
+        xScaleLog=None, yScaleLog=None,
+        missingDataNotation='NA',
+        xColumnPlotLabel=None, xColumnHeader=None,
+        xtickInterval=None,
+        drawCentromere=None, chrColumnHeader=None,
+        minChrLength=100000, minNoOfTotal=100, maxNoOfTotal=None,
+        figureDPI=300, formatString=".", ylim_type=2, samplingRate=1,
         logCount=False, need_svg=False,\
         tax_id=60711, sequence_type_id=1, chrOrder=None,\
         inputFileFormat=1, outputFileFormat=None,\
@@ -761,36 +768,42 @@ class AbstractWorkflow(Workflow):
             extraArgumentList.append('--sequence_type_id %s'%(sequence_type_id))
         if chrOrder is not None:
             extraArgumentList.append("--chrOrder %s"%(chrOrder))
-        job = self.addAbstractPlotJob(executable=executable, \
-            inputFileList=inputFileList, \
-            inputFile=inputFile, outputFile=outputFile, \
-            outputFnamePrefix=outputFnamePrefix, whichColumn=whichColumn,
-            whichColumnHeader=whichColumnHeader, \
-            whichColumnPlotLabel=whichColumnPlotLabel, \
+        job = self.addAbstractPlotJob(
+            executable=executable,
+            inputFileList=inputFileList,
+            inputFile=inputFile,
+            outputFile=outputFile,
+            outputFnamePrefix=outputFnamePrefix,
+            whichColumn=whichColumn,
+            whichColumnHeader=whichColumnHeader,
+            whichColumnPlotLabel=whichColumnPlotLabel,
             logX=logX, logY=logY,
             valueForNonPositiveYValue=valueForNonPositiveYValue,
             xScaleLog=xScaleLog, yScaleLog=yScaleLog,\
             missingDataNotation=missingDataNotation,\
-            xColumnHeader=xColumnHeader, xColumnPlotLabel=xColumnPlotLabel, \
-            minNoOfTotal=minNoOfTotal, maxNoOfTotal=maxNoOfTotal,\
+            xColumnHeader=xColumnHeader, xColumnPlotLabel=xColumnPlotLabel,
+            minNoOfTotal=minNoOfTotal, maxNoOfTotal=maxNoOfTotal,
             figureDPI=figureDPI, formatString=formatString,
             ylim_type=ylim_type, \
-            samplingRate=samplingRate, need_svg=need_svg, \
-            inputFileFormat=inputFileFormat, outputFileFormat=outputFileFormat,\
+            samplingRate=samplingRate, need_svg=need_svg,
+            inputFileFormat=inputFileFormat,
+            outputFileFormat=outputFileFormat,
             extraArguments=extraArguments,
             extraArgumentList=extraArgumentList,
-            parentJobLs=parentJobLs, \
-            extraDependentInputLs=extraDependentInputLs, \
-            transferOutput=transferOutput, 
-            job_max_memory=job_max_memory, \
+            parentJobLs=parentJobLs,
+            extraDependentInputLs=extraDependentInputLs,
+            transferOutput=transferOutput,
+            job_max_memory=job_max_memory,
             sshDBTunnel=sshDBTunnel,
             objectWithDBGenomeArguments=objectWithDBGenomeArguments,
             **keywords)
         return job
 
-    def addAbstractPlotJob(self, executable=None, inputFileList=None,\
-        inputFile=None, outputFile=None, \
-        outputFnamePrefix=None, whichColumn=None, whichColumnHeader=None, \
+    def addAbstractPlotJob(self, executable=None,
+        inputFileList=None, inputFile=None,
+        outputFile=None,
+        outputFnamePrefix=None,
+        whichColumn=None, whichColumnHeader=None, \
         whichColumnPlotLabel=None, \
         logX=None, logY=None, valueForNonPositiveYValue=-1, \
         xScaleLog=0, yScaleLog=0, \
@@ -949,10 +962,6 @@ inputFileFormat   1: csv-like plain text file; 2: YHPyTables.YHFile; 3: HDF5Matr
         sshDBTunnel=False,
         objectWithDBArguments=None, **keywords):
         """
-        2012.11.25 more arguments, logY, inputFileFormat, outputFileFormat
-        2012.10.16 added argument sshDBTunnel, objectWithDBArguments
-        2012.10.15 added extraArgumentList, parentJob
-        2012.8.15
 ('outputFname', 0, ): [None, 'o', 1, 'output file for the figure.'],\
 ('minNoOfTotal', 1, int): [100, 'i', 1, 
     'minimum no of total variants (denominator of inconsistent rate)'],\
@@ -973,8 +982,10 @@ inputFileFormat   1: csv-like plain text file; 2: YHPyTables.YHFile; 3: HDF5Matr
         """
         return self.addAbstractPlotJob(executable=executable, 
             inputFileList=inputFileList,
-            inputFile=inputFile, outputFile=outputFile, 
-            outputFnamePrefix=outputFnamePrefix, whichColumn=whichColumn,
+            inputFile=inputFile,
+            outputFile=outputFile, 
+            outputFnamePrefix=outputFnamePrefix,
+            whichColumn=whichColumn,
             whichColumnHeader=whichColumnHeader, whichColumnPlotLabel=None,
             logY=logY, \
             valueForNonPositiveYValue=valueForNonPositiveYValue,
@@ -994,8 +1005,9 @@ inputFileFormat   1: csv-like plain text file; 2: YHPyTables.YHFile; 3: HDF5Matr
             objectWithDBArguments=objectWithDBArguments, **keywords)
 
     def addAbstractGenomeFileWalkerJob(self, executable=None,
-        inputFileList=None, 
-        inputFile=None, outputFile=None,
+        inputFileList=None,
+        inputFile=None,
+        outputFile=None,
         outputFnamePrefix=None,
         whichColumn=None, whichColumnHeader=None,
         logY=None, valueForNonPositiveYValue=-1,
@@ -1031,8 +1043,10 @@ inputFileFormat   1: csv-like plain text file; 2: YHPyTables.YHFile; 3: HDF5Matr
             extraArgumentList.append('--positionHeader %s'%(positionHeader))
         return self.addAbstractPlotJob(executable=executable,
             inputFileList=inputFileList,
-            inputFile=inputFile, outputFile=outputFile, 
-            outputFnamePrefix=outputFnamePrefix, whichColumn=whichColumn,
+            inputFile=inputFile,
+            outputFile=outputFile, 
+            outputFnamePrefix=outputFnamePrefix,
+            whichColumn=whichColumn,
             whichColumnHeader=whichColumnHeader, whichColumnPlotLabel=None,
             logY=logY, \
             valueForNonPositiveYValue=valueForNonPositiveYValue,
@@ -1072,8 +1086,6 @@ inputFileFormat   1: csv-like plain text file; 2: YHPyTables.YHFile; 3: HDF5Matr
         """
         #no spaces or parenthesis or any other shell-vulnerable letters
         #  in the x or y axis labels (whichColumnPlotLabel, xColumnPlotLabel)
-        2013.08.15 added argument xScaleLog, yScaleLog, legendType
-        2012.8.2
 ('outputFname', 0, ): [None, 'o', 1, 'output file for the figure.'],\
 ('minNoOfTotal', 1, int): [100, 'i', 1, 
     'minimum no of total variants (denominator of inconsistent rate)'],\
@@ -1102,17 +1114,18 @@ inputFileFormat   1: csv-like plain text file; 2: YHPyTables.YHFile; 3: HDF5Matr
             extraArguments += " --logCount "
         return self.addAbstractPlotJob(executable=executable,
             inputFileList=inputFileList,
-            inputFile=inputFile, outputFile=outputFile, 
+            inputFile=inputFile,
+            outputFile=outputFile, 
             outputFnamePrefix=outputFnamePrefix,
             whichColumn=whichColumn,
             whichColumnHeader=whichColumnHeader,
             whichColumnPlotLabel=whichColumnPlotLabel,
-            xScaleLog=xScaleLog, yScaleLog=yScaleLog,\
+            xScaleLog=xScaleLog, yScaleLog=yScaleLog,
             logY=logY,
             valueForNonPositiveYValue=valueForNonPositiveYValue,
-            missingDataNotation=missingDataNotation,\
-            xColumnHeader=None, xColumnPlotLabel=None, title=title, \
-            minNoOfTotal=minNoOfTotal, \
+            missingDataNotation=missingDataNotation,
+            xColumnHeader=None, xColumnPlotLabel=None, title=title,
+            minNoOfTotal=minNoOfTotal,
             figureDPI=figureDPI, formatString=formatString,
             ylim_type=ylim_type,
             samplingRate=samplingRate, need_svg=need_svg,
@@ -1122,13 +1135,15 @@ inputFileFormat   1: csv-like plain text file; 2: YHPyTables.YHFile; 3: HDF5Matr
             parentJobLs=parentJobLs,
             extraDependentInputLs=extraDependentInputLs,
             transferOutput=transferOutput, 
-            job_max_memory=job_max_memory, \
+            job_max_memory=job_max_memory,
             **keywords)
 
     def addDraw2DHistogramOfMatrixJob(self, executable=None,
         inputFileList=None,
-        inputFile=None, outputFile=None, \
-        outputFnamePrefix=None, whichColumn=None,
+        inputFile=None,
+        outputFile=None,
+        outputFnamePrefix=None,
+        whichColumn=None,
         whichColumnHeader=None, whichColumnPlotLabel=None,
         logX=False, logY=False, logZ=False,
         valueForNonPositiveYValue=-1,
@@ -1161,18 +1176,19 @@ inputFileFormat   1: csv-like plain text file; 2: YHPyTables.YHFile; 3: HDF5Matr
             executable = self.Draw2DHistogramOfMatrix
         return self.addAbstractPlotJob(
             executable=executable, inputFileList=inputFileList,
-            inputFile=inputFile, outputFile=outputFile,
+            inputFile=inputFile,
+            outputFile=outputFile,
             outputFnamePrefix=outputFnamePrefix,
-            whichColumn=whichColumn, \
+            whichColumn=whichColumn,
             whichColumnHeader=whichColumnHeader,
             whichColumnPlotLabel=whichColumnPlotLabel,
             logX=logX, logY=logY,
             valueForNonPositiveYValue=valueForNonPositiveYValue,
-            missingDataNotation=missingDataNotation,\
+            missingDataNotation=missingDataNotation,
             xColumnHeader=xColumnHeader, xColumnPlotLabel=xColumnPlotLabel,
-            minNoOfTotal=minNoOfTotal, \
+            minNoOfTotal=minNoOfTotal,
             figureDPI=figureDPI, formatString=formatString, ylim_type=None,
-            samplingRate=samplingRate, need_svg=need_svg, \
+            samplingRate=samplingRate, need_svg=need_svg,
             inputFileFormat=inputFileFormat,
             outputFileFormat=outputFileFormat,
             extraArguments=extraArguments,
@@ -1186,8 +1202,7 @@ inputFileFormat   1: csv-like plain text file; 2: YHPyTables.YHFile; 3: HDF5Matr
         outputFnamePrefix=None,
         suffixAndNameTupleList=None, extraOutputLs=None, key2ObjectForJob=None):
         """
-        2012.8.16
-            split from addPlinkJob()
+        split from addPlinkJob()
         """
         for suffixNameTuple in suffixAndNameTupleList:
             if len(suffixNameTuple)==1:
@@ -1256,13 +1271,15 @@ if __name__ == '__main__':
     instance = AbstractWorkflow(
         inputSuffixList=args.inputSuffixList, 
         pegasusFolderName=args.pegasusFolderName,
-        site_handler=args.site_handler, 
-        input_site_handler=args.input_site_handler,
-        cluster_size=args.cluster_size,
         output_path=args.output_path,
         tmpDir=args.tmpDir,
         max_walltime=args.max_walltime,
         jvmVirtualByPhysicalMemoryRatio=args.jvmVirtualByPhysicalMemoryRatio,
+        
+        site_handler=args.site_handler, 
+        input_site_handler=args.input_site_handler,
+        cluster_size=args.cluster_size,
+        
         needSSHDBTunnel=args.needSSHDBTunnel,
         debug=args.debug,
         report=args.report)
