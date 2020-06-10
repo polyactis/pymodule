@@ -155,50 +155,43 @@ class AbstractWorkflow(Workflow):
                 name='convertImage', clusterSizeMultiplier=1)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath, 
             "mapper/extractor/SelectLineBlockFromFile.py"), 
-            name='SelectLineBlockFromFile', clusterSizeMultiplier=1)
+            clusterSizeMultiplier=1)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath,
-            "plot/AbstractPlot.py"), 
-            name='AbstractPlot', clusterSizeMultiplier=1)
+            "plot/AbstractPlot.py"), clusterSizeMultiplier=1)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath,
-            "plot/PlotYAsBar.py"), 
-            name='PlotYAsBar', clusterSizeMultiplier=1)
+            "plot/PlotYAsBar.py"), clusterSizeMultiplier=1)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath,
-            "plot/DrawHistogram.py"), 
-            name='DrawHistogram', clusterSizeMultiplier=1)
+            "plot/DrawHistogram.py"), clusterSizeMultiplier=1)
 
         self.registerOneExecutable(path=os.path.join(self.pymodulePath,
-            "plot/DrawMatrix.py"), 
-            name='DrawMatrix', clusterSizeMultiplier=1)
+            "plot/DrawMatrix.py"), clusterSizeMultiplier=1)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath,
-            "plot/Draw2DHistogramOfMatrix.py"), 
-            name='Draw2DHistogramOfMatrix', clusterSizeMultiplier=1)
+            "plot/Draw2DHistogramOfMatrix.py"), clusterSizeMultiplier=1)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath,
             "statistics/SampleRows.py"), 
-            name='SampleRows', clusterSizeMultiplier=1)
+            clusterSizeMultiplier=1)
         #2013.2.11 all reducers
         self.registerOneExecutable(path=os.path.join(self.pymodulePath,
             "statistics/EstimateOutliersIn2DData.py"), \
-            name='EstimateOutliersIn2DData', clusterSizeMultiplier=0)
+            clusterSizeMultiplier=0)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath,
             'reducer/MergeSameHeaderTablesIntoOne.py'), \
-            name='mergeSameHeaderTablesIntoOne', clusterSizeMultiplier=0)
+            name='mergeSameHeaderTablesIntoOne',
+            clusterSizeMultiplier=0)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath,
             'reducer/MergeSameHeaderTablesIntoOne.py'), \
-            name='MergeSameHeaderTablesIntoOne', clusterSizeMultiplier=0)
+            clusterSizeMultiplier=0)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath,
             'reducer/ReduceMatrixByAverageColumnsWithSameKey.py'), \
-            name='ReduceMatrixByAverageColumnsWithSameKey',
             clusterSizeMultiplier=0)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath,
             'reducer/ReduceMatrixByChosenColumn.py'), \
-            name='ReduceMatrixByChosenColumn', clusterSizeMultiplier=0)
+            clusterSizeMultiplier=0)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath,
             'reducer/ReduceMatrixByMergeColumnsWithSameKey.py'), \
-            name='ReduceMatrixByMergeColumnsWithSameKey',
             clusterSizeMultiplier=0)
         self.registerOneExecutable(path=os.path.join(self.pymodulePath,
             'reducer/ReduceMatrixBySumSameKeyColsAndThenDivide.py'),
-            name='ReduceMatrixBySumSameKeyColsAndThenDivide',
             clusterSizeMultiplier=0)
         """
         # 2013.05.20 DISABLE this
@@ -550,7 +543,7 @@ class AbstractWorkflow(Workflow):
             extraArgumentList.append("--movingAverageType %s"%(movingAverageType))
 
         return self.addAbstractPlotJob(executable=executable,
-            inputFileList=inputFileList, \
+            inputFileList=inputFileList,
             inputFile=inputFile,
             outputFile=outputFile, outputFnamePrefix=outputFnamePrefix,
             whichColumn=whichColumn,
@@ -566,12 +559,13 @@ class AbstractWorkflow(Workflow):
             extraArgumentList=extraArgumentList, extraArguments=extraArguments,
             parentJobLs=parentJobLs,
             extraDependentInputLs=extraDependentInputLs,
-            transferOutput=transferOutput, \
-            job_max_memory=job_max_memory, \
+            transferOutput=transferOutput,
+            job_max_memory=job_max_memory,
             **keywords)
 
     def addPlotVCFtoolsStatJob(self,
-        executable=None, inputFileList=None, 
+        executable=None,
+        inputFileList=None, 
         outputFnamePrefix=None,
         whichColumn=None, whichColumnHeader=None, whichColumnPlotLabel=None, 
         need_svg=False, logY=0, valueForNonPositiveYValue=-1,
@@ -685,15 +679,18 @@ class AbstractWorkflow(Workflow):
 
         if extraArguments:
             extraArgumentList.append(extraArguments)
-        job= self.addDBJob(executable=executable, inputFile=None,
+        job= self.addDBJob(
+            executable=executable,
+            inputFile=None,
             outputFile=None,
-            inputFileList=inputFileList, \
+            inputFileList=inputFileList,
             extraArgumentList=extraArgumentList,
             parentJobLs=parentJobLs,
             extraDependentInputLs=extraDependentInputLs,
-            extraOutputLs=extraOutputLs,\
-            transferOutput=transferOutput, \
-            key2ObjectForJob=key2ObjectForJob, job_max_memory=job_max_memory,
+            extraOutputLs=extraOutputLs,
+            transferOutput=transferOutput,
+            key2ObjectForJob=key2ObjectForJob,
+            job_max_memory=job_max_memory,
             sshDBTunnel=sshDBTunnel, objectWithDBArguments=self, **keywords)
         return job
 
@@ -933,11 +930,11 @@ inputFileFormat   1: csv-like plain text file; 2: YHPyTables.YHFile; 3: HDF5Matr
             extraArgumentList.append(extraArguments)
 
         job = self.addGenericJob(executable=executable,
-            inputFile=inputFile, 
             inputArgumentOption='-i',
+            inputFile=inputFile, 
+            outputArgumentOption='-o',
             outputFile=outputFile,
-            outputArgumentOption='-o', \
-            inputFileList = inputFileList,\
+            inputFileList = inputFileList,
             extraArgumentList=extraArgumentList,
             parentJob=parentJob, parentJobLs=parentJobLs,
             extraDependentInputLs=extraDependentInputLs,
