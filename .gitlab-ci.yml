@@ -163,6 +163,27 @@ ReduceMatrixBySumSameKeyColsAndThenDivide:
     paths:
     - reducer/data/return_per_stock.csv
 
+ReduceMatrixByAverageColumnsWithSameKey:
+  stage: test_run
+  script:
+    - echo "Test ReduceMatrixByAverageColumnsWithSameKey.py"
+    - pwd
+    - ./reducer/ReduceMatrixByAverageColumnsWithSameKey.py -k 4 -v 5
+      -o reducer/data/avg_rtn_duration.csv reducer/data/backtest_out.csv
+    - ./plot/AbstractPlot.py -i reducer/data/avg_rtn_duration.csv 
+      -o reducer/data/median_rtn_vs_duration.png --xColumnHeader duration
+      --whichColumnHeader median_rtn
+    - ./plot/AbstractPlot.py -i reducer/data/avg_rtn_duration.csv 
+      -o reducer/data/mean_rtn_vs_duration.png --xColumnHeader duration
+      --whichColumnHeader mean_rtn
+  artifacts:
+    name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}_${CI_BUILD_ID}"
+    expire_in: 3 mos
+    paths:
+    - reducer/data/avg_rtn_duration.csv
+    - reducer/data/median_rtn_vs_duration.png
+    - reducer/data/mean_rtn_vs_duration.png
+
 AbstractPlot:
   stage: test_run
   script:

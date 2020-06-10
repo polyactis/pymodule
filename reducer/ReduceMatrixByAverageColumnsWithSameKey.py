@@ -13,7 +13,7 @@ __doc__ = __doc__%(sys.argv[0])
 
 from palos import ProcessOptions, figureOutDelimiter, utils, PassingData
 import csv, numpy
-from . ReduceMatrixByChosenColumn import ReduceMatrixByChosenColumn
+from ReduceMatrixByChosenColumn import ReduceMatrixByChosenColumn
 
 class ReduceMatrixByAverageColumnsWithSameKey(ReduceMatrixByChosenColumn):
     __doc__ = __doc__
@@ -83,6 +83,7 @@ class ReduceMatrixByAverageColumnsWithSameKey(ReduceMatrixByChosenColumn):
 
 if __name__ == '__main__':
     main_class = ReduceMatrixByAverageColumnsWithSameKey
-    po = ProcessOptions(sys.argv, main_class.option_default_dict, error_doc=main_class.__doc__)
+    po = ProcessOptions(sys.argv, main_class.option_default_dict,
+        error_doc=main_class.__doc__)
     instance = main_class(po.arguments, **po.long_option2value)
     instance.run()
