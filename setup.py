@@ -6,11 +6,11 @@ from setuptools import setup, find_packages
 
 src_dir = os.path.dirname(__file__)
 
-install_requires = ["sqlalchemy", "pegaflow", "numpy", 'matplotlib', 'scipy']
+install_requires = ['h5py', 'matplotlib', "numpy", "pegaflow",
+    'scipy', "sqlalchemy", 'tables']
 
 with open(os.path.join(src_dir, 'README.md')) as readme_file:
     README = readme_file.read()
-
 #
 # Create Manifest file to exclude tests, and service files
 #
@@ -46,7 +46,7 @@ def find_package_data(dirname):
 
 setup_args = dict(
     name="Palos",
-    version="0.1.20",
+    version="0.1.22",
     author="Yu S. Huang",
     author_email="polyactis@gmail.com",
     description="Misc Python modules developed and used by the yfish group",
