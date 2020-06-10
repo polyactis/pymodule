@@ -18,17 +18,15 @@ __doc__ = __doc__%(sys.argv[0])
 
 import matplotlib; matplotlib.use("Agg")    #to disable pop-up requirement
 import pylab
-import csv, random, numpy
+import logging
 from palos import ProcessOptions, PassingData
 from palos import utils
 from palos.plot import yh_matplotlib
-from palos.mapper.AbstractMapper import AbstractMapper
 from palos.io.AbstractMatrixFileWalker import AbstractMatrixFileWalker
 
 class AbstractPlot(AbstractMatrixFileWalker):
     __doc__ = __doc__
     option_default_dict = AbstractMatrixFileWalker.option_default_dict.copy()
-    #option_default_dict.update(AbstractMapper.db_option_dict.copy())
     option_default_dict.update({
     ('title', 0, ): [None, 't', 1, 'title for the figure.'],\
     ('figureDPI', 1, int): [200, 'f', 1, 'dpi, dots per inch, for the output figures (png)'],\
@@ -67,23 +65,21 @@ class AbstractPlot(AbstractMatrixFileWalker):
     def __init__(self, inputFnameLs=None, **keywords):
         """
         """
+        #self.connectDB() called within its __init__()
         AbstractMatrixFileWalker.__init__(self, inputFnameLs=inputFnameLs, **keywords)
-                #self.connectDB() called within its __init__()
         #if user wants to preserve data in a data structure that is visisble
                 # throughout reading different files.
         # then use this self.invariantPData.
         #AbstractMatrixFileWalker has initialized a structure like below.
         #self.invariantPData = PassingData()
-        #2012.11.22
         self.xMin = None
         self.xMax = None
         self.yMin = None
         self.yMax = None
-        #2012.11.25 for legend
         self.plotObjectLs = []
         self.plotObjectLegendLs = []
         
-        #2013.07.01 set these attributes if the class or its descendants have valid values
+        # set these attributes if the class or its descendants have valid values
         if getattr(self, 'defaultFontLabelSize', None):
             yh_matplotlib.setFontAndLabelSize(self.defaultFontLabelSize)
         if getattr(self, "defaultFigureWidth", None) and  getattr(self, "defaultFigureHeight", None):
@@ -94,15 +90,13 @@ class AbstractPlot(AbstractMatrixFileWalker):
 
     def addPlotLegend(self, plotObject=None, legend=None, pdata=None, **keywords):
         """
-        2012.11.25
         """
         self.plotObjectLs.append(plotObject)
         self.plotObjectLegendLs.append(legend)
     
     def plot(self, x_ls=None, y_ls=None, pdata=None, **keywords):
         """
-        2011-9-30
-            get called by the end of fileWalker() for each inputFname.
+        get called by the end of fileWalker() for each inputFname.
         """
         plotObject = pylab.plot(x_ls, y_ls, self.formatString, markersize=self.markerSize, )[0]
         self.addPlotLegend(plotObject=plotObject, legend=os.path.basename(pdata.filename),
@@ -116,10 +110,8 @@ class AbstractPlot(AbstractMatrixFileWalker):
     
     def processRow(self, row=None, pdata=None):
         """
-        2012.8.31
-            deal with missing data
-        2012.8.2
-            handles each row in each file
+        Deal with missing data.
+        Handle one row a time.
         """
         col_name2index = getattr(pdata, 'col_name2index', None)
         x_ls = getattr(pdata, 'x_ls', None)
@@ -142,13 +134,12 @@ class AbstractPlot(AbstractMatrixFileWalker):
                 x_ls.append(xValue)
                 y_ls.append(yValue)
     
-    def setGlobalExtremeVariable(self, extremeVariableName=None, givenExtremeValue=None, extremeType=1):
+    def setGlobalExtremeVariable(self, extremeVariableName=None,
+        givenExtremeValue=None, extremeType=1):
         """
-        2012.11.22
-            extremeType:
-                1: min
-                2: max
-            
+        extremeType:
+            1: min
+            2: max
         """
         if givenExtremeValue is not None:
             extremeVariable = getattr(self, extremeVariableName)
@@ -164,7 +155,6 @@ class AbstractPlot(AbstractMatrixFileWalker):
     
     def setGlobalMinVariable(self, extremeVariableName=None, givenExtremeValue=None):
         """
-        2012.11.22
         """
         self.setGlobalExtremeVariable(extremeVariableName=extremeVariableName,
                     givenExtremeValue=givenExtremeValue, \
@@ -172,22 +162,19 @@ class AbstractPlot(AbstractMatrixFileWalker):
     
     def setGlobalMaxVariable(self, extremeVariableName=None, givenExtremeValue=None):
         """
-        2012.11.22
         """
         self.setGlobalExtremeVariable(extremeVariableName=extremeVariableName, 
             givenExtremeValue=givenExtremeValue, extremeType=2)
         
     def processHeader(self, header=None, pdata=None):
         """
-        2012.8.13
-            called everytime the header of an input file is derived in fileWalker()
+        called everytime the header of an input file is derived in fileWalker()
         """
         pass
     
     def _handleXLim(self, **keywords):
         """
-        2012.11.22
-            could be used by descendants, but not called by default
+        Could be used by descendants, but not called by default
         """
         if self.xMin is not None and self.xMax is not None:
             delta = abs(self.xMax-self.xMin)/10.0
@@ -197,8 +184,7 @@ class AbstractPlot(AbstractMatrixFileWalker):
         
     def _handleYLim(self, **keywords):
         """
-        2012.11.22
-            could be used by descendants, but not called by default
+        Could be used by descendants, but not called by default
         """
         if self.yMin is not None and self.yMax is not None:
             originalYMin, originalYMax = pylab.ylim()
@@ -209,19 +195,16 @@ class AbstractPlot(AbstractMatrixFileWalker):
     
     def handleXLim(self, **keywords):
         """
-        2012.11.22
         """
         pass
         
     def handleYLim(self, **keywords):
         """
-        2012.11.22
         """
         pass
     
     def handleXLabel(self, **keywords):
         """
-        2012.8.6
         """
         if getattr(self, 'xColumnPlotLabel', None):
             xlabel = self.xColumnPlotLabel
@@ -232,7 +215,6 @@ class AbstractPlot(AbstractMatrixFileWalker):
         
     def handleYLabel(self, **keywords):
         """
-        2012.8.6
         """
         if getattr(self, 'whichColumnPlotLabel', None):
             ylabel = self.whichColumnPlotLabel
@@ -243,46 +225,44 @@ class AbstractPlot(AbstractMatrixFileWalker):
     
     def handleTitle(self, **keywords):
         """
-        2012.8.16
         """
         if self.title:
             title = self.title
         else:
             title = yh_matplotlib.constructTitleFromTwoDataSummaryStat(
-                            self.invariantPData.x_ls, self.invariantPData.y_ls)
+                self.invariantPData.x_ls, self.invariantPData.y_ls)
         pylab.title(title)
         return title
     
     def changeFigureScaleToLog(self, xScaleLog=None, yScaleLog=None):
         """
-        2012.11.24
-            not used in default mode
+        Not used in default mode
         """
         
         if xScaleLog is None:
             xScaleLog = self.xScaleLog
         if yScaleLog is None:
             yScaleLog = self.yScaleLog
-        if xScaleLog==1:    #only change the axis into log-scale if it's positive log
+        if xScaleLog==1:
+            #only change the axis into log-scale if it's positive log
             pylab.gca().set_xscale('log', basex=10)
         elif xScaleLog==2:
             pylab.gca().set_xscale('log', basex=2)
         
-        if yScaleLog==1:    #only change the axis into log-scale if it's positive log
+        if yScaleLog==1:
+            #only change the axis into log-scale if it's positive log
             pylab.gca().set_yscale('log', basey=10)
         elif yScaleLog==2:
             pylab.gca().set_yscale('log', basey=2)
         
     def saveFigure(self, invariantPData=None, **keywords):
         """
-        2013.07.16 add legend or not , depending on self.legendType
-        2012.11.24
-        2012.10.7
+        add legend or not , depending on self.legendType
         """
         sys.stderr.write("Saving figure ")
-        #2012.12.4 change scale
+        # change scale
         self.changeFigureScaleToLog()
-        #2012.12.4 change margin
+        # change margin
         self.setMargins()
         
         if self.legendType!=0 and self.plotObjectLegendLs and self.plotObjectLs:
@@ -296,7 +276,7 @@ class AbstractPlot(AbstractMatrixFileWalker):
             pngOutputFname = self.outputFname
             svgOutputFname = '%s.svg'%(self.outputFname[:-4])
         else:
-            sys.stderr.write("could not get outputFnamePrefix from self.outputFnamePrefix %s or self.outputFname %s.\n"%\
+            logging.error("Could not get outputFnamePrefix from self.outputFnamePrefix %s or self.outputFname %s."%\
             (self.outputFnamePrefix, self.outputFname))
             sys.exit(1)
         sys.stderr.write("to %s ..."%(pngOutputFname))
@@ -307,16 +287,14 @@ class AbstractPlot(AbstractMatrixFileWalker):
 
     def setup(self, **keywords):
         """
-        2012.10.15
-            run before anything is run
+        run before anything is run
         """
         AbstractMatrixFileWalker.setup(self, **keywords)
         pylab.clf()
     
     def reduce(self, **keywords):
         """
-        2012.10.15
-            run after all files have been walked through
+        run after all files have been walked through
         """
         self.saveFigure(invariantPData=self.invariantPData)
         #delete self.invariantPData.writer if it exists
@@ -324,7 +302,6 @@ class AbstractPlot(AbstractMatrixFileWalker):
     
     def setMargins(self):
         """
-        2012.12.4
         """
         if self.xmargin is not None:
             pylab.gca().set_xmargin(self.xmargin)
@@ -342,7 +319,7 @@ class AbstractPlot(AbstractMatrixFileWalker):
         for inputFname in self.inputFnameLs:
             if os.path.isfile(inputFname):
                 self.fileWalker(inputFname, afterFileFunction=None, 
-                                    run_type=1, processRowFunction=self.processRow)
+                    run_type=1, processRowFunction=self.processRow)
                 #afterFileFunction = None means self.plot
         
         self.handleTitle()
