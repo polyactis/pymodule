@@ -812,9 +812,9 @@ class AbstractWorkflow(Workflow):
         xScaleLog=0, yScaleLog=0, \
         missingDataNotation='NA',\
         title=None, \
-        minNoOfTotal=100, maxNoOfTotal=None,\
+        minNoOfTotal=None, maxNoOfTotal=None,\
         figureDPI=300, formatString='.', markerSize=None, \
-        ylim_type=2, samplingRate=0.001, legendType=None,\
+        ylim_type=1, samplingRate=1, legendType=None,\
         need_svg=False, \
         inputFileFormat=None, outputFileFormat=None,\
         extraArgumentList=None, extraArguments=None,
