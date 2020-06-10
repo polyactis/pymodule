@@ -546,12 +546,12 @@ class AbstractWorkflow(Workflow):
             inputFileList=inputFileList,
             inputFile=inputFile,
             outputFile=outputFile, outputFnamePrefix=outputFnamePrefix,
+            xColumnHeader=xColumnHeader, xColumnPlotLabel=xColumnPlotLabel,
             whichColumn=whichColumn,
             whichColumnHeader=whichColumnHeader,
             whichColumnPlotLabel=whichColumnPlotLabel,
             logY=logY, valueForNonPositiveYValue=valueForNonPositiveYValue,
             missingDataNotation=missingDataNotation,
-            xColumnHeader=xColumnHeader, xColumnPlotLabel=xColumnPlotLabel,
             title=title,
             minNoOfTotal=minNoOfTotal,
             figureDPI=figureDPI, formatString=formatString, ylim_type=ylim_type, 
@@ -776,17 +776,17 @@ class AbstractWorkflow(Workflow):
             inputFile=inputFile,
             outputFile=outputFile,
             outputFnamePrefix=outputFnamePrefix,
+            xColumnHeader=xColumnHeader, xColumnPlotLabel=xColumnPlotLabel,
             whichColumn=whichColumn,
             whichColumnHeader=whichColumnHeader,
             whichColumnPlotLabel=whichColumnPlotLabel,
             logX=logX, logY=logY,
             valueForNonPositiveYValue=valueForNonPositiveYValue,
-            xScaleLog=xScaleLog, yScaleLog=yScaleLog,\
-            missingDataNotation=missingDataNotation,\
-            xColumnHeader=xColumnHeader, xColumnPlotLabel=xColumnPlotLabel,
+            xScaleLog=xScaleLog, yScaleLog=yScaleLog,
+            missingDataNotation=missingDataNotation,
             minNoOfTotal=minNoOfTotal, maxNoOfTotal=maxNoOfTotal,
             figureDPI=figureDPI, formatString=formatString,
-            ylim_type=ylim_type, \
+            ylim_type=ylim_type,
             samplingRate=samplingRate, need_svg=need_svg,
             inputFileFormat=inputFileFormat,
             outputFileFormat=outputFileFormat,
@@ -805,12 +805,13 @@ class AbstractWorkflow(Workflow):
         inputFileList=None, inputFile=None,
         outputFile=None,
         outputFnamePrefix=None,
+        xColumnHeader=None, xColumnPlotLabel=None,
         whichColumn=None, whichColumnHeader=None, \
         whichColumnPlotLabel=None, \
         logX=None, logY=None, valueForNonPositiveYValue=-1, \
         xScaleLog=0, yScaleLog=0, \
         missingDataNotation='NA',\
-        xColumnHeader=None, xColumnPlotLabel=None, title=None, \
+        title=None, \
         minNoOfTotal=100, maxNoOfTotal=None,\
         figureDPI=300, formatString='.', markerSize=None, \
         ylim_type=2, samplingRate=0.001, legendType=None,\
@@ -987,12 +988,12 @@ inputFileFormat   1: csv-like plain text file; 2: YHPyTables.YHFile; 3: HDF5Matr
             inputFile=inputFile,
             outputFile=outputFile, 
             outputFnamePrefix=outputFnamePrefix,
+            xColumnHeader=None, xColumnPlotLabel=None,
             whichColumn=whichColumn,
             whichColumnHeader=whichColumnHeader, whichColumnPlotLabel=None,
             logY=logY, \
             valueForNonPositiveYValue=valueForNonPositiveYValue,
-            missingDataNotation=None,\
-            xColumnHeader=None, xColumnPlotLabel=None,
+            missingDataNotation=None,
             minNoOfTotal=minNoOfTotal,
             figureDPI=None, formatString=None, ylim_type=None,
             samplingRate=samplingRate, need_svg=False,
@@ -1048,13 +1049,13 @@ inputFileFormat   1: csv-like plain text file; 2: YHPyTables.YHFile; 3: HDF5Matr
             inputFile=inputFile,
             outputFile=outputFile, 
             outputFnamePrefix=outputFnamePrefix,
+            xColumnHeader=None, xColumnPlotLabel=None,
             whichColumn=whichColumn,
             whichColumnHeader=whichColumnHeader, whichColumnPlotLabel=None,
-            logY=logY, \
+            logY=logY,
             valueForNonPositiveYValue=valueForNonPositiveYValue,
             missingDataNotation=None,
-            xColumnHeader=None, xColumnPlotLabel=None,
-            minNoOfTotal=minNoOfTotal, \
+            minNoOfTotal=minNoOfTotal,
             figureDPI=None, formatString=None, ylim_type=None, 
             samplingRate=samplingRate, need_svg=False,
             extraArguments=extraArguments,
@@ -1119,6 +1120,8 @@ inputFileFormat   1: csv-like plain text file; 2: YHPyTables.YHFile; 3: HDF5Matr
             inputFile=inputFile,
             outputFile=outputFile, 
             outputFnamePrefix=outputFnamePrefix,
+            xColumnHeader=None, xColumnPlotLabel=None,
+            title=title,
             whichColumn=whichColumn,
             whichColumnHeader=whichColumnHeader,
             whichColumnPlotLabel=whichColumnPlotLabel,
@@ -1126,7 +1129,6 @@ inputFileFormat   1: csv-like plain text file; 2: YHPyTables.YHFile; 3: HDF5Matr
             logY=logY,
             valueForNonPositiveYValue=valueForNonPositiveYValue,
             missingDataNotation=missingDataNotation,
-            xColumnHeader=None, xColumnPlotLabel=None, title=title,
             minNoOfTotal=minNoOfTotal,
             figureDPI=figureDPI, formatString=formatString,
             ylim_type=ylim_type,
@@ -1181,13 +1183,13 @@ inputFileFormat   1: csv-like plain text file; 2: YHPyTables.YHFile; 3: HDF5Matr
             inputFile=inputFile,
             outputFile=outputFile,
             outputFnamePrefix=outputFnamePrefix,
+            xColumnHeader=xColumnHeader, xColumnPlotLabel=xColumnPlotLabel,
             whichColumn=whichColumn,
             whichColumnHeader=whichColumnHeader,
             whichColumnPlotLabel=whichColumnPlotLabel,
             logX=logX, logY=logY,
             valueForNonPositiveYValue=valueForNonPositiveYValue,
             missingDataNotation=missingDataNotation,
-            xColumnHeader=xColumnHeader, xColumnPlotLabel=xColumnPlotLabel,
             minNoOfTotal=minNoOfTotal,
             figureDPI=figureDPI, formatString=formatString, ylim_type=None,
             samplingRate=samplingRate, need_svg=need_svg,
