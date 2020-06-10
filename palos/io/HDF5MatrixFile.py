@@ -1,57 +1,58 @@
 #!/usr/bin/env python3
 """
 Description:
-    2012.11.15 a matrix stored in HDF5.
+    A matrix stored in HDF5.
         This HDF5 file is composed of groups. At least one group, group0.
-    i.e.
-        reader = HDF5MatrixFile(inputFname=filename, mode='r')
-        reader = HDF5MatrixFile(filename, mode='r')
-        for row in reader:
-            ...
-        tableObject = reader.getTableObject(tableName=tableName)
-        for row in tableObject:
-            ...
-        
-        rowDefinition = [('locus_id','i8'),('chr', HDF5MatrixFile.varLenStrType), ('start','i8'), ('stop', 'i8'), \
-                    ('score', 'f8'), ('MAC', 'i8'), ('MAF', 'f8')]
-        headerList = [row[0] for row in rowDefinition]
-        dtype = numpy.dtype(rowDefinition)
-        
-        writer = HDF5MatrixFile(inputFname=filename, mode='w', dtype=dtype)
-        writer = HDF5MatrixFile(filename, mode='w', dtype=dtype)
-        
-        if writer:
-            tableObject = writer.createNewTable(tableName=tableName, dtype=dtype)
-            tableObject.setColIDList(headerList)
-        elif outputFname:
-            writer = HDF5MatrixFile(outputFname, mode='w', dtype=dtype, tableName=tableName)
-            writer.writeHeader(headerList)
-            tableObject = writer.getTableObject(tableName=tableName)
-        cellList = []
-        for data_obj in self.data_obj_ls:
-            dataTuple = self._extractOutputRowFromDataObject(data_obj=data_obj)
-            cellList.append(dataTuple)
-        tableObject.writeCellList(cellList)
-        if closeFile:
-            writer.close()
-            del writer
-        
-        
-        #each number below is counting bytes, not bits
-        rowDefinition = [('locus_id','i8'),('chromosome', HDF5MatrixFile.varLenStrType),
-            ('start','i8'), ('stop', 'i8'), \
-            ('score', 'f8'), ('MAC', 'i8'), ('MAF', 'f8')]
-        if writer is None and filename:
-            writer = HDF5MatrixFile(filename, mode='w', rowDefinition=rowDefinition, tableName=tableName)
-            tableObject = writer.getTableObject(tableName=tableName)
-        elif writer:
-            tableObject = writer.createNewTable(tableName=tableName, rowDefinition=rowDefinition)
+i.e.
+    reader = HDF5MatrixFile(inputFname=filename, mode='r')
+    reader = HDF5MatrixFile(filename, mode='r')
+    for row in reader:
+        ...
+    tableObject = reader.getTableObject(tableName=tableName)
+    for row in tableObject:
+        ...
+    
+    rowDefinition = [('locus_id','i8'),('chr', HDF5MatrixFile.varLenStrType), ('start','i8'), ('stop', 'i8'), \
+                ('score', 'f8'), ('MAC', 'i8'), ('MAF', 'f8')]
+    headerList = [row[0] for row in rowDefinition]
+    dtype = numpy.dtype(rowDefinition)
+    
+    writer = HDF5MatrixFile(inputFname=filename, mode='w', dtype=dtype)
+    writer = HDF5MatrixFile(filename, mode='w', dtype=dtype)
+    
+    if writer:
+        tableObject = writer.createNewTable(tableName=tableName, dtype=dtype)
+        tableObject.setColIDList(headerList)
+    elif outputFname:
+        writer = HDF5MatrixFile(outputFname, mode='w', dtype=dtype, tableName=tableName)
+        writer.writeHeader(headerList)
+        tableObject = writer.getTableObject(tableName=tableName)
+    cellList = []
+    for data_obj in self.data_obj_ls:
+        dataTuple = self._extractOutputRowFromDataObject(data_obj=data_obj)
+        cellList.append(dataTuple)
+    tableObject.writeCellList(cellList)
+    if closeFile:
+        writer.close()
+        del writer
+    
+    
+    #each number below is counting bytes, not bits
+    rowDefinition = [('locus_id','i8'),('chromosome', HDF5MatrixFile.varLenStrType),
+        ('start','i8'), ('stop', 'i8'), \
+        ('score', 'f8'), ('MAC', 'i8'), ('MAF', 'f8')]
+    if writer is None and filename:
+        writer = HDF5MatrixFile(filename, mode='w', rowDefinition=rowDefinition, tableName=tableName)
+        tableObject = writer.getTableObject(tableName=tableName)
+    elif writer:
+        tableObject = writer.createNewTable(tableName=tableName, rowDefinition=rowDefinition)
 """
 
 import sys, os, math
 import csv
 import h5py
 import numpy
+import logging
 from palos.utils import PassingData, PassingDataList,getListOutOfStr 
 from palos.ProcessOptions import  ProcessOptions
 from palos.io.MatrixFile import MatrixFile
@@ -59,11 +60,15 @@ varLenStrType = h5py.vlen_dtype(str)
 
 class YHTableInHDF5Group(object):
     option_default_dict = {
-        ('h5Group', 0, ): [None, '', 1, "the h5py group ojbect."],\
-        ('newGroup', 1, int): [0, '', 1, "whether this is a new group or an existing group in a file"],\
-        ('dataMatrixDtype', 0, ): ['f', '', 1, 'data type in the dataMatrix. candidates are i, f8, compound type, etc.'],\
-        ('compression', 0, ): [None, '', 1, 'the compression engine for all underlying datasets'],\
-        ('compression_opts', 0, ): [None, '', 1, 'option for the compression engine, gzip level, or tuple for szip'],\
+        ('h5Group', 0, ): [None, '', 1, "the h5py group object."],\
+        ('newGroup', 1, int): [0, '', 1, 
+            "whether this is a new group or an existing group in a file"],\
+        ('dataMatrixDtype', 0, ): ['f', '', 1, 
+            'data type in the dataMatrix. candidates are i, f8, compound type, etc.'],\
+        ('compression', 0, ): [None, '', 1, 
+            'the compression engine for all underlying datasets'],\
+        ('compression_opts', 0, ): [None, '', 1,
+            'option for the compression engine, gzip level, or tuple for szip'],\
         
         }
     def __init__(self, **keywords):
@@ -92,8 +97,8 @@ class YHTableInHDF5Group(object):
         #Offsets in bytes, here 0 and 25:
         numpy.dtype({'surname':('S25',0),'age':(numpy.uint8,25)})
         """
-        self.ad = ProcessOptions.process_function_arguments(keywords, \
-            self.option_default_dict, error_doc=self.__doc__, \
+        self.ad = ProcessOptions.process_function_arguments(keywords,
+            self.option_default_dict, error_doc=self.__doc__,
             class_to_have_attr=self)
         
         self.dataMatrixDSName = "dataMatrix"
@@ -102,51 +107,53 @@ class YHTableInHDF5Group(object):
         if not self.newGroup:
             self._readInData()
         else:
-            self._createDatasetSkeletonForOneGroup(h5Group=self.h5Group, dtype=self.dataMatrixDtype)
+            self._createDatasetSkeletonForOneGroup(h5Group=self.h5Group,
+                dtype=self.dataMatrixDtype)
         
-        self.newWrite = True	#a flag used to control whether it's first time to write stuff (first time=set whole matrix)
-        
+        self.newWrite = True
+        #a flag used to control whether it's first time to write stuff (first time=set whole matrix)
         self.rowIndexCursor = 0
         
     def _createDatasetSkeletonForOneGroup(self, h5Group=None, dtype=None):
         """
-        2012.11.18
         """
         if h5Group is None:
             h5Group = self.h5Group
         if dtype is None:
             dtype = self.dataMatrixDtype
-        self.dataMatrix = h5Group.create_dataset(self.dataMatrixDSName, shape=(1,), dtype=dtype, \
-                                        maxshape=(None, ), compression=self.compression, compression_opts=self.compression_opts)
+        self.dataMatrix = h5Group.create_dataset(self.dataMatrixDSName, shape=(1,),
+            dtype=dtype, maxshape=(None, ),
+            compression=self.compression, compression_opts=self.compression_opts)
         #by default it contains one "null" data point.
         self.dataMatrix.resize((0,))
-        self.rowIDList = h5Group.create_dataset(self.rowIDListDSName, shape=(1,), dtype=varLenStrType, maxshape=(None,),\
-                                            compression=self.compression, compression_opts=self.compression_opts)
+        self.rowIDList = h5Group.create_dataset(self.rowIDListDSName, shape=(1,),
+            dtype=varLenStrType, maxshape=(None,),
+            compression=self.compression, compression_opts=self.compression_opts)
         self.rowIDList.resize((0,))
-        self.colIDList = h5Group.create_dataset(self.colIDListDSName, shape=(1,), dtype=varLenStrType, maxshape=(None,),\
-                                            compression=self.compression, compression_opts=self.compression_opts)
+        self.colIDList = h5Group.create_dataset(self.colIDListDSName, shape=(1,),
+            dtype=varLenStrType, maxshape=(None,),\
+            compression=self.compression, compression_opts=self.compression_opts)
         self.colIDList.resize((0,))
         self.rowID2rowIndex = {}
         self.colID2colIndex = {}
     
     def _readInData(self):
         """
-        2012.11.16
         """
         self.dataMatrix = self.h5Group[self.dataMatrixDSName]
         self.rowIDList = self.h5Group[self.rowIDListDSName]
         self.colIDList = self.h5Group[self.colIDListDSName]
         self._processRowIDColID()
-        #pass the HDF5Group attributes to this object itself, it ran into "can't set attribute error".
+        #pass the HDF5Group attributes to this object itself,
+        #  it ran into "can't set attribute error".
         # conflict with existing property
         #for attributeName, attributeValue in self.h5Group.attrs.items():
         #	object.__setattr__(self, attributeName, attributeValue)
     
     def _processRowIDColID(self):
         """
-        2012.11.16 similar to SNPData.processRowIDColID()
+        Similar to SNPData.processRowIDColID()
         """
-            
         rowIDList = self.rowIDList
         colIDList = self.colIDList
         rowID2rowIndex = {}
@@ -166,13 +173,13 @@ class YHTableInHDF5Group(object):
     
     def extendDataMatrix(self, dataMatrix=None, **keywords):
         """
-        2012.11.16
-            dataMatrix has to be 2D
+        dataMatrix has to be 2D
         """
         if dataMatrix:
             m = len(dataMatrix)
             s = self.dataMatrix.shape[0]
-            if self.newWrite:	#defaultData in self.dataMatrix is of shape (1,)
+            if self.newWrite:
+                #defaultData in self.dataMatrix is of shape (1,)
                 self.dataMatrix.resize((m,))
                 self.dataMatrix[0:m] = dataMatrix
             else:
@@ -182,20 +189,17 @@ class YHTableInHDF5Group(object):
     
     def writeCellList(self, cellList=None, **keywords):
         """
-        2012.11.19
-            call self.extendDataMatrix()
+        call self.extendDataMatrix()
         """
         self.extendDataMatrix(dataMatrix=cellList, **keywords)
     
     def _appendID(self, idDataset=None, idValue=None):
         """
-        2012.11.8
         """
         self._extendIDList(idDataset=idDataset, idList=[idValue])
 
     def _extendIDList(self, idDataset=None, idList=None):
         """
-        2012.11.16
         """
         if idDataset is None:
             idDataset = self.colIDList
@@ -208,7 +212,6 @@ class YHTableInHDF5Group(object):
 
     def _setIDList(self, idDataset=None, idList=None):
         """
-        2012.11.16
         """
         if idDataset is None:
             idDataset = self.colIDList
@@ -269,13 +272,15 @@ class YHTableInHDF5Group(object):
     
     def next(self):
         """
-        2012.11.19 part of faking as a file object
+        part of faking as a file object
         """
         pdata = PassingDataList()
         if self.rowIndexCursor<self.dataMatrix.shape[0]:
             row = self.dataMatrix[self.rowIndexCursor]
-            for colID in self.colIDList:	#iteration over colIDList is in the same order as the ascending order of colIndex
-                #but iteration over self.colID2colIndex is not in the same order as the ascending order of colIndex
+            for colID in self.colIDList:
+                #iterate over colIDList is in the same order as the ascending order of colIndex
+                #but iteration over self.colID2colIndex is not in the same
+                #   order as the ascending order of colIndex
                 colIndex = self.colID2colIndex.get(colID)
                 setattr(pdata, colID, row[colIndex])
             self.rowIndexCursor += 1
@@ -285,21 +290,20 @@ class YHTableInHDF5Group(object):
     
     def reset(self):
         """
-        2012.11.19 part of faking as a file object
+        part of faking as a file object
         """
         self.rowIndexCursor = 0
     
     def constructColName2IndexFromHeader(self):
         """
-        2012.11.22 added so that YHSingleTableFile could be used as HDF5MatrixFile
+        added so that YHSingleTableFile could be used as HDF5MatrixFile
         """
         return self.colID2colIndex
     
     
     def getColIndexGivenColHeader(self, colHeader=None):
         """
-        2012.11.15
-            this is from the combined column header list.
+        this is from the combined column header list.
         """
         return self.colID2colIndex.get(colHeader)
     
@@ -308,21 +312,23 @@ class YHTableInHDF5Group(object):
         
         """
         if name in self.h5Group.attrs:
-            sys.stderr.write("Warning: h5Group %s already has attribute %s=%s.\n"%(self.name, name, value))
+            logging.warn("h5Group %s already has attribute %s=%s."%(
+                self.name, name, value))
             if overwrite:
                 self.h5Group.attrs[name] = value
             else:
                 return False
         else:
             self.h5Group.attrs[name] = value
-        #pass the HDF5Group attributes to this object itself , it ran into "can't set attribute error". conflict with existing property
+        #pass the HDF5Group attributes to this object itself,
+        #  it ran into "can't set attribute error".
+        #  conflict with existing property
         #object.__setattr__(self, name, value)
         #setattr(self, name, value)
         return True
     
     def addAttributeDict(self, attributeDict=None):
         """
-        2012.12.18
         """
         addAttributeDictToYHTableInHDF5Group(tableObject=self, attributeDict=attributeDict)
     
@@ -334,8 +340,7 @@ class YHTableInHDF5Group(object):
     
     def getListAttributeInStr(self, name=None):
         """
-        2012.11.22
-            this attribute must be a list or array
+        this attribute must be a list or array
         """
         attr_in_str = ''
         attributeValue = self.getAttribute(name=name)
@@ -347,25 +352,21 @@ class YHTableInHDF5Group(object):
     
     def addObjectAttributeToSet(self, attributeName=None, setVariable=None):
         """
-        2012.12.3
-        2012.11.22
-            do not add an attribute to the set if it's not available or if it's none
+        do not add an attribute to the set if it's not available or if it's none
         """
         attributeValue = self.getAttribute(attributeName, None)
         if attributeValue is not None and setVariable is not None:
             setVariable.add(attributeValue)
         return setVariable
     
-    def addObjectListAttributeToSet(self, attributeName=None, setVariable=None, data_type=None):
+    def addObjectListAttributeToSet(self, attributeName=None,
+        setVariable=None, data_type=None):
         """
-        2013.09.10 bugfix, added argument data_type
-        2012.12.3
-        2012.12.2 bugfix
-        2012.11.23
         """
         attributeValue = self.getAttribute(attributeName, None)
         flag = False
-        if type(attributeValue)==numpy.ndarray:	#"if attributeValue" fails for numpy array
+        if type(attributeValue)==numpy.ndarray:
+            #"if attributeValue" fails for numpy array
             if hasattr(attributeValue, '__len__') and attributeValue.size>0:
                 flag = True
         elif attributeValue or attributeValue == 0:
@@ -380,11 +381,11 @@ class YHTableInHDF5Group(object):
     
     def close(self):
         """
-        2012.12.4
-            deprecated. dimension set to 0 upon creation.
-            resize the data matrix to zero if it's in write mode and self.newWrite is still True
+        deprecated. dimension set to 0 upon creation.
+        resize the data matrix to zero if it's in write mode and self.newWrite is still True
         """
-        if self.newGroup and self.newWrite:	#in write mode and no writing has happened.
+        if self.newGroup and self.newWrite:
+            #in write mode and no writing has happened.
             self.dataMatrix.resize((0,))
             #or you can delete it
             #del self.h5Group[self.dataMatrixDSName]
@@ -392,20 +393,28 @@ class YHTableInHDF5Group(object):
     
 
 class HDF5MatrixFile(MatrixFile):
-    varLenStrType = varLenStrType	#convenient for outside program to access this variable length string type
+    varLenStrType = varLenStrType
+    #convenient for outside program to access this variable length string type
     __doc__ = __doc__
     option_default_dict = MatrixFile.option_default_dict.copy()
     option_default_dict.update({
-                            ('tableName', 0, ): [None, '', 1, "name for the first table, default is $tableNamePrefix\0. "],\
-                            ('tableNamePrefix', 0, ): ['table', '', 1, "prefix for all table's names"],\
-                            ('rowDefinition', 0, ): [None, '', 1, "data type list for a compound dtype. It overwrites dtype. i.e. a list of i.e. ('start','i8')"],\
-                            ('dtype', 0, ): [None, '', 1, 'data type in the first table to be created. candidates are i, f8, etc.'],\
-                            ('compression', 0, ): ['gzip', '', 1, 'the compression engine for all underlying datasets, gzip, szip, lzf'],\
-                            ('compression_opts', 0, ): [None, '', 1, 'option for the compression engine, gzip level, or tuple for szip'],\
-                            })
+        ('tableName', 0, ): [None, '', 1, 
+            "name for the first table, default is $tableNamePrefix\0. "],\
+        ('tableNamePrefix', 0, ): ['table', '', 1, 
+            "prefix for all table's names"],\
+        ('rowDefinition', 0, ): [None, '', 1,
+            "data type list for a compound dtype. It overwrites dtype. i.e. a list of i.e. ('start','i8')"],\
+        ('dtype', 0, ): [None, '', 1, 
+            'data type in the first table to be created. candidates are i, f8, etc.'],\
+        ('compression', 0, ): ['gzip', '', 1,
+            'the compression engine for all underlying datasets, gzip, szip, lzf'],\
+        ('compression_opts', 0, ): [None, '', 1, 
+            'option for the compression engine, gzip level, or tuple for szip'],\
+        })
     def __init__(self, inputFname=None, **keywords):
-        self.ad = ProcessOptions.process_function_arguments(keywords, self.option_default_dict, error_doc=self.__doc__, \
-                                                        class_to_have_attr=self)
+        self.ad = ProcessOptions.process_function_arguments(keywords, 
+            self.option_default_dict, error_doc=self.__doc__, \
+            class_to_have_attr=self)
         if not self.inputFname:
             self.inputFname = inputFname
         
@@ -437,9 +446,11 @@ class HDF5MatrixFile(MatrixFile):
             dtype = self.dtype
         if tableName is None:
             tableName = self._getNewTableName()
-        tableObject = YHTableInHDF5Group(h5Group=self.hdf5File.create_group(tableName), \
-                                newGroup=True, dataMatrixDtype=dtype, \
-                                compression=self.compression, compression_opts=self.compression_opts)
+        tableObject = YHTableInHDF5Group(
+            h5Group=self.hdf5File.create_group(tableName),
+            newGroup=True, dataMatrixDtype=dtype,
+            compression=self.compression,
+            compression_opts=self.compression_opts)
         if colIDList:
             tableObject.setColIDList(colIDList)
         self._appendNewTable(tableObject)
@@ -447,10 +458,12 @@ class HDF5MatrixFile(MatrixFile):
     
     def _appendNewTable(self, tableObject=None):
         if tableObject:
-            tableName = tableObject.name	##the tableName preceds with "/"
+            tableName = tableObject.name
+            ##the tableName preceds with "/"
             if tableName in self.tablePath2Index:	 
-                sys.stderr.write("ERROR, table %s already in self.tablePath2Index, index=%s.\n"%(tableName,\
-                                                                            self.tablePath2Index.get(tableName)))
+                logging.error("table %s already in self.tablePath2Index, index=%s."%(
+                    tableName,
+                    self.tablePath2Index.get(tableName)))
                 sys.exit(3)
             self.tablePath2Index[tableName] = len(self.tablePath2Index)
             self.tableObjectList.append(tableObject)
@@ -463,14 +476,14 @@ class HDF5MatrixFile(MatrixFile):
             tableNamePrefix = self.tableNamePrefix
         i = len(self.tableObjectList)
         tableName = "%s%s"%(tableNamePrefix, i)
-        while "/"+tableName in self.tablePath2Index:	#stop until a unique name shows up
+        while "/"+tableName in self.tablePath2Index:
+            #stop until a unique name shows up
             i += 1
             tableName = "%s%s"%(tableNamePrefix, i)
         return tableName
     
     def _readInData(self):
         """
-        2012.11.16
         """
         for tableName, h5Group in self.hdf5File.items():
             tableObject = YHTableInHDF5Group(h5Group=h5Group, newGroup=False,\
@@ -480,7 +493,6 @@ class HDF5MatrixFile(MatrixFile):
         
     def _setupCombinedColumnIDMapper(self,):
         """
-        2012.11.16
         """
         self.combinedColID2ColIndex = {}
         self.header = []
@@ -497,14 +509,13 @@ class HDF5MatrixFile(MatrixFile):
     
     def constructColName2IndexFromHeader(self):
         """
-        2012.11.22 overwrite parent function
+        overwrite parent function
         """
         return self.combinedColID2ColIndex
     
     def getColIndexGivenColHeader(self, colHeader=None):
         """
-        2012.11.15
-            this is from the combined column header list.
+        this is from the combined column header list.
         """
         return self.combinedColID2ColIndex.get(colHeader)
     
@@ -515,7 +526,8 @@ class HDF5MatrixFile(MatrixFile):
         if tableIndex is not None:
             tableObject = self.tableObjectList[tableIndex]
         elif tableName:
-            if tableName[0]!='/':	#bugfix, add root in front if not there.
+            if tableName[0]!='/':
+                #bugfix, add root in front if not there.
                 tableName = '/'+tableName
             tableIndex = self.tablePath2Index.get(tableName)
             if tableIndex is not None:
@@ -548,8 +560,7 @@ class HDF5MatrixFile(MatrixFile):
     
     def next(self):
         """
-        2012.11.16
-            combine the numeric and str row (if both exist). and return the combined row
+        combine the numeric and str row (if both exist). and return the combined row
         """
         
         row = None
@@ -580,26 +591,24 @@ class HDF5MatrixFile(MatrixFile):
     
     def writeHeader(self, headerList=None, tableIndex=None, tableName=None):
         """
-        2012.11.16
-            only the first table
+        only the first table
         """
-        self.setColIDList(colIDList=headerList, tableIndex=tableIndex, tableName=tableName)
+        self.setColIDList(colIDList=headerList, tableIndex=tableIndex,
+            tableName=tableName)
     
     def writeOneCell(self, oneCell=None, tableIndex=None, tableName=None):
         """
-        2012.11.19
-            mimic csv's writerow()
-            each cell must be a tuple (readable only). list is not acceptable. 
-            it's not very efficient as it's resizing the dataMatrix all the time.
+        mimic csv's writerow()
+        each cell must be a tuple (readable only). list is not acceptable. 
+        it's not very efficient as it's resizing the dataMatrix all the time.
         """
         tableObject = self.getTableObject(tableIndex=tableIndex, tableName=tableName)
         tableObject.extendDataMatrix(dataMatrix=[oneCell])
 
     def writeCellList(self, cellList=None, tableIndex=None, tableName=None):
         """
-        2012.11.18
-            for bulk writing. more efficient.
-            each cell must be a tuple (readable only). list is not acceptable. 
+        for bulk writing. more efficient.
+        each cell must be a tuple (readable only). list is not acceptable. 
         """
         tableObject = self.getTableObject(tableIndex=tableIndex, tableName=tableName)
         tableObject.extendDataMatrix(dataMatrix=cellList)
@@ -617,9 +626,10 @@ class HDF5MatrixFile(MatrixFile):
         tableObject = self.getTableObject(tableIndex=tableIndex, tableName=tableName)
         tableObject.setRowIDList(rowIDList=rowIDList)
     
-    def addAttribute(self, name=None, value=None, overwrite=True, tableIndex=None, tableName=None):
+    def addAttribute(self, name=None, value=None, overwrite=True,
+        tableIndex=None, tableName=None):
         """
-        2012.11.28 find the tableObject and let it do the job
+        find the tableObject and let it do the job
         """
         tableObject = self.getTableObject(tableIndex=tableIndex, tableName=tableName)
         return tableObject.addAttribute(name=name, value=value, overwrite=overwrite)
@@ -632,24 +642,23 @@ class HDF5MatrixFile(MatrixFile):
     
     def getAttribute(self, name=None, defaultValue=None, tableIndex=None, tableName=None):
         """
-        2012.11.28
         """
         tableObject = self.getTableObject(tableIndex=tableIndex, tableName=tableName)
         return tableObject.getAttribute(name=name, defaultValue=defaultValue)
     
     def getAttributes(self, tableIndex=None, tableName=None):
         """
-        2012.11.28
         """
-        tableObject = self.getTableObject(tableIndex=tableIndex, tableName=tableName)
+        tableObject = self.getTableObject(tableIndex=tableIndex,
+            tableName=tableName)
         return tableObject.getAttributes()
     
     def getListAttributeInStr(self, name=None, tableIndex=None, tableName=None):
         """
-        2012.11.22
-            this attribute must be a list or array
+        this attribute must be a list or array
         """
-        tableObject = self.getTableObject(tableIndex=tableIndex, tableName=tableName)
+        tableObject = self.getTableObject(tableIndex=tableIndex,
+            tableName=tableName)
         return tableObject.getListAttributeInStr(name=name)
     
     def run(self):
@@ -662,7 +671,7 @@ class HDF5MatrixFile(MatrixFile):
 
 def addAttributeDictToYHTableInHDF5Group(tableObject=None, attributeDict=None):
     """
-    2012.11.22 convenient function
+    convenient function
         attributeValue could not be high-level python objects, such as list, set.
         numpy.array could replace list.
     """
@@ -672,7 +681,8 @@ def addAttributeDictToYHTableInHDF5Group(tableObject=None, attributeDict=None):
             if type(attributeValue)==numpy.ndarray:
                 if hasattr(attributeValue, '__len__') and attributeValue.size>0:
                     doItOrNot = True
-            elif attributeValue or attributeValue == 0:	#empty array will be ignored but not 0
+            elif attributeValue or attributeValue == 0:
+                #empty array will be ignored but not 0
                 doItOrNot = True
             if doItOrNot:
                 tableObject.addAttribute(name=attributeName, value=attributeValue)
