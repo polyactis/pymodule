@@ -6,7 +6,7 @@ An abstract class for plot classes, can plot XY scatter/line (pending self.forma
         (plus the ones in trailing arguments). 
 
 Examples:
-    # 2012.8.2 draw data column NumberOfLoci (y-axis, -W) vs. AAC (x-axis -l ...).
+    # Draw data column NumberOfLoci (y-axis, -W) vs. AAC (x-axis -l ...).
     # sample all data (-s 1), generate svg figure (-n)
     # take positive (-p) log (-g) of the whichColumn value (y-axis)
     %s -p -g -l AAC -W NumberOfLoci -D NoOfLoci -O ~/NoOfLoci_vs_AAC -n -s 1 -x AAC
@@ -29,7 +29,8 @@ class AbstractPlot(AbstractMatrixFileWalker):
     option_default_dict = AbstractMatrixFileWalker.option_default_dict.copy()
     option_default_dict.update({
     ('title', 0, ): [None, 't', 1, 'title for the figure.'],\
-    ('figureDPI', 1, int): [200, 'f', 1, 'dpi, dots per inch, for the output figures (png)'],\
+    ('figureDPI', 1, int): [200, 'f', 1, 
+        'dpi, dots per inch, for the output figures (png)'],\
     ('formatString', 1, ): ['.', '', 1, 'formatString passed to matplotlib plot'],\
     ('markerSize', 1, int): [10, '', 1, \
         'size of plotting marker (dot size, usually), matplotlib default is 5'],\
@@ -48,13 +49,16 @@ class AbstractPlot(AbstractMatrixFileWalker):
     if this is non-zero, then logY should be toggled off. otherwise data will be messed up.'],\
     ('need_svg', 0, ): [0, 'n', 0, 'whether need svg output', ],\
     ('defaultFontLabelSize', 1, int): [12, '', 1, 'default font & label size on the plot'], \
-    ('defaultFigureWidth', 1, float): [10, '', 1, 'default figure width (in inch) in the pedigree plot'], \
+    ('defaultFigureWidth', 1, float): [10, '', 1, 
+        'default figure width (in inch) in the pedigree plot'], \
     ('defaultFigureHeight', 1, float): [10, '', 1, \
         'default figure height (in inch) in the pedigree plot'], \
     ('xmargin', 0, float): [0, '', 1, \
-        'this is margin within the plotting area. how far data points should be away from axis. 0-1.0'], \
+        'this is margin within the plotting area.'
+        'how far data points should be away from axis. 0-1.0'], \
     ('ymargin', 0, float): [0, '', 1, \
-        'this is margin within the plotting area. how far data points should be away from axis. 0-1.0'], \
+        'this is margin within the plotting area. '
+        'how far data points should be away from axis. 0-1.0'], \
     ('plotLeft', 0, float): [0.1, '', 1, 'the left side of the subplots of the figure'], \
     ('plotRight', 0, float): [0.9, '', 1, 'the right side of the subplots of the figure'], \
     ('plotBottom', 0, float): [0.1, '', 1, ' the bottom of the subplots of the figure'], \
@@ -187,7 +191,7 @@ class AbstractPlot(AbstractMatrixFileWalker):
         Could be used by descendants, but not called by default
         """
         if self.yMin is not None and self.yMax is not None:
-            originalYMin, originalYMax = pylab.ylim()
+            #originalYMin, originalYMax = pylab.ylim()
             delta = abs(self.yMax-self.yMin)/10.0
             if delta<=0:
                 delta = 0.5
@@ -276,8 +280,9 @@ class AbstractPlot(AbstractMatrixFileWalker):
             pngOutputFname = self.outputFname
             svgOutputFname = '%s.svg'%(self.outputFname[:-4])
         else:
-            logging.error("Could not get outputFnamePrefix from self.outputFnamePrefix %s or self.outputFname %s."%\
-            (self.outputFnamePrefix, self.outputFname))
+            logging.error(f"Could not get outputFnamePrefix from "
+                f"self.outputFnamePrefix {self.outputFnamePrefix} or "
+                f"self.outputFname {self.outputFname}.")
             sys.exit(1)
         sys.stderr.write("to %s ..."%(pngOutputFname))
         pylab.savefig(pngOutputFname, dpi=self.figureDPI)
@@ -334,6 +339,7 @@ class AbstractPlot(AbstractMatrixFileWalker):
 
 if __name__ == '__main__':
     main_class = AbstractPlot
-    po = ProcessOptions(sys.argv, main_class.option_default_dict, error_doc=main_class.__doc__)
+    po = ProcessOptions(sys.argv, main_class.option_default_dict,
+        error_doc=main_class.__doc__)
     instance = main_class(po.arguments, **po.long_option2value)
     instance.run()
