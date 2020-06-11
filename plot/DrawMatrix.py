@@ -3,25 +3,26 @@
 Examples:
     DrawMatrix.py -i /tmp/149CrossMatch_m3.tsv -o /tmp/149CrossMatch_m3.png -s 5
     
-    #font size=10, use custom font, matrix value is non-negative. only some special negative value is not ignored.
+    #font size=10, use custom font, matrix value is non-negative.
+    # only some special negative value is not ignored.
     #value -2 is colored as black
-    DrawMatrix.py -i ./149CrossMatch_m4_a0.3.tsv -o ./banyan_fs/tmp/149CrossMatch_m4_a0.3.png -s 10 -e ./FreeSerif.ttf -m -u black
+    DrawMatrix.py -i ./149CrossMatch_m4_a0.3.tsv -o ./banyan_fs/tmp/149CrossMatch_m4_a0.3.png
+        -s 10 -e ./FreeSerif.ttf -m -u black
     
     #partition rows into 2500-row blocks. Color legend is cut into 10 bands.
-    DrawMatrix.py -i ./149CrossMatch_m4_a0.1.tsv -o ./banyan_fs/tmp/149CrossMatch_m4_a0.1.png -s 10 -e ./FreeSerif.ttf -m -u black -x 2500 -t 10
+    DrawMatrix.py -i ./149CrossMatch_m4_a0.1.tsv -o ./banyan_fs/tmp/149CrossMatch_m4_a0.1.png
+        -s 10 -e ./FreeSerif.ttf -m -u black -x 2500 -t 10
     
     #draw the whole matrix into one figure with small font (size=2) and do NOT draw the cell-separating grid.
-    DrawMatrix.py -i ./149CrossMatch_m4_a0.1.tsv -o ./banyan_fs/tmp/149CrossMatch_m4_a0.1.png -s 2 -e ./FreeSerif.ttf -m -u black -x 7000 -c 7000 -t 20 -n
+    DrawMatrix.py -i ./149CrossMatch_m4_a0.1.tsv -o ./banyan_fs/tmp/149CrossMatch_m4_a0.1.png -s 2
+        -e ./FreeSerif.ttf -m -u black -x 7000 -c 7000 -t 20 -n
     
 Description:
-    2012.8.24 also a standalone program that draw matrix into images.
-        If matrix is too big, it'll partition the image into blocks and output each block into one image output.
-    2007-10-23
-    module to draw matrix into an image
-    some functions copied form annot.bin.codense.common and variation.src.common
-    
-    2008-08-29
-    DrawMatrix is a class to draw matrix values (>=0) in HSL color. values <0 are deemed as special values.
+A standalone program that draw matrix into images.
+If matrix is too big, it'll partition the image into blocks and output each block into one image output.
+Module to draw matrix into an image
+Some functions copied form annot.bin.codense.common and variation.src.common
+DrawMatrix is a class to draw matrix values (>=0) in HSL color. values <0 are deemed as special values.
 """
 
 """
@@ -41,7 +42,8 @@ def get_char_dimension():
     return char_dimension
 
 
-def get_text_region(text, dimension, rotate=1, foreground=(0,0,255), background=(255,255,255), font=None):
+def get_text_region(text, dimension, rotate=1, foreground=(0,0,255),
+    background=(255,255,255), font=None):
     """
     10-31-05 add background and foreground
     2006-12-13 add font
@@ -56,7 +58,8 @@ def get_text_region(text, dimension, rotate=1, foreground=(0,0,255), background=
     box = (0,0,dimension[0], dimension[1])
     text_reg = text_im.crop(box)
     if rotate:
-        text_reg = text_reg.transpose(Image.ROTATE_90)	#90 is anti-clockwise
+        text_reg = text_reg.transpose(Image.ROTATE_90)
+        #90 is anti-clockwise
     return text_reg
 
 """
@@ -85,11 +88,9 @@ def draw_grid(image_object, draw_object, region_to_draw, x_gap, y_gap, color='bl
 
 def drawLegend(matrix_value2label, matrix_value2color, font=None):
     """
-    2008-08-21
-        matrix_value2color could be a dictionary or function. if it's a dictionary, turn it into lambda function.
-    2007-10-23
-    2007-11-02
-        add line to get default font
+    matrix_value2color could be a dictionary or function.
+        if it's a dictionary, turn it into lambda function.
+    add line to get default font
     """
     sys.stderr.write("Drawing legend ...")
     import Image, ImageDraw
@@ -114,7 +115,8 @@ def drawLegend(matrix_value2label, matrix_value2color, font=None):
     x_offset3 = x_offset2 + label_dimension[0]	#the margin to the right starts here
     y_offset0 = 0
     y_offset1 = y_offset0 + char_height	#sample color starts here
-    y_offset2 = y_offset1 + len(label_ls)*2*char_height-char_height	# len(label_ls)-1 gaps among char_height's
+    y_offset2 = y_offset1 + len(label_ls)*2*char_height-char_height
+    # len(label_ls)-1 gaps among char_height's
     whole_dimension = (x_offset3+char_height, \
             y_offset2+char_height)
     im = Image.new('RGB',(whole_dimension[0],whole_dimension[1]),(255,255,255))
@@ -125,7 +127,8 @@ def drawLegend(matrix_value2label, matrix_value2color, font=None):
         y_offset_upper = y_offset1 + i*2*char_height
         y_offset_lower = y_offset1 + i*2*char_height + char_height
         #draw a sample color for this label
-        draw.rectangle((x_offset1, y_offset_upper, x_offset1+char_height, y_offset_lower), fill=matrix_value2color_func(matrix_value))
+        draw.rectangle((x_offset1, y_offset_upper, x_offset1+char_height, y_offset_lower),
+            fill=matrix_value2color_func(matrix_value))
         
         #draw the label
         label = matrix_value2label[matrix_value]
@@ -137,14 +140,12 @@ def drawLegend(matrix_value2label, matrix_value2color, font=None):
     return im
 
 
-def drawContinousLegend(min_value, max_value, no_of_ticks, value2color, font=None, no_of_bands_per_char_height=5):
+def drawContinousLegend(min_value, max_value, no_of_ticks, value2color,
+    font=None, no_of_bands_per_char_height=5):
     """
-    2008-09-30
-        fix a bug when min_value, max_value are all integers and band_value_step=0 if no_of_bands>(max_value-min_value).
-    2008-08-21
-        deal with the case that tick_index goes out of bound
-    2008-08-21
-        draw legend for continous values
+    fix a bug when min_value, max_value are all integers and band_value_step=0 if no_of_bands>(max_value-min_value).
+    deal with the case that tick_index goes out of bound.
+    draw legend for continous values.
     """
     sys.stderr.write("Drawing continous legend ...")
     import Image, ImageDraw
@@ -157,8 +158,12 @@ def drawContinousLegend(min_value, max_value, no_of_ticks, value2color, font=Non
     char_dimension = font.getsize('W')	#W is the the biggest(widest)
     char_width, char_height = char_dimension
     band_height = int(char_height/no_of_bands_per_char_height)
-    no_of_bands = 2*(no_of_ticks-1)*no_of_bands_per_char_height	#this is the number of bands to draw
-    min_value = float(min_value)	#2008-09-30	convert to float in case all integer cause band_value_step=0 if no_of_bands>(max_value-min_value). python gives integer output if numerator/denominator are all integer.
+    no_of_bands = 2*(no_of_ticks-1)*no_of_bands_per_char_height
+    #this is the number of bands to draw
+    min_value = float(min_value)
+    # convert to float in case all integer cause band_value_step=0 ,
+    #   if no_of_bands>(max_value-min_value).
+    # python gives integer output if numerator/denominator are all integer.
     max_value = float(max_value)
     band_value_step = (max_value-min_value)/no_of_bands
     band_value_ls = []
@@ -181,7 +186,8 @@ def drawContinousLegend(min_value, max_value, no_of_ticks, value2color, font=Non
         label = None
         if tick_index<len(tick_value_ls):	#2008-08-21
             tick_value = tick_value_ls[tick_index]
-            if abs(band_value-tick_value)<band_value_step:	#if the tick_value and band_value is close enough, bind them together
+            if abs(band_value-tick_value)<band_value_step:
+                #if the tick_value and band_value is close enough, bind them together
                 label = '%.2f'%tick_value
                 if len(label)>max_label_len:
                     max_label_len = len(label)
@@ -195,7 +201,8 @@ def drawContinousLegend(min_value, max_value, no_of_ticks, value2color, font=Non
     x_offset3 = x_offset2 + label_dimension[0]	#the margin to the right starts here
     y_offset0 = 0
     y_offset1 = y_offset0 + char_height	#sample color starts here
-    y_offset2 = y_offset1 + len(value_label_ls)*band_height	# len(label_ls)-1 gaps among char_height's
+    y_offset2 = y_offset1 + len(value_label_ls)*band_height
+    # len(label_ls)-1 gaps among char_height's
     whole_dimension = (x_offset3+char_height, \
             y_offset2+char_height)
     im = Image.new('RGB',(whole_dimension[0],whole_dimension[1]),(255,255,255))
@@ -206,7 +213,8 @@ def drawContinousLegend(min_value, max_value, no_of_ticks, value2color, font=Non
         y_offset_upper = y_offset1 + i*band_height
         y_offset_lower = y_offset1 + (i+1)*band_height
         #draw a sample color for this label
-        draw.rectangle((x_offset1, y_offset_upper, x_offset1+char_height, y_offset_lower), fill=value2color_func(band_value))
+        draw.rectangle((x_offset1, y_offset_upper, x_offset1+char_height, y_offset_lower),
+            fill=value2color_func(band_value))
         
         if label!=None:
             #draw a line here
@@ -218,7 +226,8 @@ def drawContinousLegend(min_value, max_value, no_of_ticks, value2color, font=Non
     sys.stderr.write("Done.\n")
     return im
 
-def drawMatrix(matrix, matrix_value2color, left_label_ls=[], top_label_ls=[], right_label_ls=[], bottom_label_ls=[], with_grid=0, font=None):
+def drawMatrix(matrix, matrix_value2color, left_label_ls=[], top_label_ls=[],
+    right_label_ls=[], bottom_label_ls=[], with_grid=0, font=None):
     """
     2008-08-21
         shift the left_label to the right to stick next to the matrix
@@ -262,9 +271,11 @@ def drawMatrix(matrix, matrix_value2color, left_label_ls=[], top_label_ls=[], ri
         max_bottom_label_length = 0
     
     left_label_dimension = (max_left_label_length + char_width, char_height)
-    top_label_dimension = (max_top_label_length + char_width, char_height)	#need rotation
+    top_label_dimension = (max_top_label_length + char_width, char_height)
+    #need rotation
     right_label_dimension = (max_right_label_length + char_width, char_height)
-    bottom_label_dimension = (max_bottom_label_length + char_width, char_height)	#need rotation
+    bottom_label_dimension = (max_bottom_label_length + char_width, char_height)
+    #need rotation
     
     x_offset0 = char_width
     x_offset1 = left_label_dimension[0]
@@ -282,9 +293,13 @@ def drawMatrix(matrix, matrix_value2color, left_label_ls=[], top_label_ls=[], ri
         for i in range(len(left_label_ls)):
             left_label = left_label_ls[i]
             _left_label_dimension = font.getsize(left_label)
-            text_region = get_text_region(left_label, _left_label_dimension, rotate=0, font=font)	#no rotate
-            label_shift = max_left_label_length - _left_label_dimension[0]	#shift the left_label to the right to stick next to the matrix
-            box = (x_offset0+label_shift, y_offset1+i*left_label_dimension[1], x_offset1, y_offset1+(i+1)*left_label_dimension[1])
+            text_region = get_text_region(left_label, _left_label_dimension,
+                rotate=0, font=font)
+            #no rotate
+            label_shift = max_left_label_length - _left_label_dimension[0]
+            #shift the left_label to the right to stick next to the matrix
+            box = (x_offset0+label_shift, y_offset1+i*left_label_dimension[1],
+                x_offset1, y_offset1+(i+1)*left_label_dimension[1])
             im.paste(text_region, box)
     
     #draw matrix and top_label_ls and bottom_label_ls
@@ -298,8 +313,9 @@ def drawMatrix(matrix, matrix_value2color, left_label_ls=[], top_label_ls=[], ri
             box = (x_offset_left, y_offset0, x_offset_right, y_offset1)
             im.paste(text_region, box)
         for j in range(matrix.shape[0]):	#y-axis
-            draw.rectangle((x_offset_left, y_offset1+j*left_label_dimension[1], \
-                    x_offset_right, y_offset1+(j+1)*left_label_dimension[1]), fill=matrix_value2color_func(matrix[j,i]))
+            draw.rectangle((x_offset_left, y_offset1+j*left_label_dimension[1],
+                x_offset_right, y_offset1+(j+1)*left_label_dimension[1]),
+                fill=matrix_value2color_func(matrix[j,i]))
         #draw bottom_label_ls
         if bottom_label_ls:
             bottom_label = bottom_label_ls[i]
@@ -323,14 +339,14 @@ def drawMatrix(matrix, matrix_value2color, left_label_ls=[], top_label_ls=[], ri
 
 
 
-"""
-2007-03-05
-    show an image visualizing SNP data
-2007-06-05
+
+def display_snp_matrix(input_fname, output_fname=None, need_sort=0,
+    need_savefig=0, xlabel='', ylabel=''):
+    """
+    show an image visualizing SNP data.
     set aspect='auto' in imshow(), the default (pylab.image.rcParams['image.aspect'])='equal', which is bad
-2007-11-02 copied from variation.src.common, use pylab
-"""
-def display_snp_matrix(input_fname, output_fname=None, need_sort=0, need_savefig=0, xlabel='', ylabel=''):
+    copied from variation.src.common, use pylab
+    """
     import csv, numpy, pylab
     reader = csv.reader(open(input_fname), delimiter='\t')
     header = next(reader)
@@ -340,13 +356,14 @@ def display_snp_matrix(input_fname, output_fname=None, need_sort=0, need_savefig
         data_row = map(int, data_row)
         data_matrix.append(data_row)
     del reader
-    data_matrix.reverse()	#2007-03-06 reverse() due to the imshow()'s y axis starting from bottom
+    data_matrix.reverse()
+    #2007-03-06 reverse() due to the imshow()'s y axis starting from bottom
     if need_sort:
         data_matrix.sort()
     data_matrix = numpy.array(data_matrix)
     
     pylab.clf()
-    pylab.imshow(data_matrix, aspect='auto', interpolation='nearest')	#2007-06-05
+    pylab.imshow(data_matrix, aspect='auto', interpolation='nearest')
     pylab.colorbar()
     if xlabel:
         pylab.xticks([data_matrix.shape[1]/2], [xlabel])
@@ -368,10 +385,12 @@ def make_snp_matrix_legend(value_ls, label_ls, output_fname=None):
     data_matrix = numpy.zeros([len(value_ls), 1], numpy.int)
     for i in range(len(value_ls)):
         data_matrix[i,0] = value_ls[i]
-    label_ls_copy.reverse()	#pylab put the label on starting from the bottom of the picture
+    label_ls_copy.reverse()
+    #pylab put the label on starting from the bottom of the picture
     pylab.clf()
     pylab.imshow(data_matrix, aspect='auto', interpolation='nearest')
-    pylab.yticks(range(len(value_ls)), label_ls_copy, fontsize=60, verticalalignment='bottom', horizontalalignment='right')
+    pylab.yticks(range(len(value_ls)), label_ls_copy, fontsize=60,
+        verticalalignment='bottom', horizontalalignment='right')
     pylab.xticks([],[])
     if output_fname:
         pylab.savefig('%s.eps'%output_fname, dpi=300)
@@ -380,7 +399,8 @@ def make_snp_matrix_legend(value_ls, label_ls, output_fname=None):
     pylab.show()
 
 
-def display_matrix_of_component(input_fname, ecotypeid_ls, ecotypeid2pos, output_fname=None, need_sort=0, need_savefig=0):
+def display_matrix_of_component(input_fname, ecotypeid_ls, ecotypeid2pos,
+    output_fname=None, need_sort=0, need_savefig=0):
     """
     2007-09-20
         display the data from that component
@@ -391,7 +411,8 @@ def display_matrix_of_component(input_fname, ecotypeid_ls, ecotypeid2pos, output
     for ecotypeid in ecotypeid_ls:
         cc_ecotypeid_pos.append(ecotypeid2pos[ecotypeid])
     import numpy
-    argsort_index = numpy.argsort(cc_ecotypeid_pos, 0)	#watch it's two dimensional
+    argsort_index = numpy.argsort(cc_ecotypeid_pos, 0)
+    #watch it's two dimensional
     ecotypeid2row_index = {}
     ytick_label_ls = []
     cc_size = len(ecotypeid_ls)
@@ -399,7 +420,8 @@ def display_matrix_of_component(input_fname, ecotypeid_ls, ecotypeid2pos, output
         ecotypeid_ls_index = argsort_index[i][1]	#sort based on longitude
         ecotypeid = ecotypeid_ls[ecotypeid_ls_index]
         ecotypeid2row_index[ecotypeid] = i
-        ytick_label_ls.append('%s (%.2f, %.2f)'%(ecotypeid, ecotypeid2pos[ecotypeid][0], ecotypeid2pos[ecotypeid][1]))
+        ytick_label_ls.append('%s (%.2f, %.2f)'%(ecotypeid,
+            ecotypeid2pos[ecotypeid][0], ecotypeid2pos[ecotypeid][1]))
     reader = csv.reader(open(input_fname), delimiter='\t')
     header = next(reader)
     data_matrix = [0]*cc_size
@@ -410,13 +432,14 @@ def display_matrix_of_component(input_fname, ecotypeid_ls, ecotypeid2pos, output
             data_row = map(int, data_row)
             data_matrix[ecotypeid2row_index[ecotypeid]] = data_row
     del reader
-    data_matrix.reverse()	#2007-03-06 reverse() due to the imshow()'s y axis starting from bottom
+    data_matrix.reverse()
+    #2007-03-06 reverse() due to the imshow()'s y axis starting from bottom
     if need_sort:
         data_matrix.sort()
     data_matrix = numpy.array(data_matrix)
     
     pylab.clf()
-    pylab.imshow(data_matrix, aspect='auto', interpolation='nearest')	#2007-06-05
+    pylab.imshow(data_matrix, aspect='auto', interpolation='nearest')
     pylab.colorbar()
     pylab.yticks(range(cc_size), ytick_label_ls)
     if need_savefig:
@@ -427,8 +450,7 @@ def display_matrix_of_component(input_fname, ecotypeid_ls, ecotypeid2pos, output
 
 def combineTwoImages(im1, im2, font=None):
     """
-    2008-08-21
-        combine im1 and im2 horizontally
+    combine im1 and im2 horizontally
     """
     sys.stderr.write("Combining two images ...")
     import Image, ImageDraw
@@ -451,12 +473,10 @@ def combineTwoImages(im1, im2, font=None):
 
 class Value2Color(object):
     """
-    2008-08-29
-        for out of range values, treat them as NA
+    for out of range values, treat them as NA
     
-    2008-08-28
-        a class handles conversion between numerical value and color
-        initial functions copied from OutputTestResultInMatrix.py
+    a class handles conversion between numerical value and color
+    initial functions copied from OutputTestResultInMatrix.py
         
         3 special values:
         -3: separator values
@@ -467,8 +487,8 @@ class Value2Color(object):
     """
     def __init__(self, min_value=0., max_value=255., treat_above_max_as_NA=True):
         """
-        2012.2.22
-            value<min_value is treated as NA. >max_value is treated as max_value by default unless treat_above_max_as_NA is set to True.
+        value<min_value is treated as NA. >max_value is treated as max_value
+            by default unless treat_above_max_as_NA is set to True.
         """
         self.min_value = float(min_value)
         self.max_value = float(max_value)
@@ -482,35 +502,36 @@ class Value2Color(object):
     @classmethod
     def value2GrayScale(cls, value, min_value=0., max_value=255.):
         """
-        2008-08-21
-            color span is (0,0,0) to (255,255,255).
+        color span is (0,0,0) to (255,255,255).
         """
         if value in cls.special_value2color:
             return cls.special_value2color[value]
-        elif value<min_value or value > max_value:	#out of range, treat them as NA
+        elif value<min_value or value > max_value:
+            #out of range, treat them as NA
             return cls.special_value2color[-1]
         else:
             Y = (value-min_value)/(max_value-min_value)*(cls.max_gray_value-0)
-            R_value = cls.max_gray_value-int(round(Y))	#the smaller the value is, the higher hue_value is.
+            R_value = cls.max_gray_value-int(round(Y))
+            #the smaller the value is, the higher hue_value is.
             #in (R,G,B) mode, the bigger R/G/B is, the darker the color is
             #R_value = int(Y/math.pow(2,8))
             #G_value = int(Y- R_value*math.pow(2,8))
             return (R_value, R_value, R_value)
         
-    max_hue_value = 255	#In Inkscape, the maximum possible hue value, 255, looks almost same as hue=0. cut off before reaching 255.
+    max_hue_value = 255	#In Inkscape, the maximum possible hue value,
+    # 255, looks almost same as hue=0. cut off before reaching 255.
     #but it's not the case in PIL.
     @classmethod
-    def value2HSLcolor(cls, value, min_value=0., max_value=255., treat_above_max_as_NA=True, returnType=1):
+    def value2HSLcolor(cls, value, min_value=0., max_value=255.,
+        treat_above_max_as_NA=True, returnType=1):
         """
-        2012.2.22
-            add argument returnType
-                1: return a hsl string. "hsl(%s"%(hue_value)+",100%,50%)"
-                2: return a tuple. (hue_value/max_hue_value, 1.0, 0.5)
-        2009-10-18
-            change how to deal with out-of-range value. Before, both <min_value and >max_value are treated as NA.
-            Now, <min_value is treated as NA. >max_value is treated as max_value by default unless treat_above_max_as_NA is set to True. 
-        2008-08-28
-            use Hue-Saturation-Lightness (HSL) color to replace the simple gray gradient represented by (R,G,B)
+        Argument returnType
+            1: return a hsl string. "hsl(%s"%(hue_value)+",100%,50%)"
+            2: return a tuple. (hue_value/max_hue_value, 1.0, 0.5)
+        Change how to deal with out-of-range value. Before, both <min_value and >max_value are treated as NA.
+        Now, <min_value is treated as NA. >max_value is treated as
+            max_value by default unless treat_above_max_as_NA is set to True. 
+        Use Hue-Saturation-Lightness (HSL) color to replace the simple gray gradient represented by (R,G,B)
         """
         max_value = float(max_value)
         min_value = float(min_value)
@@ -526,7 +547,8 @@ class Value2Color(object):
                 value = max_value
         #else:
         Y = (value-min_value)/(max_value-min_value)*(cls.max_hue_value-0)
-        hue_value = cls.max_hue_value-int(round(Y))	#the smaller the value is, the higher hue_value is.
+        hue_value = cls.max_hue_value-int(round(Y))
+        #the smaller the value is, the higher hue_value is.
         #in (R,G,B) mode, the bigger R/G/B is, the darker the color is
         #R_value = int(Y/math.pow(2,8))
         #G_value = int(Y- R_value*math.pow(2,8))
@@ -543,25 +565,28 @@ class Value2Color(object):
         import matplotlib
         from matplotlib import cm
         valueColorMap = cm.get_cmap(colormap)
-        valueNormalizer = matplotlib.colors.Normalize(vmin=self.min_value, vmax=self.max_value)
+        valueNormalizer = matplotlib.colors.Normalize(vmin=self.min_value,
+            vmax=self.max_value)
         if valueColorMap:
-            return valueColorMap(valueNormalizer(value))	#return (r,g,b,a), each in [0,1]
+            return valueColorMap(valueNormalizer(value))
+            #return (r,g,b,a), each in [0,1]
         else:
             return None
 
 
 
-def drawMatrixLegend(data_matrix, left_label_ls=[], top_label_ls=[], min_value=None, max_value=None,\
-                    min_possible_value=0, max_possible_value=None,\
-                    font_path='/usr/share/fonts/truetype/freefont/FreeSerif.ttf', font_size=20, \
-                    no_of_ticks=15, with_grid=1, treat_above_max_as_NA=True):
+def drawMatrixLegend(data_matrix, left_label_ls=[], top_label_ls=[],
+    min_value=None, max_value=None,
+    min_possible_value=0, max_possible_value=None,
+    font_path='/usr/share/fonts/truetype/freefont/FreeSerif.ttf',
+    font_size=20,
+    no_of_ticks=15, with_grid=1, treat_above_max_as_NA=True):
     """
-    2009-10-18
-        add argument treat_above_max_as_NA, either as maximum value or NA
-    2008-10-26
-        a wrapper to draw both legend and data matrix by calling drawContinousLegend() and drawMatrix()
-        if min_value is not given, try to figure it out by numpy.min(). If min_possible_value is not None, that's the lower bound.
-        ditto for max_value.
+    add argument treat_above_max_as_NA, either as maximum value or NA
+    a wrapper to draw both legend and data matrix by calling drawContinousLegend() and drawMatrix()
+    If min_value is not given, try to figure it out by numpy.min().
+    If min_possible_value is not None, that's the lower bound.
+    Ditto for max_value.
     """
     import numpy
     font = get_font(font_path, font_size=font_size)	#2008-08-01
@@ -575,7 +600,8 @@ def drawMatrixLegend(data_matrix, left_label_ls=[], top_label_ls=[], min_value=N
         if max_possible_value is not None:
             max_value = min(max_possible_value, max_value)
     
-    value2color_func = lambda x: Value2Color.value2HSLcolor(x, min_value, max_value, treat_above_max_as_NA=treat_above_max_as_NA)
+    value2color_func = lambda x: Value2Color.value2HSLcolor(x, min_value,
+        max_value, treat_above_max_as_NA=treat_above_max_as_NA)
     im_legend = drawContinousLegend(min_value, max_value, no_of_ticks, value2color_func, font)
     #im.save('%s_legend.png'%self.fig_fname_prefix)
     im = drawMatrix(data_matrix, value2color_func, left_label_ls,\
@@ -585,44 +611,52 @@ def drawMatrixLegend(data_matrix, left_label_ls=[], top_label_ls=[], min_value=N
 
 class DrawMatrix(object):
     __doc__ = __doc__
-    option_default_dict = {\
-                    ('font_path', 1, ):['/usr/share/fonts/truetype/freefont/FreeSerif.ttf', 'e', 1, 'path of the font used to draw labels'],\
-                    ('font_size', 1, int):[20, 's', 1, 'size of font, which determines the size of the whole figure.'],\
-                    ("input_fname", 1, ): [None, 'i', 1, 'Filename that stores data matrix. 1st two columns are labels for rows. \
-    Top row is header.'],\
-                    ('min_value_non_negative', 0, ):[0, 'm', 0, 'whether minimum value must be >=0 (minus value has special meaning), \
-    force min_value=0 if data_matrix gives negative min_value.'],\
-                    ("fig_fname", 1, ): [None, 'o', 1, 'File name prefix for the figure. If matrix is split into multiple blocks, \
-    each block will be output into one file with this prefix and block number.'],\
-                    ("no_of_ticks", 1, int): [5, 't', 1, 'Number of ticks on the legend'],\
-                    ("split_legend_and_matrix", 0, ): [0, 'p', 0, 'whether to split legend and matrix into 2 different images or not.\
-Default is to combine them.'],\
-                    ('super_value_color', 0,): ["red", 'u', 1, 'color for matrix value -2, like "black", or "red" etc.' ],\
-                    ("blockColUnit", 0, int): [200, 'c', 1, 'If the matrix is too large, it will be split into multiple blocks.\
-    each block is in one output.\
-    this argument controls how many columns per block.'],\
-                    ("blockRowUnit", 0, int): [3500, 'x', 1, 'If the matrix is too large, it will be split into multiple blocks.\
-    each block is in one output.\
-    this argument controls how many rows per block.'],\
-                    ("no_grid", 0, ): [0, 'n', 0, 'toggle to remove the grid on top of the whole 2-D structure'],\
-                    ('debug', 0, int):[0, 'b', 0, 'toggle debug mode'],\
-                    ('report', 0, int):[0, 'r', 0, 'toggle report, more verbose stdout/stderr.']
-                            }
+    option_default_dict = {
+        ('font_path', 1, ):['/usr/share/fonts/truetype/freefont/FreeSerif.ttf', 'e', 1,
+            'path of the font used to draw labels'],\
+        ('font_size', 1, int):[20, 's', 1, 
+            'size of font, which determines the size of the whole figure.'],\
+        ("input_fname", 1, ): [None, 'i', 1, 
+            'Filename that stores data matrix. 1st two columns are labels for rows. '
+            'Top row is header.'],\
+        ('min_value_non_negative', 0, ):[0, 'm', 0,
+            'whether minimum value must be >=0 (minus value has special meaning), '
+            'force min_value=0 if data_matrix gives negative min_value.'],\
+        ("fig_fname", 1, ): [None, 'o', 1, 
+            'File name prefix for the figure. If matrix is split into multiple blocks, '
+            'each block will be output into one file with this prefix and block number.'],\
+        ("no_of_ticks", 1, int): [5, 't', 1, 'Number of ticks on the legend'],\
+        ("split_legend_and_matrix", 0, ): [0, 'p', 0,
+            'whether to split legend and matrix into 2 different images or not.'
+            'Default is to combine them.'],\
+        ('super_value_color', 0,): ["red", 'u', 1,
+            'color for matrix value -2, like "black", or "red" etc.' ],\
+        ("blockColUnit", 0, int): [200, 'c', 1, 
+            'If the matrix is too large, it will be split into multiple blocks.'
+            'each block is in one output.'
+            'this argument controls how many columns per block.'],\
+        ("blockRowUnit", 0, int): [3500, 'x', 1, 
+            'If the matrix is too large, it will be split into multiple blocks.'
+            'each block is in one output.'
+            'this argument controls how many rows per block.'],\
+        ("no_grid", 0, ): [0, 'n', 0, 'toggle to remove the grid on top of the whole 2-D structure'],\
+        ('debug', 0, int):[0, 'b', 0, 'toggle debug mode'],\
+        ('report', 0, int):[0, 'r', 0, 'toggle report, more verbose stdout/stderr.']
+    }
     
     def __init__(self,  **keywords):
         """
-        2008-08-29
         """
-        self.ad = ProcessOptions.process_function_arguments(keywords, self.option_default_dict, error_doc=self.__doc__, class_to_have_attr=self)
+        self.ad = ProcessOptions.process_function_arguments(keywords, 
+            self.option_default_dict, error_doc=self.__doc__, class_to_have_attr=self)
     
     def _drawMatrix(self, data_matrix, row_label_ls, col_label_ls, fig_fname, passParam):
         """
-        2008-09-01
-            parameters come in wrapped passParam=PassingData()
-        2008-08-29
-            split out of run() to be reusable
+        parameters come in wrapped passParam=PassingData()
+        split out of run() to be reusable.
         """
-        im = drawMatrix(data_matrix, passParam.value2color_func, row_label_ls, col_label_ls, with_grid=1-passParam.no_grid, font=passParam.font)
+        im = drawMatrix(data_matrix, passParam.value2color_func, row_label_ls,
+            col_label_ls, with_grid=1-passParam.no_grid, font=passParam.font)
         if passParam.split_legend_and_matrix:
             im.save(fig_fname)
         else:
@@ -631,14 +665,15 @@ Default is to combine them.'],\
         
     def run(self):
         """
-        2008-09-10
-            in case chop the whole figure into blocks, swap col_block_index and row_block_index to make row first, column 2nd
+        in case chop the whole figure into blocks, swap col_block_index and
+            row_block_index to make row first, column 2nd
         """
         from palos.polymorphism.SNP import read_data
         from palos.utils import figureOutDelimiter, PassingData
         delimiter = figureOutDelimiter(self.input_fname)
         print(delimiter)
-        header, row_label_ls1, row_label_ls2, data_matrix = read_data(self.input_fname, matrix_data_type=float, delimiter='\t')
+        header, row_label_ls1, row_label_ls2, data_matrix = read_data(
+            self.input_fname, matrix_data_type=float, delimiter='\t')
         import numpy
         data_matrix = numpy.array(data_matrix)
         min_value = numpy.min(data_matrix)
@@ -648,15 +683,17 @@ Default is to combine them.'],\
         font = get_font(self.font_path, font_size=self.font_size)
         Value2Color.special_value2color[-2] = self.super_value_color
         value2color_func = lambda x: Value2Color.value2HSLcolor(x, min_value, max_value)
-        im_legend = drawContinousLegend(min_value, max_value, self.no_of_ticks, value2color_func, font)
+        im_legend = drawContinousLegend(min_value, max_value,
+            self.no_of_ticks, value2color_func, font)
         
         fig_fname_prefix = os.path.splitext(self.fig_fname)[0]
         if self.split_legend_and_matrix:
             im_legend.save('%s_legend.png'%fig_fname_prefix)
         
         no_of_rows, no_of_cols = data_matrix.shape
-        passParam = PassingData(value2color_func=value2color_func, im_legend=im_legend, font=font, \
-                            split_legend_and_matrix=self.split_legend_and_matrix, no_grid=self.no_grid)
+        passParam = PassingData(value2color_func=value2color_func,
+            im_legend=im_legend, font=font,
+            split_legend_and_matrix=self.split_legend_and_matrix, no_grid=self.no_grid)
         
         if no_of_cols <= self.blockColUnit:
             self._drawMatrix(data_matrix, row_label_ls1, header[2:], self.fig_fname, passParam)
@@ -671,9 +708,13 @@ Default is to combine them.'],\
                         row_start_index = j*self.blockRowUnit
                         row_end_index = (j+1)*self.blockRowUnit
                         if row_start_index<no_of_rows:
-                            fig_fname = '%s_%s_%s.png'%(fig_fname_prefix, j, i)	#row first, column 2nd
-                            self._drawMatrix(data_matrix[row_start_index:row_end_index,col_start_index:col_end_index], row_label_ls1[row_start_index:row_end_index], \
-                                            header[2+col_start_index:2+col_end_index], fig_fname, passParam)
+                            fig_fname = '%s_%s_%s.png'%(fig_fname_prefix, j, i)
+                            #row first, column 2nd
+                            self._drawMatrix(
+                                data_matrix[row_start_index:row_end_index,
+                                    col_start_index:col_end_index],
+                                row_label_ls1[row_start_index:row_end_index],
+                                header[2+col_start_index:2+col_end_index], fig_fname, passParam)
             
 if __name__ == '__main__':
     main_class = DrawMatrix

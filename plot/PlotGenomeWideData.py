@@ -37,8 +37,8 @@ import pylab
 from palos import ProcessOptions, PassingData
 from palos import utils
 from palos.db import GenomeDB
-from . AbstractPlot import AbstractPlot
 from palos.io.AbstractGenomeFileWalker import AbstractGenomeFileWalker
+from AbstractPlot import AbstractPlot
 
 ParentClass = AbstractPlot
 class PlotGenomeWideData(ParentClass, AbstractGenomeFileWalker):

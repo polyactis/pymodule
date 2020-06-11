@@ -49,10 +49,10 @@ class AbstractPlot(AbstractMatrixFileWalker):
     if this is non-zero, then logY should be toggled off. otherwise data will be messed up.'],\
     ('need_svg', 0, ): [0, 'n', 0, 'whether need svg output', ],\
     ('defaultFontLabelSize', 1, int): [12, '', 1, 'default font & label size on the plot'], \
-    ('defaultFigureWidth', 1, float): [10, '', 1, 
-        'default figure width (in inch) in the pedigree plot'], \
-    ('defaultFigureHeight', 1, float): [10, '', 1, \
-        'default figure height (in inch) in the pedigree plot'], \
+    ('defaultFigureWidth', 1, float): [12, '', 1, 
+        'default figure width (in inch)'], \
+    ('defaultFigureHeight', 1, float): [8, '', 1, \
+        'default figure height (in inch)'], \
     ('xmargin', 0, float): [0, '', 1, \
         'this is margin within the plotting area.'
         'how far data points should be away from axis. 0-1.0'], \
@@ -86,9 +86,11 @@ class AbstractPlot(AbstractMatrixFileWalker):
         # set these attributes if the class or its descendants have valid values
         if getattr(self, 'defaultFontLabelSize', None):
             yh_matplotlib.setFontAndLabelSize(self.defaultFontLabelSize)
-        if getattr(self, "defaultFigureWidth", None) and  getattr(self, "defaultFigureHeight", None):
-            yh_matplotlib.setDefaultFigureSize((self.defaultFigureWidth, self.defaultFigureHeight))
-        if getattr(self, "plotLeft", None) and  getattr(self, "plotBottom", None):
+        if getattr(self, "defaultFigureWidth", None) and \
+                getattr(self, "defaultFigureHeight", None):
+            yh_matplotlib.setDefaultFigureSize((self.defaultFigureWidth, 
+                self.defaultFigureHeight))
+        if getattr(self, "plotLeft", None) and getattr(self, "plotBottom", None):
             yh_matplotlib.setPlotDimension(left=self.plotLeft, right=self.plotRight,
                 bottom=self.plotBottom, top=self.plotTop)
 
@@ -102,9 +104,10 @@ class AbstractPlot(AbstractMatrixFileWalker):
         """
         get called by the end of fileWalker() for each inputFname.
         """
-        plotObject = pylab.plot(x_ls, y_ls, self.formatString, markersize=self.markerSize, )[0]
-        self.addPlotLegend(plotObject=plotObject, legend=os.path.basename(pdata.filename),
-            pdata=pdata)
+        plotObject = pylab.plot(x_ls, y_ls, self.formatString, \
+            markersize=self.markerSize)[0]
+        self.addPlotLegend(plotObject=plotObject,
+            legend=os.path.basename(pdata.filename), pdata=pdata)
         
         self.setGlobalMinVariable(extremeVariableName='xMin', givenExtremeValue=min(x_ls))
         self.setGlobalMaxVariable(extremeVariableName='xMax', givenExtremeValue=max(x_ls))
