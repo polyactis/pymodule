@@ -141,7 +141,7 @@ class AbstractWorkflow(Workflow):
         else:
             vcfFile = None
             tbi_F = None
-        return PassingData(job=job, jobLs=[job], file=job.output, \
+        return PassingData(job=job, jobLs=[job], file=job.output,
             fileLs=job.outputLs, vcfFile=vcfFile, tbi_F=tbi_F)
 
     def registerExecutables(self):
@@ -153,15 +153,18 @@ class AbstractWorkflow(Workflow):
             #convert, an image swissknife program, part of imagemagick
             self.registerOneExecutable(path="/usr/bin/convert",
                 name='convertImage', clusterSizeMultiplier=1)
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath, 
-            "mapper/extractor/SelectLineBlockFromFile.py"), 
+        self.SelectLineBlockFromFile = self.registerOneExecutable(
+            path=os.path.join(self.pymodulePath, "mapper/extractor/SelectLineBlockFromFile.py"), 
             clusterSizeMultiplier=1)
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath,
-            "plot/AbstractPlot.py"), clusterSizeMultiplier=1)
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath,
-            "plot/PlotYAsBar.py"), clusterSizeMultiplier=1)
-        self.registerOneExecutable(path=os.path.join(self.pymodulePath,
-            "plot/DrawHistogram.py"), clusterSizeMultiplier=1)
+        self.registerOneExecutable(
+            path=os.path.join(self.pymodulePath, "plot/AbstractPlot.py"),
+            clusterSizeMultiplier=1)
+        self.registerOneExecutable(
+            path=os.path.join(self.pymodulePath, "plot/PlotYAsBar.py"),
+            clusterSizeMultiplier=1)
+        self.DrawHistogram = self.registerOneExecutable(
+            path=os.path.join(self.pymodulePath, "plot/DrawHistogram.py"),
+            clusterSizeMultiplier=1)
 
         self.registerOneExecutable(path=os.path.join(self.pymodulePath,
             "plot/DrawMatrix.py"), clusterSizeMultiplier=1)
@@ -944,14 +947,16 @@ inputFileFormat   1: csv-like plain text file; 2: YHPyTables.YHFile; 3: HDF5Matr
         if extraArguments:
             extraArgumentList.append(extraArguments)
 
-        job = self.addGenericJob(executable=executable,
+        job = self.addGenericJob(
+            executable=executable,
             inputArgumentOption='-i',
             inputFile=inputFile, 
             outputArgumentOption='-o',
             outputFile=outputFile,
             inputFileList = inputFileList,
             extraArgumentList=extraArgumentList,
-            parentJob=parentJob, parentJobLs=parentJobLs,
+            parentJob=parentJob,
+            parentJobLs=parentJobLs,
             extraDependentInputLs=extraDependentInputLs,
             extraOutputLs=extraOutputLs,
             transferOutput=transferOutput,
@@ -998,7 +1003,8 @@ inputFileFormat   1: csv-like plain text file; 2: YHPyTables.YHFile; 3: HDF5Matr
         what yValue should be.'],\
 
         """
-        return self.addAbstractPlotJob(executable=executable, 
+        return self.addAbstractPlotJob(
+            executable=executable, 
             inputFileList=inputFileList,
             inputFile=inputFile,
             outputFile=outputFile, 
@@ -1006,7 +1012,7 @@ inputFileFormat   1: csv-like plain text file; 2: YHPyTables.YHFile; 3: HDF5Matr
             xColumnHeader=None, xColumnPlotLabel=None,
             whichColumn=whichColumn,
             whichColumnHeader=whichColumnHeader, whichColumnPlotLabel=None,
-            logY=logY, \
+            logY=logY,
             valueForNonPositiveYValue=valueForNonPositiveYValue,
             missingDataNotation=None,
             minNoOfTotal=minNoOfTotal,
@@ -1059,7 +1065,8 @@ inputFileFormat   1: csv-like plain text file; 2: YHPyTables.YHFile; 3: HDF5Matr
             extraArgumentList.append("--chrOrder %s"%(chrOrder))
         if positionHeader is not None:
             extraArgumentList.append('--positionHeader %s'%(positionHeader))
-        return self.addAbstractPlotJob(executable=executable,
+        return self.addAbstractPlotJob(
+            executable=executable,
             inputFileList=inputFileList,
             inputFile=inputFile,
             outputFile=outputFile, 
@@ -1087,12 +1094,15 @@ inputFileFormat   1: csv-like plain text file; 2: YHPyTables.YHFile; 3: HDF5Matr
     def addDrawHistogramJob(self, executable=None,
         inputFileList=None, inputFile=None,
         outputFile=None, outputFnamePrefix=None,
+        title=None,
         whichColumn=None, whichColumnHeader=None, 
         whichColumnPlotLabel=None,
         xScaleLog=0, yScaleLog=0,
-        logY=None, valueForNonPositiveYValue=-1, missingDataNotation='NA',
-        title=None,
-        minNoOfTotal=None, figureDPI=300, formatString=None, ylim_type=None,
+        logY=None,
+        valueForNonPositiveYValue=-1,
+        missingDataNotation='NA',
+        minNoOfTotal=None, figureDPI=300,
+        formatString=None, ylim_type=None,
         samplingRate=1,
         need_svg=False, legendType=None,
         logCount=False, inputFileFormat=None,
@@ -1131,13 +1141,16 @@ inputFileFormat   1: csv-like plain text file; 2: YHPyTables.YHFile; 3: HDF5Matr
             extraArguments = ""
         if logCount:
             extraArguments += " --logCount "
-        return self.addAbstractPlotJob(executable=executable,
+        if executable is None:
+            executable = self.DrawHistogram
+        return self.addAbstractPlotJob(
+            executable=executable,
             inputFileList=inputFileList,
             inputFile=inputFile,
             outputFile=outputFile, 
             outputFnamePrefix=outputFnamePrefix,
-            xColumnHeader=None, xColumnPlotLabel=None,
             title=title,
+            xColumnHeader=None, xColumnPlotLabel=None,
             whichColumn=whichColumn,
             whichColumnHeader=whichColumnHeader,
             whichColumnPlotLabel=whichColumnPlotLabel,
