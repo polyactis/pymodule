@@ -7,7 +7,7 @@ from setuptools import setup, find_packages
 src_dir = os.path.dirname(__file__)
 
 install_requires = ['h5py', 'matplotlib', "numpy", "pegaflow",
-    'scipy', "sqlalchemy", 'tables']
+    'scipy', "sqlalchemy", 'statsmodels', 'tables']
 
 with open(os.path.join(src_dir, 'README.md')) as readme_file:
     README = readme_file.read()

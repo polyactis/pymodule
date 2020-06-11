@@ -19,6 +19,7 @@ __doc__ = __doc__%(sys.argv[0])
 import matplotlib; matplotlib.use("Agg")    #to disable pop-up requirement
 import pylab
 import logging
+import statsmodels.api as sm
 from palos import ProcessOptions, PassingData
 from palos import utils
 from palos.plot import yh_matplotlib
@@ -28,26 +29,30 @@ class AbstractPlot(AbstractMatrixFileWalker):
     __doc__ = __doc__
     option_default_dict = AbstractMatrixFileWalker.option_default_dict.copy()
     option_default_dict.update({
+
     ('title', 0, ): [None, 't', 1, 'title for the figure.'],\
     ('figureDPI', 1, int): [200, 'f', 1, 
         'dpi, dots per inch, for the output figures (png)'],\
-    ('formatString', 1, ): ['.', '', 1, 'formatString passed to matplotlib plot'],\
+    ('formatString', 1, ): ['.', '', 1, 'formatString passed to matplotlib plot'],
     ('markerSize', 1, int): [10, '', 1, \
         'size of plotting marker (dot size, usually), matplotlib default is 5'],\
     ('ylim_type', 1, int): [1, 'y', 1, \
         'y-axis limit type, 1: whatever matplotlib decides. 2: min to max'],\
-    ('whichColumnPlotLabel', 0, ): ['', 'D', 1, 'plot label for data of the whichColumn', ],\
-    ('xColumnHeader', 1, ): ['', 'l', 1, 'header of the x-axis data column, ' ],\
-    ('xColumnPlotLabel', 0, ): ['', 'x', 1, 'x-axis label (posColumn) in manhattan plot', ],\
-    
-    ('logX', 0, int): [0, '', 1, 'value 0: nothing; 1: log(X), 2: -log(X)'],\
+    ('xColumnHeader', 1, ): ['', 'l', 1, 'header of the x-axis data column, ' ],
+    ('xColumnPlotLabel', 0, ): ['', 'x', 1,
+        'x-axis label (posColumn) in manhattan plot', ],
+    ('whichColumnPlotLabel', 0, ): ['', 'D', 1,
+        'plot label for data of the whichColumn', ],
+    ('fitType', 0, int): [0, '', 1, 'To add a fitting line. 0: nothing; 1: lowess/loess'],\
+
+    ('logX', 0, int): [0, '', 1, 'To change X values. 0: nothing; 1: log(X), 2: -log(X)'],\
     ('xScaleLog', 0, int): [0, '', 1, \
-        'regarding the x-axis scale. 0: nothing; 1: scale of log(10), 2: scale of log(2),\
-    if this is non-zero, then logX should be toggled off. otherwise mess up the data'],\
+        'regarding the x-axis scale. 0: nothing; 1: scale of log(10), 2: scale of log(2), '
+        'if this is non-zero, then logX should be 0. Otherwise data will be messed up.'],\
     ('yScaleLog', 0, int): [0, '', 1, \
-        'regarding the y-axis scale. 0: nothing; 1: scale of log(10), 2: scale of log(2),\
-    if this is non-zero, then logY should be toggled off. otherwise data will be messed up.'],\
-    ('need_svg', 0, ): [0, 'n', 0, 'whether need svg output', ],\
+        'regarding the y-axis scale. 0: nothing; 1: scale of log(10), 2: scale of log(2), '
+        'if this is non-zero, then logY should be 0. Otherwise data will be messed up.'],\
+    
     ('defaultFontLabelSize', 1, int): [12, '', 1, 'default font & label size on the plot'], \
     ('defaultFigureWidth', 1, float): [12, '', 1, 
         'default figure width (in inch)'], \
@@ -64,6 +69,7 @@ class AbstractPlot(AbstractMatrixFileWalker):
     ('plotBottom', 0, float): [0.1, '', 1, ' the bottom of the subplots of the figure'], \
     ('plotTop', 0, float): [0.9, '', 1, ' the top of the subplots of the figure'], \
     ('legendType', 0, int): [0, '', 1, '0: no legend; 1: legend'], \
+    ('need_svg', 0, ): [0, 'n', 0, 'whether need svg output', ],\
                         
     })
     def __init__(self, inputFnameLs=None, **keywords):
@@ -113,7 +119,16 @@ class AbstractPlot(AbstractMatrixFileWalker):
         self.setGlobalMaxVariable(extremeVariableName='xMax', givenExtremeValue=max(x_ls))
         self.setGlobalMinVariable(extremeVariableName='yMin', givenExtremeValue=min(y_ls))
         self.setGlobalMaxVariable(extremeVariableName='yMax', givenExtremeValue=max(y_ls))
-    
+
+        if self.fitType==1:
+            # lowess will return our "smoothed" data with a y value for at every x-value
+            lowess = sm.nonparametric.lowess(y, x, frac=.3)
+
+            # unpack the lowess smoothed points to their values
+            lowess_x, lowess_y = list(zip(*lowess))
+            lowess_obj = pylab.plot(lowess_x, lowess_y, '.-')[0]
+            self.addPlotLegend(plotObject=lowess_obj,
+                legend="lowess", pdata=pdata)
     
     def processRow(self, row=None, pdata=None):
         """
