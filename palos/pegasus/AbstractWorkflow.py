@@ -477,18 +477,23 @@ class AbstractWorkflow(Workflow):
     def addPlotLDJob(self, executable=None,
         inputFile=None, inputFileList=None, \
         outputFile=None, outputFnamePrefix=None,
-        whichColumn=None, whichColumnHeader=None, whichColumnPlotLabel=None, \
-        title=None, logY=None, valueForNonPositiveYValue=-1, \
-        missingDataNotation='-nan',\
-        xColumnPlotLabel=None, chrLengthColumnHeader=None, chrColumnHeader=None, \
-        minChrLength=1000000, xColumnHeader=None, pos2ColumnHeader=None, \
-        minNoOfTotal=100, maxNoOfTotal=None,\
-        figureDPI=300, formatString='.', ylim_type=2, samplingRate=0.0001, 
-        need_svg=False, logCount=False, \
-        minDist=None, maxDist=None, movingAverageType=2,\
-        extraArgumentList=None, extraArguments=None,
-        parentJobLs=None, \
-        extraDependentInputLs=None, \
+        whichColumn=None, whichColumnHeader=None, whichColumnPlotLabel=None,
+        title=None, logY=None, valueForNonPositiveYValue=-1,
+        missingDataNotation='-nan',
+        xColumnHeader=None,
+        xColumnPlotLabel=None,
+        chrLengthColumnHeader=None, chrColumnHeader=None,
+        minChrLength=1000000,
+        pos2ColumnHeader=None,
+        minNoOfTotal=100, maxNoOfTotal=None,
+        figureDPI=300, formatString='.', ylim_type=None,
+        samplingRate=1, 
+        need_svg=False, logCount=False,
+        minDist=None, maxDist=None, movingAverageType=2,
+        extraArguments=None,
+        extraArgumentList=None,
+        parentJobLs=None,
+        extraDependentInputLs=None,
         transferOutput=True,
         job_max_memory=200, **keywords):
         """
@@ -554,9 +559,11 @@ class AbstractWorkflow(Workflow):
             missingDataNotation=missingDataNotation,
             title=title,
             minNoOfTotal=minNoOfTotal,
-            figureDPI=figureDPI, formatString=formatString, ylim_type=ylim_type, 
+            figureDPI=figureDPI, formatString=formatString,
+            ylim_type=ylim_type, 
             samplingRate=samplingRate, need_svg=need_svg,
-            extraArgumentList=extraArgumentList, extraArguments=extraArguments,
+            extraArguments=extraArguments,
+            extraArgumentList=extraArgumentList,
             parentJobLs=parentJobLs,
             extraDependentInputLs=extraDependentInputLs,
             transferOutput=transferOutput,
@@ -567,12 +574,14 @@ class AbstractWorkflow(Workflow):
         executable=None,
         inputFileList=None, 
         outputFnamePrefix=None,
+        xColumnPlotLabel=None, xColumnHeader=None,
         whichColumn=None, whichColumnHeader=None, whichColumnPlotLabel=None, 
         need_svg=False, logY=0, valueForNonPositiveYValue=-1,
-        xColumnPlotLabel=None, xColumnHeader=None, chrLengthColumnHeader=None, 
+        chrLengthColumnHeader=None, 
         chrColumnHeader=None,
         minChrLength=1000000, minNoOfTotal=100,
-        figureDPI=300, ylim_type=2, samplingRate=0.0001, logCount=False,
+        figureDPI=300, ylim_type=None, samplingRate=1,
+        logCount=False,
         tax_id=60711, sequence_type_id=1, chrOrder=None,
         extraArguments=None,
         parentJobLs=None,
@@ -600,15 +609,10 @@ class AbstractWorkflow(Workflow):
         extraArguments=None, transferOutput=True, sshDBTunnel=self.needSSHDBTunnel)
 
 
-        2013.07.26 added argument tax_id, sequence_type_id, chrOrder
-        2013.05.27 remove argument positiveLog, rename logWhichColumn to logY
-        2012.10.6 use addDBJob() instead of addGenericJob()
-        2012.8.31 add argument positiveLog and valueForNonPositiveYValue
+        remove argument positiveLog, rename logWhichColumn to logY
         # whichColumnPlotLabel and xColumnPlotLabel should not contain spaces or ( or ).
         #  because they will disrupt shell commandline
 
-        2012.8.2 moved from vervet/src/CalculateVCFStatPipeline.py
-        2012.8.1
 
 ('whichColumn', 0, int): [3, 'w', 1,
     'data from this column (index starting from 0) is plotted as y-axis value'],\
@@ -638,16 +642,27 @@ class AbstractWorkflow(Workflow):
             extraDependentInputLs = []
         if inputFileList:
             extraDependentInputLs.extend(inputFileList)
-        extraArgumentList = ["--outputFnamePrefix %s"%outputFnamePrefix, 
-            '--minNoOfTotal %s'%(minNoOfTotal), \
-            '--figureDPI %s'%(figureDPI), '--ylim_type %s'%(ylim_type), \
-            '--samplingRate %s'%(samplingRate), \
-            '--xColumnHeader %s'%(xColumnHeader)]
-        extraOutputLs = [File('%s.png'%(outputFnamePrefix)), \
-            File('%s_hist.png'%(outputFnamePrefix))]
+        extraArgumentList = [
+            '--xColumnHeader %s'%(xColumnHeader)
+            ]
+        extraOutputLs = [
+            File('%s.png'%(outputFnamePrefix)),
+            File('%s_hist.png'%(outputFnamePrefix))
+            ]
+        key2ObjectForJob = {}
+        if ylim_type:
+            extraArgumentList.append(f'--ylim_type {ylim_type}')
+        if outputFnamePrefix:
+            extraArgumentList.append(f'--outputFnamePrefix {outputFnamePrefix}')
+        if minNoOfTotal:
+            extraArgumentList.append(f'--minNoOfTotal {minNoOfTotal}')
+        if figureDPI:
+            extraArgumentList.append(f'--figureDPI {figureDPI}')
+        if samplingRate:
+            extraArgumentList.append(f'--samplingRate {samplingRate}')
+        
         if need_svg:
             extraOutputLs.append(File('%s.svg'%(outputFnamePrefix)))
-        key2ObjectForJob = {}
         if minChrLength is not None:
             extraArgumentList.append('--minChrLength %s'%(minChrLength))
         if whichColumnHeader:
@@ -698,20 +713,22 @@ class AbstractWorkflow(Workflow):
         inputFileList=None,
         inputFile=None,
         outputFnamePrefix=None, outputFile=None,
+        xColumnPlotLabel=None, xColumnHeader=None,
         whichColumn=None, whichColumnHeader=None, whichColumnPlotLabel=None,
         logX=None, logY=None, valueForNonPositiveYValue=-1,
         xScaleLog=None, yScaleLog=None,
         missingDataNotation='NA',
-        xColumnPlotLabel=None, xColumnHeader=None,
         xtickInterval=None,
         drawCentromere=None, chrColumnHeader=None,
         minChrLength=100000, minNoOfTotal=100, maxNoOfTotal=None,
-        figureDPI=300, formatString=".", ylim_type=2, samplingRate=1,
-        logCount=False, need_svg=False,\
-        tax_id=60711, sequence_type_id=1, chrOrder=None,\
-        inputFileFormat=1, outputFileFormat=None,\
-        extraArguments=None, extraArgumentList=None, \
-        parentJobLs=None, extraDependentInputLs=None, \
+        figureDPI=300, formatString=".", ylim_type=1,
+        samplingRate=1,
+        logCount=False, need_svg=False,
+        tax_id=60711, sequence_type_id=1, chrOrder=None,
+        inputFileFormat=1, outputFileFormat=None,
+        extraArguments=None,
+        extraArgumentList=None,
+        parentJobLs=None, extraDependentInputLs=None,
         transferOutput=True, job_max_memory=200, \
         objectWithDBGenomeArguments=None, sshDBTunnel=False, \
         **keywords):
@@ -806,33 +823,30 @@ class AbstractWorkflow(Workflow):
         outputFile=None,
         outputFnamePrefix=None,
         xColumnHeader=None, xColumnPlotLabel=None,
-        whichColumn=None, whichColumnHeader=None, \
-        whichColumnPlotLabel=None, \
-        logX=None, logY=None, valueForNonPositiveYValue=-1, \
-        xScaleLog=0, yScaleLog=0, \
-        missingDataNotation='NA',\
-        title=None, \
-        minNoOfTotal=None, maxNoOfTotal=None,\
-        figureDPI=300, formatString='.', markerSize=None, \
-        ylim_type=1, samplingRate=1, legendType=None,\
-        need_svg=False, \
-        inputFileFormat=None, outputFileFormat=None,\
-        extraArgumentList=None, extraArguments=None,
-        parentJob=None, parentJobLs=None, \
-        extraDependentInputLs=None, extraOutputLs=None, \
+        whichColumn=None, whichColumnHeader=None,
+        whichColumnPlotLabel=None,
+        logX=None, logY=None, valueForNonPositiveYValue=-1,
+        xScaleLog=0, yScaleLog=0,
+        missingDataNotation='NA',
+        title=None,
+        minNoOfTotal=None, maxNoOfTotal=None,
+        figureDPI=300, formatString='.', markerSize=None,
+        ylim_type=1, samplingRate=1, legendType=None,
+        need_svg=False,
+        inputFileFormat=None, outputFileFormat=None,
+        extraArguments=None,
+        extraArgumentList=None,
+        parentJob=None, parentJobLs=None,
+        extraDependentInputLs=None, extraOutputLs=None,
         transferOutput=True,
-        job_max_memory=200, \
-        sshDBTunnel=False, key2ObjectForJob=None, \
+        job_max_memory=200,
+        sshDBTunnel=False, key2ObjectForJob=None,
         objectWithDBArguments=None, **keywords):
         """
-        2013.08.28 added argument markerSize
-        2013.07.16 added argument legendType
-        2012.12.3 added argument title, logX, logY
-        2012.10.16 added argument sshDBTunnel, objectWithDBArguments
-        2012.8.31 add argument missingDataNotation
         #no spaces or parenthesis or any other shell-vulnerable letters
         #  in the x or y axis labels (whichColumnPlotLabel, xColumnPlotLabel)
-        2012.8.2 (check AbstractMatrixFileWalker.py or AbstractPlot.py for updated arguments)
+        Check AbstractMatrixFileWalker.py or AbstractPlot.py for updated arguments:
+
 ('outputFname', 0, ): [None, 'o', 1, 'output file for the figure.'],\
 ('minNoOfTotal', 1, int): [100, 'M', 1, 
     'minimum no of total variants (denominator of inconsistent rate)'],\
@@ -939,9 +953,10 @@ inputFileFormat   1: csv-like plain text file; 2: YHPyTables.YHFile; 3: HDF5Matr
             extraArgumentList=extraArgumentList,
             parentJob=parentJob, parentJobLs=parentJobLs,
             extraDependentInputLs=extraDependentInputLs,
-            extraOutputLs=extraOutputLs, transferOutput=transferOutput,
+            extraOutputLs=extraOutputLs,
+            transferOutput=transferOutput,
             key2ObjectForJob=key2ObjectForJob,
-            job_max_memory=job_max_memory, \
+            job_max_memory=job_max_memory,
             sshDBTunnel=sshDBTunnel,
             objectWithDBArguments=objectWithDBArguments,
             **keywords)
@@ -1077,11 +1092,12 @@ inputFileFormat   1: csv-like plain text file; 2: YHPyTables.YHFile; 3: HDF5Matr
         xScaleLog=0, yScaleLog=0,
         logY=None, valueForNonPositiveYValue=-1, missingDataNotation='NA',
         title=None,
-        minNoOfTotal=10, figureDPI=100, formatString='.', ylim_type=2,
-        samplingRate=0.001,
+        minNoOfTotal=None, figureDPI=300, formatString=None, ylim_type=None,
+        samplingRate=1,
         need_svg=False, legendType=None,
         logCount=False, inputFileFormat=None,
         extraArguments=None,
+        extraArgumentList=None,
         parentJobLs=None,
         extraDependentInputLs=None,
         transferOutput=True, job_max_memory=200,
@@ -1136,6 +1152,7 @@ inputFileFormat   1: csv-like plain text file; 2: YHPyTables.YHFile; 3: HDF5Matr
             legendType=legendType,
             inputFileFormat=inputFileFormat,
             extraArguments=extraArguments,
+            extraArgumentList=extraArgumentList,
             parentJobLs=parentJobLs,
             extraDependentInputLs=extraDependentInputLs,
             transferOutput=transferOutput, 
@@ -1152,22 +1169,21 @@ inputFileFormat   1: csv-like plain text file; 2: YHPyTables.YHFile; 3: HDF5Matr
         logX=False, logY=False, logZ=False,
         valueForNonPositiveYValue=-1,
         missingDataNotation='NA',\
-        xColumnHeader=None, xColumnPlotLabel=None, \
-        minNoOfTotal=100,\
-        figureDPI=300, formatString='.', samplingRate=0.001,
+        xColumnHeader=None, xColumnPlotLabel=None,
+        minNoOfTotal=100,
+        figureDPI=300, formatString='.',
+        samplingRate=1,
         need_svg=False,
-        inputFileFormat=None, outputFileFormat=None,\
-        zColumnHeader=None, \
-        extraArgumentList=None, extraArguments=None,
-        parentJobLs=None, \
-        extraDependentInputLs=None, \
+        inputFileFormat=None, outputFileFormat=None,
+        zColumnHeader=None,
+        extraArguments=None,
+        extraArgumentList=None,
+        parentJobLs=None,
+        extraDependentInputLs=None,
         transferOutput=True,
         job_max_memory=200, **keywords):
         """
-        2013.2.8 added argument inputFileFormat
-        2013.2.7 executable could be None, default is self.Draw2DHistogramOfMatrix
-        2012.11.28 change logX, logY, logZ
-        2012.10.7
+        executable could be None, default is self.Draw2DHistogramOfMatrix
 
         """
         if extraArgumentList is None:
@@ -1191,11 +1207,14 @@ inputFileFormat   1: csv-like plain text file; 2: YHPyTables.YHFile; 3: HDF5Matr
             valueForNonPositiveYValue=valueForNonPositiveYValue,
             missingDataNotation=missingDataNotation,
             minNoOfTotal=minNoOfTotal,
-            figureDPI=figureDPI, formatString=formatString, ylim_type=None,
-            samplingRate=samplingRate, need_svg=need_svg,
+            figureDPI=figureDPI, formatString=formatString,
+            ylim_type=None,
+            samplingRate=samplingRate,
+            need_svg=need_svg,
             inputFileFormat=inputFileFormat,
             outputFileFormat=outputFileFormat,
             extraArguments=extraArguments,
+            extraArgumentList=extraArgumentList,
             parentJobLs=parentJobLs,
             extraDependentInputLs=extraDependentInputLs,
             transferOutput=transferOutput,
