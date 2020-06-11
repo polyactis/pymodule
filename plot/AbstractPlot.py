@@ -122,7 +122,7 @@ class AbstractPlot(AbstractMatrixFileWalker):
 
         if self.fitType==1:
             # lowess will return our "smoothed" data with a y value for at every x-value
-            lowess = sm.nonparametric.lowess(y, x, frac=.3)
+            lowess = sm.nonparametric.lowess(y_ls, x_ls, frac=.3)
 
             # unpack the lowess smoothed points to their values
             lowess_x, lowess_y = list(zip(*lowess))
