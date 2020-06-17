@@ -190,13 +190,13 @@ AbstractPlot:
     - echo "Test AbstractPlot"
     - pwd
     - ./plot/AbstractPlot.py -i reducer/data/trade_merged.csv.gz 
-      -o reducer/data/duration_vs_unit_rtn.png --xColumnHeader duration
-      --whichColumnHeader unit_rtn --fitType 1 --legendType 1
+      -o reducer/data/duration_vs_rtn_unit.png --xColumnHeader duration
+      --whichColumnHeader rtn_unit --fitType 1 --legendType 1
   artifacts:
     name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}_${CI_BUILD_ID}"
     expire_in: 3 mos
     paths:
-    - reducer/data/duration_vs_unit_rtn.png
+    - reducer/data/duration_vs_rtn_unit.png
 
 
 DrawHistogram:
@@ -218,13 +218,13 @@ Draw2DHistogramOfMatrix:
     - echo "Test Draw2DHistogramOfMatrix"
     - pwd
     - ./plot/Draw2DHistogramOfMatrix.py -i reducer/data/trade_merged.csv.gz 
-      -o reducer/data/signal_open_vs_unit_rtn_2D.png --xColumnHeader signal_open
-      --whichColumnHeader=unit_rtn
+      -o reducer/data/signal_open_vs_rtn_unit_2D.png --xColumnHeader signal_open
+      --whichColumnHeader=rtn_unit
   artifacts:
     name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}_${CI_BUILD_ID}"
     expire_in: 3 mos
     paths:
-    - reducer/data/signal_open_vs_unit_rtn_2D.png
+    - reducer/data/signal_open_vs_rtn_unit_2D.png
 
 uninstall:
   stage: uninstall
