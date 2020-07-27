@@ -768,9 +768,9 @@ class IndividualSequence(Base, AbstractTableWithFilename):
     date_updated = Column(DateTime)
     UniqueConstraint('individual_id', 'sequencer_id', 'sequence_type_id', 
         'tissue_id', 'filtered', 'no_of_chromosomes', 'format', 
-        'parent_individual_sequence_id', 'sequence_batch_id', 'version', 
-        'is_contaminated', 'outdated_index', \
-        name='individual_sequence_isstfnfpsvio')
+        'quality_score_format', 'parent_individual_sequence_id',
+        'sequence_batch_id', 'version', 'is_contaminated', 'outdated_index',
+        name='individual_sequence_unique')
     
     individual_alignment_list_in_individual_sequence = relationship(
         'IndividualAlignment', back_populates='individual_sequence', 
