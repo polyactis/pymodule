@@ -50,7 +50,7 @@ RegisterDB_h:
 Red-Black tree:
   stage: test_run
   script:
-    - echo ""Testing RB Dict and RB List ... "
+    - echo "Testing RB Dict and RB List ... "
     - pwd
     - ./palos/algorithm/RBTree.py
 
