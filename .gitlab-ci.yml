@@ -47,6 +47,13 @@ RegisterDB_h:
     - pwd
     - ./db/import/RegisterAndMoveSplitSequenceFiles.py -h
 
+Red-Black tree:
+  stage: test_run
+  script:
+    - echo ""Testing RB Dict and RB List ... "
+    - pwd
+    - ./palos/algorithm/RBTree.py
+
 GADA:
   stage: test_run
   script:
