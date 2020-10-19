@@ -1,5 +1,16 @@
 #!/usr/bin/env python
 """
+TODO:
+    Needs to upgrade this app, with Python3, matplotlib 3, gtk 3.
+    https://matplotlib.org/3.1.1/gallery/user_interfaces/pylab_with_gtk_sgskip.html
+    http://zetcode.com/python/gtk/
+
+Requisites for Ubuntu 14.04/16.04. Pakcages all use stock versions.
+    python-glade2
+    python-gnome2
+    python-gtk2
+    python-matplotlib
+
 Example of embedding matplotlib in an application and interacting with a treeview to store data.  Double click on an entry to update plot data
 
 2015.04.16 input matrix file should have a header.
