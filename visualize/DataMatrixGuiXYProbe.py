@@ -48,7 +48,7 @@ from palos.polymorphism.SNP import SNPData, read_data
 from palos.utils import figureOutDelimiter
 from palos import MatrixFile
 from palos.plot import yh_matplotlib
-from variation.src.qc.FilterStrainSNPMatrix import FilterStrainSNPMatrix
+from palos.polymorphism.SNP import write_data_matrix
 
 class ValuePreProcessor(object):
     """
@@ -78,7 +78,8 @@ class DataMatrixGuiXYProbe(gtk.Window):
             use a paned window to wrap the scrolledwindow and the canvas
             so that the relative size of canvas to the scrolledwindow could be adjusted by the user.
         """
-        prog = gnome.program_init('DataMatrixGuiXYProbe', '0.1')	#this must be called before any initialization for gnome app
+        prog = gnome.program_init('DataMatrixGuiXYProbe', '0.1')
+        #this must be called before any initialization for gnome app
         
         program_path = os.path.dirname(__init__.__file__)	#sys.argv[0])
         xml = gtk.glade.XML(os.path.join(program_path, 'DataMatrixGuiXYProbe.glade'))
@@ -134,18 +135,18 @@ class DataMatrixGuiXYProbe(gtk.Window):
 
         self.entry_x_error = xml.get_widget("entry_x_error")
         self.entry_y_error = xml.get_widget("entry_y_error")
-        self.checkbutton_logX = xml.get_widget('checkbutton_logX')	#2014.06.09
+        self.checkbutton_logX = xml.get_widget('checkbutton_logX')
         self.checkbutton_logY = xml.get_widget('checkbutton_logY')
-        self.checkButtonPlotOnlySelected = xml.get_widget('checkButtonPlotOnlySelected')	#2015.04.16
+        self.checkButtonPlotOnlySelected = xml.get_widget('checkButtonPlotOnlySelected')
         self.entry_x_column = xml.get_widget('entry_x_column')
         self.entry_y_column = xml.get_widget('entry_y_column')
         
         self.entry_filters = xml.get_widget("entry_filters")
-        #self.checkbutton_histLogX = xml.get_widget('checkbutton_histLogX')	#2014.06.09
+        #self.checkbutton_histLogX = xml.get_widget('checkbutton_histLogX')
         #self.checkbutton_histLogY = xml.get_widget('checkbutton_histLogY')
         
         self.entry_hist_column = xml.get_widget('entry_hist_column')
-        self.entry_no_of_bins = xml.get_widget('entry_no_of_bins')	#2009-5-20
+        self.entry_no_of_bins = xml.get_widget('entry_no_of_bins')
         self.entry_plot_title = xml.get_widget('entry_plot_title')
         self.entry_plot_title.set_text(self.plot_title)
         
@@ -184,11 +185,13 @@ class DataMatrixGuiXYProbe(gtk.Window):
         """
         2015.04.16
         """
-        splitP= re.compile(r'([,/|\.\-_=\?:;"\'^%$@+])')	#any single character included could be used as splitter
+        splitP= re.compile(r'([,/|\.\-_=\?:;"\'^%$@+])')
+        #any single character included could be used as splitter
         self.dataLabelColumnIndexAndSeparatorList = splitP.split(inputText)
         self.dataLabelNumericItemIndexList = []
         for i in range(len(self.dataLabelColumnIndexAndSeparatorList)):
-            if not splitP.match(self.dataLabelColumnIndexAndSeparatorList[i]):	#it's a column index
+            if not splitP.match(self.dataLabelColumnIndexAndSeparatorList[i]):
+                #it's a column index
                 self.dataLabelColumnIndexAndSeparatorList[i] = int(self.dataLabelColumnIndexAndSeparatorList[i])
                 self.dataLabelNumericItemIndexList.append(i)
         return self.dataLabelColumnIndexAndSeparatorList, self.dataLabelNumericItemIndexList 
@@ -233,7 +236,8 @@ class DataMatrixGuiXYProbe(gtk.Window):
                 if self.list2D is None:
                     return
                 for row in self.list2D:
-                    if row[x_column] is not None and row[x_column]!="" and row[y_column] is not None and row[y_column]!="" :	#not empty
+                    if row[x_column] is not None and row[x_column]!="" and \
+                        row[y_column] is not None and row[y_column]!="" :	#not empty
                         #2016.06.07
                         try:
                             x_data = float(row[x_column])
@@ -250,11 +254,11 @@ class DataMatrixGuiXYProbe(gtk.Window):
                                     self.ax.text(event.xdata, event.ydata, dataLabel, size=8)
                                     self.canvas.draw()
                                 sys.stderr.write("%s: %s, %s: %s, raw xy=(%s, %s), scaled xy=(%s,%s), dataLabel: %s.\n"%\
-                                                (self.columnHeaders[0], row[0], self.columnHeaders[1], row[1], 
-                                                row[x_column], row[y_column], x,y, dataLabel))
+                                    (self.columnHeaders[0], row[0], self.columnHeaders[1], row[1], 
+                                    row[x_column], row[y_column], x,y, dataLabel))
                         except:
                             sys.stderr.write("Column %s, %s of row (%s), could not be converted to float. skip.\n"%\
-                                            (x_column, y_column, repr(row)))
+                                (x_column, y_column, repr(row)))
     
     def setUserDataPreprocessingFlags(self):
         """
@@ -289,7 +293,8 @@ class DataMatrixGuiXYProbe(gtk.Window):
         2014.07.31
         """
         
-        if valuePreProcessor.na is not None and (value==valuePreProcessor.na or float(value)==float(valuePreProcessor.na)):
+        if valuePreProcessor.na is not None and (value==valuePreProcessor.na or \
+            float(value)==float(valuePreProcessor.na)):
             return None
         value = float(value)
         if valuePreProcessor.scalar is not None:
@@ -427,11 +432,13 @@ class DataMatrixGuiXYProbe(gtk.Window):
         ax.plot([diagonal_start, diagonal_end],[diagonal_start, diagonal_end])
         """
         if x_chosen_ls and y_chosen_ls:	#highlight
-            titleWithStats = "Highlighted data\n" + yh_matplotlib.constructTitleFromTwoDataSummaryStat(x_chosen_ls, y_chosen_ls)
+            titleWithStats = "Highlighted data\n" + \
+                yh_matplotlib.constructTitleFromTwoDataSummaryStat(x_chosen_ls, y_chosen_ls)
             
             ax.plot(x_chosen_ls, y_chosen_ls, 'o', alpha=0.6,  c='r')
             if self.x_error_column_index is not None and self.y_error_column_index is not None:
-                ax.errorbar(x_chosen_ls, y_chosen_ls, xerr=x_chosen_error_ls, yerr=y_chosen_error_ls, ecolor='r', color='r', fmt='o')
+                ax.errorbar(x_chosen_ls, y_chosen_ls, xerr=x_chosen_error_ls,
+                    yerr=y_chosen_error_ls, ecolor='r', color='r', fmt='o')
         else:	#take all data
             titleWithStats = yh_matplotlib.constructTitleFromTwoDataSummaryStat(x_ls+x_chosen_ls, y_ls+y_chosen_ls)
         if plot_title:
@@ -461,15 +468,16 @@ class DataMatrixGuiXYProbe(gtk.Window):
             return
         self.liststore = gtk.ListStore(*self.columnTypes)
         #self.add_columns(self.treeview_matrix)
-        yh_gnome.create_columns(self.treeview_matrix, self.columnHeaders, self.columnEditableFlagList, self.liststore)
+        yh_gnome.create_columns(self.treeview_matrix, self.columnHeaders,
+            self.columnEditableFlagList, self.liststore)
         yh_gnome.fill_treeview(self.treeview_matrix, self.liststore, self.list2D, reorderable=True)
         self.treeselection = self.treeview_matrix.get_selection()
     
     def on_button_PlotXY_clicked(self, widget, data=None):
         """
         2008-02-12
-        to update the no_of_selected rows (have to double click a row to change a cursor if it's multiple selection)
-        2008-02-05
+        to update the no_of_selected rows
+        (have to double click a row to change a cursor if it's multiple selection)
         """
         if self._idClick==None:
             self._idClick = self.canvas.mpl_connect('button_press_event', self.onUserClickCanvas)
@@ -525,20 +533,23 @@ class DataMatrixGuiXYProbe(gtk.Window):
                     self.category_list[index_in_data_matrix] = id[1].strip()
                 #else:
                 #	self.header[index_in_data_matrix+2] = id
-            FilterStrainSNPMatrix_instance = FilterStrainSNPMatrix()
             if self.id_is_strain:
                 rows_to_be_tossed_out = set(range(len(self.strain_acc_list))) - selected_index_set
-                FilterStrainSNPMatrix_instance.write_data_matrix(self.data_matrix, output_fname, self.header, self.strain_acc_list, self.category_list,\
-                                rows_to_be_tossed_out, cols_to_be_tossed_out=set(), nt_alphabet=0)
+                write_data_matrix(self.data_matrix, output_fname, self.header,
+                    self.strain_acc_list, self.category_list,\
+                    rows_to_be_tossed_out, cols_to_be_tossed_out=set(), nt_alphabet=0)
             else:
                 cols_to_be_tossed_out = set(range(len(self.header)-2)) - selected_index_set
-                FilterStrainSNPMatrix_instance.write_data_matrix(self.data_matrix, output_fname, self.header, self.strain_acc_list, self.category_list,\
-                                rows_to_be_tossed_out=set(), cols_to_be_tossed_out=cols_to_be_tossed_out, nt_alphabet=0)
+                write_data_matrix(self.data_matrix, output_fname, self.header,
+                    self.strain_acc_list, self.category_list,
+                    rows_to_be_tossed_out=set(),
+                    cols_to_be_tossed_out=cols_to_be_tossed_out, nt_alphabet=0)
     
     def show_all(self):
         """
         2008-02-05
-            preserve the old interface. in order not to change anything in plot_col_NA_mismatch_rate() and plot_row_NA_mismatch_rate() of QualityControl.py
+            preserve the old interface. in order not to change anything in 
+            plot_col_NA_mismatch_rate() and plot_row_NA_mismatch_rate() of QualityControl.py
         """
         self.app1.show_all()
     
@@ -584,7 +595,8 @@ class DataMatrixGuiXYProbe(gtk.Window):
         
         title = "%s %s %s"%(self.plot_title, self.columnHeaders[hist_column],
                 yh_matplotlib.constructTitleFromDataSummaryStat(hist_ls))
-        self.ax.set_title(title);	#"Histogram of %s %s"%(self.plot_title, self.columnHeaders[hist_column]))
+        self.ax.set_title(title);
+        #"Histogram of %s %s"%(self.plot_title, self.columnHeaders[hist_column]))
         no_of_bins = int(self.entry_no_of_bins.get_text())
         
         #if self.x_logScale:
@@ -603,7 +615,8 @@ class DataMatrixGuiXYProbe(gtk.Window):
     def update_no_of_selected(self, treeview, app1_appbar1):
         """
         2008-02-12
-            to update the no_of_selected rows (have to double click a row to change a cursor if it's multiple selection)
+            to update the no_of_selected rows
+            (have to double click a row to change a cursor if it's multiple selection)
         """
         pathlist_strains1 = []
         self.treeselection.selected_foreach(yh_gnome.foreach_cb, pathlist_strains1)
@@ -674,7 +687,8 @@ class DataMatrixGuiXYProbe(gtk.Window):
                 try:
                     new_row[i+1] = self.columnTypes[i+1](row[i])
                 except:
-                    sys.stderr.write("Error in converting column %s data %s to type %s.\n"%(i, row[i], self.columnTypes[i+1]))
+                    sys.stderr.write("Error in converting column %s data %s to type %s.\n"%\
+                        (i, row[i], self.columnTypes[i+1]))
                     sys.stderr.write('Except type: %s\n'%repr(sys.exc_info()))
                     traceback.print_exc()
             
@@ -684,7 +698,8 @@ class DataMatrixGuiXYProbe(gtk.Window):
             self.list2D.append(new_row)
             
         reader.close()
-        sys.stderr.write("Dimension of raw data: %s. Dimension of displayed data: %s."%(dimOfRawData, dimOfList2D))
+        sys.stderr.write("Dimension of raw data: %s. Dimension of displayed data: %s."%\
+            (dimOfRawData, dimOfList2D))
         self.setupColumns(self.treeview_matrix)
         #update status to reflect the input filename
         self.app1.set_title(os.path.basename(input_fname))
@@ -697,7 +712,8 @@ class DataMatrixGuiXYProbe(gtk.Window):
         2009-3-13
         """
         delimiter = figureOutDelimiter(input_fname)
-        self.header, self.strain_acc_list, self.category_list, self.data_matrix = read_data(input_fname, delimiter=delimiter)
+        self.header, self.strain_acc_list, self.category_list, \
+            self.data_matrix = read_data(input_fname, delimiter=delimiter)
         
     def on_imagemenuitem_open_activate(self, widget, data=None):
         """
