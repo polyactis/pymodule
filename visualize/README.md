@@ -1,7 +1,8 @@
 
 - [1. DataMatrixGUI: A Python2+Gtk2 program.](#1-datamatrixgui-a-python2gtk2-program)
   - [1.1. Prequisites](#11-prequisites)
-  - [1.2. How to run](#12-how-to-run)
+  - [1.2. Input File Format](#12-input-file-format)
+  - [1.3. How to run](#13-how-to-run)
 - [2. Salon: A Python3+Gtk3 upgrade of DataMatrixGUI](#2-salon-a-python3gtk3-upgrade-of-datamatrixgui)
 - [3. QCVisualize: A derivative of DataMatrixGUI.py](#3-qcvisualize-a-derivative-of-datamatrixguipy)
 
@@ -34,10 +35,36 @@ apt remove python-matplotlib
 pip install matplotlib --no-binary=matplotlib
 ```
 
-## 1.2. How to run
+## 1.2. Input File Format
+
+The input matrix file should have a header. By default, the first two columns are of type string, thereafter are of type float.
+    
+A user can also append something like "|float" to each header to specify type.
+For example:
+    name|string,position|int,chr|str,value|float
+    
+"float/number/double/numeric" denotes float. "str/string" denotes string.
+    
+Numeric value can not be empty.
+By default -1000 (changeable on the fly) is treated as NA in plotting.
+
+## 1.3. How to run
 
 ```bash
 yh@neon:~/src/pymodule/visualize$ ./DataMatrixGUI.py
+
+```
+
+The example input looks like this:
+
+```
+duration,mean_rtn|float,median_rtn|float,stdev_rtn|float
+1,-0.016964018730390898,-0.0031555695803093613,0.03545061008601551
+10,0.04110182821814123,0.05033562112551317,0.08243081988516482
+11,0.039782885915683464,0.057106598984771384,0.07804014851647187
+12,0.05387298928989632,0.06,0.07221520722342892
+13,0.04951129499085373,0.07008581622818724,0.07292704192354837
+14,0.056159262553250086,0.08590681033493638,0.06400626796445509
 
 ```
 
