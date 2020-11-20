@@ -1,17 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 """
-TODO:
-    Needs to upgrade this app, with Python3, matplotlib 3, gtk 3.
-    https://matplotlib.org/3.1.1/gallery/user_interfaces/pylab_with_gtk_sgskip.html
-    http://zetcode.com/python/gtk/
-
-Requisites for Ubuntu 14.04/16.04. Pakcages all use stock versions.
-    python-glade2
-    python-gnome2
-    python-gtk2
-    python-matplotlib
-
-Example of embedding matplotlib in an application and interacting with a treeview to store data. 
+A GUI program that embeds matplotlib in an application and interacting with a treeview to store data.
 Double click on an entry to update plot data.
 
 The input matrix file should have a header.
@@ -30,6 +19,7 @@ By default, the first two columns are of type string, thereafter are of type flo
 """
 import __init__	#used to know the path to this file itself
 import os, sys, pygtk
+import csv, traceback
 pygtk.require('2.0')
 import gtk, gtk.glade, gobject
 from gtk import gdk
@@ -38,12 +28,13 @@ import gnome.ui
 import math, random, re, copy
 import matplotlib
 matplotlib.use('GTKAgg')  # or 'GTK'
+#matplotlib.use('GTK3Agg')  # or 'GTK3Cairo'
 from matplotlib.backends.backend_gtkagg import FigureCanvasGTKAgg as FigureCanvas
 
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_gtkagg import NavigationToolbar2GTKAgg as NavigationToolbar
+from palos.visualize import yh_gnome
 
-import yh_gnome, csv, traceback
 from palos.polymorphism.SNP import SNPData, read_data
 from palos.utils import figureOutDelimiter
 from palos import MatrixFile
@@ -108,13 +99,15 @@ class DataMatrixGuiXYProbe(gtk.Window):
         
         # matplotlib stuff
         fig = Figure(figsize=(8,8))
+        
         self.canvas = FigureCanvas(fig)  # a gtk.DrawingArea
         self._idClick = self.canvas.mpl_connect('button_press_event', self.onUserClickCanvas)
         self.vpaned1 = xml.get_widget("vpaned1")
         self.vpaned1.add2(self.canvas)
         
-        #vbox.pack_start(self.canvas, True, True)
+        #self.vbox1.pack_start(self.canvas, True, True)
         self.ax = fig.add_subplot(111)
+
         self.treeview_matrix.connect('row-activated', self.plot_row)
         
         toolbar = NavigationToolbar(self.canvas, self.app1)
@@ -626,7 +619,6 @@ class DataMatrixGuiXYProbe(gtk.Window):
     def parseDataHeader(self, dataHeaders=None):
         """
         2016.04.15 inserted a first column to denote order of data
-        2015.04.16
         """
         no_of_cols = len(dataHeaders)
         self.columnHeaders = ['']*(no_of_cols+1)
@@ -634,6 +626,9 @@ class DataMatrixGuiXYProbe(gtk.Window):
         self.columnTypes = [str]*(no_of_cols+1)
         self.columnTypes[0] = int
         self.columnEditableFlagList = [False]*(no_of_cols+1)
+        print("columnHeaders: ", self.columnHeaders)
+        print("columnTypes: ", self.columnTypes)
+        print("columnEditableFlagList: ", self.columnEditableFlagList)
         
         for i in range(no_of_cols):
             header = dataHeaders[i]
@@ -650,6 +645,9 @@ class DataMatrixGuiXYProbe(gtk.Window):
             self.columnTypes[i+1] = column_type
             if column_type==str:
                 self.columnEditableFlagList[i+1] = True
+        print("columnHeaders: ", self.columnHeaders)
+        print("columnTypes: ", self.columnTypes)
+        print("columnEditableFlagList: ", self.columnEditableFlagList)
         
     
     def readInDataToPlot(self, input_fname, sampling_probability=1.0):
@@ -668,7 +666,9 @@ class DataMatrixGuiXYProbe(gtk.Window):
         if sampling_probability>1 or sampling_probability<0:
             sampling_probability=1.0
         reader = MatrixFile(path=input_fname)
-        self.inputDataHeaders = reader.next()
+        self.inputDataHeaders = reader.__next__()
+        print("delimiter: ", reader.delimiter)
+        print("inputDataHeaders: ", self.inputDataHeaders)
         self.parseDataHeader(self.inputDataHeaders)
         
         self.list2D = []
@@ -687,8 +687,8 @@ class DataMatrixGuiXYProbe(gtk.Window):
                 try:
                     new_row[i+1] = self.columnTypes[i+1](row[i])
                 except:
-                    sys.stderr.write("Error in converting column %s data %s to type %s.\n"%\
-                        (i, row[i], self.columnTypes[i+1]))
+                    sys.stderr.write("Error in converting column %s data %s (row=%s) to type %s.\n"%\
+                        (i, row[i], repr(row), self.columnTypes[i+1]))
                     sys.stderr.write('Except type: %s\n'%repr(sys.exc_info()))
                     traceback.print_exc()
             

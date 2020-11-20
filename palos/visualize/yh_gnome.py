@@ -3,8 +3,26 @@
 	module for some custom gnome functions
 """
 import os, sys
-from variation.src.common import get_chr_pos_from_x_axis_pos
 import traceback
+
+def get_chr_pos_from_x_axis_pos(x_axis_pos, chr_gap, chr_id2cumu_size, chr_id_ls):
+    """
+    2008-02-04
+        split out from variation.src.GenomeBrowser.py
+    2008-02-03
+        get chromosome, position from the x axis position
+        chr_id_ls is the sorted version of the keys of chr_id2cumu_size
+    """
+    chr_id_chosen = None
+    position = -1
+    for i in range(1, len(chr_id_ls)):	#the 1st in chr_id_ls is fake chromosome 0
+        prev_chr_id = chr_id_ls[i-1]
+        chr_id = chr_id_ls[i]
+        if chr_id2cumu_size[chr_id]>=x_axis_pos:
+            chr_id_chosen = chr_id
+            position = x_axis_pos - chr_id2cumu_size[prev_chr_id]
+            break
+    return chr_id_chosen, position
 
 def foreach_cb(model, path, iter, pathlist):
 	"""
