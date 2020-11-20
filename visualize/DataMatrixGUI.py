@@ -53,7 +53,7 @@ class ValuePreProcessor(object):
         self.errorColumnIndex = errorColumnIndex
         
 
-class DataMatrixGuiXYProbe(gtk.Window):
+class DataMatrixGUI(gtk.Window):
     """
     2009-3-13
         migrated from QCVisualize.py. now become a standalone program and able to read data from a file and plot ...
@@ -69,11 +69,11 @@ class DataMatrixGuiXYProbe(gtk.Window):
             use a paned window to wrap the scrolledwindow and the canvas
             so that the relative size of canvas to the scrolledwindow could be adjusted by the user.
         """
-        prog = gnome.program_init('DataMatrixGuiXYProbe', '0.1')
+        prog = gnome.program_init('DataMatrixGUI', '0.1')
         #this must be called before any initialization for gnome app
         
         program_path = os.path.dirname(__init__.__file__)	#sys.argv[0])
-        xml = gtk.glade.XML(os.path.join(program_path, 'DataMatrixGuiXYProbe.glade'))
+        xml = gtk.glade.XML(os.path.join(program_path, 'DataMatrixGUI.glade'))
         xml.signal_autoconnect(self)
         self.app1 = xml.get_widget("app1")
         self.app1.connect("delete_event", gtk.main_quit)
@@ -745,6 +745,6 @@ class DataMatrixGuiXYProbe(gtk.Window):
         self.plot_title = self.entry_plot_title.get_text()
     
 if __name__ == '__main__':
-    prog = gnome.program_init('DataMatrixGuiXYProbe', '0.1')
-    instance = DataMatrixGuiXYProbe()
+    prog = gnome.program_init('DataMatrixGUI', '0.1')
+    instance = DataMatrixGUI()
     gtk.main()
