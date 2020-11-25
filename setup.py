@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 import os
 import sys
 import subprocess
@@ -19,7 +20,7 @@ def create_manifest_file():
     f = None
     try:
         f = open('MANIFEST.in', 'w')
-        f.write('global-exclude *.py[cod]\n')
+        f.write(u"global-exclude *.py[cod]\n")
     finally:
         if f:
             f.close()
@@ -45,37 +46,37 @@ def find_package_data(dirname):
     return [path.replace(dirname, "") for path in items]
 
 
-setup_args = dict(
-    name="Palos",
-    version="0.1.28",
-    author="Yu S. Huang",
-    author_email="polyactis@gmail.com",
-    description="Misc Python modules developed and used by the yfish group",
-    long_description_content_type="text/markdown",
-    long_description=README,
-    license="Apache2",
-    url="https://github.com/polyactis/pymodule",
-    python_requires=">=2.7",
-    classifiers=[
-        "Intended Audience :: Developers",
-        "Intended Audience :: Science/Research",
-        "Operating System :: Unix",
-        "Programming Language :: Python",
-        "Programming Language :: Python :: 3",
-        "Topic :: Scientific/Engineering",
-        "Topic :: Utilities",
-    ],
-    packages=find_packages(include=['palos', 'palos.*'], exclude=['.test*']),
-    package_data={
-        # If any package contains *.sh files, include them:
-        "": ["*.sh", "*.md"],
-    },
-    include_package_data=True,
-    zip_safe=False,
-)
 
 
 if __name__ == '__main__':
     create_manifest_file()
     setup_installer_dependencies()
-    setup(**setup_args, install_requires=install_requires)
+    setup(
+        name="Palos",
+        version="0.1.28",
+        author="Yu S. Huang",
+        author_email="polyactis@gmail.com",
+        description="Misc Python modules developed and used by the yfish group",
+        long_description_content_type="text/markdown",
+        long_description=README,
+        license="Apache2",
+        url="https://github.com/polyactis/pymodule",
+        python_requires=">=2.7",
+        classifiers=[
+            "Intended Audience :: Developers",
+            "Intended Audience :: Science/Research",
+            "Operating System :: Unix",
+            "Programming Language :: Python",
+            "Programming Language :: Python :: 3",
+            "Topic :: Scientific/Engineering",
+            "Topic :: Utilities",
+        ],
+        packages=find_packages(include=['palos', 'palos.*'], exclude=['.test*']),
+        package_data={
+            # If any package contains *.sh files, include them:
+            "": ["*.sh", "*.md"],
+        },
+        include_package_data=True,
+        zip_safe=False,
+        install_requires = install_requires,
+    )
