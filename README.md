@@ -13,12 +13,32 @@ It contains code related to bioinformatics projects focusing on next-generation 
 
 [ngs/](ngs/) contains programs analyzing next-generation sequencing data.
 
-# Prerequisites
-The `palos` module is universally used by many programs and must be installed before running any program in pymodule.
+# Prerequisites to run Python programs in Pymodule
+Most programs in pymodule is dependent on the `palos` module, which is housed in [palos/](palos/). Installation of `palos` will trigger installation of other dependencies.
+
+## Palos
+Palos supports Python3 primarily, but is ported to Python2 via https://github.com/asottile/future-fstrings, because some pymodule programs are Python2-only.
+
+```sh
+pip3 install --upgrade palos
+```
+
+```sh
+# to run some Python2 pymodule programs
+pip install --upgrade palos
+```
+
+
+Package future-fstrings allows the use of f-string in Python2.
+```python
+# -*- coding: future_fstrings -*-
+thing = 'world'
+print(f'hello {thing}')
+```
 
 ## Optional prerequisites
 
-Following pakcages are optional, only needed for some functions.
+The following pakcages are optional, only needed for some functions.
 
 1. python-mysqldb
 1. python-psycopg2 http://initd.org/psycopg/
@@ -40,13 +60,9 @@ apt-get install libhdf5-dev libhdf5-serial-dev libhdf5-cpp-100 hdf5-tools \
        libarmadillo-dev libboost-program-options-dev libboost-iostreams-dev \
        libboost-python-dev python-dev
 
-## Install palos
 
-```sh
-pip3 install --upgrade palos
-```
 
-# Usage
+# Example on how to run some pymodule programs
 
 ```sh
 ./ngs/DownsampleWorkflow.py  -h

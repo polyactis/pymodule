@@ -28,10 +28,6 @@ import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
-import gtk, gtk.glade, gobject
-from gtk import gdk
-import gnome
-import gnome.ui
 import math, random, re, copy
 import matplotlib
 matplotlib.use('GTKAgg')  # or 'GTK'
@@ -60,21 +56,18 @@ class ValuePreProcessor(object):
         self.errorColumnIndex = errorColumnIndex
         
 
-class Salon(gtk.Window):
+class Salon(Gtk.Window):
     """
     2020/11/19 Python3 + Gtk3
     """
     def __init__(self, plot_title='', id_is_strain=1, header=None, \
         strain_acc_list=None, category_list=None, data_matrix=None):
         """
-        2008-01-10
-            use a paned window to wrap the scrolledwindow and the canvas
-            so that the relative size of canvas to the scrolledwindow could be adjusted by the user.
+        use a paned window to wrap the scrolledwindow and the canvas
+        so that the relative size of canvas to the scrolledwindow could be adjusted by the user.
         """
-        prog = gnome.program_init('Salon', '0.1')
-        #this must be called before any initialization for gnome app
+        Gtk.Window.__init__(self, title="Salon")
         
-        program_path = os.path.dirname(__init__.__file__)	#sys.argv[0])
         xml = gtk.glade.XML(os.path.join(program_path, 'Salon.glade'))
         xml.signal_autoconnect(self)
         self.app1 = xml.get_widget("app1")
@@ -101,7 +94,14 @@ class Salon(gtk.Window):
         
         # matplotlib stuff
         fig = Figure(figsize=(8,8))
-        self.canvas = FigureCanvas(fig)  # a gtk.DrawingArea
+        # you can access the window or vbox attributes this way
+        # toolbar and vbox only accessible after something is drawn
+        #manager = fig.canvas.manager
+        #toolbar = manager.toolbar
+        #vbox = manager.vbox
+
+        self.canvas = fig.canvas  # a gtk.DrawingArea
+        self.canvas.mpl_connect('motion_notify_event', update)
         self._idClick = self.canvas.mpl_connect('button_press_event', self.onUserClickCanvas)
         self.vpaned1 = xml.get_widget("vpaned1")
         self.vpaned1.add2(self.canvas)
@@ -176,7 +176,6 @@ class Salon(gtk.Window):
     
     def parseDataLabelColumns(self, inputText):
         """
-        2015.04.16
         """
         splitP= re.compile(r'([,/|\.\-_=\?:;"\'^%$@+])')
         #any single character included could be used as splitter
@@ -191,7 +190,6 @@ class Salon(gtk.Window):
     
     def getDataPointLabel(self, dataRow):
         """
-        2015.04.16
         """
         dataLabelInList = copy.deepcopy(self.dataLabelColumnIndexAndSeparatorList)
         for i in self.dataLabelNumericItemIndexList:
@@ -200,15 +198,12 @@ class Salon(gtk.Window):
     
     def onUserClickCanvas(self, event):
         """
-        2016.06.07 bugfix. zero(0) generates false condition while only empty string or None should generate false.
-        2009-3-13
-            use (x_lim[1]-x_lim[0])/200. as the resolution for a dot to be called identical to a data point.
-            similar for the y_data
-        2009-3-13
-            deal with checkbutton_label_dot, entry_dot_label_column, entry_x_column, entry_y_column
-        2008-01-01
-            derived from on_click_row() of QualityControl.py
-            reaction when user clicked in the plot
+        bugfix. zero(0) generates false condition while only empty string or None should generate false.
+        use (x_lim[1]-x_lim[0])/200. as the resolution for a dot to be called identical to a data point.
+        similar for the y_data
+        deal with checkbutton_label_dot, entry_dot_label_column, entry_x_column, entry_y_column
+        derived from on_click_row() of QualityControl.py
+        reaction when user clicked in the plot
         """
         # get the x and y coords, flip y from top to bottom
         x, y = event.x, event.y
@@ -230,7 +225,8 @@ class Salon(gtk.Window):
                     return
                 for row in self.list2D:
                     if row[x_column] is not None and row[x_column]!="" and \
-                        row[y_column] is not None and row[y_column]!="" :	#not empty
+                        row[y_column] is not None and row[y_column]!="" :
+                        #not empty
                         try:
                             x_data = float(row[x_column])
                             y_data = float(row[y_column])
@@ -254,7 +250,6 @@ class Salon(gtk.Window):
     
     def setUserDataPreprocessingFlags(self):
         """
-        2014.07.25
         """
         
         self.xValuePreProcessor = ValuePreProcessor(na = self.entry_x_na.get_text())
@@ -282,9 +277,7 @@ class Salon(gtk.Window):
     
     def processDataValue(self, value=None, valuePreProcessor=None):
         """
-        2014.07.31
         """
-        
         if valuePreProcessor.na is not None and \
             (value==valuePreProcessor.na or float(value)==float(valuePreProcessor.na)):
             return None
@@ -297,7 +290,6 @@ class Salon(gtk.Window):
     
     def decorateAxisLabel(self, label=None, valuePreProcessor=None):
         """
-        2014.07.31
         """
         if valuePreProcessor.scalar is not None:
             label = "%s*%s"%(valuePreProcessor.scalar, label)
@@ -307,8 +299,7 @@ class Salon(gtk.Window):
     
     def filterDataRow(self, dataRow):
         """
-        2015.4.16
-            unfinished
+        unfinished
         """
         logicSplitP= re.compile(r'(AND|OR)')
         equationSplitP = re.compile(r'>=|>|=|<|<=')
@@ -330,11 +321,8 @@ class Salon(gtk.Window):
         """
         2015.01.28 add summary stats to title
         2014.04.29 add error bars
-        2009-3-13
-            rename plot_NA_mismatch_rate to plotXY()
-        2008-02-05
-            chosen_index => chosen_index_ls
-        2007-12-14
+        rename plot_NA_mismatch_rate to plotXY()
+        chosen_index => chosen_index_ls
         """
         x_column = int(self.entry_x_column.get_text())
         y_column = int(self.entry_y_column.get_text())
@@ -456,7 +444,6 @@ class Salon(gtk.Window):
     
     def setupColumns(self, treeview):
         """
-        2009-3-13
         """
         if not getattr(self, 'columnHeaders', None):
             sys.stderr.write("Nothing in columns yet.\n")
@@ -470,9 +457,7 @@ class Salon(gtk.Window):
     
     def on_button_PlotXY_clicked(self, widget, data=None):
         """
-        2008-02-12
         to update the no_of_selected rows (have to double click a row to change a cursor if it's multiple selection)
-        2008-02-05
         """
         if self._idClick==None:
             self._idClick = self.canvas.mpl_connect('button_press_event', self.onUserClickCanvas)
@@ -486,7 +471,6 @@ class Salon(gtk.Window):
     
     def on_button_UnSelectAll_clicked(self, widget, data=None):
         """
-        2015.04.16
         """
         self.treeselection = self.treeview_matrix.get_selection()
         self.treeselection.unselect_all()
@@ -494,21 +478,17 @@ class Salon(gtk.Window):
         
     def on_button_save_clicked(self, widget, data=None):
         """
-        2008-02-05
         """
         self.filechooserdialog_save.show_all()
     
     def on_button_filechooserdialog_cancel_ok_clicked(self, widget, data=None):
         """
-        2008-02-05
         """
         self.filechooserdialog_save.hide()
     
     def on_button_filechooserdialog_save_ok_clicked(self, widget, data=None):
         """
-        2008-02-12
         to update the no_of_selected rows (have to double click a row to change a cursor if it's multiple selection)
-        2008-02-05
         """
         output_fname = self.filechooserdialog_save.get_filename()
         self.filechooserdialog_save.hide()
@@ -542,10 +522,9 @@ class Salon(gtk.Window):
     
     def show_all(self):
         """
-        2008-02-05
-            preserve the old interface.
-            in order not to change anything in plot_col_NA_mismatch_rate() and
-            plot_row_NA_mismatch_rate() of QualityControl.py
+        preserve the old interface.
+        in order not to change anything in plot_col_NA_mismatch_rate() and
+        plot_row_NA_mismatch_rate() of QualityControl.py
         """
         self.app1.show_all()
     
@@ -609,8 +588,7 @@ class Salon(gtk.Window):
     
     def update_no_of_selected(self, treeview, app1_appbar1):
         """
-        2008-02-12
-            to update the no_of_selected rows (have to double click a row to change a cursor if it's multiple selection)
+        to update the no_of_selected rows (have to double click a row to change a cursor if it's multiple selection)
         """
         pathlist_strains1 = []
         self.treeselection.selected_foreach(yh_gnome.foreach_cb, pathlist_strains1)
@@ -619,8 +597,7 @@ class Salon(gtk.Window):
     
     def parseDataHeader(self, dataHeaders=None):
         """
-        2016.04.15 inserted a first column to denote order of data
-        2015.04.16
+        inserted a first column to denote order of data
         """
         no_of_cols = len(dataHeaders)
         self.columnHeaders = ['']*(no_of_cols+1)
@@ -703,7 +680,6 @@ class Salon(gtk.Window):
     
     def readInRawMatrixData(self, input_fname):
         """
-        2009-3-13
         """
         delimiter = figureOutDelimiter(input_fname)
         self.header, self.strain_acc_list, self.category_list, \
@@ -711,20 +687,17 @@ class Salon(gtk.Window):
         
     def on_imagemenuitem_open_activate(self, widget, data=None):
         """
-        2009-3-13
         """
         self.filechooserdialog_open.show_all()
     
     def on_button_fileopen_cancel_clicked(self, widget, data=None):
         """
-        2015.01.23
         """
         self.filechooserdialog_open.hide()
         
     
     def on_button_fileopen_ok_clicked(self, widget, data=None):
         """
-        2009-3-13
         """
         input_fname = self.filechooserdialog_open.get_filename()
         sampling_probability = float(self.entry_sampling_probability.get_text())
@@ -733,12 +706,12 @@ class Salon(gtk.Window):
     
     def on_entry_plot_title_change(self, widget, data=None):
         """
-        2009-3-13
-            upon any change in the entry_plot_title
+        upon any change in the entry_plot_title
         """
         self.plot_title = self.entry_plot_title.get_text()
     
 if __name__ == '__main__':
-    prog = gnome.program_init('Salon', '0.1')
     instance = Salon()
-    gtk.main()
+    instance.connect("destroy", Gtk.main_quit)
+    instance.show_all()
+    Gtk.main()

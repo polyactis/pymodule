@@ -7,7 +7,8 @@ from setuptools import setup, find_packages
 src_dir = os.path.dirname(__file__)
 
 install_requires = ['h5py', 'matplotlib', "numpy", "pegaflow",
-    'scipy', "sqlalchemy", 'statsmodels', 'tables']
+    'scipy', "sqlalchemy", 'statsmodels', 'tables',
+    'future', 'future-fstrings']
 
 with open(os.path.join(src_dir, 'README.md')) as readme_file:
     README = readme_file.read()
@@ -54,7 +55,7 @@ setup_args = dict(
     long_description=README,
     license="Apache2",
     url="https://github.com/polyactis/pymodule",
-    python_requires=">=3.5",
+    python_requires=">=2.7",
     classifiers=[
         "Intended Audience :: Developers",
         "Intended Audience :: Science/Research",

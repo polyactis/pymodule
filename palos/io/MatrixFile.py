@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+# -*- coding: future_fstrings -*-
 """
 A matrix file API like csv.reader, it can deal with any delimiter: coma, tab, space or multi-space.
 
@@ -20,6 +20,15 @@ Example:
     writer.close()
 
 """
+#for Python2&3 compatibility
+from __future__ import absolute_import, division, print_function
+from builtins import (bytes, str, open, super, range,
+    zip, round, input, int, pow, object)
+from future import standard_library
+standard_library.install_aliases()
+from future.builtins import next
+from future.builtins import object
+
 import csv
 import os
 import re
@@ -146,7 +155,6 @@ class MatrixFile(object):
     
     def __iter__(self):
         return self
-    
     
     def __next__(self):
         try:

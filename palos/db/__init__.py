@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: future_fstrings -*-
 """
 2008-04-28
 A wrapper on top of sqlalchemy around a database. 
@@ -6,6 +7,9 @@ Mostly copied from collective.lead.Database.
 Can't directly use it because of trouble in 
   understanding how to use adapter involved in TreadlocalDatabaseTransactions.
 """
+from __future__ import absolute_import, division, print_function
+from builtins import (bytes, str, open, super, range,
+    zip, round, input, int, pow, object)
 import sys, os, math
 import logging
 import sqlalchemy
@@ -221,11 +225,11 @@ class Database(object):
         ('debug', 0, int):[0, 'b', 0, 'toggle debug mode'],\
         ('report', 0, int):[0, 'r', 0, 'toggle report, more verbose stdout/stderr.']
         }
-    def __init__(self, drivername:str='postgresql', hostname:str="localhost",\
-        dbname:str=None, schema:str=None, db_user:str=None, db_passwd:str=None,\
-        port:int=5432, pool_recycle:int=3600, echo_pool:bool=False,
-        sql_echo:bool=False, is_elixir:bool=False, commit:int=0, 
-        debug:int=0, report:int=0):
+    def __init__(self, drivername='postgresql', hostname="localhost",\
+        dbname=None, schema=None, db_user=None, db_passwd=None,\
+        port=5432, pool_recycle=3600, echo_pool=False,
+        sql_echo=False, is_elixir=False, commit=0, 
+        debug=0, report=0):
         """
         """
         self.drivername = drivername
@@ -330,7 +334,7 @@ class Database(object):
         if create_tables:
             #from sqlalchemy.ext.declarative import declarative_base
             #Base = declarative_base()
-            print(self.engine, flush=True)
+            #print(self.engine, flush=True)
             Base.metadata.create_all(self.engine)
 
     def SessionDown(self):

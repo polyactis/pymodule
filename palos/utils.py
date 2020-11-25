@@ -1,3 +1,13 @@
+# -*- coding: future_fstrings -*-
+#for Python2&3 compatibility
+from __future__ import absolute_import, division, print_function
+from builtins import (bytes, str, open, super, range,
+    zip, round, input, int, pow, object)
+from future import standard_library
+standard_library.install_aliases()
+from future.builtins import next
+from future.builtins import object
+
 import os, sys, csv, re, numpy
 import logging
 
@@ -324,7 +334,7 @@ def figureOutDelimiter(input_fname, report=0,
     else:
         import sys
         logging.warn(f"{input_fname} is neither a file name nor a file object. "
-        "But try 'open' it anyway.")
+            "But try 'open' it anyway.")
         inf = openGzipFile(input_fname)
     if getattr(inf, 'readline', None) is not None and use_sniff:
         #2008-01-08 don't use cs.sniff unless the user specifies it. 
@@ -955,7 +965,7 @@ def openGzipFile(inputFname, mode='r'):
         inf.is_gzip = True
     else:
         inf = open(inputFname, mode)
-        inf.is_gzip = False
+        #inf.is_gzip = False
     return inf
 
 def comeUpSplitFilename(outputFnamePrefix=None, suffixLength=3, fileOrder=0,

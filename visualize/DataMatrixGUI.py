@@ -56,14 +56,16 @@ class ValuePreProcessor(object):
 class DataMatrixGUI(gtk.Window):
     """
     2009-3-13
-        migrated from QCVisualize.py. now become a standalone program and able to read data from a file and plot ...
+        migrated from QCVisualize.py. now become a standalone program and
+            able to read data from a file and plot ...
         QCVisualize.py inherits from here
     2008-02-05
         embed it into a bigger gnome app, add more buttons, and change the __init__()
     2008-01-01
         class to visualize the results from QualityControl.py
     """
-    def __init__(self, plot_title='', id_is_strain=1, header=None, strain_acc_list=None, category_list=None, data_matrix=None):
+    def __init__(self, plot_title='', id_is_strain=1, header=None,
+        strain_acc_list=None, category_list=None, data_matrix=None):
         """
         2008-01-10
             use a paned window to wrap the scrolledwindow and the canvas
@@ -72,7 +74,7 @@ class DataMatrixGUI(gtk.Window):
         prog = gnome.program_init('DataMatrixGUI', '0.1')
         #this must be called before any initialization for gnome app
         
-        program_path = os.path.dirname(__init__.__file__)	#sys.argv[0])
+        program_path = os.path.dirname(__init__.__file__)
         xml = gtk.glade.XML(os.path.join(program_path, 'DataMatrixGUI.glade'))
         xml.signal_autoconnect(self)
         self.app1 = xml.get_widget("app1")
@@ -320,7 +322,8 @@ class DataMatrixGUI(gtk.Window):
         self.dataLabelNumericItemIndexList = []
         for i in range(len(self.dataLabelColumnIndexAndSeparatorList)):
             if not splitP.match(self.dataLabelColumnIndexAndSeparatorList[i]):	#it's a column index
-                self.dataLabelColumnIndexAndSeparatorList[i] = int(self.dataLabelColumnIndexAndSeparatorList[i])
+                self.dataLabelColumnIndexAndSeparatorList[i] = \
+                    int(self.dataLabelColumnIndexAndSeparatorList[i])
                 self.dataLabelNumericItemIndexList.append(i)
 
     
@@ -362,7 +365,7 @@ class DataMatrixGUI(gtk.Window):
             row = liststore[i]
             x = row[x_column]
             y = row[y_column]
-            if x=='' or y=='':	#2015.04.16 bugfix 2013.07.12 skip if empty cells
+            if x=='' or y=='':
                 continue
                 noOfValuesDiscarded += 1
             x = self.processDataValue(x, self.xValuePreProcessor)
@@ -433,7 +436,8 @@ class DataMatrixGUI(gtk.Window):
                 ax.errorbar(x_chosen_ls, y_chosen_ls, xerr=x_chosen_error_ls,
                     yerr=y_chosen_error_ls, ecolor='r', color='r', fmt='o')
         else:	#take all data
-            titleWithStats = yh_matplotlib.constructTitleFromTwoDataSummaryStat(x_ls+x_chosen_ls, y_ls+y_chosen_ls)
+            titleWithStats = yh_matplotlib.\
+                constructTitleFromTwoDataSummaryStat(x_ls+x_chosen_ls, y_ls+y_chosen_ls)
         if plot_title:
             ax.set_title("%s %s"%(plot_title, titleWithStats))
         else:
@@ -522,7 +526,7 @@ class DataMatrixGUI(gtk.Window):
                 selected_index_set.add(index_in_data_matrix)
                 if self.id_is_strain:
                     id = id[1:-1].split(',')	#id is a tuple of (ecotypeid,duplicate)
-                    self.strain_acc_list[index_in_data_matrix] = id[0].strip()	#remove extra space
+                    self.strain_acc_list[index_in_data_matrix] = id[0].strip()
                     self.category_list[index_in_data_matrix] = id[1].strip()
                 #else:
                 #	self.header[index_in_data_matrix+2] = id

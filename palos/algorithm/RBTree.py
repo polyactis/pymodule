@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: future_fstrings -*-
 """
 Usage:
     
@@ -39,31 +40,31 @@ Usage:
 #	author.
 #
 # Adapted by Chris Gonnerman <chris.gonnerman@newcenturycomputers.net>
-#		and Graham Breed
+#   and Graham Breed
 #
 # Updated by Charles Tolman <ct@acm.org>
-#		inheritance from object class
-#		added RBTreeIter class
-#		added lastNode and prevNode routines to RBTree
-#		added RBList class and associated tests
+#   inheritance from object class
+#   added RBTreeIter class
+#   added lastNode and prevNode routines to RBTree
+#   added RBList class and associated tests
 #
 # Updated by Stefan Fruhner <marycue@gmx.de>
-#		Added item count to RBNode, which counts the occurence
-#		of objects. The tree is kept unique, but insertions 
-#		of the same object are counted
-#		changed RBList.count():  returns the number of occurences of 
-#								 an item
-#		Renamed RBList.count to RBList.elements, because of a name 
-#		mismatch with RBList.count()
-#		changed RBTree.insertNode to count insertions of the same item
-#		changed RBList.insert(): uncommented some superfluid code
-#		changed RBList.remove(): If called with all=True, then all instances
-#								 of the node are deleted from the tree;
-#								 else only node.count is decremented,
-#								 if finally node.count is 1 the node 
-#								 is deleted.  all is True by default.
-#		changed RBTree.deleteNode : same changes as for RBList.remove()
-#		finally I've changed the __version__ string to '1.6'
+#       Added item count to RBNode, which counts the occurence
+#       of objects. The tree is kept unique, but insertions 
+#       of the same object are counted
+#       changed RBList.count():  returns the number of occurences of 
+#                                an item
+#       Renamed RBList.count to RBList.elements, because of a name 
+#       mismatch with RBList.count()
+#       changed RBTree.insertNode to count insertions of the same item
+#       changed RBList.insert(): uncommented some superfluid code
+#       changed RBList.remove(): If called with all=True, then all instances
+#                                of the node are deleted from the tree;
+#                                else only node.count is decremented,
+#                                if finally node.count is 1 the node 
+#                                is deleted.  all is True by default.
+#        changed RBTree.deleteNode : same changes as for RBList.remove()
+#       finally I've changed the __version__ string to '1.6'
 
 RBTree.py -- Red/Black Balanced Binary Trees with Dictionary Interface
 
@@ -109,8 +110,16 @@ RBTree.py contains an internal Distutils-based installer; just run:
 -------------------------------------------------------------------------------
 
 """
-__version__ = "1.6"
+#for Python2&3 compatibility
+from __future__ import absolute_import, division, print_function
+from builtins import (bytes, str, open, super, range,
+    zip, round, input, int, pow, object)
+from future import standard_library
+standard_library.install_aliases()
+from future.builtins import next
+from future.builtins import object
 
+__version__ = "1.6"
 import sys, os
 import string, math
 from palos.utils import PassingData
@@ -319,7 +328,7 @@ class RBTree(object):
     def insertFixup(self, x):
         #************************************
         #  maintain Red-Black tree balance  *
-        #  after inserting node x			*
+        #  after inserting node x        	*
         #************************************
 
         # check Red-Black properties
@@ -433,7 +442,7 @@ class RBTree(object):
     def deleteFixup(self, x):
         #************************************
         #  maintain Red-Black tree balance  *
-        #  after deleting node x			*
+        #  after deleting node x        	*
         #************************************
 
         while x != self.root and x.color == BLACK:
@@ -504,7 +513,7 @@ class RBTree(object):
         #SF If all=True then the complete node has to be deleted
         if z.count > 1 and not all: 
             z.count -= 1
-            return		  
+            return
 
         if z.left == self.sentinel or z.right == self.sentinel:
             # y has a self.sentinel node as a child
@@ -737,8 +746,8 @@ class RBTree(object):
         2010-1-26
             copied from class node in BinarySearchTree.py
         
-        Calculate the optimum depth of the tree based on how many nodes there are. The formula is:
-            log2(n + 1)
+        Calculate the optimum depth of the tree based on how many nodes there are.
+            The formula is: log2(n + 1)
         """
 
         return math.log(self.elements + 1, 2)
@@ -748,8 +757,8 @@ class RBTree(object):
         2010-1-26
             copied from class node in BinarySearchTree.py
         
-        Calculate how many nodes could be used based on the depth of the tree. The formula is:
-        (2 ^ depth) - 1
+        Calculate how many nodes could be used based on the depth of the tree.
+        The formula is: (2 ^ depth) - 1.
         """
 
         return (2 ** self.depth()) - 1
@@ -1007,7 +1016,8 @@ class RBDict(RBTree):
         Examples:
             segmentKey = CNVSegmentBinarySearchTreeKey(chromosome=str(row.chromosome), \
                 span_ls=[row.start, row.stop], \
-                min_reciprocal_overlap=0.0000001, )	#min_reciprocal_overlap doesn't matter here.
+                min_reciprocal_overlap=0.0000001)
+                #min_reciprocal_overlap doesn't matter here.
                 # it's decided by compareIns.
             node_ls = []
             genomeRBDict.findNodes(segmentKey, node_ls=node_ls, compareIns=compareIns)
@@ -1055,7 +1065,7 @@ def testRBlist():
     initList = [5,3,6,7,2,4,21,8,99,32,23]
     rbList = RBList(initList)
     initList.sort()
-    print("initList after sort: \n", initList, flush=True)
+    print(f"initList after sort: {initList}\n")
     assert rbList.values() == initList
     print('rbList.values() == sorted initList')
     initList.reverse()
@@ -1063,7 +1073,7 @@ def testRBlist():
     
     print("Test if index(i) is equal to i.")
     rbList = RBList([0,1,2,3,4,5,6,7,8,9])
-    print("len(rbList):", len(rbList))
+    print(f"len(rbList): {len(rbList)}.")
     for i in range(10):
         #print(f'i={i}, rbList.index(i)={rbList.index(i)}')
         assert i == rbList.index(i)
@@ -1073,10 +1083,10 @@ def testRBlist():
     for i in range(1,10,2):
         rbList.remove(i)
     
-    print("rbList.values() after deleting 1,3,5,7:", rbList.values(), flush=True)
+    print(f"rbList.values() after deleting 1,3,5,7: {rbList.values()}")
     assert rbList.values() == [0,2,4,6,8]
 
-    print("Pop tests", flush=True)
+    print("Pop tests")
     assert rbList.pop() == 8
     assert rbList.values() == [0,2,4,6]
     assert rbList.pop(1) == 2
@@ -1084,25 +1094,25 @@ def testRBlist():
     assert rbList.pop(0) == 0
     assert rbList.values() == [4,6]
 
-    print("Random number insertion test", flush=True)
+    print("Random number insertion test")
     rbList = RBList()
     for i in range(5):
         k = random.randrange(10) + 1
-        print("	Inserting", k, flush=True)
+        print("	Inserting", k)
         rbList.insert(k)
-    print("	Random contents:", rbList, flush=True)
+    print("	Random contents:", rbList)
 
-    print("	Inserting 0.", flush=True)
+    print("	Inserting 0.")
     rbList.insert(0)
-    print("	Inserting 1.", flush=True)
+    print("	Inserting 1.")
     rbList.insert(1)
-    print("	Inserting 10.", flush=True)
+    print("	Inserting 10.")
     rbList.insert(10)
 
-    print("	With 0, 1 and 10:", rbList, flush=True)
+    print("	With 0, 1 and 10:", rbList)
     n = rbList.findNode(0)
     print("\n")
-    print("	Forward from 0:", flush=True)
+    print("	Forward from 0:")
     while n is not None:
         print("(" + str(n) + ")",)
         n = rbList.nextNode(n)

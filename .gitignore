@@ -25,5 +25,6 @@ io/AbstractMatrixFileWalkerCC.a
 mapper/extractor/SelectRowsFromMatrixCC
 mapper/CalculateColCorBetweenTwoHDF5
 mapper/CalculateMedianMeanOfInputColumn
-reducer/ReduceSameChromosomeAlignmentDepthFiles
 mapper/FindMaxLDBetweenPeakAndEachLocus
+palos.orig
+reducer/ReduceSameChromosomeAlignmentDepthFiles

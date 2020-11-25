@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+# -*- coding: future_fstrings -*-
 import os, sys
 from . utils import getListOutOfStr
 
