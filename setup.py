@@ -7,9 +7,13 @@ from setuptools import setup, find_packages
 
 src_dir = os.path.dirname(__file__)
 
-install_requires = ['h5py', 'matplotlib', "numpy", "pegaflow",
+install_requires = ['h5py', 'matplotlib', "numpy", 
     'scipy', "sqlalchemy", 'statsmodels', 'tables',
     'future', 'future-fstrings']
+
+if sys.version_info.major>2:
+    #Pegaflow is Python3 only
+    install_requires.append("pegaflow")
 
 with open(os.path.join(src_dir, 'README.md')) as readme_file:
     README = readme_file.read()
