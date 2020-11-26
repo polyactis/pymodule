@@ -17,7 +17,7 @@ stages:
 Py2 install:
   stage: install
   script:
-    - pip install --user ./
+    - pip2 install --user ./
 
 Py3 install:
   stage: install
