@@ -19,16 +19,16 @@ from matplotlib.backends.backend_gtkagg import FigureCanvasGTKAgg as FigureCanva
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_gtkagg import NavigationToolbar2GTKAgg as NavigationToolbar
 
-import yh_gnome
+from palos.visualize import yh_gnome
 
 from sets import Set
 
-from DataMatrixGuiXYProbe import DataMatrixGuiXYProbe
+from DataMatrixGUI import DataMatrixGUI
 
-class QCVisualize(DataMatrixGuiXYProbe):
+class QCVisualize(DataMatrixGUI):
 	"""
 	2009-3-24
-		trunk moved to indepedent DataMatrixGuiXYProbe.py and inherits from it
+		trunk moved to indepedent DataMatrixGUI.py and inherits from it
 	2008-02-05
 		embed it into a bigger gnome app, add more buttons, and change the __init__()
 	2008-01-01
@@ -40,7 +40,7 @@ class QCVisualize(DataMatrixGuiXYProbe):
 			use a paned window to wrap the scrolledwindow and the canvas
 			so that the relative size of canvas to the scrolledwindow could be adjusted by the user.
 		"""
-		DataMatrixGuiXYProbe.__init__(self, plot_title=plot_title, id_is_strain=id_is_strain)
+		DataMatrixGUI.__init__(self, plot_title=plot_title, id_is_strain=id_is_strain)
 		
 		self.app1.set_title(plot_title)
 		
