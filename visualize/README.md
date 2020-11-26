@@ -1,5 +1,5 @@
 
-- [1. DataMatrixGUI: A Python2+Gtk2 program.](#1-datamatrixgui-a-python2gtk2-program)
+- [1. DataMatrixGUI: A Python2 Gtk2 program](#1-datamatrixgui-a-python2-gtk2-program)
   - [1.1. Prequisites](#11-prequisites)
   - [1.2. Input File Format](#12-input-file-format)
   - [1.3. How to run](#13-how-to-run)
@@ -9,19 +9,19 @@
 
 This folder contains some GUI programs to inspect data.
 
-# 1. DataMatrixGUI: A Python2+Gtk2 program.
+# 1. DataMatrixGUI: A Python2 Gtk2 program
 
-WARNING: Gtk2 is deprecated, replaced by Gtk3. Still runnable on 18.04 but may not in the future.
+WARNING: Gtk2 is deprecated, replaced by Gtk3. But it is still runnable on 18.04.
 
 ## 1.1. Prequisites
 
-Install these .deb packages via apt on Ubuntu 16.04/18.04, unless noted.
+Install these packages via apt (except palos) on Ubuntu 16.04/18.04.
 
+1. palos (pip2 install)
 1. python-glade2
 1. python-gnome2
 1. python-gtk2
 1. python-matplotlib
-1. palos (pip install)
 
 On Ubuntu 18.04, install matplotlib manually to make sure matplotlib.backends._backend_gdk is compiled. The Ubuntu matplotlib package did not compile _backend_gdk.so.
 
