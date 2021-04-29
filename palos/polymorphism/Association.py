@@ -32,17 +32,27 @@ class AssociationTable(tables.IsDescription):
 
 class AssociationTableFile(YHFile):
 	"""
-	example usage:
-		for read (but not read in the whole data):
-			associationTableFile = AssociationTableFile(absPath, mode='r', autoRead=False)
-			self.no_of_loci = associationTableFile.nrows
-			associationTableFile.close()
+	Example to read an association table file:
+		associationTableFile = AssociationTableFile(absPath, mode='r', autoRead=False)
+		self.no_of_loci = associationTableFile.nrows # will NOT read in the whole data
+		associationTableFile.close()
+	
+    	>>> associationTableFile.associationTable.shape
+        (213655,)
+        >>> associationTableFile.associationTable[:3]
+        array([ (1L, 1L, '1', 657L, 657L, 0.00464357927467517, 46, 0.2658959537572254, -1.0, [-1.0, -1.0, -1.0, -1.0, -1.0], [-1.0, -1.0, -1.0, -1.0, -1.0]),
+           (2L, 2L, '1', 3102L, 3102L, 0.008631413389472068, 50, 0.28901734104046245, -1.0, [-1.0, -1.0, -1.0, -1.0, -1.0], [-1.0, -1.0, -1.0, -1.0, -1.0]),
+           (3L, 3L, '1', 4648L, 4648L, 0.0026632828069891286, 50, 0.28901734104046245, -1.0, [-1.0, -1.0, -1.0, -1.0, -1.0], [-1.0, -1.0, -1.0, -1.0, -1.0])], 
+          dtype=[('id', '<u8'), ('locus_id', '<u8'), ('chromosome', 'S64'), ('start', '<u8'), ('stop', '<u8'), ('score', '<f8'), ('mac', '<i8'), ('maf', '<f8'), ('genotype_var_perc', '<f8'), ('beta_list', '<f8', (5,)), ('beta_pvalue_list', '<f8', (5,))])
+        >>> associationTableFile.associationTable.colIDList
+        ['id', 'locus_id', 'chromosome', 'start', 'stop', 'score', 'mac', 'maf', 'genotype_var_perc', 'beta_list', 'beta_pvalue_list']
+
 		
-		for write:
-			associationTableFile = AssociationTableFile(output_fname, mode='w')
-			attributeDict = None
-			writer = gwr.outputInHDF5MatrixFile(tableObject=associationTableFile.associationTable, attributeDict=attributeDict)
-			associationTableFile.close()
+	Example to write:
+		associationTableFile = AssociationTableFile(output_fname, mode='w')
+		attributeDict = None
+		writer = gwr.outputInHDF5MatrixFile(tableObject=associationTableFile.associationTable, attributeDict=attributeDict)
+		associationTableFile.close()
 	"""
 	def __init__(self, inputFname=None, mode='r', \
 				tableName='association', groupNamePrefix='group', tableNamePrefix='table',\
