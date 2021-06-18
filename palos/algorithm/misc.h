@@ -138,7 +138,7 @@ inline void * SafeCalloc(int numberOfElements , size_t size) {
     { /* assignment intentional in above line */
     return(result);
   } else {
-    printf("memory overflow: calloc failed in SafeCalloc(%i,%i).",
+    printf("memory overflow: calloc failed in SafeCalloc(%i,%lu).",
 	   numberOfElements, size);
     //printf("sbrk(0) gives %x\n",(int)(sbrk(0)));
     printf("  Exiting Program.\n");
