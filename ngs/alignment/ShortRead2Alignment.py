@@ -110,7 +110,7 @@ __doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0],\
 
 import getpass
 import logging
-import copy
+from typing import List
 import pegaflow
 from pegaflow.api import File, Job, Transformation
 from palos import PassingData, utils
@@ -399,7 +399,7 @@ class ShortRead2Alignment(ParentClass):
             job_max_memory=job_max_memory, walltime=walltime)
         return bwa_index_job
 
-    def addStampyGenomeIndexHashJob(self, refFastaFList=None,
+    def addStampyGenomeIndexHashJob(self, refFastaFList:List[File]=None,
         extraDependentInputLs=None,
         transferOutput=True,
         parentJobLs=None, job_max_memory=100, walltime = 60,
@@ -753,8 +753,8 @@ class ShortRead2Alignment(ParentClass):
             self.addRefIndexJobAndItsOutputAsParent(refIndexJob, childJob=sai2samJob)
         return sai2samJob
 
-    def addBWAMemJob(self, fileObjectLs=None,
-        refFastaFList=None, extraAlignArgs=None,
+    def addBWAMemJob(self, fileObjectLs:List[File]=None,
+        refFastaFList:List[File]=None, extraAlignArgs=None,
         alignment_method=None, maxNoOfGaps=None,
         no_of_aln_threads=3, maxMissingAlignmentFraction=None,
         outputDir=None,
@@ -834,7 +834,7 @@ in pipe2File:
             self.addRefIndexJobAndItsOutputAsParent(refIndexJob, childJob=alignmentJob)
         return alignmentJob
 
-    def addHisat2Job(self, fileObjectLs=None,
+    def addHisat2Job(self, fileObjectLs:List[File]=None,
         refFastaFList=None, extraAlignArgs=None,
         alignment_method=None, maxNoOfGaps=None,
         no_of_aln_threads=3, maxMissingAlignmentFraction=None,

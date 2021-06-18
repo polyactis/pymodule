@@ -179,7 +179,7 @@ class AddVCFFolder2DBWorkflow(GenericVCFWorkflow):
                 checkEmptyVCFByReading=checkEmptyVCFByReading, commit=commit, \
                 parentJobLs=[addGM2DBJob]+jobData.jobLs, extraDependentInputLs=[], transferOutput=True, \
                 extraArguments=None, job_max_memory=1000, sshDBTunnel=needSSHDBTunnel)
-            self.depends(parent=addVCFJob, child=updateGMNoOfLociJob)
+            self.add_dependency(updateGMNoOfLociJob, parents=[addVCFJob])
         sys.stderr.write("%s jobs.\n"%(self.no_of_jobs))
         #include the tfam (outputList[1]) into the fileLs
         returnData.jobDataLs.append(PassingData(jobLs=[updateGMNoOfLociJob],

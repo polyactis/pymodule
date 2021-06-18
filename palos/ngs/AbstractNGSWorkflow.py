@@ -3254,8 +3254,10 @@ run something like below to extract data from regionOfInterest out of
             merge_sam_job = self.addGenericJob(
                 executable=self.cp, 
                 frontArgumentList=None,
-                inputFile=alignmentOutput, inputArgumentOption=None,
-                outputFile=outputBamFile, outputArgumentOption=None,
+                inputArgumentOption=None,
+                inputFile=alignmentOutput,
+                outputArgumentOption=None,
+                outputFile=outputBamFile,
                 extraArgumentList=None,
                 parentJobLs=alignmentJobLs,
                 extraDependentInputLs=None,
@@ -3270,7 +3272,7 @@ run something like below to extract data from regionOfInterest out of
         merge_sam_job.output = outputBamFile
         if parentJobLs:
             for parentJob in parentJobLs:
-                self.depends(parent=parentJob, child=merge_sam_job)
+                self.add_dependency(merge_sam_job, parents=[parentJob])
 
         bamIndexJob = None
         if needBAMIndexJob:

@@ -604,9 +604,8 @@ class InspectAlignmentPipeline(ParentClass):
 
         reduceDepthOfCoverageJob.addArguments(DOCJob.sample_statistics_file)
         reduceDepthOfCoverageJob.add_inputs(DOCJob.sample_statistics_file)
-        self.depends(parent=DOCJob, child=reduceDepthOfCoverageJob)
+        self.add_dependency(reduceDepthOfCoverageJob, parents=[DOCJob])
         """
-
         return returnData
 
     def reduceAfterEachAlignment(self, passingData=None,
@@ -779,7 +778,7 @@ class InspectAlignmentPipeline(ParentClass):
                     transferOutput=True,
                     job_max_memory=2000, walltime=30,
                     sshDBTunnel=self.needSSHDBTunnel)
-                self.depends(parent=addFile2DBJob, child=updateMethodNoOfIntervalsJob)
+                self.add_dependency(updateMethodNoOfIntervalsJob, parents=[addFile2DBJob])
         print(f" {self.no_of_jobs} jobs, {self.no_of_alns_with_depth_jobs}"
             f" alignments with depth jobs, {self.no_of_alns_with_flagstat_jobs} "
             f"alignments with flagstat jobs.", flush=True)
