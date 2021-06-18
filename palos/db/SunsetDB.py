@@ -16,7 +16,7 @@ __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 import hashlib
 import logging
 from sqlalchemy import Unicode, DateTime, String, BigInteger, Integer
-from sqlalchemy import UnicodeText, Text, Boolean, Float, Binary, Enum, Table
+from sqlalchemy import Text, Float, Enum, Table
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column
 from sqlalchemy import ForeignKey
