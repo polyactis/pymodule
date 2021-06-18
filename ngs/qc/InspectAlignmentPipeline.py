@@ -465,8 +465,8 @@ class InspectAlignmentPipeline(ParentClass):
                 inputFile=bamF, outputFile=oneFlagStatOutputF, \
                 parentJobLs=parentJobLs + [flagStatMapFolderJob], \
                 extraDependentInputLs=[baiF], transferOutput=False, \
-                job_max_memory=jobMaxMemory/2, \
-                walltime=jobWalltime/2)
+                job_max_memory=int(jobMaxMemory/2), \
+                walltime=int(jobWalltime/2))
             self.addRefFastaJobDependency(job=samtoolsFlagStatJob, \
                 refFastaF=passingData.refFastaF, \
                 fastaDictJob=passingData.fastaDictJob, \
@@ -497,7 +497,7 @@ class InspectAlignmentPipeline(ParentClass):
                 samtools_path=self.samtools_path,
                 bamF=bamF, outputFile=depthOutputFile, baiF=baiF,
                 parentJobLs=[topOutputDirJob] + alignmentData.jobLs, 
-                job_max_memory = jobMaxMemory/2,
+                job_max_memory = int(jobMaxMemory/2),
                 transferOutput=False)
             self.addRefFastaJobDependency(job=samtoolsDepthJob,
                 refFastaF=passingData.refFastaF,
