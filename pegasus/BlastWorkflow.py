@@ -2,7 +2,8 @@
 """
 Examples:
     %s --databaseFname /Network/Data/vervet/db/individual_sequence/524_superContigsMinSize2000.fasta 
-        --inputFname ~/script/vervet/data/OphoffMethylation/DMR330K_ProbeSeq.fasta --maxNoOfMismatches 2
+        --inputFname ~/script/vervet/data/OphoffMethylation/DMR330K_ProbeSeq.fasta
+        --maxNoOfMismatches 2
         -l condorpool -j condorpool --blockSize 500
         -C 1 -o workflow/BlastDMR330K_ProbeSeqAgainst524.xml
     
@@ -17,7 +18,7 @@ Examples:
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 
-from pegaflow.api import File
+from pegaflow.api import File, Transformation
 from palos import ProcessOptions, PassingData, utils
 from palos.pegasus.AbstractBioinfoWorkflow import AbstractBioinfoWorkflow
 
@@ -64,7 +65,8 @@ class BlastWorkflow(ParentClass):
         sys.stderr.write("%s sequences.\n"%(no_of_sequences))
         return no_of_sequences
     
-    def addSplitFastaFileJob(self, executable=None, inputFile=None, outputFnamePrefix=None, \
+    def addSplitFastaFileJob(self, executable:Transformation=None, inputFile:File=None,
+        outputFnamePrefix=None, \
         noOfSequencesPerSplitFile=1000, filenameSuffix="", noOfTotalSequences=1000000,\
         parentJobLs=[], extraDependentInputLs=[], transferOutput=False, \
         extraArguments=None, job_max_memory=500, **keywords):
@@ -75,11 +77,13 @@ class BlastWorkflow(ParentClass):
         suffixLength = len(repr(noOfSplitFiles))
         
         job = self.addGenericJob(executable=executable, inputArgumentOption="-i",
-            inputFile=inputFile, extraArgumentList=["--noOfSequences %s"%(noOfSequencesPerSplitFile), \
+            inputFile=inputFile,
+            extraArguments=extraArguments, \
+            extraArgumentList=["--noOfSequences %s"%(noOfSequencesPerSplitFile), \
                 "--outputFnamePrefix", outputFnamePrefix,
                 '--filenameSuffix %s'%(filenameSuffix),
                 '--suffixLength %s'%(suffixLength)],
-            parentJobLs=parentJobLs, extraArguments=extraArguments, \
+            parentJobLs=parentJobLs,
             extraDependentInputLs=extraDependentInputLs,
             job_max_memory=job_max_memory)
         
@@ -91,8 +95,8 @@ class BlastWorkflow(ParentClass):
             self.addJobUse(job, file=splitFile, is_input=False, transfer=transferOutput)
         return job
     
-    def addBlastWrapperJob(self, executable=None, inputFile=None,
-        outputFile=None, outputFnamePrefix=None, databaseFile=None,\
+    def addBlastWrapperJob(self, executable:Transformation=None, inputFile:File=None,
+        outputFile:File=None, outputFnamePrefix=None, databaseFile:File=None,\
         maxNoOfMismatches=None, minNoOfIdentities=None,
         minIdentityPercentage=None, blastallPath=None, \
         parentJobLs=[], extraDependentInputLs=[], transferOutput=False, \
@@ -117,8 +121,8 @@ class BlastWorkflow(ParentClass):
             transferOutput=transferOutput, \
             extraArgumentList=extraArgumentList, job_max_memory=job_max_memory)
         
-    def addJobs(self, inputData=None, outputDirPrefix="", ntDatabaseFileList=None, noOfTotalSequences=None, \
-        transferOutput=True, makeBlastDBJob=None):
+    def addJobs(self, inputData=None, outputDirPrefix="", ntDatabaseFileList=None,
+        noOfTotalSequences=None, transferOutput=True, makeBlastDBJob=None):
         """
         2012.5.24
         """
@@ -131,8 +135,10 @@ class BlastWorkflow(ParentClass):
         no_of_jobs += 1
         
         allBlastResultFile = File(os.path.join(topOutputDir, 'blast.tsv'))
-        allBlastMergeJob = self.addStatMergeJob(statMergeProgram=self.mergeSameHeaderTablesIntoOne, \
-            outputF=allBlastResultFile, transferOutput=transferOutput, parentJobLs=[topOutputDirJob])
+        allBlastMergeJob = self.addStatMergeJob(
+            statMergeProgram=self.mergeSameHeaderTablesIntoOne, \
+            outputF=allBlastResultFile, transferOutput=transferOutput,
+            parentJobLs=[topOutputDirJob])
         no_of_jobs += 1
         
         ntDatabaseFile = ntDatabaseFileList[0]
@@ -141,31 +147,40 @@ class BlastWorkflow(ParentClass):
         
         for jobData in inputData.jobDataLs:
             inputF = jobData.output
-            outputFnamePrefix = os.path.join(topOutputDir, os.path.splitext(os.path.basename(inputF.name))[0])
+            outputFnamePrefix = os.path.join(topOutputDir,
+                os.path.splitext(os.path.basename(inputF.name))[0])
             
-            splitFastaJob = self.addSplitFastaFileJob(executable=self.SplitFastaFile, inputFile=inputF, outputFnamePrefix=outputFnamePrefix, \
-                        noOfSequencesPerSplitFile=self.blockSize, filenameSuffix=".fasta", noOfTotalSequences=noOfTotalSequences,\
-                        parentJobLs=jobData.jobLs + [topOutputDirJob], extraDependentInputLs=[], transferOutput=False, \
-                        extraArguments=None, job_max_memory=500)
+            splitFastaJob = self.addSplitFastaFileJob(executable=self.SplitFastaFile,
+                inputFile=inputF, outputFnamePrefix=outputFnamePrefix, \
+                noOfSequencesPerSplitFile=self.blockSize, filenameSuffix=".fasta",
+                noOfTotalSequences=noOfTotalSequences,\
+                parentJobLs=jobData.jobLs + [topOutputDirJob],
+                extraDependentInputLs=None, transferOutput=False, \
+                extraArguments=None, job_max_memory=500)
             no_of_jobs += 1
             for splitFastaOutput in splitFastaJob.outputList:
                 outputFile = File('%s.tsv'%(splitFastaOutput.name))
                 blastJob = self.addBlastWrapperJob(executable=self.BlastWrapper,
-                    inputFile=splitFastaOutput, outputFile=outputFile, \
-                    outputFnamePrefix=splitFastaOutput.name , databaseFile=ntDatabaseFile,\
-                    maxNoOfMismatches=self.maxNoOfMismatches, minNoOfIdentities=self.minNoOfIdentities, \
-                    minIdentityPercentage=self.minIdentityPercentage, blastallPath=self.blastallPath, \
-                    parentJobLs=[splitFastaJob, makeBlastDBJob], extraDependentInputLs=ntDatabaseFileList, transferOutput=False, \
+                    inputFile=splitFastaOutput, outputFile=outputFile,
+                    outputFnamePrefix=splitFastaOutput.name ,
+                    databaseFile=ntDatabaseFile,
+                    maxNoOfMismatches=self.maxNoOfMismatches,
+                    minNoOfIdentities=self.minNoOfIdentities,
+                    minIdentityPercentage=self.minIdentityPercentage,
+                    blastallPath=self.blastallPath,
+                    parentJobLs=[splitFastaJob, makeBlastDBJob],
+                    extraDependentInputLs=ntDatabaseFileList,
+                    transferOutput=False, \
                     extraArguments=None, job_max_memory=1000)
                 
                 #add output to some reduce job
                 self.addInputToMergeJob(allBlastMergeJob, \
-                                inputF=blastJob.output, parentJobLs=[blastJob])
+                    inputF=blastJob.output, parentJobLs=[blastJob])
                 no_of_jobs += 1
         sys.stderr.write("%s jobs. Done.\n"%(no_of_jobs))
         #include the tfam (outputList[1]) into the fileLs
         returnData.jobDataLs.append(PassingData(jobLs=[allBlastMergeJob], file=allBlastResultFile, \
-                                            fileLs=[allBlastResultFile]))
+            fileLs=[allBlastResultFile]))
         return returnData
     
                 
@@ -185,7 +200,7 @@ class BlastWorkflow(ParentClass):
             path=os.path.join(self.pymodulePath, 'pegasus/mapper/splitter/SplitFastaFile.py'),
             clusterSizeMultiplier=0.1)
     
-    def addMakeBlastDBJob(self, executable=None, inputFile=None, \
+    def addMakeBlastDBJob(self, executable:Transformation=None, inputFile=None, \
         parentJobLs=None, extraDependentInputLs=None, transferOutput=False, \
         extraArguments=None, job_max_memory=500, **keywords):
         """
@@ -201,13 +216,14 @@ class BlastWorkflow(ParentClass):
         extraOutputLs.append(File("formatdb.log"))
         
         extraArgumentList = ["-p F"]
-        job = self.addGenericJob(executable=executable, inputFile=inputFile, outputFile=None, \
-                        parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
-                        extraOutputLs=extraOutputLs,\
-                        transferOutput=transferOutput, \
-                        extraArguments=extraArguments, extraArgumentList=extraArgumentList, \
-                        key2ObjectForJob=None,\
-                        job_max_memory=job_max_memory)
+        job = self.addGenericJob(executable=executable,
+            inputFile=inputFile, outputFile=None, \
+            extraArguments=extraArguments, extraArgumentList=extraArgumentList, \
+            parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
+            extraOutputLs=extraOutputLs,\
+            transferOutput=transferOutput, \
+            key2ObjectForJob=None,\
+            job_max_memory=job_max_memory)
         return job
     
     def run(self):
@@ -221,7 +237,8 @@ class BlastWorkflow(ParentClass):
         inputData.jobDataLs.append(PassingData(output=inputFile, jobLs=[]))
         noOfTotalSequences= self.getNoOfSequencesFromFasta(inputFastaFname=self.inputFname)
         
-        registerReferenceData = self.registerBlastNucleotideDatabaseFile(ntDatabaseFname=self.databaseFname, \
+        registerReferenceData = self.registerBlastNucleotideDatabaseFile(
+            ntDatabaseFname=self.databaseFname, \
             input_site_handler=self.input_site_handler)
         ntDatabaseFileList = registerReferenceData.refFastaFList
         ntDatabaseFile = ntDatabaseFileList[0]
