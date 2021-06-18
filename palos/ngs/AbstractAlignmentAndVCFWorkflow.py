@@ -4,7 +4,6 @@
 """
 import sys, os
 import copy
-from pegaflow.api import Job
 from palos import ProcessOptions, PassingData, utils
 from . AbstractAlignmentWorkflow import AbstractAlignmentWorkflow
 from . AbstractVCFWorkflow import AbstractVCFWorkflow

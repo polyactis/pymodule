@@ -15,10 +15,10 @@ Examples:
 import sys, os, copy
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 import getpass
-from palos import ProcessOptions, getListOutOfStr, PassingData, utils
+from palos import getListOutOfStr, utils
 from palos.db import SunsetDB
 from palos.ngs.AbstractNGSWorkflow import AbstractNGSWorkflow
-from pegaflow.api import File, PFN
+from pegaflow.api import File
 
 class InspectBaseQualityPipeline(AbstractNGSWorkflow):
     __doc__ = __doc__

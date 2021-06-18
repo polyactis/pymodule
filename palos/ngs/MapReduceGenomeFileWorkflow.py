@@ -20,7 +20,7 @@ __doc__ = __doc__%(sys.argv[0])
 import logging
 from pegaflow.api import File
 from palos import PassingData, utils
-from AbstractNGSWorkflow import AbstractNGSWorkflow
+from . AbstractNGSWorkflow import AbstractNGSWorkflow
 
 ParentClass = AbstractNGSWorkflow
 class MapReduceGenomeFileWorkflow(ParentClass):

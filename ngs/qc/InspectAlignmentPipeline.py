@@ -51,18 +51,16 @@ Description:
     A pegasus workflow that inspects no-of-reads-aligned, infers insert size and etc.
     Use samtools flagstat.
 """
-import sys, os, math
+import sys, os
 __doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0])
 
-import copy
 import getpass
 import logging
-from pegaflow.api import File, Link, Job
-from palos import ProcessOptions, utils, PassingData
+from pegaflow.api import File
+from palos import utils, PassingData
 from palos.ngs.AbstractAlignmentWorkflow import AbstractAlignmentWorkflow
 
 ParentClass = AbstractAlignmentWorkflow
-
 class InspectAlignmentPipeline(ParentClass):
     __doc__ = __doc__
     #	("fractionToSample", 0, float): [0.001, '', 1, 
@@ -605,8 +603,7 @@ class InspectAlignmentPipeline(ParentClass):
                 fractionToSample=self.fractionToSample)
 
         reduceDepthOfCoverageJob.addArguments(DOCJob.sample_statistics_file)
-        reduceDepthOfCoverageJob.uses(DOCJob.sample_statistics_file, transfer=True,
-            register=True, link=Link.INPUT)
+        reduceDepthOfCoverageJob.add_inputs(DOCJob.sample_statistics_file)
         self.depends(parent=DOCJob, child=reduceDepthOfCoverageJob)
         """
 

@@ -15,16 +15,16 @@ Examples:
         --pegasusFolderName readCount --commit
     
 """
-import sys, os, math
+import sys, os
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 
 import getpass
 import logging
-import subprocess
-from pegaflow.api import File, Link, PFN, Job
-from palos import getListOutOfStr, PassingData, utils
+from typing import List
+from pegaflow.api import File, Transformation, Job
+from palos import getListOutOfStr, PassingData
 from palos.ngs.AbstractNGSWorkflow import AbstractNGSWorkflow
-from palos.db import SunsetDB
+from palos.db import SunsetDB, Database
 
 ParentClass = AbstractNGSWorkflow
 class CountReadsWorkflow(ParentClass):
@@ -105,19 +105,20 @@ class CountReadsWorkflow(ParentClass):
         2012.3.14
         """
         ParentClass.registerCustomExecutables(self)
-        
         self.registerOneExecutable(
+            name='CountFastqReadBaseCount',
             path=os.path.join(self.pymodulePath,
                 'mapper/computer/CountFastqReadBaseCount.py'),
-            name='CountFastqReadBaseCount', clusterSizeMultiplier=1)
+            clusterSizeMultiplier=1)
         
         self.registerOneExecutable(
+            name='PutReadBaseCountIntoDB',
             path=os.path.join(self.pymodulePath,
                 'db/import/PutReadBaseCountIntoDB.py'),
-            name='PutReadBaseCountIntoDB', clusterSizeMultiplier=0.2)
+            clusterSizeMultiplier=0.2)
         
     
-    def registerISQFiles(self, db_main=None, ind_seq_id_ls=[],
+    def registerISQFiles(self, db_main:Database=None, ind_seq_id_ls=[],
         local_data_dir='', pegasusFolderName='', \
         input_site_handler='local'):
         """
@@ -136,11 +137,9 @@ class CountReadsWorkflow(ParentClass):
                     absPath = os.path.join(local_data_dir, 
                         individual_sequence_file.path)
                     if os.path.isfile(absPath):
-                        inputF = File(os.path.join(pegasusFolderName,
+                        inputF = self.registerOneInputFile(absPath,
+                            pegasusFileName=os.path.join(pegasusFolderName,
                             individual_sequence_file.path))
-                        inputF.addPFN(PFN("file://" + absPath, input_site_handler))
-                        inputF.absPath = absPath
-                        self.addFile(inputF)
                         returnData.jobDataLs.append(PassingData(
                             output=inputF, jobLs=[],
                             isq_id=individual_sequence.id,
@@ -155,10 +154,9 @@ class CountReadsWorkflow(ParentClass):
             elif individual_sequence.path:
                 absPath = os.path.join(local_data_dir, individual_sequence.path)
                 if os.path.isfile(absPath):
-                    inputF = File(os.path.join(pegasusFolderName, individual_sequence.path))
-                    inputF.addPFN(PFN("file://" + absPath, input_site_handler))
-                    inputF.absPath = absPath
-                    self.addFile(inputF)
+                    inputF = self.registerOneInputFile(absPath,
+                        pegasusFileName=os.path.join(pegasusFolderName,
+                        individual_sequence_file.path))
                     returnData.jobDataLs.append(PassingData(output=inputF, 
                         jobLs=[], isq_id=individual_sequence.id,\
                         isqf_id=None))
@@ -176,9 +174,10 @@ class CountReadsWorkflow(ParentClass):
             flush=True)
         return returnData
     
-    def addPutReadBaseCountIntoDBJob(self, executable=None, inputFileLs=[], \
-        logFile=None, commit=False, parentJobLs=None,
-        extraDependentInputLs=[],
+    def addPutReadBaseCountIntoDBJob(self, executable:Transformation=None,
+        inputFileLs:List[File]=None, \
+        logFile=None, commit=False, parentJobLs:List[Job]=None,
+        extraDependentInputLs:List[File]=None,
         transferOutput=True, extraArguments=None, \
         job_max_memory=10, sshDBTunnel=1, **keywords):
         """
@@ -201,8 +200,9 @@ class CountReadsWorkflow(ParentClass):
         return job
     
     
-    def addCountFastqReadBaseCountJob(self, executable=None, inputFile=None, \
-        outputFile=None, isq_id=None, isqf_id=None, \
+    def addCountFastqReadBaseCountJob(self, executable:Transformation=None,
+        inputFile:File=None, \
+        outputFile:File=None, isq_id=None, isqf_id=None, \
         parentJobLs=None, extraDependentInputLs=None, transferOutput=True,
         extraArguments=None,
         job_max_memory=100, **keywords):
@@ -210,8 +210,6 @@ class CountReadsWorkflow(ParentClass):
         20170503 use addGenericJob()
         2012.3.14
         """
-        job = Job(namespace=self.namespace, name=executable.name, version=self.version)
-        job.addArguments("--inputFname", inputFile, "--outputFname", outputFile)
         if not extraArguments:
             extraArguments = ""
         if isq_id:
@@ -220,9 +218,10 @@ class CountReadsWorkflow(ParentClass):
             extraArguments += " --isqf_id %s "%(isqf_id)
         
         job = self.addGenericJob(executable=executable, \
-            inputFile=inputFile, \
             inputArgumentOption="-i", \
-            outputFile=outputFile, outputArgumentOption="-o", \
+            inputFile=inputFile, \
+            outputArgumentOption="-o", \
+            outputFile=outputFile,
             parentJobLs=parentJobLs, \
             extraDependentInputLs=extraDependentInputLs, \
             transferOutput=transferOutput, \
@@ -290,7 +289,7 @@ class CountReadsWorkflow(ParentClass):
             setting up for run(), called by run()
         """
         pdata = ParentClass.setup_run(self)
-        db_main = self.db_main
+        db_main:Database = self.db_main
         session = db_main.session
         session.begin(subtransactions=True)
         """

@@ -11,7 +11,7 @@ from palos import Genome, PassingData, utils
 from palos.io.MatrixFile import MatrixFile
 from palos.ngs.io.VCFFile import VCFFile
 from palos import ngs
-from MapReduceGenomeFileWorkflow import MapReduceGenomeFileWorkflow
+from . MapReduceGenomeFileWorkflow import MapReduceGenomeFileWorkflow
 ParentClass = MapReduceGenomeFileWorkflow
 
 class AbstractVCFWorkflow(ParentClass):
