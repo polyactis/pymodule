@@ -14,23 +14,23 @@ stages:
   - test_run
   - uninstall
 
-Py2 install:
-  stage: install
-  script:
-    - pip2 install --user ./
+# Py2_install:
+#   stage: install
+#   script:
+#     - pip2 install --user ./
 
-Py3 install:
+Py3_install:
   stage: install
   script:
     - pip3 install --user ./
 
-Py2 check_version:
-  stage: check_version
-  script:
-    - echo "Checking the version of the installed package"
-    - python2 -c "import palos; print(palos.version)"
+# Py2_check_version:
+#   stage: check_version
+#   script:
+#     - echo "Checking the version of the installed package"
+#     - python2 -c "import palos; print(palos.version)"
 
-Py3 check_version:
+Py3_check_version:
   stage: check_version
   script:
     - echo "Checking the version of the installed package"
@@ -57,19 +57,19 @@ RegisterDB_h:
     - pwd
     - ./db/import/RegisterAndMoveSplitSequenceFiles.py -h
 
-Py3 Red-Black Tree:
+Py3_Red-Black Tree:
   stage: test_run
   script:
     - echo "Testing RB Dict and RB List ... "
     - pwd
     - python3 ./palos/algorithm/RBTree.py
 
-Py2 Red-Black Tree:
-  stage: test_run
-  script:
-    - echo "Testing RB Dict and RB List ... "
-    - pwd
-    - python2 ./palos/algorithm/RBTree.py
+# Py2_Red-Black Tree:
+#   stage: test_run
+#   script:
+#     - echo "Testing RB Dict and RB List ... "
+#     - pwd
+#     - python2 ./palos/algorithm/RBTree.py
 
 
 GADA:
