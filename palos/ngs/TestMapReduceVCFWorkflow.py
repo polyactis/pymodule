@@ -12,13 +12,11 @@ Examples:
         --notToUseDBToInferVCFNoOfLoci
         --db_user yh -z localhost
 """
-import sys, os, math
+import sys, os
 __doc__ = __doc__%(sys.argv[0])
 
-from pegaflow.DAX3 import Executable, File, PFN
-import pegaflow
+from pegaflow.api import File
 from palos import ProcessOptions, PassingData
-from palos.io.FastaFile import FastaFile
 from . AbstractVCFWorkflow import AbstractVCFWorkflow
 
 ParentClass = AbstractVCFWorkflow
@@ -173,7 +171,7 @@ class TestMapReduceVCFWorkflow(ParentClass):
         """
         """
         self.needSplitChrIntervalData = False
-        pdata = ParentClass.setup_run(self)
+        ParentClass.setup_run(self)
         return self
 
 if __name__ == '__main__':

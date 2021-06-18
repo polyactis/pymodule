@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3g
 
 import os
 import sys
@@ -7,7 +7,7 @@ from setuptools import setup, find_packages
 
 src_dir = os.path.dirname(__file__)
 
-install_requires = ['h5py', 'matplotlib', "numpy", 
+install_requires = ['biopython', 'h5py', 'matplotlib', "numpy", 
     'scipy', "sqlalchemy", 'statsmodels', 'tables',
     'future', 'future-fstrings']
 
@@ -57,7 +57,7 @@ if __name__ == '__main__':
     setup_installer_dependencies()
     setup(
         name="Palos",
-        version="0.1.29",
+        version="0.1.30",
         author="Yu S. Huang",
         author_email="polyactis@gmail.com",
         description="Misc Python modules developed and used by the yfish group",

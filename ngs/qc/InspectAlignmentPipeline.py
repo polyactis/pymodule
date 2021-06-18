@@ -57,7 +57,7 @@ __doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0])
 import copy
 import getpass
 import logging
-from pegaflow.DAX3 import File, Link, Job
+from pegaflow.api import File, Link, Job
 from palos import ProcessOptions, utils, PassingData
 from palos.ngs.AbstractAlignmentWorkflow import AbstractAlignmentWorkflow
 

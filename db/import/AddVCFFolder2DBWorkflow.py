@@ -35,7 +35,7 @@ import sys, os, math
 __doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0])
 
 import csv, copy
-from pegaflow.DAX3 import Executable, File
+from pegaflow.api import File
 from palos import ProcessOptions, getListOutOfStr, PassingData
 from palos.db import SunsetDB
 from palos.ngs.GenericVCFWorkflow import GenericVCFWorkflow

@@ -12,7 +12,7 @@ import copy
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
 from palos.db import SunsetDB
 from palos.ngs.AbstractNGSWorkflow import AbstractNGSWorkflow
-from pegaflow.DAX3 import Executable, File
+from pegaflow.api import File
 
 ParentClass = AbstractNGSWorkflow
 class DownsampleWorkflow(ParentClass):

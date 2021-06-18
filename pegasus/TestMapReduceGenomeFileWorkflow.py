@@ -15,11 +15,10 @@ Examples:
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0])
 
-import pegaflow
-from pegaflow.DAX3 import Executable, File, PFN
+from pegaflow.api import File
 from palos import ProcessOptions, PassingData, utils
 from palos.io.FastaFile import FastaFile
-from palos.pegasus.MapReduceGenomeFileWorkflow import MapReduceGenomeFileWorkflow
+from palos.ngs.MapReduceGenomeFileWorkflow import MapReduceGenomeFileWorkflow
 
 ParentClass = MapReduceGenomeFileWorkflow
 

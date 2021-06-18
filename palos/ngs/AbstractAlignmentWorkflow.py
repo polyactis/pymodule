@@ -2,12 +2,12 @@
 """
 abstract class for pegasus workflows that work on alignment files (already aligned).
 """
-import sys, os, math
+import sys, os
 import copy
 import logging
-from pegaflow.DAX3 import Executable, File, PFN, Link, Job
-import pegaflow
-from palos import ProcessOptions, getListOutOfStr, PassingData, utils
+from typing import List
+from pegaflow.api import File, Job
+from palos import ProcessOptions, PassingData
 from . MapReduceGenomeFileWorkflow import MapReduceGenomeFileWorkflow
 
 ParentClass = MapReduceGenomeFileWorkflow
@@ -252,7 +252,7 @@ class AbstractAlignmentWorkflow(ParentClass):
         self.needGzipPreReduceReturnData = True
         self.needGzipReduceReturnData = True
 
-    def addAlignmentAsInputToJobLs(self, alignmentDataLs=None, jobLs=[],
+    def addAlignmentAsInputToJobLs(self, alignmentDataLs=None, jobLs:List[Job]=None,
         jobInputOption=""):
         """
         Used in addGenotypeCallJobs() to add alignment files as input
@@ -260,21 +260,19 @@ class AbstractAlignmentWorkflow(ParentClass):
         """
         for alignmentData in alignmentDataLs:
             alignment = alignmentData.alignment
-            parentJobLs = alignmentData.jobLs
             bamF = alignmentData.bamF
             baiF = alignmentData.baiF
             for job in jobLs:
                 if jobInputOption:
-                    job.addArguments(jobInputOption)
-                job.addArguments(bamF)
+                    job.add_args(jobInputOption)
+                job.add_args(bamF)
                 #it's either symlink or stage-in
-                job.uses(bamF, transfer=True, register=True, link=Link.INPUT)
-                job.uses(baiF, transfer=True, register=True, link=Link.INPUT)
-                for parentJob in parentJobLs:
-                    if parentJob:
-                        self.addJobDependency(parentJob=parentJob, childJob=job)
+                self.addJobUse(job, bamF, is_input=True)
+                self.addJobUse(job, baiF, is_input=True)
+                self.add_dependency(job, parents=alignmentData.jobLs)
 
-    def addAlignmentAsInputToPlatypusJobLs(self, alignmentDataLs=None, jobLs=[],
+    def addAlignmentAsInputToPlatypusJobLs(self, alignmentDataLs=None,
+        jobLs:List[Job]=None,
         jobInputOption="--bamFiles"):
         """
         2013.05.21 bugfix: pegasus/condor would truncate long single-argument.
@@ -284,32 +282,28 @@ class AbstractAlignmentWorkflow(ParentClass):
         """
         for job in jobLs:
             if jobInputOption:
-                job.addArguments(jobInputOption)
+                job.add_args(jobInputOption)
             fileArgumentLs = []
             alignmentFileFolder = None
             for alignmentData in alignmentDataLs:
                 alignment = alignmentData.alignment
-                parentJobLs = alignmentData.jobLs
                 bamF = alignmentData.bamF
                 baiF = alignmentData.baiF
-
                 fileArgumentLs.append(bamF.name)
                 if alignmentFileFolder is None:
                     alignmentFileFolder = os.path.split(bamF.name)[0]
                 #it's either symlink or stage-in
-                job.uses(bamF, transfer=True, register=True, link=Link.INPUT)
-                job.uses(baiF, transfer=True, register=True, link=Link.INPUT)
-                for parentJob in parentJobLs:
-                    if parentJob:
-                        self.addJobDependency(parentJob=parentJob, childJob=job)
+                self.addJobUse(job, bamF, is_input=True)
+                self.addJobUse(job, baiF, is_input=True)
+                self.add_dependency(job, parents=alignmentData.jobLs)
             #if alignmentFileFolder:
             # #2013.05.21 pegasus/condor would truncate long single-argument.
             #	job.addArguments('%s/*.bam'%(alignmentFileFolder))
             #else:
-            job.addArguments(','.join(fileArgumentLs))
+            job.add_args(','.join(fileArgumentLs))
 
-    def addAddRG2BamJobsAsNeeded(self, alignmentDataLs=None,
-        tmpDir="/tmp"):
+
+    def addAddRG2BamJobsAsNeeded(self, alignmentDataLs=None, transferOutput=True):
         """
         2011-9-15
             add a read group only when the alignment doesn't have it according to db record
@@ -323,8 +317,6 @@ class AbstractAlignmentWorkflow(ParentClass):
         print(f"Adding add-read-group2BAM jobs for {len(alignmentDataLs)} "
             f"alignments if read group is not detected ... ", flush=True)
         job_max_memory = 3500	#in MB
-        javaMemRequirement = "-Xms128m -Xmx%sm"%job_max_memory
-        indexJobMaxMem = 2500
 
         addRG2BamDir = None
         addRG2BamDirJob = None
@@ -349,40 +341,29 @@ class AbstractAlignmentWorkflow(ParentClass):
                     platform_id = 'ILLUMINA'
                 else:
                     platform_id = 'ILLUMINA'
-                addRGJob = Job(namespace=self.namespace,
-                    name=self.AddOrReplaceReadGroupsJava.name,
-                    version=self.version)
                 outputRGSAM = File(os.path.join(addRG2BamDir,\
                     os.path.basename(alignment.path)))
-
-                addRGJob.addArguments(javaMemRequirement,
-                    '-jar', self.AddOrReplaceReadGroupsJar,
-                    "INPUT=", bamF,
-                    'RGID=%s'%(read_group), 'RGLB=%s'%(platform_id),
-                    'RGPL=%s'%(platform_id),
-                    'RGPU=%s'%(read_group), 'RGSM=%s'%(read_group),
-                    'OUTPUT=', outputRGSAM, 'SORT_ORDER=coordinate',
-                    "VALIDATION_STRINGENCY=LENIENT")
+                addRGJob:Job = self.addJavaJob(self.AddOrReplaceReadGroupsJava,
+                    jarFile=self.AddOrReplaceReadGroupsJar,
+                    inputArgumentOption="INPUT=", inputFile=bamF,
+                    outputArgumentOption="OUTPUT=", outputFile=outputRGSAM,
+                    transferOutput=transferOutput,
+                    extraArgumentList=['RGID=%s'%(read_group), 
+                        'RGLB=%s'%(platform_id),
+                        'RGPL=%s'%(platform_id), 'RGPU=%s'%(read_group), 'RGSM=%s'%(read_group),
+                        'SORT_ORDER=coordinate', "VALIDATION_STRINGENCY=LENIENT"],
+                    parentJobLs=parentJobLs,
+                    extraDependentInputLs=[baiF], job_max_memory=job_max_memory)
                     #(adding the SORT_ORDER doesn't do sorting but it marks the header
                     #  as sorted so that BuildBamIndexJar won't fail.)
-                self.addJobUse(addRGJob, file=self.AddOrReplaceReadGroupsJar,
-                    transfer=True, register=True, link=Link.INPUT)
                 if self.tmpDir:
-                    addRGJob.addArguments("TMP_DIR=%s"%self.tmpDir)
-                addRGJob.uses(bamF, transfer=True, register=True, link=Link.INPUT)
-                addRGJob.uses(baiF, transfer=True, register=True, link=Link.INPUT)
-                addRGJob.uses(outputRGSAM, transfer=True, register=True, link=Link.OUTPUT)
-                pegaflow.setJobResourceRequirement(addRGJob,
-                    job_max_memory=job_max_memory)
-                for parentJob in parentJobLs:
-                    if parentJob:
-                        self.depends(parent=parentJob, child=addRGJob)
-                self.addJob(addRGJob)
-
+                    addRGJob.add_args("TMP_DIR=%s"%self.tmpDir)
+                if addRG2BamDirJob:
+                    self.add_dependency(addRGJob, parents=[addRG2BamDirJob])
 
                 index_sam_job = self.addBAMIndexJob(
                     inputBamF=outputRGSAM, parentJobLs=[addRGJob],
-                    transferOutput=True, javaMaxMemory=2000)
+                    transferOutput=transferOutput, javaMaxMemory=2000)
                 newAlignmentData = PassingData(alignment=alignment)
                 newAlignmentData.jobLs = [index_sam_job, addRGJob]
                 newAlignmentData.bamF = index_sam_job.bamFile
@@ -634,7 +615,7 @@ class AbstractAlignmentWorkflow(ParentClass):
         skipDoneAlignment=False,\
         registerReferenceData=None, \
         needFastaIndexJob=False, needFastaDictJob=False, \
-        data_dir=None, no_of_gatk_threads = 1, \
+        data_dir=None, \
         outputDirPrefix="", transferOutput=True, **keywords):
         """
         2012.7.26

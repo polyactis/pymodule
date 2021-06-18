@@ -17,9 +17,8 @@ Examples:
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 
-from pegaflow.DAX3 import Executable, File, PFN, Link, Job
-from palos import ProcessOptions, getListOutOfStr, PassingData, utils
-import pegaflow
+from pegaflow.api import File
+from palos import ProcessOptions, PassingData, utils
 from palos.pegasus.AbstractBioinfoWorkflow import AbstractBioinfoWorkflow
 
 ParentClass = AbstractBioinfoWorkflow
@@ -72,34 +71,24 @@ class BlastWorkflow(ParentClass):
         """
         2012.5.24
         """
-        job = Job(namespace=self.namespace, name=executable.name, version=self.version)
-        
         noOfSplitFiles = int(math.ceil(noOfTotalSequences/float(noOfSequencesPerSplitFile)))
         suffixLength = len(repr(noOfSplitFiles))
         
-        job.addArguments("-i", inputFile, "--noOfSequences %s"%(noOfSequencesPerSplitFile), \
-                        "--outputFnamePrefix", outputFnamePrefix, '--filenameSuffix %s'%(filenameSuffix), '--suffixLength %s'%(suffixLength))
-        if extraArguments:
-            job.addArguments(extraArguments)
-        job.uses(inputFile, transfer=True, register=True, link=Link.INPUT)
-        job.outputList = []
+        job = self.addGenericJob(executable=executable, inputArgumentOption="-i",
+            inputFile=inputFile, extraArgumentList=["--noOfSequences %s"%(noOfSequencesPerSplitFile), \
+                "--outputFnamePrefix", outputFnamePrefix,
+                '--filenameSuffix %s'%(filenameSuffix),
+                '--suffixLength %s'%(suffixLength)],
+            parentJobLs=parentJobLs, extraArguments=extraArguments, \
+            extraDependentInputLs=extraDependentInputLs,
+            job_max_memory=job_max_memory)
+        
         for i in range(noOfSplitFiles):	#start from 0
-            splitFname = utils.comeUpSplitFilename(outputFnamePrefix=outputFnamePrefix, suffixLength=suffixLength, fileOrder=i,\
+            splitFname = utils.comeUpSplitFilename(outputFnamePrefix=outputFnamePrefix,
+                suffixLength=suffixLength, fileOrder=i,\
                 filenameSuffix=filenameSuffix)
             splitFile = File(splitFname)
-            
-            job.outputList.append(splitFile)
-            job.uses(splitFile, transfer=transferOutput, register=True,
-                link=Link.OUTPUT)
-            
-        pegaflow.setJobResourceRequirement(job, job_max_memory=job_max_memory)
-        self.addJob(job)
-        for parentJob in parentJobLs:
-            if parentJob:
-                self.depends(parent=parentJob, child=job)
-        for input in extraDependentInputLs:
-            if input:
-                job.uses(input, transfer=True, register=True, link=Link.INPUT)
+            self.addJobUse(job, file=splitFile, is_input=False, transfer=transferOutput)
         return job
     
     def addBlastWrapperJob(self, executable=None, inputFile=None,
@@ -185,40 +174,20 @@ class BlastWorkflow(ParentClass):
         """
         2012.5.23
         """
-        namespace = self.namespace
-        version = self.version
-        operatingSystem = self.operatingSystem
-        architecture = self.architecture
-        cluster_size = self.cluster_size
-        site_handler = self.site_handler
-        
-        executableClusterSizeMultiplierList = []	#2012.8.7 each cell is a tuple of (executable, clusterSizeMultiplier (0 if u do not need clustering)		
-        blastall = Executable(namespace=namespace, name="blastall", version=version, os=operatingSystem, \
-                            arch=architecture, installed=True)
-        blastall.addPFN(PFN("file://" + os.path.join(self.blastallPath), site_handler))
-        executableClusterSizeMultiplierList.append((blastall, 0.2))
-        
-        formatdb = Executable(namespace=namespace, name="formatdb", version=version, os=operatingSystem, \
-                            arch=architecture, installed=True)
-        formatdb.addPFN(PFN("file://" + os.path.join(self.formatdbPath), site_handler))
-        executableClusterSizeMultiplierList.append((formatdb, 0))
-        
-        BlastWrapper = Executable(namespace=namespace, name="BlastWrapper", version=version, os=operatingSystem, \
-                            arch=architecture, installed=True)
-        BlastWrapper.addPFN(PFN("file://" + os.path.join(self.pymodulePath, 'pegasus/mapper/alignment/BlastWrapper.py'), site_handler))
-        executableClusterSizeMultiplierList.append((BlastWrapper, 0.1))
-        
-        SplitFastaFile = Executable(namespace=namespace, name="SplitFastaFile", version=version, os=operatingSystem, \
-                            arch=architecture, installed=True)
-        SplitFastaFile.addPFN(PFN("file://" + os.path.join(self.pymodulePath, 'pegasus/mapper/splitter/SplitFastaFile.py'), site_handler))
-        executableClusterSizeMultiplierList.append((SplitFastaFile, 0.1))
-        
-        self.setExecutablesClusterSize(executableClusterSizeMultiplierList, defaultClusterSize=self.cluster_size)
-
+        self.registerOneExecutable(name="blastall", path=self.blastallPath,
+            clusterSizeMultiplier=0.2)
+        self.registerOneExecutable(name="formatdb", path=self.formatdbPath,
+            clusterSizeMultiplier=0)
+        self.registerOneExecutable(name="BlastWrapper",
+            path=os.path.join(self.pymodulePath, 'pegasus/mapper/alignment/BlastWrapper.py'),
+            clusterSizeMultiplier=0.1)
+        self.registerOneExecutable(name="SplitFastaFile",
+            path=os.path.join(self.pymodulePath, 'pegasus/mapper/splitter/SplitFastaFile.py'),
+            clusterSizeMultiplier=0.1)
     
     def addMakeBlastDBJob(self, executable=None, inputFile=None, \
-                        parentJobLs=None, extraDependentInputLs=None, transferOutput=False, \
-                        extraArguments=None, job_max_memory=500, **keywords):
+        parentJobLs=None, extraDependentInputLs=None, transferOutput=False, \
+        extraArguments=None, job_max_memory=500, **keywords):
         """
         2012.10.9 use addGenericJob() instead
         2012.5.24
@@ -253,26 +222,26 @@ class BlastWorkflow(ParentClass):
         noOfTotalSequences= self.getNoOfSequencesFromFasta(inputFastaFname=self.inputFname)
         
         registerReferenceData = self.registerBlastNucleotideDatabaseFile(ntDatabaseFname=self.databaseFname, \
-                                                                    input_site_handler=self.input_site_handler)
+            input_site_handler=self.input_site_handler)
         ntDatabaseFileList = registerReferenceData.refFastaFList
         ntDatabaseFile = ntDatabaseFileList[0]
 
         if len(ntDatabaseFileList)<4:	#some nt-database index file is missing
             sys.stderr.write("Adding blast-db-making job...")
             makeBlastDBJob = self.addMakeBlastDBJob(executable=self.formatdb,\
-                                                inputFile=ntDatabaseFile, transferOutput=True)
+                inputFile=ntDatabaseFile, transferOutput=True)
             #add the index files to the ntDatabaseFileList
             ntDatabaseFileList = [ntDatabaseFile] + makeBlastDBJob.outputList
             sys.stderr.write(".\n")
         else:
             makeBlastDBJob = None
         
-        self.addJobs(inputData=inputData, outputDirPrefix=self.pegasusFolderName, ntDatabaseFileList=ntDatabaseFileList, \
-                    noOfTotalSequences=noOfTotalSequences, \
-                    transferOutput=True, makeBlastDBJob=makeBlastDBJob)
-        # Write the DAX to stdout
-        outf = open(self.outputFname, 'w')
-        self.writeXML(outf)
+        self.addJobs(inputData=inputData, outputDirPrefix=self.pegasusFolderName,
+            ntDatabaseFileList=ntDatabaseFileList, \
+            noOfTotalSequences=noOfTotalSequences, \
+            transferOutput=True, makeBlastDBJob=makeBlastDBJob)
+        
+        self.end_run()
 
 if __name__ == '__main__':
     main_class = BlastWorkflow

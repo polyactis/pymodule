@@ -90,7 +90,7 @@ import getpass
 import logging
 import numpy
 import pandas as pd
-from pegaflow.DAX3 import File
+from pegaflow.api import File
 from palos import PassingData, utils
 from palos.io.MatrixFile import MatrixFile
 from palos.pegasus.AbstractWorkflow import AbstractWorkflow
@@ -351,7 +351,7 @@ Example ("Library" and "Bam Path" are required):
         return job
     
     def addSplitReadFileJob(self, executable=None, \
-        inputF=None, outputFnamePrefix=None, outputFnamePrefixTail="",\
+        inputF=None, outputFnamePrefix=None, \
         minNoOfReads=5000000, logFile=None, parentJobLs=None, \
         job_max_memory=4000, walltime = 800, \
         extraDependentInputLs=None, transferOutput=False, **keywords):

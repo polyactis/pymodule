@@ -3,11 +3,10 @@
 2012.5.23
     a common class for other pymodule workflows
 """
-import sys, os, math
-from palos import ProcessOptions, getListOutOfStr, PassingData, utils
+import sys, os
+from palos import PassingData
 from pegaflow.Workflow import Workflow
-from pegaflow.DAX3 import Executable, File, PFN, Profile
-from pegaflow.DAX3 import Namespace, Link, Use, Job, Dependency
+from pegaflow.api import File
 
 #path to the source code directory
 src_dir = os.path.dirname(os.path.abspath(__file__))

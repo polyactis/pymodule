@@ -23,12 +23,12 @@ Description:
 
 """
 
-import sys, os, math
+import sys, os
 __doc__ = __doc__%(sys.argv[0])
 
 import copy
 import logging
-from palos import ProcessOptions, getListOutOfStr, PassingData, utils
+from palos import ProcessOptions, utils
 from palos.mapper.AbstractSunsetMapper import AbstractSunsetMapper as ParentClass
 from palos.db import SunsetDB
 

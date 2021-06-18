@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-from pegaflow.DAX3 import *
+from pegaflow.api import *
 import os,sys 
 import argparse
 parser = argparse.ArgumentParser(description='Convert quality format of fastq files')

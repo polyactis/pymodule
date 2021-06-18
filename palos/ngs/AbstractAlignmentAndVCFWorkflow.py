@@ -2,11 +2,10 @@
 """
 2013.1.25 an abstract class for pegasus workflows that work on alignment & VCF files.
 """
-import sys, os, math
+import sys, os
 import copy
-from pegaflow.DAX3 import Executable, File, PFN, Link, Job
-from palos import ProcessOptions, getListOutOfStr, PassingData, utils
-from palos import ngs
+from pegaflow.api import Job
+from palos import ProcessOptions, PassingData, utils
 from . AbstractAlignmentWorkflow import AbstractAlignmentWorkflow
 from . AbstractVCFWorkflow import AbstractVCFWorkflow
 

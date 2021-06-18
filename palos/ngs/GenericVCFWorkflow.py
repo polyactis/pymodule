@@ -53,15 +53,15 @@ Examples:
         -D /u/home/eeskin/polyacti/NetworkData/vervet/db/ -t /u/home/eeskin/polyacti/NetworkData/vervet/db/
     
 """
-import sys, os, math
+import sys, os
 __doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], \
     sys.argv[0], sys.argv[0])
 
 import csv, copy
-from palos import ProcessOptions, getListOutOfStr, PassingData, \
+from palos import PassingData, \
     figureOutDelimiter, getColName2IndexFromHeader, utils
 from palos.ngs.io.VCFFile import VCFFile
-from pegaflow.DAX3 import File, Executable, PFN
+from pegaflow.api import File
 import pegaflow
 #from palos.pegasus.AbstractVCFWorkflow import AbstractVCFWorkflow
 from palos.db import SunsetDB

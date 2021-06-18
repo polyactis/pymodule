@@ -2,10 +2,11 @@
 """
 a pegasus workflow class for analyzing NGS (next-gen sequencing) data
 """
-import sys, os, math
+import sys, os, math, re
 import logging
-from pegaflow.DAX3 import Executable, File, PFN, Link, Job
-import pegaflow
+import copy
+from typing import Dict, List
+from pegaflow.api import File, Job, Transformation
 from palos import Genome, utils
 from palos import ProcessOptions
 from palos.Genome import IntervalData
@@ -14,7 +15,7 @@ from palos import ngs
 from palos.io.MatrixFile import MatrixFile
 from palos.ngs.io.VCFFile import VCFFile
 from palos.ngs.io.AlignmentDepthIntervalFile import AlignmentDepthIntervalFile
-from palos.polymorphism.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey
+from palos.polymorphism.CNV import CNVSegmentBinarySearchTreeKey
 from palos.algorithm.RBTree import RBDict
 from palos.pegasus.AbstractBioinfoWorkflow import AbstractBioinfoWorkflow
 from palos.db import SunsetDB
@@ -444,27 +445,25 @@ class AbstractNGSWorkflow(ParentClass):
         print(f"Registering {len(alignmentLs)} alignments ...", flush=True)
         alignmentDataLs = []
         for alignment in alignmentLs:
-            inputFname = os.path.join(data_dir, alignment.path)
+            input_path = os.path.join(data_dir, alignment.path)
             #relative path, induces symlinking in stage-in
-            inputFile = File(alignment.path)
-            baiFilepath = '%s.bai'%(inputFname)
-            if checkFileExistence and (not os.path.isfile(inputFname) or \
-                not os.path.isfile(baiFilepath)):
-                if not os.path.isfile(inputFname):
+            bai_filepath = '%s.bai'%(input_path)
+            if checkFileExistence and (not os.path.isfile(input_path) or \
+                not os.path.isfile(bai_filepath)):
+                if not os.path.isfile(input_path):
                     logging.warn(f"registerAlignmentAndItsIndexFile(): "
-                        f"{inputFname} does not exist. skip entire alignment.")
-                if not os.path.isfile(baiFilepath):
+                        f"{input_path} does not exist. skip entire alignment.")
+                if not os.path.isfile(bai_filepath):
                     logging.warn(f"registerAlignmentAndItsIndexFile(): "
-                        f"{baiFilepath} does not exist. skip entire alignment.")
+                        f"{bai_filepath} does not exist. skip entire alignment.")
                 continue
-            inputFile.addPFN(PFN("file://" + inputFname, self.input_site_handler))
-            self.addFile(inputFile)
-            baiF = File('%s.bai'%alignment.path)
-            baiF.addPFN(PFN("file://" + baiFilepath, self.input_site_handler))
-            self.addFile(baiF)
+            input_file = self.registerOneInputFile(input_path, 
+                pegasusFileName=alignment.path)
+            bai_file = self.registerOneInputFile(bai_filepath,
+                pegasusFileName='%s.bai'%alignment.path)
             alignmentData = PassingData(alignment=alignment, jobLs = [], 
-                bamF=inputFile, baiF=baiF, file=inputFile,\
-                fileLs = [inputFile, baiF])
+                bamF=input_file, baiF=bai_file, file=input_file,\
+                fileLs = [input_file, bai_file])
             alignmentDataLs.append(alignmentData)
         print("Done.", flush=True)
         return alignmentDataLs
@@ -764,9 +763,9 @@ class AbstractNGSWorkflow(ParentClass):
         sys.stderr.write("\n")
         return fastaDictJob
 
-    def addRefFastaJobDependency(self, job=None, refFastaF=None, 
-        fastaDictJob=None, refFastaDictF=None, \
-        fastaIndexJob = None, refFastaIndexF = None, **keywords):
+    def addRefFastaJobDependency(self, job:Job=None, refFastaF:File=None, 
+        fastaDictJob:Job=None, refFastaDictF:File=None, \
+        fastaIndexJob:Job = None, refFastaIndexF:File = None, **keywords):
         """
         Examples:
         self.addRefFastaJobDependency(job=job, refFastaF=refFastaF, 
@@ -782,28 +781,23 @@ class AbstractNGSWorkflow(ParentClass):
         if fastaIndexJob:
             #2011-7-22 if job doesn't exist, don't add it.
             #  means this job isn't necessary to run.
-            self.depends(parent=fastaIndexJob, child=job)
+            self.add_dependency(job, parents=[fastaIndexJob])
             if refFastaIndexF is None:
                 refFastaIndexF = fastaIndexJob.output
-            self.addJobUse(job=job, file=refFastaIndexF, transfer=True,
-                register=True, link=Link.INPUT)
+            self.addJobUse(job=job, file=refFastaIndexF, is_input=True)
         elif refFastaIndexF:
-            self.addJobUse(job=job, file=refFastaIndexF, transfer=True,
-                register=True, link=Link.INPUT)
+            self.addJobUse(job=job, file=refFastaIndexF, is_input=True)
 
         if fastaDictJob:
-            self.depends(parent=fastaDictJob, child=job)
+            self.add_dependency(job, parents=[fastaDictJob])
             if refFastaDictF is None:
                 refFastaDictF = fastaDictJob.output
-            self.addJobUse(job=job, file=refFastaDictF, transfer=True,
-                register=True, link=Link.INPUT)
+            self.addJobUse(job=job, file=refFastaDictF, is_input=True)
         elif refFastaDictF:
-            self.addJobUse(job=job, file=refFastaDictF, transfer=True,
-                register=True, link=Link.INPUT)
+            self.addJobUse(job=job, file=refFastaDictF, is_input=True)
 
         if fastaIndexJob or fastaDictJob:
-            self.addJobUse(job=job, file=refFastaF, transfer=True,
-                register=True, link=Link.INPUT)
+            self.addJobUse(job=job, file=refFastaF, is_input=True)
 
     def addVCFFormatConvertJob(self, vcf_convert=None,
         inputF=None, outputF=None,
@@ -1629,10 +1623,6 @@ class AbstractNGSWorkflow(ParentClass):
             extraDependentInputLs=None, transferOutput=False, 
             extraArguments=None, job_max_memory=1000,
             perSampleMismatchFraction=False)
-        if statMergeJob:
-            self.addInputToMergeJob(statMergeJob,
-                inputF=vcfFilterStatJob.output,
-                parentJobLs=[vcfFilterStatJob])
         for _statMergeJob in statMergeJobLs:
             self.addInputToMergeJob(_statMergeJob,
                 inputF=vcfFilterStatJob.output,
@@ -1679,15 +1669,16 @@ class AbstractNGSWorkflow(ParentClass):
             transferOutput=transferOutput,
             extraArguments=extraArguments,
             extraArgumentList=extraArgumentList,
-            job_max_memory=2000,  sshDBTunnel=None, \
+            job_max_memory=job_max_memory,  sshDBTunnel=None, \
             key2ObjectForJob=key2ObjectForJob, **keywords)
         return job
 
     def addCalculatePairwiseDistanceFromSNPXStrainMatrixJob(self,
-        executable=None, inputFile=None, outputFile=None, \
+        executable:Transformation=None, inputFile:File=None, outputFile:File=None, \
         min_MAF=0, max_NA_rate=0.4, convertHetero2NA=0,
         hetHalfMatchDistance=0.5,
-        parentJobLs=[], extraDependentInputLs=[], transferOutput=False, \
+        parentJobLs:List[Job]=None, extraDependentInputLs:List[File]=None,
+        transferOutput=False, \
         extraArguments=None, job_max_memory=2000, **keywords):
         """
         2012.5.11
@@ -1700,35 +1691,20 @@ class AbstractNGSWorkflow(ParentClass):
                 "-o", calculaOutput, '-m', repr(self.max_NA_rate),
                 '-c', str(self.convertHetero2NA),\
                 '-H', repr(self.hetHalfMatchDistance))
-            calcula_job.uses(genotypeCallOutput, transfer=False, register=False,
-                link=Link.INPUT)
-            calcula_job.uses(calculaOutput, transfer=True, register=False,
-                link=Link.OUTPUT)
+            calcula_job.add_inputs(genotypeCallOutput)
+            calcula_job.add_inputs(calculaOutput)
 
-            self.addJob(calcula_job)
-            self.depends(parent=genotypeCallByCoverage_job, child=calcula_job)
-            self.depends(parent=matrixDirJob, child=calcula_job)
+            self.add_jobs(calcula_job)
+            self.add_dependency(calcula_job, parents=[genotypeCallByCoverage_job])
+            self.add_dependency(calcula_job, parents=[matrixDirJob])
         """
-        job = Job(namespace=self.namespace, name=executable.name,
-            version=self.version)
-        job.addArguments("-i", inputFile,  "-n %s"%(min_MAF), \
-            "-o", outputFile, '-m %s'%(max_NA_rate), '-c %s'%(convertHetero2NA),\
-            '-H %s'%(hetHalfMatchDistance))
-        if extraArguments:
-            job.addArguments(extraArguments)
-        job.uses(inputFile, transfer=True, register=True, link=Link.INPUT)
-        job.uses(outputFile, transfer=transferOutput, register=True, link=Link.OUTPUT)
-        job.output = outputFile
-        pegaflow.setJobResourceRequirement(job, job_max_memory=job_max_memory)
-        self.addJob(job)
-        for parentJob in parentJobLs:
-            if parentJob:
-                self.depends(parent=parentJob, child=job)
-        for extraInputFile in extraDependentInputLs:
-            if extraInputFile:
-                job.uses(extraInputFile, transfer=True, register=True,
-                    link=Link.INPUT)
-        self.no_of_jobs += 1
+        job = self.addGenericJob(executable, inputArgumentOption="-i", inputFile=inputFile,
+            outputArgumentOption="-o", outputFile=outputFile,
+            extraArgumentList=[ "-n %s"%(min_MAF), '-m %s'%(max_NA_rate), '-c %s'%(convertHetero2NA),\
+                '-H %s'%(hetHalfMatchDistance)],
+            extraArguments=extraArguments, parentJobLs=parentJobLs,
+            extraDependentInputLs=extraDependentInputLs,
+            transferOutput=transferOutput, job_max_memory=job_max_memory)
         return job
 
     @classmethod
@@ -2004,10 +1980,10 @@ option:
         sys.stderr.write("Getting all vcf files from %s "%(inputDir))
         vcfFileID2object = {}
         for inputFname in os.listdir(inputDir):
-            inputAbsPath = os.path.join(os.path.abspath(inputDir), inputFname)
+            input_path = os.path.join(os.path.abspath(inputDir), inputFname)
             if ngs.isFileNameVCF(inputFname, includeIndelVCF=False) and \
-                not ngs.isVCFFileEmpty(inputAbsPath):
-                vcfIndexFname = '%s.tbi'%(inputAbsPath)
+                not ngs.isVCFFileEmpty(input_path):
+                vcfIndexFname = '%s.tbi'%(input_path)
                 fileID = Genome.getChrFromFname(inputFname)
                 if not os.path.isfile(vcfIndexFname):
                     #does not exist, pass on a None structure
@@ -2016,7 +1992,7 @@ option:
                     logging.warn(f"fileID {fileID} already has value, "
                         f"{vcfFileID2object.get(fileID)}, in dictionary. but"
                         f" now a 2nd file {inputFname} overwrites previous value.")
-                vcfFileID2object[fileID] = PassingData(vcfFilePath=inputAbsPath,
+                vcfFileID2object[fileID] = PassingData(vcfFilePath=input_path,
                     vcfIndexFilePath=vcfIndexFname)
         sys.stderr.write("  found %s files.\n"%(len(vcfFileID2object)))
         return vcfFileID2object
@@ -2063,9 +2039,9 @@ option:
         no_of_loci = 0
         outputF = MatrixFile(path=outputFname, mode='w', delimiter='\t')
         for inputFname in os.listdir(inputVCFFolder):
-            inputAbsPath = os.path.join(os.path.abspath(inputVCFFolder), inputFname)
+            input_path = os.path.join(os.path.abspath(inputVCFFolder), inputFname)
             if ngs.isFileNameVCF(inputFname, includeIndelVCF=False):
-                vcfFile= VCFFile(inputFname=inputAbsPath)
+                vcfFile= VCFFile(inputFname=input_path)
                 no_of_vcfFiles += 1
                 for vcfRecord in vcfFile:
                     no_of_loci += 1
@@ -2145,67 +2121,58 @@ option:
         #	job.overlapSitePosF = overlapSitePosF
         return job
 
-    def addFilterVCFByDepthJob(self, FilterVCFByDepthJava=None, 
+    def addFilterVCFByDepthJob(self, FilterVCFByDepthJava:Transformation=None, 
         GenomeAnalysisTKJar=None, \
-        refFastaFList=None, inputVCFF=None, outputVCFF=None,
+        refFastaFList:List[File]=None,
+        inputVCFF:File=None, outputVCFF=None,
         outputSiteStatF=None,
-        parentJobLs=[], alnStatForFilterF=None, \
-        job_max_memory=1000, extraDependentInputLs=[],
+        parentJobLs:List[Job]=None, alnStatForFilterF=None, \
+        extraDependentInputLs:List[Job]=None,
         onlyKeepBiAllelicSNP=False, 
-        namespace=None, version=None, transferOutput=False, **keywords):
+        job_max_memory=1000, 
+        transferOutput=False, **keywords):
         """
         2013.04.09 added the VCFIndexFile in output (transfer=False)
         2011.12.20
             moved from FilterVCFPipeline.py
             add argument transferOutput, outputSiteStatF
         """
-        # Add a mkdir job for any directory.
-        filterByDepthJob = Job(namespace=getattr(self, 'namespace', namespace),
-            name=FilterVCFByDepthJava.name, \
-            version=getattr(self, 'version', version))
+        if extraDependentInputLs is None:
+            extraDependentInputLs = []
+        else:
+            extraDependentInputLs = copy.deepcopy(extraDependentInputLs)
+        
         refFastaF = refFastaFList[0]
-        filterByDepthJob.addArguments("-Xmx%sm"%(job_max_memory), \
-            "-jar", GenomeAnalysisTKJar, "-R", refFastaF,
+        
+        extraArgumentList = ["-R", refFastaF,
             "-T FilterVCFByDepth",
-            "--variant", inputVCFF, "-depthFname", alnStatForFilterF)
-        self.addJobUse(filterByDepthJob, file=GenomeAnalysisTKJar,
-            transfer=True, register=True, link=Link.INPUT)
-        if outputVCFF:
-            filterByDepthJob.addArguments("-o", outputVCFF)
-            filterByDepthJob.uses(outputVCFF, transfer=transferOutput,
-                register=True, link=Link.OUTPUT)
-            filterByDepthJob.output = outputVCFF
-
-            VCFIndexFile = File('%s.idx'%(outputVCFF.name))
-            self.addJobUse(job=filterByDepthJob, file=VCFIndexFile,
-                transfer=False, register=True, link=Link.OUTPUT)
+            "-depthFname", alnStatForFilterF]
+        VCFIndexFile = File('%s.idx'%(outputVCFF.name))
+        extraOutputLs = [VCFIndexFile]
 
         if outputSiteStatF:
-            filterByDepthJob.addArguments("-ssFname", outputSiteStatF)
-            filterByDepthJob.uses(outputSiteStatF, transfer=transferOutput,
-                register=True, link=Link.OUTPUT)
-            filterByDepthJob.outputSiteStatF = outputSiteStatF
+
+            extraArgumentList.extend(["-ssFname", outputSiteStatF])
+            extraOutputLs.append(outputSiteStatF)
 
         if onlyKeepBiAllelicSNP:
-            filterByDepthJob.addArguments("--onlyKeepBiAllelicSNP")
+            extraArgumentList.append("--onlyKeepBiAllelicSNP")
 
-        for refFastaFile in refFastaFList:
-            filterByDepthJob.uses(refFastaFile, transfer=True, register=True,
-                link=Link.INPUT)
-        filterByDepthJob.uses(alnStatForFilterF, transfer=True, register=True,
-            link=Link.INPUT)
-        filterByDepthJob.uses(inputVCFF, transfer=True, register=True,
-            link=Link.INPUT)
-        for inputF in extraDependentInputLs:
-            filterByDepthJob.uses(inputF, transfer=True, register=True,
-                link=Link.INPUT)
-        self.addJob(filterByDepthJob)
-        for parentJob in parentJobLs:
-            self.depends(parent=parentJob, child=filterByDepthJob)
-        pegaflow.setJobResourceRequirement(filterByDepthJob,
-            job_max_memory=job_max_memory)
-        self.no_of_jobs += 1
-        return filterByDepthJob
+        extraDependentInputLs.append(alnStatForFilterF)
+        job = self.addJavaJob(FilterVCFByDepthJava, jarFile=GenomeAnalysisTKJar,
+            inputArgumentOption="--variant", inputFile=inputVCFF, 
+            outputArgumentOption="-o",  outputFile=outputVCFF,
+            parentJobLs=parentJobLs,
+            extraDependentInputLs=extraDependentInputLs + refFastaFList,
+            extraOutputLs=extraOutputLs,\
+            transferOutput=transferOutput, \
+            extraArgumentList=extraArgumentList, 
+            job_max_memory=job_max_memory,\
+            **keywords)
+        
+        if outputSiteStatF:
+            job.outputSiteStatF = outputSiteStatF
+        return job
 
     def addFilterJobByvcftools(self, vcftoolsWrapper=None, inputVCFF=None, 
         outputFnamePrefix=None, \
@@ -2588,35 +2555,35 @@ Contig966       3160    50
             **keywords)
         return job
 
-    def addCalculateTwoVCFSNPMismatchRateJob(self, executable=None,
-        vcf1=None, vcf2=None, snpMisMatchStatFile=None,
-        maxSNPMismatchRate=1.0, parentJobLs=[],
-        job_max_memory=1000, extraDependentInputLs=[],
+    def addCalculateTwoVCFSNPMismatchRateJob(self, executable:Transformation=None,
+        vcf1:File=None, vcf2:File=None, snpMisMatchStatFile:File=None,
+        maxSNPMismatchRate=1.0, parentJobLs:List[Job]=None,
+        job_max_memory=1000, extraDependentInputLs=None,
         transferOutput=False, **keywords):
         """
         2011.12.20
 
         """
-        job = Job(namespace=self.namespace, name=executable.name,
-            version=self.version)
-        job.addArguments("-i", vcf1, "-j", vcf2, \
-            "-m %s"%(maxSNPMismatchRate), '-o', snpMisMatchStatFile)
-        job.uses(vcf1, transfer=True, register=True, link=Link.INPUT)
-        job.uses(vcf2, transfer=True, register=True, link=Link.INPUT)
-        job.uses(snpMisMatchStatFile, transfer=transferOutput, register=True,
-            link=Link.OUTPUT)
-        pegaflow.setJobResourceRequirement(job, job_max_memory=job_max_memory)
-        self.addJob(job)
-        for input in extraDependentInputLs:
-            job.uses(input, transfer=True, register=True, link=Link.INPUT)
-        for parentJob in parentJobLs:
-            if parentJob:
-                self.depends(parent=parentJob, child=job)
+        extraArgumentList = [ "-j", vcf2, "-m %s"%(maxSNPMismatchRate)]
+        if extraDependentInputLs is None:
+            extraDependentInputLs = []
+        else:
+            extraDependentInputLs = copy.deepcopy(extraDependentInputLs)
+        extraDependentInputLs.append(vcf2)
+        job= self.addGenericJob(executable,
+            inputArgumentOption="-i", inputFile=vcf1, 
+            outputArgumentOption="-o", outputFile=snpMisMatchStatFile,
+            parentJobLs=parentJobLs,
+            extraDependentInputLs=extraDependentInputLs,
+            transferOutput=transferOutput, \
+            extraArgumentList=extraArgumentList, 
+            job_max_memory=job_max_memory,
+            **keywords)
         return job
 
-    def addTabixRetrieveJob(self, executable=None, tabixPath=None,
-        inputF=None, outputF=None, regionOfInterest=None, includeHeader=True,
-        parentJobLs=None, job_max_memory=100, extraDependentInputLs=None,
+    def addTabixRetrieveJob(self, executable:Transformation=None, tabixPath=None,
+        inputF:File=None, outputF:File=None, regionOfInterest=None, includeHeader=True,
+        parentJobLs:List[Job]=None, job_max_memory=100, extraDependentInputLs=None,
         transferOutput=False, **keywords):
         """
         Examples:
@@ -2738,11 +2705,11 @@ run something like below to extract data from regionOfInterest out of
         return chr2size
 
     def readDictFile(self):
-        ref_dict_filename = os.path.join(self.ref_folder_path, "genome.dict")
+        ref_dict_filepath = os.path.join(self.ref_folder_path, "genome.dict")
         chromosomeNames = []
         # dict file's chromosome id should be well sorted
         pattern = re.compile(r'^chr\d+$')
-        with open(ref_dict_filename, 'r') as f:
+        with open(ref_dict_filepath, 'r') as f:
             for line in f:
                 if line.startswith('@SQ'):
                     records = line.split('\t')
@@ -3004,10 +2971,10 @@ run something like below to extract data from regionOfInterest out of
             if not included:	#skip this chromosome
                 continue
             chromosomeSize = alignment_depth_interval_file.chromosome_size
-            inputFname = os.path.join(self.data_dir, alignment_depth_interval_file.path)
-            sys.stderr.write("\t %s ..."%(inputFname))
-            if os.path.isfile(inputFname):
-                reader = AlignmentDepthIntervalFile(inputFname)
+            input_path = os.path.join(self.data_dir, alignment_depth_interval_file.path)
+            sys.stderr.write("\t %s ..."%(input_path))
+            if os.path.isfile(input_path):
+                reader = AlignmentDepthIntervalFile(input_path)
                 intervalLs = reader.getAllIntervalWithinDepthRange(
                     minDepth=minDepth, maxDepth=maxDepth)
                 reader.close()
@@ -3017,11 +2984,11 @@ run something like below to extract data from regionOfInterest out of
                         chromosomeSize=chromosomeSize, intervalLs=intervalLs)
                 else:
                     logging.warn(f"\tchromosome {chromosome} has new alignment"
-                        f" depth interval data from {inputFname}.")
+                        f" depth interval data from {input_path}.")
                     chr2alignmentDepthIntervalData[chromosome].intervalLs.extend(intervalLs)
             else:
                 logging.warn("\tinterval file %s of chromosome %s does not exist. Ignore."%(
-                    inputFname, chromosome))
+                    input_path, chromosome))
             sys.stderr.write(" noOfRawIntervals=%s.\n"%(noOfRawIntervals))
         sys.stderr.write(" %s alignment depth intervals covering %s chromosomes.\n"%(
             noOfRawIntervals, len(chr2alignmentDepthIntervalData)))
@@ -3247,7 +3214,6 @@ run something like below to extract data from regionOfInterest out of
         memRequirementObject = self.getJVMMemRequirment(
             job_max_memory=job_max_memory, minMemory=2000)
         job_max_memory = memRequirementObject.memRequirement
-        javaMemRequirement = memRequirementObject.memRequirementInStr
 
         if len(alignmentJobAndOutputLs)>1:
             # 'USE_THREADING=true', threading might be causing process hanging forever (sleep).

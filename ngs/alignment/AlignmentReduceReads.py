@@ -32,8 +32,7 @@ Examples:
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 
-from pegaflow.DAX3 import Executable, File, PFN, Link, Job
-import pegaflow
+from pegaflow.api import File
 from palos import ProcessOptions, getListOutOfStr, PassingData, ngs, \
     figureOutDelimiter, getColName2IndexFromHeader, utils
 from palos.ngs.io.VCFFile import VCFFile

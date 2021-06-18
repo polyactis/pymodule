@@ -10,28 +10,27 @@ Examples:
         -o /tmp/workflow.xml -F gxfer3_74079526293008 -j hcondor -l hcondor -C 1 -c2
 
 """
-import sys, os, math
+import sys, os
 __doc__ = __doc__%(sys.argv[0])
 
-from palos import ProcessOptions, getListOutOfStr, PassingData, utils
-import pegaflow
-from pegaflow.DAX3 import Executable, File, PFN, Link, Job
+from palos import ProcessOptions, PassingData
+from pegaflow.api import File
 from palos.pegasus.AbstractWorkflow import AbstractWorkflow
 class WgetWorkflow(AbstractWorkflow):
     __doc__ = __doc__
     option_default_dict = AbstractWorkflow.option_default_dict.copy()
     option_default_dict.update({
-                        ("inputFname", 0, ): ["", 'i', 1, 'the input file that contains the URLs to wget, not supported yet.'],\
-                        ("inputURL", 0, ): ["", 'I', 1, 'the URL and all the links (files only) embedded in the URL will be downloaded.'],\
-                        ("pathToWget", 1, ): ['/usr/bin/wget', '', 1, 'path to the wget binary'],\
-                        ("username", 0, ): ['', 'u', 1, 'username to access the URL'],\
-                        ("password", 0, ): ['', 'p', 1, 'password to access the URL'],\
-                        ("cut_dir_number", 1, int): [1, 'c', 1, 'how many levels of folders after the URL to be ignored. \
-    i.e. Files in ftp://ftp.xemacs.org/pub/xemacs/ (cut_dir_number=1) will have prefix xemacs/. \
-    It (--cut-dirs=..) is used in conjunction with -nH.'],\
-                        
-                        })
-                        #('bamListFname', 1, ): ['/tmp/bamFileList.txt', 'L', 1, 'The file contains path to each bam file, one file per line.'],\
+        ("inputFname", 0, ): ["", 'i', 1, 'the input file that contains the URLs to wget, not supported yet.'],\
+        ("inputURL", 0, ): ["", 'I', 1, 'the URL and all the links (files only) embedded in the URL will be downloaded.'],\
+        ("pathToWget", 1, ): ['/usr/bin/wget', '', 1, 'path to the wget binary'],\
+        ("username", 0, ): ['', 'u', 1, 'username to access the URL'],\
+        ("password", 0, ): ['', 'p', 1, 'password to access the URL'],\
+        ("cut_dir_number", 1, int): [1, 'c', 1, 'how many levels of folders after the URL to be ignored. \
+i.e. Files in ftp://ftp.xemacs.org/pub/xemacs/ (cut_dir_number=1) will have prefix xemacs/. \
+It (--cut-dirs=..) is used in conjunction with -nH.'],\
+        
+        })
+        #('bamListFname', 1, ): ['/tmp/bamFileList.txt', 'L', 1, 'The file contains path to each bam file, one file per line.'],\
 
     def __init__(self,  **keywords):
         """
@@ -40,14 +39,15 @@ class WgetWorkflow(AbstractWorkflow):
         AbstractWorkflow.__init__(self, **keywords)
     
     def addWgetJob(self, executable=None, url=None, relativePath=None, username=None, password=None,\
-                targetFolder=None, logFile=None, cut_dir_number=1, parentJobLs=[], extraDependentInputLs=[], transferOutput=False, \
-                extraArguments=None, job_max_memory=2000, **keywords):
+        targetFolder=None, logFile=None, cut_dir_number=1, parentJobLs=[],
+        extraDependentInputLs=[], transferOutput=False, \
+        extraArguments=None, job_max_memory=2000, **keywords):
         """
         2012.6.27
         """
         extraArgumentList = ['--user=%s'%(username), '--password=%s'%(password), '--recursive', '--no-parent',\
-                    '--continue', "--reject='index.html*'", "-nc -nH --cut-dirs=%s"%(cut_dir_number), "-P %s"%(targetFolder), \
-                    "%s/%s"%(url, relativePath)]
+            '--continue', "--reject='index.html*'", "-nc -nH --cut-dirs=%s"%(cut_dir_number), "-P %s"%(targetFolder), \
+            "%s/%s"%(url, relativePath)]
         
         """
         # unlike -nd, --cut-dirs does not lose with subdirectories---for instance, with
@@ -95,17 +95,19 @@ class WgetWorkflow(AbstractWorkflow):
         
         if relativePath.find('/')>=0:	#2013.06.26 it's a folder itself. so no straight output.
             sys.stderr.write("\n\t Warning: item %s is a folder, will not be staged out. You have to manually copy them out of scratch folder.\n"%\
-                            (relativePath))
+                (relativePath))
             extraOutputLs = None
         else:
             extraOutputLs = [File(os.path.join(targetFolder, os.path.join(subPath, relativePath)))]
         #2012.6.27 don't pass the downloaded outputFile to argument outputFile of addGenericJob()
         # because it will add "-o" in front of it. "-o" of wget is reserved for logFile.
-        return self.addGenericJob(executable=executable, inputFile=None, outputFile=logFile, \
-                        parentJobLs=parentJobLs, extraDependentInputLs=extraDependentInputLs, \
-                        extraOutputLs=extraOutputLs,\
-                        transferOutput=transferOutput, \
-                        extraArgumentList=extraArgumentList, job_max_memory=job_max_memory)
+        return self.addGenericJob(executable=executable,
+            inputFile=None, outputFile=logFile, \
+            parentJobLs=parentJobLs,
+            extraDependentInputLs=extraDependentInputLs, \
+            extraOutputLs=extraOutputLs,\
+            transferOutput=transferOutput, \
+            extraArgumentList=extraArgumentList, job_max_memory=job_max_memory)
     
     def getFilenamesToBeDownloaded(self, url=None, username=None, password=None):
         """
@@ -202,7 +204,6 @@ class WgetWorkflow(AbstractWorkflow):
         """
         2012.6.27
         """
-        
         sys.stderr.write("Adding wget jobs for %s input ... "%(len(relativePathList)))
         no_of_jobs= 0
         
@@ -216,14 +217,17 @@ class WgetWorkflow(AbstractWorkflow):
             #2013.06.26 remove all "/" from  relativePath in case it's a folder
             relativePathNoFolder = relativePath.replace('/', '_')
             logFile = File('%s.log'%(relativePathNoFolder))
-            wgetJob = self.addWgetJob(executable=self.wget, url=inputURL, relativePath=relativePath, \
-                        username=username, password=password,\
-                        targetFolder=outputDir, logFile=logFile, cut_dir_number=self.cut_dir_number, parentJobLs=[topOutputDirJob], extraDependentInputLs=[], \
-                        transferOutput=transferOutput, \
-                        extraArguments=None, job_max_memory=50)
+            wgetJob = self.addWgetJob(executable=self.wget, url=inputURL,
+                relativePath=relativePath, \
+                username=username, password=password,\
+                targetFolder=outputDir, logFile=logFile,
+                cut_dir_number=self.cut_dir_number,
+                parentJobLs=[topOutputDirJob], extraDependentInputLs=[], \
+                transferOutput=transferOutput, \
+                extraArguments=None, job_max_memory=50)
             #include the tfam (outputList[1]) into the fileLs
             returnData.jobDataLs.append(PassingData(jobLs=[wgetJob], file=wgetJob.output, \
-                                            fileLs=wgetJob.outputLs))
+                fileLs=wgetJob.outputLs))
             no_of_jobs += 1
         sys.stderr.write("%s jobs.\n"%(no_of_jobs))
         
@@ -233,7 +237,7 @@ class WgetWorkflow(AbstractWorkflow):
         """
         2012.6.27
         """
-        self.registerOneExecutable(path=pathToWget, \
+        self.registerOneExecutable(path=self.pathToWget, \
                 name="wget", clusterSizeMultiplier=1)
     
     def run(self):
@@ -244,21 +248,17 @@ class WgetWorkflow(AbstractWorkflow):
         if self.debug:
             import pdb
             pdb.set_trace()
-        
-        self.registerJars()
-        self.registerExecutables()
-        self.registerCustomExecutables()
+        self.setup_run()
         
         relativePathList = self.getFilenamesToBeDownloaded(url=self.inputURL, username=self.username, password=self.password)
         #one file needs to registered so that replica catalog is not empty
         #but this file doesn't need to be actually used by any job.
         wgetFile = self.registerOneInputFile(self.pathToWget)
         
-        self.addJobs(inputURL=self.inputURL, relativePathList=relativePathList, outputDir=self.pegasusFolderName, username=self.username, \
-                    password=self.password, \
-                    transferOutput=True)
-        outf = open(self.outputFname, 'w')
-        self.writeXML(outf)
+        self.addJobs(inputURL=self.inputURL, relativePathList=relativePathList,
+            outputDir=self.pegasusFolderName, username=self.username, \
+            password=self.password, transferOutput=True)
+        self.end_run()
 
 if __name__ == '__main__':
     main_class = WgetWorkflow

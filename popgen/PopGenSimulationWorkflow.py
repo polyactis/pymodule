@@ -16,8 +16,7 @@ Examples:
 import sys, os, math
 __doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0])
 
-from pegaflow.DAX3 import Executable, File, PFN, Link, Job
-import pegaflow
+from pegaflow.api import File
 from palos import ProcessOptions, PassingData, utils
 from palos.pegasus.AbstractWorkflow import AbstractWorkflow
 
@@ -29,26 +28,26 @@ class PopGenSimulationWorkflow(ParentClass):
     
     
     option_default_dict.update({
-                        #('seqCoverageFname', 0, ): ['', 'q', 1, 'The sequence coverage file. tab/comma-delimited: individual_sequence.id coverage'],\
-                        ("recombinationRate", 1, float): [1e-9, '', 1, 'recombination rate per base per meiosis.'],\
-                        ("mutationRate", 1, float): [1e-8, '', 1, 'mutation rate per base per generation.'],\
-                        
-                        ("initialEffectivePopulationSize", 1, int ): [50000, '', 1, 'the effective population size for pop-gen simulation to start with'],\
-                        ("otherParametersPassedToPopGenSimulator", 0, ): [None, '', 1, ''],\
-                        
-                        ("sampleSize", 1, int ): [50, '', 1, 'how many individuals from the pop-gen simulation to be sampled out to constitute the final output.\n\
-            measured in terms of the number of chromosomes (haploid).'],\
-                        ("noOfLociToSimulate", 1, int): [1, '', 1, 'how many loci to simulate'],\
-                        ("simulateLocusLengthList", 1, ): ['10000000', '', 1, 'a coma-separated list of locus length to simulate. if not a list, assuming just one locus'],\
-                        ("sfs_code_path", 1, ): ['script/repository/sfscode/bin/sfs_code', '', 1, 'path to the sfs_code pop-gen forward simulator'],\
-                        ("slim_path", 1, ): ['script/repository/slim/slim', '', 1, 'path to the slim pop-gen forward simulator'],\
-                        ("msHOT_lite_path", 1, ): ['script/lh3_foreign/msHOT-lite/msHOT-lite', '', 1, 'path to the ms pop-gen backwards simulator'],\
-                        
-                        
-                        ("simulateIndels", 0, int): [0, '', 1, 'toggle to simulate insertion/deletion polymorphism as well in pop-gen simulation'],\
-                        ("noOfReplicates", 1, int): [5, '', 1, 'how many replicates for this simulation setup'],\
-                        
-                        })
+        #('seqCoverageFname', 0, ): ['', 'q', 1, 'The sequence coverage file. tab/comma-delimited: individual_sequence.id coverage'],\
+        ("recombinationRate", 1, float): [1e-9, '', 1, 'recombination rate per base per meiosis.'],\
+        ("mutationRate", 1, float): [1e-8, '', 1, 'mutation rate per base per generation.'],\
+        
+        ("initialEffectivePopulationSize", 1, int ): [50000, '', 1, 'the effective population size for pop-gen simulation to start with'],\
+        ("otherParametersPassedToPopGenSimulator", 0, ): [None, '', 1, ''],\
+        
+        ("sampleSize", 1, int ): [50, '', 1, 'how many individuals from the pop-gen simulation to be sampled out to constitute the final output.\n\
+measured in terms of the number of chromosomes (haploid).'],\
+        ("noOfLociToSimulate", 1, int): [1, '', 1, 'how many loci to simulate'],\
+        ("simulateLocusLengthList", 1, ): ['10000000', '', 1, 'a coma-separated list of locus length to simulate. if not a list, assuming just one locus'],\
+        ("sfs_code_path", 1, ): ['script/repository/sfscode/bin/sfs_code', '', 1, 'path to the sfs_code pop-gen forward simulator'],\
+        ("slim_path", 1, ): ['script/repository/slim/slim', '', 1, 'path to the slim pop-gen forward simulator'],\
+        ("msHOT_lite_path", 1, ): ['script/lh3_foreign/msHOT-lite/msHOT-lite', '', 1, 'path to the ms pop-gen backwards simulator'],\
+        
+        
+        ("simulateIndels", 0, int): [0, '', 1, 'toggle to simulate insertion/deletion polymorphism as well in pop-gen simulation'],\
+        ("noOfReplicates", 1, int): [5, '', 1, 'how many replicates for this simulation setup'],\
+        
+        })
 
     def __init__(self,  **keywords):
         """
@@ -65,14 +64,14 @@ class PopGenSimulationWorkflow(ParentClass):
             self.simulateLocusLengthList = []
     
     def addMSSimulationJob(self, commandFile=None, outputFile=None, \
-                    recombinationRate=None, mutationRate=None, \
-                    initialEffectivePopulationSize=50000,\
-                    otherParametersPassedToPopGenSimulator="",\
-                    sampleSize=50, noOfLociToSimulate=1,\
-                    simulateLocusLengthList=None, lh3SpecificOutput=True, outputGeneTree=False, \
-                    parentJobLs=None, extraDependentInputLs=None, extraOutputLs=None, transferOutput=False, \
-                    extraArguments=None, extraArgumentList=None,\
-                    job_max_memory=2000, walltime=120, **keywords):
+        recombinationRate=None, mutationRate=None, \
+        initialEffectivePopulationSize=50000,\
+        otherParametersPassedToPopGenSimulator="",\
+        sampleSize=50, noOfLociToSimulate=1,\
+        simulateLocusLengthList=None, lh3SpecificOutput=True, outputGeneTree=False, \
+        parentJobLs=None, extraDependentInputLs=None, extraOutputLs=None, transferOutput=False, \
+        extraArguments=None, extraArgumentList=None,\
+        job_max_memory=2000, walltime=120, **keywords):
         """
         2013.08.04
             sampleSize is measured in terms of the number of chromosomes (haploid)

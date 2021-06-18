@@ -21,7 +21,7 @@ __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 import getpass
 import logging
 import subprocess
-from pegaflow.DAX3 import File, Link, PFN, Job
+from pegaflow.api import File, Link, PFN, Job
 from palos import getListOutOfStr, PassingData, utils
 from palos.ngs.AbstractNGSWorkflow import AbstractNGSWorkflow
 from palos.db import SunsetDB

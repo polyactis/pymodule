@@ -112,9 +112,8 @@ import getpass
 import logging
 import copy
 import pegaflow
-from pegaflow.DAX3 import Executable, File, PFN, Link, Job
-from palos import ProcessOptions, getListOutOfStr, PassingData, utils
-from palos.db import SunsetDB
+from pegaflow.api import File, Job, Transformation
+from palos import PassingData, utils
 from palos.ngs.AbstractAlignmentWorkflow import AbstractAlignmentWorkflow
 ParentClass = AbstractAlignmentWorkflow
 
@@ -443,9 +442,7 @@ class ShortRead2Alignment(ParentClass):
         newFileObjLs = []
         for fileObject in fileObjectLs:
             relativePath = fileObject.db_entry.path
-            fastqF = File(relativePath)
-            fastqF.addPFN(PFN("file://" + fileObject.path, self.input_site_handler))
-            self.addFile(fastqF)
+            fastqF = self.registerOneInputFile(fileObject.path, pegasusFileName=relativePath)
             fileObject.fastqF = fastqF
             newFileObjLs.append(fileObject)
         return newFileObjLs
@@ -456,8 +453,7 @@ class ShortRead2Alignment(ParentClass):
         """
         self.addJobDependency(parentJob=refIndexJob, childJob=childJob)
         for output in refIndexJob.outputLs:
-            self.addJobUse(childJob, file=output, transfer=True,
-                register=True, link=Link.INPUT)
+            self.addJobUse(childJob, file=output, is_input=False)
 
     def addStampyAlignmentJob(self, fileObjectLs=None,
         refFastaFList=None, extraAlignArgs=None,
@@ -511,51 +507,48 @@ class ShortRead2Alignment(ParentClass):
             os.path.basename(relativePath))[0]
         outputSamFile = File('%s.sam'%(os.path.join(outputDir, fileBasenamePrefix)))
 
-        alignmentJob = Job(namespace=self.namespace, name=self.stampy.name,
-            version=self.version)
-        # Make sure to use ', rather than ", 
-        #  to wrap the bwaoptions. double-quote(") would disappear
-        #   during xml translation.
-        alignmentJob.addArguments(" --bwa=%s "%(
+        extraArgumentList = [" --bwa=%s "%(
             pegaflow.getAbsPathOutOfExecutable(self.bwa)),
             "--bwaoptions='%s -t%s %s' "%(extraAlignArgs, 
                 no_of_aln_threads, refFastaFile.name),
-            "-g", refFastaFile, "-h", refFastaFile, "-o", outputSamFile,
+            "-g", refFastaFile, "-h", refFastaFile,
             '--overwrite',
-            '--baq', '--alignquals', '--gatkcigarworkaround')
+            '--baq', '--alignquals', '--gatkcigarworkaround']
+        # Make sure to use ', rather than ", 
+        #  to wrap the bwaoptions. double-quote(") would disappear
+        #   during xml translation.
         #Added option --gatkcigarworkaround removing adjacent I/D events
         #  from CIGAR strings, which trips up GATK
+        
         if firstFileObject.db_entry.quality_score_format=='Illumina':
-            alignmentJob.addArguments("--solexa")
-        alignmentJob.uses(outputSamFile, transfer=transferOutput,
-            register=True, link=Link.OUTPUT)
-        alignmentJob.output = outputSamFile
+            extraArgumentList.append("--solexa")
+        
+        extraDependentInputLs = []
+        alignmentJob = self.addGenericJob(
+            executable=self.stampy,
+            outputArgumentOption="-o", outputFile=outputSamFile,
+            extraArgumentList=extraArgumentList, 
+            extraDependentInputLs= extraDependentInputLs+refFastaFList,
+            parentJobLs=parentJobLs, transferOutput=transferOutput,
+            no_of_cpus=no_of_aln_threads, 
+            job_max_memory=aln_job_max_memory, \
+            walltime=aln_job_walltime
+            **keywords)
+
         alignmentJob.fileBasenamePrefix = fileBasenamePrefix
 
-        for refFastaFile in refFastaFList:
-            alignmentJob.uses(refFastaFile, transfer=True,
-                register=True, link=Link.INPUT)
-        pegaflow.setJobResourceRequirement(alignmentJob,
-            job_max_memory=aln_job_max_memory, \
-            no_of_cpus=no_of_aln_threads, walltime=aln_job_walltime)
-        self.addJob(alignmentJob)
         #add fastq files after "-M"
         # -M FILE[,FILE] Map fastq file(s). 
         # Use FILE.recaldata for recalibration if available
-        alignmentJob.addArguments(" -M ")
+        alignmentJob.add_args(" -M ")
         for fileObject in fileObjectLs:
             fastqF = fileObject.fastqF
             relativePath = fastqF.name
-            alignmentJob.addArguments(fastqF)
-            alignmentJob.uses(fastqF, transfer=True, register=True,
-                link=Link.INPUT)
+            alignmentJob.add_args(fastqF)
+            self.addJobUse(alignmentJob, fastqF, is_input=True)
         if refIndexJob:
             self.addRefIndexJobAndItsOutputAsParent(refIndexJob,
                 childJob=alignmentJob)
-        if parentJobLs:
-            for parentJob in parentJobLs:
-                if parentJob:
-                    self.depends(parent=parentJob, child=alignmentJob)
         return alignmentJob
 
     def addBWAJob(self, executable=None, bwaCommand='aln',
@@ -1057,35 +1050,29 @@ in pipe2File:
         """
         javaMaxMemory=2500
         if len(alignmentJobAndOutputLs)>1:
-            merge_sam_job = Job(namespace=self.namespace,
-                name=self.samtools.name,
-                version=self.version)
-            merge_sam_job.addArguments('-f', outputBamFile)	
-            #'overwrite the output BAM if exist'
-            merge_sam_job.uses(outputBamFile, transfer=transferOutput,
-                register=True, link=Link.OUTPUT)
-            pegaflow.setJobResourceRequirement(merge_sam_job,
-                job_max_memory=job_max_memory)
-            self.addJob(merge_sam_job)
+            merge_sam_job = self.addGenericJob(
+                executable=self.samtools,
+                outputArgumentOption="-f", outputFile=outputBamFile,
+                transferOutput=transferOutput,
+                job_max_memory=job_max_memory, \
+                **keywords)
+
             for alignmentJobAndOutput in alignmentJobAndOutputLs:
                 alignmentJob, alignmentOutput = alignmentJobAndOutput[:2]
-                merge_sam_job.addArguments(alignmentOutput)
-                merge_sam_job.uses(alignmentOutput, transfer=True,
-                    register=True, link=Link.INPUT)
-                self.depends(parent=alignmentJob, child=merge_sam_job)
+                merge_sam_job.add_args(alignmentOutput)
+                merge_sam_job.add_inputs(alignmentOutput)
+                self.add_dependency(merge_sam_job, parents=[alignmentJob])
         else:
             #one input file, no samtools merge. use "cp" to rename it instead
             alignmentJob, alignmentOutput = alignmentJobAndOutputLs[0][:2]
-            merge_sam_job = Job(namespace=self.namespace,
-                name=self.cp.name,
-                version=self.version)
-            merge_sam_job.addArguments(alignmentOutput, outputBamFile)
-            self.depends(parent=alignmentJob, child=merge_sam_job)
-            merge_sam_job.uses(alignmentOutput, transfer=True, register=True,
-                link=Link.INPUT)
-            merge_sam_job.uses(outputBamFile, transfer=transferOutput,
-                register=True, link=Link.OUTPUT)
-            self.addJob(merge_sam_job)
+            merge_sam_job = self.addGenericJob(
+                executable=self.cp,
+                inputArgumentOption="", inputFile=alignmentOutput,
+                outputArgumentOption="", outputFile=outputBamFile,
+                parentJobLs=[alignmentJob], transferOutput=transferOutput,
+                job_max_memory=job_max_memory, \
+                **keywords)
+
 
         # add the index job on the merged bam file
         bamIndexJob = self.addBAMIndexJob(

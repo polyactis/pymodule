@@ -2,16 +2,16 @@
 """
 a common class for pegasus workflows that work on VCF variant files
 """
-import sys, os, math
+import sys, os
 import copy
 import logging
-import pegaflow
-from pegaflow.DAX3 import Executable, File, PFN, Link, Job
-from palos import Genome, getListOutOfStr, PassingData, utils
+from typing import Dict, List
+from pegaflow.api import File, Transformation
+from palos import Genome, PassingData, utils
 from palos.io.MatrixFile import MatrixFile
 from palos.ngs.io.VCFFile import VCFFile
 from palos import ngs
-from . MapReduceGenomeFileWorkflow import MapReduceGenomeFileWorkflow
+from MapReduceGenomeFileWorkflow import MapReduceGenomeFileWorkflow
 ParentClass = MapReduceGenomeFileWorkflow
 
 class AbstractVCFWorkflow(ParentClass):
@@ -173,11 +173,6 @@ class AbstractVCFWorkflow(ParentClass):
                         continue
                 if ngs.isFileNameVCF(fname, includeIndelVCF=includeIndelVCF) and \
                         not ngs.isVCFFileEmpty(inputFname, checkContent=checkEmptyVCFByReading):
-                    inputBaseFname = os.path.basename(inputFname)
-                    inputF = File(os.path.join(pegasusFolderName, inputBaseFname))
-                    inputF.addPFN(PFN("file://" + inputFname, input_site_handler))
-                    inputF.absPath = inputFname
-                    inputF.abspath = inputFname
                     no_of_loci = None
                     no_of_individuals = None
                     if needToKnowNoOfLoci:
@@ -196,26 +191,25 @@ class AbstractVCFWorkflow(ParentClass):
                             no_of_loci = vcfFile.getNoOfLoci()
                             no_of_individuals = len(vcfFile.getSampleIDList())
                             vcfFile.close()
-                    inputF.noOfLoci = no_of_loci
-                    inputF.no_of_loci = no_of_loci
-                    inputF.no_of_individuals = no_of_individuals
-                    inputF.noOfIndividuals = no_of_individuals
                     
-                    if minNoOfLociInVCF is None or inputF.noOfLoci is None or \
-                            (minNoOfLociInVCF is not None and inputF.noOfLoci is not None and \
-                                inputF.noOfLoci >=minNoOfLociInVCF):
-                        self.addFile(inputF)
+                    if minNoOfLociInVCF is None or no_of_loci is None or \
+                            (minNoOfLociInVCF is not None and no_of_loci is not None and \
+                                no_of_loci >=minNoOfLociInVCF):
+                        input_file = self.registerOneInputFile(input_path=inputFname, folderName=pegasusFolderName)
+                        inputBaseFname = os.path.basename(inputFname)
+                        input_file.noOfLoci = no_of_loci
+                        input_file.no_of_loci = no_of_loci
+                        input_file.no_of_individuals = no_of_individuals
+                        input_file.noOfIndividuals = no_of_individuals
                         tbi_F_absPath = "%s.tbi"%inputFname
                         if os.path.isfile(tbi_F_absPath):	#it exists
-                            tbi_F = File(os.path.join(pegasusFolderName, "%s.tbi"%inputBaseFname))
-                            tbi_F.addPFN(PFN("file://" + tbi_F_absPath, input_site_handler))
-                            tbi_F.abspath = tbi_F_absPath
-                            self.addFile(tbi_F)
+                            tbi_F = self.registerOneInputFile(input_path=tbi_F_absPath,
+                                folderName=pegasusFolderName)
                         else:
                             tbi_F = None
-                        inputF.tbi_F = tbi_F
+                        input_file.tbi_F = tbi_F
                         returnData.jobDataLs.append(PassingData(job=None, jobLs=[], \
-                            vcfFile=inputF, tbi_F=tbi_F, file=inputF, fileLs=[inputF, tbi_F]))
+                            vcfFile=input_file, tbi_F=tbi_F, file=input_file, fileLs=[input_file, tbi_F]))
                         real_counter += 1
                     if real_counter%10==0:
                         sys.stderr.write("%s%s"%('\x08'*len(previous_reported_real_counter), real_counter))
@@ -225,8 +219,8 @@ class AbstractVCFWorkflow(ParentClass):
             counter, real_counter))
         return returnData
     
-    def addSplitVCFFileJob(self, executable=None,
-        inputFile=None, outputFnamePrefix=None,
+    def addSplitVCFFileJob(self, executable:Transformation=None,
+        inputFile:File=None, outputFnamePrefix=None,
         noOfOverlappingSites=1000, noOfSitesPerUnit=5000, noOfTotalSites=10000,
         extraArguments=None,
         parentJobLs=None,
@@ -287,7 +281,8 @@ class AbstractVCFWorkflow(ParentClass):
         return job
     
     
-    def addLigateVcfJob(self, executable=None, ligateVcfExecutableFile=None, outputFile=None, \
+    def addLigateVcfJob(self, executable:Transformation=None,
+        ligateVcfExecutableFile:File=None, outputFile:File=None, \
         extraArguments=None,
         parentJobLs=None, extraDependentInputLs=None, transferOutput=False, \
         job_max_memory=2000, **keywords):
@@ -618,8 +613,9 @@ class AbstractVCFWorkflow(ParentClass):
                 job=concatJob, jobLs=[concatJob], tbi_F=None)
         return returnData
     
-    def concatenateIntervalsIntoOneVCFSubWorkflow(self, executable=None,
-        refFastaFList=None, fileBasenamePrefix=None,
+    def concatenateIntervalsIntoOneVCFSubWorkflow(self,
+        executable:Transformation=None,
+        refFastaFList:List[File]=None, fileBasenamePrefix=None,
         passingData=None, intervalJobLs=None,\
         outputDirJob=None,needBGzipAndTabixJob=True,\
         transferOutput=True, job_max_memory=None, walltime=None,

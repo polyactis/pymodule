@@ -18,7 +18,7 @@ import getpass
 from palos import ProcessOptions, getListOutOfStr, PassingData, utils
 from palos.db import SunsetDB
 from palos.ngs.AbstractNGSWorkflow import AbstractNGSWorkflow
-from pegaflow.DAX3 import File, PFN
+from pegaflow.api import File, PFN
 
 class InspectBaseQualityPipeline(AbstractNGSWorkflow):
     __doc__ = __doc__

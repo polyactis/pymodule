@@ -15,13 +15,12 @@ Examples:
         --notToUseDBToInferVCFNoOfLoci
         --db_user yh -z localhost
 """
-import sys, os, math
+import sys, os
 __doc__ = __doc__%(sys.argv[0])
 import logging
-import pegaflow
-from pegaflow.DAX3 import Executable, File, PFN
+from pegaflow.api import File
 from palos import PassingData, utils
-from . AbstractNGSWorkflow import AbstractNGSWorkflow
+from AbstractNGSWorkflow import AbstractNGSWorkflow
 
 ParentClass = AbstractNGSWorkflow
 class MapReduceGenomeFileWorkflow(ParentClass):
@@ -114,7 +113,7 @@ class MapReduceGenomeFileWorkflow(ParentClass):
         """
         ParentClass.__init__(self,
             input_path=input_path,
-            inputSuffixList=None,
+            inputSuffixList=inputSuffixList,
             pegasusFolderName=pegasusFolderName,
             output_path=output_path,
 

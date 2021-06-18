@@ -3,10 +3,9 @@
 2020/01/29
     an abstract class for pegasus workflows that work on bioinformatic data
 """
-import sys, os, math
+import os, sys
 import logging
-from palos import ProcessOptions, getListOutOfStr, PassingData, utils
-from pegaflow.DAX3 import Executable, File, PFN, Link, Job
+from palos import PassingData
 from . AbstractWorkflow import AbstractWorkflow
 
 ParentClass = AbstractWorkflow
@@ -99,13 +98,8 @@ class AbstractBioinfoWorkflow(ParentClass):
         missingSuffixSet = set()
         
         if registerAffiliateFiles:
-            refFastaF = File(os.path.join(folderName, os.path.basename(refFastaFname)))
-            #use relative path, otherwise, it'll go to absolute path
-            # Add it into replica only when needed.
-            refFastaF.addPFN(PFN("file://" + refFastaFname, self.input_site_handler))
-            if not self.hasFile(refFastaF):
-                self.addFile(refFastaF)
-            returnData.refFastaFList.append(refFastaF)
+            ref_fasta_file = self.registerOneInputFile(input_path=refFastaFname, folderName=folderName)
+            returnData.refFastaFList.append(ref_fasta_file)
             # If it's not needed, assume the index is done and all relevant files
             #  are in absolute path. and no replica transfer
             
@@ -136,20 +130,17 @@ class AbstractBioinfoWorkflow(ParentClass):
                     logging.warn(f"{pathToFile} don't exist or not a file. "
                         "Skip registration.")
                     continue
-                affiliateF = File(os.path.join(folderName, os.path.basename(pathToFile)))
-                #use relative path, otherwise, it'll go to absolute path
-                affiliateF.addPFN(PFN("file://" + pathToFile, self.input_site_handler))
-                if not self.hasFile(affiliateF):
-                    self.addFile(affiliateF)
-                returnData.refFastaFList.append(affiliateF)
+                affiliate_file = self.registerOneInputFile(input_path=pathToFile,
+                    folderName=folderName)
+                returnData.refFastaFList.append(affiliate_file)
                 
                 if suffix=='dict':
-                    returnData.refPicardFastaDictF = affiliateF
+                    returnData.refPicardFastaDictF = affiliate_file
                 elif suffix=='fai':
-                    returnData.refSAMtoolsFastaIndexF = affiliateF
+                    returnData.refSAMtoolsFastaIndexF = affiliate_file
         else:
-            refFastaF = File(os.path.join(folderName, os.path.basename(refFastaFname)))
-            returnData.refFastaFList.append(refFastaF)
+            ref_fasta_file = self.registerOneInputFile(input_path=refFastaFname, folderName=folderName)
+            returnData.refFastaFList.append(ref_fasta_file)
         if 'bwt' in missingSuffixSet or 'pac' in missingSuffixSet:
             returnData.needBWARefIndexJob = True
         if 'fai' in missingSuffixSet:
