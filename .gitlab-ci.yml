@@ -71,27 +71,38 @@ Py3_Red-Black Tree:
 #     - pwd
 #     - python2 ./palos/algorithm/RBTree.py
 
-
 GADA:
+  stage: test_run
+  script:
+    - echo "Compiling GADA and test-run its C++ binary ... "
+    - pwd
+    - cd GADA && make
+    - ./GADA -i input.txt -o output_CPP.tsv
+  artifacts:
+    name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}_${CI_BUILD_ID}"
+    expire_in: 3 mos
+    paths:
+    - GADA/output_CPP.tsv
+
+pyGADA:
   stage: test_run
   script:
     - echo "Compiling GADA and test-run its Python2 module ... "
     - pwd
     - cd GADA && make
-    - ./testGADA.py -i input.txt -o output.tsv
+    - ./testGADA.py -i input.txt -o output_py.tsv
   artifacts:
     name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}_${CI_BUILD_ID}"
     expire_in: 3 mos
     paths:
-    - GADA/output.tsv
-
+    - GADA/output_py.tsv
 
 DAG_CountReadsWorkflow:
   stage: test_run
   script:
     - echo "Output a CountReadsWorkflow DAG ... "
     - pwd
-    - ./ngs/qc/CountReadsWorkflow.py -i 790-800 -o CountReads.ISQ790-800.xml
+    - ./ngs/qc/CountReadsWorkflow.py -i 790-800 -o CountReads.ISQ790-800.yml
       -l condor --pymodulePath `pwd`
       --hostname pdc --dbname pmdb --schema sunset
       -u sunset_r -p yfishLabSunset --commit
@@ -99,7 +110,7 @@ DAG_CountReadsWorkflow:
     name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}_${CI_BUILD_ID}"
     expire_in: 3 mos
     paths:
-    - CountReads.ISQ790-800.xml
+    - CountReads.ISQ790-800.yml
 
 
 DAG_ShortRead2Alignment:
@@ -108,7 +119,7 @@ DAG_ShortRead2Alignment:
     - echo "Output a ShortRead2Alignment DAG ... "
     - pwd
     - ./ngs/alignment/ShortRead2Alignment.py --ind_seq_id_ls 787-811
-      -a 633 -o Alignment_isq_787_811_vs_633.xml -l condor
+      -a 633 -o Alignment_isq_787_811_vs_633.yml -l condor
       --home_path /y/home/huangyu --pymodulePath `pwd`
       --tmpDir /y/scratch/tmp/huangyu/
       --no_of_aln_threads 8
@@ -118,7 +129,7 @@ DAG_ShortRead2Alignment:
     name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}_${CI_BUILD_ID}"
     expire_in: 3 mos
     paths:
-    - Alignment_isq_787_811_vs_633.xml
+    - Alignment_isq_787_811_vs_633.yml
 
 DAG_InspectAlignment:
   stage: test_run
@@ -131,12 +142,12 @@ DAG_InspectAlignment:
       --dbname pmdb --schema sunset -u sunset_r -p yfishLabSunset
       --home_path /y/home/huangyu --pymodulePath `pwd`
       --tmpDir /y/scratch/tmp/huangyu/
-      -o InspectAln_2112_2132.xml
+      -o InspectAln_2112_2132.yml
   artifacts:
     name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}_${CI_BUILD_ID}"
     expire_in: 3 mos
     paths:
-    - InspectAln_2112_2132.xml
+    - InspectAln_2112_2132.yml
 
 DAG_InspectBaseQuality:
   stage: test_run
@@ -147,12 +158,12 @@ DAG_InspectBaseQuality:
       --dbname pmdb --schema sunset -u sunset_r -p yfishLabSunset
       --home_path /y/home/huangyu --pymodulePath `pwd`
       --tmpDir /y/scratch/tmp/huangyu/
-      -o InspectBaseQuality_650_850.xml
+      -o InspectBaseQuality_650_850.yml
   artifacts:
     name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}_${CI_BUILD_ID}"
     expire_in: 3 mos
     paths:
-    - InspectBaseQuality_650_850.xml
+    - InspectBaseQuality_650_850.yml
 
 InspectBaseQuality:
   stage: test_run
