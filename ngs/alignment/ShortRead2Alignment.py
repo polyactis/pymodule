@@ -742,7 +742,7 @@ class ShortRead2Alignment(ParentClass):
             for fileObject in fileObjectLs:
                 self.addInputToMergeJob(mergeJob=sai2samJob,
                     inputF=fileObject.fastqF)
-            sai2samJob.addArguments(alignmentSamF)
+            sai2samJob.add_args(alignmentSamF)
         else:
             logging.error("AddBWANonMemJob(): %s (!=1, !=2) file objects (%s)."%\
                 (len(fileObjectLs), fileObjectLs))

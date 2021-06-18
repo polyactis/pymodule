@@ -602,7 +602,7 @@ class InspectAlignmentPipeline(ParentClass):
                 transferOutput=False,\
                 fractionToSample=self.fractionToSample)
 
-        reduceDepthOfCoverageJob.addArguments(DOCJob.sample_statistics_file)
+        reduceDepthOfCoverageJob.add_args(DOCJob.sample_statistics_file)
         reduceDepthOfCoverageJob.add_inputs(DOCJob.sample_statistics_file)
         self.add_dependency(reduceDepthOfCoverageJob, parents=[DOCJob])
         """

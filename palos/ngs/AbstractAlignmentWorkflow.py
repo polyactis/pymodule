@@ -298,7 +298,7 @@ class AbstractAlignmentWorkflow(ParentClass):
                 self.add_dependency(job, parents=alignmentData.jobLs)
             #if alignmentFileFolder:
             # #2013.05.21 pegasus/condor would truncate long single-argument.
-            #	job.addArguments('%s/*.bam'%(alignmentFileFolder))
+            #	job.add_args('%s/*.bam'%(alignmentFileFolder))
             #else:
             job.add_args(','.join(fileArgumentLs))
 

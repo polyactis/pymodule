@@ -1687,7 +1687,7 @@ class AbstractNGSWorkflow(ParentClass):
             #add the pairwise distance matrix job after filter is done
             calcula_job = Job(namespace=namespace, name=calcula.name, version=version)
 
-            calcula_job.addArguments("-i", genotypeCallOutput, "-n", str(self.min_MAF),
+            calcula_job.add_args("-i", genotypeCallOutput, "-n", str(self.min_MAF),
                 "-o", calculaOutput, '-m', repr(self.max_NA_rate),
                 '-c', str(self.convertHetero2NA),\
                 '-H', repr(self.hetHalfMatchDistance))
@@ -3189,7 +3189,7 @@ run something like below to extract data from regionOfInterest out of
         if otherInputFileList:
             for inputFile in otherInputFileList:
                 if inputFile:
-                    job.addArguments(inputFile)
+                    job.add_args(inputFile)
         return job
 
     def addAlignmentMergeJob(self,

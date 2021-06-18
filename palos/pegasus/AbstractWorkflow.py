@@ -6,7 +6,7 @@
 import sys, os
 from palos import PassingData
 from pegaflow.Workflow import Workflow
-from pegaflow.api import File
+from pegaflow.api import File, Job
 
 #path to the source code directory
 src_dir = os.path.dirname(os.path.abspath(__file__))
@@ -355,7 +355,7 @@ class AbstractWorkflow(Workflow):
             job_max_memory=job_max_memory, **keywords)
         return job
 
-    def addDBGenomeArgumentsToOneJob(self, job=None, objectWithDBArguments=None):
+    def addDBGenomeArgumentsToOneJob(self, job:Job=None, objectWithDBArguments=None):
         """
         2013.07.31 similar to addDBArgumentsToOneJob() but for genome db
         """
@@ -365,17 +365,17 @@ class AbstractWorkflow(Workflow):
             genome_dbname = 'genome'
         else:
             genome_dbname = self.dbname
-        job.addArguments(
+        job.add_args(
             "--genome_drivername", objectWithDBArguments.drivername,
             "--genome_hostname", objectWithDBArguments.hostname, \
             "--genome_dbname", genome_dbname, \
             "--genome_db_user", objectWithDBArguments.db_user, \
             "--genome_db_passwd %s"%objectWithDBArguments.db_passwd)
 
-        job.addArguments("--genome_schema genome")
+        job.add_args("--genome_schema genome")
 
         if getattr(objectWithDBArguments, 'port', None):
-            job.addArguments("--genome_port=%s"%(objectWithDBArguments.port))
+            job.add_args("--genome_port=%s"%(objectWithDBArguments.port))
         return job
 
 
