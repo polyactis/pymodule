@@ -156,7 +156,7 @@ class ImportIndividualSequence2DB(ParentClass):
         self.study_id = study_id
         self.site_id = site_id
 
-        ParentClass.__init__(self, inputSuffixList=None, 
+        ParentClass.__init__(self, input_path=input_path, inputSuffixList=None, 
             site_handler=site_handler,
             pegasusFolderName=pegasusFolderName,
             output_path=output_path,
