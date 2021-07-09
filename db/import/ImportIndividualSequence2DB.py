@@ -594,7 +594,7 @@ Example ("Library" and "Bam Path" are required):
                     f"{found_path_ls}.")
                 continue
             #replace space in sample_id
-            sample_id = row.sample_id.strip().replace(' ', '_')
+            sample_id = str(row.sample_id).strip().replace(' ', '_')
             if sample_id not in sample_id2data:
                 sample_id2data[sample_id] = PassingData(
                     sample_id=sample_id, study=NoneForNan(row.study),
