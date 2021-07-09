@@ -1893,5 +1893,6 @@ if __name__ == '__main__':
         needSSHDBTunnel=args.needSSHDBTunnel,
         commit=args.commit,
         debug=args.debug,
-        report=args.report)
+        report=args.report,
+        javaPath=args.javaPath)
     instance.run()
