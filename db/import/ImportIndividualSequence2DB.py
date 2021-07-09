@@ -134,6 +134,7 @@ class ImportIndividualSequence2DB(ParentClass):
         self.pathToInsertHomePathList.extend(
             ['SplitReadFileJarPath', 'picard_path',]
             )
+        self.input_path = input_path
         self.drivername = drivername
         self.hostname = hostname
         self.dbname = dbname
