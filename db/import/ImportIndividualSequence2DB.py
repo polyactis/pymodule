@@ -164,7 +164,7 @@ class ImportIndividualSequence2DB(ParentClass):
             tmpDir=tmpDir,
             max_walltime=max_walltime, 
             home_path=home_path,
-            javaPath=None,
+            javaPath=javaPath,
             pymodulePath=pymodulePath,
             needSSHDBTunnel=needSSHDBTunnel, commit=commit,
             debug=debug, report=report)
@@ -1770,6 +1770,8 @@ if __name__ == '__main__':
     ap.add_argument("-p", "--db_passwd", required=False,
         help="Password of the database user")
 
+    ap.add_argument("--javaPath", default="/usr/bin/java",
+        help="Default: %(default)s")
     ap.add_argument("--SplitReadFileJarPath",
         default="script/picard/dist/SplitReadFile.jar",
         help='Default: %(default)s')
