@@ -572,7 +572,7 @@ Example ("Library" and "Bam Path" are required):
             condition,tissue_name,tissue_id
         """
         logging.warn(f"Getting sample_id2data from {sample_sheet} ...")
-        filename_pattern = re.compile(r'(?P<other>.*)_(?P<mate_id>\d).(fastq|fq)')
+        filename_pattern = re.compile(r'(?P<other>.*)_.*?(?P<mate_id>\d).(fastq|fq)')
         sample_id2data = {}
         df = pd.read_excel(sample_sheet, header=0)
         #numpy.isnan can't be used in lambda function.
