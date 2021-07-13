@@ -30,6 +30,7 @@ Description:
         One variable on each line.
     """
     __doc__ = __doc__%(sys.argv[0])
+    parse_args_from_commandline = 0
     option_default_dict = copy.deepcopy(ParentClass.option_default_dict)
     option_default_dict.pop(('outputFname', 0, ))
     option_default_dict.pop(('outputFnamePrefix', 0, ))
@@ -50,6 +51,8 @@ Description:
             'individual_sequence_file_raw.id associated with the raw file'],
         ('library', 0, ): [None, 'l', 1, 
             'library name for files in inputDir', ],
+        ('parse_args_from_commandline', 0, int): [0, '', 1, 
+            'If 1, parse args from the commandline, not from the input file.', ],
         ('mate_id', 0, int): [None, 'm', 1, 
             '1: first end; 2: 2nd end. of paired-end or mate-paired libraries'],
         ("sequence_format", 1, ): ["fastq", 'f', 1, 'fasta, fastq, etc.'],
@@ -57,21 +60,21 @@ Description:
             'output file to contain logs. optional.'],
         })
 
-    def __init__(self,  **keywords):
+    def __init__(self, **keywords):
         """
         """
         #connectDB(), and setup srcFilenameLs and dstFilenameLs
         ParentClass.__init__(self, inputFnameLs=None, **keywords)
-        if self.inputFname:
-            self.parseArgumentsFromFile()
+        if self.inputFname and self.parse_args_from_commandline==0:
+            self.parseArgumentsFromFile(self.inputFname)
     
-    def parseArgumentsFromFile(self):
+    def parseArgumentsFromFile(self, inputFname):
         """
         20190206
         """
         #parse inputFname to get individual_sequence_id & 
         # individual_sequence_file_raw_id and others.
-        inputFile = utils.openGzipFile(self.inputFname)
+        inputFile = utils.openGzipFile(inputFname)
         input_variable_dict = {}
         for line in inputFile:
             var_name, var_value = line.strip().split(": ")
