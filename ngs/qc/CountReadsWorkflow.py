@@ -156,7 +156,7 @@ class CountReadsWorkflow(ParentClass):
                 if os.path.isfile(absPath):
                     inputF = self.registerOneInputFile(absPath,
                         pegasusFileName=os.path.join(pegasusFolderName,
-                        individual_sequence_file.path))
+                        individual_sequence.path))
                     returnData.jobDataLs.append(PassingData(output=inputF, 
                         jobLs=[], isq_id=individual_sequence.id,\
                         isqf_id=None))
