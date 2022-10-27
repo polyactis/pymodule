@@ -28,7 +28,7 @@ Usage:
 
 
 2010-1-26 Yu S. Huang polyactis@gmail.com
-downloaded from http://newcenturycomputers.net/projects/rbtree.html
+adapted from http://newcenturycomputers.net/projects/rbtree.html
 
 #
 # This code adapted from C source from
