@@ -27,7 +27,9 @@ Usage:
         print rbNode.value
 
 
-2010-1-26 downloaded from http://newcenturycomputers.net/projects/rbtree.html
+2010-1-26 Yu S. Huang polyactis@gmail.com
+downloaded from http://newcenturycomputers.net/projects/rbtree.html
+
 #
 # This code adapted from C source from
 # Thomas Niemann's Sorting and Searching Algorithms: A Cookbook
