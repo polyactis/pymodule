@@ -105,13 +105,15 @@ def is_reciprocal_overlap(span1_ls=None, span2_ls=None, min_reciprocal_overlap=0
 
 class CNVSegmentBinarySearchTreeKey(object):
     """
+    A key designed to represent a CNV segment in the node of a Red-Black tree (algorithm/RBTree.py)
+        or binary search tree (BinarySearchTree.py, less efficient than RBTree.py).
+
+    It has custom comparison function based on the is_reciprocal_overlap() function.
     2013.06.25 added argument isDataDiscrete to treat discrete and continuous coordinates differently
     2010-8-2
-        add argument keywords to __init__()
+        Added argument keywords to __init__()
     2009-12-12
-        a key designed to represent a CNV segment in the node of a binary search tree (BinarySearchTree.py) or RBTree (RBTree.py),
-        
-        It has custom comparison function based on the is_reciprocal_overlap() function.
+        Init.
     """
     def __init__(self, chromosome=None, span_ls=None, min_reciprocal_overlap=0.6, isDataDiscrete=True, **keywords):
         self.chromosome = chromosome
@@ -157,7 +159,8 @@ class CNVSegmentBinarySearchTreeKey(object):
                 if len(other.span_ls)==1:
                     return self.span_ls[0]<other.span_ls[0]
                 elif len(other.span_ls)>1:
-                    overlapData = get_overlap_ratio(self.span_ls, other.span_ls, isDataDiscrete=self.isDataDiscrete)
+                    overlapData = get_overlap_ratio(self.span_ls, other.span_ls, 
+                                                    isDataDiscrete=self.isDataDiscrete)
                     overlapFraction1 = overlapData.overlapFraction1
                     overlapFraction2 = overlapData.overlapFraction2
                     min_overlap = min(overlapFraction1, overlapFraction2)
@@ -190,8 +193,8 @@ class CNVSegmentBinarySearchTreeKey(object):
                     return self.span_ls[0]<=other.span_ls[0]
                 elif len(other.span_ls)>1:
                     is_overlap = is_reciprocal_overlap(self.span_ls, other.span_ls, \
-                                                    min_reciprocal_overlap=self.min_reciprocal_overlap,\
-                                                    isDataDiscrete=self.isDataDiscrete)
+                                min_reciprocal_overlap=self.min_reciprocal_overlap,\
+                                isDataDiscrete=self.isDataDiscrete)
                     if is_overlap:
                         return True
                     else:
@@ -222,8 +225,8 @@ class CNVSegmentBinarySearchTreeKey(object):
                 elif len(other.span_ls)>1:
                     # need to calculate min_reciprocal_overlap
                     return is_reciprocal_overlap(self.span_ls, other.span_ls, \
-                                                min_reciprocal_overlap=self.min_reciprocal_overlap,\
-                                                isDataDiscrete=self.isDataDiscrete)
+                                    min_reciprocal_overlap=self.min_reciprocal_overlap,\
+                                    isDataDiscrete=self.isDataDiscrete)
                     #return self.span_ls[1]<other.span_ls[0]	# whether the stop of this segment is ahead of the start of other
                 else:
                     return None
