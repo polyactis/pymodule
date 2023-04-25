@@ -109,6 +109,7 @@ class CNVSegmentBinarySearchTreeKey(object):
         or binary search tree (BinarySearchTree.py, less efficient than RBTree.py).
 
     It has custom comparison function based on the is_reciprocal_overlap() function.
+    
     2013.06.25 added argument isDataDiscrete to treat discrete and continuous coordinates differently
     2010-8-2
         Added argument keywords to __init__()
@@ -117,12 +118,6 @@ class CNVSegmentBinarySearchTreeKey(object):
     """
     def __init__(self, chromosome=None, span_ls=None, min_reciprocal_overlap=0.6, isDataDiscrete=True, **keywords):
         self.chromosome = chromosome
-        
-        """
-        if len(span_ls)==2 and span_ls[0]==span_ls[1]:	#2010-8-2 if start and stop are same position, reduce span_ls.
-            span_ls = [span_ls[0]]
-        """
-        
         self.span_ls = span_ls
         self.min_reciprocal_overlap = min_reciprocal_overlap
         self.isDataDiscrete= isDataDiscrete
