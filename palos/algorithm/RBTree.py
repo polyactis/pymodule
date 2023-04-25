@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: future_fstrings -*-
 """
+2010-1-26 Yu S. Huang polyactis@gmail.com
+adapted from http://newcenturycomputers.net/projects/rbtree.html
+
 Usage:
     
-    ## for genomic or other data with span-like data structures (chromsome, start, stop).
-    # chromosome could be set to the same for other non-genomic span data. 
-    
+    ## An example to search for overlapping genomic regions (i.e. CNVs) using RBTree.
+    # This example is also dependent on https://github.com/polyactis/pymodule/blob/master/palos/polymorphism/CNV.py.
+
     from RBTree import RBDict
-    # 2010-1-26 RBDict is more efficiency than binary_tree.
     rbDict = RBDict(cmpfn=leftWithinRightAlsoEqualCmp)
     for segment in segment_ls:
         chromosome, start, stop = segment[:3]
@@ -16,7 +18,7 @@ Usage:
             min_reciprocal_overlap=min_reciprocal_overlap)
         rbDict[segmentKey] = segment
     
-    ## keys that are easier to be hashed and compared
+    ## An example show some keys that are easier than CNVs to be hashed and compared with.
     rbDict = RBDict()
     key1 = 0.5
     individual1 = "1978001"
@@ -26,12 +28,8 @@ Usage:
         print rbNode.key
         print rbNode.value
 
-
-2010-1-26 Yu S. Huang polyactis@gmail.com
-adapted from http://newcenturycomputers.net/projects/rbtree.html
-
 #
-# This code adapted from C source from
+# This code is adapted from C source code of
 # Thomas Niemann's Sorting and Searching Algorithms: A Cookbook
 #
 # From the title page:
@@ -114,8 +112,7 @@ RBTree.py contains an internal Distutils-based installer; just run:
 """
 #for Python2&3 compatibility
 from __future__ import absolute_import, division, print_function
-from builtins import (bytes, str, open, super, range,
-    zip, round, input, int, pow, object)
+from builtins import (bytes, str, range, zip, int, object)
 from future import standard_library
 standard_library.install_aliases()
 from future.builtins import next
@@ -1178,7 +1175,7 @@ if __name__ == "__main__":
             version=__version__,
             description="Red/Black Tree",
             long_description="Red/Black Balanced Binary Tree plus Dictionary and List",
-            author="Yu Huang, Chris Gonnerman, Graham Breed, Charles Tolman, and Stefan Fruhner",
+            author="Yu S. Huang, Chris Gonnerman, Graham Breed, Charles Tolman, and Stefan Fruhner",
             author_email="polyactis@gmail.com",
             url="https://github.com/polyactis/pymodule",
             py_modules=["RBTree"]
