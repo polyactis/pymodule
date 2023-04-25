@@ -1,6 +1,7 @@
 /*
- * 2013.09.18 Yu Huang, copyright. a red-black tree template, c++
- * still contains bugs, use RedBlackTree.h instead.
+ * 2013.09.18 Yu S. Huang, polyactis@gmail.com, copyright. 
+ * A buggy red-black tree template in C++.
+ * It still contains bugs, use RedBlackTree.h instead.
  *
  * Built on top of asoliman's work which was created on: Feb 1, 2009 https://code.google.com/p/rbtrees/.
  * 	his version contains bugs. i.e. in deleteNode() and sibling_() is not implemented.

@@ -1,9 +1,8 @@
 /*
- * 2013.09.21 Yu Huang, copyright. a red-black tree template, c++
- * based on http://web.mit.edu/~emin/www.old/source_code/cpp_trees/index.html (check c++/trees folder in test repository)
- *
- * asoliman's version https://code.google.com/p/rbtrees/ is too buggy.
- * so try luck on this version.
+ * 2013.09.21 Yu S. Huang, polyactis@gmail.com, Copyright.
+ * A red-black tree template in C++.
+ * Adapted from http://web.mit.edu/~emin/www.old/source_code/cpp_trees/index.html 
+ * Check https://github.com/polyactis/test/tree/master/trunk/c%2B%2B/trees for how to call this code.
  *
  * Examples
  *
