@@ -1,10 +1,11 @@
-- [1. A repo that contains miscellaneous Python programs and a 'palos' module by the yfish group.](#1-a-repo-that-contains-miscellaneous-python-programs-and-a-palos-module-by-the-yfish-group)
+- [1. A repo that contains miscellaneous Python/C++ modules/programs, a standalone Python module 'palos' by the yfish group (can be installed by pip).](#1-a-repo-that-contains-miscellaneous-pythonc-modulesprograms-a-standalone-python-module-palos-by-the-yfish-group-can-be-installed-by-pip)
 - [2. Prerequisites to run Python programs in Pymodule](#2-prerequisites-to-run-python-programs-in-pymodule)
   - [2.1. Palos](#21-palos)
   - [2.2. Optional prerequisites](#22-optional-prerequisites)
   - [2.3. Optional C++ libraries](#23-optional-c-libraries)
 - [3. Example on how to run some pymodule programs](#3-example-on-how-to-run-some-pymodule-programs)
-# 1. A repo that contains miscellaneous Python programs and a 'palos' module by the yfish group.
+
+# 1. A repo that contains miscellaneous Python/C++ modules/programs, a standalone Python module 'palos' by the yfish group (can be installed by pip).
 
 This repository is mixture of a python module 'palos' and other standalone programs developed and used by the yfish group, http://www.yfish.org/.
 
@@ -15,7 +16,7 @@ It contains code related to bioinformatics projects focusing on next-generation 
 [palos/algorithm/](palos/algorithm/) contains pure algorithms, not specific to Bioinformatics.
 
 
-[GADA/](GADA/) contains a fast segmentation algorithm/program. It contains some bugfixes and improvement over the original GADA (2008/2009) by using a Red-Black tree to accelerate its speed.
+[GADA/](GADA/) contains a faster algorithm than the original GADA (2008/2009) by using a Red-Black tree. Now in an independent repo https://github.com/polyactis/eGADA.
 
 [ngs/](ngs/) contains programs analyzing next-generation sequencing data.
 

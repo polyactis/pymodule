@@ -1,3 +1,5 @@
+2022/04/01 Latest code is now in https://github.com/polyactis/eGADA.
+
 To build the code using gcc and makefile, type:
 
     make
