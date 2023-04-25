@@ -14,22 +14,17 @@ Description:
 """
 import sys, os
 import logging
-from sqlalchemy.engine.url import URL
-from sqlalchemy import Unicode, DateTime, String, BigInteger, Integer
-from sqlalchemy import UnicodeText, Text, Boolean, Float, Binary, Enum, Table
+from sqlalchemy import DateTime, String, Integer, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy import UniqueConstraint
 from datetime import datetime
-from sqlalchemy.schema import MetaData
-from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy import UniqueConstraint, create_engine
-from sqlalchemy import and_, or_, not_
+from sqlalchemy import UniqueConstraint
 from sqlalchemy import desc
 from palos.utils import PassingData	
-from palos.polymorphism.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey
+from palos.polymorphism.CNV import CNVSegmentBinarySearchTreeKey
 from palos.algorithm.RBTree import RBDict
 from palos.Genome import GeneModel
 #2010-9-21 although "from Genome import GeneModel" works,
