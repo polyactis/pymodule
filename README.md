@@ -5,6 +5,8 @@
   - [2.3. Optional C++ libraries](#23-optional-c-libraries)
 - [3. Example on how to run some pymodule programs](#3-example-on-how-to-run-some-pymodule-programs)
 
+Yu S. Huang, polyactis@gmail.com
+
 # 1. A repo that contains miscellaneous Python/C++ modules/programs, a standalone Python module 'palos' by the yfish group (can be installed by pip).
 
 This repository is mixture of a python module 'palos' and other standalone programs developed and used by the yfish group, http://www.yfish.org/.
