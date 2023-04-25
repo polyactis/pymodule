@@ -2,7 +2,8 @@
  * 2013.09.21 Yu S. Huang, polyactis@gmail.com, Copyright.
  * A red-black tree template in C++.
  * Adapted from http://web.mit.edu/~emin/www.old/source_code/cpp_trees/index.html 
- * Check https://github.com/polyactis/test/tree/master/trunk/c%2B%2B/trees for how to call this code.
+ * Check https://github.com/polyactis/eGADA or
+ * 	 https://github.com/polyactis/test/tree/master/trunk/c%2B%2B/trees for examples of using this code.
  *
  * Examples
  *
