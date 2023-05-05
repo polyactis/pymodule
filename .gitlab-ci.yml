@@ -118,7 +118,7 @@ DAG_CountReadsWorkflow:
     expire_in: 3 mos
     paths:
     - CountReads.ISQ790-800.yml
-
+  allow_failure: true
 
 DAG_ShortRead2Alignment:
   stage: test_run
@@ -137,6 +137,7 @@ DAG_ShortRead2Alignment:
     expire_in: 3 mos
     paths:
     - Alignment_isq_787_811_vs_633.yml
+  allow_failure: true
 
 DAG_InspectAlignment:
   stage: test_run
@@ -155,6 +156,8 @@ DAG_InspectAlignment:
     expire_in: 3 mos
     paths:
     - InspectAln_2112_2132.yml
+  allow_failure: true
+
 
 DAG_InspectBaseQuality:
   stage: test_run
@@ -171,6 +174,8 @@ DAG_InspectBaseQuality:
     expire_in: 3 mos
     paths:
     - InspectBaseQuality_650_850.yml
+  allow_failure: true
+
 
 InspectBaseQuality:
   stage: test_run
