@@ -8,15 +8,13 @@ Description:
     this program draws multiple box plots of yValue. each boxplot's data has the same xValue (on X-axis).
 """
 
-import sys, os, math
+import sys
 __doc__ = __doc__%(sys.argv[0])
 
 import matplotlib; matplotlib.use("Agg")	#to disable pop-up requirement
-import csv
-import numpy, random, pylab
+import pylab
 from palos import ProcessOptions, PassingData
-from palos.plot import yh_matplotlib
-from AbstractPlot import AbstractPlot
+from palos.plot.AbstractPlot import AbstractPlot
 
 class PlotBoxPlot(AbstractPlot):
     __doc__ = __doc__

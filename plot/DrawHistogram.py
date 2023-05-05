@@ -13,11 +13,10 @@ import sys, os, math
 __doc__ = __doc__%(sys.argv[0])
 
 import matplotlib; matplotlib.use("Agg")	#to disable pop-up requirement
-import csv
 from palos import ProcessOptions
 from palos.plot import yh_matplotlib
-import numpy, random, pylab
-from AbstractPlot import AbstractPlot
+import pylab
+from palos.plot.AbstractPlot import AbstractPlot
 
 class DrawHistogram(AbstractPlot):
     __doc__ = __doc__

@@ -214,10 +214,10 @@ ReduceMatrixByAverageColumnsWithSameKey:
     - pwd
     - ./reducer/ReduceMatrixByAverageColumnsWithSameKey.py -k 3 -v 4
       -o reducer/data/avg_rtn_duration.csv reducer/data/trade_merged.csv.gz
-    - ./plot/AbstractPlot.py -i reducer/data/avg_rtn_duration.csv 
+    - ./palos/plot/AbstractPlot.py -i reducer/data/avg_rtn_duration.csv 
       -o reducer/data/duration_vs_median_rtn.png --xColumnHeader duration
       --whichColumnHeader median_rtn
-    - ./plot/AbstractPlot.py -i reducer/data/avg_rtn_duration.csv 
+    - ./palos/plot/AbstractPlot.py -i reducer/data/avg_rtn_duration.csv 
       -o reducer/data/duration_vs_mean_rtn.png --xColumnHeader duration
       --whichColumnHeader mean_rtn
   artifacts:
@@ -233,7 +233,7 @@ AbstractPlot:
   script:
     - echo "Test AbstractPlot"
     - pwd
-    - ./plot/AbstractPlot.py -i reducer/data/trade_merged.csv.gz 
+    - ./palos/plot/AbstractPlot.py -i reducer/data/trade_merged.csv.gz 
       -o reducer/data/duration_vs_rtn_unit.png --xColumnHeader duration
       --whichColumnHeader rtn_unit --fitType 1 --legendType 1
   artifacts:

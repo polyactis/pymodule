@@ -29,9 +29,7 @@ DrawMatrix is a class to draw matrix values (>=0) in HSL color. values <0 are de
 10-31-05 basic functions to draw images
 """
 import sys,os
-from palos import ProcessOptions, getListOutOfStr, PassingData, figureOutDelimiter
-from palos.polymorphism.SNP import SNPData
-
+from palos import ProcessOptions
 
 def get_char_dimension():
     import Image, ImageDraw

@@ -7,13 +7,12 @@ Examples:
 
 """
 
-import sys, os, math
+import sys, os
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 import matplotlib; matplotlib.use("Agg")	#to disable pop-up requirement
-import csv
-import numpy, random, pylab
+import numpy, pylab
 from palos import ProcessOptions, PassingData
-from AbstractPlot import AbstractPlot
+from palos.plot.AbstractPlot import AbstractPlot
 
 class PlotYAsBar(AbstractPlot):
     __doc__ = __doc__

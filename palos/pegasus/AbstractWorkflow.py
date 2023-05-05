@@ -156,7 +156,7 @@ class AbstractWorkflow(Workflow):
             path=os.path.join(self.pymodulePath, "mapper/extractor/SelectLineBlockFromFile.py"), 
             clusterSizeMultiplier=1)
         self.registerOneExecutable(
-            path=os.path.join(self.pymodulePath, "plot/AbstractPlot.py"),
+            path=os.path.join(self.pymodulePath, "palos/plot/AbstractPlot.py"),
             clusterSizeMultiplier=1)
         self.registerOneExecutable(
             path=os.path.join(self.pymodulePath, "plot/PlotYAsBar.py"),

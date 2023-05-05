@@ -11,11 +11,11 @@ __doc__ = __doc__%(sys.argv[0])
 
 import matplotlib; matplotlib.use("Agg")	#to disable pop-up requirement
 import csv
-import numpy, random, pylab
-from palos import ProcessOptions, getListOutOfStr, PassingData, getColName2IndexFromHeader, figureOutDelimiter
+import pylab
+from palos import ProcessOptions
 from palos import statistics
 from palos.io.AbstractMatrixFileWalker import AbstractMatrixFileWalker
-from AbstractPlot import AbstractPlot
+from palos.plot.AbstractPlot import AbstractPlot
 
 class PlotLD(AbstractPlot):
     __doc__ = __doc__

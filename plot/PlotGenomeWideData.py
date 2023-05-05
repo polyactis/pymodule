@@ -27,18 +27,16 @@ Description:
     2012.12.11 a program that makes generic GWAS-like plots
 """
 
-import sys, os, math
+import sys
 __doc__ = __doc__%(sys.argv[0], sys.argv[0])
 
 import matplotlib; matplotlib.use("Agg")	#to disable pop-up requirement
 
 import copy
 import pylab
-from palos import ProcessOptions, PassingData
-from palos import utils
-from palos.db import GenomeDB
+from palos import ProcessOptions
 from palos.io.AbstractGenomeFileWalker import AbstractGenomeFileWalker
-from AbstractPlot import AbstractPlot
+from palos.plot.AbstractPlot import AbstractPlot
 
 ParentClass = AbstractPlot
 class PlotGenomeWideData(ParentClass, AbstractGenomeFileWalker):
