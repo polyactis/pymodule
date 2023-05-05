@@ -2,7 +2,7 @@
 - [2 Prerequisites to run Python programs in Pymodule](#2-prerequisites-to-run-python-programs-in-pymodule)
   - [2.1 PyPi package: Palos](#21-pypi-package-palos)
   - [2.1.1 Package future-fstrings ensures compatibility between Python2 and Python3](#211-package-future-fstrings-ensures-compatibility-between-python2-and-python3)
-  - [2.1.2 Compile and upload the palos packcage to PyPi](#212-compile-and-upload-the-palos-packcage-to-pypi)
+  - [2.1.2 Build and upload the palos package to PyPi](#212-build-and-upload-the-palos-package-to-pypi)
   - [2.2 Optional prerequisites](#22-optional-prerequisites)
   - [2.3 Optional C++ libraries](#23-optional-c-libraries)
 - [3 Example on how to run some pymodule programs](#3-example-on-how-to-run-some-pymodule-programs)
@@ -25,7 +25,7 @@ It contains code related to bioinformatics projects focusing on next-generation 
 [ngs/](ngs/) contains programs analyzing next-generation sequencing data.
 
 # 2 Prerequisites to run Python programs in Pymodule
-Most programs in pymodule is dependent on the `palos` module, which is housed in [palos/](palos/). Installation of `palos` will trigger installation of other dependencies.
+Most programs in pymodule are dependent on the `palos` module, which is in [palos/](palos/). Installation of `palos` will trigger installation of other dependencies.
 
 ## 2.1 PyPi package: Palos
 Palos supports Python3 primarily, but is ported to Python2 via https://github.com/asottile/future-fstrings because some pymodule programs are Python2-only.
@@ -51,15 +51,15 @@ thing = 'world'
 print(f'hello {thing}')
 ```
 
-## 2.1.2 Compile and upload the palos packcage to PyPi
+## 2.1.2 Build and upload the palos package to PyPi
 
 ```bash
-# Compile the package.
+# Build the package.
 # sdist and bdist_wheel are both commands of setup.py, not package names.
 python3 setup.py sdist bdist_wheel
 
-# Upload the compiled package file (Delete old ones beforehand).
-# Enter your PyPi username (__token__) and password (NOT the pypi.org account username and pwd).
+# (Delete old ones beforehand) and Upload the compiled package file.
+# Enter your PyPi username (__token__) and password (!= the pypi.org account password).
 twine upload dist/*
 
 ```
