@@ -57,6 +57,13 @@ RegisterDB_h:
     - pwd
     - ./db/import/RegisterAndMoveSplitSequenceFiles.py -h
 
+EstimateOutliersIn2DData_h:
+  stage: output_help
+  script:
+    - echo "Testing if EstimateOutliersIn2DData.py can print help."
+    - pwd
+    - ./statistics/EstimateOutliersIn2DData.py -h
+
 Py3_Red-Black Tree:
   stage: test_run
   script:
