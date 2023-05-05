@@ -21,7 +21,6 @@ import pylab
 import logging
 import statsmodels.api as sm
 from palos import ProcessOptions, PassingData
-from palos import utils
 from palos.plot import yh_matplotlib
 from palos.io.AbstractMatrixFileWalker import AbstractMatrixFileWalker
 
