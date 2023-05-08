@@ -85,7 +85,7 @@ Py3_Red-Black Tree:
 #     - pwd
 #     - python2 ./palos/algorithm/RBTree.py
 
-CNV:
+Compare_efficiency_list_vs_rbTree:
   stage: test_run
   script:
     - echo "Compare the query efficiency between two different databases of identical content... "
