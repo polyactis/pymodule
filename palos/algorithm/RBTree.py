@@ -112,10 +112,9 @@ RBTree.py contains an internal Distutils-based installer; just run:
 """
 #for Python2&3 compatibility
 from __future__ import absolute_import, division, print_function
-from builtins import (bytes, str, range, zip, int, object)
+from builtins import (str, range, object)
 from future import standard_library
 standard_library.install_aliases()
-from future.builtins import next
 from future.builtins import object
 
 __version__ = "1.6"
@@ -219,11 +218,11 @@ class RBTree(object):
         self.elements = 0
         
         #SF: If self.unique is True, all elements in the tree have 
-            #SF  to be unique and an exception is raised for multiple 
-            #SF insertions of a node
-            #SF If self.unique is set to False, nodes can be added multiple 
-            #SF times. There is still only one node, but all insertions are
-            #SF counted in the variable node.count
+        #  to be unique and an exception is raised for multiple 
+        #  insertions of a node.
+        # If self.unique is set to False, nodes can be added multiple 
+        #  times. There is still only one node, but all insertions are
+        #  counted in the variable node.count
         self.unique = unique
         # changing the comparison function for an existing tree is dangerous!
         self.__cmp = cmpfn
