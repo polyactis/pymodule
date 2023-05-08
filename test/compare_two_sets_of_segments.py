@@ -5,6 +5,13 @@ A program that compares the query efficiency between two different databases of 
     identical content.
     1) One database is constructed using a list.
     2) The other database is a red-black tree/dictionary.
+
+Prerequisites:
+    1. pip3 install palos tqdm
+
+Example:
+    ./compare_two_sets_of_segments.py -q HCC1187_10X_0_3_chr1.segments.M10.T5.tsv -d HCC1187_10X_0_3_chr1.segments.M20.T10.tsv
+
 """
 
 import os, sys
