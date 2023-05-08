@@ -64,6 +64,13 @@ EstimateOutliersIn2DData_h:
     - pwd
     - ./statistics/EstimateOutliersIn2DData.py -h
 
+CNV_h:
+  stage: output_help
+  script:
+    - echo "palos/polymorphism/CNV.py self-run ... "
+    - pwd
+    - python3 ./palos/polymorphism/CNV.py
+
 Py3_Red-Black Tree:
   stage: test_run
   script:
@@ -81,9 +88,10 @@ Py3_Red-Black Tree:
 CNV:
   stage: test_run
   script:
-    - echo "Testing RB Dict and CNVs... "
+    - echo "Compare the query efficiency between two different databases of identical content... "
     - pwd
-    - python3 ./palos/polymorphism/CNV.py
+    - cd test
+    - ./compare_two_sets_of_segments.py  -q HCC1187_10X_0_3_chr1.segments.M10.T5.tsv -d HCC1187_10X_0_3_chr1.segments.M20.T10.tsv
 
 
 GADA:
