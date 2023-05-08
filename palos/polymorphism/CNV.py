@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-2013.1.27 coordinates are all 1-based and inclusive (??), start=1,stop=100 means [1,100]?? 
+Coordinates in this module are assumed to be 1-based (and inclusive)
+    i.e. start=1,stop=100 means [1,100].
 2009-10-31
     module for CNV (copy-number-variation)-related functions & classes
 """
@@ -8,13 +9,12 @@
 import os, sys
 import fileinput
 import numpy
-from palos.ProcessOptions import ProcessOptions
 from palos.polymorphism.SNP import GenomeWideResult, DataObject
-from palos.utils import getColName2IndexFromHeader, dict_map, importNumericArray, figureOutDelimiter, PassingData
+from palos.utils import getColName2IndexFromHeader, figureOutDelimiter, PassingData
 
 def get_overlap_ratio(span1_ls=None, span2_ls=None, isDataDiscrete=True):
     """
-    2013.06.25 added argument isDataDiscrete
+    isDataDiscrete: boolean
         True, numbers in span are discrete, like 1,2,3 (i.e. chromosomal position). then length of [1,2] is 2 because each number
             occupies 1 on axis.
         False, numbers in span are continuous, then length of [1,2] is 1 because each number occupies infinitesimal amount on axis.
@@ -52,11 +52,11 @@ def get_overlap_ratio(span1_ls=None, span2_ls=None, isDataDiscrete=True):
         overlap_stop_pos = None
     if isDataDiscrete:
         # accomodates 6 scenarios
-        overlap_length = max(0, segment_stop_pos - qc_start+1) - max(0, segment_stop_pos - qc_stop) - \
-            max(0, segment_start_pos - qc_start)
+        overlap_length = max(0, segment_stop_pos - qc_start+1) - \
+            max(0, segment_stop_pos - qc_stop) - max(0, segment_start_pos - qc_start)
     else:
-        overlap_length = max(0, segment_stop_pos - qc_start) - max(0, segment_stop_pos - qc_stop) - \
-            max(0, segment_start_pos - qc_start)
+        overlap_length = max(0, segment_stop_pos - qc_start) - \
+            max(0, segment_stop_pos - qc_stop) - max(0, segment_start_pos - qc_start)
     overlap_length = float(overlap_length)
     if segment_stop_pos == segment_start_pos:	#2010-8-2 bugfix
         if overlap_length>0:
@@ -66,15 +66,15 @@ def get_overlap_ratio(span1_ls=None, span2_ls=None, isDataDiscrete=True):
             overlapFraction1 = 0.0
     else:
         if isDataDiscrete:
-            segmentLength = segment_stop_pos-segment_start_pos+1 #2013.1.27 add +1?
+            segmentLength = segment_stop_pos-segment_start_pos+1    # add +1?
         else:
-            segmentLength = segment_stop_pos-segment_start_pos	#2013.06.25
+            segmentLength = segment_stop_pos-segment_start_pos
         overlapFraction1 = overlap_length/segmentLength
     if qc_stop == qc_start:
         if overlap_length>0:
             overlapFraction2 = 1.0
         else:
-            overlap_length = 0#2012.5.17 bugfix. can't be negative
+            overlap_length = 0  #can't be negative
             overlapFraction2 = 0.0
     else:
         if isDataDiscrete:
@@ -84,18 +84,20 @@ def get_overlap_ratio(span1_ls=None, span2_ls=None, isDataDiscrete=True):
         overlapFraction2 = overlap_length/qcLength
     overlapFraction = float(overlap_length)/total_span	#2013.1.27
     return PassingData(overlapFraction1=overlapFraction1, overlapFraction2=overlapFraction2, \
-                    overlap_length=overlap_length, \
-                    overlapFraction=overlapFraction,\
-                    overlap_start_pos=overlap_start_pos, overlap_stop_pos=overlap_stop_pos, \
-                    total_start_pos=total_start_pos, total_stop_pos=total_stop_pos,\
-                    total_span = total_span)
+            overlap_length=overlap_length, \
+            overlapFraction=overlapFraction,\
+            overlap_start_pos=overlap_start_pos, overlap_stop_pos=overlap_stop_pos, \
+            total_start_pos=total_start_pos, total_stop_pos=total_stop_pos,\
+            total_span = total_span)
 
-def is_reciprocal_overlap(span1_ls=None, span2_ls=None, min_reciprocal_overlap=0.6, isDataDiscrete=True):
+def is_reciprocal_overlap(span1_ls=None, span2_ls=None, min_reciprocal_overlap=0.6, \
+                          isDataDiscrete=True):
     """
     2009-12-12
         return True if both overlap ratios are above the min_reciprocal_overlap
     """
-    overlapData = get_overlap_ratio(span1_ls=span1_ls, span2_ls=span2_ls, isDataDiscrete=isDataDiscrete)
+    overlapData = get_overlap_ratio(span1_ls=span1_ls, span2_ls=span2_ls, \
+                                    isDataDiscrete=isDataDiscrete)
     overlapFraction1 = overlapData.overlapFraction1
     overlapFraction2 = overlapData.overlapFraction2
     if overlapFraction1>=min_reciprocal_overlap and overlapFraction2>=min_reciprocal_overlap:
@@ -116,7 +118,8 @@ class CNVSegmentBinarySearchTreeKey(object):
     2009-12-12
         Init.
     """
-    def __init__(self, chromosome=None, span_ls=None, min_reciprocal_overlap=0.6, isDataDiscrete=True, **keywords):
+    def __init__(self, chromosome=None, span_ls=None, min_reciprocal_overlap=0.6, \
+            isDataDiscrete=True, **keywords):
         self.chromosome = chromosome
         self.span_ls = span_ls
         self.min_reciprocal_overlap = min_reciprocal_overlap
@@ -125,7 +128,7 @@ class CNVSegmentBinarySearchTreeKey(object):
         self.start = self.span_ls[0]
         if len(self.span_ls)>1:
             self.stop = self.span_ls[1]
-            if self.start is not None and self.stop is not None:	#2012.12.31 bugfix
+            if self.start is not None and self.stop is not None:
                 self.span = abs(self.stop-self.start)
             else:
                 self.span = 0
@@ -134,76 +137,15 @@ class CNVSegmentBinarySearchTreeKey(object):
             self.span = 0
         if self.stop<self.start:
             sys.stderr.write("Warning: not supposed to happen. stop %s is smaller than start %s.\n"%(self.stop, self.start))
-        for key, value in keywords.items():	#2010-8-2
+        for key, value in keywords.items():
             setattr(self, key, value)
     
-    def __lt__(self, other):
-        """
-        2009-12-12
-            whether self is less than other, in chromosomal order
-        """
-        if self.chromosome==other.chromosome:
-            if len(self.span_ls)==1:
-                if len(other.span_ls)==1:
-                    return self.span_ls[0]<other.span_ls[0]
-                elif len(other.span_ls)>1:
-                    return self.span_ls[0]<other.span_ls[0]
-                else:
-                    return None
-            elif len(self.span_ls)>1:
-                if len(other.span_ls)==1:
-                    return self.span_ls[0]<other.span_ls[0]
-                elif len(other.span_ls)>1:
-                    overlapData = get_overlap_ratio(self.span_ls, other.span_ls, 
-                                                    isDataDiscrete=self.isDataDiscrete)
-                    overlapFraction1 = overlapData.overlapFraction1
-                    overlapFraction2 = overlapData.overlapFraction2
-                    min_overlap = min(overlapFraction1, overlapFraction2)
-                    if min_overlap>=self.min_reciprocal_overlap:	#should be equal,
-                        return False
-                    #if overlapFraction1>0 and overlapFraction1<=1 and  overlapFraction2>0 and overlapFraction2<=1:	# there's overlap between two segments 
-                    #	return False
-                    else:
-                        return self.span_ls[0]<other.span_ls[0]	# whether the stop of this segment is ahead of the start of other
-                else:
-                    return None
-        else:
-            return self.chromosome<other.chromosome
-    
-    def __le__(self, other):
-        """
-        2009-12-12
-            whether self is less than or equal to other, in chromosomal order
-        """
-        if self.chromosome==other.chromosome:
-            if len(self.span_ls)==1:	# self is a point
-                if len(other.span_ls)==1:
-                    return self.span_ls[0]<=other.span_ls[0]
-                elif len(other.span_ls)>1:
-                    return self.span_ls[0]<=other.span_ls[0]
-                else:
-                    return None
-            elif len(self.span_ls)>1:
-                if len(other.span_ls)==1:
-                    return self.span_ls[0]<=other.span_ls[0]
-                elif len(other.span_ls)>1:
-                    is_overlap = is_reciprocal_overlap(self.span_ls, other.span_ls, \
-                                min_reciprocal_overlap=self.min_reciprocal_overlap,\
-                                isDataDiscrete=self.isDataDiscrete)
-                    if is_overlap:
-                        return True
-                    else:
-                        return self.span_ls[0]<=other.span_ls[0]	# whether the stop of this segment is ahead of the start of other
-                else:
-                    return None
-        else:
-            return self.chromosome<other.chromosome
-        
-        
     def __eq__(self, other):
         """
+        equal: self == other
         2010-2-11
-            fix a bug when len(self.span_ls)>1 and len(other.span_ls)==1. it was completely wrong before.
+            fix a bug when len(self.span_ls)>1 and len(other.span_ls)==1.
+            it was completely wrong before.
         2009-12-12
         """
         if self.chromosome==other.chromosome:
@@ -220,33 +162,24 @@ class CNVSegmentBinarySearchTreeKey(object):
                 elif len(other.span_ls)>1:
                     # need to calculate min_reciprocal_overlap
                     return is_reciprocal_overlap(self.span_ls, other.span_ls, \
-                                    min_reciprocal_overlap=self.min_reciprocal_overlap,\
-                                    isDataDiscrete=self.isDataDiscrete)
+                                min_reciprocal_overlap=self.min_reciprocal_overlap,\
+                                isDataDiscrete=self.isDataDiscrete)
                     #return self.span_ls[1]<other.span_ls[0]	# whether the stop of this segment is ahead of the start of other
                 else:
                     return None
         else:
             return False
-                
-    def __ne__(self, other):
-        """
-        2009-12-12
-            whether self is not equal to other
-        """
-        return not self.__eq__(other)
-        
+    
     def __ge__(self, other):
         """
         2009-12-12
+        greater than or equal: self >= other.
         """
         if self.chromosome==other.chromosome and len(self.span_ls)>1 and len(other.span_ls)>1:
-            overlapData = get_overlap_ratio(self.span_ls, other.span_ls, isDataDiscrete=self.isDataDiscrete)
-            overlapFraction1 = overlapData.overlapFraction1
-            overlapFraction2 = overlapData.overlapFraction2
-            if overlapFraction1>=min_reciprocal_overlap and overlapFraction2>=min_reciprocal_overlap:
+            if is_reciprocal_overlap(self.span_ls, other.span_ls, \
+                    min_reciprocal_overlap=self.min_reciprocal_overlap,\
+                    isDataDiscrete=self.isDataDiscrete):
                 return True
-            #elif overlapFraction1>0 and overlapFraction1<=1 and  overlapFraction2>0 and overlapFraction2<=1:	# there's overlap between two segments 
-            #	return False
             else:
                 return not self.__lt__(other)
         else:
@@ -255,21 +188,94 @@ class CNVSegmentBinarySearchTreeKey(object):
     def __gt__(self, other):
         """
         2009-12-12
+        greater than: self > other.
         """
         if self.chromosome==other.chromosome and len(self.span_ls)>1 and len(other.span_ls)>1:
-            overlapData = get_overlap_ratio(self.span_ls, other.span_ls, isDataDiscrete=self.isDataDiscrete)
-            overlapFraction1 = overlapData.overlapFraction1
-            overlapFraction2 = overlapData.overlapFraction2
-            min_overlap = min(overlapFraction1, overlapFraction2)
-            if min_overlap>=self.min_reciprocal_overlap:	#should be equal,
+            if is_reciprocal_overlap(self.span_ls, other.span_ls, \
+                    min_reciprocal_overlap=self.min_reciprocal_overlap,\
+                    isDataDiscrete=self.isDataDiscrete):
+                ## too much overlap. The two objects are equal (not self > other). 
                 return False
-            #if overlapFraction1>0 and overlapFraction1<=1 and  overlapFraction2>0 and overlapFraction2<=1:	# there's overlap between two segments 
-            #	return False
             else:
                 return not self.__le__(other)
         else:
             return not self.__le__(other)
 
+    def __hash__(self):
+        """
+        make it hashable
+        """
+        return hash((self.chromosome, tuple(self.span_ls)))
+    
+
+    def __lt__(self, other):
+        """
+        less than: self < other.
+        2009-12-12
+        """
+        if self.chromosome==other.chromosome:
+            if len(self.span_ls)==1:
+                if len(other.span_ls)==1:
+                    return self.span_ls[0]<other.span_ls[0]
+                elif len(other.span_ls)>1:
+                    return self.span_ls[0]<other.span_ls[0]
+                else:
+                    return None
+            elif len(self.span_ls)>1:
+                if len(other.span_ls)==1:
+                    return self.span_ls[0]<other.span_ls[0]
+                elif len(other.span_ls)>1:
+                    if is_reciprocal_overlap(self.span_ls, other.span_ls, \
+                        min_reciprocal_overlap=self.min_reciprocal_overlap,\
+                        isDataDiscrete=self.isDataDiscrete):
+                        ## too much overlap. The two objects are equal (not self < other). 
+                        return False
+                    #if overlapFraction1>0 and overlapFraction1<=1 and  overlapFraction2>0 and overlapFraction2<=1:	# there's overlap between two segments 
+                    #	return False
+                    else:
+                        # whether the stop of this segment is ahead of the start of other
+                        return self.span_ls[0]<other.span_ls[0]
+                else:
+                    return None
+        else:
+            return self.chromosome<other.chromosome
+    
+    def __le__(self, other):
+        """
+        less than or equal: self <= other.
+        2009-12-12
+        """
+        if self.chromosome==other.chromosome:
+            if len(self.span_ls)==1:	# self is a point
+                if len(other.span_ls)==1:
+                    return self.span_ls[0]<=other.span_ls[0]
+                elif len(other.span_ls)>1:
+                    return self.span_ls[0]<=other.span_ls[0]
+                else:
+                    return None
+            elif len(self.span_ls)>1:
+                if len(other.span_ls)==1:
+                    return self.span_ls[0]<=other.span_ls[0]
+                elif len(other.span_ls)>1:
+                    if is_reciprocal_overlap(self.span_ls, other.span_ls, \
+                            min_reciprocal_overlap=self.min_reciprocal_overlap,\
+                            isDataDiscrete=self.isDataDiscrete):
+                        return True
+                    else:
+                        # whether the stop of this segment is ahead of the start of other
+                        return self.span_ls[0]<=other.span_ls[0]
+                else:
+                    return None
+        else:
+            return self.chromosome < other.chromosome
+    
+    def __ne__(self, other):
+        """
+        not equal: self != other.
+        2009-12-12
+        """
+        return not self.__eq__(other)
+    
     def __str__(self):
         """
         2009-12-13
@@ -314,10 +320,8 @@ class SegmentTreeNodeKey(CNVSegmentBinarySearchTreeKey):
 
 class CNVCompareBySmallOverlapRatio(object):
     """
-    2011-3-16
-        renamed from CNVCompare to CNVCompareByMinRecipOverlapRatio
+    A class to compare two CNVSegmentBinarySearchTreeKey based on min_reciprocal_overlap
     2010-8-16
-        a class to compare two CNVSegmentBinarySearchTreeKey according to any arbitrary min_reciprocal_overlap
     """
     def __init__(self, min_reciprocal_overlap = 0.4, isDataDiscrete=True):
         """
@@ -345,13 +349,14 @@ class CNVCompareBySmallOverlapRatio(object):
                 else:
                     return None
             elif len(key1.span_ls)>1:
-                if len(key2.span_ls)==1:	# self is a segment. other is a point position.
+                if len(key2.span_ls)==1:
+                    # self is a segment. other is a point position.
                     return key1.span_ls[0]<=key2.span_ls[0] and key1.span_ls[1]>=key2.span_ls[0]	# if self includes the point position, yes it's equal
                 elif len(key2.span_ls)>1:
                     # need to calculate min_reciprocal_overlap
                     return is_reciprocal_overlap(key1.span_ls, key2.span_ls, \
-                                                min_reciprocal_overlap=min_reciprocal_overlap,\
-                                                isDataDiscrete=isDataDiscrete)
+                                min_reciprocal_overlap=min_reciprocal_overlap,\
+                                isDataDiscrete=isDataDiscrete)
                 else:
                     return None		#2010-8-16 shouldn't be here
         else:
@@ -373,17 +378,13 @@ class CNVCompareBySmallOverlapRatio(object):
                 if len(key2.span_ls)==1:
                     return key1.span_ls[0]<key2.span_ls[0]
                 elif len(key2.span_ls)>1:
-                    overlapData = get_overlap_ratio(key1.span_ls, key2.span_ls, isDataDiscrete=isDataDiscrete)
-                    overlapFraction1 = overlapData.overlapFraction1
-                    overlapFraction2 = overlapData.overlapFraction2
-                    recip_overlap = min(overlapFraction1, overlapFraction2)
-                    if recip_overlap>=min_reciprocal_overlap:	#should be equal,
+                    if is_reciprocal_overlap(key1.span_ls, key2.span_ls, \
+                                min_reciprocal_overlap=min_reciprocal_overlap,\
+                                isDataDiscrete=isDataDiscrete): 
                         return False
-                    
-                    #if overlapFraction1>0 and overlapFraction1<=1 and  overlapFraction2>0 and overlapFraction2<=1:	# there's overlap between two segments 
-                    #	return False
                     else:
-                        return key1.span_ls[0]<key2.span_ls[0]	# whether the start of key1 is ahead of the start of key2
+                        # whether the start of key1 is ahead of the start of key2
+                        return key1.span_ls[0]<key2.span_ls[0]
                 else:
                     return None	#shouldn't be here
         else:
@@ -397,14 +398,14 @@ class CNVCompareBySmallOverlapRatio(object):
         """
         pass
 
-#2011-3-24
+#2011-3-24 make an alias
 CNVCompare = CNVCompareBySmallOverlapRatio
 
 
 class CNVCompareByOverlapLen(object):
     """
     2011-3-16
-        a class to compare two CNVSegmentBinarySearchTreeKey according to any arbitrary min_overlap_len
+    A class to compare two CNVSegmentBinarySearchTreeKey according to any arbitrary min_overlap_len.
     """
     def __init__(self, min_overlap_len = 1):
         """
@@ -435,7 +436,8 @@ class CNVCompareByOverlapLen(object):
                     return key1.span_ls[0]<=key2.span_ls[0] and key1.span_ls[1]>=key2.span_ls[0]	# if self includes the point position, yes it's equal
                 elif len(key2.span_ls)>1:
                     # need to calculate min_reciprocal_overlap
-                    overlapData = get_overlap_ratio(key1.span_ls, key2.span_ls, isDataDiscrete=isDataDiscrete)
+                    overlapData = get_overlap_ratio(key1.span_ls, key2.span_ls, \
+                                                    isDataDiscrete=isDataDiscrete)
                     overlapFraction1 = overlapData.overlapFraction1
                     overlapFraction2 = overlapData.overlapFraction2
                     overlap_length = overlapData.overlap_length
@@ -467,14 +469,16 @@ class CNVCompareByOverlapLen(object):
                 if len(key2.span_ls)==1:
                     return key1.span_ls[0]<key2.span_ls[0]
                 elif len(key2.span_ls)>1:
-                    overlapData = get_overlap_ratio(key1.span_ls, key2.span_ls, isDataDiscrete=isDataDiscrete)
+                    overlapData = get_overlap_ratio(key1.span_ls, key2.span_ls, \
+                                                    isDataDiscrete=isDataDiscrete)
                     overlapFraction1 = overlapData.overlapFraction1
                     overlapFraction2 = overlapData.overlapFraction2
                     overlap_length = overlapData.overlap_length
                     if overlap_length>=min_overlap_len:	#should be equal,
                         return False
                     else:
-                        return key1.span_ls[0]<key2.span_ls[0]	# whether the start of key1 is ahead of the start of key2
+                        # whether the start of key1 is ahead of the start of key2
+                        return key1.span_ls[0]<key2.span_ls[0]
                 else:
                     return None	#shouldn't be here
         else:
@@ -491,10 +495,9 @@ class CNVCompareByOverlapLen(object):
 class CNVCompareByBigOverlapRatio(object):
     """
     2011-3-16
-        similar to CNVCompareBySmallOverlapRatio, but use max(overlapFraction1, overlapFraction2) to compare aginst min_overlap_len, \
-            rather than min(overlapFraction1, overlapFraction2)
-    2010-8-16
-        a class to compare two CNVSegmentBinarySearchTreeKey according to any arbitrary min_reciprocal_overlap
+    Similar to CNVCompareBySmallOverlapRatio, but use max(overlapFraction1, overlapFraction2) \
+        to compare against min_overlap_len, \
+        rather than min(overlapFraction1, overlapFraction2)
     """
     def __init__(self, min_reciprocal_overlap = 0.4):
         """
@@ -578,8 +581,8 @@ class CNVCompareByBigOverlapRatio(object):
 def leftWithinRightAlsoEqual(key1, key2, isDataDiscrete=True):
     """
     2010-1-28
-        Besides CNVSegmentBinarySearchTreeKey.__eq__(), if key1 is embedded in key2, it's also regarded as equal.
-        this function is solely used in leftWithinRightAlsoEqualCmp().
+    Besides key1.__eq__(key2), if key1 is embedded in key2, it's also regarded as equal.
+    This function is solely used in leftWithinRightAlsoEqualCmp().
     """
     equalResult = key1.__eq__(key2)
     if equalResult:
@@ -589,7 +592,7 @@ def leftWithinRightAlsoEqual(key1, key2, isDataDiscrete=True):
             overlapData = get_overlap_ratio(key1.span_ls, key2.span_ls, isDataDiscrete=isDataDiscrete)
             overlapFraction1 = overlapData.overlapFraction1
             overlapFraction2 = overlapData.overlapFraction2
-            if overlapFraction1==1.:	# 2010-1-28 added the overlapFraction2==1.
+            if overlapFraction1==1.:
                 return True
             else:
                 return equalResult
@@ -611,7 +614,6 @@ def rightWithinLeftAlsoEqual(key1, key2, isDataDiscrete=True):
             overlapFraction1 = overlapData.overlapFraction1
             overlapFraction2 = overlapData.overlapFraction2
             overlap_length = overlapData.overlap_length
-                    
             if overlapFraction2==1.:	# 2010-1-28 added the overlapFraction2==1.
                 return True
             else:
@@ -622,33 +624,34 @@ def rightWithinLeftAlsoEqual(key1, key2, isDataDiscrete=True):
 def leftWithinRightAlsoEqualCmp(key1, key2):
     """
     2010-1-28
-        a cmp function for RBDict to compare CNVSegmentBinarySearchTreeKey or SegmentTreeNodeKey.
-        
-        If key1 is embedded in key2, it's also regarded as equal.
-        
-        similar purpose as the class SegmentTreeNodeKey()
-        
-        add this to RBDict as in "tree = RBDict(cmpfn=leftWithinRightAlsoEqualCmp)".
-            key1 is the new entry or query. key2 is the one that is already in RBDict. 
+    A cmp function for RBDict to compare CNVSegmentBinarySearchTreeKey or SegmentTreeNodeKey.
+    key1 is the new entry or query. key2 is the one that is already in RBDict. 
+    
+    If key1 is embedded in key2, it's also regarded as equal.
+    
+    similar purpose as the class SegmentTreeNodeKey()
+
+    Example:
+        Add this to RBDict as in "rb_dict = RBDict(cmpfn=leftWithinRightAlsoEqualCmp)".
     """
     if leftWithinRightAlsoEqual(key1, key2):
         return 0
     elif key1 > key2:
         return 1
-    else:  #key1 < key2
+    else: #key1 < key2
         return -1
 
 def rightWithinLeftAlsoEqualCmp(key1, key2):
     """
     2010-1-28
-        a cmp function for RBDict to compare CNVSegmentBinarySearchTreeKey or SegmentTreeNodeKey.
-        If key2 is embedded in key1, it's also regarded as equal.
-        
-        similar purpose as the class SegmentTreeNodeKey().
-        
-        add this to RBDict as in "tree = RBDict(cmpfn=rightWithinLeftAlsoEqualCmp)".
-            key1 is the new entry or query. key2 is the one that is already in RBDict.
-         
+    A cmp function for RBDict to compare CNVSegmentBinarySearchTreeKey or SegmentTreeNodeKey.
+    key1 is the new entry or query. key2 is the one that is already in RBDict.
+    If key2 is embedded in key1, it's also regarded as equal.
+    
+    similar purpose as the class SegmentTreeNodeKey().
+    
+    Use this with RBDict: "rb_dict = RBDict(cmpfn=rightWithinLeftAlsoEqualCmp)".
+    
     
     """
     if rightWithinLeftAlsoEqual(key1, key2):
@@ -658,8 +661,9 @@ def rightWithinLeftAlsoEqualCmp(key1, key2):
     else:  #key1 < key2
         return -1
 
-def getCNVDataFromFileInGWA(input_fname_ls, array_id, max_amp=-0.33, min_amp=-0.33, min_size=50, min_no_of_probes=None, \
-                        report=False, chr=None, start=None, stop=None, filter_gada_by_cutoff=True):
+def getCNVDataFromFileInGWA(input_fname_ls, array_id, max_amp=-0.33, min_amp=-0.33, \
+        min_size=50, min_no_of_probes=None, \
+        report=False, chr=None, start=None, stop=None, filter_gada_by_cutoff=True):
     """
     2010-6-5
         data_obj.genome_wide_result_name = gwr_name
@@ -670,7 +674,7 @@ def getCNVDataFromFileInGWA(input_fname_ls, array_id, max_amp=-0.33, min_amp=-0.
         get deletion (below max_amp) or duplication (above min_amp) from files (output by RunGADA.py)
     """
     sys.stderr.write("Getting CNV calls for array %s, min_size %s, min_no_of_probes %s from %s ..."%\
-                    (array_id, min_size, min_no_of_probes, repr(input_fname_ls)))
+        (array_id, min_size, min_no_of_probes, repr(input_fname_ls)))
     
     gwr_name = "(a-id %s)"%(array_id)
     gwr = GenomeWideResult(name=gwr_name)
@@ -737,7 +741,7 @@ def getCNVDataFromFileInGWA(input_fname_ls, array_id, max_amp=-0.33, min_amp=-0.
                     position=segment_start_pos, stop_position=segment_stop_pos, \
                     value=amplitude, color=color)
                 data_obj.comment = 'ecotype-id %s, start probe-id %s, end probe-id %s, no of probes %s, size=%s'%\
-                            (ecotype_id, start_probe_id, end_probe_id, no_of_probes, segment_length)
+                    (ecotype_id, start_probe_id, end_probe_id, no_of_probes, segment_length)
                 data_obj.genome_wide_result_name = gwr_name
                 data_obj.genome_wide_result_id = genome_wide_result_id
                 gwr.add_one_data_obj(data_obj)
@@ -757,14 +761,13 @@ def getCNVDataFromFileInGWA(input_fname_ls, array_id, max_amp=-0.33, min_amp=-0.
 
 def mergeTwoSegments(segment, next_segment):
     """
-    2010-7-28
-        copied from CNV.mergeTwoCNVQCSegments() in variation/src/misc.py
-        
     2010-7-19
-        called by getCNVQCDataFromDB()
-        
-        segment = (row.chromosome, row.start, row.stop, \
-                row.size_affected, row.no_of_probes_covered, row.copy_number, row.id, row.ecotype_id)
+    called by getCNVQCDataFromDB()
+    
+    segment = (row.chromosome, row.start, row.stop, row.size_affected, \
+        row.no_of_probes_covered, row.copy_number, row.id, row.ecotype_id)
+    
+    copied from CNV.mergeTwoCNVQCSegments() in variation/src/misc.py
     """
     new_segment_stop = max(segment[2], next_segment[2])
     
@@ -845,8 +848,8 @@ def turnSegmentGWRIntoRBDict(gwr, extend_dist=20000, min_reciprocal_overlap=0.6,
     return rbDict
 
 def getProbeIntensityDataFromProbeXArray(input_fname, data_type=numpy.float32, \
-                        nonIntensityColumnLabelSet = set(['probes_id', 'chromosome', 'position']),\
-                        array_id=None):
+        nonIntensityColumnLabelSet = set(['probes_id', 'chromosome', 'position']),\
+        array_id=None):
     """
     2010-7-28
         bug-fix:
@@ -917,6 +920,7 @@ def getProbeIntensityDataFromProbeXArray(input_fname, data_type=numpy.float32, \
 def getProbeIntensityDataFromArrayXProbe(input_fname, data_type=numpy.float32, \
     nonIntensityColumnLabelSet = None, array_id=None, no_of_arrays=None):
     """
+    Similar to getProbeIntensityDataFromProbeXArray, but the input is in Probe X Array. 
     2010-7-28
         add argument no_of_arrays to skip the "wc -l" command
         bug-fix:
@@ -924,7 +928,6 @@ def getProbeIntensityDataFromArrayXProbe(input_fname, data_type=numpy.float32, \
     2010-6-28
         add argument array_id to get intensity only for that array.
     2010-5-25
-        similar to getProbeIntensityDataFromProbeXArray, but the input is in Probe X Array. 
     """
     sys.stderr.write("Getting Array X Probe intensity data from %s for array %s ...\n"%(input_fname, array_id))
     import csv, subprocess
@@ -990,10 +993,10 @@ def getProbeIntensityData(input_fname, data_type=numpy.float32, \
     nonIntensityColumnLabelSet = set(['probes_id', 'chromosome', 'position']),\
     array_id = None):
     """
-    add argument array_id to get intensity only for that array.
-    use header[0] to guess the orientation, and 
-        call getProbeIntensityDataFromArrayXProbe() or getProbeIntensityDataFromProbeXArray()
+    1. use header[0] to guess the orientation;
+    2. call getProbeIntensityDataFromArrayXProbe() or getProbeIntensityDataFromProbeXArray()
     2010-5-23
+        add argument array_id to get intensity only for that array.
         add argument nonIntensityColumnLabelSet to find out which columns harbor intensity data.
         Non-intensity columns (probes_id, chromosome, position) are not bound to any particular column.
     2010-3-18
@@ -1022,7 +1025,7 @@ def getProbeIntensityData(input_fname, data_type=numpy.float32, \
 class TilingProbeIntensityData(object):
     """
     2010-7-28
-        a data structure which makes accessing the intensity data of any array from the big file easy and memory-efficient.
+    a data structure which makes accessing the intensity data of any array from the big file easy and memory-efficient.
         
     """
     def __init__(self, input_fname = None, min_reciprocal_overlap=None):
@@ -1055,7 +1058,8 @@ class TilingProbeIntensityData(object):
                 self.chr_pos_ls = chr_pos_ls
             
             self.array_id2index[array_id] = len(self.array_id2index)
-            self.intensity_matrix.append(data_matrix[:,0])		# data_matrix is in probe X array format.
+            # data_matrix is in probe X array format.
+            self.intensity_matrix.append(data_matrix[:,0])
             
         from SNP import GenomeWideResult, DataObject
         gwr_name = 'array %s probe intensity'%array_id
@@ -1077,8 +1081,8 @@ class TilingProbeIntensityData(object):
             chr_pos = self.chr_pos_ls[i]
             chr, pos = map(int, chr_pos)
             cnvSegmentKey = CNVSegmentBinarySearchTreeKey(chromosome=chr, span_ls=[pos],\
-                                                        min_reciprocal_overlap=self.min_reciprocal_overlap,\
-                                                        isDataDiscrete=isDataDiscrete)
+                    min_reciprocal_overlap=self.min_reciprocal_overlap,\
+                    isDataDiscrete=isDataDiscrete)
             if rbDict is None or cnvSegmentKey in rbDict:
                 probeIntensity = self.intensity_matrix[array_index][i]
                 data_obj = DataObject(chromosome=chr, position=pos, value=probeIntensity)
@@ -1178,7 +1182,8 @@ def get_chr2start_stop_index(chr_pos_ls):
             chr2start_stop_index[old_chr].append(i-1)
         
         old_chr = chromosome
-    chr2start_stop_index[old_chr].append(i)	#append the the stop index to the last chromosome
+    #append the the stop index to the last chromosome
+    chr2start_stop_index[old_chr].append(i)
     sys.stderr.write("Done.\n")
     return chr2start_stop_index
 
@@ -1240,50 +1245,50 @@ def findCorrespondenceBetweenTwoCNVRBDict(rbDict1=None, rbDict2=None, isDataDisc
     """
     dc1Length = len(rbDict1)
     dc2Length = len(rbDict2)
-    sys.stderr.write("Finding correspondence between two CNV RB dictionaries, %s and %s nodes in input1, input2 respectively ... "%\
+    sys.stderr.write("Finding correspondence between two CNV RB dictionaries, %s and %s nodes in rbDict1, rbDict2 respectively ... "%\
         (dc1Length, dc2Length))
     nodePairList = []
     #each cell is a tuple of (node1, node2, overlap)
-    compareIns = CNVCompare(min_reciprocal_overlap=0.0000001)
     #to detect any overlap
-    setOfMatchedNodesInRBDict2 = set()
-    for input1Node in rbDict1:
+    compareIns = CNVCompare(min_reciprocal_overlap=0.0000001)
+    rb_dict2_nodes_matching_rb_dict1_set = set()
+    for rb_dict1_node in rbDict1:
         targetNodeLs = []
-        rbDict2.findNodes(input1Node.key, node_ls=targetNodeLs, compareIns=compareIns)
+        rbDict2.findNodes(rb_dict1_node.key, node_ls=targetNodeLs, compareIns=compareIns)
         if targetNodeLs:
-            for input2Node in targetNodeLs:
-                overlapData = get_overlap_ratio(input1Node.key.span_ls,
-                    input2Node.key.span_ls, isDataDiscrete=isDataDiscrete)
+            for rb_dict2_node in targetNodeLs:
+                overlapData = get_overlap_ratio(rb_dict1_node.key.span_ls,
+                    rb_dict2_node.key.span_ls, isDataDiscrete=isDataDiscrete)
                 overlapFraction = overlapData.overlapFraction
-                nodePairList.append((input1Node, input2Node, overlapFraction))
-                setOfMatchedNodesInRBDict2.add(input2Node)
+                nodePairList.append((rb_dict1_node, rb_dict2_node, overlapFraction))
+                rb_dict2_nodes_matching_rb_dict1_set.add(rb_dict2_node)
         else:
-            nodePairList.append((input1Node, None, None))
-    sys.stderr.write(" %s input2 nodes matched. "%(len(setOfMatchedNodesInRBDict2)))
+            nodePairList.append((rb_dict1_node, None, None))
+    sys.stderr.write(" %s input2 nodes matched. "%(len(rb_dict2_nodes_matching_rb_dict1_set)))
     
     no_of_unmatched_input2_nodes_matched_to_input1 = 0
-    for input2Node in rbDict2:
-        if input2Node not in setOfMatchedNodesInRBDict2:
+    for rb_dict2_node in rbDict2:
+        if rb_dict2_node not in rb_dict2_nodes_matching_rb_dict1_set:
             targetNodeLs = []
-            rbDict1.findNodes(input2Node.key, node_ls=targetNodeLs, compareIns=compareIns)
+            rbDict1.findNodes(rb_dict2_node.key, node_ls=targetNodeLs, compareIns=compareIns)
             if targetNodeLs:	#this should not happen
-                sys.stderr.write("Warning: after first scan node from rbDict2, key=%s, value=%s, still has hits from rbDict1.\n"%\
-                    (str(input2Node.key), str(input2Node.value[0])))
+                sys.stderr.write("Warning (should not happen): rbDict2-only node (key=%s, value=%s) was found to have some matches in rbDict1.\n"%\
+                    (str(rb_dict2_node.key), str(rb_dict2_node.value[0])))
                 no_of_unmatched_input2_nodes_matched_to_input1 += 1
                 
-                for input1Node in targetNodeLs:
-                    overlapData = get_overlap_ratio(input1Node.key.span_ls,
-                        input2Node.key.span_ls, isDataDiscrete=isDataDiscrete)
+                for rb_dict1_node in targetNodeLs:
+                    overlapData = get_overlap_ratio(rb_dict1_node.key.span_ls,
+                        rb_dict2_node.key.span_ls, isDataDiscrete=isDataDiscrete)
                     overlapFraction = overlapData.overlapFraction
-                    nodePairList.append((input1Node, input2Node, overlapFraction))
+                    nodePairList.append((rb_dict1_node, rb_dict2_node, overlapFraction))
             else:
-                nodePairList.append((None, input2Node, None))
+                nodePairList.append((None, rb_dict2_node, None))
     sys.stderr.write(" %s un-matched input2 nodes have matches from input1. found %s corresponding pairs.\n"%\
         (no_of_unmatched_input2_nodes_matched_to_input1, len(nodePairList)))
     return nodePairList
 
 
-# test program if this file is run
+# test some functions within this module.
 if __name__ == "__main__":
     import os, sys, math
     
@@ -1295,16 +1300,17 @@ if __name__ == "__main__":
     else:
         debug = False
     
-    cnv_ls = [[1, (2323,2600)], [2,(50000,)], [3,(43214,78788)], [5,(150,500)], [5,(500,950)], [5, (43241, 43242)]]
+    cnv_ls = [[1, (2323,2600)], [2,(50000,)], [3,(43214,78788)], [5,(150,500)], \
+              [5,(500,950)], [5, (43241, 43242)]]
     no_of_cnvs = len(cnv_ls)
     min_reciprocal_overlap = 0.6
     
     #from BinarySearchTree import binary_tree
     #tree = binary_tree()
     from palos.algorithm.RBTree import RBDict
-    #2010-1-26 binary_tree and RBDict are swappable. but RBDict is more efficient (balanced).
+    # 2010-1-26 binary_tree and RBDict are swappable. but RBDict is more efficient (balanced).
     tree = RBDict(cmpfn=leftWithinRightAlsoEqualCmp)
-    # 2010-1-28 use the custom cmpfn if you want the case that left within right is regarded as equal as well.  
+    # 2010-1-28 use the custom cmpfn if you want the case that left within right is regarded as equal as well.
     tree = RBDict(cmpfn=rightWithinLeftAlsoEqualCmp)
     
     for cnv in cnv_ls:
