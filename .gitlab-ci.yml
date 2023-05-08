@@ -78,6 +78,14 @@ Py3_Red-Black Tree:
 #     - pwd
 #     - python2 ./palos/algorithm/RBTree.py
 
+CNV:
+  stage: test_run
+  script:
+    - echo "Testing RB Dict and CNVs... "
+    - pwd
+    - python3 ./palos/polymorphism/CNV.py
+
+
 GADA:
   stage: test_run
   script:
