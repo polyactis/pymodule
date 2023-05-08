@@ -2,7 +2,6 @@
 
 import os
 import sys
-import subprocess
 from setuptools import setup, find_packages
 
 src_dir = os.path.dirname(__file__)
@@ -58,7 +57,7 @@ if __name__ == '__main__':
     setup_installer_dependencies()
     setup(
         name="Palos",
-        version="0.1.34",
+        version="0.1.35",
         author="Yu S. Huang",
         author_email="polyactis@gmail.com",
         description="Misc Python modules developed and used by the yfish group",
