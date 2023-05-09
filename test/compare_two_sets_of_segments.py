@@ -111,6 +111,7 @@ class compare_two_sets_of_segments(object):
         start_time = time.time()
         compare_function = CNVCompare(min_reciprocal_overlap=self.min_reciprocal_overlap)
         no_of_query_with_hits = 0
+        no_of_hits = 0
         for query_segment in query_segment_ls:
             query_key = CNVSegmentBinarySearchTreeKey(chromosome=query_segment[0], \
                             span_ls=[query_segment[1], query_segment[2]])
@@ -119,8 +120,9 @@ class compare_two_sets_of_segments(object):
                                         compareIns=compare_function)
             if len(hit_node_ls)>0:
                 no_of_query_with_hits += 1
+                no_of_hits += len(hit_node_ls)
         print(f"\t {no_of_query_with_hits}/{no_of_total_query_segments} query "
-            f"segments have hits in the db. "\
+            f"segments have {no_of_hits} hits in the db. "\
             f"Cost {time.time()-start_time:.3f} seconds.\n", file=sys.stderr)
         return no_of_query_with_hits
     
@@ -166,9 +168,9 @@ if __name__ == '__main__':
     
     ap.add_argument("-m", "--min_reciprocal_overlap", type=float, default=0.0001,
         help='Default: %(default)s. '
-        'If a job virtual memory (usually 1.2X of JVM resident memory) exceeds request, '
-        "it will be killed on some clusters. "
-        "This will make sure your job requests enough memory.")
+        'A threshold to decide if two segments are overlapping.'
+        "i.e. Segment 1 length A. Segment 2 length B. Overalpping length C."
+        "If min(C/A, C/B)>=min_reciprocal_overlap, then they overlap.")
     
     
     ap.add_argument("--debug", action='store_true',
