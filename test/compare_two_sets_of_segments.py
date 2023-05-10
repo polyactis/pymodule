@@ -72,20 +72,10 @@ class compare_two_sets_of_segments(object):
                 min_reciprocal_overlap=self.min_reciprocal_overlap)
             rb_dict[segment_key] = segment
             #pbar.update(1)
-        print(f"\t Done in {time.time()-start_time:.3f} seconds.\n", file=sys.stderr)
-        
+        # output some description (efficiency) of this rb_tree
         print(rb_dict, file=sys.stderr)
-        # tree = rb_dict
-        # print("Node Count: %d" % len(tree))
-        # print("Depth: %d" % tree.depth())
-        # print("Optimum Depth: %.2f (%d) (%.3f%% depth efficiency)" % (
-        #     tree.optimumdepth(), math.ceil(tree.optimumdepth()),
-        #     math.ceil(tree.optimumdepth()) / tree.depth()))
-        
-        # print("Node Efficiency: %.3f%% (max possible #nodes: %d. wasted #nodes: %d)" % (
-        #     tree.efficiency() * 100,
-        #     len(tree) / tree.efficiency(),
-        #     (len(tree) / tree.efficiency()) - len(tree)))
+
+        print(f"\t Done in {time.time()-start_time:.3f} seconds.\n", file=sys.stderr)
         return rb_dict
 
     def construct_segment_rbdict_from_file(self, filepath) -> RBDict:
@@ -110,6 +100,8 @@ class compare_two_sets_of_segments(object):
                     span_ls=[start, stop], \
                     min_reciprocal_overlap=self.min_reciprocal_overlap)
                 rb_dict[segment_key] = 1
+        # output some description (efficiency) of this rb_tree
+        print(rb_dict, file=sys.stderr)
         print(f"\t {len(rb_dict)} segments in the red-black tree"\
                 f" in {time.time()-start_time:.3f} seconds.\n", file=sys.stderr)
         return rb_dict
