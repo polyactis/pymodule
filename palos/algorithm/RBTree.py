@@ -271,15 +271,13 @@ class RBTree(object):
         tree = self
         return_ls.append("Node Count: %d" % len(self))
         return_ls.append("Depth: %d" % tree.depth())
-        return_ls.append("Optimum Depth: %.2f (%d) (%.3f%% depth efficiency)" % (
-            tree.optimumdepth(), math.ceil(tree.optimumdepth()),
-            math.ceil(tree.optimumdepth()) / tree.depth()))
-        
-        return_ls.append("Tree Node Efficiency: %.3f%% (max possible #nodes: %d. wasted #nodes: %d): " % (
-            tree.efficiency() * 100,
-            len(tree) / tree.efficiency(),
-            (len(tree) / tree.efficiency()) - len(tree) )
-            )
+        return_ls.append(f"Optimum Depth: {tree.optimumdepth():.2f} "
+            f"({math.ceil(tree.optimumdepth()):d}) "
+            f"({math.ceil(tree.optimumdepth()) / tree.depth()*100:.3f}% depth efficiency)")
+        max_no_of_possible_nodes = math.ceil(len(tree) / tree.efficiency())
+        return_ls.append(f"Tree Node Efficiency: {tree.efficiency() * 100:.3f}% "
+            f"(max possible #nodes: {max_no_of_possible_nodes:d}. "
+            f"wasted #nodes: {max_no_of_possible_nodes - len(tree):d}")
         
         return '\n'.join(return_ls)
 
