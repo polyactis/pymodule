@@ -945,6 +945,10 @@ class RBDict(RBTree):
         raise IndexError
 
     def __setitem__(self, key, value):
+        """
+        This dictionary operation will trigger this method:
+            rb_dict[key] = value
+        """
         n = self.findNode(key)
         if n:
             n.value = value
