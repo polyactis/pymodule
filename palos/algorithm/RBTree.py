@@ -273,8 +273,7 @@ class RBTree(object):
             f"({self.optimumdepth()/self.depth()*100 :.2f}% depth efficiency).")
         max_no_of_possible_nodes = 2**self.depth()
         return_ls.append(f"Tree Node Efficiency: {self.efficiency() * 100:.3f}%. "
-            f"#max possible nodes (2^d): {max_no_of_possible_nodes:d}. "
-            f"#unused nodes: {max_no_of_possible_nodes - len(self):d}.")
+            f"#max possible nodes (2^d): {max_no_of_possible_nodes:d}.")
         
         return '\n'.join(return_ls)
 
