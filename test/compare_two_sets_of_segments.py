@@ -10,11 +10,10 @@ Prerequisites:
     1. pip3 install palos tqdm
 
 Example:
-    ./compare_two_sets_of_segments.py -q HCC1187_10X_0_3_chr1.segments.M10.T5.tsv -d HCC1187_10X_0_3_chr1.segments.M20.T10.tsv
-
+    ./compare_two_sets_of_segments.py -q query_segments.tsv  -d db_segments.tsv
 """
 
-import os, sys
+import os, sys, math
 import time
 from palos import RBDict
 from palos.polymorphism.CNV import CNVCompare, CNVSegmentBinarySearchTreeKey, \
@@ -74,6 +73,18 @@ class compare_two_sets_of_segments(object):
             rb_dict[segment_key] = segment
             #pbar.update(1)
         print(f"\t Done in {time.time()-start_time:.3f} seconds.\n", file=sys.stderr)
+        
+        tree = rb_dict
+        print("Node Count: %d" % len(tree))
+        print("Depth: %d" % tree.depth())
+        print("Optimum Depth: %.2f (%d) (%.3f%% depth efficiency)" % (
+            tree.optimumdepth(), math.ceil(tree.optimumdepth()),
+            math.ceil(tree.optimumdepth()) / tree.depth()))
+        
+        print("Efficiency: %.3f%% (total possible used: %d, total wasted: %d)" % (
+            tree.efficiency() * 100,
+            len(tree) / tree.efficiency(),
+            (len(tree) / tree.efficiency()) - len(tree)))
         return rb_dict
 
     def construct_segment_rbdict_from_file(self, filepath) -> RBDict:
@@ -152,8 +163,8 @@ class compare_two_sets_of_segments(object):
         db_segment_ls = self.construct_segment_list_from_file(self.db_segment_filepath)
         db_segment_rbdict = self.construct_segment_rbdict_from_segment_list(db_segment_ls)
         query_segment_ls = self.construct_segment_list_from_file(self.query_segment_filepath)
-        # query_segment_rbdict = self.construct_segment_rbdict_from_file(self.query_segment_filepath)
-        # query_segment_rbdict_2 = self.construct_segment_rbdict_from_segment_list(query_segment_ls)
+        query_segment_rbdict = self.construct_segment_rbdict_from_file(self.query_segment_filepath)
+        query_segment_rbdict_2 = self.construct_segment_rbdict_from_segment_list(query_segment_ls)
         self.query_against_rbtree(query_segment_ls, db_segment_rbdict)
         self.query_against_list(query_segment_ls, db_segment_ls)
 
