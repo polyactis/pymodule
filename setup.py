@@ -57,7 +57,7 @@ if __name__ == '__main__':
     setup_installer_dependencies()
     setup(
         name="Palos",
-        version="0.1.36",
+        version="0.1.37",
         author="Yu S. Huang",
         author_email="polyactis@gmail.com",
         description="Misc Python modules developed and used by the yfish group",
