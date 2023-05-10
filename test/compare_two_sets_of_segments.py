@@ -74,17 +74,18 @@ class compare_two_sets_of_segments(object):
             #pbar.update(1)
         print(f"\t Done in {time.time()-start_time:.3f} seconds.\n", file=sys.stderr)
         
-        tree = rb_dict
-        print("Node Count: %d" % len(tree))
-        print("Depth: %d" % tree.depth())
-        print("Optimum Depth: %.2f (%d) (%.3f%% depth efficiency)" % (
-            tree.optimumdepth(), math.ceil(tree.optimumdepth()),
-            math.ceil(tree.optimumdepth()) / tree.depth()))
+        print(rb_dict, file=sys.stderr)
+        # tree = rb_dict
+        # print("Node Count: %d" % len(tree))
+        # print("Depth: %d" % tree.depth())
+        # print("Optimum Depth: %.2f (%d) (%.3f%% depth efficiency)" % (
+        #     tree.optimumdepth(), math.ceil(tree.optimumdepth()),
+        #     math.ceil(tree.optimumdepth()) / tree.depth()))
         
-        print("Efficiency: %.3f%% (total possible used: %d, total wasted: %d)" % (
-            tree.efficiency() * 100,
-            len(tree) / tree.efficiency(),
-            (len(tree) / tree.efficiency()) - len(tree)))
+        # print("Node Efficiency: %.3f%% (max possible #nodes: %d. wasted #nodes: %d)" % (
+        #     tree.efficiency() * 100,
+        #     len(tree) / tree.efficiency(),
+        #     (len(tree) / tree.efficiency()) - len(tree)))
         return rb_dict
 
     def construct_segment_rbdict_from_file(self, filepath) -> RBDict:

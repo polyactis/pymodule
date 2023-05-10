@@ -1319,16 +1319,8 @@ if __name__ == "__main__":
         tree[segmentKey] = cnv
     
     print("Binary Tree Test\n")
-    print("Node Count: %d" % len(tree))
-    print("Depth: %d" % tree.depth())
-    print("Optimum Depth: %f (%d) (%f%% depth efficiency)" % (
-        tree.optimumdepth(), math.ceil(tree.optimumdepth()),
-        math.ceil(tree.optimumdepth()) / tree.depth()))
+    print(tree)
     
-    print("Efficiency: %f%% (total possible used: %d, total wasted: %d)" % (
-        tree.efficiency() * 100,
-        len(tree) / tree.efficiency(),
-        (len(tree) / tree.efficiency()) - len(tree)))
     """
     print("Min: %s" % repr(tree.min()))
     print("Max: %s" % repr(tree.max()))

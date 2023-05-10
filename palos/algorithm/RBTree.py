@@ -240,7 +240,7 @@ class RBTree(object):
             return True
         else:
             return False
-        
+    
     def __len__(self):
         return self.elements
 
@@ -260,12 +260,31 @@ class RBTree(object):
 
         self.root = None
         self.sentinel = None
-
+    
     def __str__(self):
-        return "<RBTree object>"
+        """
+        2010-6-17
+            better str() function
+        """
+        # eval(str(self)) returns a regular dictionary
+        return_ls = []
+        tree = self
+        return_ls.append("Node Count: %d" % len(self))
+        return_ls.append("Depth: %d" % tree.depth())
+        return_ls.append("Optimum Depth: %.2f (%d) (%.3f%% depth efficiency)" % (
+            tree.optimumdepth(), math.ceil(tree.optimumdepth()),
+            math.ceil(tree.optimumdepth()) / tree.depth()))
+        
+        return_ls.append("Tree Node Efficiency: %.3f%% (max possible #nodes: %d. wasted #nodes: %d): " % (
+            tree.efficiency() * 100,
+            len(tree) / tree.efficiency(),
+            (len(tree) / tree.efficiency()) - len(tree) )
+            )
+        
+        return '\n'.join(return_ls)
 
     def __repr__(self):
-        return "<RBTree object>"
+        return "<RBTree object " + str(self) + ">"
 
     def __iter__(self):
         return RBTreeIter(self)
@@ -913,28 +932,7 @@ class RBDict(RBTree):
             self[key]=value
         # changing the comparison function for an existing tree is dangerous!
         self.__cmp = cmpfn
-    
-    def __str__(self):
-        """
-        2010-6-17
-            better str() function
-        """
-        # eval(str(self)) returns a regular dictionary
-        return_ls = []
-        tree = self
-        return_ls.append("Node Count: %d" % len(self))
-        return_ls.append("Depth: %d" % tree.depth())
-        return_ls.append("Optimum Depth: %f (%d) (%f%% depth efficiency)" % (
-            tree.optimumdepth(), math.ceil(tree.optimumdepth()),
-            math.ceil(tree.optimumdepth()) / tree.depth()))
-        
-        return_ls.append("Efficiency: %f%% (total possible used: %d, total wasted: %d): " % (
-            tree.efficiency() * 100,
-            len(tree) / tree.efficiency(),
-            (len(tree) / tree.efficiency()) - len(tree)))
-        
-        return '\n'.join(return_ls)
-    
+
     def __repr__(self):
         return "<RBDict object " + str(self) + ">"
 
