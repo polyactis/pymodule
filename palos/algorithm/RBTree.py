@@ -268,14 +268,13 @@ class RBTree(object):
         """
         # eval(str(self)) returns a regular dictionary
         return_ls = []
-        tree = self
-        return_ls.append(f"Tree Node Count: {len(self)}. Tree Depth: {tree.depth()}.")
-        return_ls.append(f"Optimum Depth (log2(N)): {tree.optimumdepth():.2f} "
-            f"({tree.optimumdepth()/tree.depth()*100 :.2f}% depth efficiency).")
-        max_no_of_possible_nodes = math.ceil(len(tree) / tree.efficiency())
-        return_ls.append(f"Tree Node Efficiency: {tree.efficiency() * 100:.3f}%. "
+        return_ls.append(f"Tree Node Count: {len(self)}. Tree Depth: {self.depth()}.")
+        return_ls.append(f"Optimum Depth (log2(N)): {self.optimumdepth():.2f} "
+            f"({self.optimumdepth()/self.depth()*100 :.2f}% depth efficiency).")
+        max_no_of_possible_nodes = 2**self.depth()
+        return_ls.append(f"Tree Node Efficiency: {self.efficiency() * 100:.3f}%. "
             f"#max possible nodes (2^d): {max_no_of_possible_nodes:d}. "
-            f"#unused nodes: {max_no_of_possible_nodes - len(tree):d}.")
+            f"#unused nodes: {max_no_of_possible_nodes - len(self):d}.")
         
         return '\n'.join(return_ls)
 
