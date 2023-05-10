@@ -275,9 +275,9 @@ class RBTree(object):
             f"({math.ceil(tree.optimumdepth()):d}) "
             f"({math.ceil(tree.optimumdepth()) / tree.depth()*100:.3f}% depth efficiency)")
         max_no_of_possible_nodes = math.ceil(len(tree) / tree.efficiency())
-        return_ls.append(f"Tree Node Efficiency: {tree.efficiency() * 100:.3f}% "
-            f"(max possible #nodes: {max_no_of_possible_nodes:d}. "
-            f"wasted #nodes: {max_no_of_possible_nodes - len(tree):d}")
+        return_ls.append(f"Tree Node Efficiency: {tree.efficiency() * 100:.3f}%. "
+            f"#max possible nodes: {max_no_of_possible_nodes:d}. "
+            f"#unused nodes: {max_no_of_possible_nodes - len(tree):d}.")
         
         return '\n'.join(return_ls)
 
